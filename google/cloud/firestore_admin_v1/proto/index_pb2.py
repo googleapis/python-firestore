@@ -362,8 +362,8 @@ Index = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_INDEX_INDEXFIELD,
                 __module__="google.cloud.firestore.admin_v1.proto.index_pb2",
-                __doc__="""A field in an index. The field\_path describes which field
-    is indexed, the value\_mode describes how the field value is indexed.
+                __doc__="""A field in an index. The field\_path describes which field is indexed,
+    the value\_mode describes how the field value is indexed.
     
     
     Attributes:
