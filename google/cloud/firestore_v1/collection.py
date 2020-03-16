@@ -431,7 +431,7 @@ class CollectionReference(object):
             collection_ref = db.collection(u'users')
 
             def on_snapshot(collection_snapshot, changes, read_time):
-                for doc in collection_snapshot:
+                for doc in collection_snapshot.document:
                     print(u'{} => {}'.format(doc.id, doc.to_dict()))
 
             # Watch this collection

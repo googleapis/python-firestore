@@ -791,7 +791,7 @@ class Query(object):
         provided callback is run on the snapshot of the documents.
 
         Args:
-            callback(Callable[List[:class:`~google.cloud.firestore_v1.query.QuerySnapshot`], \
+            callback (Callable[List[:class:`~google.cloud.firestore_v1.query.QuerySnapshot`], \
             List[:class:`~google.cloud.firestore_v1.watch.DocumentChange`], datetime.datetime], NoneType):
                 a callback to run when a change occurs.
 
