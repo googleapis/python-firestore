@@ -500,7 +500,8 @@ class DocumentReference(object):
         provided callback is run on the snapshot.
 
         Args:
-            callback(Callable[[:class:`~google.cloud.firestore.document.DocumentSnapshot`], NoneType]):
+            callback(Callable[List[:class:`~google.cloud.firestore_v1.document.DocumentSnapshot`], \
+            List[:class:`~google.cloud.firestore_v1.watch.DocumentChange`], datetime.datetime], NoneType):
                 a callback to run when a change occurs
 
         Example:
@@ -513,8 +514,8 @@ class DocumentReference(object):
             collection_ref = db.collection(u'users')
 
             def on_snapshot(document_snapshot, changes, read_time):
-                doc = document_snapshot
-                print(u'{} => {}'.format(doc.id, doc.to_dict()))
+                for doc in collection_snapshot.documents:
+                    print(u'{} => {}'.format(doc.id, doc.to_dict()))
 
             doc_ref = db.collection(u'users').document(
                 u'alovelace' + unique_resource_id())
