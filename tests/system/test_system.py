@@ -30,6 +30,7 @@ from google.api_core.exceptions import NotFound
 from google.cloud._helpers import _pb_timestamp_to_datetime
 from google.cloud._helpers import UTC
 from google.cloud import firestore_v1 as firestore
+from google.cloud.firestore_v1.client import _FIRESTORE_EMULATOR_HOST
 from test_utils.system import unique_resource_id
 from test_utils.system import EmulatorCreds
 
@@ -41,9 +42,8 @@ RANDOM_ID_REGEX = re.compile("^[a-zA-Z0-9]{20}$")
 MISSING_DOCUMENT = "No document to update: "
 DOCUMENT_EXISTS = "Document already exists: "
 UNIQUE_RESOURCE_ID = unique_resource_id("-")
-FIRESTORE_EMULATOR_HOST = "FIRESTORE_EMULATOR_HOST"
 
-FIRESTORE_EMULATOR = os.getenv(FIRESTORE_EMULATOR_HOST) is not None
+FIRESTORE_EMULATOR = os.getenv(_FIRESTORE_EMULATOR_HOST) is not None
 
 
 @pytest.fixture(scope=u"module")
