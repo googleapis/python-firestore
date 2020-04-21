@@ -33,7 +33,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
         "\n\027com.google.firestore.v1B\nWriteProtoP\001Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\242\002\004GCFS\252\002\031Google.Cloud.Firestore.V1\312\002\031Google\\Cloud\\Firestore\\V1"
     ),
     serialized_pb=_b(
-        '\n+google/cloud/firestore_v1/proto/write.proto\x12\x13google.firestore.v1\x1a,google/cloud/firestore_v1/proto/common.proto\x1a.google/cloud/firestore_v1/proto/document.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto"\x89\x02\n\x05Write\x12/\n\x06update\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentH\x00\x12\x10\n\x06\x64\x65lete\x18\x02 \x01(\tH\x00\x12;\n\ttransform\x18\x06 \x01(\x0b\x32&.google.firestore.v1.DocumentTransformH\x00\x12\x36\n\x0bupdate_mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12;\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32!.google.firestore.v1.PreconditionB\x0b\n\toperation"\xe5\x04\n\x11\x44ocumentTransform\x12\x10\n\x08\x64ocument\x18\x01 \x01(\t\x12O\n\x10\x66ield_transforms\x18\x02 \x03(\x0b\x32\x35.google.firestore.v1.DocumentTransform.FieldTransform\x1a\xec\x03\n\x0e\x46ieldTransform\x12\x12\n\nfield_path\x18\x01 \x01(\t\x12`\n\x13set_to_server_value\x18\x02 \x01(\x0e\x32\x41.google.firestore.v1.DocumentTransform.FieldTransform.ServerValueH\x00\x12/\n\tincrement\x18\x03 \x01(\x0b\x32\x1a.google.firestore.v1.ValueH\x00\x12-\n\x07maximum\x18\x04 \x01(\x0b\x32\x1a.google.firestore.v1.ValueH\x00\x12-\n\x07minimum\x18\x05 \x01(\x0b\x32\x1a.google.firestore.v1.ValueH\x00\x12\x42\n\x17\x61ppend_missing_elements\x18\x06 \x01(\x0b\x32\x1f.google.firestore.v1.ArrayValueH\x00\x12@\n\x15remove_all_from_array\x18\x07 \x01(\x0b\x32\x1f.google.firestore.v1.ArrayValueH\x00"=\n\x0bServerValue\x12\x1c\n\x18SERVER_VALUE_UNSPECIFIED\x10\x00\x12\x10\n\x0cREQUEST_TIME\x10\x01\x42\x10\n\x0etransform_type"u\n\x0bWriteResult\x12/\n\x0bupdate_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x35\n\x11transform_results\x18\x02 \x03(\x0b\x32\x1a.google.firestore.v1.Value"q\n\x0e\x44ocumentChange\x12/\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.Document\x12\x12\n\ntarget_ids\x18\x05 \x03(\x05\x12\x1a\n\x12removed_target_ids\x18\x06 \x03(\x05"m\n\x0e\x44ocumentDelete\x12\x10\n\x08\x64ocument\x18\x01 \x01(\t\x12\x1a\n\x12removed_target_ids\x18\x06 \x03(\x05\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"m\n\x0e\x44ocumentRemove\x12\x10\n\x08\x64ocument\x18\x01 \x01(\t\x12\x1a\n\x12removed_target_ids\x18\x02 \x03(\x05\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"3\n\x0f\x45xistenceFilter\x12\x11\n\ttarget_id\x18\x01 \x01(\x05\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\x42\xa4\x01\n\x17\x63om.google.firestore.v1B\nWriteProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3'
+        '\n+google/cloud/firestore_v1/proto/write.proto\x12\x13google.firestore.v1\x1a,google/cloud/firestore_v1/proto/common.proto\x1a.google/cloud/firestore_v1/proto/document.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto"\xdb\x02\n\x05Write\x12/\n\x06update\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentH\x00\x12\x10\n\x06\x64\x65lete\x18\x02 \x01(\tH\x00\x12;\n\ttransform\x18\x06 \x01(\x0b\x32&.google.firestore.v1.DocumentTransformH\x00\x12\x36\n\x0bupdate_mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12P\n\x11update_transforms\x18\x07 \x03(\x0b\x32\x35.google.firestore.v1.DocumentTransform.FieldTransform\x12;\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32!.google.firestore.v1.PreconditionB\x0b\n\toperation"\xe5\x04\n\x11\x44ocumentTransform\x12\x10\n\x08\x64ocument\x18\x01 \x01(\t\x12O\n\x10\x66ield_transforms\x18\x02 \x03(\x0b\x32\x35.google.firestore.v1.DocumentTransform.FieldTransform\x1a\xec\x03\n\x0e\x46ieldTransform\x12\x12\n\nfield_path\x18\x01 \x01(\t\x12`\n\x13set_to_server_value\x18\x02 \x01(\x0e\x32\x41.google.firestore.v1.DocumentTransform.FieldTransform.ServerValueH\x00\x12/\n\tincrement\x18\x03 \x01(\x0b\x32\x1a.google.firestore.v1.ValueH\x00\x12-\n\x07maximum\x18\x04 \x01(\x0b\x32\x1a.google.firestore.v1.ValueH\x00\x12-\n\x07minimum\x18\x05 \x01(\x0b\x32\x1a.google.firestore.v1.ValueH\x00\x12\x42\n\x17\x61ppend_missing_elements\x18\x06 \x01(\x0b\x32\x1f.google.firestore.v1.ArrayValueH\x00\x12@\n\x15remove_all_from_array\x18\x07 \x01(\x0b\x32\x1f.google.firestore.v1.ArrayValueH\x00"=\n\x0bServerValue\x12\x1c\n\x18SERVER_VALUE_UNSPECIFIED\x10\x00\x12\x10\n\x0cREQUEST_TIME\x10\x01\x42\x10\n\x0etransform_type"u\n\x0bWriteResult\x12/\n\x0bupdate_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x35\n\x11transform_results\x18\x02 \x03(\x0b\x32\x1a.google.firestore.v1.Value"q\n\x0e\x44ocumentChange\x12/\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.Document\x12\x12\n\ntarget_ids\x18\x05 \x03(\x05\x12\x1a\n\x12removed_target_ids\x18\x06 \x03(\x05"m\n\x0e\x44ocumentDelete\x12\x10\n\x08\x64ocument\x18\x01 \x01(\t\x12\x1a\n\x12removed_target_ids\x18\x06 \x03(\x05\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"m\n\x0e\x44ocumentRemove\x12\x10\n\x08\x64ocument\x18\x01 \x01(\t\x12\x1a\n\x12removed_target_ids\x18\x02 \x03(\x05\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"3\n\x0f\x45xistenceFilter\x12\x11\n\ttarget_id\x18\x01 \x01(\x05\x12\r\n\x05\x63ount\x18\x02 \x01(\x05\x42\xa4\x01\n\x17\x63om.google.firestore.v1B\nWriteProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3'
     ),
     dependencies=[
         google_dot_cloud_dot_firestore__v1_dot_proto_dot_common__pb2.DESCRIPTOR,
@@ -63,8 +63,8 @@ _DOCUMENTTRANSFORM_FIELDTRANSFORM_SERVERVALUE = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     serialized_options=None,
-    serialized_start=1028,
-    serialized_end=1089,
+    serialized_start=1110,
+    serialized_end=1171,
 )
 _sym_db.RegisterEnumDescriptor(_DOCUMENTTRANSFORM_FIELDTRANSFORM_SERVERVALUE)
 
@@ -149,9 +149,27 @@ _WRITE = _descriptor.Descriptor(
             file=DESCRIPTOR,
         ),
         _descriptor.FieldDescriptor(
+            name="update_transforms",
+            full_name="google.firestore.v1.Write.update_transforms",
+            index=4,
+            number=7,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+        ),
+        _descriptor.FieldDescriptor(
             name="current_document",
             full_name="google.firestore.v1.Write.current_document",
-            index=4,
+            index=5,
             number=4,
             type=11,
             cpp_type=10,
@@ -184,7 +202,7 @@ _WRITE = _descriptor.Descriptor(
         )
     ],
     serialized_start=226,
-    serialized_end=491,
+    serialized_end=573,
 )
 
 
@@ -338,8 +356,8 @@ _DOCUMENTTRANSFORM_FIELDTRANSFORM = _descriptor.Descriptor(
             fields=[],
         )
     ],
-    serialized_start=615,
-    serialized_end=1107,
+    serialized_start=697,
+    serialized_end=1189,
 )
 
 _DOCUMENTTRANSFORM = _descriptor.Descriptor(
@@ -394,8 +412,8 @@ _DOCUMENTTRANSFORM = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=494,
-    serialized_end=1107,
+    serialized_start=576,
+    serialized_end=1189,
 )
 
 
@@ -451,8 +469,8 @@ _WRITERESULT = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1109,
-    serialized_end=1226,
+    serialized_start=1191,
+    serialized_end=1308,
 )
 
 
@@ -526,8 +544,8 @@ _DOCUMENTCHANGE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1228,
-    serialized_end=1341,
+    serialized_start=1310,
+    serialized_end=1423,
 )
 
 
@@ -601,8 +619,8 @@ _DOCUMENTDELETE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1343,
-    serialized_end=1452,
+    serialized_start=1425,
+    serialized_end=1534,
 )
 
 
@@ -676,8 +694,8 @@ _DOCUMENTREMOVE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1454,
-    serialized_end=1563,
+    serialized_start=1536,
+    serialized_end=1645,
 )
 
 
@@ -733,8 +751,8 @@ _EXISTENCEFILTER = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=1565,
-    serialized_end=1616,
+    serialized_start=1647,
+    serialized_end=1698,
 )
 
 _WRITE.fields_by_name[
@@ -748,6 +766,9 @@ _WRITE.fields_by_name[
 ].message_type = (
     google_dot_cloud_dot_firestore__v1_dot_proto_dot_common__pb2._DOCUMENTMASK
 )
+_WRITE.fields_by_name[
+    "update_transforms"
+].message_type = _DOCUMENTTRANSFORM_FIELDTRANSFORM
 _WRITE.fields_by_name[
     "current_document"
 ].message_type = (
@@ -857,8 +878,6 @@ Write = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_WRITE,
         __module__="google.cloud.firestore_v1.proto.write_pb2",
         __doc__="""A write on a document.
-  
-  
   Attributes:
       operation:
           The operation to execute.
@@ -868,10 +887,7 @@ Write = _reflection.GeneratedProtocolMessageType(
           A document name to delete. In the format: ``projects/{project_
           id}/databases/{database_id}/documents/{document_path}``.
       transform:
-          Applies a transformation to a document. At most one
-          ``transform`` per document is allowed in a given request. An
-          ``update`` cannot follow a ``transform`` on the same document
-          in a given request.
+          Applies a transformation to a document.
       update_mask:
           The fields to update in this write.  This field can be set
           only when the operation is ``update``. If the mask is not set
@@ -882,6 +898,11 @@ Write = _reflection.GeneratedProtocolMessageType(
           the input document, are deleted from the document on the
           server. The field paths in this mask must not contain a
           reserved field name.
+      update_transforms:
+          The transforms to perform after update.  This field can be set
+          only when the operation is ``update``. If present, this write
+          is equivalent to performing ``update`` and ``transform`` to
+          the same document atomically and in order.
       current_document:
           An optional precondition on the document.  The write will fail
           if this is set and not met by the target document.
@@ -902,8 +923,6 @@ DocumentTransform = _reflection.GeneratedProtocolMessageType(
                 DESCRIPTOR=_DOCUMENTTRANSFORM_FIELDTRANSFORM,
                 __module__="google.cloud.firestore_v1.proto.write_pb2",
                 __doc__="""A transformation of a field of the document.
-    
-    
     Attributes:
         field_path:
             The path of the field. See
@@ -976,8 +995,6 @@ DocumentTransform = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_DOCUMENTTRANSFORM,
         __module__="google.cloud.firestore_v1.proto.write_pb2",
         __doc__="""A transformation of a document.
-  
-  
   Attributes:
       document:
           The name of the document to transform.
@@ -998,8 +1015,6 @@ WriteResult = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_WRITERESULT,
         __module__="google.cloud.firestore_v1.proto.write_pb2",
         __doc__="""The result of applying a write.
-  
-  
   Attributes:
       update_time:
           The last update time of the document after applying the write.
@@ -1021,17 +1036,13 @@ DocumentChange = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_DOCUMENTCHANGE,
         __module__="google.cloud.firestore_v1.proto.write_pb2",
-        __doc__="""A [Document][google.firestore.v1.Document] has changed.
-  
-  May be the result of multiple [writes][google.firestore.v1.Write],
-  including deletes, that ultimately resulted in a new value for the
-  [Document][google.firestore.v1.Document].
-  
-  Multiple [DocumentChange][google.firestore.v1.DocumentChange] messages
-  may be returned for the same logical change, if multiple targets are
+        __doc__="""A [Document][google.firestore.v1.Document] has changed.  May be the
+  result of multiple [writes][google.firestore.v1.Write], including
+  deletes, that ultimately resulted in a new value for the
+  [Document][google.firestore.v1.Document].  Multiple
+  [DocumentChange][google.firestore.v1.DocumentChange] messages may be
+  returned for the same logical change, if multiple targets are
   affected.
-  
-  
   Attributes:
       document:
           The new state of the [Document][google.firestore.v1.Document].
@@ -1054,18 +1065,13 @@ DocumentDelete = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_DOCUMENTDELETE,
         __module__="google.cloud.firestore_v1.proto.write_pb2",
-        __doc__="""A [Document][google.firestore.v1.Document] has been
-  deleted.
-  
-  May be the result of multiple [writes][google.firestore.v1.Write],
-  including updates, the last of which deleted the
-  [Document][google.firestore.v1.Document].
-  
-  Multiple [DocumentDelete][google.firestore.v1.DocumentDelete] messages
-  may be returned for the same logical delete, if multiple targets are
+        __doc__="""A [Document][google.firestore.v1.Document] has been deleted.  May be
+  the result of multiple [writes][google.firestore.v1.Write], including
+  updates, the last of which deleted the
+  [Document][google.firestore.v1.Document].  Multiple
+  [DocumentDelete][google.firestore.v1.DocumentDelete] messages may be
+  returned for the same logical delete, if multiple targets are
   affected.
-  
-  
   Attributes:
       document:
           The resource name of the
@@ -1088,18 +1094,14 @@ DocumentRemove = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_DOCUMENTREMOVE,
         __module__="google.cloud.firestore_v1.proto.write_pb2",
-        __doc__="""A [Document][google.firestore.v1.Document] has been
-  removed from the view of the targets.
-  
-  Sent if the document is no longer relevant to a target and is out of
-  view. Can be sent instead of a DocumentDelete or a DocumentChange if the
-  server can not send the new value of the document.
-  
-  Multiple [DocumentRemove][google.firestore.v1.DocumentRemove] messages
-  may be returned for the same logical write or delete, if multiple
-  targets are affected.
-  
-  
+        __doc__="""A [Document][google.firestore.v1.Document] has been removed from the
+  view of the targets.  Sent if the document is no longer relevant to a
+  target and is out of view. Can be sent instead of a DocumentDelete or
+  a DocumentChange if the server can not send the new value of the
+  document.  Multiple
+  [DocumentRemove][google.firestore.v1.DocumentRemove] messages may be
+  returned for the same logical write or delete, if multiple targets are
+  affected.
   Attributes:
       document:
           The resource name of the
@@ -1124,8 +1126,6 @@ ExistenceFilter = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_EXISTENCEFILTER,
         __module__="google.cloud.firestore_v1.proto.write_pb2",
         __doc__="""A digest of all the documents that match a given target.
-  
-  
   Attributes:
       target_id:
           The target ID to which this filter applies.

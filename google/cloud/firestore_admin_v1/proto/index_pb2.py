@@ -362,10 +362,8 @@ Index = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_INDEX_INDEXFIELD,
                 __module__="google.cloud.firestore.admin_v1.proto.index_pb2",
-                __doc__="""A field in an index. The field\_path describes which field
-    is indexed, the value\_mode describes how the field value is indexed.
-    
-    
+                __doc__="""A field in an index. The field\_path describes which field is indexed,
+    the value\_mode describes how the field value is indexed.
     Attributes:
         field_path:
             Can be **name**. For single field indexes, this must match the
@@ -384,10 +382,8 @@ Index = _reflection.GeneratedProtocolMessageType(
         ),
         DESCRIPTOR=_INDEX,
         __module__="google.cloud.firestore.admin_v1.proto.index_pb2",
-        __doc__="""Cloud Firestore indexes enable simple and complex queries
-  against documents in a database.
-  
-  
+        __doc__="""Cloud Firestore indexes enable simple and complex queries against
+  documents in a database.
   Attributes:
       name:
           Output only. A server defined name for this index. The form of

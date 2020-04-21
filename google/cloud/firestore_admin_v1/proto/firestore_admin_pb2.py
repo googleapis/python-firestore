@@ -794,10 +794,8 @@ CreateIndexRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_CREATEINDEXREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.CreateIndex][google.firestore.admin.v1
+  .FirestoreAdmin.CreateIndex].
   Attributes:
       parent:
           Required. A parent name of the form ``projects/{project_id}/da
@@ -816,10 +814,8 @@ ListIndexesRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LISTINDEXESREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.ListIndexes][google.firestore.admin.v1
+  .FirestoreAdmin.ListIndexes].
   Attributes:
       parent:
           Required. A parent name of the form ``projects/{project_id}/da
@@ -844,10 +840,8 @@ ListIndexesResponse = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LISTINDEXESRESPONSE,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The response for
-  [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
-  
-  
+        __doc__="""The response for [FirestoreAdmin.ListIndexes][google.firestore.admin.v
+  1.FirestoreAdmin.ListIndexes].
   Attributes:
       indexes:
           The requested indexes.
@@ -866,10 +860,8 @@ GetIndexRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_GETINDEXREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.GetIndex][google.firestore.admin.v1.FirestoreAdmin.GetIndex].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.GetIndex][google.firestore.admin.v1.Fi
+  restoreAdmin.GetIndex].
   Attributes:
       name:
           Required. A name of the form ``projects/{project_id}/databases
@@ -887,10 +879,8 @@ DeleteIndexRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_DELETEINDEXREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1
+  .FirestoreAdmin.DeleteIndex].
   Attributes:
       name:
           Required. A name of the form ``projects/{project_id}/databases
@@ -908,10 +898,8 @@ UpdateFieldRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_UPDATEFIELDREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.UpdateField][google.firestore.admin.v1
+  .FirestoreAdmin.UpdateField].
   Attributes:
       field:
           Required. The field to be updated.
@@ -931,10 +919,8 @@ GetFieldRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_GETFIELDREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.GetField][google.firestore.admin.v1.FirestoreAdmin.GetField].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.GetField][google.firestore.admin.v1.Fi
+  restoreAdmin.GetField].
   Attributes:
       name:
           Required. A name of the form ``projects/{project_id}/databases
@@ -952,10 +938,8 @@ ListFieldsRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LISTFIELDSREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.ListFields][google.firestore.admin.v1.
+  FirestoreAdmin.ListFields].
   Attributes:
       parent:
           Required. A parent name of the form ``projects/{project_id}/da
@@ -985,10 +969,8 @@ ListFieldsResponse = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LISTFIELDSRESPONSE,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The response for
-  [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
-  
-  
+        __doc__="""The response for [FirestoreAdmin.ListFields][google.firestore.admin.v1
+  .FirestoreAdmin.ListFields].
   Attributes:
       fields:
           The requested fields.
@@ -1007,10 +989,8 @@ ExportDocumentsRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_EXPORTDOCUMENTSREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.ExportDocuments][google.firestore.admi
+  n.v1.FirestoreAdmin.ExportDocuments].
   Attributes:
       name:
           Required. Database to export. Should be of the form:
@@ -1040,10 +1020,8 @@ ImportDocumentsRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_IMPORTDOCUMENTSREQUEST,
         __module__="google.cloud.firestore.admin_v1.proto.firestore_admin_pb2",
-        __doc__="""The request for
-  [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
-  
-  
+        __doc__="""The request for [FirestoreAdmin.ImportDocuments][google.firestore.admi
+  n.v1.FirestoreAdmin.ImportDocuments].
   Attributes:
       name:
           Required. Database to import into. Should be of the form:

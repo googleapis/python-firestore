@@ -2816,10 +2816,8 @@ GetDocumentRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_GETDOCUMENTREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The request for
-  [Firestore.GetDocument][google.firestore.v1beta1.Firestore.GetDocument].
-  
-  
+        __doc__="""The request for [Firestore.GetDocument][google.firestore.v1beta1.Fires
+  tore.GetDocument].
   Attributes:
       name:
           Required. The resource name of the Document to get. In the
@@ -2849,10 +2847,8 @@ ListDocumentsRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LISTDOCUMENTSREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The request for
-  [Firestore.ListDocuments][google.firestore.v1beta1.Firestore.ListDocuments].
-  
-  
+        __doc__="""The request for [Firestore.ListDocuments][google.firestore.v1beta1.Fir
+  estore.ListDocuments].
   Attributes:
       parent:
           Required. The parent resource name. In the format:
@@ -2905,10 +2901,8 @@ ListDocumentsResponse = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LISTDOCUMENTSRESPONSE,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The response for
-  [Firestore.ListDocuments][google.firestore.v1beta1.Firestore.ListDocuments].
-  
-  
+        __doc__="""The response for [Firestore.ListDocuments][google.firestore.v1beta1.Fi
+  restore.ListDocuments].
   Attributes:
       documents:
           The Documents found.
@@ -2926,10 +2920,8 @@ CreateDocumentRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_CREATEDOCUMENTREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The request for
-  [Firestore.CreateDocument][google.firestore.v1beta1.Firestore.CreateDocument].
-  
-  
+        __doc__="""The request for [Firestore.CreateDocument][google.firestore.v1beta1.Fi
+  restore.CreateDocument].
   Attributes:
       parent:
           Required. The parent resource. For example:
@@ -2961,10 +2953,8 @@ UpdateDocumentRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_UPDATEDOCUMENTREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The request for
-  [Firestore.UpdateDocument][google.firestore.v1beta1.Firestore.UpdateDocument].
-  
-  
+        __doc__="""The request for [Firestore.UpdateDocument][google.firestore.v1beta1.Fi
+  restore.UpdateDocument].
   Attributes:
       document:
           Required. The updated document. Creates the document if it
@@ -2995,10 +2985,8 @@ DeleteDocumentRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_DELETEDOCUMENTREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The request for
-  [Firestore.DeleteDocument][google.firestore.v1beta1.Firestore.DeleteDocument].
-  
-  
+        __doc__="""The request for [Firestore.DeleteDocument][google.firestore.v1beta1.Fi
+  restore.DeleteDocument].
   Attributes:
       name:
           Required. The resource name of the Document to delete. In the
@@ -3019,10 +3007,8 @@ BatchGetDocumentsRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_BATCHGETDOCUMENTSREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The request for
-  [Firestore.BatchGetDocuments][google.firestore.v1beta1.Firestore.BatchGetDocuments].
-  
-  
+        __doc__="""The request for [Firestore.BatchGetDocuments][google.firestore.v1beta1
+  .Firestore.BatchGetDocuments].
   Attributes:
       database:
           Required. The database name. In the format:
@@ -3061,10 +3047,8 @@ BatchGetDocumentsResponse = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_BATCHGETDOCUMENTSRESPONSE,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The streamed response for
-  [Firestore.BatchGetDocuments][google.firestore.v1beta1.Firestore.BatchGetDocuments].
-  
-  
+        __doc__="""The streamed response for [Firestore.BatchGetDocuments][google.firesto
+  re.v1beta1.Firestore.BatchGetDocuments].
   Attributes:
       result:
           A single result. This can be empty if the server is just
@@ -3097,10 +3081,8 @@ BeginTransactionRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_BEGINTRANSACTIONREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The request for
-  [Firestore.BeginTransaction][google.firestore.v1beta1.Firestore.BeginTransaction].
-  
-  
+        __doc__="""The request for [Firestore.BeginTransaction][google.firestore.v1beta1.
+  Firestore.BeginTransaction].
   Attributes:
       database:
           Required. The database name. In the format:
@@ -3120,10 +3102,8 @@ BeginTransactionResponse = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_BEGINTRANSACTIONRESPONSE,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The response for
-  [Firestore.BeginTransaction][google.firestore.v1beta1.Firestore.BeginTransaction].
-  
-  
+        __doc__="""The response for [Firestore.BeginTransaction][google.firestore.v1beta1
+  .Firestore.BeginTransaction].
   Attributes:
       transaction:
           The transaction that was started.
@@ -3141,8 +3121,6 @@ CommitRequest = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""The request for
   [Firestore.Commit][google.firestore.v1beta1.Firestore.Commit].
-  
-  
   Attributes:
       database:
           Required. The database name. In the format:
@@ -3166,8 +3144,6 @@ CommitResponse = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""The response for
   [Firestore.Commit][google.firestore.v1beta1.Firestore.Commit].
-  
-  
   Attributes:
       write_results:
           The result of applying the writes.  This i-th write result
@@ -3188,8 +3164,6 @@ RollbackRequest = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""The request for
   [Firestore.Rollback][google.firestore.v1beta1.Firestore.Rollback].
-  
-  
   Attributes:
       database:
           Required. The database name. In the format:
@@ -3210,8 +3184,6 @@ RunQueryRequest = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""The request for
   [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
-  
-  
   Attributes:
       parent:
           Required. The parent resource name. In the format:
@@ -3251,8 +3223,6 @@ RunQueryResponse = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""The response for
   [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
-  
-  
   Attributes:
       transaction:
           The transaction that was started as part of this request. Can
@@ -3295,19 +3265,13 @@ WriteRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_WRITEREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.Write][google.firestore.v1beta1.Firestore.Write].
-  
-  The first request creates a stream, or resumes an existing one from a
-  token.
-  
-  When creating a new stream, the server replies with a response
-  containing only an ID and a token, to use in the next request.
-  
-  When resuming a stream, the server first streams any responses later
-  than the given token, then a response containing only an up-to-date
-  token, to use in the next request.
-  
-  
+  [Firestore.Write][google.firestore.v1beta1.Firestore.Write].  The
+  first request creates a stream, or resumes an existing one from a
+  token.  When creating a new stream, the server replies with a response
+  containing only an ID and a token, to use in the next request.  When
+  resuming a stream, the server first streams any responses later than
+  the given token, then a response containing only an up-to-date token,
+  to use in the next request.
   Attributes:
       database:
           Required. The database name. In the format:
@@ -3351,8 +3315,6 @@ WriteResponse = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""The response for
   [Firestore.Write][google.firestore.v1beta1.Firestore.Write].
-  
-  
   Attributes:
       stream_id:
           The ID of the stream. Only set on the first message, when a
@@ -3389,8 +3351,6 @@ ListenRequest = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""A request for
   [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen]
-  
-  
   Attributes:
       database:
           Required. The database name. In the format:
@@ -3418,8 +3378,6 @@ ListenResponse = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""The response for
   [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen].
-  
-  
   Attributes:
       response_type:
           The supported responses.
@@ -3456,8 +3414,6 @@ Target = _reflection.GeneratedProtocolMessageType(
                 DESCRIPTOR=_TARGET_DOCUMENTSTARGET,
                 __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
                 __doc__="""A target specified by a set of documents names.
-    
-    
     Attributes:
         documents:
             The names of the documents to retrieve. In the format: ``proje
@@ -3476,8 +3432,6 @@ Target = _reflection.GeneratedProtocolMessageType(
                 DESCRIPTOR=_TARGET_QUERYTARGET,
                 __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
                 __doc__="""A target specified by a query.
-    
-    
     Attributes:
         parent:
             The parent resource name. In the format:
@@ -3498,8 +3452,6 @@ Target = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_TARGET,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""A specification of a set of documents to listen to.
-  
-  
   Attributes:
       target_type:
           The type of target to listen to.
@@ -3539,8 +3491,6 @@ TargetChange = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_TARGETCHANGE,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
         __doc__="""Targets being watched have changed.
-  
-  
   Attributes:
       target_change_type:
           The type of change that occurred.
@@ -3576,10 +3526,8 @@ ListCollectionIdsRequest = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LISTCOLLECTIONIDSREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The request for
-  [Firestore.ListCollectionIds][google.firestore.v1beta1.Firestore.ListCollectionIds].
-  
-  
+        __doc__="""The request for [Firestore.ListCollectionIds][google.firestore.v1beta1
+  .Firestore.ListCollectionIds].
   Attributes:
       parent:
           Required. The parent document. In the format: ``projects/{proj
@@ -3603,10 +3551,8 @@ ListCollectionIdsResponse = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LISTCOLLECTIONIDSRESPONSE,
         __module__="google.cloud.firestore_v1beta1.proto.firestore_pb2",
-        __doc__="""The response from
-  [Firestore.ListCollectionIds][google.firestore.v1beta1.Firestore.ListCollectionIds].
-  
-  
+        __doc__="""The response from [Firestore.ListCollectionIds][google.firestore.v1bet
+  a1.Firestore.ListCollectionIds].
   Attributes:
       collection_ids:
           The collection ids.
