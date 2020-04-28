@@ -27,8 +27,6 @@ import google.api_core.gapic_v1.config
 import google.api_core.gapic_v1.method
 import google.api_core.gapic_v1.routing_header
 import google.api_core.grpc_helpers
-import google.api_core.operation
-import google.api_core.operations_v1
 import google.api_core.page_iterator
 import google.api_core.path_template
 import grpc
@@ -42,7 +40,6 @@ from google.cloud.firestore_admin_v1.proto import field_pb2
 from google.cloud.firestore_admin_v1.proto import firestore_admin_pb2
 from google.cloud.firestore_admin_v1.proto import firestore_admin_pb2_grpc
 from google.cloud.firestore_admin_v1.proto import index_pb2
-from google.cloud.firestore_admin_v1.proto import operation_pb2
 from google.longrunning import operations_pb2
 from google.protobuf import empty_pb2
 from google.protobuf import field_mask_pb2
@@ -87,16 +84,6 @@ class FirestoreAdminClient(object):
     from_service_account_json = from_service_account_file
 
     @classmethod
-    def collection_group_path(cls, project, database, collection):
-        """Return a fully-qualified collection_group string."""
-        return google.api_core.path_template.expand(
-            "projects/{project}/databases/{database}/collectionGroups/{collection}",
-            project=project,
-            database=database,
-            collection=collection,
-        )
-
-    @classmethod
     def database_path(cls, project, database):
         """Return a fully-qualified database string."""
         return google.api_core.path_template.expand(
@@ -106,25 +93,35 @@ class FirestoreAdminClient(object):
         )
 
     @classmethod
-    def field_path(cls, project, database, collection, field):
+    def field_path(cls, project, database, collection_id, field_id):
         """Return a fully-qualified field string."""
         return google.api_core.path_template.expand(
-            "projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}",
+            "projects/{project}/databases/{database}/collectionGroups/{collection_id}/fields/{field_id}",
             project=project,
             database=database,
-            collection=collection,
-            field=field,
+            collection_id=collection_id,
+            field_id=field_id,
         )
 
     @classmethod
-    def index_path(cls, project, database, collection, index):
+    def index_path(cls, project, database, collection_id, index_id):
         """Return a fully-qualified index string."""
         return google.api_core.path_template.expand(
-            "projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}",
+            "projects/{project}/databases/{database}/collectionGroups/{collection_id}/indexes/{index_id}",
             project=project,
             database=database,
-            collection=collection,
-            index=index,
+            collection_id=collection_id,
+            index_id=index_id,
+        )
+
+    @classmethod
+    def parent_path(cls, project, database, collection_id):
+        """Return a fully-qualified parent string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/collectionGroups/{collection_id}",
+            project=project,
+            database=database,
+            collection_id=collection_id,
         )
 
     def __init__(
@@ -240,181 +237,6 @@ class FirestoreAdminClient(object):
         self._inner_api_calls = {}
 
     # Service calls
-    def delete_index(
-        self,
-        name,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Deletes a composite index.
-
-        Example:
-            >>> from google.cloud import firestore_admin_v1
-            >>>
-            >>> client = firestore_admin_v1.FirestoreAdminClient()
-            >>>
-            >>> name = client.index_path('[PROJECT]', '[DATABASE]', '[COLLECTION]', '[INDEX]')
-            >>>
-            >>> client.delete_index(name)
-
-        Args:
-            name (str): Required. A name of the form
-                ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}``
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "delete_index" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "delete_index"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.delete_index,
-                default_retry=self._method_configs["DeleteIndex"].retry,
-                default_timeout=self._method_configs["DeleteIndex"].timeout,
-                client_info=self._client_info,
-            )
-
-        request = firestore_admin_pb2.DeleteIndexRequest(name=name)
-        if metadata is None:
-            metadata = []
-        metadata = list(metadata)
-        try:
-            routing_header = [("name", name)]
-        except AttributeError:
-            pass
-        else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
-            metadata.append(routing_metadata)
-
-        self._inner_api_calls["delete_index"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
-
-    def update_field(
-        self,
-        field,
-        update_mask=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Updates a field configuration. Currently, field updates apply only to
-        single field index configuration. However, calls to
-        ``FirestoreAdmin.UpdateField`` should provide a field mask to avoid
-        changing any configuration that the caller isn't aware of. The field
-        mask should be specified as: ``{ paths: "index_config" }``.
-
-        This call returns a ``google.longrunning.Operation`` which may be used
-        to track the status of the field update. The metadata for the operation
-        will be the type ``FieldOperationMetadata``.
-
-        To configure the default field settings for the database, use the
-        special ``Field`` with resource name:
-        ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
-
-        Example:
-            >>> from google.cloud import firestore_admin_v1
-            >>>
-            >>> client = firestore_admin_v1.FirestoreAdminClient()
-            >>>
-            >>> # TODO: Initialize `field`:
-            >>> field = {}
-            >>>
-            >>> response = client.update_field(field)
-            >>>
-            >>> def callback(operation_future):
-            ...     # Handle result.
-            ...     result = operation_future.result()
-            >>>
-            >>> response.add_done_callback(callback)
-            >>>
-            >>> # Handle metadata.
-            >>> metadata = response.metadata()
-
-        Args:
-            field (Union[dict, ~google.cloud.firestore_admin_v1.types.Field]): Required. The field to be updated.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_admin_v1.types.Field`
-            update_mask (Union[dict, ~google.cloud.firestore_admin_v1.types.FieldMask]): A mask, relative to the field. If specified, only configuration
-                specified by this field\_mask will be updated in the field.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_admin_v1.types.FieldMask`
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Returns:
-            A :class:`~google.cloud.firestore_admin_v1.types._OperationFuture` instance.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "update_field" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "update_field"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.update_field,
-                default_retry=self._method_configs["UpdateField"].retry,
-                default_timeout=self._method_configs["UpdateField"].timeout,
-                client_info=self._client_info,
-            )
-
-        request = firestore_admin_pb2.UpdateFieldRequest(
-            field=field, update_mask=update_mask
-        )
-        if metadata is None:
-            metadata = []
-        metadata = list(metadata)
-        try:
-            routing_header = [("field.name", field.name)]
-        except AttributeError:
-            pass
-        else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
-            metadata.append(routing_metadata)
-
-        operation = self._inner_api_calls["update_field"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
-        return google.api_core.operation.from_gapic(
-            operation,
-            self.transport._operations_client,
-            field_pb2.Field,
-            metadata_type=operation_pb2.FieldOperationMetadata,
-        )
-
     def create_index(
         self,
         parent,
@@ -434,21 +256,12 @@ class FirestoreAdminClient(object):
             >>>
             >>> client = firestore_admin_v1.FirestoreAdminClient()
             >>>
-            >>> parent = client.collection_group_path('[PROJECT]', '[DATABASE]', '[COLLECTION]')
+            >>> parent = client.parent_path('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]')
             >>>
             >>> # TODO: Initialize `index`:
             >>> index = {}
             >>>
             >>> response = client.create_index(parent, index)
-            >>>
-            >>> def callback(operation_future):
-            ...     # Handle result.
-            ...     result = operation_future.result()
-            >>>
-            >>> response.add_done_callback(callback)
-            >>>
-            >>> # Handle metadata.
-            >>> metadata = response.metadata()
 
         Args:
             parent (str): Required. A parent name of the form
@@ -467,7 +280,7 @@ class FirestoreAdminClient(object):
                 that is provided to the method.
 
         Returns:
-            A :class:`~google.cloud.firestore_admin_v1.types._OperationFuture` instance.
+            A :class:`~google.cloud.firestore_admin_v1.types.Operation` instance.
 
         Raises:
             google.api_core.exceptions.GoogleAPICallError: If the request
@@ -501,14 +314,8 @@ class FirestoreAdminClient(object):
             )
             metadata.append(routing_metadata)
 
-        operation = self._inner_api_calls["create_index"](
+        return self._inner_api_calls["create_index"](
             request, retry=retry, timeout=timeout, metadata=metadata
-        )
-        return google.api_core.operation.from_gapic(
-            operation,
-            self.transport._operations_client,
-            index_pb2.Index,
-            metadata_type=operation_pb2.IndexOperationMetadata,
         )
 
     def list_indexes(
@@ -528,7 +335,7 @@ class FirestoreAdminClient(object):
             >>>
             >>> client = firestore_admin_v1.FirestoreAdminClient()
             >>>
-            >>> parent = client.collection_group_path('[PROJECT]', '[DATABASE]', '[COLLECTION]')
+            >>> parent = client.parent_path('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]')
             >>>
             >>> # Iterate over all results
             >>> for element in client.list_indexes(parent):
@@ -632,7 +439,7 @@ class FirestoreAdminClient(object):
             >>>
             >>> client = firestore_admin_v1.FirestoreAdminClient()
             >>>
-            >>> name = client.index_path('[PROJECT]', '[DATABASE]', '[COLLECTION]', '[INDEX]')
+            >>> name = client.index_path('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]', '[INDEX_ID]')
             >>>
             >>> response = client.get_index(name)
 
@@ -687,6 +494,249 @@ class FirestoreAdminClient(object):
             request, retry=retry, timeout=timeout, metadata=metadata
         )
 
+    def delete_index(
+        self,
+        name,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Deletes a composite index.
+
+        Example:
+            >>> from google.cloud import firestore_admin_v1
+            >>>
+            >>> client = firestore_admin_v1.FirestoreAdminClient()
+            >>>
+            >>> name = client.index_path('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]', '[INDEX_ID]')
+            >>>
+            >>> client.delete_index(name)
+
+        Args:
+            name (str): Required. A name of the form
+                ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}``
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "delete_index" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "delete_index"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.delete_index,
+                default_retry=self._method_configs["DeleteIndex"].retry,
+                default_timeout=self._method_configs["DeleteIndex"].timeout,
+                client_info=self._client_info,
+            )
+
+        request = firestore_admin_pb2.DeleteIndexRequest(name=name)
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("name", name)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        self._inner_api_calls["delete_index"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )
+
+    def import_documents(
+        self,
+        name,
+        collection_ids=None,
+        input_uri_prefix=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Imports documents into Google Cloud Firestore. Existing documents with the
+        same name are overwritten. The import occurs in the background and its
+        progress can be monitored and managed via the Operation resource that is
+        created. If an ImportDocuments operation is cancelled, it is possible
+        that a subset of the data has already been imported to Cloud Firestore.
+
+        Example:
+            >>> from google.cloud import firestore_admin_v1
+            >>>
+            >>> client = firestore_admin_v1.FirestoreAdminClient()
+            >>>
+            >>> name = client.database_path('[PROJECT]', '[DATABASE]')
+            >>>
+            >>> response = client.import_documents(name)
+
+        Args:
+            name (str): Required. Database to import into. Should be of the form:
+                ``projects/{project_id}/databases/{database_id}``.
+            collection_ids (list[str]): Which collection ids to import. Unspecified means all collections included
+                in the import.
+            input_uri_prefix (str): Location of the exported files. This must match the output\_uri\_prefix
+                of an ExportDocumentsResponse from an export that has completed
+                successfully. See:
+                ``google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix``.
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.cloud.firestore_admin_v1.types.Operation` instance.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "import_documents" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "import_documents"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.import_documents,
+                default_retry=self._method_configs["ImportDocuments"].retry,
+                default_timeout=self._method_configs["ImportDocuments"].timeout,
+                client_info=self._client_info,
+            )
+
+        request = firestore_admin_pb2.ImportDocumentsRequest(
+            name=name, collection_ids=collection_ids, input_uri_prefix=input_uri_prefix
+        )
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("name", name)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        return self._inner_api_calls["import_documents"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )
+
+    def export_documents(
+        self,
+        name,
+        collection_ids=None,
+        output_uri_prefix=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Exports a copy of all or a subset of documents from Google Cloud Firestore
+        to another storage system, such as Google Cloud Storage. Recent updates to
+        documents may not be reflected in the export. The export occurs in the
+        background and its progress can be monitored and managed via the
+        Operation resource that is created. The output of an export may only be
+        used once the associated operation is done. If an export operation is
+        cancelled before completion it may leave partial data behind in Google
+        Cloud Storage.
+
+        Example:
+            >>> from google.cloud import firestore_admin_v1
+            >>>
+            >>> client = firestore_admin_v1.FirestoreAdminClient()
+            >>>
+            >>> name = client.database_path('[PROJECT]', '[DATABASE]')
+            >>>
+            >>> response = client.export_documents(name)
+
+        Args:
+            name (str): Required. Database to export. Should be of the form:
+                ``projects/{project_id}/databases/{database_id}``.
+            collection_ids (list[str]): Which collection ids to export. Unspecified means all collections.
+            output_uri_prefix (str): The output URI. Currently only supports Google Cloud Storage URIs of the
+                form: ``gs://BUCKET_NAME[/NAMESPACE_PATH]``, where ``BUCKET_NAME`` is
+                the name of the Google Cloud Storage bucket and ``NAMESPACE_PATH`` is an
+                optional Google Cloud Storage namespace path. When choosing a name, be
+                sure to consider Google Cloud Storage naming guidelines:
+                https://cloud.google.com/storage/docs/naming. If the URI is a bucket
+                (without a namespace path), a prefix will be generated based on the
+                start time.
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.cloud.firestore_admin_v1.types.Operation` instance.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "export_documents" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "export_documents"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.export_documents,
+                default_retry=self._method_configs["ExportDocuments"].retry,
+                default_timeout=self._method_configs["ExportDocuments"].timeout,
+                client_info=self._client_info,
+            )
+
+        request = firestore_admin_pb2.ExportDocumentsRequest(
+            name=name,
+            collection_ids=collection_ids,
+            output_uri_prefix=output_uri_prefix,
+        )
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("name", name)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        return self._inner_api_calls["export_documents"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )
+
     def get_field(
         self,
         name,
@@ -702,7 +752,7 @@ class FirestoreAdminClient(object):
             >>>
             >>> client = firestore_admin_v1.FirestoreAdminClient()
             >>>
-            >>> name = client.field_path('[PROJECT]', '[DATABASE]', '[COLLECTION]', '[FIELD]')
+            >>> name = client.field_path('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]', '[FIELD_ID]')
             >>>
             >>> response = client.get_field(name)
 
@@ -779,7 +829,7 @@ class FirestoreAdminClient(object):
             >>>
             >>> client = firestore_admin_v1.FirestoreAdminClient()
             >>>
-            >>> parent = client.collection_group_path('[PROJECT]', '[DATABASE]', '[COLLECTION]')
+            >>> parent = client.parent_path('[PROJECT]', '[DATABASE]', '[COLLECTION_ID]')
             >>>
             >>> # Iterate over all results
             >>> for element in client.list_fields(parent):
@@ -872,55 +922,49 @@ class FirestoreAdminClient(object):
         )
         return iterator
 
-    def export_documents(
+    def update_field(
         self,
-        name,
-        collection_ids=None,
-        output_uri_prefix=None,
+        field,
+        update_mask=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
         timeout=google.api_core.gapic_v1.method.DEFAULT,
         metadata=None,
     ):
         """
-        Exports a copy of all or a subset of documents from Google Cloud Firestore
-        to another storage system, such as Google Cloud Storage. Recent updates to
-        documents may not be reflected in the export. The export occurs in the
-        background and its progress can be monitored and managed via the
-        Operation resource that is created. The output of an export may only be
-        used once the associated operation is done. If an export operation is
-        cancelled before completion it may leave partial data behind in Google
-        Cloud Storage.
+        Updates a field configuration. Currently, field updates apply only to
+        single field index configuration. However, calls to
+        ``FirestoreAdmin.UpdateField`` should provide a field mask to avoid
+        changing any configuration that the caller isn't aware of. The field
+        mask should be specified as: ``{ paths: "index_config" }``.
+
+        This call returns a ``google.longrunning.Operation`` which may be used
+        to track the status of the field update. The metadata for the operation
+        will be the type ``FieldOperationMetadata``.
+
+        To configure the default field settings for the database, use the
+        special ``Field`` with resource name:
+        ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
 
         Example:
             >>> from google.cloud import firestore_admin_v1
             >>>
             >>> client = firestore_admin_v1.FirestoreAdminClient()
             >>>
-            >>> name = client.database_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `field`:
+            >>> field = {}
             >>>
-            >>> response = client.export_documents(name)
-            >>>
-            >>> def callback(operation_future):
-            ...     # Handle result.
-            ...     result = operation_future.result()
-            >>>
-            >>> response.add_done_callback(callback)
-            >>>
-            >>> # Handle metadata.
-            >>> metadata = response.metadata()
+            >>> response = client.update_field(field)
 
         Args:
-            name (str): Required. Database to export. Should be of the form:
-                ``projects/{project_id}/databases/{database_id}``.
-            collection_ids (list[str]): Which collection ids to export. Unspecified means all collections.
-            output_uri_prefix (str): The output URI. Currently only supports Google Cloud Storage URIs of the
-                form: ``gs://BUCKET_NAME[/NAMESPACE_PATH]``, where ``BUCKET_NAME`` is
-                the name of the Google Cloud Storage bucket and ``NAMESPACE_PATH`` is an
-                optional Google Cloud Storage namespace path. When choosing a name, be
-                sure to consider Google Cloud Storage naming guidelines:
-                https://cloud.google.com/storage/docs/naming. If the URI is a bucket
-                (without a namespace path), a prefix will be generated based on the
-                start time.
+            field (Union[dict, ~google.cloud.firestore_admin_v1.types.Field]): Required. The field to be updated.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_admin_v1.types.Field`
+            update_mask (Union[dict, ~google.cloud.firestore_admin_v1.types.FieldMask]): A mask, relative to the field. If specified, only configuration
+                specified by this field\_mask will be updated in the field.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_admin_v1.types.FieldMask`
             retry (Optional[google.api_core.retry.Retry]):  A retry object used
                 to retry requests. If ``None`` is specified, requests will
                 be retried using a default configuration.
@@ -931,7 +975,7 @@ class FirestoreAdminClient(object):
                 that is provided to the method.
 
         Returns:
-            A :class:`~google.cloud.firestore_admin_v1.types._OperationFuture` instance.
+            A :class:`~google.cloud.firestore_admin_v1.types.Operation` instance.
 
         Raises:
             google.api_core.exceptions.GoogleAPICallError: If the request
@@ -941,26 +985,24 @@ class FirestoreAdminClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "export_documents" not in self._inner_api_calls:
+        if "update_field" not in self._inner_api_calls:
             self._inner_api_calls[
-                "export_documents"
+                "update_field"
             ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.export_documents,
-                default_retry=self._method_configs["ExportDocuments"].retry,
-                default_timeout=self._method_configs["ExportDocuments"].timeout,
+                self.transport.update_field,
+                default_retry=self._method_configs["UpdateField"].retry,
+                default_timeout=self._method_configs["UpdateField"].timeout,
                 client_info=self._client_info,
             )
 
-        request = firestore_admin_pb2.ExportDocumentsRequest(
-            name=name,
-            collection_ids=collection_ids,
-            output_uri_prefix=output_uri_prefix,
+        request = firestore_admin_pb2.UpdateFieldRequest(
+            field=field, update_mask=update_mask
         )
         if metadata is None:
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("name", name)]
+            routing_header = [("field.name", field.name)]
         except AttributeError:
             pass
         else:
@@ -969,111 +1011,6 @@ class FirestoreAdminClient(object):
             )
             metadata.append(routing_metadata)
 
-        operation = self._inner_api_calls["export_documents"](
+        return self._inner_api_calls["update_field"](
             request, retry=retry, timeout=timeout, metadata=metadata
-        )
-        return google.api_core.operation.from_gapic(
-            operation,
-            self.transport._operations_client,
-            operation_pb2.ExportDocumentsResponse,
-            metadata_type=operation_pb2.ExportDocumentsMetadata,
-        )
-
-    def import_documents(
-        self,
-        name,
-        collection_ids=None,
-        input_uri_prefix=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Imports documents into Google Cloud Firestore. Existing documents with the
-        same name are overwritten. The import occurs in the background and its
-        progress can be monitored and managed via the Operation resource that is
-        created. If an ImportDocuments operation is cancelled, it is possible
-        that a subset of the data has already been imported to Cloud Firestore.
-
-        Example:
-            >>> from google.cloud import firestore_admin_v1
-            >>>
-            >>> client = firestore_admin_v1.FirestoreAdminClient()
-            >>>
-            >>> name = client.database_path('[PROJECT]', '[DATABASE]')
-            >>>
-            >>> response = client.import_documents(name)
-            >>>
-            >>> def callback(operation_future):
-            ...     # Handle result.
-            ...     result = operation_future.result()
-            >>>
-            >>> response.add_done_callback(callback)
-            >>>
-            >>> # Handle metadata.
-            >>> metadata = response.metadata()
-
-        Args:
-            name (str): Required. Database to import into. Should be of the form:
-                ``projects/{project_id}/databases/{database_id}``.
-            collection_ids (list[str]): Which collection ids to import. Unspecified means all collections included
-                in the import.
-            input_uri_prefix (str): Location of the exported files. This must match the output\_uri\_prefix
-                of an ExportDocumentsResponse from an export that has completed
-                successfully. See:
-                ``google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix``.
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Returns:
-            A :class:`~google.cloud.firestore_admin_v1.types._OperationFuture` instance.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "import_documents" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "import_documents"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.import_documents,
-                default_retry=self._method_configs["ImportDocuments"].retry,
-                default_timeout=self._method_configs["ImportDocuments"].timeout,
-                client_info=self._client_info,
-            )
-
-        request = firestore_admin_pb2.ImportDocumentsRequest(
-            name=name, collection_ids=collection_ids, input_uri_prefix=input_uri_prefix
-        )
-        if metadata is None:
-            metadata = []
-        metadata = list(metadata)
-        try:
-            routing_header = [("name", name)]
-        except AttributeError:
-            pass
-        else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
-            metadata.append(routing_metadata)
-
-        operation = self._inner_api_calls["import_documents"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
-        return google.api_core.operation.from_gapic(
-            operation,
-            self.transport._operations_client,
-            empty_pb2.Empty,
-            metadata_type=operation_pb2.ImportDocumentsMetadata,
         )

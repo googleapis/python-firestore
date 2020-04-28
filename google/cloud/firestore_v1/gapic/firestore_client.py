@@ -28,6 +28,7 @@ import google.api_core.gapic_v1.method
 import google.api_core.gapic_v1.routing_header
 import google.api_core.grpc_helpers
 import google.api_core.page_iterator
+import google.api_core.path_template
 import google.api_core.protobuf_helpers
 import grpc
 
@@ -87,6 +88,45 @@ class FirestoreClient(object):
         return cls(*args, **kwargs)
 
     from_service_account_json = from_service_account_file
+
+    @classmethod
+    def any_path_path(cls, project, database, document, any_path):
+        """Return a fully-qualified any_path string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents/{document}/{any_path=**}",
+            project=project,
+            database=database,
+            document=document,
+            any_path=any_path,
+        )
+
+    @classmethod
+    def database_root_path(cls, project, database):
+        """Return a fully-qualified database_root string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}",
+            project=project,
+            database=database,
+        )
+
+    @classmethod
+    def document_path_path(cls, project, database, document_path):
+        """Return a fully-qualified document_path string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents/{document_path=**}",
+            project=project,
+            database=database,
+            document_path=document_path,
+        )
+
+    @classmethod
+    def document_root_path(cls, project, database):
+        """Return a fully-qualified document_root string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents",
+            project=project,
+            database=database,
+        )
 
     def __init__(
         self,
@@ -219,8 +259,7 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `name`:
-            >>> name = ''
+            >>> name = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
             >>>
             >>> response = client.get_document(name)
 
@@ -318,8 +357,7 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `parent`:
-            >>> parent = ''
+            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
             >>>
             >>> # TODO: Initialize `collection_id`:
             >>> collection_id = ''
@@ -440,8 +478,8 @@ class FirestoreClient(object):
         self,
         parent,
         collection_id,
+        document_id,
         document,
-        document_id=None,
         mask=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
         timeout=google.api_core.gapic_v1.method.DEFAULT,
@@ -455,16 +493,18 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `parent`:
-            >>> parent = ''
+            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
             >>>
             >>> # TODO: Initialize `collection_id`:
             >>> collection_id = ''
             >>>
+            >>> # TODO: Initialize `document_id`:
+            >>> document_id = ''
+            >>>
             >>> # TODO: Initialize `document`:
             >>> document = {}
             >>>
-            >>> response = client.create_document(parent, collection_id, document)
+            >>> response = client.create_document(parent, collection_id, document_id, document)
 
         Args:
             parent (str): Required. The parent resource. For example:
@@ -472,13 +512,13 @@ class FirestoreClient(object):
                 ``projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}``
             collection_id (str): Required. The collection ID, relative to ``parent``, to list. For
                 example: ``chatrooms``.
+            document_id (str): The client-assigned document ID to use for this document.
+
+                Optional. If not specified, an ID will be assigned by the service.
             document (Union[dict, ~google.cloud.firestore_v1.types.Document]): Required. The document to create. ``name`` must not be set.
 
                 If a dict is provided, it must be of the same form as the protobuf
                 message :class:`~google.cloud.firestore_v1.types.Document`
-            document_id (str): The client-assigned document ID to use for this document.
-
-                Optional. If not specified, an ID will be assigned by the service.
             mask (Union[dict, ~google.cloud.firestore_v1.types.DocumentMask]): The fields to return. If not set, returns all fields.
 
                 If the document has a field that is not present in this mask, that field
@@ -519,8 +559,8 @@ class FirestoreClient(object):
         request = firestore_pb2.CreateDocumentRequest(
             parent=parent,
             collection_id=collection_id,
-            document=document,
             document_id=document_id,
+            document=document,
             mask=mask,
         )
         return self._inner_api_calls["create_document"](
@@ -530,7 +570,7 @@ class FirestoreClient(object):
     def update_document(
         self,
         document,
-        update_mask=None,
+        update_mask,
         mask=None,
         current_document=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
@@ -548,7 +588,10 @@ class FirestoreClient(object):
             >>> # TODO: Initialize `document`:
             >>> document = {}
             >>>
-            >>> response = client.update_document(document)
+            >>> # TODO: Initialize `update_mask`:
+            >>> update_mask = {}
+            >>>
+            >>> response = client.update_document(document, update_mask)
 
         Args:
             document (Union[dict, ~google.cloud.firestore_v1.types.Document]): Required. The updated document.
@@ -647,8 +690,7 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `name`:
-            >>> name = ''
+            >>> name = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
             >>>
             >>> client.delete_document(name)
 
@@ -710,7 +752,7 @@ class FirestoreClient(object):
     def batch_get_documents(
         self,
         database,
-        documents=None,
+        documents,
         mask=None,
         transaction=None,
         new_transaction=None,
@@ -730,10 +772,12 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `database`:
-            >>> database = ''
+            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
             >>>
-            >>> for element in client.batch_get_documents(database):
+            >>> # TODO: Initialize `documents`:
+            >>> documents = []
+            >>>
+            >>> for element in client.batch_get_documents(database, documents):
             ...     # process element
             ...     pass
 
@@ -843,8 +887,7 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `database`:
-            >>> database = ''
+            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
             >>>
             >>> response = client.begin_transaction(database)
 
@@ -909,7 +952,7 @@ class FirestoreClient(object):
     def commit(
         self,
         database,
-        writes=None,
+        writes,
         transaction=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
         timeout=google.api_core.gapic_v1.method.DEFAULT,
@@ -923,10 +966,12 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `database`:
-            >>> database = ''
+            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
             >>>
-            >>> response = client.commit(database)
+            >>> # TODO: Initialize `writes`:
+            >>> writes = []
+            >>>
+            >>> response = client.commit(database, writes)
 
         Args:
             database (str): Required. The database name. In the format:
@@ -1004,8 +1049,7 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `database`:
-            >>> database = ''
+            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
             >>>
             >>> # TODO: Initialize `transaction`:
             >>> transaction = b''
@@ -1082,8 +1126,7 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `parent`:
-            >>> parent = ''
+            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
             >>>
             >>> for element in client.run_query(parent):
             ...     # process element
@@ -1188,13 +1231,14 @@ class FirestoreClient(object):
         """
         Streams batches of document updates and deletes, in order.
 
+        EXPERIMENTAL: This method interface might change in the future.
+
         Example:
             >>> from google.cloud import firestore_v1
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `database`:
-            >>> database = ''
+            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
             >>> request = {'database': database}
             >>>
             >>> requests = [request]
@@ -1249,13 +1293,14 @@ class FirestoreClient(object):
         """
         Listens to changes.
 
+        EXPERIMENTAL: This method interface might change in the future.
+
         Example:
             >>> from google.cloud import firestore_v1
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `database`:
-            >>> database = ''
+            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
             >>> request = {'database': database}
             >>>
             >>> requests = [request]
@@ -1316,8 +1361,7 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> # TODO: Initialize `parent`:
-            >>> parent = ''
+            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
             >>>
             >>> # Iterate over all results
             >>> for element in client.list_collection_ids(parent):

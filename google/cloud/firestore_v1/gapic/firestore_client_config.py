@@ -2,7 +2,7 @@ config = {
     "interfaces": {
         "google.firestore.v1.Firestore": {
             "retry_codes": {
-                "idempotent": ["DEADLINE_EXCEEDED", "UNAVAILABLE"],
+                "idempotent": ["DEADLINE_EXCEEDED", "INTERNAL", "UNAVAILABLE"],
                 "non_idempotent": [],
             },
             "retry_params": {
@@ -52,7 +52,7 @@ config = {
                     "retry_params_name": "default",
                 },
                 "BatchGetDocuments": {
-                    "timeout_millis": 60000,
+                    "timeout_millis": 300000,
                     "retry_codes_name": "idempotent",
                     "retry_params_name": "streaming",
                 },
@@ -77,18 +77,18 @@ config = {
                     "retry_params_name": "streaming",
                 },
                 "Write": {
-                    "timeout_millis": 60000,
+                    "timeout_millis": 86400000,
                     "retry_codes_name": "non_idempotent",
                     "retry_params_name": "streaming",
                 },
                 "Listen": {
-                    "timeout_millis": 60000,
+                    "timeout_millis": 86400000,
                     "retry_codes_name": "idempotent",
                     "retry_params_name": "streaming",
                 },
                 "ListCollectionIds": {
                     "timeout_millis": 60000,
-                    "retry_codes_name": "non_idempotent",
+                    "retry_codes_name": "idempotent",
                     "retry_params_name": "default",
                 },
             },

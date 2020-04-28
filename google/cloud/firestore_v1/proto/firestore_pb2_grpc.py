@@ -39,6 +39,11 @@ class FirestoreStub(object):
             request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListDocumentsRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListDocumentsResponse.FromString,
         )
+        self.CreateDocument = channel.unary_unary(
+            "/google.firestore.v1.Firestore/CreateDocument",
+            request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.CreateDocumentRequest.SerializeToString,
+            response_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2.Document.FromString,
+        )
         self.UpdateDocument = channel.unary_unary(
             "/google.firestore.v1.Firestore/UpdateDocument",
             request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.UpdateDocumentRequest.SerializeToString,
@@ -89,11 +94,6 @@ class FirestoreStub(object):
             request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListCollectionIdsRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListCollectionIdsResponse.FromString,
         )
-        self.CreateDocument = channel.unary_unary(
-            "/google.firestore.v1.Firestore/CreateDocument",
-            request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.CreateDocumentRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2.Document.FromString,
-        )
 
 
 class FirestoreServicer(object):
@@ -118,6 +118,13 @@ class FirestoreServicer(object):
 
     def ListDocuments(self, request, context):
         """Lists documents.
+    """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def CreateDocument(self, request, context):
+        """Creates a new document.
     """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -196,13 +203,6 @@ class FirestoreServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
-    def CreateDocument(self, request, context):
-        """Creates a new document.
-    """
-        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
-
 
 def add_FirestoreServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -215,6 +215,11 @@ def add_FirestoreServicer_to_server(servicer, server):
             servicer.ListDocuments,
             request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListDocumentsRequest.FromString,
             response_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListDocumentsResponse.SerializeToString,
+        ),
+        "CreateDocument": grpc.unary_unary_rpc_method_handler(
+            servicer.CreateDocument,
+            request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.CreateDocumentRequest.FromString,
+            response_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2.Document.SerializeToString,
         ),
         "UpdateDocument": grpc.unary_unary_rpc_method_handler(
             servicer.UpdateDocument,
@@ -265,11 +270,6 @@ def add_FirestoreServicer_to_server(servicer, server):
             servicer.ListCollectionIds,
             request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListCollectionIdsRequest.FromString,
             response_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListCollectionIdsResponse.SerializeToString,
-        ),
-        "CreateDocument": grpc.unary_unary_rpc_method_handler(
-            servicer.CreateDocument,
-            request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.CreateDocumentRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2.Document.SerializeToString,
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(

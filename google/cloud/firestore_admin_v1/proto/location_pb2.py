@@ -64,8 +64,10 @@ LocationMetadata = _reflection.GeneratedProtocolMessageType(
     dict(
         DESCRIPTOR=_LOCATIONMETADATA,
         __module__="google.cloud.firestore.admin_v1.proto.location_pb2",
-        __doc__="""The metadata message for [google.cloud.location.Location.metadata][goo
-  gle.cloud.location.Location.metadata].""",
+        __doc__="""The metadata message for
+  [google.cloud.location.Location.metadata][google.cloud.location.Location.metadata].
+  
+  """,
         # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.LocationMetadata)
     ),
 )

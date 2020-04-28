@@ -19,13 +19,10 @@
 import mock
 import pytest
 
-from google.rpc import status_pb2
-
 from google.cloud import firestore_admin_v1
 from google.cloud.firestore_admin_v1.proto import field_pb2
 from google.cloud.firestore_admin_v1.proto import firestore_admin_pb2
 from google.cloud.firestore_admin_v1.proto import index_pb2
-from google.cloud.firestore_admin_v1.proto import operation_pb2
 from google.longrunning import operations_pb2
 from google.protobuf import empty_pb2
 
@@ -67,112 +64,26 @@ class CustomException(Exception):
 
 
 class TestFirestoreAdminClient(object):
-    def test_delete_index(self):
-        channel = ChannelStub()
-        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
-        with patch as create_channel:
-            create_channel.return_value = channel
-            client = firestore_admin_v1.FirestoreAdminClient()
-
-        # Setup Request
-        name = client.index_path("[PROJECT]", "[DATABASE]", "[COLLECTION]", "[INDEX]")
-
-        client.delete_index(name)
-
-        assert len(channel.requests) == 1
-        expected_request = firestore_admin_pb2.DeleteIndexRequest(name=name)
-        actual_request = channel.requests[0][1]
-        assert expected_request == actual_request
-
-    def test_delete_index_exception(self):
-        # Mock the API response
-        channel = ChannelStub(responses=[CustomException()])
-        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
-        with patch as create_channel:
-            create_channel.return_value = channel
-            client = firestore_admin_v1.FirestoreAdminClient()
-
-        # Setup request
-        name = client.index_path("[PROJECT]", "[DATABASE]", "[COLLECTION]", "[INDEX]")
-
-        with pytest.raises(CustomException):
-            client.delete_index(name)
-
-    def test_update_field(self):
-        # Setup Expected Response
-        name = "name3373707"
-        expected_response = {"name": name}
-        expected_response = field_pb2.Field(**expected_response)
-        operation = operations_pb2.Operation(
-            name="operations/test_update_field", done=True
-        )
-        operation.response.Pack(expected_response)
-
-        # Mock the API response
-        channel = ChannelStub(responses=[operation])
-        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
-        with patch as create_channel:
-            create_channel.return_value = channel
-            client = firestore_admin_v1.FirestoreAdminClient()
-
-        # Setup Request
-        field = {}
-
-        response = client.update_field(field)
-        result = response.result()
-        assert expected_response == result
-
-        assert len(channel.requests) == 1
-        expected_request = firestore_admin_pb2.UpdateFieldRequest(field=field)
-        actual_request = channel.requests[0][1]
-        assert expected_request == actual_request
-
-    def test_update_field_exception(self):
-        # Setup Response
-        error = status_pb2.Status()
-        operation = operations_pb2.Operation(
-            name="operations/test_update_field_exception", done=True
-        )
-        operation.error.CopyFrom(error)
-
-        # Mock the API response
-        channel = ChannelStub(responses=[operation])
-        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
-        with patch as create_channel:
-            create_channel.return_value = channel
-            client = firestore_admin_v1.FirestoreAdminClient()
-
-        # Setup Request
-        field = {}
-
-        response = client.update_field(field)
-        exception = response.exception()
-        assert exception.errors[0] == error
-
     def test_create_index(self):
         # Setup Expected Response
         name = "name3373707"
-        expected_response = {"name": name}
-        expected_response = index_pb2.Index(**expected_response)
-        operation = operations_pb2.Operation(
-            name="operations/test_create_index", done=True
-        )
-        operation.response.Pack(expected_response)
+        done = True
+        expected_response = {"name": name, "done": done}
+        expected_response = operations_pb2.Operation(**expected_response)
 
         # Mock the API response
-        channel = ChannelStub(responses=[operation])
+        channel = ChannelStub(responses=[expected_response])
         patch = mock.patch("google.api_core.grpc_helpers.create_channel")
         with patch as create_channel:
             create_channel.return_value = channel
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup Request
-        parent = client.collection_group_path("[PROJECT]", "[DATABASE]", "[COLLECTION]")
+        parent = client.parent_path("[PROJECT]", "[DATABASE]", "[COLLECTION_ID]")
         index = {}
 
         response = client.create_index(parent, index)
-        result = response.result()
-        assert expected_response == result
+        assert expected_response == response
 
         assert len(channel.requests) == 1
         expected_request = firestore_admin_pb2.CreateIndexRequest(
@@ -182,27 +93,19 @@ class TestFirestoreAdminClient(object):
         assert expected_request == actual_request
 
     def test_create_index_exception(self):
-        # Setup Response
-        error = status_pb2.Status()
-        operation = operations_pb2.Operation(
-            name="operations/test_create_index_exception", done=True
-        )
-        operation.error.CopyFrom(error)
-
         # Mock the API response
-        channel = ChannelStub(responses=[operation])
+        channel = ChannelStub(responses=[CustomException()])
         patch = mock.patch("google.api_core.grpc_helpers.create_channel")
         with patch as create_channel:
             create_channel.return_value = channel
             client = firestore_admin_v1.FirestoreAdminClient()
 
-        # Setup Request
-        parent = client.collection_group_path("[PROJECT]", "[DATABASE]", "[COLLECTION]")
+        # Setup request
+        parent = client.parent_path("[PROJECT]", "[DATABASE]", "[COLLECTION_ID]")
         index = {}
 
-        response = client.create_index(parent, index)
-        exception = response.exception()
-        assert exception.errors[0] == error
+        with pytest.raises(CustomException):
+            client.create_index(parent, index)
 
     def test_list_indexes(self):
         # Setup Expected Response
@@ -220,7 +123,7 @@ class TestFirestoreAdminClient(object):
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup Request
-        parent = client.collection_group_path("[PROJECT]", "[DATABASE]", "[COLLECTION]")
+        parent = client.parent_path("[PROJECT]", "[DATABASE]", "[COLLECTION_ID]")
 
         paged_list_response = client.list_indexes(parent)
         resources = list(paged_list_response)
@@ -241,7 +144,7 @@ class TestFirestoreAdminClient(object):
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup request
-        parent = client.collection_group_path("[PROJECT]", "[DATABASE]", "[COLLECTION]")
+        parent = client.parent_path("[PROJECT]", "[DATABASE]", "[COLLECTION_ID]")
 
         paged_list_response = client.list_indexes(parent)
         with pytest.raises(CustomException):
@@ -261,7 +164,9 @@ class TestFirestoreAdminClient(object):
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup Request
-        name = client.index_path("[PROJECT]", "[DATABASE]", "[COLLECTION]", "[INDEX]")
+        name = client.index_path(
+            "[PROJECT]", "[DATABASE]", "[COLLECTION_ID]", "[INDEX_ID]"
+        )
 
         response = client.get_index(name)
         assert expected_response == response
@@ -280,10 +185,125 @@ class TestFirestoreAdminClient(object):
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup request
-        name = client.index_path("[PROJECT]", "[DATABASE]", "[COLLECTION]", "[INDEX]")
+        name = client.index_path(
+            "[PROJECT]", "[DATABASE]", "[COLLECTION_ID]", "[INDEX_ID]"
+        )
 
         with pytest.raises(CustomException):
             client.get_index(name)
+
+    def test_delete_index(self):
+        channel = ChannelStub()
+        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
+        with patch as create_channel:
+            create_channel.return_value = channel
+            client = firestore_admin_v1.FirestoreAdminClient()
+
+        # Setup Request
+        name = client.index_path(
+            "[PROJECT]", "[DATABASE]", "[COLLECTION_ID]", "[INDEX_ID]"
+        )
+
+        client.delete_index(name)
+
+        assert len(channel.requests) == 1
+        expected_request = firestore_admin_pb2.DeleteIndexRequest(name=name)
+        actual_request = channel.requests[0][1]
+        assert expected_request == actual_request
+
+    def test_delete_index_exception(self):
+        # Mock the API response
+        channel = ChannelStub(responses=[CustomException()])
+        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
+        with patch as create_channel:
+            create_channel.return_value = channel
+            client = firestore_admin_v1.FirestoreAdminClient()
+
+        # Setup request
+        name = client.index_path(
+            "[PROJECT]", "[DATABASE]", "[COLLECTION_ID]", "[INDEX_ID]"
+        )
+
+        with pytest.raises(CustomException):
+            client.delete_index(name)
+
+    def test_import_documents(self):
+        # Setup Expected Response
+        name_2 = "name2-1052831874"
+        done = True
+        expected_response = {"name": name_2, "done": done}
+        expected_response = operations_pb2.Operation(**expected_response)
+
+        # Mock the API response
+        channel = ChannelStub(responses=[expected_response])
+        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
+        with patch as create_channel:
+            create_channel.return_value = channel
+            client = firestore_admin_v1.FirestoreAdminClient()
+
+        # Setup Request
+        name = client.database_path("[PROJECT]", "[DATABASE]")
+
+        response = client.import_documents(name)
+        assert expected_response == response
+
+        assert len(channel.requests) == 1
+        expected_request = firestore_admin_pb2.ImportDocumentsRequest(name=name)
+        actual_request = channel.requests[0][1]
+        assert expected_request == actual_request
+
+    def test_import_documents_exception(self):
+        # Mock the API response
+        channel = ChannelStub(responses=[CustomException()])
+        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
+        with patch as create_channel:
+            create_channel.return_value = channel
+            client = firestore_admin_v1.FirestoreAdminClient()
+
+        # Setup request
+        name = client.database_path("[PROJECT]", "[DATABASE]")
+
+        with pytest.raises(CustomException):
+            client.import_documents(name)
+
+    def test_export_documents(self):
+        # Setup Expected Response
+        name_2 = "name2-1052831874"
+        done = True
+        expected_response = {"name": name_2, "done": done}
+        expected_response = operations_pb2.Operation(**expected_response)
+
+        # Mock the API response
+        channel = ChannelStub(responses=[expected_response])
+        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
+        with patch as create_channel:
+            create_channel.return_value = channel
+            client = firestore_admin_v1.FirestoreAdminClient()
+
+        # Setup Request
+        name = client.database_path("[PROJECT]", "[DATABASE]")
+
+        response = client.export_documents(name)
+        assert expected_response == response
+
+        assert len(channel.requests) == 1
+        expected_request = firestore_admin_pb2.ExportDocumentsRequest(name=name)
+        actual_request = channel.requests[0][1]
+        assert expected_request == actual_request
+
+    def test_export_documents_exception(self):
+        # Mock the API response
+        channel = ChannelStub(responses=[CustomException()])
+        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
+        with patch as create_channel:
+            create_channel.return_value = channel
+            client = firestore_admin_v1.FirestoreAdminClient()
+
+        # Setup request
+        name = client.database_path("[PROJECT]", "[DATABASE]")
+
+        with pytest.raises(CustomException):
+            client.export_documents(name)
 
     def test_get_field(self):
         # Setup Expected Response
@@ -299,7 +319,9 @@ class TestFirestoreAdminClient(object):
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup Request
-        name = client.field_path("[PROJECT]", "[DATABASE]", "[COLLECTION]", "[FIELD]")
+        name = client.field_path(
+            "[PROJECT]", "[DATABASE]", "[COLLECTION_ID]", "[FIELD_ID]"
+        )
 
         response = client.get_field(name)
         assert expected_response == response
@@ -318,7 +340,9 @@ class TestFirestoreAdminClient(object):
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup request
-        name = client.field_path("[PROJECT]", "[DATABASE]", "[COLLECTION]", "[FIELD]")
+        name = client.field_path(
+            "[PROJECT]", "[DATABASE]", "[COLLECTION_ID]", "[FIELD_ID]"
+        )
 
         with pytest.raises(CustomException):
             client.get_field(name)
@@ -339,7 +363,7 @@ class TestFirestoreAdminClient(object):
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup Request
-        parent = client.collection_group_path("[PROJECT]", "[DATABASE]", "[COLLECTION]")
+        parent = client.parent_path("[PROJECT]", "[DATABASE]", "[COLLECTION_ID]")
 
         paged_list_response = client.list_fields(parent)
         resources = list(paged_list_response)
@@ -360,109 +384,47 @@ class TestFirestoreAdminClient(object):
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup request
-        parent = client.collection_group_path("[PROJECT]", "[DATABASE]", "[COLLECTION]")
+        parent = client.parent_path("[PROJECT]", "[DATABASE]", "[COLLECTION_ID]")
 
         paged_list_response = client.list_fields(parent)
         with pytest.raises(CustomException):
             list(paged_list_response)
 
-    def test_export_documents(self):
+    def test_update_field(self):
         # Setup Expected Response
-        output_uri_prefix = "outputUriPrefix124746435"
-        expected_response = {"output_uri_prefix": output_uri_prefix}
-        expected_response = operation_pb2.ExportDocumentsResponse(**expected_response)
-        operation = operations_pb2.Operation(
-            name="operations/test_export_documents", done=True
-        )
-        operation.response.Pack(expected_response)
+        name = "name3373707"
+        done = True
+        expected_response = {"name": name, "done": done}
+        expected_response = operations_pb2.Operation(**expected_response)
 
         # Mock the API response
-        channel = ChannelStub(responses=[operation])
+        channel = ChannelStub(responses=[expected_response])
         patch = mock.patch("google.api_core.grpc_helpers.create_channel")
         with patch as create_channel:
             create_channel.return_value = channel
             client = firestore_admin_v1.FirestoreAdminClient()
 
         # Setup Request
-        name = client.database_path("[PROJECT]", "[DATABASE]")
+        field = {}
 
-        response = client.export_documents(name)
-        result = response.result()
-        assert expected_response == result
+        response = client.update_field(field)
+        assert expected_response == response
 
         assert len(channel.requests) == 1
-        expected_request = firestore_admin_pb2.ExportDocumentsRequest(name=name)
+        expected_request = firestore_admin_pb2.UpdateFieldRequest(field=field)
         actual_request = channel.requests[0][1]
         assert expected_request == actual_request
 
-    def test_export_documents_exception(self):
-        # Setup Response
-        error = status_pb2.Status()
-        operation = operations_pb2.Operation(
-            name="operations/test_export_documents_exception", done=True
-        )
-        operation.error.CopyFrom(error)
-
+    def test_update_field_exception(self):
         # Mock the API response
-        channel = ChannelStub(responses=[operation])
+        channel = ChannelStub(responses=[CustomException()])
         patch = mock.patch("google.api_core.grpc_helpers.create_channel")
         with patch as create_channel:
             create_channel.return_value = channel
             client = firestore_admin_v1.FirestoreAdminClient()
 
-        # Setup Request
-        name = client.database_path("[PROJECT]", "[DATABASE]")
+        # Setup request
+        field = {}
 
-        response = client.export_documents(name)
-        exception = response.exception()
-        assert exception.errors[0] == error
-
-    def test_import_documents(self):
-        # Setup Expected Response
-        expected_response = {}
-        expected_response = empty_pb2.Empty(**expected_response)
-        operation = operations_pb2.Operation(
-            name="operations/test_import_documents", done=True
-        )
-        operation.response.Pack(expected_response)
-
-        # Mock the API response
-        channel = ChannelStub(responses=[operation])
-        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
-        with patch as create_channel:
-            create_channel.return_value = channel
-            client = firestore_admin_v1.FirestoreAdminClient()
-
-        # Setup Request
-        name = client.database_path("[PROJECT]", "[DATABASE]")
-
-        response = client.import_documents(name)
-        result = response.result()
-        assert expected_response == result
-
-        assert len(channel.requests) == 1
-        expected_request = firestore_admin_pb2.ImportDocumentsRequest(name=name)
-        actual_request = channel.requests[0][1]
-        assert expected_request == actual_request
-
-    def test_import_documents_exception(self):
-        # Setup Response
-        error = status_pb2.Status()
-        operation = operations_pb2.Operation(
-            name="operations/test_import_documents_exception", done=True
-        )
-        operation.error.CopyFrom(error)
-
-        # Mock the API response
-        channel = ChannelStub(responses=[operation])
-        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
-        with patch as create_channel:
-            create_channel.return_value = channel
-            client = firestore_admin_v1.FirestoreAdminClient()
-
-        # Setup Request
-        name = client.database_path("[PROJECT]", "[DATABASE]")
-
-        response = client.import_documents(name)
-        exception = response.exception()
-        assert exception.errors[0] == error
+        with pytest.raises(CustomException):
+            client.update_field(field)
