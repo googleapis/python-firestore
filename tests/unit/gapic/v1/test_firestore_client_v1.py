@@ -20,7 +20,6 @@ import mock
 import pytest
 
 from google.cloud.firestore_v1.gapic import firestore_client
-from google.cloud.firestore_v1.proto import common_pb2
 from google.cloud.firestore_v1.proto import document_pb2
 from google.cloud.firestore_v1.proto import firestore_pb2
 from google.protobuf import empty_pb2
@@ -85,9 +84,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        name = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        name = "name3373707"
 
         response = client.get_document(name)
         assert expected_response == response
@@ -106,9 +103,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        name = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        name = "name3373707"
 
         with pytest.raises(CustomException):
             client.get_document(name)
@@ -129,9 +124,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        parent = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        parent = "parent-995424086"
         collection_id = "collectionId-821242276"
 
         paged_list_response = client.list_documents(parent, collection_id)
@@ -155,9 +148,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        parent = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        parent = "parent-995424086"
         collection_id = "collectionId-821242276"
 
         paged_list_response = client.list_documents(parent, collection_id)
@@ -178,22 +169,16 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        parent = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        parent = "parent-995424086"
         collection_id = "collectionId-821242276"
-        document_id = "documentId506676927"
         document = {}
 
-        response = client.create_document(parent, collection_id, document_id, document)
+        response = client.create_document(parent, collection_id, document)
         assert expected_response == response
 
         assert len(channel.requests) == 1
         expected_request = firestore_pb2.CreateDocumentRequest(
-            parent=parent,
-            collection_id=collection_id,
-            document_id=document_id,
-            document=document,
+            parent=parent, collection_id=collection_id, document=document
         )
         actual_request = channel.requests[0][1]
         assert expected_request == actual_request
@@ -207,15 +192,12 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        parent = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        parent = "parent-995424086"
         collection_id = "collectionId-821242276"
-        document_id = "documentId506676927"
         document = {}
 
         with pytest.raises(CustomException):
-            client.create_document(parent, collection_id, document_id, document)
+            client.create_document(parent, collection_id, document)
 
     def test_update_document(self):
         # Setup Expected Response
@@ -232,15 +214,12 @@ class TestFirestoreClient(object):
 
         # Setup Request
         document = {}
-        update_mask = {}
 
-        response = client.update_document(document, update_mask)
+        response = client.update_document(document)
         assert expected_response == response
 
         assert len(channel.requests) == 1
-        expected_request = firestore_pb2.UpdateDocumentRequest(
-            document=document, update_mask=update_mask
-        )
+        expected_request = firestore_pb2.UpdateDocumentRequest(document=document)
         actual_request = channel.requests[0][1]
         assert expected_request == actual_request
 
@@ -254,10 +233,9 @@ class TestFirestoreClient(object):
 
         # Setup request
         document = {}
-        update_mask = {}
 
         with pytest.raises(CustomException):
-            client.update_document(document, update_mask)
+            client.update_document(document)
 
     def test_delete_document(self):
         channel = ChannelStub()
@@ -267,9 +245,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        name = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        name = "name3373707"
 
         client.delete_document(name)
 
@@ -287,9 +263,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        name = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        name = "name3373707"
 
         with pytest.raises(CustomException):
             client.delete_document(name)
@@ -309,18 +283,15 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
-        documents = []
+        database = "database1789464955"
 
-        response = client.batch_get_documents(database, documents)
+        response = client.batch_get_documents(database)
         resources = list(response)
         assert len(resources) == 1
         assert expected_response == resources[0]
 
         assert len(channel.requests) == 1
-        expected_request = firestore_pb2.BatchGetDocumentsRequest(
-            database=database, documents=documents
-        )
+        expected_request = firestore_pb2.BatchGetDocumentsRequest(database=database)
         actual_request = channel.requests[0][1]
         assert expected_request == actual_request
 
@@ -333,11 +304,10 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
-        documents = []
+        database = "database1789464955"
 
         with pytest.raises(CustomException):
-            client.batch_get_documents(database, documents)
+            client.batch_get_documents(database)
 
     def test_begin_transaction(self):
         # Setup Expected Response
@@ -353,7 +323,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
+        database = "database1789464955"
 
         response = client.begin_transaction(database)
         assert expected_response == response
@@ -372,7 +342,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
+        database = "database1789464955"
 
         with pytest.raises(CustomException):
             client.begin_transaction(database)
@@ -390,14 +360,13 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
-        writes = []
+        database = "database1789464955"
 
-        response = client.commit(database, writes)
+        response = client.commit(database)
         assert expected_response == response
 
         assert len(channel.requests) == 1
-        expected_request = firestore_pb2.CommitRequest(database=database, writes=writes)
+        expected_request = firestore_pb2.CommitRequest(database=database)
         actual_request = channel.requests[0][1]
         assert expected_request == actual_request
 
@@ -410,11 +379,10 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
-        writes = []
+        database = "database1789464955"
 
         with pytest.raises(CustomException):
-            client.commit(database, writes)
+            client.commit(database)
 
     def test_rollback(self):
         channel = ChannelStub()
@@ -424,7 +392,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
+        database = "database1789464955"
         transaction = b"-34"
 
         client.rollback(database, transaction)
@@ -445,7 +413,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
+        database = "database1789464955"
         transaction = b"-34"
 
         with pytest.raises(CustomException):
@@ -469,9 +437,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        parent = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        parent = "parent-995424086"
 
         response = client.run_query(parent)
         resources = list(response)
@@ -492,9 +458,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        parent = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        parent = "parent-995424086"
 
         with pytest.raises(CustomException):
             client.run_query(parent)
@@ -514,7 +478,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
+        database = "database1789464955"
         request = {"database": database}
         request = firestore_pb2.WriteRequest(**request)
         requests = [request]
@@ -539,7 +503,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
+        database = "database1789464955"
         request = {"database": database}
 
         request = firestore_pb2.WriteRequest(**request)
@@ -561,7 +525,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
+        database = "database1789464955"
         request = {"database": database}
         request = firestore_pb2.ListenRequest(**request)
         requests = [request]
@@ -586,7 +550,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        database = client.database_root_path("[PROJECT]", "[DATABASE]")
+        database = "database1789464955"
         request = {"database": database}
 
         request = firestore_pb2.ListenRequest(**request)
@@ -614,9 +578,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup Request
-        parent = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        parent = "parent-995424086"
 
         paged_list_response = client.list_collection_ids(parent)
         resources = list(paged_list_response)
@@ -637,9 +599,7 @@ class TestFirestoreClient(object):
             client = firestore_client.FirestoreClient()
 
         # Setup request
-        parent = client.any_path_path(
-            "[PROJECT]", "[DATABASE]", "[DOCUMENT]", "[ANY_PATH]"
-        )
+        parent = "parent-995424086"
 
         paged_list_response = client.list_collection_ids(parent)
         with pytest.raises(CustomException):
