@@ -2,13 +2,13 @@
 import grpc
 
 from google.cloud.firestore_admin_v1.proto import (
-    field_pb2 as google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_field__pb2,
+    field_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2,
 )
 from google.cloud.firestore_admin_v1.proto import (
-    firestore_admin_pb2 as google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2,
+    firestore_admin_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2,
 )
 from google.cloud.firestore_admin_v1.proto import (
-    index_pb2 as google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_index__pb2,
+    index_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2,
 )
 from google.longrunning import (
     operations_pb2 as google_dot_longrunning_dot_operations__pb2,
@@ -29,47 +29,47 @@ class FirestoreAdminStub(object):
     """
         self.CreateIndex = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/CreateIndex",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.SerializeToString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
         self.ListIndexes = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/ListIndexes",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.FromString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.SerializeToString,
+            response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.FromString,
         )
         self.GetIndex = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/GetIndex",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_index__pb2.Index.FromString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.SerializeToString,
+            response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2.Index.FromString,
         )
         self.DeleteIndex = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.SerializeToString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.SerializeToString,
             response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
         )
         self.GetField = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/GetField",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_field__pb2.Field.FromString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.SerializeToString,
+            response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2.Field.FromString,
         )
         self.UpdateField = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/UpdateField",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.SerializeToString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
         self.ListFields = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/ListFields",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.FromString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.SerializeToString,
+            response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.FromString,
         )
         self.ExportDocuments = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.SerializeToString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
         self.ImportDocuments = channel.unary_unary(
             "/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments",
-            request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.SerializeToString,
+            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
 
@@ -177,47 +177,47 @@ def add_FirestoreAdminServicer_to_server(servicer, server):
     rpc_method_handlers = {
         "CreateIndex": grpc.unary_unary_rpc_method_handler(
             servicer.CreateIndex,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.FromString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.FromString,
             response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
         ),
         "ListIndexes": grpc.unary_unary_rpc_method_handler(
             servicer.ListIndexes,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.SerializeToString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.FromString,
+            response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.SerializeToString,
         ),
         "GetIndex": grpc.unary_unary_rpc_method_handler(
             servicer.GetIndex,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_index__pb2.Index.SerializeToString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.FromString,
+            response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2.Index.SerializeToString,
         ),
         "DeleteIndex": grpc.unary_unary_rpc_method_handler(
             servicer.DeleteIndex,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.FromString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.FromString,
             response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
         ),
         "GetField": grpc.unary_unary_rpc_method_handler(
             servicer.GetField,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_field__pb2.Field.SerializeToString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.FromString,
+            response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2.Field.SerializeToString,
         ),
         "UpdateField": grpc.unary_unary_rpc_method_handler(
             servicer.UpdateField,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.FromString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.FromString,
             response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
         ),
         "ListFields": grpc.unary_unary_rpc_method_handler(
             servicer.ListFields,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.SerializeToString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.FromString,
+            response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.SerializeToString,
         ),
         "ExportDocuments": grpc.unary_unary_rpc_method_handler(
             servicer.ExportDocuments,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.FromString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.FromString,
             response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
         ),
         "ImportDocuments": grpc.unary_unary_rpc_method_handler(
             servicer.ImportDocuments,
-            request_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.FromString,
+            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.FromString,
             response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
         ),
     }
