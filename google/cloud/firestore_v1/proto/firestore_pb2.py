@@ -37,6 +37,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="google.firestore.v1",
     syntax="proto3",
     serialized_options=b"\n\027com.google.firestore.v1B\016FirestoreProtoP\001Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\242\002\004GCFS\252\002\031Google.Cloud.Firestore.V1\312\002\031Google\\Cloud\\Firestore\\V1",
+    create_key=_descriptor._internal_create_key,
     serialized_pb=b'\n/google/cloud/firestore_v1/proto/firestore.proto\x12\x13google.firestore.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a,google/cloud/firestore_v1/proto/common.proto\x1a.google/cloud/firestore_v1/proto/document.proto\x1a+google/cloud/firestore_v1/proto/query.proto\x1a+google/cloud/firestore_v1/proto/write.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto"\xb8\x01\n\x12GetDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x02 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x03 \x01(\x0cH\x00\x12/\n\tread_time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xa7\x02\n\x14ListDocumentsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t\x12\x10\n\x08order_by\x18\x06 \x01(\t\x12/\n\x04mask\x18\x07 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x08 \x01(\x0cH\x00\x12/\n\tread_time\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x14\n\x0cshow_missing\x18\x0c \x01(\x08\x42\x16\n\x14\x63onsistency_selector"b\n\x15ListDocumentsResponse\x12\x30\n\tdocuments\x18\x01 \x03(\x0b\x32\x1d.google.firestore.v1.Document\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\xc4\x01\n\x15\x43reateDocumentRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12\x34\n\x08\x64ocument\x18\x04 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x05 \x01(\x0b\x32!.google.firestore.v1.DocumentMask"\xf3\x01\n\x15UpdateDocumentRequest\x12\x34\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentB\x03\xe0\x41\x02\x12\x36\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12;\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32!.google.firestore.v1.Precondition"g\n\x15\x44\x65leteDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12;\n\x10\x63urrent_document\x18\x02 \x01(\x0b\x32!.google.firestore.v1.Precondition"\x99\x02\n\x18\x42\x61tchGetDocumentsRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tdocuments\x18\x02 \x03(\t\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x04 \x01(\x0cH\x00\x12\x42\n\x0fnew_transaction\x18\x05 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptionsH\x00\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xac\x01\n\x19\x42\x61tchGetDocumentsResponse\x12.\n\x05\x66ound\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentH\x00\x12\x11\n\x07missing\x18\x02 \x01(\tH\x00\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\n\x06result"j\n\x17\x42\x65ginTransactionRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x38\n\x07options\x18\x02 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptions"/\n\x18\x42\x65ginTransactionResponse\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c"g\n\rCommitRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12*\n\x06writes\x18\x02 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c"z\n\x0e\x43ommitResponse\x12\x37\n\rwrite_results\x18\x01 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"B\n\x0fRollbackRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x18\n\x0btransaction\x18\x02 \x01(\x0c\x42\x03\xe0\x41\x02"\x9a\x02\n\x0fRunQueryRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x12\x15\n\x0btransaction\x18\x05 \x01(\x0cH\x01\x12\x42\n\x0fnew_transaction\x18\x06 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptionsH\x01\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x42\x0c\n\nquery_typeB\x16\n\x14\x63onsistency_selector"\xa0\x01\n\x10RunQueryResponse\x12\x13\n\x0btransaction\x18\x02 \x01(\x0c\x12/\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.Document\x12-\n\tread_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0fskipped_results\x18\x04 \x01(\x05"\xe8\x01\n\x0cWriteRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tstream_id\x18\x02 \x01(\t\x12*\n\x06writes\x18\x03 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x14\n\x0cstream_token\x18\x04 \x01(\x0c\x12=\n\x06labels\x18\x05 \x03(\x0b\x32-.google.firestore.v1.WriteRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xa2\x01\n\rWriteResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x14\n\x0cstream_token\x18\x02 \x01(\x0c\x12\x37\n\rwrite_results\x18\x03 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"\xf2\x01\n\rListenRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x31\n\nadd_target\x18\x02 \x01(\x0b\x32\x1b.google.firestore.v1.TargetH\x00\x12\x17\n\rremove_target\x18\x03 \x01(\x05H\x00\x12>\n\x06labels\x18\x04 \x03(\x0b\x32..google.firestore.v1.ListenRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0f\n\rtarget_change"\xd5\x02\n\x0eListenResponse\x12:\n\rtarget_change\x18\x02 \x01(\x0b\x32!.google.firestore.v1.TargetChangeH\x00\x12>\n\x0f\x64ocument_change\x18\x03 \x01(\x0b\x32#.google.firestore.v1.DocumentChangeH\x00\x12>\n\x0f\x64ocument_delete\x18\x04 \x01(\x0b\x32#.google.firestore.v1.DocumentDeleteH\x00\x12>\n\x0f\x64ocument_remove\x18\x06 \x01(\x0b\x32#.google.firestore.v1.DocumentRemoveH\x00\x12\x36\n\x06\x66ilter\x18\x05 \x01(\x0b\x32$.google.firestore.v1.ExistenceFilterH\x00\x42\x0f\n\rresponse_type"\xa1\x03\n\x06Target\x12\x38\n\x05query\x18\x02 \x01(\x0b\x32\'.google.firestore.v1.Target.QueryTargetH\x00\x12@\n\tdocuments\x18\x03 \x01(\x0b\x32+.google.firestore.v1.Target.DocumentsTargetH\x00\x12\x16\n\x0cresume_token\x18\x04 \x01(\x0cH\x01\x12/\n\tread_time\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x12\x11\n\ttarget_id\x18\x05 \x01(\x05\x12\x0c\n\x04once\x18\x06 \x01(\x08\x1a$\n\x0f\x44ocumentsTarget\x12\x11\n\tdocuments\x18\x02 \x03(\t\x1am\n\x0bQueryTarget\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x42\x0c\n\nquery_typeB\r\n\x0btarget_typeB\r\n\x0bresume_type"\xaa\x02\n\x0cTargetChange\x12N\n\x12target_change_type\x18\x01 \x01(\x0e\x32\x32.google.firestore.v1.TargetChange.TargetChangeType\x12\x12\n\ntarget_ids\x18\x02 \x03(\x05\x12!\n\x05\x63\x61use\x18\x03 \x01(\x0b\x32\x12.google.rpc.Status\x12\x14\n\x0cresume_token\x18\x04 \x01(\x0c\x12-\n\tread_time\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"N\n\x10TargetChangeType\x12\r\n\tNO_CHANGE\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02\x12\x0b\n\x07\x43URRENT\x10\x03\x12\t\n\x05RESET\x10\x04"V\n\x18ListCollectionIdsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x02 \x01(\x05\x12\x12\n\npage_token\x18\x03 \x01(\t"L\n\x19ListCollectionIdsResponse\x12\x16\n\x0e\x63ollection_ids\x18\x01 \x03(\t\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t2\xd7\x13\n\tFirestore\x12\x8f\x01\n\x0bGetDocument\x12\'.google.firestore.v1.GetDocumentRequest\x1a\x1d.google.firestore.v1.Document"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1/{name=projects/*/databases/*/documents/*/**}\x12\xb2\x01\n\rListDocuments\x12).google.firestore.v1.ListDocumentsRequest\x1a*.google.firestore.v1.ListDocumentsResponse"J\x82\xd3\xe4\x93\x02\x44\x12\x42/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}\x12\xbf\x01\n\x0eUpdateDocument\x12*.google.firestore.v1.UpdateDocumentRequest\x1a\x1d.google.firestore.v1.Document"b\x82\xd3\xe4\x93\x02\x45\x32\x39/v1/{document.name=projects/*/databases/*/documents/*/**}:\x08\x64ocument\xda\x41\x14\x64ocument,update_mask\x12\x95\x01\n\x0e\x44\x65leteDocument\x12*.google.firestore.v1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty"?\x82\xd3\xe4\x93\x02\x32*0/v1/{name=projects/*/databases/*/documents/*/**}\xda\x41\x04name\x12\xb9\x01\n\x11\x42\x61tchGetDocuments\x12-.google.firestore.v1.BatchGetDocumentsRequest\x1a..google.firestore.v1.BatchGetDocumentsResponse"C\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:batchGet:\x01*0\x01\x12\xc7\x01\n\x10\x42\x65ginTransaction\x12,.google.firestore.v1.BeginTransactionRequest\x1a-.google.firestore.v1.BeginTransactionResponse"V\x82\xd3\xe4\x93\x02\x45"@/v1/{database=projects/*/databases/*}/documents:beginTransaction:\x01*\xda\x41\x08\x64\x61tabase\x12\xa6\x01\n\x06\x43ommit\x12".google.firestore.v1.CommitRequest\x1a#.google.firestore.v1.CommitResponse"S\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:commit:\x01*\xda\x41\x0f\x64\x61tabase,writes\x12\xa4\x01\n\x08Rollback\x12$.google.firestore.v1.RollbackRequest\x1a\x16.google.protobuf.Empty"Z\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:rollback:\x01*\xda\x41\x14\x64\x61tabase,transaction\x12\xdf\x01\n\x08RunQuery\x12$.google.firestore.v1.RunQueryRequest\x1a%.google.firestore.v1.RunQueryResponse"\x83\x01\x82\xd3\xe4\x93\x02}"6/v1/{parent=projects/*/databases/*/documents}:runQuery:\x01*Z@";/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\x01*0\x01\x12\x94\x01\n\x05Write\x12!.google.firestore.v1.WriteRequest\x1a".google.firestore.v1.WriteResponse"@\x82\xd3\xe4\x93\x02:"5/v1/{database=projects/*/databases/*}/documents:write:\x01*(\x01\x30\x01\x12\x98\x01\n\x06Listen\x12".google.firestore.v1.ListenRequest\x1a#.google.firestore.v1.ListenResponse"A\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:listen:\x01*(\x01\x30\x01\x12\x94\x02\n\x11ListCollectionIds\x12-.google.firestore.v1.ListCollectionIdsRequest\x1a..google.firestore.v1.ListCollectionIdsResponse"\x9f\x01\x82\xd3\xe4\x93\x02\x8f\x01"?/v1/{parent=projects/*/databases/*/documents}:listCollectionIds:\x01*ZI"D/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\x01*\xda\x41\x06parent\x12\xaf\x01\n\x0e\x43reateDocument\x12*.google.firestore.v1.CreateDocumentRequest\x1a\x1d.google.firestore.v1.Document"R\x82\xd3\xe4\x93\x02L"@/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\x08\x64ocument\x1av\xca\x41\x18\x66irestore.googleapis.com\xd2\x41Xhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastoreB\xa8\x01\n\x17\x63om.google.firestore.v1B\x0e\x46irestoreProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3',
     dependencies=[
         google_dot_api_dot_annotations__pb2.DESCRIPTOR,
@@ -58,21 +59,47 @@ _TARGETCHANGE_TARGETCHANGETYPE = _descriptor.EnumDescriptor(
     full_name="google.firestore.v1.TargetChange.TargetChangeType",
     filename=None,
     file=DESCRIPTOR,
+    create_key=_descriptor._internal_create_key,
     values=[
         _descriptor.EnumValueDescriptor(
-            name="NO_CHANGE", index=0, number=0, serialized_options=None, type=None
+            name="NO_CHANGE",
+            index=0,
+            number=0,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="ADD", index=1, number=1, serialized_options=None, type=None
+            name="ADD",
+            index=1,
+            number=1,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="REMOVE", index=2, number=2, serialized_options=None, type=None
+            name="REMOVE",
+            index=2,
+            number=2,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="CURRENT", index=3, number=3, serialized_options=None, type=None
+            name="CURRENT",
+            index=3,
+            number=3,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="RESET", index=4, number=4, serialized_options=None, type=None
+            name="RESET",
+            index=4,
+            number=4,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     containing_type=None,
@@ -89,6 +116,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
@@ -107,6 +135,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="mask",
@@ -125,6 +154,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -143,6 +173,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
@@ -161,6 +192,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -176,6 +208,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
             full_name="google.firestore.v1.GetDocumentRequest.consistency_selector",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         )
     ],
@@ -190,6 +223,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
@@ -208,6 +242,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="collection_id",
@@ -226,6 +261,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="page_size",
@@ -244,6 +280,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="page_token",
@@ -262,6 +299,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="order_by",
@@ -280,6 +318,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="mask",
@@ -298,6 +337,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -316,6 +356,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
@@ -334,6 +375,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="show_missing",
@@ -352,6 +394,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -367,6 +410,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
             full_name="google.firestore.v1.ListDocumentsRequest.consistency_selector",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         )
     ],
@@ -381,6 +425,7 @@ _LISTDOCUMENTSRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="documents",
@@ -399,6 +444,7 @@ _LISTDOCUMENTSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="next_page_token",
@@ -417,6 +463,7 @@ _LISTDOCUMENTSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -438,6 +485,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
@@ -456,6 +504,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="collection_id",
@@ -474,6 +523,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="document_id",
@@ -492,6 +542,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="document",
@@ -510,6 +561,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="mask",
@@ -528,6 +580,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -549,6 +602,7 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="document",
@@ -567,6 +621,7 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="update_mask",
@@ -585,6 +640,7 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="mask",
@@ -603,6 +659,7 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="current_document",
@@ -621,6 +678,7 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -642,6 +700,7 @@ _DELETEDOCUMENTREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
@@ -660,6 +719,7 @@ _DELETEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="current_document",
@@ -678,6 +738,7 @@ _DELETEDOCUMENTREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -699,6 +760,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
@@ -717,6 +779,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="documents",
@@ -735,6 +798,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="mask",
@@ -753,6 +817,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -771,6 +836,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="new_transaction",
@@ -789,6 +855,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
@@ -807,6 +874,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -822,6 +890,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
             full_name="google.firestore.v1.BatchGetDocumentsRequest.consistency_selector",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         )
     ],
@@ -836,6 +905,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="found",
@@ -854,6 +924,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="missing",
@@ -872,6 +943,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -890,6 +962,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
@@ -908,6 +981,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -923,6 +997,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
             full_name="google.firestore.v1.BatchGetDocumentsResponse.result",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         )
     ],
@@ -937,6 +1012,7 @@ _BEGINTRANSACTIONREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
@@ -955,6 +1031,7 @@ _BEGINTRANSACTIONREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="options",
@@ -973,6 +1050,7 @@ _BEGINTRANSACTIONREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -994,6 +1072,7 @@ _BEGINTRANSACTIONRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -1012,6 +1091,7 @@ _BEGINTRANSACTIONRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         )
     ],
     extensions=[],
@@ -1033,6 +1113,7 @@ _COMMITREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
@@ -1051,6 +1132,7 @@ _COMMITREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="writes",
@@ -1069,6 +1151,7 @@ _COMMITREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -1087,6 +1170,7 @@ _COMMITREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1108,6 +1192,7 @@ _COMMITRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="write_results",
@@ -1126,6 +1211,7 @@ _COMMITRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="commit_time",
@@ -1144,6 +1230,7 @@ _COMMITRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1165,6 +1252,7 @@ _ROLLBACKREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
@@ -1183,6 +1271,7 @@ _ROLLBACKREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -1201,6 +1290,7 @@ _ROLLBACKREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1222,6 +1312,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
@@ -1240,6 +1331,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="structured_query",
@@ -1258,6 +1350,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -1276,6 +1369,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="new_transaction",
@@ -1294,6 +1388,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
@@ -1312,6 +1407,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1327,6 +1423,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
             full_name="google.firestore.v1.RunQueryRequest.query_type",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         ),
         _descriptor.OneofDescriptor(
@@ -1334,6 +1431,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
             full_name="google.firestore.v1.RunQueryRequest.consistency_selector",
             index=1,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         ),
     ],
@@ -1348,6 +1446,7 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction",
@@ -1366,6 +1465,7 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="document",
@@ -1384,6 +1484,7 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
@@ -1402,6 +1503,7 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="skipped_results",
@@ -1420,6 +1522,7 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1441,6 +1544,7 @@ _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
@@ -1459,6 +1563,7 @@ _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1477,6 +1582,7 @@ _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1497,6 +1603,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
@@ -1515,6 +1622,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="stream_id",
@@ -1533,6 +1641,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="writes",
@@ -1551,6 +1660,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="stream_token",
@@ -1569,6 +1679,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="labels",
@@ -1587,6 +1698,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1608,6 +1720,7 @@ _WRITERESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="stream_id",
@@ -1626,6 +1739,7 @@ _WRITERESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="stream_token",
@@ -1644,6 +1758,7 @@ _WRITERESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="write_results",
@@ -1662,6 +1777,7 @@ _WRITERESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="commit_time",
@@ -1680,6 +1796,7 @@ _WRITERESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1701,6 +1818,7 @@ _LISTENREQUEST_LABELSENTRY = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
@@ -1719,6 +1837,7 @@ _LISTENREQUEST_LABELSENTRY = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="value",
@@ -1737,6 +1856,7 @@ _LISTENREQUEST_LABELSENTRY = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1757,6 +1877,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
@@ -1775,6 +1896,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="add_target",
@@ -1793,6 +1915,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="remove_target",
@@ -1811,6 +1934,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="labels",
@@ -1829,6 +1953,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1844,6 +1969,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
             full_name="google.firestore.v1.ListenRequest.target_change",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         )
     ],
@@ -1858,6 +1984,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="target_change",
@@ -1876,6 +2003,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="document_change",
@@ -1894,6 +2022,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="document_delete",
@@ -1912,6 +2041,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="document_remove",
@@ -1930,6 +2060,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="filter",
@@ -1948,6 +2079,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1963,6 +2095,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
             full_name="google.firestore.v1.ListenResponse.response_type",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         )
     ],
@@ -1977,6 +2110,7 @@ _TARGET_DOCUMENTSTARGET = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="documents",
@@ -1995,6 +2129,7 @@ _TARGET_DOCUMENTSTARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         )
     ],
     extensions=[],
@@ -2015,6 +2150,7 @@ _TARGET_QUERYTARGET = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
@@ -2033,6 +2169,7 @@ _TARGET_QUERYTARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="structured_query",
@@ -2051,6 +2188,7 @@ _TARGET_QUERYTARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -2066,6 +2204,7 @@ _TARGET_QUERYTARGET = _descriptor.Descriptor(
             full_name="google.firestore.v1.Target.QueryTarget.query_type",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         )
     ],
@@ -2079,6 +2218,7 @@ _TARGET = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="query",
@@ -2097,6 +2237,7 @@ _TARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="documents",
@@ -2115,6 +2256,7 @@ _TARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="resume_token",
@@ -2133,6 +2275,7 @@ _TARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
@@ -2151,6 +2294,7 @@ _TARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="target_id",
@@ -2169,6 +2313,7 @@ _TARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="once",
@@ -2187,6 +2332,7 @@ _TARGET = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -2202,6 +2348,7 @@ _TARGET = _descriptor.Descriptor(
             full_name="google.firestore.v1.Target.target_type",
             index=0,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         ),
         _descriptor.OneofDescriptor(
@@ -2209,6 +2356,7 @@ _TARGET = _descriptor.Descriptor(
             full_name="google.firestore.v1.Target.resume_type",
             index=1,
             containing_type=None,
+            create_key=_descriptor._internal_create_key,
             fields=[],
         ),
     ],
@@ -2223,6 +2371,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="target_change_type",
@@ -2241,6 +2390,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="target_ids",
@@ -2259,6 +2409,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="cause",
@@ -2277,6 +2428,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="resume_token",
@@ -2295,6 +2447,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
@@ -2313,6 +2466,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -2334,6 +2488,7 @@ _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
@@ -2352,6 +2507,7 @@ _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="page_size",
@@ -2370,6 +2526,7 @@ _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="page_token",
@@ -2388,6 +2545,7 @@ _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -2409,6 +2567,7 @@ _LISTCOLLECTIONIDSRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="collection_ids",
@@ -2427,6 +2586,7 @@ _LISTCOLLECTIONIDSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="next_page_token",
@@ -2445,6 +2605,7 @@ _LISTCOLLECTIONIDSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -3587,6 +3748,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
     file=DESCRIPTOR,
     index=0,
     serialized_options=b"\312A\030firestore.googleapis.com\322AXhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore",
+    create_key=_descriptor._internal_create_key,
     serialized_start=4804,
     serialized_end=7323,
     methods=[
@@ -3598,6 +3760,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_GETDOCUMENTREQUEST,
             output_type=google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2._DOCUMENT,
             serialized_options=b"\202\323\344\223\0022\0220/v1/{name=projects/*/databases/*/documents/*/**}",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="ListDocuments",
@@ -3607,6 +3770,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_LISTDOCUMENTSREQUEST,
             output_type=_LISTDOCUMENTSRESPONSE,
             serialized_options=b"\202\323\344\223\002D\022B/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="UpdateDocument",
@@ -3616,6 +3780,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_UPDATEDOCUMENTREQUEST,
             output_type=google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2._DOCUMENT,
             serialized_options=b"\202\323\344\223\002E29/v1/{document.name=projects/*/databases/*/documents/*/**}:\010document\332A\024document,update_mask",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="DeleteDocument",
@@ -3625,6 +3790,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_DELETEDOCUMENTREQUEST,
             output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
             serialized_options=b"\202\323\344\223\0022*0/v1/{name=projects/*/databases/*/documents/*/**}\332A\004name",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="BatchGetDocuments",
@@ -3634,6 +3800,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_BATCHGETDOCUMENTSREQUEST,
             output_type=_BATCHGETDOCUMENTSRESPONSE,
             serialized_options=b'\202\323\344\223\002="8/v1/{database=projects/*/databases/*}/documents:batchGet:\001*',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="BeginTransaction",
@@ -3643,6 +3810,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_BEGINTRANSACTIONREQUEST,
             output_type=_BEGINTRANSACTIONRESPONSE,
             serialized_options=b'\202\323\344\223\002E"@/v1/{database=projects/*/databases/*}/documents:beginTransaction:\001*\332A\010database',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="Commit",
@@ -3652,6 +3820,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_COMMITREQUEST,
             output_type=_COMMITRESPONSE,
             serialized_options=b'\202\323\344\223\002;"6/v1/{database=projects/*/databases/*}/documents:commit:\001*\332A\017database,writes',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="Rollback",
@@ -3661,6 +3830,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_ROLLBACKREQUEST,
             output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
             serialized_options=b'\202\323\344\223\002="8/v1/{database=projects/*/databases/*}/documents:rollback:\001*\332A\024database,transaction',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="RunQuery",
@@ -3670,6 +3840,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_RUNQUERYREQUEST,
             output_type=_RUNQUERYRESPONSE,
             serialized_options=b'\202\323\344\223\002}"6/v1/{parent=projects/*/databases/*/documents}:runQuery:\001*Z@";/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\001*',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="Write",
@@ -3679,6 +3850,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_WRITEREQUEST,
             output_type=_WRITERESPONSE,
             serialized_options=b'\202\323\344\223\002:"5/v1/{database=projects/*/databases/*}/documents:write:\001*',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="Listen",
@@ -3688,6 +3860,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_LISTENREQUEST,
             output_type=_LISTENRESPONSE,
             serialized_options=b'\202\323\344\223\002;"6/v1/{database=projects/*/databases/*}/documents:listen:\001*',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="ListCollectionIds",
@@ -3697,6 +3870,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_LISTCOLLECTIONIDSREQUEST,
             output_type=_LISTCOLLECTIONIDSRESPONSE,
             serialized_options=b'\202\323\344\223\002\217\001"?/v1/{parent=projects/*/databases/*/documents}:listCollectionIds:\001*ZI"D/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\001*\332A\006parent',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="CreateDocument",
@@ -3706,6 +3880,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             input_type=_CREATEDOCUMENTREQUEST,
             output_type=google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2._DOCUMENT,
             serialized_options=b'\202\323\344\223\002L"@/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\010document',
+            create_key=_descriptor._internal_create_key,
         ),
     ],
 )
