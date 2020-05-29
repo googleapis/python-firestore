@@ -336,9 +336,9 @@ DocumentMask = _reflection.GeneratedProtocolMessageType(
     {
         "DESCRIPTOR": _DOCUMENTMASK,
         "__module__": "google.cloud.firestore_v1beta1.proto.common_pb2",
-        "__doc__": """A set of field paths on a document. Used to restrict a get
-  or update operation on a document to a subset of its fields. This is
-  different from standard field masks, as this is always scoped to a
+        "__doc__": """A set of field paths on a document. Used to restrict a get or update
+  operation on a document to a subset of its fields. This is different
+  from standard field masks, as this is always scoped to a
   [Document][google.firestore.v1beta1.Document], and takes in account the
   dynamic nature of [Value][google.firestore.v1beta1.Value].
   
