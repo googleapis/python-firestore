@@ -406,7 +406,8 @@ TransactionOptions = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _TRANSACTIONOPTIONS_READONLY,
                 "__module__": "google.cloud.firestore_v1beta1.proto.common_pb2",
-                "__doc__": """Options for a transaction that can only be used to read documents.
+                "__doc__": """Options for a transaction that can only be used to read
+    documents.
     
     
     Attributes:
