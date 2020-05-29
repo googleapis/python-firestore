@@ -66,8 +66,8 @@ class FieldOperationMetadata(object):
 class Index(object):
     class QueryScope(enum.IntEnum):
         """
-        Query Scope defines the scope at which a query is run. This is specified
-        on a StructuredQuery's ``from`` field.
+        Query Scope defines the scope at which a query is run. This is
+        specified on a StructuredQuery's ``from`` field.
 
         Attributes:
           QUERY_SCOPE_UNSPECIFIED (int): The query scope is unspecified. Not a valid option.
@@ -85,8 +85,8 @@ class Index(object):
 
     class State(enum.IntEnum):
         """
-        The state of an index. During index creation, an index will be in the
-        ``CREATING`` state. If the index is created successfully, it will
+        The state of an index. During index creation, an index will be in
+        the ``CREATING`` state. If the index is created successfully, it will
         transition to the ``READY`` state. If the index creation encounters a
         problem, the index will transition to the ``NEEDS_REPAIR`` state.
 

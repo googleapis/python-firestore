@@ -1,32 +1,25 @@
 {
   "sources": [
     {
-      "generator": {
-        "name": "artman",
-        "version": "2.0.0",
-        "dockerImage": "googleapis/artman@sha256:b3b47805231a305d0f40c4bf069df20f6a2635574e6d4259fac651d3f9f6e098"
-      }
-    },
-    {
       "git": {
         "name": ".",
-        "remote": "git@github.com:googleapis/python-firestore",
-        "sha": "30ca7962134dd534bbc2a00e40de7e0b35401464"
+        "remote": "https://github.com/googleapis/python-firestore.git",
+        "sha": "777d0e3c5c466a3460d8f57e3680fddaa1675c03"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "756b174de4a122461993c1c583345533d819936d",
-        "internalRef": "308824110"
+        "sha": "e0f9d9e1f9de890db765be46f45ca8490723e3eb",
+        "internalRef": "309824146"
       }
     },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "01b6f23d24b27878b48667ce597876d66b59780e"
+        "sha": "04cb397eb7590ea1e6c10a39fca3d8fe0fb3d256"
       }
     }
   ],
@@ -37,8 +30,7 @@
         "apiName": "firestore",
         "apiVersion": "v1beta1",
         "language": "python",
-        "generator": "gapic",
-        "config": "google/firestore/artman_firestore.yaml"
+        "generator": "bazel"
       }
     },
     {
@@ -47,8 +39,7 @@
         "apiName": "firestore",
         "apiVersion": "v1",
         "language": "python",
-        "generator": "gapic",
-        "config": "google/firestore/artman_firestore_v1.yaml"
+        "generator": "bazel"
       }
     },
     {
@@ -57,8 +48,7 @@
         "apiName": "firestore_admin",
         "apiVersion": "v1",
         "language": "python",
-        "generator": "gapic",
-        "config": "google/firestore/admin/artman_firestore_v1.yaml"
+        "generator": "bazel"
       }
     }
   ]
