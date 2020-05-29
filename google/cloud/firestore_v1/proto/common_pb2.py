@@ -341,8 +341,6 @@ DocumentMask = _reflection.GeneratedProtocolMessageType(
   from standard field masks, as this is always scoped to a
   [Document][google.firestore.v1.Document], and takes in account the
   dynamic nature of [Value][google.firestore.v1.Value].
-  
-  
   Attributes:
       field_paths:
           The list of field paths in the mask. See
@@ -360,10 +358,7 @@ Precondition = _reflection.GeneratedProtocolMessageType(
     {
         "DESCRIPTOR": _PRECONDITION,
         "__module__": "google.cloud.firestore_v1.proto.common_pb2",
-        "__doc__": """A precondition on a document, used for conditional
-  operations.
-  
-  
+        "__doc__": """A precondition on a document, used for conditional operations.
   Attributes:
       condition_type:
           The type of precondition.
@@ -389,10 +384,8 @@ TransactionOptions = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _TRANSACTIONOPTIONS_READWRITE,
                 "__module__": "google.cloud.firestore_v1.proto.common_pb2",
-                "__doc__": """Options for a transaction that can be used to read and
-    write documents.
-    
-    
+                "__doc__": """Options for a transaction that can be used to read and write
+    documents.
     Attributes:
         retry_transaction:
             An optional transaction to retry.
@@ -406,10 +399,7 @@ TransactionOptions = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _TRANSACTIONOPTIONS_READONLY,
                 "__module__": "google.cloud.firestore_v1.proto.common_pb2",
-                "__doc__": """Options for a transaction that can only be used to read
-    documents.
-    
-    
+                "__doc__": """Options for a transaction that can only be used to read documents.
     Attributes:
         consistency_selector:
             The consistency mode for this transaction. If not set,
@@ -424,8 +414,6 @@ TransactionOptions = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _TRANSACTIONOPTIONS,
         "__module__": "google.cloud.firestore_v1.proto.common_pb2",
         "__doc__": """Options for creating a new transaction.
-  
-  
   Attributes:
       mode:
           The mode of the transaction.

@@ -858,8 +858,6 @@ Write = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _WRITE,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
         "__doc__": """A write on a document.
-  
-  
   Attributes:
       operation:
           The operation to execute.
@@ -903,8 +901,6 @@ DocumentTransform = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _DOCUMENTTRANSFORM_FIELDTRANSFORM,
                 "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
                 "__doc__": """A transformation of a field of the document.
-    
-    
     Attributes:
         field_path:
             The path of the field. See
@@ -977,8 +973,6 @@ DocumentTransform = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _DOCUMENTTRANSFORM,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
         "__doc__": """A transformation of a document.
-  
-  
   Attributes:
       document:
           The name of the document to transform.
@@ -999,8 +993,6 @@ WriteResult = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _WRITERESULT,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
         "__doc__": """The result of applying a write.
-  
-  
   Attributes:
       update_time:
           The last update time of the document after applying the write.
@@ -1022,18 +1014,13 @@ DocumentChange = _reflection.GeneratedProtocolMessageType(
     {
         "DESCRIPTOR": _DOCUMENTCHANGE,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
-        "__doc__": """A [Document][google.firestore.v1beta1.Document] has
-  changed.
-  
-  May be the result of multiple [writes][google.firestore.v1beta1.Write],
+        "__doc__": """A [Document][google.firestore.v1beta1.Document] has changed.  May be
+  the result of multiple [writes][google.firestore.v1beta1.Write],
   including deletes, that ultimately resulted in a new value for the
-  [Document][google.firestore.v1beta1.Document].
-  
-  Multiple [DocumentChange][google.firestore.v1beta1.DocumentChange]
-  messages may be returned for the same logical change, if multiple
-  targets are affected.
-  
-  
+  [Document][google.firestore.v1beta1.Document].  Multiple
+  [DocumentChange][google.firestore.v1beta1.DocumentChange] messages may
+  be returned for the same logical change, if multiple targets are
+  affected.
   Attributes:
       document:
           The new state of the
@@ -1056,18 +1043,13 @@ DocumentDelete = _reflection.GeneratedProtocolMessageType(
     {
         "DESCRIPTOR": _DOCUMENTDELETE,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
-        "__doc__": """A [Document][google.firestore.v1beta1.Document] has been
-  deleted.
-  
-  May be the result of multiple [writes][google.firestore.v1beta1.Write],
+        "__doc__": """A [Document][google.firestore.v1beta1.Document] has been deleted.  May
+  be the result of multiple [writes][google.firestore.v1beta1.Write],
   including updates, the last of which deleted the
-  [Document][google.firestore.v1beta1.Document].
-  
-  Multiple [DocumentDelete][google.firestore.v1beta1.DocumentDelete]
-  messages may be returned for the same logical delete, if multiple
-  targets are affected.
-  
-  
+  [Document][google.firestore.v1beta1.Document].  Multiple
+  [DocumentDelete][google.firestore.v1beta1.DocumentDelete] messages may
+  be returned for the same logical delete, if multiple targets are
+  affected.
   Attributes:
       document:
           The resource name of the
@@ -1091,18 +1073,14 @@ DocumentRemove = _reflection.GeneratedProtocolMessageType(
     {
         "DESCRIPTOR": _DOCUMENTREMOVE,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
-        "__doc__": """A [Document][google.firestore.v1beta1.Document] has been
-  removed from the view of the targets.
-  
-  Sent if the document is no longer relevant to a target and is out of
-  view. Can be sent instead of a DocumentDelete or a DocumentChange if the
-  server can not send the new value of the document.
-  
-  Multiple [DocumentRemove][google.firestore.v1beta1.DocumentRemove]
-  messages may be returned for the same logical write or delete, if
-  multiple targets are affected.
-  
-  
+        "__doc__": """A [Document][google.firestore.v1beta1.Document] has been removed from
+  the view of the targets.  Sent if the document is no longer relevant
+  to a target and is out of view. Can be sent instead of a
+  DocumentDelete or a DocumentChange if the server can not send the new
+  value of the document.  Multiple
+  [DocumentRemove][google.firestore.v1beta1.DocumentRemove] messages may
+  be returned for the same logical write or delete, if multiple targets
+  are affected.
   Attributes:
       document:
           The resource name of the
@@ -1127,8 +1105,6 @@ ExistenceFilter = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _EXISTENCEFILTER,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
         "__doc__": """A digest of all the documents that match a given target.
-  
-  
   Attributes:
       target_id:
           The target ID to which this filter applies.
