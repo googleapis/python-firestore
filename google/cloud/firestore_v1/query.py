@@ -20,7 +20,6 @@ a more common way to create a query than direct usage of the constructor.
 """
 import copy
 import math
-import warnings
 
 from google.protobuf import wrappers_pb2
 import six
@@ -134,6 +133,7 @@ class Query(object):
         field_filters=(),
         orders=(),
         limit=None,
+        limit_to_last=None,
         offset=None,
         start_at=None,
         end_at=None,
@@ -144,6 +144,7 @@ class Query(object):
         self._field_filters = field_filters
         self._orders = orders
         self._limit = limit
+        self._limit_to_last = limit_to_last
         self._offset = offset
         self._start_at = start_at
         self._end_at = end_at
@@ -158,6 +159,7 @@ class Query(object):
             and self._field_filters == other._field_filters
             and self._orders == other._orders
             and self._limit == other._limit
+            and self._limit_to_last == other._limit_to_last
             and self._offset == other._offset
             and self._start_at == other._start_at
             and self._end_at == other._end_at
@@ -212,6 +214,7 @@ class Query(object):
             field_filters=self._field_filters,
             orders=self._orders,
             limit=self._limit,
+            limit_to_last=self._limit_to_last,
             offset=self._offset,
             start_at=self._start_at,
             end_at=self._end_at,
@@ -281,6 +284,7 @@ class Query(object):
             field_filters=new_filters,
             orders=self._orders,
             limit=self._limit,
+            limit_to_last=self._limit_to_last,
             offset=self._offset,
             start_at=self._start_at,
             end_at=self._end_at,
@@ -333,6 +337,7 @@ class Query(object):
             field_filters=self._field_filters,
             orders=new_orders,
             limit=self._limit,
+            limit_to_last=self._limit_to_last,
             offset=self._offset,
             start_at=self._start_at,
             end_at=self._end_at,
@@ -340,7 +345,7 @@ class Query(object):
         )
 
     def limit(self, count):
-        """Limit a query to return a fixed number of results.
+        """Limit a query to return first `count` results.
 
         If the current query already has a limit set, this will overwrite it.
 
@@ -359,6 +364,32 @@ class Query(object):
             field_filters=self._field_filters,
             orders=self._orders,
             limit=count,
+            offset=self._offset,
+            start_at=self._start_at,
+            end_at=self._end_at,
+            all_descendants=self._all_descendants,
+        )
+
+    def limit_to_last(self, count):
+        """Limit a query to return last `count` results.
+
+        If the current query already has a limit set, this will overwrite it.
+
+        Args:
+            count (int): Maximum number of documents to return that match
+                the query.
+
+        Returns:
+            :class:`~google.cloud.firestore_v1.query.Query`:
+            A limited query. Acts as a copy of the current query, modified
+            with the newly added "limit" filter.
+        """
+        return self.__class__(
+            self._parent,
+            projection=self._projection,
+            field_filters=self._field_filters,
+            orders=self._orders,
+            limit_to_last=count,
             offset=self._offset,
             start_at=self._start_at,
             end_at=self._end_at,
@@ -386,6 +417,7 @@ class Query(object):
             field_filters=self._field_filters,
             orders=self._orders,
             limit=self._limit,
+            limit_to_last=self._limit_to_last,
             offset=num_to_skip,
             start_at=self._start_at,
             end_at=self._end_at,
@@ -729,13 +761,35 @@ class Query(object):
         return query_pb2.StructuredQuery(**query_kwargs)
 
     def get(self, transaction=None):
-        """Deprecated alias for :meth:`stream`."""
-        warnings.warn(
-            "'Query.get' is deprecated:  please use 'Query.stream' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.stream(transaction=transaction)
+        """Read the documents in the collection that match this query.
+
+        This sends a ``RunQuery`` RPC and returns a list with documents
+        returned in the stream of ``RunQueryResponse`` messages.
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+
+        If a ``transaction`` is used and it already has write operations
+        added, this method cannot be used (i.e. read-after-write is not
+        allowed).
+
+        Returns:
+            list: The documents in the collection that match this query.
+        """
+        if self._limit_to_last:
+            self._limit = self._limit_to_last
+
+            for order in self._orders:
+                order.direction = _enum_from_direction(
+                    self.DESCENDING
+                    if order.direction == self.ASCENDING
+                    else self.ASCENDING
+                )
+
+        result = list(self.stream(transaction=transaction))
+        return list(reversed(result))
 
     def stream(self, transaction=None):
         """Read the documents in the collection that match this query.
