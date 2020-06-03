@@ -1077,12 +1077,10 @@ class TestQuery(unittest.TestCase):
         _, expected_prefix = parent._parent_info()
         name = "{}/sleep".format(expected_prefix)
         data = {"snooze": 10}
-        data2 = {"snooze": 20}
 
         response_pb = _make_query_response(name=name, data=data)
-        response_pb2 = _make_query_response(name=name, data=data2)
 
-        firestore_api.run_query.return_value = iter([response_pb, response_pb2])
+        firestore_api.run_query.return_value = iter([response_pb])
 
         # Execute the query and check the response.
         query = self._make_one(parent)
@@ -1090,15 +1088,11 @@ class TestQuery(unittest.TestCase):
 
         self.assertIsInstance(get_response, list)
         returned = list(get_response)
-        self.assertEqual(len(returned), 2)
+        self.assertEqual(len(returned), 1)
 
         snapshot = returned[0]
         self.assertEqual(snapshot.reference._path, ("dee", "sleep"))
-        self.assertEqual(snapshot.to_dict(), data2)
-
-        snapshot2 = returned[1]
-        self.assertEqual(snapshot2.reference._path, ("dee", "sleep"))
-        self.assertEqual(snapshot2.to_dict(), data)
+        self.assertEqual(snapshot.to_dict(), data)
 
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
