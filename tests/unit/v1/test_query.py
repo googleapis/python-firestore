@@ -1084,10 +1084,9 @@ class TestQuery(unittest.TestCase):
 
         # Execute the query and check the response.
         query = self._make_one(parent)
-        get_response = query.get()
+        returned = query.get()
 
-        self.assertIsInstance(get_response, list)
-        returned = list(get_response)
+        self.assertIsInstance(returned, list)
         self.assertEqual(len(returned), 1)
 
         snapshot = returned[0]
@@ -1191,6 +1190,20 @@ class TestQuery(unittest.TestCase):
             transaction=None,
             metadata=client._rpc_metadata,
         )
+
+    def test_stream_with_limit_to_last(self):
+        # Attach the fake GAPIC to a real client.
+        client = _make_client()
+        # Make a **real** collection reference as parent.
+        parent = client.collection("dee")
+        # Execute the query and check the response.
+        query = self._make_one(parent)
+        query = query.limit_to_last(2)
+
+        stream_response = query.stream()
+
+        with self.assertRaises(ValueError):
+            list(stream_response)
 
     def test_stream_with_transaction(self):
         # Create a minimal fake GAPIC.

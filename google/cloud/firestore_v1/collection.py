@@ -14,7 +14,6 @@
 
 """Classes for representing collections for the Google Cloud Firestore API."""
 import random
-import warnings
 
 import six
 
@@ -273,19 +272,19 @@ class CollectionReference(object):
         return query.limit(count)
 
     def limit_to_last(self, count):
-        """Create a limited query with this collection as parent.
+        """Create a limited to last query with this collection as parent.
 
         See
         :meth:`~google.cloud.firestore_v1.query.Query.limit` for
         more information on this method.
 
         Args:
-            count (int): Maximum number of documents to return that match
-                the query.
+            count (int): Maximum number of documents to return that
+                match the query.
 
         Returns:
             :class:`~google.cloud.firestore_v1.query.Query`:
-            A limited query.
+            A limited to last query.
         """
         query = query_mod.Query(self)
         return query.limit_to_last(count)
@@ -393,13 +392,25 @@ class CollectionReference(object):
         return query.end_at(document_fields)
 
     def get(self, transaction=None):
-        """Deprecated alias for :meth:`stream`."""
-        warnings.warn(
-            "'Collection.get' is deprecated:  please use 'Collection.stream' instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.stream(transaction=transaction)
+        """Read the documents in this collection.
+
+        This sends a ``RunQuery`` RPC and returns a list of documents
+        returned in the stream of ``RunQueryResponse`` messages.
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+
+        If a ``transaction`` is used and it already has write operations
+        added, this method cannot be used (i.e. read-after-write is not
+        allowed).
+
+        Returns:
+            list: The documents in the collection that match this query.
+        """
+        query = query_mod.Query(self)
+        return query.get(transaction=transaction)
 
     def stream(self, transaction=None):
         """Read the documents in this collection.

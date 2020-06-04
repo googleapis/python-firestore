@@ -763,7 +763,7 @@ class Query(object):
     def get(self, transaction=None):
         """Read the documents in the collection that match this query.
 
-        This sends a ``RunQuery`` RPC and returns a list with documents
+        This sends a ``RunQuery`` RPC and returns a list of documents
         returned in the stream of ``RunQueryResponse`` messages.
 
         Args:
@@ -778,9 +778,11 @@ class Query(object):
         Returns:
             list: The documents in the collection that match this query.
         """
-        if self._limit_to_last:
+        if self._limit_to_last is not None:
             self._limit = self._limit_to_last
+            self._limit_to_last = None
 
+            # flip order statements
             for order in self._orders:
                 order.direction = _enum_from_direction(
                     self.DESCENDING
@@ -818,6 +820,11 @@ class Query(object):
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
             The next document that fulfills the query.
         """
+        if self._limit_to_last is not None:
+            raise ValueError(
+                "Query results for queries that include limit_to_last() "
+                "constraints cannot be streamed. Use Query.get() instead."
+            )
         parent_path, expected_prefix = self._parent._parent_info()
         response_iterator = self._client._firestore_api.run_query(
             parent_path,
