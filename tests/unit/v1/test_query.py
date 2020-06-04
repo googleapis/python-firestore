@@ -1104,6 +1104,7 @@ class TestQuery(unittest.TestCase):
 
     def test_get_limit_to_last(self):
         from google.cloud import firestore
+        from google.cloud.firestore_v1.query import _enum_from_direction
 
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
@@ -1124,26 +1125,28 @@ class TestQuery(unittest.TestCase):
         response_pb = _make_query_response(name=name, data=data)
         response_pb2 = _make_query_response(name=name, data=data2)
 
-        firestore_api.run_query.return_value = iter([response_pb, response_pb2])
+        firestore_api.run_query.return_value = iter([response_pb2, response_pb])
 
         # Execute the query and check the response.
         query = self._make_one(parent)
         query = query.order_by(
             u"snooze", direction=firestore.Query.DESCENDING
         ).limit_to_last(2)
-        get_response = query.get()
+        returned = query.get()
 
-        self.assertIsInstance(get_response, list)
-        returned = list(get_response)
+        self.assertIsInstance(returned, list)
+        self.assertEqual(
+            query._orders[0].direction, _enum_from_direction(firestore.Query.ASCENDING),
+        )
         self.assertEqual(len(returned), 2)
 
         snapshot = returned[0]
         self.assertEqual(snapshot.reference._path, ("dee", "sleep"))
-        self.assertEqual(snapshot.to_dict(), data2)
+        self.assertEqual(snapshot.to_dict(), data)
 
         snapshot2 = returned[1]
         self.assertEqual(snapshot2.reference._path, ("dee", "sleep"))
-        self.assertEqual(snapshot2.to_dict(), data)
+        self.assertEqual(snapshot2.to_dict(), data2)
 
         # Verify the mock call.
         parent_path, _ = parent._parent_info()

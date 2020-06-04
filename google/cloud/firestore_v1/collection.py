@@ -275,8 +275,8 @@ class CollectionReference(object):
         """Create a limited to last query with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.limit` for
-        more information on this method.
+        :meth:`~google.cloud.firestore_v1.query.Query.limit_to_last`
+        for more information on this method.
 
         Args:
             count (int): Maximum number of documents to return that
@@ -407,7 +407,7 @@ class CollectionReference(object):
         allowed).
 
         Returns:
-            list: The documents in the collection that match this query.
+            list: The documents in this collection that match the query.
         """
         query = query_mod.Query(self)
         return query.get(transaction=transaction)
