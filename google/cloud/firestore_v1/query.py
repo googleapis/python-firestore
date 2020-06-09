@@ -778,7 +778,10 @@ class Query(object):
         Returns:
             list: The documents in the collection that match this query.
         """
+        is_limit_to_last = False
+
         if self._limit_to_last is not None:
+            is_limit_to_last = True
             self._limit = self._limit_to_last
             self._limit_to_last = None
 
@@ -790,8 +793,11 @@ class Query(object):
                     else self.ASCENDING
                 )
 
-        result = list(self.stream(transaction=transaction))
-        return list(reversed(result))
+        result = self.stream(transaction=transaction)
+        if is_limit_to_last:
+            result = reversed(list(result))
+
+        return list(result)
 
     def stream(self, transaction=None):
         """Read the documents in the collection that match this query.
