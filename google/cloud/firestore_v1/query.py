@@ -347,7 +347,7 @@ class Query(object):
     def limit(self, count):
         """Limit a query to return first `count` results.
 
-        If the current query already has a limit set, this will overwrite it.
+        If the current query already has a `limit` set, this will overwrite it.
 
         Args:
             count (int): Maximum number of documents to return that match
@@ -373,7 +373,8 @@ class Query(object):
     def limit_to_last(self, count):
         """Limit a query to return last `count` results.
 
-        If the current query already has a limit set, this will overwrite it.
+        If the current query already has a `limit_to_last`
+        set, this will overwrite it.
 
         Args:
             count (int): Maximum number of documents to return that match
@@ -778,10 +779,10 @@ class Query(object):
         Returns:
             list: The documents in the collection that match this query.
         """
-        is_limit_to_last = False
+        is_limited_to_last = False
 
         if self._limit_to_last is not None:
-            is_limit_to_last = True
+            is_limited_to_last = True
             self._limit = self._limit_to_last
             self._limit_to_last = None
 
@@ -794,7 +795,7 @@ class Query(object):
                 )
 
         result = self.stream(transaction=transaction)
-        if is_limit_to_last:
+        if is_limited_to_last:
             result = reversed(list(result))
 
         return list(result)
