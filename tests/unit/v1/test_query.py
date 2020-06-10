@@ -1136,7 +1136,7 @@ class TestQuery(unittest.TestCase):
 
         self.assertIsInstance(returned, list)
         self.assertEqual(
-            query._orders[0].direction, _enum_from_direction(firestore.Query.ASCENDING),
+            query._orders[0].direction, _enum_from_direction(firestore.Query.ASCENDING)
         )
         self.assertEqual(len(returned), 2)
 

@@ -85,6 +85,8 @@ class Query(object):
             The "order by" entries to use in the query.
         limit (Optional[int]):
             The maximum number of documents the query is allowed to return.
+        limit_to_last (Optional[bool]):
+            Limit query results to last.
         offset (Optional[int]):
             The number of results to skip.
         start_at (Optional[Tuple[dict, bool]]):
@@ -133,7 +135,7 @@ class Query(object):
         field_filters=(),
         orders=(),
         limit=None,
-        limit_to_last=None,
+        limit_to_last=False,
         offset=None,
         start_at=None,
         end_at=None,
@@ -364,6 +366,7 @@ class Query(object):
             field_filters=self._field_filters,
             orders=self._orders,
             limit=count,
+            limit_to_last=False,
             offset=self._offset,
             start_at=self._start_at,
             end_at=self._end_at,
@@ -390,7 +393,8 @@ class Query(object):
             projection=self._projection,
             field_filters=self._field_filters,
             orders=self._orders,
-            limit_to_last=count,
+            limit=count,
+            limit_to_last=True,
             offset=self._offset,
             start_at=self._start_at,
             end_at=self._end_at,
@@ -779,13 +783,9 @@ class Query(object):
         Returns:
             list: The documents in the collection that match this query.
         """
-        is_limited_to_last = False
+        is_limited_to_last = self._limit_to_last
 
-        if self._limit_to_last is not None:
-            is_limited_to_last = True
-            self._limit = self._limit_to_last
-            self._limit_to_last = None
-
+        if self._limit_to_last:
             # flip order statements
             for order in self._orders:
                 order.direction = _enum_from_direction(
@@ -793,6 +793,7 @@ class Query(object):
                     if order.direction == self.ASCENDING
                     else self.ASCENDING
                 )
+            self._limit_to_last = False
 
         result = self.stream(transaction=transaction)
         if is_limited_to_last:
@@ -827,7 +828,7 @@ class Query(object):
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
             The next document that fulfills the query.
         """
-        if self._limit_to_last is not None:
+        if self._limit_to_last:
             raise ValueError(
                 "Query results for queries that include limit_to_last() "
                 "constraints cannot be streamed. Use Query.get() instead."

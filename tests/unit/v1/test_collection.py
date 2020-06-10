@@ -374,13 +374,14 @@ class TestCollectionReference(unittest.TestCase):
     def test_limit_to_last(self):
         from google.cloud.firestore_v1.query import Query
 
-        collection = self._make_one("collection")
         LIMIT = 15
+        collection = self._make_one("collection")
         query = collection.limit_to_last(LIMIT)
 
         self.assertIsInstance(query, Query)
         self.assertIs(query._parent, collection)
-        self.assertEqual(query._limit_to_last, LIMIT)
+        self.assertEqual(query._limit, LIMIT)
+        self.assertTrue(query._limit_to_last)
 
     def test_offset(self):
         from google.cloud.firestore_v1.query import Query
