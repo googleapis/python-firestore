@@ -347,9 +347,9 @@ class Query(object):
         )
 
     def limit(self, count):
-        """Limit a query to return first `count` results.
+        """Limit a query to return the first `count` matching results.
 
-        If the current query already has a `limit` set, this will overwrite it.
+        If the current query already has a `limit` set, this will override it.
 
         Args:
             count (int): Maximum number of documents to return that match
@@ -374,10 +374,10 @@ class Query(object):
         )
 
     def limit_to_last(self, count):
-        """Limit a query to return last `count` results.
+        """Limit a query to return the last `count` matching results.
 
         If the current query already has a `limit_to_last`
-        set, this will overwrite it.
+        set, this will override it.
 
         Args:
             count (int): Maximum number of documents to return that match
