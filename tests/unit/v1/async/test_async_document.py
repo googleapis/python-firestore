@@ -168,7 +168,7 @@ class TestAsyncDocumentReference(unittest.TestCase):
         self.assertEqual(document.id, document_id)
 
     def test_parent_property(self):
-        from google.cloud.firestore_v1.collection import CollectionReference
+        from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 
         collection_id = "grocery-store"
         document_id = "market"
@@ -176,12 +176,12 @@ class TestAsyncDocumentReference(unittest.TestCase):
         document = self._make_one(collection_id, document_id, client=client)
 
         parent = document.parent
-        self.assertIsInstance(parent, CollectionReference)
+        self.assertIsInstance(parent, AsyncCollectionReference)
         self.assertIs(parent._client, client)
         self.assertEqual(parent._path, (collection_id,))
 
     def test_collection_factory(self):
-        from google.cloud.firestore_v1.collection import CollectionReference
+        from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 
         collection_id = "grocery-store"
         document_id = "market"
@@ -190,7 +190,7 @@ class TestAsyncDocumentReference(unittest.TestCase):
         document = self._make_one(collection_id, document_id, client=client)
 
         child = document.collection(new_collection)
-        self.assertIsInstance(child, CollectionReference)
+        self.assertIsInstance(child, AsyncCollectionReference)
         self.assertIs(child._client, client)
         self.assertEqual(child._path, (collection_id, document_id, new_collection))
 
@@ -483,7 +483,9 @@ class TestAsyncDocumentReference(unittest.TestCase):
         else:
             transaction = None
 
-        snapshot = asyncio.run(document.get(field_paths=field_paths, transaction=transaction))
+        snapshot = asyncio.run(
+            document.get(field_paths=field_paths, transaction=transaction)
+        )
 
         self.assertIs(snapshot.reference, document)
         if not_found:
@@ -539,7 +541,7 @@ class TestAsyncDocumentReference(unittest.TestCase):
     def _collections_helper(self, page_size=None):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
-        from google.cloud.firestore_v1.collection import CollectionReference
+        from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
         from google.cloud.firestore_v1.gapic.firestore_client import FirestoreClient
 
         class _Iterator(Iterator):
@@ -570,7 +572,7 @@ class TestAsyncDocumentReference(unittest.TestCase):
         # Verify the response and the mocks.
         self.assertEqual(len(collections), len(collection_ids))
         for collection, collection_id in zip(collections, collection_ids):
-            self.assertIsInstance(collection, CollectionReference)
+            self.assertIsInstance(collection, AsyncCollectionReference)
             self.assertEqual(collection.parent, document)
             self.assertEqual(collection.id, collection_id)
 
@@ -820,7 +822,7 @@ def _make_credentials():
 
 
 def _make_client(project="project-project"):
-    from google.cloud.firestore_v1.client import Client
+    from google.cloud.firestore_v1.async_client import AsyncClient
 
     credentials = _make_credentials()
-    return Client(project=project, credentials=credentials)
+    return AsyncClient(project=project, credentials=credentials)

@@ -162,7 +162,7 @@ class AsyncDocumentReference(object):
         """Collection that owns the current document.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.collection.CollectionReference`:
+            :class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`:
             The parent collection.
         """
         parent_path = self._path[:-1]
@@ -176,7 +176,7 @@ class AsyncDocumentReference(object):
                 referred to as the "kind").
 
         Returns:
-            :class:`~google.cloud.firestore_v1.collection.CollectionReference`:
+            :class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`:
             The child collection.
         """
         child_path = self._path + (collection_id,)
@@ -479,7 +479,7 @@ class AsyncDocumentReference(object):
             are ignored. Defaults to a sensible value set by the API.
 
         Returns:
-            Sequence[:class:`~google.cloud.firestore_v1.collection.CollectionReference`]:
+            Sequence[:class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`]:
                 iterator of subcollections of the current document. If the
                 document does not exist at the time of `snapshot`, the
                 iterator will be empty

@@ -185,7 +185,7 @@ class TestAsyncClient(unittest.TestCase):
         )
 
     def test_collection_factory(self):
-        from google.cloud.firestore_v1.collection import CollectionReference
+        from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 
         collection_id = "users"
         client = self._make_default_one()
@@ -193,10 +193,10 @@ class TestAsyncClient(unittest.TestCase):
 
         self.assertEqual(collection._path, (collection_id,))
         self.assertIs(collection._client, client)
-        self.assertIsInstance(collection, CollectionReference)
+        self.assertIsInstance(collection, AsyncCollectionReference)
 
     def test_collection_factory_nested(self):
-        from google.cloud.firestore_v1.collection import CollectionReference
+        from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 
         client = self._make_default_one()
         parts = ("users", "alovelace", "beep")
@@ -205,13 +205,13 @@ class TestAsyncClient(unittest.TestCase):
 
         self.assertEqual(collection1._path, parts)
         self.assertIs(collection1._client, client)
-        self.assertIsInstance(collection1, CollectionReference)
+        self.assertIsInstance(collection1, AsyncCollectionReference)
 
         # Make sure using segments gives the same result.
         collection2 = client.collection(*parts)
         self.assertEqual(collection2._path, parts)
         self.assertIs(collection2._client, client)
-        self.assertIsInstance(collection2, CollectionReference)
+        self.assertIsInstance(collection2, AsyncCollectionReference)
 
     def test_collection_group(self):
         client = self._make_default_one()
@@ -336,7 +336,7 @@ class TestAsyncClient(unittest.TestCase):
     def test_collections(self):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
-        from google.cloud.firestore_v1.collection import CollectionReference
+        from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 
         collection_ids = ["users", "projects"]
         client = self._make_default_one()
@@ -360,7 +360,7 @@ class TestAsyncClient(unittest.TestCase):
 
         self.assertEqual(len(collections), len(collection_ids))
         for collection, collection_id in zip(collections, collection_ids):
-            self.assertIsInstance(collection, CollectionReference)
+            self.assertIsInstance(collection, AsyncCollectionReference)
             self.assertEqual(collection.parent, None)
             self.assertEqual(collection.id, collection_id)
 

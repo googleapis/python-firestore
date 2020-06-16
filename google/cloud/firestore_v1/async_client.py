@@ -19,7 +19,7 @@ This is the base from which all interactions with the API occur.
 In the hierarchy of API concepts
 
 * a :class:`~google.cloud.firestore_v1.client.Client` owns a
-  :class:`~google.cloud.firestore_v1.collection.CollectionReference`
+  :class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`
 * a :class:`~google.cloud.firestore_v1.client.Client` owns a
   :class:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference`
 """
@@ -34,7 +34,7 @@ from google.cloud.firestore_v1 import __version__
 from google.cloud.firestore_v1 import query
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.batch import WriteBatch
-from google.cloud.firestore_v1.collection import CollectionReference
+from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_document import DocumentSnapshot
 from google.cloud.firestore_v1.field_path import render_field_path
@@ -238,7 +238,7 @@ class AsyncClient(ClientWithProject):
                 * A tuple of collection path segments
 
         Returns:
-            :class:`~google.cloud.firestore_v1.collection.CollectionReference`:
+            :class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`:
             A reference to a collection in the Firestore database.
         """
         if len(collection_path) == 1:
@@ -246,7 +246,7 @@ class AsyncClient(ClientWithProject):
         else:
             path = collection_path
 
-        return CollectionReference(*path, client=self)
+        return AsyncCollectionReference(*path, client=self)
 
     def collection_group(self, collection_id):
         """
@@ -448,7 +448,7 @@ class AsyncClient(ClientWithProject):
         """List top-level collections of the client's database.
 
         Returns:
-            Sequence[:class:`~google.cloud.firestore_v1.collection.CollectionReference`]:
+            Sequence[:class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`]:
                 iterator of subcollections of the current document.
         """
         iterator = self._firestore_api.list_collection_ids(
