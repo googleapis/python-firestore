@@ -21,7 +21,7 @@ In the hierarchy of API concepts
 * a :class:`~google.cloud.firestore_v1.client.Client` owns a
   :class:`~google.cloud.firestore_v1.collection.CollectionReference`
 * a :class:`~google.cloud.firestore_v1.client.Client` owns a
-  :class:`~google.cloud.firestore_v1.document.DocumentReference`
+  :class:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference`
 """
 import os
 
@@ -35,8 +35,8 @@ from google.cloud.firestore_v1 import query
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.batch import WriteBatch
 from google.cloud.firestore_v1.collection import CollectionReference
-from google.cloud.firestore_v1.document import DocumentReference
-from google.cloud.firestore_v1.document import DocumentSnapshot
+from google.cloud.firestore_v1.async_document import AsyncDocumentReference
+from google.cloud.firestore_v1.async_document import DocumentSnapshot
 from google.cloud.firestore_v1.field_path import render_field_path
 from google.cloud.firestore_v1.gapic import firestore_client
 from google.cloud.firestore_v1.gapic.transports import firestore_grpc_transport
@@ -301,7 +301,7 @@ class AsyncClient(ClientWithProject):
                 * A tuple of document path segments
 
         Returns:
-            :class:`~google.cloud.firestore_v1.document.DocumentReference`:
+            :class:`~google.cloud.firestore_v1.document.AsyncDocumentReference`:
             A reference to a document in a collection.
         """
         if len(document_path) == 1:
@@ -309,14 +309,14 @@ class AsyncClient(ClientWithProject):
         else:
             path = document_path
 
-        # DocumentReference takes a relative path. Strip the database string if present.
+        # AsyncDocumentReference takes a relative path. Strip the database string if present.
         base_path = self._database_string + "/documents/"
         joined_path = _helpers.DOCUMENT_PATH_DELIMITER.join(path)
         if joined_path.startswith(base_path):
             joined_path = joined_path[len(base_path) :]
         path = joined_path.split(_helpers.DOCUMENT_PATH_DELIMITER)
 
-        return DocumentReference(*path, client=self)
+        return AsyncDocumentReference(*path, client=self)
 
     @staticmethod
     def field_path(*field_names):
@@ -351,9 +351,9 @@ class AsyncClient(ClientWithProject):
     def write_option(**kwargs):
         """Create a write option for write operations.
 
-        Write operations include :meth:`~google.cloud.DocumentReference.set`,
-        :meth:`~google.cloud.DocumentReference.update` and
-        :meth:`~google.cloud.DocumentReference.delete`.
+        Write operations include :meth:`~google.cloud.AsyncDocumentReference.set`,
+        :meth:`~google.cloud.AsyncDocumentReference.update` and
+        :meth:`~google.cloud.AsyncDocumentReference.delete`.
 
         One of the following keyword arguments must be provided:
 
@@ -417,7 +417,7 @@ class AsyncClient(ClientWithProject):
         allowed).
 
         Args:
-            references (List[.DocumentReference, ...]): Iterable of document
+            references (List[.AsyncDocumentReference, ...]): Iterable of document
                 references to be retrieved.
             field_paths (Optional[Iterable[str, ...]]): An iterable of field
                 paths (``.``-delimited list of field names) to use as a
@@ -493,11 +493,11 @@ def _reference_info(references):
     Helper for :meth:`~google.cloud.firestore_v1.client.Client.get_all`.
 
     Args:
-        references (List[.DocumentReference, ...]): Iterable of document
+        references (List[.AsyncDocumentReference, ...]): Iterable of document
             references.
 
     Returns:
-        Tuple[List[str, ...], Dict[str, .DocumentReference]]: A two-tuple of
+        Tuple[List[str, ...], Dict[str, .AsyncDocumentReference]]: A two-tuple of
 
         * fully-qualified documents paths for each reference in ``references``
         * a mapping from the paths to the original reference. (If multiple
@@ -523,12 +523,12 @@ def _get_reference(document_path, reference_map):
 
     Args:
         document_path (str): A fully-qualified document path.
-        reference_map (Dict[str, .DocumentReference]): A mapping (produced
+        reference_map (Dict[str, .AsyncDocumentReference]): A mapping (produced
             by :func:`_reference_info`) of fully-qualified document paths to
             document references.
 
     Returns:
-        .DocumentReference: The matching reference.
+        .AsyncDocumentReference: The matching reference.
 
     Raises:
         ValueError: If ``document_path`` has not been encountered.
@@ -547,7 +547,7 @@ def _parse_batch_get(get_doc_response, reference_map, client):
         get_doc_response (~google.cloud.proto.firestore.v1.\
             firestore_pb2.BatchGetDocumentsResponse): A single response (from
             a stream) containing the "get" response for a document.
-        reference_map (Dict[str, .DocumentReference]): A mapping (produced
+        reference_map (Dict[str, .AsyncDocumentReference]): A mapping (produced
             by :func:`_reference_info`) of fully-qualified document paths to
             document references.
         client (:class:`~google.cloud.firestore_v1.client.Client`):

@@ -229,7 +229,7 @@ class TestAsyncClient(unittest.TestCase):
             client.collection_group("foo/bar")
 
     def test_document_factory(self):
-        from google.cloud.firestore_v1.document import DocumentReference
+        from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
         parts = ("rooms", "roomA")
         client = self._make_default_one()
@@ -238,16 +238,16 @@ class TestAsyncClient(unittest.TestCase):
 
         self.assertEqual(document1._path, parts)
         self.assertIs(document1._client, client)
-        self.assertIsInstance(document1, DocumentReference)
+        self.assertIsInstance(document1, AsyncDocumentReference)
 
         # Make sure using segments gives the same result.
         document2 = client.document(*parts)
         self.assertEqual(document2._path, parts)
         self.assertIs(document2._client, client)
-        self.assertIsInstance(document2, DocumentReference)
+        self.assertIsInstance(document2, AsyncDocumentReference)
 
     def test_document_factory_w_absolute_path(self):
-        from google.cloud.firestore_v1.document import DocumentReference
+        from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
         parts = ("rooms", "roomA")
         client = self._make_default_one()
@@ -257,10 +257,10 @@ class TestAsyncClient(unittest.TestCase):
 
         self.assertEqual(document1._path, parts)
         self.assertIs(document1._client, client)
-        self.assertIsInstance(document1, DocumentReference)
+        self.assertIsInstance(document1, AsyncDocumentReference)
 
     def test_document_factory_w_nested_path(self):
-        from google.cloud.firestore_v1.document import DocumentReference
+        from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
         client = self._make_default_one()
         parts = ("rooms", "roomA", "shoes", "dressy")
@@ -269,13 +269,13 @@ class TestAsyncClient(unittest.TestCase):
 
         self.assertEqual(document1._path, parts)
         self.assertIs(document1._client, client)
-        self.assertIsInstance(document1, DocumentReference)
+        self.assertIsInstance(document1, AsyncDocumentReference)
 
         # Make sure using segments gives the same result.
         document2 = client.document(*parts)
         self.assertEqual(document2._path, parts)
         self.assertIs(document2._client, client)
-        self.assertIsInstance(document2, DocumentReference)
+        self.assertIsInstance(document2, AsyncDocumentReference)
 
     def test_field_path(self):
         klass = self._get_target_class()
@@ -400,7 +400,7 @@ class TestAsyncClient(unittest.TestCase):
 
     def test_get_all(self):
         from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.document import DocumentSnapshot
+        from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
         data1 = {"a": u"cheese"}
         data2 = {"b": True, "c": 18}
@@ -441,7 +441,7 @@ class TestAsyncClient(unittest.TestCase):
         )
 
     def test_get_all_with_transaction(self):
-        from google.cloud.firestore_v1.document import DocumentSnapshot
+        from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
         data = {"so-much": 484}
         info = self._info_for_get_all(data, {})
@@ -497,7 +497,7 @@ class TestAsyncClient(unittest.TestCase):
         )
 
     def test_get_all_wrong_order(self):
-        from google.cloud.firestore_v1.document import DocumentSnapshot
+        from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
         data1 = {"up": 10}
         data2 = {"down": -10}
@@ -645,7 +645,7 @@ class Test__parse_batch_get(unittest.TestCase):
     def test_found(self):
         from google.cloud.firestore_v1.proto import document_pb2
         from google.cloud._helpers import _datetime_to_pb_timestamp
-        from google.cloud.firestore_v1.document import DocumentSnapshot
+        from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
         now = datetime.datetime.utcnow()
         read_time = _datetime_to_pb_timestamp(now)
@@ -676,11 +676,11 @@ class Test__parse_batch_get(unittest.TestCase):
         self.assertEqual(snapshot.update_time, update_time)
 
     def test_missing(self):
-        from google.cloud.firestore_v1.document import DocumentReference
+        from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
         ref_string = self._dummy_ref_string()
         response_pb = _make_batch_response(missing=ref_string)
-        document = DocumentReference("fizz", "bazz", client=mock.sentinel.client)
+        document = AsyncDocumentReference("fizz", "bazz", client=mock.sentinel.client)
         reference_map = {ref_string: document}
         snapshot = self._call_fut(response_pb, reference_map)
         self.assertFalse(snapshot.exists)
