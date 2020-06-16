@@ -86,7 +86,7 @@ class Query(object):
         limit (Optional[int]):
             The maximum number of documents the query is allowed to return.
         limit_to_last (Optional[bool]):
-            Limit query results to last.
+            Denotes whether a provided limit is applied to the end of the result set.
         offset (Optional[int]):
             The number of results to skip.
         start_at (Optional[Tuple[dict, bool]]):
@@ -347,7 +347,7 @@ class Query(object):
         )
 
     def limit(self, count):
-        """Limit a query to return the first `count` matching results.
+        """Limit a query to return the next `count` matching results.
 
         If the current query already has a `limit` set, this will override it.
 
