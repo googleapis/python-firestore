@@ -544,11 +544,11 @@ class TestAsyncClient(unittest.TestCase):
         )
 
     def test_batch(self):
-        from google.cloud.firestore_v1.batch import WriteBatch
+        from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 
         client = self._make_default_one()
         batch = client.batch()
-        self.assertIsInstance(batch, WriteBatch)
+        self.assertIsInstance(batch, AsyncWriteBatch)
         self.assertIs(batch._client, client)
         self.assertEqual(batch._write_pbs, [])
 

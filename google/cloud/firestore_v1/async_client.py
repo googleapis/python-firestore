@@ -33,7 +33,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import __version__
 from google.cloud.firestore_v1 import query
 from google.cloud.firestore_v1 import types
-from google.cloud.firestore_v1.batch import WriteBatch
+from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_document import DocumentSnapshot
@@ -462,11 +462,11 @@ class AsyncClient(ClientWithProject):
         """Get a batch instance from this client.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.batch.WriteBatch`:
+            :class:`~google.cloud.firestore_v1.async_batch.AsyncWriteBatch`:
             A "write" batch to be used for accumulating document changes and
             sending the changes all at once.
         """
-        return WriteBatch(self)
+        return AsyncWriteBatch(self)
 
     def transaction(self, **kwargs):
         """Get a transaction that uses this client.
