@@ -347,7 +347,7 @@ class Query(object):
         )
 
     def limit(self, count):
-        """Limit a query to return the next `count` matching results.
+        """Limit a query to return at most `count` matching results.
 
         If the current query already has a `limit` set, this will override it.
 
@@ -786,7 +786,10 @@ class Query(object):
         is_limited_to_last = self._limit_to_last
 
         if self._limit_to_last:
-            # flip order statements
+            # In order to fetch up to `self._limit` results from the end of the 
+            # query flip the defined ordering on the query to start from the 
+            # end, retrieving up to `self._limit` results from the backend.
+
             for order in self._orders:
                 order.direction = _enum_from_direction(
                     self.DESCENDING
