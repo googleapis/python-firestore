@@ -159,7 +159,7 @@ class AsyncCollectionReference(object):
             document_id = _auto_id()
 
         document_ref = self.document(document_id)
-        write_result = document_ref.create(document_data)
+        write_result = await document_ref.create(document_data)
         return write_result.update_time, document_ref
 
     async def list_documents(self, page_size=None):
@@ -189,7 +189,7 @@ class AsyncCollectionReference(object):
         iterator.item_to_value = _item_to_document_ref
         return iterator
 
-    async def select(self, field_paths):
+    def select(self, field_paths):
         """Create a "select" query with this collection as parent.
 
         See
@@ -381,9 +381,9 @@ class AsyncCollectionReference(object):
             DeprecationWarning,
             stacklevel=2,
         )
-        return self.stream(transaction=transaction)
+        return await self.stream(transaction=transaction)
 
-    def stream(self, transaction=None):
+    async def stream(self, transaction=None):
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
