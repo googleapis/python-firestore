@@ -256,6 +256,11 @@ class CollectionReference(object):
     def limit(self, count):
         """Create a limited query with this collection as parent.
 
+        .. note::
+
+           `limit` and `limit_to_last` are mutually exclusive.
+           Setting `limit` will drop previously set `limit_to_last`.
+
         See
         :meth:`~google.cloud.firestore_v1.query.Query.limit` for
         more information on this method.
@@ -273,6 +278,11 @@ class CollectionReference(object):
 
     def limit_to_last(self, count):
         """Create a limited to last query with this collection as parent.
+
+        .. note::
+
+           `limit` and `limit_to_last` are mutually exclusive.
+           Setting `limit_to_last` will drop previously set `limit`.
 
         See
         :meth:`~google.cloud.firestore_v1.query.Query.limit_to_last`

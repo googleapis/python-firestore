@@ -351,6 +351,11 @@ class Query(object):
 
         If the current query already has a `limit` set, this will override it.
 
+        .. note::
+
+           `limit` and `limit_to_last` are mutually exclusive.
+           Setting `limit` will drop previously set `limit_to_last`.
+
         Args:
             count (int): Maximum number of documents to return that match
                 the query.
@@ -378,6 +383,11 @@ class Query(object):
 
         If the current query already has a `limit_to_last`
         set, this will override it.
+
+        .. note::
+
+           `limit` and `limit_to_last` are mutually exclusive.
+           Setting `limit_to_last` will drop previously set `limit`.
 
         Args:
             count (int): Maximum number of documents to return that match
@@ -786,10 +796,9 @@ class Query(object):
         is_limited_to_last = self._limit_to_last
 
         if self._limit_to_last:
-            # In order to fetch up to `self._limit` results from the end of the 
-            # query flip the defined ordering on the query to start from the 
+            # In order to fetch up to `self._limit` results from the end of the
+            # query flip the defined ordering on the query to start from the
             # end, retrieving up to `self._limit` results from the backend.
-
             for order in self._orders:
                 order.direction = _enum_from_direction(
                     self.DESCENDING
