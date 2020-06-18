@@ -22,7 +22,7 @@ from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.firestore.v1",
+    package="google.cloud.firestore.v1",
     manifest={"DocumentMask", "Precondition", "TransactionOptions"},
 )
 
@@ -31,13 +31,13 @@ class DocumentMask(proto.Message):
     r"""A set of field paths on a document. Used to restrict a get or update
     operation on a document to a subset of its fields. This is different
     from standard field masks, as this is always scoped to a
-    [Document][google.firestore.v1.Document], and takes in account the
-    dynamic nature of [Value][google.firestore.v1.Value].
+    [Document][google.cloud.firestore.v1.Document], and takes in account the
+    dynamic nature of [Value][google.cloud.firestore.v1.Value].
 
     Attributes:
         field_paths (Sequence[str]):
             The list of field paths in the mask. See
-            [Document.fields][google.firestore.v1.Document.fields] for a
+            [Document.fields][google.cloud.firestore.v1.Document.fields] for a
             field path syntax reference.
     """
 

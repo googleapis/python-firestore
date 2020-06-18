@@ -20,10 +20,10 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore_v1beta1/proto/admin/index.proto",
-    package="google.firestore.admin.v1beta1",
+    package="google.cloud.firestore.admin.v1beta1",
     syntax="proto3",
     serialized_pb=_b(
-        '\n6google/cloud/firestore_v1beta1/proto/admin/index.proto\x12\x1egoogle.firestore.admin.v1beta1\x1a\x1cgoogle/api/annotations.proto"\x9c\x01\n\nIndexField\x12\x12\n\nfield_path\x18\x01 \x01(\t\x12=\n\x04mode\x18\x02 \x01(\x0e\x32/.google.firestore.admin.v1beta1.IndexField.Mode";\n\x04Mode\x12\x14\n\x10MODE_UNSPECIFIED\x10\x00\x12\r\n\tASCENDING\x10\x02\x12\x0e\n\nDESCENDING\x10\x03"\xe8\x01\n\x05Index\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\rcollection_id\x18\x02 \x01(\t\x12:\n\x06\x66ields\x18\x03 \x03(\x0b\x32*.google.firestore.admin.v1beta1.IndexField\x12:\n\x05state\x18\x06 \x01(\x0e\x32+.google.firestore.admin.v1beta1.Index.State"B\n\x05State\x12\x15\n\x11STATE_UNSPECIFIED\x10\x00\x12\x0c\n\x08\x43REATING\x10\x03\x12\t\n\x05READY\x10\x02\x12\t\n\x05\x45RROR\x10\x05\x42\xa5\x01\n"com.google.firestore.admin.v1beta1B\nIndexProtoP\x01ZCgoogle.golang.org/genproto/googleapis/firestore/admin/v1beta1;admin\xa2\x02\x04GCFS\xaa\x02$Google.Cloud.Firestore.Admin.V1Beta1b\x06proto3'
+        '\n6google/cloud/firestore_v1beta1/proto/admin/index.proto\x12\x1egoogle.cloud.firestore.admin.v1beta1\x1a\x1cgoogle/api/annotations.proto"\x9c\x01\n\nIndexField\x12\x12\n\nfield_path\x18\x01 \x01(\t\x12=\n\x04mode\x18\x02 \x01(\x0e\x32/.google.cloud.firestore.admin.v1beta1.IndexField.Mode";\n\x04Mode\x12\x14\n\x10MODE_UNSPECIFIED\x10\x00\x12\r\n\tASCENDING\x10\x02\x12\x0e\n\nDESCENDING\x10\x03"\xe8\x01\n\x05Index\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x15\n\rcollection_id\x18\x02 \x01(\t\x12:\n\x06\x66ields\x18\x03 \x03(\x0b\x32*.google.cloud.firestore.admin.v1beta1.IndexField\x12:\n\x05state\x18\x06 \x01(\x0e\x32+.google.cloud.firestore.admin.v1beta1.Index.State"B\n\x05State\x12\x15\n\x11STATE_UNSPECIFIED\x10\x00\x12\x0c\n\x08\x43REATING\x10\x03\x12\t\n\x05READY\x10\x02\x12\t\n\x05\x45RROR\x10\x05\x42\xa5\x01\n"com.google.cloud.firestore.admin.v1beta1B\nIndexProtoP\x01ZCgoogle.golang.org/genproto/googleapis/firestore/admin/v1beta1;admin\xa2\x02\x04GCFS\xaa\x02$Google.Cloud.Firestore.Admin.V1Beta1b\x06proto3'
     ),
     dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR],
 )
@@ -31,7 +31,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _INDEXFIELD_MODE = _descriptor.EnumDescriptor(
     name="Mode",
-    full_name="google.firestore.admin.v1beta1.IndexField.Mode",
+    full_name="google.cloud.firestore.admin.v1beta1.IndexField.Mode",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -54,7 +54,7 @@ _sym_db.RegisterEnumDescriptor(_INDEXFIELD_MODE)
 
 _INDEX_STATE = _descriptor.EnumDescriptor(
     name="State",
-    full_name="google.firestore.admin.v1beta1.Index.State",
+    full_name="google.cloud.firestore.admin.v1beta1.Index.State",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -81,14 +81,14 @@ _sym_db.RegisterEnumDescriptor(_INDEX_STATE)
 
 _INDEXFIELD = _descriptor.Descriptor(
     name="IndexField",
-    full_name="google.firestore.admin.v1beta1.IndexField",
+    full_name="google.cloud.firestore.admin.v1beta1.IndexField",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="field_path",
-            full_name="google.firestore.admin.v1beta1.IndexField.field_path",
+            full_name="google.cloud.firestore.admin.v1beta1.IndexField.field_path",
             index=0,
             number=1,
             type=9,
@@ -105,7 +105,7 @@ _INDEXFIELD = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="mode",
-            full_name="google.firestore.admin.v1beta1.IndexField.mode",
+            full_name="google.cloud.firestore.admin.v1beta1.IndexField.mode",
             index=1,
             number=2,
             type=14,
@@ -136,14 +136,14 @@ _INDEXFIELD = _descriptor.Descriptor(
 
 _INDEX = _descriptor.Descriptor(
     name="Index",
-    full_name="google.firestore.admin.v1beta1.Index",
+    full_name="google.cloud.firestore.admin.v1beta1.Index",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
-            full_name="google.firestore.admin.v1beta1.Index.name",
+            full_name="google.cloud.firestore.admin.v1beta1.Index.name",
             index=0,
             number=1,
             type=9,
@@ -160,7 +160,7 @@ _INDEX = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="collection_id",
-            full_name="google.firestore.admin.v1beta1.Index.collection_id",
+            full_name="google.cloud.firestore.admin.v1beta1.Index.collection_id",
             index=1,
             number=2,
             type=9,
@@ -177,7 +177,7 @@ _INDEX = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="fields",
-            full_name="google.firestore.admin.v1beta1.Index.fields",
+            full_name="google.cloud.firestore.admin.v1beta1.Index.fields",
             index=2,
             number=3,
             type=11,
@@ -194,7 +194,7 @@ _INDEX = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="state",
-            full_name="google.firestore.admin.v1beta1.Index.state",
+            full_name="google.cloud.firestore.admin.v1beta1.Index.state",
             index=3,
             number=6,
             type=14,
@@ -244,13 +244,13 @@ IndexField = _reflection.GeneratedProtocolMessageType(
       field_path:
           The path of the field. Must match the field path specification
           described by
-          [google.firestore.v1beta1.Document.fields][fields]. Special
+          [google.cloud.firestore.v1beta1.Document.fields][fields]. Special
           field path ``__name__`` may be used by itself or at the end of
           a path. ``__type__`` may be used only at the end of path.
       mode:
           The field's mode.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.IndexField)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.IndexField)
     ),
 )
 _sym_db.RegisterMessage(IndexField)
@@ -274,7 +274,7 @@ Index = _reflection.GeneratedProtocolMessageType(
       state:
           The state of the index. The state is read-only. @OutputOnly
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.Index)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.Index)
     ),
 )
 _sym_db.RegisterMessage(Index)
@@ -284,7 +284,7 @@ DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(
     descriptor_pb2.FileOptions(),
     _b(
-        '\n"com.google.firestore.admin.v1beta1B\nIndexProtoP\001ZCgoogle.golang.org/genproto/googleapis/firestore/admin/v1beta1;admin\242\002\004GCFS\252\002$Google.Cloud.Firestore.Admin.V1Beta1'
+        '\n"com.google.cloud.firestore.admin.v1beta1B\nIndexProtoP\001ZCgoogle.golang.org/genproto/googleapis/firestore/admin/v1beta1;admin\242\002\004GCFS\252\002$Google.Cloud.Firestore.Admin.V1Beta1'
     ),
 )
 try:

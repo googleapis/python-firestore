@@ -28,47 +28,47 @@ class FirestoreAdminStub(object):
       channel: A grpc.Channel.
     """
         self.CreateIndex = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/CreateIndex",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/CreateIndex",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
         self.ListIndexes = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/ListIndexes",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/ListIndexes",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.FromString,
         )
         self.GetIndex = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/GetIndex",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/GetIndex",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_index__pb2.Index.FromString,
         )
         self.DeleteIndex = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/DeleteIndex",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.SerializeToString,
             response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
         )
         self.GetField = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/GetField",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/GetField",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_field__pb2.Field.FromString,
         )
         self.UpdateField = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/UpdateField",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/UpdateField",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
         self.ListFields = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/ListFields",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/ListFields",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.FromString,
         )
         self.ExportDocuments = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/ExportDocuments",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
         self.ImportDocuments = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments",
+            "/google.cloud.firestore.admin.v1.FirestoreAdmin/ImportDocuments",
             request_serializer=google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
@@ -82,7 +82,7 @@ class FirestoreAdminServicer(object):
     def CreateIndex(self, request, context):
         """Creates a composite index. This returns a [google.longrunning.Operation][google.longrunning.Operation]
     which may be used to track the status of the creation. The metadata for
-    the operation will be the type [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
+    the operation will be the type [IndexOperationMetadata][google.cloud.firestore.admin.v1.IndexOperationMetadata].
     """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -119,13 +119,13 @@ class FirestoreAdminServicer(object):
     def UpdateField(self, request, context):
         """Updates a field configuration. Currently, field updates apply only to
     single field index configuration. However, calls to
-    [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField] should provide a field mask to avoid
+    [FirestoreAdmin.UpdateField][google.cloud.firestore.admin.v1.FirestoreAdmin.UpdateField] should provide a field mask to avoid
     changing any configuration that the caller isn't aware of. The field mask
     should be specified as: `{ paths: "index_config" }`.
 
     This call returns a [google.longrunning.Operation][google.longrunning.Operation] which may be used to
     track the status of the field update. The metadata for
-    the operation will be the type [FieldOperationMetadata][google.firestore.admin.v1.FieldOperationMetadata].
+    the operation will be the type [FieldOperationMetadata][google.cloud.firestore.admin.v1.FieldOperationMetadata].
 
     To configure the default field settings for the database, use
     the special `Field` with resource name:
@@ -138,9 +138,9 @@ class FirestoreAdminServicer(object):
     def ListFields(self, request, context):
         """Lists the field configuration and metadata for this database.
 
-    Currently, [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields] only supports listing fields
+    Currently, [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields] only supports listing fields
     that have been explicitly overridden. To issue this query, call
-    [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields] with the filter set to
+    [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields] with the filter set to
     `indexConfig.usesAncestorConfig:false`.
     """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -222,6 +222,6 @@ def add_FirestoreAdminServicer_to_server(servicer, server):
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "google.firestore.admin.v1.FirestoreAdmin", rpc_method_handlers
+        "google.cloud.firestore.admin.v1.FirestoreAdmin", rpc_method_handlers
     )
     server.add_generic_rpc_handlers((generic_handler,))

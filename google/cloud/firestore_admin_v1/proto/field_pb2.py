@@ -24,13 +24,13 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore/admin_v1/proto/field.proto",
-    package="google.firestore.admin.v1",
+    package="google.cloud.firestore.admin.v1",
     syntax="proto3",
     serialized_options=_b(
-        "\n\035com.google.firestore.admin.v1B\nFieldProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1"
+        "\n\035com.google.cloud.firestore.admin.v1B\nFieldProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1"
     ),
     serialized_pb=_b(
-        '\n1google/cloud/firestore/admin_v1/proto/field.proto\x12\x19google.firestore.admin.v1\x1a\x19google/api/resource.proto\x1a\x31google/cloud/firestore/admin_v1/proto/index.proto\x1a\x1cgoogle/api/annotations.proto"\xe0\x02\n\x05\x46ield\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x42\n\x0cindex_config\x18\x02 \x01(\x0b\x32,.google.firestore.admin.v1.Field.IndexConfig\x1a\x89\x01\n\x0bIndexConfig\x12\x31\n\x07indexes\x18\x01 \x03(\x0b\x32 .google.firestore.admin.v1.Index\x12\x1c\n\x14uses_ancestor_config\x18\x02 \x01(\x08\x12\x16\n\x0e\x61ncestor_field\x18\x03 \x01(\t\x12\x11\n\treverting\x18\x04 \x01(\x08:y\xea\x41v\n\x1e\x66irestore.googleapis.com/Field\x12Tprojects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}B\xb8\x01\n\x1d\x63om.google.firestore.admin.v1B\nFieldProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1b\x06proto3'
+        '\n1google/cloud/firestore/admin_v1/proto/field.proto\x12\x19google.cloud.firestore.admin.v1\x1a\x19google/api/resource.proto\x1a\x31google/cloud/firestore/admin_v1/proto/index.proto\x1a\x1cgoogle/api/annotations.proto"\xe0\x02\n\x05\x46ield\x12\x0c\n\x04name\x18\x01 \x01(\t\x12\x42\n\x0cindex_config\x18\x02 \x01(\x0b\x32,.google.cloud.firestore.admin.v1.Field.IndexConfig\x1a\x89\x01\n\x0bIndexConfig\x12\x31\n\x07indexes\x18\x01 \x03(\x0b\x32 .google.cloud.firestore.admin.v1.Index\x12\x1c\n\x14uses_ancestor_config\x18\x02 \x01(\x08\x12\x16\n\x0e\x61ncestor_field\x18\x03 \x01(\t\x12\x11\n\treverting\x18\x04 \x01(\x08:y\xea\x41v\n\x1e\x66irestore.googleapis.com/Field\x12Tprojects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}B\xb8\x01\n\x1d\x63om.google.cloud.firestore.admin.v1B\nFieldProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1b\x06proto3'
     ),
     dependencies=[
         google_dot_api_dot_resource__pb2.DESCRIPTOR,
@@ -42,14 +42,14 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _FIELD_INDEXCONFIG = _descriptor.Descriptor(
     name="IndexConfig",
-    full_name="google.firestore.admin.v1.Field.IndexConfig",
+    full_name="google.cloud.firestore.admin.v1.Field.IndexConfig",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="indexes",
-            full_name="google.firestore.admin.v1.Field.IndexConfig.indexes",
+            full_name="google.cloud.firestore.admin.v1.Field.IndexConfig.indexes",
             index=0,
             number=1,
             type=11,
@@ -67,7 +67,7 @@ _FIELD_INDEXCONFIG = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="uses_ancestor_config",
-            full_name="google.firestore.admin.v1.Field.IndexConfig.uses_ancestor_config",
+            full_name="google.cloud.firestore.admin.v1.Field.IndexConfig.uses_ancestor_config",
             index=1,
             number=2,
             type=8,
@@ -85,7 +85,7 @@ _FIELD_INDEXCONFIG = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="ancestor_field",
-            full_name="google.firestore.admin.v1.Field.IndexConfig.ancestor_field",
+            full_name="google.cloud.firestore.admin.v1.Field.IndexConfig.ancestor_field",
             index=2,
             number=3,
             type=9,
@@ -103,7 +103,7 @@ _FIELD_INDEXCONFIG = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="reverting",
-            full_name="google.firestore.admin.v1.Field.IndexConfig.reverting",
+            full_name="google.cloud.firestore.admin.v1.Field.IndexConfig.reverting",
             index=3,
             number=4,
             type=8,
@@ -134,14 +134,14 @@ _FIELD_INDEXCONFIG = _descriptor.Descriptor(
 
 _FIELD = _descriptor.Descriptor(
     name="Field",
-    full_name="google.firestore.admin.v1.Field",
+    full_name="google.cloud.firestore.admin.v1.Field",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
-            full_name="google.firestore.admin.v1.Field.name",
+            full_name="google.cloud.firestore.admin.v1.Field.name",
             index=0,
             number=1,
             type=9,
@@ -159,7 +159,7 @@ _FIELD = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="index_config",
-            full_name="google.firestore.admin.v1.Field.index_config",
+            full_name="google.cloud.firestore.admin.v1.Field.index_config",
             index=1,
             number=2,
             type=11,
@@ -235,7 +235,7 @@ Field = _reflection.GeneratedProtocolMessageType(
             ``uses_ancestor_config`` will be ``true`` and ``reverting``
             will be ``false``.
     """,
-                # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.Field.IndexConfig)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.Field.IndexConfig)
             ),
         ),
         DESCRIPTOR=_FIELD,
@@ -276,7 +276,7 @@ Field = _reflection.GeneratedProtocolMessageType(
           ``ancestor_field``. To explicitly remove all indexes for this
           field, specify an index config with an empty list of indexes.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.Field)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.Field)
     ),
 )
 _sym_db.RegisterMessage(Field)

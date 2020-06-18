@@ -3,7 +3,8 @@
     {
       "git": {
         "name": ".",
-        "sha": "b1c5987c606a14874b412e70f93015e161e278d6"
+        "remote": "git@github.com:crwilcox/python-firestore.git",
+        "sha": "9638ecb1786baf4b7052f8900f8cdfab09858de3"
       }
     },
     {

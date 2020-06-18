@@ -23,13 +23,13 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore_v1beta1/proto/document.proto",
-    package="google.firestore.v1beta1",
+    package="google.cloud.firestore.v1beta1",
     syntax="proto3",
     serialized_options=_b(
-        "\n\034com.google.firestore.v1beta1B\rDocumentProtoP\001ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\242\002\004GCFS\252\002\036Google.Cloud.Firestore.V1Beta1\312\002\036Google\\Cloud\\Firestore\\V1beta1"
+        "\n\034com.google.cloud.firestore.v1beta1B\rDocumentProtoP\001ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\242\002\004GCFS\252\002\036Google.Cloud.Firestore.V1Beta1\312\002\036Google\\Cloud\\Firestore\\V1beta1"
     ),
     serialized_pb=_b(
-        '\n3google/cloud/firestore_v1beta1/proto/document.proto\x12\x18google.firestore.v1beta1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18google/type/latlng.proto\x1a\x1cgoogle/api/annotations.proto"\x8a\x02\n\x08\x44ocument\x12\x0c\n\x04name\x18\x01 \x01(\t\x12>\n\x06\x66ields\x18\x02 \x03(\x0b\x32..google.firestore.v1beta1.Document.FieldsEntry\x12/\n\x0b\x63reate_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12/\n\x0bupdate_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x1aN\n\x0b\x46ieldsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x1f.google.firestore.v1beta1.Value:\x02\x38\x01"\xb8\x03\n\x05Value\x12\x30\n\nnull_value\x18\x0b \x01(\x0e\x32\x1a.google.protobuf.NullValueH\x00\x12\x17\n\rboolean_value\x18\x01 \x01(\x08H\x00\x12\x17\n\rinteger_value\x18\x02 \x01(\x03H\x00\x12\x16\n\x0c\x64ouble_value\x18\x03 \x01(\x01H\x00\x12\x35\n\x0ftimestamp_value\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x16\n\x0cstring_value\x18\x11 \x01(\tH\x00\x12\x15\n\x0b\x62ytes_value\x18\x12 \x01(\x0cH\x00\x12\x19\n\x0freference_value\x18\x05 \x01(\tH\x00\x12.\n\x0fgeo_point_value\x18\x08 \x01(\x0b\x32\x13.google.type.LatLngH\x00\x12;\n\x0b\x61rray_value\x18\t \x01(\x0b\x32$.google.firestore.v1beta1.ArrayValueH\x00\x12\x37\n\tmap_value\x18\x06 \x01(\x0b\x32".google.firestore.v1beta1.MapValueH\x00\x42\x0c\n\nvalue_type"=\n\nArrayValue\x12/\n\x06values\x18\x01 \x03(\x0b\x32\x1f.google.firestore.v1beta1.Value"\x9a\x01\n\x08MapValue\x12>\n\x06\x66ields\x18\x01 \x03(\x0b\x32..google.firestore.v1beta1.MapValue.FieldsEntry\x1aN\n\x0b\x46ieldsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x1f.google.firestore.v1beta1.Value:\x02\x38\x01\x42\xbb\x01\n\x1c\x63om.google.firestore.v1beta1B\rDocumentProtoP\x01ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\xa2\x02\x04GCFS\xaa\x02\x1eGoogle.Cloud.Firestore.V1Beta1\xca\x02\x1eGoogle\\Cloud\\Firestore\\V1beta1b\x06proto3'
+        '\n3google/cloud/firestore_v1beta1/proto/document.proto\x12\x18google.cloud.firestore.v1beta1\x1a\x1cgoogle/protobuf/struct.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x18google/type/latlng.proto\x1a\x1cgoogle/api/annotations.proto"\x8a\x02\n\x08\x44ocument\x12\x0c\n\x04name\x18\x01 \x01(\t\x12>\n\x06\x66ields\x18\x02 \x03(\x0b\x32..google.cloud.firestore.v1beta1.Document.FieldsEntry\x12/\n\x0b\x63reate_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12/\n\x0bupdate_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x1aN\n\x0b\x46ieldsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x1f.google.cloud.firestore.v1beta1.Value:\x02\x38\x01"\xb8\x03\n\x05Value\x12\x30\n\nnull_value\x18\x0b \x01(\x0e\x32\x1a.google.protobuf.NullValueH\x00\x12\x17\n\rboolean_value\x18\x01 \x01(\x08H\x00\x12\x17\n\rinteger_value\x18\x02 \x01(\x03H\x00\x12\x16\n\x0c\x64ouble_value\x18\x03 \x01(\x01H\x00\x12\x35\n\x0ftimestamp_value\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x16\n\x0cstring_value\x18\x11 \x01(\tH\x00\x12\x15\n\x0b\x62ytes_value\x18\x12 \x01(\x0cH\x00\x12\x19\n\x0freference_value\x18\x05 \x01(\tH\x00\x12.\n\x0fgeo_point_value\x18\x08 \x01(\x0b\x32\x13.google.type.LatLngH\x00\x12;\n\x0b\x61rray_value\x18\t \x01(\x0b\x32$.google.cloud.firestore.v1beta1.ArrayValueH\x00\x12\x37\n\tmap_value\x18\x06 \x01(\x0b\x32".google.cloud.firestore.v1beta1.MapValueH\x00\x42\x0c\n\nvalue_type"=\n\nArrayValue\x12/\n\x06values\x18\x01 \x03(\x0b\x32\x1f.google.cloud.firestore.v1beta1.Value"\x9a\x01\n\x08MapValue\x12>\n\x06\x66ields\x18\x01 \x03(\x0b\x32..google.cloud.firestore.v1beta1.MapValue.FieldsEntry\x1aN\n\x0b\x46ieldsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12.\n\x05value\x18\x02 \x01(\x0b\x32\x1f.google.cloud.firestore.v1beta1.Value:\x02\x38\x01\x42\xbb\x01\n\x1c\x63om.google.cloud.firestore.v1beta1B\rDocumentProtoP\x01ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\xa2\x02\x04GCFS\xaa\x02\x1eGoogle.Cloud.Firestore.V1Beta1\xca\x02\x1eGoogle\\Cloud\\Firestore\\V1beta1b\x06proto3'
     ),
     dependencies=[
         google_dot_protobuf_dot_struct__pb2.DESCRIPTOR,
@@ -42,14 +42,14 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _DOCUMENT_FIELDSENTRY = _descriptor.Descriptor(
     name="FieldsEntry",
-    full_name="google.firestore.v1beta1.Document.FieldsEntry",
+    full_name="google.cloud.firestore.v1beta1.Document.FieldsEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="google.firestore.v1beta1.Document.FieldsEntry.key",
+            full_name="google.cloud.firestore.v1beta1.Document.FieldsEntry.key",
             index=0,
             number=1,
             type=9,
@@ -67,7 +67,7 @@ _DOCUMENT_FIELDSENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="google.firestore.v1beta1.Document.FieldsEntry.value",
+            full_name="google.cloud.firestore.v1beta1.Document.FieldsEntry.value",
             index=1,
             number=2,
             type=11,
@@ -98,14 +98,14 @@ _DOCUMENT_FIELDSENTRY = _descriptor.Descriptor(
 
 _DOCUMENT = _descriptor.Descriptor(
     name="Document",
-    full_name="google.firestore.v1beta1.Document",
+    full_name="google.cloud.firestore.v1beta1.Document",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
-            full_name="google.firestore.v1beta1.Document.name",
+            full_name="google.cloud.firestore.v1beta1.Document.name",
             index=0,
             number=1,
             type=9,
@@ -123,7 +123,7 @@ _DOCUMENT = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="fields",
-            full_name="google.firestore.v1beta1.Document.fields",
+            full_name="google.cloud.firestore.v1beta1.Document.fields",
             index=1,
             number=2,
             type=11,
@@ -141,7 +141,7 @@ _DOCUMENT = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="create_time",
-            full_name="google.firestore.v1beta1.Document.create_time",
+            full_name="google.cloud.firestore.v1beta1.Document.create_time",
             index=2,
             number=3,
             type=11,
@@ -159,7 +159,7 @@ _DOCUMENT = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="update_time",
-            full_name="google.firestore.v1beta1.Document.update_time",
+            full_name="google.cloud.firestore.v1beta1.Document.update_time",
             index=3,
             number=4,
             type=11,
@@ -191,14 +191,14 @@ _DOCUMENT = _descriptor.Descriptor(
 
 _VALUE = _descriptor.Descriptor(
     name="Value",
-    full_name="google.firestore.v1beta1.Value",
+    full_name="google.cloud.firestore.v1beta1.Value",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="null_value",
-            full_name="google.firestore.v1beta1.Value.null_value",
+            full_name="google.cloud.firestore.v1beta1.Value.null_value",
             index=0,
             number=11,
             type=14,
@@ -216,7 +216,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="boolean_value",
-            full_name="google.firestore.v1beta1.Value.boolean_value",
+            full_name="google.cloud.firestore.v1beta1.Value.boolean_value",
             index=1,
             number=1,
             type=8,
@@ -234,7 +234,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="integer_value",
-            full_name="google.firestore.v1beta1.Value.integer_value",
+            full_name="google.cloud.firestore.v1beta1.Value.integer_value",
             index=2,
             number=2,
             type=3,
@@ -252,7 +252,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="double_value",
-            full_name="google.firestore.v1beta1.Value.double_value",
+            full_name="google.cloud.firestore.v1beta1.Value.double_value",
             index=3,
             number=3,
             type=1,
@@ -270,7 +270,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="timestamp_value",
-            full_name="google.firestore.v1beta1.Value.timestamp_value",
+            full_name="google.cloud.firestore.v1beta1.Value.timestamp_value",
             index=4,
             number=10,
             type=11,
@@ -288,7 +288,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="string_value",
-            full_name="google.firestore.v1beta1.Value.string_value",
+            full_name="google.cloud.firestore.v1beta1.Value.string_value",
             index=5,
             number=17,
             type=9,
@@ -306,7 +306,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="bytes_value",
-            full_name="google.firestore.v1beta1.Value.bytes_value",
+            full_name="google.cloud.firestore.v1beta1.Value.bytes_value",
             index=6,
             number=18,
             type=12,
@@ -324,7 +324,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="reference_value",
-            full_name="google.firestore.v1beta1.Value.reference_value",
+            full_name="google.cloud.firestore.v1beta1.Value.reference_value",
             index=7,
             number=5,
             type=9,
@@ -342,7 +342,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="geo_point_value",
-            full_name="google.firestore.v1beta1.Value.geo_point_value",
+            full_name="google.cloud.firestore.v1beta1.Value.geo_point_value",
             index=8,
             number=8,
             type=11,
@@ -360,7 +360,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="array_value",
-            full_name="google.firestore.v1beta1.Value.array_value",
+            full_name="google.cloud.firestore.v1beta1.Value.array_value",
             index=9,
             number=9,
             type=11,
@@ -378,7 +378,7 @@ _VALUE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="map_value",
-            full_name="google.firestore.v1beta1.Value.map_value",
+            full_name="google.cloud.firestore.v1beta1.Value.map_value",
             index=10,
             number=6,
             type=11,
@@ -405,7 +405,7 @@ _VALUE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="value_type",
-            full_name="google.firestore.v1beta1.Value.value_type",
+            full_name="google.cloud.firestore.v1beta1.Value.value_type",
             index=0,
             containing_type=None,
             fields=[],
@@ -418,14 +418,14 @@ _VALUE = _descriptor.Descriptor(
 
 _ARRAYVALUE = _descriptor.Descriptor(
     name="ArrayValue",
-    full_name="google.firestore.v1beta1.ArrayValue",
+    full_name="google.cloud.firestore.v1beta1.ArrayValue",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="values",
-            full_name="google.firestore.v1beta1.ArrayValue.values",
+            full_name="google.cloud.firestore.v1beta1.ArrayValue.values",
             index=0,
             number=1,
             type=11,
@@ -457,14 +457,14 @@ _ARRAYVALUE = _descriptor.Descriptor(
 
 _MAPVALUE_FIELDSENTRY = _descriptor.Descriptor(
     name="FieldsEntry",
-    full_name="google.firestore.v1beta1.MapValue.FieldsEntry",
+    full_name="google.cloud.firestore.v1beta1.MapValue.FieldsEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="google.firestore.v1beta1.MapValue.FieldsEntry.key",
+            full_name="google.cloud.firestore.v1beta1.MapValue.FieldsEntry.key",
             index=0,
             number=1,
             type=9,
@@ -482,7 +482,7 @@ _MAPVALUE_FIELDSENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="google.firestore.v1beta1.MapValue.FieldsEntry.value",
+            full_name="google.cloud.firestore.v1beta1.MapValue.FieldsEntry.value",
             index=1,
             number=2,
             type=11,
@@ -513,14 +513,14 @@ _MAPVALUE_FIELDSENTRY = _descriptor.Descriptor(
 
 _MAPVALUE = _descriptor.Descriptor(
     name="MapValue",
-    full_name="google.firestore.v1beta1.MapValue",
+    full_name="google.cloud.firestore.v1beta1.MapValue",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="fields",
-            full_name="google.firestore.v1beta1.MapValue.fields",
+            full_name="google.cloud.firestore.v1beta1.MapValue.fields",
             index=0,
             number=1,
             type=11,
@@ -643,7 +643,7 @@ Document = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_DOCUMENT_FIELDSENTRY,
                 __module__="google.cloud.firestore_v1beta1.proto.document_pb2"
-                # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Document.FieldsEntry)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1beta1.Document.FieldsEntry)
             ),
         ),
         DESCRIPTOR=_DOCUMENT,
@@ -688,7 +688,7 @@ Document = _reflection.GeneratedProtocolMessageType(
           can also be compared to values from other documents and the
           ``read_time`` of a query.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Document)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1beta1.Document)
     ),
 )
 _sym_db.RegisterMessage(Document)
@@ -736,7 +736,7 @@ Value = _reflection.GeneratedProtocolMessageType(
       map_value:
           A map value.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Value)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1beta1.Value)
     ),
 )
 _sym_db.RegisterMessage(Value)
@@ -754,7 +754,7 @@ ArrayValue = _reflection.GeneratedProtocolMessageType(
       values:
           Values in the array.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ArrayValue)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1beta1.ArrayValue)
     ),
 )
 _sym_db.RegisterMessage(ArrayValue)
@@ -769,7 +769,7 @@ MapValue = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_MAPVALUE_FIELDSENTRY,
                 __module__="google.cloud.firestore_v1beta1.proto.document_pb2"
-                # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.MapValue.FieldsEntry)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1beta1.MapValue.FieldsEntry)
             ),
         ),
         DESCRIPTOR=_MAPVALUE,
@@ -785,7 +785,7 @@ MapValue = _reflection.GeneratedProtocolMessageType(
           documented contexts. The map keys, represented as UTF-8, must
           not exceed 1,500 bytes and cannot be empty.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.MapValue)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1beta1.MapValue)
     ),
 )
 _sym_db.RegisterMessage(MapValue)

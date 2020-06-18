@@ -21,13 +21,13 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore_v1/proto/common.proto",
-    package="google.firestore.v1",
+    package="google.cloud.firestore.v1",
     syntax="proto3",
     serialized_options=_b(
-        "\n\027com.google.firestore.v1B\013CommonProtoP\001Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\242\002\004GCFS\252\002\031Google.Cloud.Firestore.V1\312\002\031Google\\Cloud\\Firestore\\V1"
+        "\n\027com.google.cloud.firestore.v1B\013CommonProtoP\001Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\242\002\004GCFS\252\002\031Google.Cloud.Firestore.V1\312\002\031Google\\Cloud\\Firestore\\V1"
     ),
     serialized_pb=_b(
-        '\n,google/cloud/firestore_v1/proto/common.proto\x12\x13google.firestore.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto"#\n\x0c\x44ocumentMask\x12\x13\n\x0b\x66ield_paths\x18\x01 \x03(\t"e\n\x0cPrecondition\x12\x10\n\x06\x65xists\x18\x01 \x01(\x08H\x00\x12\x31\n\x0bupdate_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x10\n\x0e\x63ondition_type"\xa9\x02\n\x12TransactionOptions\x12\x45\n\tread_only\x18\x02 \x01(\x0b\x32\x30.google.firestore.v1.TransactionOptions.ReadOnlyH\x00\x12G\n\nread_write\x18\x03 \x01(\x0b\x32\x31.google.firestore.v1.TransactionOptions.ReadWriteH\x00\x1a&\n\tReadWrite\x12\x19\n\x11retry_transaction\x18\x01 \x01(\x0c\x1aS\n\x08ReadOnly\x12/\n\tread_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selectorB\x06\n\x04modeB\xa5\x01\n\x17\x63om.google.firestore.v1B\x0b\x43ommonProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3'
+        '\n,google/cloud/firestore_v1/proto/common.proto\x12\x13google.cloud.firestore.v1\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto"#\n\x0c\x44ocumentMask\x12\x13\n\x0b\x66ield_paths\x18\x01 \x03(\t"e\n\x0cPrecondition\x12\x10\n\x06\x65xists\x18\x01 \x01(\x08H\x00\x12\x31\n\x0bupdate_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x10\n\x0e\x63ondition_type"\xa9\x02\n\x12TransactionOptions\x12\x45\n\tread_only\x18\x02 \x01(\x0b\x32\x30.google.cloud.firestore.v1.TransactionOptions.ReadOnlyH\x00\x12G\n\nread_write\x18\x03 \x01(\x0b\x32\x31.google.cloud.firestore.v1.TransactionOptions.ReadWriteH\x00\x1a&\n\tReadWrite\x12\x19\n\x11retry_transaction\x18\x01 \x01(\x0c\x1aS\n\x08ReadOnly\x12/\n\tread_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selectorB\x06\n\x04modeB\xa5\x01\n\x17\x63om.google.cloud.firestore.v1B\x0b\x43ommonProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3'
     ),
     dependencies=[
         google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,
@@ -38,14 +38,14 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _DOCUMENTMASK = _descriptor.Descriptor(
     name="DocumentMask",
-    full_name="google.firestore.v1.DocumentMask",
+    full_name="google.cloud.firestore.v1.DocumentMask",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="field_paths",
-            full_name="google.firestore.v1.DocumentMask.field_paths",
+            full_name="google.cloud.firestore.v1.DocumentMask.field_paths",
             index=0,
             number=1,
             type=9,
@@ -77,14 +77,14 @@ _DOCUMENTMASK = _descriptor.Descriptor(
 
 _PRECONDITION = _descriptor.Descriptor(
     name="Precondition",
-    full_name="google.firestore.v1.Precondition",
+    full_name="google.cloud.firestore.v1.Precondition",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="exists",
-            full_name="google.firestore.v1.Precondition.exists",
+            full_name="google.cloud.firestore.v1.Precondition.exists",
             index=0,
             number=1,
             type=8,
@@ -102,7 +102,7 @@ _PRECONDITION = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="update_time",
-            full_name="google.firestore.v1.Precondition.update_time",
+            full_name="google.cloud.firestore.v1.Precondition.update_time",
             index=1,
             number=2,
             type=11,
@@ -129,7 +129,7 @@ _PRECONDITION = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="condition_type",
-            full_name="google.firestore.v1.Precondition.condition_type",
+            full_name="google.cloud.firestore.v1.Precondition.condition_type",
             index=0,
             containing_type=None,
             fields=[],
@@ -142,14 +142,14 @@ _PRECONDITION = _descriptor.Descriptor(
 
 _TRANSACTIONOPTIONS_READWRITE = _descriptor.Descriptor(
     name="ReadWrite",
-    full_name="google.firestore.v1.TransactionOptions.ReadWrite",
+    full_name="google.cloud.firestore.v1.TransactionOptions.ReadWrite",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="retry_transaction",
-            full_name="google.firestore.v1.TransactionOptions.ReadWrite.retry_transaction",
+            full_name="google.cloud.firestore.v1.TransactionOptions.ReadWrite.retry_transaction",
             index=0,
             number=1,
             type=12,
@@ -180,14 +180,14 @@ _TRANSACTIONOPTIONS_READWRITE = _descriptor.Descriptor(
 
 _TRANSACTIONOPTIONS_READONLY = _descriptor.Descriptor(
     name="ReadOnly",
-    full_name="google.firestore.v1.TransactionOptions.ReadOnly",
+    full_name="google.cloud.firestore.v1.TransactionOptions.ReadOnly",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.TransactionOptions.ReadOnly.read_time",
+            full_name="google.cloud.firestore.v1.TransactionOptions.ReadOnly.read_time",
             index=0,
             number=2,
             type=11,
@@ -214,7 +214,7 @@ _TRANSACTIONOPTIONS_READONLY = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="consistency_selector",
-            full_name="google.firestore.v1.TransactionOptions.ReadOnly.consistency_selector",
+            full_name="google.cloud.firestore.v1.TransactionOptions.ReadOnly.consistency_selector",
             index=0,
             containing_type=None,
             fields=[],
@@ -226,14 +226,14 @@ _TRANSACTIONOPTIONS_READONLY = _descriptor.Descriptor(
 
 _TRANSACTIONOPTIONS = _descriptor.Descriptor(
     name="TransactionOptions",
-    full_name="google.firestore.v1.TransactionOptions",
+    full_name="google.cloud.firestore.v1.TransactionOptions",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="read_only",
-            full_name="google.firestore.v1.TransactionOptions.read_only",
+            full_name="google.cloud.firestore.v1.TransactionOptions.read_only",
             index=0,
             number=2,
             type=11,
@@ -251,7 +251,7 @@ _TRANSACTIONOPTIONS = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_write",
-            full_name="google.firestore.v1.TransactionOptions.read_write",
+            full_name="google.cloud.firestore.v1.TransactionOptions.read_write",
             index=1,
             number=3,
             type=11,
@@ -278,7 +278,7 @@ _TRANSACTIONOPTIONS = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="mode",
-            full_name="google.firestore.v1.TransactionOptions.mode",
+            full_name="google.cloud.firestore.v1.TransactionOptions.mode",
             index=0,
             containing_type=None,
             fields=[],
@@ -346,17 +346,17 @@ DocumentMask = _reflection.GeneratedProtocolMessageType(
         __doc__="""A set of field paths on a document. Used to restrict a get
   or update operation on a document to a subset of its fields. This is
   different from standard field masks, as this is always scoped to a
-  [Document][google.firestore.v1.Document], and takes in account the
-  dynamic nature of [Value][google.firestore.v1.Value].
+  [Document][google.cloud.firestore.v1.Document], and takes in account the
+  dynamic nature of [Value][google.cloud.firestore.v1.Value].
   
   
   Attributes:
       field_paths:
           The list of field paths in the mask. See
-          [Document.fields][google.firestore.v1.Document.fields] for a
+          [Document.fields][google.cloud.firestore.v1.Document.fields] for a
           field path syntax reference.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.DocumentMask)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.DocumentMask)
     ),
 )
 _sym_db.RegisterMessage(DocumentMask)
@@ -381,7 +381,7 @@ Precondition = _reflection.GeneratedProtocolMessageType(
           When set, the target document must exist and have been last
           updated at that time.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.Precondition)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.Precondition)
     ),
 )
 _sym_db.RegisterMessage(Precondition)
@@ -404,7 +404,7 @@ TransactionOptions = _reflection.GeneratedProtocolMessageType(
         retry_transaction:
             An optional transaction to retry.
     """,
-                # @@protoc_insertion_point(class_scope:google.firestore.v1.TransactionOptions.ReadWrite)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.TransactionOptions.ReadWrite)
             ),
         ),
         ReadOnly=_reflection.GeneratedProtocolMessageType(
@@ -425,7 +425,7 @@ TransactionOptions = _reflection.GeneratedProtocolMessageType(
             Reads documents at the given time. This may not be older than
             60 seconds.
     """,
-                # @@protoc_insertion_point(class_scope:google.firestore.v1.TransactionOptions.ReadOnly)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.TransactionOptions.ReadOnly)
             ),
         ),
         DESCRIPTOR=_TRANSACTIONOPTIONS,
@@ -442,7 +442,7 @@ TransactionOptions = _reflection.GeneratedProtocolMessageType(
           The transaction can be used for both read and write
           operations.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.TransactionOptions)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.TransactionOptions)
     ),
 )
 _sym_db.RegisterMessage(TransactionOptions)

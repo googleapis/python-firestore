@@ -28,10 +28,10 @@ from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore_v1beta1/proto/admin/firestore_admin.proto",
-    package="google.firestore.admin.v1beta1",
+    package="google.cloud.firestore.admin.v1beta1",
     syntax="proto3",
     serialized_pb=_b(
-        '\n@google/cloud/firestore_v1beta1/proto/admin/firestore_admin.proto\x12\x1egoogle.firestore.admin.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a\x36google/cloud/firestore_v1beta1/proto/admin/index.proto\x1a#google/longrunning/operations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto"\x80\x03\n\x16IndexOperationMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05index\x18\x03 \x01(\t\x12\\\n\x0eoperation_type\x18\x04 \x01(\x0e\x32\x44.google.firestore.admin.v1beta1.IndexOperationMetadata.OperationType\x12\x11\n\tcancelled\x18\x05 \x01(\x08\x12\x43\n\x11\x64ocument_progress\x18\x06 \x01(\x0b\x32(.google.firestore.admin.v1beta1.Progress"C\n\rOperationType\x12\x1e\n\x1aOPERATION_TYPE_UNSPECIFIED\x10\x00\x12\x12\n\x0e\x43REATING_INDEX\x10\x01":\n\x08Progress\x12\x16\n\x0ework_completed\x18\x01 \x01(\x03\x12\x16\n\x0ework_estimated\x18\x02 \x01(\x03"Z\n\x12\x43reateIndexRequest\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12\x34\n\x05index\x18\x02 \x01(\x0b\x32%.google.firestore.admin.v1beta1.Index"\x1f\n\x0fGetIndexRequest\x12\x0c\n\x04name\x18\x01 \x01(\t"[\n\x12ListIndexesRequest\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t""\n\x12\x44\x65leteIndexRequest\x12\x0c\n\x04name\x18\x01 \x01(\t"f\n\x13ListIndexesResponse\x12\x36\n\x07indexes\x18\x01 \x03(\x0b\x32%.google.firestore.admin.v1beta1.Index\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t2\x9c\x05\n\x0e\x46irestoreAdmin\x12\xa1\x01\n\x0b\x43reateIndex\x12\x32.google.firestore.admin.v1beta1.CreateIndexRequest\x1a\x1d.google.longrunning.Operation"?\x82\xd3\xe4\x93\x02\x39"0/v1beta1/{parent=projects/*/databases/*}/indexes:\x05index\x12\xb0\x01\n\x0bListIndexes\x12\x32.google.firestore.admin.v1beta1.ListIndexesRequest\x1a\x33.google.firestore.admin.v1beta1.ListIndexesResponse"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1beta1/{parent=projects/*/databases/*}/indexes\x12\x9c\x01\n\x08GetIndex\x12/.google.firestore.admin.v1beta1.GetIndexRequest\x1a%.google.firestore.admin.v1beta1.Index"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1beta1/{name=projects/*/databases/*/indexes/*}\x12\x93\x01\n\x0b\x44\x65leteIndex\x12\x32.google.firestore.admin.v1beta1.DeleteIndexRequest\x1a\x16.google.protobuf.Empty"8\x82\xd3\xe4\x93\x02\x32*0/v1beta1/{name=projects/*/databases/*/indexes/*}B\xae\x01\n"com.google.firestore.admin.v1beta1B\x13\x46irestoreAdminProtoP\x01ZCgoogle.golang.org/genproto/googleapis/firestore/admin/v1beta1;admin\xa2\x02\x04GCFS\xaa\x02$Google.Cloud.Firestore.Admin.V1Beta1b\x06proto3'
+        '\n@google/cloud/firestore_v1beta1/proto/admin/firestore_admin.proto\x12\x1egoogle.cloud.firestore.admin.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a\x36google/cloud/firestore_v1beta1/proto/admin/index.proto\x1a#google/longrunning/operations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto"\x80\x03\n\x16IndexOperationMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05index\x18\x03 \x01(\t\x12\\\n\x0eoperation_type\x18\x04 \x01(\x0e\x32\x44.google.cloud.firestore.admin.v1beta1.IndexOperationMetadata.OperationType\x12\x11\n\tcancelled\x18\x05 \x01(\x08\x12\x43\n\x11\x64ocument_progress\x18\x06 \x01(\x0b\x32(.google.cloud.firestore.admin.v1beta1.Progress"C\n\rOperationType\x12\x1e\n\x1aOPERATION_TYPE_UNSPECIFIED\x10\x00\x12\x12\n\x0e\x43REATING_INDEX\x10\x01":\n\x08Progress\x12\x16\n\x0ework_completed\x18\x01 \x01(\x03\x12\x16\n\x0ework_estimated\x18\x02 \x01(\x03"Z\n\x12\x43reateIndexRequest\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12\x34\n\x05index\x18\x02 \x01(\x0b\x32%.google.cloud.firestore.admin.v1beta1.Index"\x1f\n\x0fGetIndexRequest\x12\x0c\n\x04name\x18\x01 \x01(\t"[\n\x12ListIndexesRequest\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t""\n\x12\x44\x65leteIndexRequest\x12\x0c\n\x04name\x18\x01 \x01(\t"f\n\x13ListIndexesResponse\x12\x36\n\x07indexes\x18\x01 \x03(\x0b\x32%.google.cloud.firestore.admin.v1beta1.Index\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t2\x9c\x05\n\x0e\x46irestoreAdmin\x12\xa1\x01\n\x0b\x43reateIndex\x12\x32.google.cloud.firestore.admin.v1beta1.CreateIndexRequest\x1a\x1d.google.longrunning.Operation"?\x82\xd3\xe4\x93\x02\x39"0/v1beta1/{parent=projects/*/databases/*}/indexes:\x05index\x12\xb0\x01\n\x0bListIndexes\x12\x32.google.cloud.firestore.admin.v1beta1.ListIndexesRequest\x1a\x33.google.cloud.firestore.admin.v1beta1.ListIndexesResponse"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1beta1/{parent=projects/*/databases/*}/indexes\x12\x9c\x01\n\x08GetIndex\x12/.google.cloud.firestore.admin.v1beta1.GetIndexRequest\x1a%.google.cloud.firestore.admin.v1beta1.Index"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1beta1/{name=projects/*/databases/*/indexes/*}\x12\x93\x01\n\x0b\x44\x65leteIndex\x12\x32.google.cloud.firestore.admin.v1beta1.DeleteIndexRequest\x1a\x16.google.protobuf.Empty"8\x82\xd3\xe4\x93\x02\x32*0/v1beta1/{name=projects/*/databases/*/indexes/*}B\xae\x01\n"com.google.cloud.firestore.admin.v1beta1B\x13\x46irestoreAdminProtoP\x01ZCgoogle.golang.org/genproto/googleapis/firestore/admin/v1beta1;admin\xa2\x02\x04GCFS\xaa\x02$Google.Cloud.Firestore.Admin.V1Beta1b\x06proto3'
     ),
     dependencies=[
         google_dot_api_dot_annotations__pb2.DESCRIPTOR,
@@ -45,7 +45,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _INDEXOPERATIONMETADATA_OPERATIONTYPE = _descriptor.EnumDescriptor(
     name="OperationType",
-    full_name="google.firestore.admin.v1beta1.IndexOperationMetadata.OperationType",
+    full_name="google.cloud.firestore.admin.v1beta1.IndexOperationMetadata.OperationType",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -70,14 +70,14 @@ _sym_db.RegisterEnumDescriptor(_INDEXOPERATIONMETADATA_OPERATIONTYPE)
 
 _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
     name="IndexOperationMetadata",
-    full_name="google.firestore.admin.v1beta1.IndexOperationMetadata",
+    full_name="google.cloud.firestore.admin.v1beta1.IndexOperationMetadata",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
-            full_name="google.firestore.admin.v1beta1.IndexOperationMetadata.start_time",
+            full_name="google.cloud.firestore.admin.v1beta1.IndexOperationMetadata.start_time",
             index=0,
             number=1,
             type=11,
@@ -94,7 +94,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
-            full_name="google.firestore.admin.v1beta1.IndexOperationMetadata.end_time",
+            full_name="google.cloud.firestore.admin.v1beta1.IndexOperationMetadata.end_time",
             index=1,
             number=2,
             type=11,
@@ -111,7 +111,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="index",
-            full_name="google.firestore.admin.v1beta1.IndexOperationMetadata.index",
+            full_name="google.cloud.firestore.admin.v1beta1.IndexOperationMetadata.index",
             index=2,
             number=3,
             type=9,
@@ -128,7 +128,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="operation_type",
-            full_name="google.firestore.admin.v1beta1.IndexOperationMetadata.operation_type",
+            full_name="google.cloud.firestore.admin.v1beta1.IndexOperationMetadata.operation_type",
             index=3,
             number=4,
             type=14,
@@ -145,7 +145,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="cancelled",
-            full_name="google.firestore.admin.v1beta1.IndexOperationMetadata.cancelled",
+            full_name="google.cloud.firestore.admin.v1beta1.IndexOperationMetadata.cancelled",
             index=4,
             number=5,
             type=8,
@@ -162,7 +162,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="document_progress",
-            full_name="google.firestore.admin.v1beta1.IndexOperationMetadata.document_progress",
+            full_name="google.cloud.firestore.admin.v1beta1.IndexOperationMetadata.document_progress",
             index=5,
             number=6,
             type=11,
@@ -193,14 +193,14 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
 
 _PROGRESS = _descriptor.Descriptor(
     name="Progress",
-    full_name="google.firestore.admin.v1beta1.Progress",
+    full_name="google.cloud.firestore.admin.v1beta1.Progress",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="work_completed",
-            full_name="google.firestore.admin.v1beta1.Progress.work_completed",
+            full_name="google.cloud.firestore.admin.v1beta1.Progress.work_completed",
             index=0,
             number=1,
             type=3,
@@ -217,7 +217,7 @@ _PROGRESS = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="work_estimated",
-            full_name="google.firestore.admin.v1beta1.Progress.work_estimated",
+            full_name="google.cloud.firestore.admin.v1beta1.Progress.work_estimated",
             index=1,
             number=2,
             type=3,
@@ -248,14 +248,14 @@ _PROGRESS = _descriptor.Descriptor(
 
 _CREATEINDEXREQUEST = _descriptor.Descriptor(
     name="CreateIndexRequest",
-    full_name="google.firestore.admin.v1beta1.CreateIndexRequest",
+    full_name="google.cloud.firestore.admin.v1beta1.CreateIndexRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
-            full_name="google.firestore.admin.v1beta1.CreateIndexRequest.parent",
+            full_name="google.cloud.firestore.admin.v1beta1.CreateIndexRequest.parent",
             index=0,
             number=1,
             type=9,
@@ -272,7 +272,7 @@ _CREATEINDEXREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="index",
-            full_name="google.firestore.admin.v1beta1.CreateIndexRequest.index",
+            full_name="google.cloud.firestore.admin.v1beta1.CreateIndexRequest.index",
             index=1,
             number=2,
             type=11,
@@ -303,14 +303,14 @@ _CREATEINDEXREQUEST = _descriptor.Descriptor(
 
 _GETINDEXREQUEST = _descriptor.Descriptor(
     name="GetIndexRequest",
-    full_name="google.firestore.admin.v1beta1.GetIndexRequest",
+    full_name="google.cloud.firestore.admin.v1beta1.GetIndexRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
-            full_name="google.firestore.admin.v1beta1.GetIndexRequest.name",
+            full_name="google.cloud.firestore.admin.v1beta1.GetIndexRequest.name",
             index=0,
             number=1,
             type=9,
@@ -341,14 +341,14 @@ _GETINDEXREQUEST = _descriptor.Descriptor(
 
 _LISTINDEXESREQUEST = _descriptor.Descriptor(
     name="ListIndexesRequest",
-    full_name="google.firestore.admin.v1beta1.ListIndexesRequest",
+    full_name="google.cloud.firestore.admin.v1beta1.ListIndexesRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
-            full_name="google.firestore.admin.v1beta1.ListIndexesRequest.parent",
+            full_name="google.cloud.firestore.admin.v1beta1.ListIndexesRequest.parent",
             index=0,
             number=1,
             type=9,
@@ -365,7 +365,7 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="filter",
-            full_name="google.firestore.admin.v1beta1.ListIndexesRequest.filter",
+            full_name="google.cloud.firestore.admin.v1beta1.ListIndexesRequest.filter",
             index=1,
             number=2,
             type=9,
@@ -382,7 +382,7 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="page_size",
-            full_name="google.firestore.admin.v1beta1.ListIndexesRequest.page_size",
+            full_name="google.cloud.firestore.admin.v1beta1.ListIndexesRequest.page_size",
             index=2,
             number=3,
             type=5,
@@ -399,7 +399,7 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="page_token",
-            full_name="google.firestore.admin.v1beta1.ListIndexesRequest.page_token",
+            full_name="google.cloud.firestore.admin.v1beta1.ListIndexesRequest.page_token",
             index=3,
             number=4,
             type=9,
@@ -430,14 +430,14 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
 
 _DELETEINDEXREQUEST = _descriptor.Descriptor(
     name="DeleteIndexRequest",
-    full_name="google.firestore.admin.v1beta1.DeleteIndexRequest",
+    full_name="google.cloud.firestore.admin.v1beta1.DeleteIndexRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
-            full_name="google.firestore.admin.v1beta1.DeleteIndexRequest.name",
+            full_name="google.cloud.firestore.admin.v1beta1.DeleteIndexRequest.name",
             index=0,
             number=1,
             type=9,
@@ -468,14 +468,14 @@ _DELETEINDEXREQUEST = _descriptor.Descriptor(
 
 _LISTINDEXESRESPONSE = _descriptor.Descriptor(
     name="ListIndexesResponse",
-    full_name="google.firestore.admin.v1beta1.ListIndexesResponse",
+    full_name="google.cloud.firestore.admin.v1beta1.ListIndexesResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="indexes",
-            full_name="google.firestore.admin.v1beta1.ListIndexesResponse.indexes",
+            full_name="google.cloud.firestore.admin.v1beta1.ListIndexesResponse.indexes",
             index=0,
             number=1,
             type=11,
@@ -492,7 +492,7 @@ _LISTINDEXESRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="next_page_token",
-            full_name="google.firestore.admin.v1beta1.ListIndexesResponse.next_page_token",
+            full_name="google.cloud.firestore.admin.v1beta1.ListIndexesResponse.next_page_token",
             index=1,
             number=2,
             type=9,
@@ -581,7 +581,7 @@ IndexOperationMetadata = _reflection.GeneratedProtocolMessageType(
           Progress of the existing operation, measured in number of
           documents.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.IndexOperationMetadata)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.IndexOperationMetadata)
     ),
 )
 _sym_db.RegisterMessage(IndexOperationMetadata)
@@ -604,7 +604,7 @@ Progress = _reflection.GeneratedProtocolMessageType(
           the work estimate is unavailable. May change as work
           progresses.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.Progress)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.Progress)
     ),
 )
 _sym_db.RegisterMessage(Progress)
@@ -616,7 +616,7 @@ CreateIndexRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_CREATEINDEXREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.admin.firestore_admin_pb2",
         __doc__="""The request for
-  [FirestoreAdmin.CreateIndex][google.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
+  [FirestoreAdmin.CreateIndex][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
   
   
   Attributes:
@@ -628,7 +628,7 @@ CreateIndexRequest = _reflection.GeneratedProtocolMessageType(
           specified. Certain single field indexes cannot be created or
           deleted.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.CreateIndexRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.CreateIndexRequest)
     ),
 )
 _sym_db.RegisterMessage(CreateIndexRequest)
@@ -640,7 +640,7 @@ GetIndexRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_GETINDEXREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.admin.firestore_admin_pb2",
         __doc__="""The request for
-  [FirestoreAdmin.GetIndex][google.firestore.admin.v1beta1.FirestoreAdmin.GetIndex].
+  [FirestoreAdmin.GetIndex][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.GetIndex].
   
   
   Attributes:
@@ -648,7 +648,7 @@ GetIndexRequest = _reflection.GeneratedProtocolMessageType(
           The name of the index. For example: ``projects/{project_id}/da
           tabases/{database_id}/indexes/{index_id}``
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.GetIndexRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.GetIndexRequest)
     ),
 )
 _sym_db.RegisterMessage(GetIndexRequest)
@@ -660,7 +660,7 @@ ListIndexesRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_LISTINDEXESREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.admin.firestore_admin_pb2",
         __doc__="""The request for
-  [FirestoreAdmin.ListIndexes][google.firestore.admin.v1beta1.FirestoreAdmin.ListIndexes].
+  [FirestoreAdmin.ListIndexes][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.ListIndexes].
   
   
   Attributes:
@@ -672,7 +672,7 @@ ListIndexesRequest = _reflection.GeneratedProtocolMessageType(
       page_token:
           The standard List page token.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.ListIndexesRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.ListIndexesRequest)
     ),
 )
 _sym_db.RegisterMessage(ListIndexesRequest)
@@ -684,7 +684,7 @@ DeleteIndexRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_DELETEINDEXREQUEST,
         __module__="google.cloud.firestore_v1beta1.proto.admin.firestore_admin_pb2",
         __doc__="""The request for
-  [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex].
+  [FirestoreAdmin.DeleteIndex][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex].
   
   
   Attributes:
@@ -692,7 +692,7 @@ DeleteIndexRequest = _reflection.GeneratedProtocolMessageType(
           The index name. For example: ``projects/{project_id}/databases
           /{database_id}/indexes/{index_id}``
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.DeleteIndexRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.DeleteIndexRequest)
     ),
 )
 _sym_db.RegisterMessage(DeleteIndexRequest)
@@ -704,7 +704,7 @@ ListIndexesResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_LISTINDEXESRESPONSE,
         __module__="google.cloud.firestore_v1beta1.proto.admin.firestore_admin_pb2",
         __doc__="""The response for
-  [FirestoreAdmin.ListIndexes][google.firestore.admin.v1beta1.FirestoreAdmin.ListIndexes].
+  [FirestoreAdmin.ListIndexes][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.ListIndexes].
   
   
   Attributes:
@@ -713,7 +713,7 @@ ListIndexesResponse = _reflection.GeneratedProtocolMessageType(
       next_page_token:
           The standard List next-page token.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1beta1.ListIndexesResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1beta1.ListIndexesResponse)
     ),
 )
 _sym_db.RegisterMessage(ListIndexesResponse)
@@ -723,13 +723,13 @@ DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(
     descriptor_pb2.FileOptions(),
     _b(
-        '\n"com.google.firestore.admin.v1beta1B\023FirestoreAdminProtoP\001ZCgoogle.golang.org/genproto/googleapis/firestore/admin/v1beta1;admin\242\002\004GCFS\252\002$Google.Cloud.Firestore.Admin.V1Beta1'
+        '\n"com.google.cloud.firestore.admin.v1beta1B\023FirestoreAdminProtoP\001ZCgoogle.golang.org/genproto/googleapis/firestore/admin/v1beta1;admin\242\002\004GCFS\252\002$Google.Cloud.Firestore.Admin.V1Beta1'
     ),
 )
 
 _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
     name="FirestoreAdmin",
-    full_name="google.firestore.admin.v1beta1.FirestoreAdmin",
+    full_name="google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
     file=DESCRIPTOR,
     index=0,
     options=None,
@@ -738,7 +738,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
     methods=[
         _descriptor.MethodDescriptor(
             name="CreateIndex",
-            full_name="google.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex",
+            full_name="google.cloud.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex",
             index=0,
             containing_service=None,
             input_type=_CREATEINDEXREQUEST,
@@ -752,7 +752,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="ListIndexes",
-            full_name="google.firestore.admin.v1beta1.FirestoreAdmin.ListIndexes",
+            full_name="google.cloud.firestore.admin.v1beta1.FirestoreAdmin.ListIndexes",
             index=1,
             containing_service=None,
             input_type=_LISTINDEXESREQUEST,
@@ -766,7 +766,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="GetIndex",
-            full_name="google.firestore.admin.v1beta1.FirestoreAdmin.GetIndex",
+            full_name="google.cloud.firestore.admin.v1beta1.FirestoreAdmin.GetIndex",
             index=2,
             containing_service=None,
             input_type=_GETINDEXREQUEST,
@@ -780,7 +780,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="DeleteIndex",
-            full_name="google.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex",
+            full_name="google.cloud.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex",
             index=3,
             containing_service=None,
             input_type=_DELETEINDEXREQUEST,
@@ -860,22 +860,22 @@ try:
         channel: A grpc.Channel.
       """
             self.CreateIndex = channel.unary_unary(
-                "/google.firestore.admin.v1beta1.FirestoreAdmin/CreateIndex",
+                "/google.cloud.firestore.admin.v1beta1.FirestoreAdmin/CreateIndex",
                 request_serializer=CreateIndexRequest.SerializeToString,
                 response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
             )
             self.ListIndexes = channel.unary_unary(
-                "/google.firestore.admin.v1beta1.FirestoreAdmin/ListIndexes",
+                "/google.cloud.firestore.admin.v1beta1.FirestoreAdmin/ListIndexes",
                 request_serializer=ListIndexesRequest.SerializeToString,
                 response_deserializer=ListIndexesResponse.FromString,
             )
             self.GetIndex = channel.unary_unary(
-                "/google.firestore.admin.v1beta1.FirestoreAdmin/GetIndex",
+                "/google.cloud.firestore.admin.v1beta1.FirestoreAdmin/GetIndex",
                 request_serializer=GetIndexRequest.SerializeToString,
                 response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_index__pb2.Index.FromString,
             )
             self.DeleteIndex = channel.unary_unary(
-                "/google.firestore.admin.v1beta1.FirestoreAdmin/DeleteIndex",
+                "/google.cloud.firestore.admin.v1beta1.FirestoreAdmin/DeleteIndex",
                 request_serializer=DeleteIndexRequest.SerializeToString,
                 response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             )
@@ -936,8 +936,8 @@ try:
       During creation, the process could result in an error, in which case the
       index will move to the `ERROR` state. The process can be recovered by
       fixing the data that caused the error, removing the index with
-      [delete][google.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex], then re-creating the index with
-      [create][google.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
+      [delete][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex], then re-creating the index with
+      [create][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
 
       Indexes with a single field cannot be created.
       """
@@ -990,7 +990,7 @@ try:
             ),
         }
         generic_handler = grpc.method_handlers_generic_handler(
-            "google.firestore.admin.v1beta1.FirestoreAdmin", rpc_method_handlers
+            "google.cloud.firestore.admin.v1beta1.FirestoreAdmin", rpc_method_handlers
         )
         server.add_generic_rpc_handlers((generic_handler,))
 
@@ -1056,8 +1056,8 @@ try:
       During creation, the process could result in an error, in which case the
       index will move to the `ERROR` state. The process can be recovered by
       fixing the data that caused the error, removing the index with
-      [delete][google.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex], then re-creating the index with
-      [create][google.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
+      [delete][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex], then re-creating the index with
+      [create][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
 
       Indexes with a single field cannot be created.
       """
@@ -1147,8 +1147,8 @@ try:
       During creation, the process could result in an error, in which case the
       index will move to the `ERROR` state. The process can be recovered by
       fixing the data that caused the error, removing the index with
-      [delete][google.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex], then re-creating the index with
-      [create][google.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
+      [delete][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex], then re-creating the index with
+      [create][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
 
       Indexes with a single field cannot be created.
       """
@@ -1208,55 +1208,55 @@ try:
     generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
         request_deserializers = {
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "CreateIndex",
             ): CreateIndexRequest.FromString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "DeleteIndex",
             ): DeleteIndexRequest.FromString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "GetIndex",
             ): GetIndexRequest.FromString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "ListIndexes",
             ): ListIndexesRequest.FromString,
         }
         response_serializers = {
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "CreateIndex",
             ): google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "DeleteIndex",
             ): google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "GetIndex",
             ): google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_index__pb2.Index.SerializeToString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "ListIndexes",
             ): ListIndexesResponse.SerializeToString,
         }
         method_implementations = {
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "CreateIndex",
             ): face_utilities.unary_unary_inline(servicer.CreateIndex),
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "DeleteIndex",
             ): face_utilities.unary_unary_inline(servicer.DeleteIndex),
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "GetIndex",
             ): face_utilities.unary_unary_inline(servicer.GetIndex),
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "ListIndexes",
             ): face_utilities.unary_unary_inline(servicer.ListIndexes),
         }
@@ -1282,37 +1282,37 @@ try:
     generated only to ease transition from grpcio<0.15.0 to grpcio>=0.15.0"""
         request_serializers = {
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "CreateIndex",
             ): CreateIndexRequest.SerializeToString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "DeleteIndex",
             ): DeleteIndexRequest.SerializeToString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "GetIndex",
             ): GetIndexRequest.SerializeToString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "ListIndexes",
             ): ListIndexesRequest.SerializeToString,
         }
         response_deserializers = {
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "CreateIndex",
             ): google_dot_longrunning_dot_operations__pb2.Operation.FromString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "DeleteIndex",
             ): google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "GetIndex",
             ): google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_index__pb2.Index.FromString,
             (
-                "google.firestore.admin.v1beta1.FirestoreAdmin",
+                "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
                 "ListIndexes",
             ): ListIndexesResponse.FromString,
         }
@@ -1332,7 +1332,7 @@ try:
         )
         return beta_implementations.dynamic_stub(
             channel,
-            "google.firestore.admin.v1beta1.FirestoreAdmin",
+            "google.cloud.firestore.admin.v1beta1.FirestoreAdmin",
             cardinalities,
             options=stub_options,
         )

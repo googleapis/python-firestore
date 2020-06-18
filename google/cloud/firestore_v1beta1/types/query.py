@@ -18,12 +18,12 @@
 import proto  # type: ignore
 
 
-from google.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import document
 from google.protobuf import wrappers_pb2 as wrappers  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.firestore.v1beta1", manifest={"StructuredQuery", "Cursor"}
+    package="google.cloud.firestore.v1beta1", manifest={"StructuredQuery", "Cursor"}
 )
 
 

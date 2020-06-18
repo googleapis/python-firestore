@@ -24,7 +24,7 @@ from google.type import latlng_pb2 as latlng  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.firestore.v1",
+    package="google.cloud.firestore.v1",
     manifest={"Document", "Value", "ArrayValue", "MapValue"},
 )
 

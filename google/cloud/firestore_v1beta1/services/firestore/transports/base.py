@@ -21,9 +21,9 @@ import typing
 from google import auth
 from google.auth import credentials  # type: ignore
 
-from google.firestore_v1beta1.types import document
-from google.firestore_v1beta1.types import document as gf_document
-from google.firestore_v1beta1.types import firestore
+from google.cloud.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import document as gf_document
+from google.cloud.firestore_v1beta1.types import firestore
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
 

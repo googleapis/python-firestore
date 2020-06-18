@@ -37,13 +37,13 @@ from google.rpc import status_pb2 as google_dot_rpc_dot_status__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore_v1/proto/firestore.proto",
-    package="google.firestore.v1",
+    package="google.cloud.firestore.v1",
     syntax="proto3",
     serialized_options=_b(
-        "\n\027com.google.firestore.v1B\016FirestoreProtoP\001Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\242\002\004GCFS\252\002\031Google.Cloud.Firestore.V1\312\002\031Google\\Cloud\\Firestore\\V1"
+        "\n\027com.google.cloud.firestore.v1B\016FirestoreProtoP\001Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\242\002\004GCFS\252\002\031Google.Cloud.Firestore.V1\312\002\031Google\\Cloud\\Firestore\\V1"
     ),
     serialized_pb=_b(
-        '\n/google/cloud/firestore_v1/proto/firestore.proto\x12\x13google.firestore.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a,google/cloud/firestore_v1/proto/common.proto\x1a.google/cloud/firestore_v1/proto/document.proto\x1a+google/cloud/firestore_v1/proto/query.proto\x1a+google/cloud/firestore_v1/proto/write.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto"\xb8\x01\n\x12GetDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x02 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x03 \x01(\x0cH\x00\x12/\n\tread_time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xa7\x02\n\x14ListDocumentsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t\x12\x10\n\x08order_by\x18\x06 \x01(\t\x12/\n\x04mask\x18\x07 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x08 \x01(\x0cH\x00\x12/\n\tread_time\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x14\n\x0cshow_missing\x18\x0c \x01(\x08\x42\x16\n\x14\x63onsistency_selector"b\n\x15ListDocumentsResponse\x12\x30\n\tdocuments\x18\x01 \x03(\x0b\x32\x1d.google.firestore.v1.Document\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\xc4\x01\n\x15\x43reateDocumentRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12\x34\n\x08\x64ocument\x18\x04 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x05 \x01(\x0b\x32!.google.firestore.v1.DocumentMask"\xf3\x01\n\x15UpdateDocumentRequest\x12\x34\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentB\x03\xe0\x41\x02\x12\x36\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12;\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32!.google.firestore.v1.Precondition"g\n\x15\x44\x65leteDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12;\n\x10\x63urrent_document\x18\x02 \x01(\x0b\x32!.google.firestore.v1.Precondition"\x99\x02\n\x18\x42\x61tchGetDocumentsRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tdocuments\x18\x02 \x03(\t\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x04 \x01(\x0cH\x00\x12\x42\n\x0fnew_transaction\x18\x05 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptionsH\x00\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xac\x01\n\x19\x42\x61tchGetDocumentsResponse\x12.\n\x05\x66ound\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentH\x00\x12\x11\n\x07missing\x18\x02 \x01(\tH\x00\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\n\x06result"j\n\x17\x42\x65ginTransactionRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x38\n\x07options\x18\x02 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptions"/\n\x18\x42\x65ginTransactionResponse\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c"g\n\rCommitRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12*\n\x06writes\x18\x02 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c"z\n\x0e\x43ommitResponse\x12\x37\n\rwrite_results\x18\x01 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"B\n\x0fRollbackRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x18\n\x0btransaction\x18\x02 \x01(\x0c\x42\x03\xe0\x41\x02"\x9a\x02\n\x0fRunQueryRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x12\x15\n\x0btransaction\x18\x05 \x01(\x0cH\x01\x12\x42\n\x0fnew_transaction\x18\x06 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptionsH\x01\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x42\x0c\n\nquery_typeB\x16\n\x14\x63onsistency_selector"\xa0\x01\n\x10RunQueryResponse\x12\x13\n\x0btransaction\x18\x02 \x01(\x0c\x12/\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.Document\x12-\n\tread_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0fskipped_results\x18\x04 \x01(\x05"\xe8\x01\n\x0cWriteRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tstream_id\x18\x02 \x01(\t\x12*\n\x06writes\x18\x03 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x14\n\x0cstream_token\x18\x04 \x01(\x0c\x12=\n\x06labels\x18\x05 \x03(\x0b\x32-.google.firestore.v1.WriteRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xa2\x01\n\rWriteResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x14\n\x0cstream_token\x18\x02 \x01(\x0c\x12\x37\n\rwrite_results\x18\x03 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"\xf2\x01\n\rListenRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x31\n\nadd_target\x18\x02 \x01(\x0b\x32\x1b.google.firestore.v1.TargetH\x00\x12\x17\n\rremove_target\x18\x03 \x01(\x05H\x00\x12>\n\x06labels\x18\x04 \x03(\x0b\x32..google.firestore.v1.ListenRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0f\n\rtarget_change"\xd5\x02\n\x0eListenResponse\x12:\n\rtarget_change\x18\x02 \x01(\x0b\x32!.google.firestore.v1.TargetChangeH\x00\x12>\n\x0f\x64ocument_change\x18\x03 \x01(\x0b\x32#.google.firestore.v1.DocumentChangeH\x00\x12>\n\x0f\x64ocument_delete\x18\x04 \x01(\x0b\x32#.google.firestore.v1.DocumentDeleteH\x00\x12>\n\x0f\x64ocument_remove\x18\x06 \x01(\x0b\x32#.google.firestore.v1.DocumentRemoveH\x00\x12\x36\n\x06\x66ilter\x18\x05 \x01(\x0b\x32$.google.firestore.v1.ExistenceFilterH\x00\x42\x0f\n\rresponse_type"\xa1\x03\n\x06Target\x12\x38\n\x05query\x18\x02 \x01(\x0b\x32\'.google.firestore.v1.Target.QueryTargetH\x00\x12@\n\tdocuments\x18\x03 \x01(\x0b\x32+.google.firestore.v1.Target.DocumentsTargetH\x00\x12\x16\n\x0cresume_token\x18\x04 \x01(\x0cH\x01\x12/\n\tread_time\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x12\x11\n\ttarget_id\x18\x05 \x01(\x05\x12\x0c\n\x04once\x18\x06 \x01(\x08\x1a$\n\x0f\x44ocumentsTarget\x12\x11\n\tdocuments\x18\x02 \x03(\t\x1am\n\x0bQueryTarget\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x42\x0c\n\nquery_typeB\r\n\x0btarget_typeB\r\n\x0bresume_type"\xaa\x02\n\x0cTargetChange\x12N\n\x12target_change_type\x18\x01 \x01(\x0e\x32\x32.google.firestore.v1.TargetChange.TargetChangeType\x12\x12\n\ntarget_ids\x18\x02 \x03(\x05\x12!\n\x05\x63\x61use\x18\x03 \x01(\x0b\x32\x12.google.rpc.Status\x12\x14\n\x0cresume_token\x18\x04 \x01(\x0c\x12-\n\tread_time\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"N\n\x10TargetChangeType\x12\r\n\tNO_CHANGE\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02\x12\x0b\n\x07\x43URRENT\x10\x03\x12\t\n\x05RESET\x10\x04"V\n\x18ListCollectionIdsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x02 \x01(\x05\x12\x12\n\npage_token\x18\x03 \x01(\t"L\n\x19ListCollectionIdsResponse\x12\x16\n\x0e\x63ollection_ids\x18\x01 \x03(\t\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t2\xd7\x13\n\tFirestore\x12\x8f\x01\n\x0bGetDocument\x12\'.google.firestore.v1.GetDocumentRequest\x1a\x1d.google.firestore.v1.Document"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1/{name=projects/*/databases/*/documents/*/**}\x12\xb2\x01\n\rListDocuments\x12).google.firestore.v1.ListDocumentsRequest\x1a*.google.firestore.v1.ListDocumentsResponse"J\x82\xd3\xe4\x93\x02\x44\x12\x42/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}\x12\xaf\x01\n\x0e\x43reateDocument\x12*.google.firestore.v1.CreateDocumentRequest\x1a\x1d.google.firestore.v1.Document"R\x82\xd3\xe4\x93\x02L"@/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\x08\x64ocument\x12\xbf\x01\n\x0eUpdateDocument\x12*.google.firestore.v1.UpdateDocumentRequest\x1a\x1d.google.firestore.v1.Document"b\x82\xd3\xe4\x93\x02\x45\x32\x39/v1/{document.name=projects/*/databases/*/documents/*/**}:\x08\x64ocument\xda\x41\x14\x64ocument,update_mask\x12\x95\x01\n\x0e\x44\x65leteDocument\x12*.google.firestore.v1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty"?\x82\xd3\xe4\x93\x02\x32*0/v1/{name=projects/*/databases/*/documents/*/**}\xda\x41\x04name\x12\xb9\x01\n\x11\x42\x61tchGetDocuments\x12-.google.firestore.v1.BatchGetDocumentsRequest\x1a..google.firestore.v1.BatchGetDocumentsResponse"C\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:batchGet:\x01*0\x01\x12\xc7\x01\n\x10\x42\x65ginTransaction\x12,.google.firestore.v1.BeginTransactionRequest\x1a-.google.firestore.v1.BeginTransactionResponse"V\x82\xd3\xe4\x93\x02\x45"@/v1/{database=projects/*/databases/*}/documents:beginTransaction:\x01*\xda\x41\x08\x64\x61tabase\x12\xa6\x01\n\x06\x43ommit\x12".google.firestore.v1.CommitRequest\x1a#.google.firestore.v1.CommitResponse"S\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:commit:\x01*\xda\x41\x0f\x64\x61tabase,writes\x12\xa4\x01\n\x08Rollback\x12$.google.firestore.v1.RollbackRequest\x1a\x16.google.protobuf.Empty"Z\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:rollback:\x01*\xda\x41\x14\x64\x61tabase,transaction\x12\xdf\x01\n\x08RunQuery\x12$.google.firestore.v1.RunQueryRequest\x1a%.google.firestore.v1.RunQueryResponse"\x83\x01\x82\xd3\xe4\x93\x02}"6/v1/{parent=projects/*/databases/*/documents}:runQuery:\x01*Z@";/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\x01*0\x01\x12\x94\x01\n\x05Write\x12!.google.firestore.v1.WriteRequest\x1a".google.firestore.v1.WriteResponse"@\x82\xd3\xe4\x93\x02:"5/v1/{database=projects/*/databases/*}/documents:write:\x01*(\x01\x30\x01\x12\x98\x01\n\x06Listen\x12".google.firestore.v1.ListenRequest\x1a#.google.firestore.v1.ListenResponse"A\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:listen:\x01*(\x01\x30\x01\x12\x94\x02\n\x11ListCollectionIds\x12-.google.firestore.v1.ListCollectionIdsRequest\x1a..google.firestore.v1.ListCollectionIdsResponse"\x9f\x01\x82\xd3\xe4\x93\x02\x8f\x01"?/v1/{parent=projects/*/databases/*/documents}:listCollectionIds:\x01*ZI"D/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\x01*\xda\x41\x06parent\x1av\xca\x41\x18\x66irestore.googleapis.com\xd2\x41Xhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastoreB\xa8\x01\n\x17\x63om.google.firestore.v1B\x0e\x46irestoreProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3'
+        '\n/google/cloud/firestore_v1/proto/firestore.proto\x12\x13google.cloud.firestore.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a,google/cloud/firestore_v1/proto/common.proto\x1a.google/cloud/firestore_v1/proto/document.proto\x1a+google/cloud/firestore_v1/proto/query.proto\x1a+google/cloud/firestore_v1/proto/write.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto"\xb8\x01\n\x12GetDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x02 \x01(\x0b\x32!.google.cloud.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x03 \x01(\x0cH\x00\x12/\n\tread_time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xa7\x02\n\x14ListDocumentsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t\x12\x10\n\x08order_by\x18\x06 \x01(\t\x12/\n\x04mask\x18\x07 \x01(\x0b\x32!.google.cloud.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x08 \x01(\x0cH\x00\x12/\n\tread_time\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x14\n\x0cshow_missing\x18\x0c \x01(\x08\x42\x16\n\x14\x63onsistency_selector"b\n\x15ListDocumentsResponse\x12\x30\n\tdocuments\x18\x01 \x03(\x0b\x32\x1d.google.cloud.firestore.v1.Document\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\xc4\x01\n\x15\x43reateDocumentRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12\x34\n\x08\x64ocument\x18\x04 \x01(\x0b\x32\x1d.google.cloud.firestore.v1.DocumentB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x05 \x01(\x0b\x32!.google.cloud.firestore.v1.DocumentMask"\xf3\x01\n\x15UpdateDocumentRequest\x12\x34\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.cloud.firestore.v1.DocumentB\x03\xe0\x41\x02\x12\x36\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32!.google.cloud.firestore.v1.DocumentMask\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.cloud.firestore.v1.DocumentMask\x12;\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32!.google.cloud.firestore.v1.Precondition"g\n\x15\x44\x65leteDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12;\n\x10\x63urrent_document\x18\x02 \x01(\x0b\x32!.google.cloud.firestore.v1.Precondition"\x99\x02\n\x18\x42\x61tchGetDocumentsRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tdocuments\x18\x02 \x03(\t\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.cloud.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x04 \x01(\x0cH\x00\x12\x42\n\x0fnew_transaction\x18\x05 \x01(\x0b\x32\'.google.cloud.firestore.v1.TransactionOptionsH\x00\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xac\x01\n\x19\x42\x61tchGetDocumentsResponse\x12.\n\x05\x66ound\x18\x01 \x01(\x0b\x32\x1d.google.cloud.firestore.v1.DocumentH\x00\x12\x11\n\x07missing\x18\x02 \x01(\tH\x00\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\n\x06result"j\n\x17\x42\x65ginTransactionRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x38\n\x07options\x18\x02 \x01(\x0b\x32\'.google.cloud.firestore.v1.TransactionOptions"/\n\x18\x42\x65ginTransactionResponse\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c"g\n\rCommitRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12*\n\x06writes\x18\x02 \x03(\x0b\x32\x1a.google.cloud.firestore.v1.Write\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c"z\n\x0e\x43ommitResponse\x12\x37\n\rwrite_results\x18\x01 \x03(\x0b\x32 .google.cloud.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"B\n\x0fRollbackRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x18\n\x0btransaction\x18\x02 \x01(\x0c\x42\x03\xe0\x41\x02"\x9a\x02\n\x0fRunQueryRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.cloud.firestore.v1.StructuredQueryH\x00\x12\x15\n\x0btransaction\x18\x05 \x01(\x0cH\x01\x12\x42\n\x0fnew_transaction\x18\x06 \x01(\x0b\x32\'.google.cloud.firestore.v1.TransactionOptionsH\x01\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x42\x0c\n\nquery_typeB\x16\n\x14\x63onsistency_selector"\xa0\x01\n\x10RunQueryResponse\x12\x13\n\x0btransaction\x18\x02 \x01(\x0c\x12/\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.cloud.firestore.v1.Document\x12-\n\tread_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0fskipped_results\x18\x04 \x01(\x05"\xe8\x01\n\x0cWriteRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tstream_id\x18\x02 \x01(\t\x12*\n\x06writes\x18\x03 \x03(\x0b\x32\x1a.google.cloud.firestore.v1.Write\x12\x14\n\x0cstream_token\x18\x04 \x01(\x0c\x12=\n\x06labels\x18\x05 \x03(\x0b\x32-.google.cloud.firestore.v1.WriteRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xa2\x01\n\rWriteResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x14\n\x0cstream_token\x18\x02 \x01(\x0c\x12\x37\n\rwrite_results\x18\x03 \x03(\x0b\x32 .google.cloud.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"\xf2\x01\n\rListenRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x31\n\nadd_target\x18\x02 \x01(\x0b\x32\x1b.google.cloud.firestore.v1.TargetH\x00\x12\x17\n\rremove_target\x18\x03 \x01(\x05H\x00\x12>\n\x06labels\x18\x04 \x03(\x0b\x32..google.cloud.firestore.v1.ListenRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0f\n\rtarget_change"\xd5\x02\n\x0eListenResponse\x12:\n\rtarget_change\x18\x02 \x01(\x0b\x32!.google.cloud.firestore.v1.TargetChangeH\x00\x12>\n\x0f\x64ocument_change\x18\x03 \x01(\x0b\x32#.google.cloud.firestore.v1.DocumentChangeH\x00\x12>\n\x0f\x64ocument_delete\x18\x04 \x01(\x0b\x32#.google.cloud.firestore.v1.DocumentDeleteH\x00\x12>\n\x0f\x64ocument_remove\x18\x06 \x01(\x0b\x32#.google.cloud.firestore.v1.DocumentRemoveH\x00\x12\x36\n\x06\x66ilter\x18\x05 \x01(\x0b\x32$.google.cloud.firestore.v1.ExistenceFilterH\x00\x42\x0f\n\rresponse_type"\xa1\x03\n\x06Target\x12\x38\n\x05query\x18\x02 \x01(\x0b\x32\'.google.cloud.firestore.v1.Target.QueryTargetH\x00\x12@\n\tdocuments\x18\x03 \x01(\x0b\x32+.google.cloud.firestore.v1.Target.DocumentsTargetH\x00\x12\x16\n\x0cresume_token\x18\x04 \x01(\x0cH\x01\x12/\n\tread_time\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x12\x11\n\ttarget_id\x18\x05 \x01(\x05\x12\x0c\n\x04once\x18\x06 \x01(\x08\x1a$\n\x0f\x44ocumentsTarget\x12\x11\n\tdocuments\x18\x02 \x03(\t\x1am\n\x0bQueryTarget\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.cloud.firestore.v1.StructuredQueryH\x00\x42\x0c\n\nquery_typeB\r\n\x0btarget_typeB\r\n\x0bresume_type"\xaa\x02\n\x0cTargetChange\x12N\n\x12target_change_type\x18\x01 \x01(\x0e\x32\x32.google.cloud.firestore.v1.TargetChange.TargetChangeType\x12\x12\n\ntarget_ids\x18\x02 \x03(\x05\x12!\n\x05\x63\x61use\x18\x03 \x01(\x0b\x32\x12.google.rpc.Status\x12\x14\n\x0cresume_token\x18\x04 \x01(\x0c\x12-\n\tread_time\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"N\n\x10TargetChangeType\x12\r\n\tNO_CHANGE\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02\x12\x0b\n\x07\x43URRENT\x10\x03\x12\t\n\x05RESET\x10\x04"V\n\x18ListCollectionIdsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x02 \x01(\x05\x12\x12\n\npage_token\x18\x03 \x01(\t"L\n\x19ListCollectionIdsResponse\x12\x16\n\x0e\x63ollection_ids\x18\x01 \x03(\t\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t2\xd7\x13\n\tFirestore\x12\x8f\x01\n\x0bGetDocument\x12\'.google.cloud.firestore.v1.GetDocumentRequest\x1a\x1d.google.cloud.firestore.v1.Document"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1/{name=projects/*/databases/*/documents/*/**}\x12\xb2\x01\n\rListDocuments\x12).google.cloud.firestore.v1.ListDocumentsRequest\x1a*.google.cloud.firestore.v1.ListDocumentsResponse"J\x82\xd3\xe4\x93\x02\x44\x12\x42/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}\x12\xaf\x01\n\x0e\x43reateDocument\x12*.google.cloud.firestore.v1.CreateDocumentRequest\x1a\x1d.google.cloud.firestore.v1.Document"R\x82\xd3\xe4\x93\x02L"@/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\x08\x64ocument\x12\xbf\x01\n\x0eUpdateDocument\x12*.google.cloud.firestore.v1.UpdateDocumentRequest\x1a\x1d.google.cloud.firestore.v1.Document"b\x82\xd3\xe4\x93\x02\x45\x32\x39/v1/{document.name=projects/*/databases/*/documents/*/**}:\x08\x64ocument\xda\x41\x14\x64ocument,update_mask\x12\x95\x01\n\x0e\x44\x65leteDocument\x12*.google.cloud.firestore.v1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty"?\x82\xd3\xe4\x93\x02\x32*0/v1/{name=projects/*/databases/*/documents/*/**}\xda\x41\x04name\x12\xb9\x01\n\x11\x42\x61tchGetDocuments\x12-.google.cloud.firestore.v1.BatchGetDocumentsRequest\x1a..google.cloud.firestore.v1.BatchGetDocumentsResponse"C\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:batchGet:\x01*0\x01\x12\xc7\x01\n\x10\x42\x65ginTransaction\x12,.google.cloud.firestore.v1.BeginTransactionRequest\x1a-.google.cloud.firestore.v1.BeginTransactionResponse"V\x82\xd3\xe4\x93\x02\x45"@/v1/{database=projects/*/databases/*}/documents:beginTransaction:\x01*\xda\x41\x08\x64\x61tabase\x12\xa6\x01\n\x06\x43ommit\x12".google.cloud.firestore.v1.CommitRequest\x1a#.google.cloud.firestore.v1.CommitResponse"S\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:commit:\x01*\xda\x41\x0f\x64\x61tabase,writes\x12\xa4\x01\n\x08Rollback\x12$.google.cloud.firestore.v1.RollbackRequest\x1a\x16.google.protobuf.Empty"Z\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:rollback:\x01*\xda\x41\x14\x64\x61tabase,transaction\x12\xdf\x01\n\x08RunQuery\x12$.google.cloud.firestore.v1.RunQueryRequest\x1a%.google.cloud.firestore.v1.RunQueryResponse"\x83\x01\x82\xd3\xe4\x93\x02}"6/v1/{parent=projects/*/databases/*/documents}:runQuery:\x01*Z@";/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\x01*0\x01\x12\x94\x01\n\x05Write\x12!.google.cloud.firestore.v1.WriteRequest\x1a".google.cloud.firestore.v1.WriteResponse"@\x82\xd3\xe4\x93\x02:"5/v1/{database=projects/*/databases/*}/documents:write:\x01*(\x01\x30\x01\x12\x98\x01\n\x06Listen\x12".google.cloud.firestore.v1.ListenRequest\x1a#.google.cloud.firestore.v1.ListenResponse"A\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:listen:\x01*(\x01\x30\x01\x12\x94\x02\n\x11ListCollectionIds\x12-.google.cloud.firestore.v1.ListCollectionIdsRequest\x1a..google.cloud.firestore.v1.ListCollectionIdsResponse"\x9f\x01\x82\xd3\xe4\x93\x02\x8f\x01"?/v1/{parent=projects/*/databases/*/documents}:listCollectionIds:\x01*ZI"D/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\x01*\xda\x41\x06parent\x1av\xca\x41\x18\x66irestore.googleapis.com\xd2\x41Xhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastoreB\xa8\x01\n\x17\x63om.google.cloud.firestore.v1B\x0e\x46irestoreProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3'
     ),
     dependencies=[
         google_dot_api_dot_annotations__pb2.DESCRIPTOR,
@@ -62,7 +62,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _TARGETCHANGE_TARGETCHANGETYPE = _descriptor.EnumDescriptor(
     name="TargetChangeType",
-    full_name="google.firestore.v1.TargetChange.TargetChangeType",
+    full_name="google.cloud.firestore.v1.TargetChange.TargetChangeType",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -92,14 +92,14 @@ _sym_db.RegisterEnumDescriptor(_TARGETCHANGE_TARGETCHANGETYPE)
 
 _GETDOCUMENTREQUEST = _descriptor.Descriptor(
     name="GetDocumentRequest",
-    full_name="google.firestore.v1.GetDocumentRequest",
+    full_name="google.cloud.firestore.v1.GetDocumentRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
-            full_name="google.firestore.v1.GetDocumentRequest.name",
+            full_name="google.cloud.firestore.v1.GetDocumentRequest.name",
             index=0,
             number=1,
             type=9,
@@ -117,7 +117,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="mask",
-            full_name="google.firestore.v1.GetDocumentRequest.mask",
+            full_name="google.cloud.firestore.v1.GetDocumentRequest.mask",
             index=1,
             number=2,
             type=11,
@@ -135,7 +135,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.GetDocumentRequest.transaction",
+            full_name="google.cloud.firestore.v1.GetDocumentRequest.transaction",
             index=2,
             number=3,
             type=12,
@@ -153,7 +153,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.GetDocumentRequest.read_time",
+            full_name="google.cloud.firestore.v1.GetDocumentRequest.read_time",
             index=3,
             number=5,
             type=11,
@@ -180,7 +180,7 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="consistency_selector",
-            full_name="google.firestore.v1.GetDocumentRequest.consistency_selector",
+            full_name="google.cloud.firestore.v1.GetDocumentRequest.consistency_selector",
             index=0,
             containing_type=None,
             fields=[],
@@ -193,14 +193,14 @@ _GETDOCUMENTREQUEST = _descriptor.Descriptor(
 
 _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
     name="ListDocumentsRequest",
-    full_name="google.firestore.v1.ListDocumentsRequest",
+    full_name="google.cloud.firestore.v1.ListDocumentsRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
-            full_name="google.firestore.v1.ListDocumentsRequest.parent",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.parent",
             index=0,
             number=1,
             type=9,
@@ -218,7 +218,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="collection_id",
-            full_name="google.firestore.v1.ListDocumentsRequest.collection_id",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.collection_id",
             index=1,
             number=2,
             type=9,
@@ -236,7 +236,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="page_size",
-            full_name="google.firestore.v1.ListDocumentsRequest.page_size",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.page_size",
             index=2,
             number=3,
             type=5,
@@ -254,7 +254,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="page_token",
-            full_name="google.firestore.v1.ListDocumentsRequest.page_token",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.page_token",
             index=3,
             number=4,
             type=9,
@@ -272,7 +272,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="order_by",
-            full_name="google.firestore.v1.ListDocumentsRequest.order_by",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.order_by",
             index=4,
             number=6,
             type=9,
@@ -290,7 +290,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="mask",
-            full_name="google.firestore.v1.ListDocumentsRequest.mask",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.mask",
             index=5,
             number=7,
             type=11,
@@ -308,7 +308,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.ListDocumentsRequest.transaction",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.transaction",
             index=6,
             number=8,
             type=12,
@@ -326,7 +326,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.ListDocumentsRequest.read_time",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.read_time",
             index=7,
             number=10,
             type=11,
@@ -344,7 +344,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="show_missing",
-            full_name="google.firestore.v1.ListDocumentsRequest.show_missing",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.show_missing",
             index=8,
             number=12,
             type=8,
@@ -371,7 +371,7 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="consistency_selector",
-            full_name="google.firestore.v1.ListDocumentsRequest.consistency_selector",
+            full_name="google.cloud.firestore.v1.ListDocumentsRequest.consistency_selector",
             index=0,
             containing_type=None,
             fields=[],
@@ -384,14 +384,14 @@ _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
 
 _LISTDOCUMENTSRESPONSE = _descriptor.Descriptor(
     name="ListDocumentsResponse",
-    full_name="google.firestore.v1.ListDocumentsResponse",
+    full_name="google.cloud.firestore.v1.ListDocumentsResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="documents",
-            full_name="google.firestore.v1.ListDocumentsResponse.documents",
+            full_name="google.cloud.firestore.v1.ListDocumentsResponse.documents",
             index=0,
             number=1,
             type=11,
@@ -409,7 +409,7 @@ _LISTDOCUMENTSRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="next_page_token",
-            full_name="google.firestore.v1.ListDocumentsResponse.next_page_token",
+            full_name="google.cloud.firestore.v1.ListDocumentsResponse.next_page_token",
             index=1,
             number=2,
             type=9,
@@ -441,14 +441,14 @@ _LISTDOCUMENTSRESPONSE = _descriptor.Descriptor(
 
 _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
     name="CreateDocumentRequest",
-    full_name="google.firestore.v1.CreateDocumentRequest",
+    full_name="google.cloud.firestore.v1.CreateDocumentRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
-            full_name="google.firestore.v1.CreateDocumentRequest.parent",
+            full_name="google.cloud.firestore.v1.CreateDocumentRequest.parent",
             index=0,
             number=1,
             type=9,
@@ -466,7 +466,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="collection_id",
-            full_name="google.firestore.v1.CreateDocumentRequest.collection_id",
+            full_name="google.cloud.firestore.v1.CreateDocumentRequest.collection_id",
             index=1,
             number=2,
             type=9,
@@ -484,7 +484,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="document_id",
-            full_name="google.firestore.v1.CreateDocumentRequest.document_id",
+            full_name="google.cloud.firestore.v1.CreateDocumentRequest.document_id",
             index=2,
             number=3,
             type=9,
@@ -502,7 +502,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="document",
-            full_name="google.firestore.v1.CreateDocumentRequest.document",
+            full_name="google.cloud.firestore.v1.CreateDocumentRequest.document",
             index=3,
             number=4,
             type=11,
@@ -520,7 +520,7 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="mask",
-            full_name="google.firestore.v1.CreateDocumentRequest.mask",
+            full_name="google.cloud.firestore.v1.CreateDocumentRequest.mask",
             index=4,
             number=5,
             type=11,
@@ -552,14 +552,14 @@ _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
 
 _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
     name="UpdateDocumentRequest",
-    full_name="google.firestore.v1.UpdateDocumentRequest",
+    full_name="google.cloud.firestore.v1.UpdateDocumentRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="document",
-            full_name="google.firestore.v1.UpdateDocumentRequest.document",
+            full_name="google.cloud.firestore.v1.UpdateDocumentRequest.document",
             index=0,
             number=1,
             type=11,
@@ -577,7 +577,7 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="update_mask",
-            full_name="google.firestore.v1.UpdateDocumentRequest.update_mask",
+            full_name="google.cloud.firestore.v1.UpdateDocumentRequest.update_mask",
             index=1,
             number=2,
             type=11,
@@ -595,7 +595,7 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="mask",
-            full_name="google.firestore.v1.UpdateDocumentRequest.mask",
+            full_name="google.cloud.firestore.v1.UpdateDocumentRequest.mask",
             index=2,
             number=3,
             type=11,
@@ -613,7 +613,7 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="current_document",
-            full_name="google.firestore.v1.UpdateDocumentRequest.current_document",
+            full_name="google.cloud.firestore.v1.UpdateDocumentRequest.current_document",
             index=3,
             number=4,
             type=11,
@@ -645,14 +645,14 @@ _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
 
 _DELETEDOCUMENTREQUEST = _descriptor.Descriptor(
     name="DeleteDocumentRequest",
-    full_name="google.firestore.v1.DeleteDocumentRequest",
+    full_name="google.cloud.firestore.v1.DeleteDocumentRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
-            full_name="google.firestore.v1.DeleteDocumentRequest.name",
+            full_name="google.cloud.firestore.v1.DeleteDocumentRequest.name",
             index=0,
             number=1,
             type=9,
@@ -670,7 +670,7 @@ _DELETEDOCUMENTREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="current_document",
-            full_name="google.firestore.v1.DeleteDocumentRequest.current_document",
+            full_name="google.cloud.firestore.v1.DeleteDocumentRequest.current_document",
             index=1,
             number=2,
             type=11,
@@ -702,14 +702,14 @@ _DELETEDOCUMENTREQUEST = _descriptor.Descriptor(
 
 _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
     name="BatchGetDocumentsRequest",
-    full_name="google.firestore.v1.BatchGetDocumentsRequest",
+    full_name="google.cloud.firestore.v1.BatchGetDocumentsRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
-            full_name="google.firestore.v1.BatchGetDocumentsRequest.database",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsRequest.database",
             index=0,
             number=1,
             type=9,
@@ -727,7 +727,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="documents",
-            full_name="google.firestore.v1.BatchGetDocumentsRequest.documents",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsRequest.documents",
             index=1,
             number=2,
             type=9,
@@ -745,7 +745,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="mask",
-            full_name="google.firestore.v1.BatchGetDocumentsRequest.mask",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsRequest.mask",
             index=2,
             number=3,
             type=11,
@@ -763,7 +763,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.BatchGetDocumentsRequest.transaction",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsRequest.transaction",
             index=3,
             number=4,
             type=12,
@@ -781,7 +781,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="new_transaction",
-            full_name="google.firestore.v1.BatchGetDocumentsRequest.new_transaction",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsRequest.new_transaction",
             index=4,
             number=5,
             type=11,
@@ -799,7 +799,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.BatchGetDocumentsRequest.read_time",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsRequest.read_time",
             index=5,
             number=7,
             type=11,
@@ -826,7 +826,7 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="consistency_selector",
-            full_name="google.firestore.v1.BatchGetDocumentsRequest.consistency_selector",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsRequest.consistency_selector",
             index=0,
             containing_type=None,
             fields=[],
@@ -839,14 +839,14 @@ _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
 
 _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
     name="BatchGetDocumentsResponse",
-    full_name="google.firestore.v1.BatchGetDocumentsResponse",
+    full_name="google.cloud.firestore.v1.BatchGetDocumentsResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="found",
-            full_name="google.firestore.v1.BatchGetDocumentsResponse.found",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsResponse.found",
             index=0,
             number=1,
             type=11,
@@ -864,7 +864,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="missing",
-            full_name="google.firestore.v1.BatchGetDocumentsResponse.missing",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsResponse.missing",
             index=1,
             number=2,
             type=9,
@@ -882,7 +882,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.BatchGetDocumentsResponse.transaction",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsResponse.transaction",
             index=2,
             number=3,
             type=12,
@@ -900,7 +900,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.BatchGetDocumentsResponse.read_time",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsResponse.read_time",
             index=3,
             number=4,
             type=11,
@@ -927,7 +927,7 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="result",
-            full_name="google.firestore.v1.BatchGetDocumentsResponse.result",
+            full_name="google.cloud.firestore.v1.BatchGetDocumentsResponse.result",
             index=0,
             containing_type=None,
             fields=[],
@@ -940,14 +940,14 @@ _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
 
 _BEGINTRANSACTIONREQUEST = _descriptor.Descriptor(
     name="BeginTransactionRequest",
-    full_name="google.firestore.v1.BeginTransactionRequest",
+    full_name="google.cloud.firestore.v1.BeginTransactionRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
-            full_name="google.firestore.v1.BeginTransactionRequest.database",
+            full_name="google.cloud.firestore.v1.BeginTransactionRequest.database",
             index=0,
             number=1,
             type=9,
@@ -965,7 +965,7 @@ _BEGINTRANSACTIONREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="options",
-            full_name="google.firestore.v1.BeginTransactionRequest.options",
+            full_name="google.cloud.firestore.v1.BeginTransactionRequest.options",
             index=1,
             number=2,
             type=11,
@@ -997,14 +997,14 @@ _BEGINTRANSACTIONREQUEST = _descriptor.Descriptor(
 
 _BEGINTRANSACTIONRESPONSE = _descriptor.Descriptor(
     name="BeginTransactionResponse",
-    full_name="google.firestore.v1.BeginTransactionResponse",
+    full_name="google.cloud.firestore.v1.BeginTransactionResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.BeginTransactionResponse.transaction",
+            full_name="google.cloud.firestore.v1.BeginTransactionResponse.transaction",
             index=0,
             number=1,
             type=12,
@@ -1036,14 +1036,14 @@ _BEGINTRANSACTIONRESPONSE = _descriptor.Descriptor(
 
 _COMMITREQUEST = _descriptor.Descriptor(
     name="CommitRequest",
-    full_name="google.firestore.v1.CommitRequest",
+    full_name="google.cloud.firestore.v1.CommitRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
-            full_name="google.firestore.v1.CommitRequest.database",
+            full_name="google.cloud.firestore.v1.CommitRequest.database",
             index=0,
             number=1,
             type=9,
@@ -1061,7 +1061,7 @@ _COMMITREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="writes",
-            full_name="google.firestore.v1.CommitRequest.writes",
+            full_name="google.cloud.firestore.v1.CommitRequest.writes",
             index=1,
             number=2,
             type=11,
@@ -1079,7 +1079,7 @@ _COMMITREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.CommitRequest.transaction",
+            full_name="google.cloud.firestore.v1.CommitRequest.transaction",
             index=2,
             number=3,
             type=12,
@@ -1111,14 +1111,14 @@ _COMMITREQUEST = _descriptor.Descriptor(
 
 _COMMITRESPONSE = _descriptor.Descriptor(
     name="CommitResponse",
-    full_name="google.firestore.v1.CommitResponse",
+    full_name="google.cloud.firestore.v1.CommitResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="write_results",
-            full_name="google.firestore.v1.CommitResponse.write_results",
+            full_name="google.cloud.firestore.v1.CommitResponse.write_results",
             index=0,
             number=1,
             type=11,
@@ -1136,7 +1136,7 @@ _COMMITRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="commit_time",
-            full_name="google.firestore.v1.CommitResponse.commit_time",
+            full_name="google.cloud.firestore.v1.CommitResponse.commit_time",
             index=1,
             number=2,
             type=11,
@@ -1168,14 +1168,14 @@ _COMMITRESPONSE = _descriptor.Descriptor(
 
 _ROLLBACKREQUEST = _descriptor.Descriptor(
     name="RollbackRequest",
-    full_name="google.firestore.v1.RollbackRequest",
+    full_name="google.cloud.firestore.v1.RollbackRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
-            full_name="google.firestore.v1.RollbackRequest.database",
+            full_name="google.cloud.firestore.v1.RollbackRequest.database",
             index=0,
             number=1,
             type=9,
@@ -1193,7 +1193,7 @@ _ROLLBACKREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.RollbackRequest.transaction",
+            full_name="google.cloud.firestore.v1.RollbackRequest.transaction",
             index=1,
             number=2,
             type=12,
@@ -1225,14 +1225,14 @@ _ROLLBACKREQUEST = _descriptor.Descriptor(
 
 _RUNQUERYREQUEST = _descriptor.Descriptor(
     name="RunQueryRequest",
-    full_name="google.firestore.v1.RunQueryRequest",
+    full_name="google.cloud.firestore.v1.RunQueryRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
-            full_name="google.firestore.v1.RunQueryRequest.parent",
+            full_name="google.cloud.firestore.v1.RunQueryRequest.parent",
             index=0,
             number=1,
             type=9,
@@ -1250,7 +1250,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="structured_query",
-            full_name="google.firestore.v1.RunQueryRequest.structured_query",
+            full_name="google.cloud.firestore.v1.RunQueryRequest.structured_query",
             index=1,
             number=2,
             type=11,
@@ -1268,7 +1268,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.RunQueryRequest.transaction",
+            full_name="google.cloud.firestore.v1.RunQueryRequest.transaction",
             index=2,
             number=5,
             type=12,
@@ -1286,7 +1286,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="new_transaction",
-            full_name="google.firestore.v1.RunQueryRequest.new_transaction",
+            full_name="google.cloud.firestore.v1.RunQueryRequest.new_transaction",
             index=3,
             number=6,
             type=11,
@@ -1304,7 +1304,7 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.RunQueryRequest.read_time",
+            full_name="google.cloud.firestore.v1.RunQueryRequest.read_time",
             index=4,
             number=7,
             type=11,
@@ -1331,14 +1331,14 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="query_type",
-            full_name="google.firestore.v1.RunQueryRequest.query_type",
+            full_name="google.cloud.firestore.v1.RunQueryRequest.query_type",
             index=0,
             containing_type=None,
             fields=[],
         ),
         _descriptor.OneofDescriptor(
             name="consistency_selector",
-            full_name="google.firestore.v1.RunQueryRequest.consistency_selector",
+            full_name="google.cloud.firestore.v1.RunQueryRequest.consistency_selector",
             index=1,
             containing_type=None,
             fields=[],
@@ -1351,14 +1351,14 @@ _RUNQUERYREQUEST = _descriptor.Descriptor(
 
 _RUNQUERYRESPONSE = _descriptor.Descriptor(
     name="RunQueryResponse",
-    full_name="google.firestore.v1.RunQueryResponse",
+    full_name="google.cloud.firestore.v1.RunQueryResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="transaction",
-            full_name="google.firestore.v1.RunQueryResponse.transaction",
+            full_name="google.cloud.firestore.v1.RunQueryResponse.transaction",
             index=0,
             number=2,
             type=12,
@@ -1376,7 +1376,7 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="document",
-            full_name="google.firestore.v1.RunQueryResponse.document",
+            full_name="google.cloud.firestore.v1.RunQueryResponse.document",
             index=1,
             number=1,
             type=11,
@@ -1394,7 +1394,7 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.RunQueryResponse.read_time",
+            full_name="google.cloud.firestore.v1.RunQueryResponse.read_time",
             index=2,
             number=3,
             type=11,
@@ -1412,7 +1412,7 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="skipped_results",
-            full_name="google.firestore.v1.RunQueryResponse.skipped_results",
+            full_name="google.cloud.firestore.v1.RunQueryResponse.skipped_results",
             index=3,
             number=4,
             type=5,
@@ -1444,14 +1444,14 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
 
 _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
     name="LabelsEntry",
-    full_name="google.firestore.v1.WriteRequest.LabelsEntry",
+    full_name="google.cloud.firestore.v1.WriteRequest.LabelsEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="google.firestore.v1.WriteRequest.LabelsEntry.key",
+            full_name="google.cloud.firestore.v1.WriteRequest.LabelsEntry.key",
             index=0,
             number=1,
             type=9,
@@ -1469,7 +1469,7 @@ _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="google.firestore.v1.WriteRequest.LabelsEntry.value",
+            full_name="google.cloud.firestore.v1.WriteRequest.LabelsEntry.value",
             index=1,
             number=2,
             type=9,
@@ -1500,14 +1500,14 @@ _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
 
 _WRITEREQUEST = _descriptor.Descriptor(
     name="WriteRequest",
-    full_name="google.firestore.v1.WriteRequest",
+    full_name="google.cloud.firestore.v1.WriteRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
-            full_name="google.firestore.v1.WriteRequest.database",
+            full_name="google.cloud.firestore.v1.WriteRequest.database",
             index=0,
             number=1,
             type=9,
@@ -1525,7 +1525,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="stream_id",
-            full_name="google.firestore.v1.WriteRequest.stream_id",
+            full_name="google.cloud.firestore.v1.WriteRequest.stream_id",
             index=1,
             number=2,
             type=9,
@@ -1543,7 +1543,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="writes",
-            full_name="google.firestore.v1.WriteRequest.writes",
+            full_name="google.cloud.firestore.v1.WriteRequest.writes",
             index=2,
             number=3,
             type=11,
@@ -1561,7 +1561,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="stream_token",
-            full_name="google.firestore.v1.WriteRequest.stream_token",
+            full_name="google.cloud.firestore.v1.WriteRequest.stream_token",
             index=3,
             number=4,
             type=12,
@@ -1579,7 +1579,7 @@ _WRITEREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="labels",
-            full_name="google.firestore.v1.WriteRequest.labels",
+            full_name="google.cloud.firestore.v1.WriteRequest.labels",
             index=4,
             number=5,
             type=11,
@@ -1611,14 +1611,14 @@ _WRITEREQUEST = _descriptor.Descriptor(
 
 _WRITERESPONSE = _descriptor.Descriptor(
     name="WriteResponse",
-    full_name="google.firestore.v1.WriteResponse",
+    full_name="google.cloud.firestore.v1.WriteResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="stream_id",
-            full_name="google.firestore.v1.WriteResponse.stream_id",
+            full_name="google.cloud.firestore.v1.WriteResponse.stream_id",
             index=0,
             number=1,
             type=9,
@@ -1636,7 +1636,7 @@ _WRITERESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="stream_token",
-            full_name="google.firestore.v1.WriteResponse.stream_token",
+            full_name="google.cloud.firestore.v1.WriteResponse.stream_token",
             index=1,
             number=2,
             type=12,
@@ -1654,7 +1654,7 @@ _WRITERESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="write_results",
-            full_name="google.firestore.v1.WriteResponse.write_results",
+            full_name="google.cloud.firestore.v1.WriteResponse.write_results",
             index=2,
             number=3,
             type=11,
@@ -1672,7 +1672,7 @@ _WRITERESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="commit_time",
-            full_name="google.firestore.v1.WriteResponse.commit_time",
+            full_name="google.cloud.firestore.v1.WriteResponse.commit_time",
             index=3,
             number=4,
             type=11,
@@ -1704,14 +1704,14 @@ _WRITERESPONSE = _descriptor.Descriptor(
 
 _LISTENREQUEST_LABELSENTRY = _descriptor.Descriptor(
     name="LabelsEntry",
-    full_name="google.firestore.v1.ListenRequest.LabelsEntry",
+    full_name="google.cloud.firestore.v1.ListenRequest.LabelsEntry",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="key",
-            full_name="google.firestore.v1.ListenRequest.LabelsEntry.key",
+            full_name="google.cloud.firestore.v1.ListenRequest.LabelsEntry.key",
             index=0,
             number=1,
             type=9,
@@ -1729,7 +1729,7 @@ _LISTENREQUEST_LABELSENTRY = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="value",
-            full_name="google.firestore.v1.ListenRequest.LabelsEntry.value",
+            full_name="google.cloud.firestore.v1.ListenRequest.LabelsEntry.value",
             index=1,
             number=2,
             type=9,
@@ -1760,14 +1760,14 @@ _LISTENREQUEST_LABELSENTRY = _descriptor.Descriptor(
 
 _LISTENREQUEST = _descriptor.Descriptor(
     name="ListenRequest",
-    full_name="google.firestore.v1.ListenRequest",
+    full_name="google.cloud.firestore.v1.ListenRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="database",
-            full_name="google.firestore.v1.ListenRequest.database",
+            full_name="google.cloud.firestore.v1.ListenRequest.database",
             index=0,
             number=1,
             type=9,
@@ -1785,7 +1785,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="add_target",
-            full_name="google.firestore.v1.ListenRequest.add_target",
+            full_name="google.cloud.firestore.v1.ListenRequest.add_target",
             index=1,
             number=2,
             type=11,
@@ -1803,7 +1803,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="remove_target",
-            full_name="google.firestore.v1.ListenRequest.remove_target",
+            full_name="google.cloud.firestore.v1.ListenRequest.remove_target",
             index=2,
             number=3,
             type=5,
@@ -1821,7 +1821,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="labels",
-            full_name="google.firestore.v1.ListenRequest.labels",
+            full_name="google.cloud.firestore.v1.ListenRequest.labels",
             index=3,
             number=4,
             type=11,
@@ -1848,7 +1848,7 @@ _LISTENREQUEST = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="target_change",
-            full_name="google.firestore.v1.ListenRequest.target_change",
+            full_name="google.cloud.firestore.v1.ListenRequest.target_change",
             index=0,
             containing_type=None,
             fields=[],
@@ -1861,14 +1861,14 @@ _LISTENREQUEST = _descriptor.Descriptor(
 
 _LISTENRESPONSE = _descriptor.Descriptor(
     name="ListenResponse",
-    full_name="google.firestore.v1.ListenResponse",
+    full_name="google.cloud.firestore.v1.ListenResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="target_change",
-            full_name="google.firestore.v1.ListenResponse.target_change",
+            full_name="google.cloud.firestore.v1.ListenResponse.target_change",
             index=0,
             number=2,
             type=11,
@@ -1886,7 +1886,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="document_change",
-            full_name="google.firestore.v1.ListenResponse.document_change",
+            full_name="google.cloud.firestore.v1.ListenResponse.document_change",
             index=1,
             number=3,
             type=11,
@@ -1904,7 +1904,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="document_delete",
-            full_name="google.firestore.v1.ListenResponse.document_delete",
+            full_name="google.cloud.firestore.v1.ListenResponse.document_delete",
             index=2,
             number=4,
             type=11,
@@ -1922,7 +1922,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="document_remove",
-            full_name="google.firestore.v1.ListenResponse.document_remove",
+            full_name="google.cloud.firestore.v1.ListenResponse.document_remove",
             index=3,
             number=6,
             type=11,
@@ -1940,7 +1940,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="filter",
-            full_name="google.firestore.v1.ListenResponse.filter",
+            full_name="google.cloud.firestore.v1.ListenResponse.filter",
             index=4,
             number=5,
             type=11,
@@ -1967,7 +1967,7 @@ _LISTENRESPONSE = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="response_type",
-            full_name="google.firestore.v1.ListenResponse.response_type",
+            full_name="google.cloud.firestore.v1.ListenResponse.response_type",
             index=0,
             containing_type=None,
             fields=[],
@@ -1980,14 +1980,14 @@ _LISTENRESPONSE = _descriptor.Descriptor(
 
 _TARGET_DOCUMENTSTARGET = _descriptor.Descriptor(
     name="DocumentsTarget",
-    full_name="google.firestore.v1.Target.DocumentsTarget",
+    full_name="google.cloud.firestore.v1.Target.DocumentsTarget",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="documents",
-            full_name="google.firestore.v1.Target.DocumentsTarget.documents",
+            full_name="google.cloud.firestore.v1.Target.DocumentsTarget.documents",
             index=0,
             number=2,
             type=9,
@@ -2018,14 +2018,14 @@ _TARGET_DOCUMENTSTARGET = _descriptor.Descriptor(
 
 _TARGET_QUERYTARGET = _descriptor.Descriptor(
     name="QueryTarget",
-    full_name="google.firestore.v1.Target.QueryTarget",
+    full_name="google.cloud.firestore.v1.Target.QueryTarget",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
-            full_name="google.firestore.v1.Target.QueryTarget.parent",
+            full_name="google.cloud.firestore.v1.Target.QueryTarget.parent",
             index=0,
             number=1,
             type=9,
@@ -2043,7 +2043,7 @@ _TARGET_QUERYTARGET = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="structured_query",
-            full_name="google.firestore.v1.Target.QueryTarget.structured_query",
+            full_name="google.cloud.firestore.v1.Target.QueryTarget.structured_query",
             index=1,
             number=2,
             type=11,
@@ -2070,7 +2070,7 @@ _TARGET_QUERYTARGET = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="query_type",
-            full_name="google.firestore.v1.Target.QueryTarget.query_type",
+            full_name="google.cloud.firestore.v1.Target.QueryTarget.query_type",
             index=0,
             containing_type=None,
             fields=[],
@@ -2082,14 +2082,14 @@ _TARGET_QUERYTARGET = _descriptor.Descriptor(
 
 _TARGET = _descriptor.Descriptor(
     name="Target",
-    full_name="google.firestore.v1.Target",
+    full_name="google.cloud.firestore.v1.Target",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="query",
-            full_name="google.firestore.v1.Target.query",
+            full_name="google.cloud.firestore.v1.Target.query",
             index=0,
             number=2,
             type=11,
@@ -2107,7 +2107,7 @@ _TARGET = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="documents",
-            full_name="google.firestore.v1.Target.documents",
+            full_name="google.cloud.firestore.v1.Target.documents",
             index=1,
             number=3,
             type=11,
@@ -2125,7 +2125,7 @@ _TARGET = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="resume_token",
-            full_name="google.firestore.v1.Target.resume_token",
+            full_name="google.cloud.firestore.v1.Target.resume_token",
             index=2,
             number=4,
             type=12,
@@ -2143,7 +2143,7 @@ _TARGET = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.Target.read_time",
+            full_name="google.cloud.firestore.v1.Target.read_time",
             index=3,
             number=11,
             type=11,
@@ -2161,7 +2161,7 @@ _TARGET = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="target_id",
-            full_name="google.firestore.v1.Target.target_id",
+            full_name="google.cloud.firestore.v1.Target.target_id",
             index=4,
             number=5,
             type=5,
@@ -2179,7 +2179,7 @@ _TARGET = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="once",
-            full_name="google.firestore.v1.Target.once",
+            full_name="google.cloud.firestore.v1.Target.once",
             index=5,
             number=6,
             type=8,
@@ -2206,14 +2206,14 @@ _TARGET = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="target_type",
-            full_name="google.firestore.v1.Target.target_type",
+            full_name="google.cloud.firestore.v1.Target.target_type",
             index=0,
             containing_type=None,
             fields=[],
         ),
         _descriptor.OneofDescriptor(
             name="resume_type",
-            full_name="google.firestore.v1.Target.resume_type",
+            full_name="google.cloud.firestore.v1.Target.resume_type",
             index=1,
             containing_type=None,
             fields=[],
@@ -2226,14 +2226,14 @@ _TARGET = _descriptor.Descriptor(
 
 _TARGETCHANGE = _descriptor.Descriptor(
     name="TargetChange",
-    full_name="google.firestore.v1.TargetChange",
+    full_name="google.cloud.firestore.v1.TargetChange",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="target_change_type",
-            full_name="google.firestore.v1.TargetChange.target_change_type",
+            full_name="google.cloud.firestore.v1.TargetChange.target_change_type",
             index=0,
             number=1,
             type=14,
@@ -2251,7 +2251,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="target_ids",
-            full_name="google.firestore.v1.TargetChange.target_ids",
+            full_name="google.cloud.firestore.v1.TargetChange.target_ids",
             index=1,
             number=2,
             type=5,
@@ -2269,7 +2269,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="cause",
-            full_name="google.firestore.v1.TargetChange.cause",
+            full_name="google.cloud.firestore.v1.TargetChange.cause",
             index=2,
             number=3,
             type=11,
@@ -2287,7 +2287,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="resume_token",
-            full_name="google.firestore.v1.TargetChange.resume_token",
+            full_name="google.cloud.firestore.v1.TargetChange.resume_token",
             index=3,
             number=4,
             type=12,
@@ -2305,7 +2305,7 @@ _TARGETCHANGE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="read_time",
-            full_name="google.firestore.v1.TargetChange.read_time",
+            full_name="google.cloud.firestore.v1.TargetChange.read_time",
             index=4,
             number=6,
             type=11,
@@ -2337,14 +2337,14 @@ _TARGETCHANGE = _descriptor.Descriptor(
 
 _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
     name="ListCollectionIdsRequest",
-    full_name="google.firestore.v1.ListCollectionIdsRequest",
+    full_name="google.cloud.firestore.v1.ListCollectionIdsRequest",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
-            full_name="google.firestore.v1.ListCollectionIdsRequest.parent",
+            full_name="google.cloud.firestore.v1.ListCollectionIdsRequest.parent",
             index=0,
             number=1,
             type=9,
@@ -2362,7 +2362,7 @@ _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="page_size",
-            full_name="google.firestore.v1.ListCollectionIdsRequest.page_size",
+            full_name="google.cloud.firestore.v1.ListCollectionIdsRequest.page_size",
             index=1,
             number=2,
             type=5,
@@ -2380,7 +2380,7 @@ _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="page_token",
-            full_name="google.firestore.v1.ListCollectionIdsRequest.page_token",
+            full_name="google.cloud.firestore.v1.ListCollectionIdsRequest.page_token",
             index=2,
             number=3,
             type=9,
@@ -2412,14 +2412,14 @@ _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
 
 _LISTCOLLECTIONIDSRESPONSE = _descriptor.Descriptor(
     name="ListCollectionIdsResponse",
-    full_name="google.firestore.v1.ListCollectionIdsResponse",
+    full_name="google.cloud.firestore.v1.ListCollectionIdsResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="collection_ids",
-            full_name="google.firestore.v1.ListCollectionIdsResponse.collection_ids",
+            full_name="google.cloud.firestore.v1.ListCollectionIdsResponse.collection_ids",
             index=0,
             number=1,
             type=9,
@@ -2437,7 +2437,7 @@ _LISTCOLLECTIONIDSRESPONSE = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="next_page_token",
-            full_name="google.firestore.v1.ListCollectionIdsResponse.next_page_token",
+            full_name="google.cloud.firestore.v1.ListCollectionIdsResponse.next_page_token",
             index=1,
             number=2,
             type=9,
@@ -2817,7 +2817,7 @@ GetDocumentRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_GETDOCUMENTREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.GetDocument][google.firestore.v1.Firestore.GetDocument].
+  [Firestore.GetDocument][google.cloud.firestore.v1.Firestore.GetDocument].
   
   
   Attributes:
@@ -2838,7 +2838,7 @@ GetDocumentRequest = _reflection.GeneratedProtocolMessageType(
           Reads the version of the document at the given time. This may
           not be older than 60 seconds.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.GetDocumentRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.GetDocumentRequest)
     ),
 )
 _sym_db.RegisterMessage(GetDocumentRequest)
@@ -2850,7 +2850,7 @@ ListDocumentsRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_LISTDOCUMENTSREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.ListDocuments][google.firestore.v1.Firestore.ListDocuments].
+  [Firestore.ListDocuments][google.cloud.firestore.v1.Firestore.ListDocuments].
   
   
   Attributes:
@@ -2889,12 +2889,12 @@ ListDocumentsRequest = _reflection.GeneratedProtocolMessageType(
           If the list should show missing documents. A missing document
           is a document that does not exist but has sub-documents. These
           documents will be returned with a key but will not have
-          fields, [Document.create\_time][google.firestore.v1.Document.c
-          reate\_time], or [Document.update\_time][google.firestore.v1.D
+          fields, [Document.create\_time][google.cloud.firestore.v1.Document.c
+          reate\_time], or [Document.update\_time][google.cloud.firestore.v1.D
           ocument.update\_time] set.  Requests with ``show_missing`` may
           not specify ``where`` or ``order_by``.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.ListDocumentsRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.ListDocumentsRequest)
     ),
 )
 _sym_db.RegisterMessage(ListDocumentsRequest)
@@ -2906,7 +2906,7 @@ ListDocumentsResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_LISTDOCUMENTSRESPONSE,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The response for
-  [Firestore.ListDocuments][google.firestore.v1.Firestore.ListDocuments].
+  [Firestore.ListDocuments][google.cloud.firestore.v1.Firestore.ListDocuments].
   
   
   Attributes:
@@ -2915,7 +2915,7 @@ ListDocumentsResponse = _reflection.GeneratedProtocolMessageType(
       next_page_token:
           The next page token.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.ListDocumentsResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.ListDocumentsResponse)
     ),
 )
 _sym_db.RegisterMessage(ListDocumentsResponse)
@@ -2927,7 +2927,7 @@ CreateDocumentRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_CREATEDOCUMENTREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.CreateDocument][google.firestore.v1.Firestore.CreateDocument].
+  [Firestore.CreateDocument][google.cloud.firestore.v1.Firestore.CreateDocument].
   
   
   Attributes:
@@ -2950,7 +2950,7 @@ CreateDocumentRequest = _reflection.GeneratedProtocolMessageType(
           document has a field that is not present in this mask, that
           field will not be returned in the response.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.CreateDocumentRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.CreateDocumentRequest)
     ),
 )
 _sym_db.RegisterMessage(CreateDocumentRequest)
@@ -2962,7 +2962,7 @@ UpdateDocumentRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_UPDATEDOCUMENTREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.UpdateDocument][google.firestore.v1.Firestore.UpdateDocument].
+  [Firestore.UpdateDocument][google.cloud.firestore.v1.Firestore.UpdateDocument].
   
   
   Attributes:
@@ -2984,7 +2984,7 @@ UpdateDocumentRequest = _reflection.GeneratedProtocolMessageType(
           An optional precondition on the document. The request will
           fail if this is set and not met by the target document.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.UpdateDocumentRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.UpdateDocumentRequest)
     ),
 )
 _sym_db.RegisterMessage(UpdateDocumentRequest)
@@ -2996,7 +2996,7 @@ DeleteDocumentRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_DELETEDOCUMENTREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.DeleteDocument][google.firestore.v1.Firestore.DeleteDocument].
+  [Firestore.DeleteDocument][google.cloud.firestore.v1.Firestore.DeleteDocument].
   
   
   Attributes:
@@ -3008,7 +3008,7 @@ DeleteDocumentRequest = _reflection.GeneratedProtocolMessageType(
           An optional precondition on the document. The request will
           fail if this is set and not met by the target document.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.DeleteDocumentRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.DeleteDocumentRequest)
     ),
 )
 _sym_db.RegisterMessage(DeleteDocumentRequest)
@@ -3020,7 +3020,7 @@ BatchGetDocumentsRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_BATCHGETDOCUMENTSREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.BatchGetDocuments][google.firestore.v1.Firestore.BatchGetDocuments].
+  [Firestore.BatchGetDocuments][google.cloud.firestore.v1.Firestore.BatchGetDocuments].
   
   
   Attributes:
@@ -3050,7 +3050,7 @@ BatchGetDocumentsRequest = _reflection.GeneratedProtocolMessageType(
           Reads documents as they were at the given time. This may not
           be older than 60 seconds.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.BatchGetDocumentsRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.BatchGetDocumentsRequest)
     ),
 )
 _sym_db.RegisterMessage(BatchGetDocumentsRequest)
@@ -3062,7 +3062,7 @@ BatchGetDocumentsResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_BATCHGETDOCUMENTSRESPONSE,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The streamed response for
-  [Firestore.BatchGetDocuments][google.firestore.v1.Firestore.BatchGetDocuments].
+  [Firestore.BatchGetDocuments][google.cloud.firestore.v1.Firestore.BatchGetDocuments].
   
   
   Attributes:
@@ -3078,7 +3078,7 @@ BatchGetDocumentsResponse = _reflection.GeneratedProtocolMessageType(
       transaction:
           The transaction that was started as part of this request. Will
           only be set in the first response, and only if [BatchGetDocume
-          ntsRequest.new\_transaction][google.firestore.v1.BatchGetDocum
+          ntsRequest.new\_transaction][google.cloud.firestore.v1.BatchGetDocum
           entsRequest.new\_transaction] was set in the request.
       read_time:
           The time at which the document was read. This may be
@@ -3086,7 +3086,7 @@ BatchGetDocumentsResponse = _reflection.GeneratedProtocolMessageType(
           the result stream are guaranteed not to have changed between
           their read\_time and this one.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.BatchGetDocumentsResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.BatchGetDocumentsResponse)
     ),
 )
 _sym_db.RegisterMessage(BatchGetDocumentsResponse)
@@ -3098,7 +3098,7 @@ BeginTransactionRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_BEGINTRANSACTIONREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.BeginTransaction][google.firestore.v1.Firestore.BeginTransaction].
+  [Firestore.BeginTransaction][google.cloud.firestore.v1.Firestore.BeginTransaction].
   
   
   Attributes:
@@ -3109,7 +3109,7 @@ BeginTransactionRequest = _reflection.GeneratedProtocolMessageType(
           The options for the transaction. Defaults to a read-write
           transaction.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.BeginTransactionRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.BeginTransactionRequest)
     ),
 )
 _sym_db.RegisterMessage(BeginTransactionRequest)
@@ -3121,14 +3121,14 @@ BeginTransactionResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_BEGINTRANSACTIONRESPONSE,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The response for
-  [Firestore.BeginTransaction][google.firestore.v1.Firestore.BeginTransaction].
+  [Firestore.BeginTransaction][google.cloud.firestore.v1.Firestore.BeginTransaction].
   
   
   Attributes:
       transaction:
           The transaction that was started.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.BeginTransactionResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.BeginTransactionResponse)
     ),
 )
 _sym_db.RegisterMessage(BeginTransactionResponse)
@@ -3140,7 +3140,7 @@ CommitRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_COMMITREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.Commit][google.firestore.v1.Firestore.Commit].
+  [Firestore.Commit][google.cloud.firestore.v1.Firestore.Commit].
   
   
   Attributes:
@@ -3153,7 +3153,7 @@ CommitRequest = _reflection.GeneratedProtocolMessageType(
           If set, applies all writes in this transaction, and commits
           it.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.CommitRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.CommitRequest)
     ),
 )
 _sym_db.RegisterMessage(CommitRequest)
@@ -3165,7 +3165,7 @@ CommitResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_COMMITRESPONSE,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The response for
-  [Firestore.Commit][google.firestore.v1.Firestore.Commit].
+  [Firestore.Commit][google.cloud.firestore.v1.Firestore.Commit].
   
   
   Attributes:
@@ -3177,7 +3177,7 @@ CommitResponse = _reflection.GeneratedProtocolMessageType(
           or greater ``read_time`` is guaranteed to see the effects of
           the commit.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.CommitResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.CommitResponse)
     ),
 )
 _sym_db.RegisterMessage(CommitResponse)
@@ -3189,7 +3189,7 @@ RollbackRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_ROLLBACKREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.Rollback][google.firestore.v1.Firestore.Rollback].
+  [Firestore.Rollback][google.cloud.firestore.v1.Firestore.Rollback].
   
   
   Attributes:
@@ -3199,7 +3199,7 @@ RollbackRequest = _reflection.GeneratedProtocolMessageType(
       transaction:
           Required. The transaction to roll back.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.RollbackRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.RollbackRequest)
     ),
 )
 _sym_db.RegisterMessage(RollbackRequest)
@@ -3211,7 +3211,7 @@ RunQueryRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_RUNQUERYREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.RunQuery][google.firestore.v1.Firestore.RunQuery].
+  [Firestore.RunQuery][google.cloud.firestore.v1.Firestore.RunQuery].
   
   
   Attributes:
@@ -3240,7 +3240,7 @@ RunQueryRequest = _reflection.GeneratedProtocolMessageType(
           Reads documents as they were at the given time. This may not
           be older than 60 seconds.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.RunQueryRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.RunQueryRequest)
     ),
 )
 _sym_db.RegisterMessage(RunQueryRequest)
@@ -3252,14 +3252,14 @@ RunQueryResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_RUNQUERYRESPONSE,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The response for
-  [Firestore.RunQuery][google.firestore.v1.Firestore.RunQuery].
+  [Firestore.RunQuery][google.cloud.firestore.v1.Firestore.RunQuery].
   
   
   Attributes:
       transaction:
           The transaction that was started as part of this request. Can
           only be set in the first response, and only if [RunQueryReques
-          t.new\_transaction][google.firestore.v1.RunQueryRequest.new\_t
+          t.new\_transaction][google.cloud.firestore.v1.RunQueryRequest.new\_t
           ransaction] was set in the request. If set, no other fields
           will be set in this response.
       document:
@@ -3276,7 +3276,7 @@ RunQueryResponse = _reflection.GeneratedProtocolMessageType(
           The number of results that have been skipped due to an offset
           between the last response and the current response.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.RunQueryResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.RunQueryResponse)
     ),
 )
 _sym_db.RegisterMessage(RunQueryResponse)
@@ -3291,13 +3291,13 @@ WriteRequest = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_WRITEREQUEST_LABELSENTRY,
                 __module__="google.cloud.firestore_v1.proto.firestore_pb2"
-                # @@protoc_insertion_point(class_scope:google.firestore.v1.WriteRequest.LabelsEntry)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.WriteRequest.LabelsEntry)
             ),
         ),
         DESCRIPTOR=_WRITEREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.Write][google.firestore.v1.Firestore.Write].
+  [Firestore.Write][google.cloud.firestore.v1.Firestore.Write].
   
   The first request creates a stream, or resumes an existing one from a
   token.
@@ -3327,7 +3327,7 @@ WriteRequest = _reflection.GeneratedProtocolMessageType(
       stream_token:
           A stream token that was previously sent by the server.  The
           client should set this field to the token from the most recent
-          [WriteResponse][google.firestore.v1.WriteResponse] it has
+          [WriteResponse][google.cloud.firestore.v1.WriteResponse] it has
           received. This acknowledges that the client has received
           responses up to this token. After sending this token, earlier
           tokens may not be used anymore.  The server may close the
@@ -3339,7 +3339,7 @@ WriteRequest = _reflection.GeneratedProtocolMessageType(
       labels:
           Labels associated with this write request.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.WriteRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.WriteRequest)
     ),
 )
 _sym_db.RegisterMessage(WriteRequest)
@@ -3352,7 +3352,7 @@ WriteResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_WRITERESPONSE,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The response for
-  [Firestore.Write][google.firestore.v1.Firestore.Write].
+  [Firestore.Write][google.cloud.firestore.v1.Firestore.Write].
   
   
   Attributes:
@@ -3371,7 +3371,7 @@ WriteResponse = _reflection.GeneratedProtocolMessageType(
           or greater ``read_time`` is guaranteed to see the effects of
           the write.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.WriteResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.WriteResponse)
     ),
 )
 _sym_db.RegisterMessage(WriteResponse)
@@ -3386,13 +3386,13 @@ ListenRequest = _reflection.GeneratedProtocolMessageType(
             dict(
                 DESCRIPTOR=_LISTENREQUEST_LABELSENTRY,
                 __module__="google.cloud.firestore_v1.proto.firestore_pb2"
-                # @@protoc_insertion_point(class_scope:google.firestore.v1.ListenRequest.LabelsEntry)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.ListenRequest.LabelsEntry)
             ),
         ),
         DESCRIPTOR=_LISTENREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""A request for
-  [Firestore.Listen][google.firestore.v1.Firestore.Listen]
+  [Firestore.Listen][google.cloud.firestore.v1.Firestore.Listen]
   
   
   Attributes:
@@ -3408,7 +3408,7 @@ ListenRequest = _reflection.GeneratedProtocolMessageType(
       labels:
           Labels associated with this target change.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.ListenRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.ListenRequest)
     ),
 )
 _sym_db.RegisterMessage(ListenRequest)
@@ -3421,7 +3421,7 @@ ListenResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_LISTENRESPONSE,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The response for
-  [Firestore.Listen][google.firestore.v1.Firestore.Listen].
+  [Firestore.Listen][google.cloud.firestore.v1.Firestore.Listen].
   
   
   Attributes:
@@ -3430,11 +3430,11 @@ ListenResponse = _reflection.GeneratedProtocolMessageType(
       target_change:
           Targets have changed.
       document_change:
-          A [Document][google.firestore.v1.Document] has changed.
+          A [Document][google.cloud.firestore.v1.Document] has changed.
       document_delete:
-          A [Document][google.firestore.v1.Document] has been deleted.
+          A [Document][google.cloud.firestore.v1.Document] has been deleted.
       document_remove:
-          A [Document][google.firestore.v1.Document] has been removed
+          A [Document][google.cloud.firestore.v1.Document] has been removed
           from a target (because it is no longer relevant to that
           target).
       filter:
@@ -3443,7 +3443,7 @@ ListenResponse = _reflection.GeneratedProtocolMessageType(
           removed from the given target, but the exact documents are
           unknown.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.ListenResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.ListenResponse)
     ),
 )
 _sym_db.RegisterMessage(ListenResponse)
@@ -3469,7 +3469,7 @@ Target = _reflection.GeneratedProtocolMessageType(
             child resource of the given ``database``. Duplicate names will
             be elided.
     """,
-                # @@protoc_insertion_point(class_scope:google.firestore.v1.Target.DocumentsTarget)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.Target.DocumentsTarget)
             ),
         ),
         QueryTarget=_reflection.GeneratedProtocolMessageType(
@@ -3495,7 +3495,7 @@ Target = _reflection.GeneratedProtocolMessageType(
         structured_query:
             A structured query.
     """,
-                # @@protoc_insertion_point(class_scope:google.firestore.v1.Target.QueryTarget)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.Target.QueryTarget)
             ),
         ),
         DESCRIPTOR=_TARGET,
@@ -3515,7 +3515,7 @@ Target = _reflection.GeneratedProtocolMessageType(
           Documents are returned before any subsequent changes.
       resume_token:
           A resume token from a prior
-          [TargetChange][google.firestore.v1.TargetChange] for an
+          [TargetChange][google.cloud.firestore.v1.TargetChange] for an
           identical target.  Using a resume token with a different
           target is unsupported and may fail.
       read_time:
@@ -3528,7 +3528,7 @@ Target = _reflection.GeneratedProtocolMessageType(
           If the target should be removed once it is current and
           consistent.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.Target)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.Target)
     ),
 )
 _sym_db.RegisterMessage(Target)
@@ -3568,7 +3568,7 @@ TargetChange = _reflection.GeneratedProtocolMessageType(
           stream, ``read_time`` is guaranteed to be monotonically
           increasing.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.TargetChange)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.TargetChange)
     ),
 )
 _sym_db.RegisterMessage(TargetChange)
@@ -3580,7 +3580,7 @@ ListCollectionIdsRequest = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_LISTCOLLECTIONIDSREQUEST,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The request for
-  [Firestore.ListCollectionIds][google.firestore.v1.Firestore.ListCollectionIds].
+  [Firestore.ListCollectionIds][google.cloud.firestore.v1.Firestore.ListCollectionIds].
   
   
   Attributes:
@@ -3593,9 +3593,9 @@ ListCollectionIdsRequest = _reflection.GeneratedProtocolMessageType(
           The maximum number of results to return.
       page_token:
           A page token. Must be a value from [ListCollectionIdsResponse]
-          [google.firestore.v1.ListCollectionIdsResponse].
+          [google.cloud.firestore.v1.ListCollectionIdsResponse].
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.ListCollectionIdsRequest)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.ListCollectionIdsRequest)
     ),
 )
 _sym_db.RegisterMessage(ListCollectionIdsRequest)
@@ -3607,7 +3607,7 @@ ListCollectionIdsResponse = _reflection.GeneratedProtocolMessageType(
         DESCRIPTOR=_LISTCOLLECTIONIDSRESPONSE,
         __module__="google.cloud.firestore_v1.proto.firestore_pb2",
         __doc__="""The response from
-  [Firestore.ListCollectionIds][google.firestore.v1.Firestore.ListCollectionIds].
+  [Firestore.ListCollectionIds][google.cloud.firestore.v1.Firestore.ListCollectionIds].
   
   
   Attributes:
@@ -3616,7 +3616,7 @@ ListCollectionIdsResponse = _reflection.GeneratedProtocolMessageType(
       next_page_token:
           A page token that may be used to continue the list.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.v1.ListCollectionIdsResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.v1.ListCollectionIdsResponse)
     ),
 )
 _sym_db.RegisterMessage(ListCollectionIdsResponse)
@@ -3645,7 +3645,7 @@ _LISTCOLLECTIONIDSREQUEST.fields_by_name["parent"]._options = None
 
 _FIRESTORE = _descriptor.ServiceDescriptor(
     name="Firestore",
-    full_name="google.firestore.v1.Firestore",
+    full_name="google.cloud.firestore.v1.Firestore",
     file=DESCRIPTOR,
     index=0,
     serialized_options=_b(
@@ -3656,7 +3656,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
     methods=[
         _descriptor.MethodDescriptor(
             name="GetDocument",
-            full_name="google.firestore.v1.Firestore.GetDocument",
+            full_name="google.cloud.firestore.v1.Firestore.GetDocument",
             index=0,
             containing_service=None,
             input_type=_GETDOCUMENTREQUEST,
@@ -3667,7 +3667,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="ListDocuments",
-            full_name="google.firestore.v1.Firestore.ListDocuments",
+            full_name="google.cloud.firestore.v1.Firestore.ListDocuments",
             index=1,
             containing_service=None,
             input_type=_LISTDOCUMENTSREQUEST,
@@ -3678,7 +3678,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="CreateDocument",
-            full_name="google.firestore.v1.Firestore.CreateDocument",
+            full_name="google.cloud.firestore.v1.Firestore.CreateDocument",
             index=2,
             containing_service=None,
             input_type=_CREATEDOCUMENTREQUEST,
@@ -3689,7 +3689,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="UpdateDocument",
-            full_name="google.firestore.v1.Firestore.UpdateDocument",
+            full_name="google.cloud.firestore.v1.Firestore.UpdateDocument",
             index=3,
             containing_service=None,
             input_type=_UPDATEDOCUMENTREQUEST,
@@ -3700,7 +3700,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="DeleteDocument",
-            full_name="google.firestore.v1.Firestore.DeleteDocument",
+            full_name="google.cloud.firestore.v1.Firestore.DeleteDocument",
             index=4,
             containing_service=None,
             input_type=_DELETEDOCUMENTREQUEST,
@@ -3711,7 +3711,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="BatchGetDocuments",
-            full_name="google.firestore.v1.Firestore.BatchGetDocuments",
+            full_name="google.cloud.firestore.v1.Firestore.BatchGetDocuments",
             index=5,
             containing_service=None,
             input_type=_BATCHGETDOCUMENTSREQUEST,
@@ -3722,7 +3722,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="BeginTransaction",
-            full_name="google.firestore.v1.Firestore.BeginTransaction",
+            full_name="google.cloud.firestore.v1.Firestore.BeginTransaction",
             index=6,
             containing_service=None,
             input_type=_BEGINTRANSACTIONREQUEST,
@@ -3733,7 +3733,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="Commit",
-            full_name="google.firestore.v1.Firestore.Commit",
+            full_name="google.cloud.firestore.v1.Firestore.Commit",
             index=7,
             containing_service=None,
             input_type=_COMMITREQUEST,
@@ -3744,7 +3744,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="Rollback",
-            full_name="google.firestore.v1.Firestore.Rollback",
+            full_name="google.cloud.firestore.v1.Firestore.Rollback",
             index=8,
             containing_service=None,
             input_type=_ROLLBACKREQUEST,
@@ -3755,7 +3755,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="RunQuery",
-            full_name="google.firestore.v1.Firestore.RunQuery",
+            full_name="google.cloud.firestore.v1.Firestore.RunQuery",
             index=9,
             containing_service=None,
             input_type=_RUNQUERYREQUEST,
@@ -3766,7 +3766,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="Write",
-            full_name="google.firestore.v1.Firestore.Write",
+            full_name="google.cloud.firestore.v1.Firestore.Write",
             index=10,
             containing_service=None,
             input_type=_WRITEREQUEST,
@@ -3777,7 +3777,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="Listen",
-            full_name="google.firestore.v1.Firestore.Listen",
+            full_name="google.cloud.firestore.v1.Firestore.Listen",
             index=11,
             containing_service=None,
             input_type=_LISTENREQUEST,
@@ -3788,7 +3788,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         ),
         _descriptor.MethodDescriptor(
             name="ListCollectionIds",
-            full_name="google.firestore.v1.Firestore.ListCollectionIds",
+            full_name="google.cloud.firestore.v1.Firestore.ListCollectionIds",
             index=12,
             containing_service=None,
             input_type=_LISTCOLLECTIONIDSREQUEST,

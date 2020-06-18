@@ -26,10 +26,10 @@ from google.cloud.firestore_v1beta1.proto import (
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore_v1beta1/proto/event_flow_document_change.proto",
-    package="google.firestore.v1beta1",
+    package="google.cloud.firestore.v1beta1",
     syntax="proto3",
     serialized_pb=_b(
-        "\nEgoogle/cloud/firestore_v1beta1/proto/event_flow_document_change.proto\x12\x18google.firestore.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a\x31google/cloud/firestore_v1beta1/proto/common.proto\x1a\x33google/cloud/firestore_v1beta1/proto/document.protoB\xa2\x01\n\x1c\x63om.google.firestore.v1beta1B\x1c\x45ventFlowDocumentChangeProtoP\x01ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\xaa\x02\x1eGoogle.Cloud.Firestore.V1Beta1b\x06proto3"
+        "\nEgoogle/cloud/firestore_v1beta1/proto/event_flow_document_change.proto\x12\x18google.cloud.firestore.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a\x31google/cloud/firestore_v1beta1/proto/common.proto\x1a\x33google/cloud/firestore_v1beta1/proto/document.protoB\xa2\x01\n\x1c\x63om.google.cloud.firestore.v1beta1B\x1c\x45ventFlowDocumentChangeProtoP\x01ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\xaa\x02\x1eGoogle.Cloud.Firestore.V1Beta1b\x06proto3"
     ),
     dependencies=[
         google_dot_api_dot_annotations__pb2.DESCRIPTOR,
@@ -46,7 +46,7 @@ DESCRIPTOR.has_options = True
 DESCRIPTOR._options = _descriptor._ParseOptions(
     descriptor_pb2.FileOptions(),
     _b(
-        "\n\034com.google.firestore.v1beta1B\034EventFlowDocumentChangeProtoP\001ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\252\002\036Google.Cloud.Firestore.V1Beta1"
+        "\n\034com.google.cloud.firestore.v1beta1B\034EventFlowDocumentChangeProtoP\001ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\252\002\036Google.Cloud.Firestore.V1Beta1"
     ),
 )
 try:

@@ -21,13 +21,13 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore/admin_v1/proto/index.proto",
-    package="google.firestore.admin.v1",
+    package="google.cloud.firestore.admin.v1",
     syntax="proto3",
     serialized_options=_b(
-        "\n\035com.google.firestore.admin.v1B\nIndexProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1"
+        "\n\035com.google.cloud.firestore.admin.v1B\nIndexProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1"
     ),
     serialized_pb=_b(
-        '\n1google/cloud/firestore/admin_v1/proto/index.proto\x12\x19google.firestore.admin.v1\x1a\x19google/api/resource.proto\x1a\x1cgoogle/api/annotations.proto"\xa3\x06\n\x05Index\x12\x0c\n\x04name\x18\x01 \x01(\t\x12@\n\x0bquery_scope\x18\x02 \x01(\x0e\x32+.google.firestore.admin.v1.Index.QueryScope\x12;\n\x06\x66ields\x18\x03 \x03(\x0b\x32+.google.firestore.admin.v1.Index.IndexField\x12\x35\n\x05state\x18\x04 \x01(\x0e\x32&.google.firestore.admin.v1.Index.State\x1a\xbd\x02\n\nIndexField\x12\x12\n\nfield_path\x18\x01 \x01(\t\x12\x42\n\x05order\x18\x02 \x01(\x0e\x32\x31.google.firestore.admin.v1.Index.IndexField.OrderH\x00\x12O\n\x0c\x61rray_config\x18\x03 \x01(\x0e\x32\x37.google.firestore.admin.v1.Index.IndexField.ArrayConfigH\x00"=\n\x05Order\x12\x15\n\x11ORDER_UNSPECIFIED\x10\x00\x12\r\n\tASCENDING\x10\x01\x12\x0e\n\nDESCENDING\x10\x02"9\n\x0b\x41rrayConfig\x12\x1c\n\x18\x41RRAY_CONFIG_UNSPECIFIED\x10\x00\x12\x0c\n\x08\x43ONTAINS\x10\x01\x42\x0c\n\nvalue_mode"O\n\nQueryScope\x12\x1b\n\x17QUERY_SCOPE_UNSPECIFIED\x10\x00\x12\x0e\n\nCOLLECTION\x10\x01\x12\x14\n\x10\x43OLLECTION_GROUP\x10\x02"I\n\x05State\x12\x15\n\x11STATE_UNSPECIFIED\x10\x00\x12\x0c\n\x08\x43REATING\x10\x01\x12\t\n\x05READY\x10\x02\x12\x10\n\x0cNEEDS_REPAIR\x10\x03:z\xea\x41w\n\x1e\x66irestore.googleapis.com/Index\x12Uprojects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}B\xb8\x01\n\x1d\x63om.google.firestore.admin.v1B\nIndexProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1b\x06proto3'
+        '\n1google/cloud/firestore/admin_v1/proto/index.proto\x12\x19google.cloud.firestore.admin.v1\x1a\x19google/api/resource.proto\x1a\x1cgoogle/api/annotations.proto"\xa3\x06\n\x05Index\x12\x0c\n\x04name\x18\x01 \x01(\t\x12@\n\x0bquery_scope\x18\x02 \x01(\x0e\x32+.google.cloud.firestore.admin.v1.Index.QueryScope\x12;\n\x06\x66ields\x18\x03 \x03(\x0b\x32+.google.cloud.firestore.admin.v1.Index.IndexField\x12\x35\n\x05state\x18\x04 \x01(\x0e\x32&.google.cloud.firestore.admin.v1.Index.State\x1a\xbd\x02\n\nIndexField\x12\x12\n\nfield_path\x18\x01 \x01(\t\x12\x42\n\x05order\x18\x02 \x01(\x0e\x32\x31.google.cloud.firestore.admin.v1.Index.IndexField.OrderH\x00\x12O\n\x0c\x61rray_config\x18\x03 \x01(\x0e\x32\x37.google.cloud.firestore.admin.v1.Index.IndexField.ArrayConfigH\x00"=\n\x05Order\x12\x15\n\x11ORDER_UNSPECIFIED\x10\x00\x12\r\n\tASCENDING\x10\x01\x12\x0e\n\nDESCENDING\x10\x02"9\n\x0b\x41rrayConfig\x12\x1c\n\x18\x41RRAY_CONFIG_UNSPECIFIED\x10\x00\x12\x0c\n\x08\x43ONTAINS\x10\x01\x42\x0c\n\nvalue_mode"O\n\nQueryScope\x12\x1b\n\x17QUERY_SCOPE_UNSPECIFIED\x10\x00\x12\x0e\n\nCOLLECTION\x10\x01\x12\x14\n\x10\x43OLLECTION_GROUP\x10\x02"I\n\x05State\x12\x15\n\x11STATE_UNSPECIFIED\x10\x00\x12\x0c\n\x08\x43REATING\x10\x01\x12\t\n\x05READY\x10\x02\x12\x10\n\x0cNEEDS_REPAIR\x10\x03:z\xea\x41w\n\x1e\x66irestore.googleapis.com/Index\x12Uprojects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}B\xb8\x01\n\x1d\x63om.google.cloud.firestore.admin.v1B\nIndexProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1b\x06proto3'
     ),
     dependencies=[
         google_dot_api_dot_resource__pb2.DESCRIPTOR,
@@ -38,7 +38,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _INDEX_INDEXFIELD_ORDER = _descriptor.EnumDescriptor(
     name="Order",
-    full_name="google.firestore.admin.v1.Index.IndexField.Order",
+    full_name="google.cloud.firestore.admin.v1.Index.IndexField.Order",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -65,7 +65,7 @@ _sym_db.RegisterEnumDescriptor(_INDEX_INDEXFIELD_ORDER)
 
 _INDEX_INDEXFIELD_ARRAYCONFIG = _descriptor.EnumDescriptor(
     name="ArrayConfig",
-    full_name="google.firestore.admin.v1.Index.IndexField.ArrayConfig",
+    full_name="google.cloud.firestore.admin.v1.Index.IndexField.ArrayConfig",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -89,7 +89,7 @@ _sym_db.RegisterEnumDescriptor(_INDEX_INDEXFIELD_ARRAYCONFIG)
 
 _INDEX_QUERYSCOPE = _descriptor.EnumDescriptor(
     name="QueryScope",
-    full_name="google.firestore.admin.v1.Index.QueryScope",
+    full_name="google.cloud.firestore.admin.v1.Index.QueryScope",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -120,7 +120,7 @@ _sym_db.RegisterEnumDescriptor(_INDEX_QUERYSCOPE)
 
 _INDEX_STATE = _descriptor.EnumDescriptor(
     name="State",
-    full_name="google.firestore.admin.v1.Index.State",
+    full_name="google.cloud.firestore.admin.v1.Index.State",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -151,14 +151,14 @@ _sym_db.RegisterEnumDescriptor(_INDEX_STATE)
 
 _INDEX_INDEXFIELD = _descriptor.Descriptor(
     name="IndexField",
-    full_name="google.firestore.admin.v1.Index.IndexField",
+    full_name="google.cloud.firestore.admin.v1.Index.IndexField",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="field_path",
-            full_name="google.firestore.admin.v1.Index.IndexField.field_path",
+            full_name="google.cloud.firestore.admin.v1.Index.IndexField.field_path",
             index=0,
             number=1,
             type=9,
@@ -176,7 +176,7 @@ _INDEX_INDEXFIELD = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="order",
-            full_name="google.firestore.admin.v1.Index.IndexField.order",
+            full_name="google.cloud.firestore.admin.v1.Index.IndexField.order",
             index=1,
             number=2,
             type=14,
@@ -194,7 +194,7 @@ _INDEX_INDEXFIELD = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="array_config",
-            full_name="google.firestore.admin.v1.Index.IndexField.array_config",
+            full_name="google.cloud.firestore.admin.v1.Index.IndexField.array_config",
             index=2,
             number=3,
             type=14,
@@ -221,7 +221,7 @@ _INDEX_INDEXFIELD = _descriptor.Descriptor(
     oneofs=[
         _descriptor.OneofDescriptor(
             name="value_mode",
-            full_name="google.firestore.admin.v1.Index.IndexField.value_mode",
+            full_name="google.cloud.firestore.admin.v1.Index.IndexField.value_mode",
             index=0,
             containing_type=None,
             fields=[],
@@ -233,14 +233,14 @@ _INDEX_INDEXFIELD = _descriptor.Descriptor(
 
 _INDEX = _descriptor.Descriptor(
     name="Index",
-    full_name="google.firestore.admin.v1.Index",
+    full_name="google.cloud.firestore.admin.v1.Index",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
-            full_name="google.firestore.admin.v1.Index.name",
+            full_name="google.cloud.firestore.admin.v1.Index.name",
             index=0,
             number=1,
             type=9,
@@ -258,7 +258,7 @@ _INDEX = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="query_scope",
-            full_name="google.firestore.admin.v1.Index.query_scope",
+            full_name="google.cloud.firestore.admin.v1.Index.query_scope",
             index=1,
             number=2,
             type=14,
@@ -276,7 +276,7 @@ _INDEX = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="fields",
-            full_name="google.firestore.admin.v1.Index.fields",
+            full_name="google.cloud.firestore.admin.v1.Index.fields",
             index=2,
             number=3,
             type=11,
@@ -294,7 +294,7 @@ _INDEX = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="state",
-            full_name="google.firestore.admin.v1.Index.state",
+            full_name="google.cloud.firestore.admin.v1.Index.state",
             index=3,
             number=4,
             type=14,
@@ -379,7 +379,7 @@ Index = _reflection.GeneratedProtocolMessageType(
             Indicates that this field supports operations on
             ``array_value``\ s.
     """,
-                # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.Index.IndexField)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.Index.IndexField)
             ),
         ),
         DESCRIPTOR=_INDEX,
@@ -417,7 +417,7 @@ Index = _reflection.GeneratedProtocolMessageType(
       state:
           Output only. The serving state of the index.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.Index)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.Index)
     ),
 )
 _sym_db.RegisterMessage(Index)

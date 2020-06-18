@@ -50,17 +50,20 @@ for version in versions:
 
 
     s.replace(
-        f"tests/unit/gapic/{version}/test_firestore_client_{version}.py",
-        f"from google.cloud import firestore_{version}",
-        f"from google.cloud.firestore_{version}.gapic import firestore_client",
+        f"tests/unit/gapic/*.py",
+        f"google.firestore",
+        f"google.cloud.firestore",
     )
-
     s.replace(
-        f"tests/unit/gapic/{version}/test_firestore_client_{version}.py",
-        f"client = firestore_{version}.FirestoreClient",
-        "client = firestore_client.FirestoreClient",
+        f"google/cloud/**/*.py",
+        f"google.firestore",
+        f"google.cloud.firestore",
     )
-
+    s.replace(
+        f"docs/**/*.rst",
+        f"google.firestore",
+        f"google.cloud.firestore",
+    )
 
 # ----------------------------------------------------------------------------
 # Generate firestore admin GAPIC layer

@@ -1,5 +1,5 @@
 Types for Google Firestore v1beta1 API
 ======================================
 
-.. automodule:: google.firestore_v1beta1.types
+.. automodule:: google.cloud.firestore_v1beta1.types
     :members:

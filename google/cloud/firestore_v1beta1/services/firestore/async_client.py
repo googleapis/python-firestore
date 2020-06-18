@@ -28,12 +28,12 @@ from google.api_core import retry as retries  # type: ignore
 from google.auth import credentials  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 
-from google.firestore_v1beta1.services.firestore import pagers
-from google.firestore_v1beta1.types import common
-from google.firestore_v1beta1.types import document
-from google.firestore_v1beta1.types import document as gf_document
-from google.firestore_v1beta1.types import firestore
-from google.firestore_v1beta1.types import write as gf_write
+from google.cloud.firestore_v1beta1.services.firestore import pagers
+from google.cloud.firestore_v1beta1.types import common
+from google.cloud.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import document as gf_document
+from google.cloud.firestore_v1beta1.types import firestore
+from google.cloud.firestore_v1beta1.types import write as gf_write
 from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 
 from .transports.base import FirestoreTransport
@@ -127,7 +127,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.GetDocumentRequest`):
                 The request object. The request for
-                [Firestore.GetDocument][google.firestore.v1beta1.Firestore.GetDocument].
+                [Firestore.GetDocument][google.cloud.firestore.v1beta1.Firestore.GetDocument].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -178,7 +178,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.ListDocumentsRequest`):
                 The request object. The request for
-                [Firestore.ListDocuments][google.firestore.v1beta1.Firestore.ListDocuments].
+                [Firestore.ListDocuments][google.cloud.firestore.v1beta1.Firestore.ListDocuments].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -189,7 +189,7 @@ class FirestoreAsyncClient:
         Returns:
             ~.pagers.ListDocumentsAsyncPager:
                 The response for
-                [Firestore.ListDocuments][google.firestore.v1beta1.Firestore.ListDocuments].
+                [Firestore.ListDocuments][google.cloud.firestore.v1beta1.Firestore.ListDocuments].
 
                 Iterating over this object will yield results and
                 resolve additional pages automatically.
@@ -238,7 +238,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.CreateDocumentRequest`):
                 The request object. The request for
-                [Firestore.CreateDocument][google.firestore.v1beta1.Firestore.CreateDocument].
+                [Firestore.CreateDocument][google.cloud.firestore.v1beta1.Firestore.CreateDocument].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -291,7 +291,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.UpdateDocumentRequest`):
                 The request object. The request for
-                [Firestore.UpdateDocument][google.firestore.v1beta1.Firestore.UpdateDocument].
+                [Firestore.UpdateDocument][google.cloud.firestore.v1beta1.Firestore.UpdateDocument].
             document (:class:`~.gf_document.Document`):
                 Required. The updated document.
                 Creates the document if it does not
@@ -380,7 +380,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.DeleteDocumentRequest`):
                 The request object. The request for
-                [Firestore.DeleteDocument][google.firestore.v1beta1.Firestore.DeleteDocument].
+                [Firestore.DeleteDocument][google.cloud.firestore.v1beta1.Firestore.DeleteDocument].
             name (:class:`str`):
                 Required. The resource name of the Document to delete.
                 In the format:
@@ -444,7 +444,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.BatchGetDocumentsRequest`):
                 The request object. The request for
-                [Firestore.BatchGetDocuments][google.firestore.v1beta1.Firestore.BatchGetDocuments].
+                [Firestore.BatchGetDocuments][google.cloud.firestore.v1beta1.Firestore.BatchGetDocuments].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -455,7 +455,7 @@ class FirestoreAsyncClient:
         Returns:
             AsyncIterable[~.firestore.BatchGetDocumentsResponse]:
                 The streamed response for
-                [Firestore.BatchGetDocuments][google.firestore.v1beta1.Firestore.BatchGetDocuments].
+                [Firestore.BatchGetDocuments][google.cloud.firestore.v1beta1.Firestore.BatchGetDocuments].
 
         """
         # Create or coerce a protobuf request object.
@@ -496,7 +496,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.BeginTransactionRequest`):
                 The request object. The request for
-                [Firestore.BeginTransaction][google.firestore.v1beta1.Firestore.BeginTransaction].
+                [Firestore.BeginTransaction][google.cloud.firestore.v1beta1.Firestore.BeginTransaction].
             database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
@@ -513,7 +513,7 @@ class FirestoreAsyncClient:
         Returns:
             ~.firestore.BeginTransactionResponse:
                 The response for
-                [Firestore.BeginTransaction][google.firestore.v1beta1.Firestore.BeginTransaction].
+                [Firestore.BeginTransaction][google.cloud.firestore.v1beta1.Firestore.BeginTransaction].
 
         """
         # Create or coerce a protobuf request object.
@@ -569,7 +569,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.CommitRequest`):
                 The request object. The request for
-                [Firestore.Commit][google.firestore.v1beta1.Firestore.Commit].
+                [Firestore.Commit][google.cloud.firestore.v1beta1.Firestore.Commit].
             database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
@@ -592,7 +592,7 @@ class FirestoreAsyncClient:
         Returns:
             ~.firestore.CommitResponse:
                 The response for
-                [Firestore.Commit][google.firestore.v1beta1.Firestore.Commit].
+                [Firestore.Commit][google.cloud.firestore.v1beta1.Firestore.Commit].
 
         """
         # Create or coerce a protobuf request object.
@@ -649,7 +649,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.RollbackRequest`):
                 The request object. The request for
-                [Firestore.Rollback][google.firestore.v1beta1.Firestore.Rollback].
+                [Firestore.Rollback][google.cloud.firestore.v1beta1.Firestore.Rollback].
             database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
@@ -718,7 +718,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.RunQueryRequest`):
                 The request object. The request for
-                [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
+                [Firestore.RunQuery][google.cloud.firestore.v1beta1.Firestore.RunQuery].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -729,7 +729,7 @@ class FirestoreAsyncClient:
         Returns:
             AsyncIterable[~.firestore.RunQueryResponse]:
                 The response for
-                [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
+                [Firestore.RunQuery][google.cloud.firestore.v1beta1.Firestore.RunQuery].
 
         """
         # Create or coerce a protobuf request object.
@@ -770,7 +770,7 @@ class FirestoreAsyncClient:
         Args:
             requests (AsyncIterator[`~.firestore.WriteRequest`]):
                 The request object AsyncIterator. The request for
-                [Firestore.Write][google.firestore.v1beta1.Firestore.Write].
+                [Firestore.Write][google.cloud.firestore.v1beta1.Firestore.Write].
                 The first request creates a stream, or resumes an
                 existing one from a token.
                 When creating a new stream, the server replies with a
@@ -790,7 +790,7 @@ class FirestoreAsyncClient:
         Returns:
             AsyncIterable[~.firestore.WriteResponse]:
                 The response for
-                [Firestore.Write][google.firestore.v1beta1.Firestore.Write].
+                [Firestore.Write][google.cloud.firestore.v1beta1.Firestore.Write].
 
         """
 
@@ -825,7 +825,7 @@ class FirestoreAsyncClient:
         Args:
             requests (AsyncIterator[`~.firestore.ListenRequest`]):
                 The request object AsyncIterator. A request for
-                [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen]
+                [Firestore.Listen][google.cloud.firestore.v1beta1.Firestore.Listen]
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -835,7 +835,7 @@ class FirestoreAsyncClient:
         Returns:
             AsyncIterable[~.firestore.ListenResponse]:
                 The response for
-                [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen].
+                [Firestore.Listen][google.cloud.firestore.v1beta1.Firestore.Listen].
 
         """
 
@@ -871,7 +871,7 @@ class FirestoreAsyncClient:
         Args:
             request (:class:`~.firestore.ListCollectionIdsRequest`):
                 The request object. The request for
-                [Firestore.ListCollectionIds][google.firestore.v1beta1.Firestore.ListCollectionIds].
+                [Firestore.ListCollectionIds][google.cloud.firestore.v1beta1.Firestore.ListCollectionIds].
             parent (:class:`str`):
                 Required. The parent document. In the format:
                 ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
@@ -890,7 +890,7 @@ class FirestoreAsyncClient:
         Returns:
             ~.firestore.ListCollectionIdsResponse:
                 The response from
-                [Firestore.ListCollectionIds][google.firestore.v1beta1.Firestore.ListCollectionIds].
+                [Firestore.ListCollectionIds][google.cloud.firestore.v1beta1.Firestore.ListCollectionIds].
 
         """
         # Create or coerce a protobuf request object.
@@ -933,7 +933,7 @@ class FirestoreAsyncClient:
 
 try:
     _client_info = gapic_v1.client_info.ClientInfo(
-        gapic_version=pkg_resources.get_distribution("google-firestore").version
+        gapic_version=pkg_resources.get_distribution("google.cloud.firestore").version
     )
 except pkg_resources.DistributionNotFound:
     _client_info = gapic_v1.client_info.ClientInfo()

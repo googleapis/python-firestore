@@ -18,16 +18,16 @@
 import proto  # type: ignore
 
 
-from google.firestore_v1.types import common
-from google.firestore_v1.types import document as gf_document
-from google.firestore_v1.types import query as gf_query
-from google.firestore_v1.types import write
+from google.cloud.firestore_v1.types import common
+from google.cloud.firestore_v1.types import document as gf_document
+from google.cloud.firestore_v1.types import query as gf_query
+from google.cloud.firestore_v1.types import write
 from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 from google.rpc import status_pb2 as gr_status  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.firestore.v1",
+    package="google.cloud.firestore.v1",
     manifest={
         "GetDocumentRequest",
         "ListDocumentsRequest",
@@ -62,7 +62,7 @@ __protobuf__ = proto.module(
 
 class GetDocumentRequest(proto.Message):
     r"""The request for
-    [Firestore.GetDocument][google.firestore.v1.Firestore.GetDocument].
+    [Firestore.GetDocument][google.cloud.firestore.v1.Firestore.GetDocument].
 
     Attributes:
         name (str):
@@ -91,7 +91,7 @@ class GetDocumentRequest(proto.Message):
 
 class ListDocumentsRequest(proto.Message):
     r"""The request for
-    [Firestore.ListDocuments][google.firestore.v1.Firestore.ListDocuments].
+    [Firestore.ListDocuments][google.cloud.firestore.v1.Firestore.ListDocuments].
 
     Attributes:
         parent (str):
@@ -129,9 +129,9 @@ class ListDocumentsRequest(proto.Message):
             document is a document that does not exist but has
             sub-documents. These documents will be returned with a key
             but will not have fields,
-            [Document.create_time][google.firestore.v1.Document.create_time],
+            [Document.create_time][google.cloud.firestore.v1.Document.create_time],
             or
-            [Document.update_time][google.firestore.v1.Document.update_time]
+            [Document.update_time][google.cloud.firestore.v1.Document.update_time]
             set.
 
             Requests with ``show_missing`` may not specify ``where`` or
@@ -151,7 +151,7 @@ class ListDocumentsRequest(proto.Message):
 
 class ListDocumentsResponse(proto.Message):
     r"""The response for
-    [Firestore.ListDocuments][google.firestore.v1.Firestore.ListDocuments].
+    [Firestore.ListDocuments][google.cloud.firestore.v1.Firestore.ListDocuments].
 
     Attributes:
         documents (Sequence[~.gf_document.Document]):
@@ -172,7 +172,7 @@ class ListDocumentsResponse(proto.Message):
 
 class CreateDocumentRequest(proto.Message):
     r"""The request for
-    [Firestore.CreateDocument][google.firestore.v1.Firestore.CreateDocument].
+    [Firestore.CreateDocument][google.cloud.firestore.v1.Firestore.CreateDocument].
 
     Attributes:
         parent (str):
@@ -207,7 +207,7 @@ class CreateDocumentRequest(proto.Message):
 
 class UpdateDocumentRequest(proto.Message):
     r"""The request for
-    [Firestore.UpdateDocument][google.firestore.v1.Firestore.UpdateDocument].
+    [Firestore.UpdateDocument][google.cloud.firestore.v1.Firestore.UpdateDocument].
 
     Attributes:
         document (~.gf_document.Document):
@@ -244,7 +244,7 @@ class UpdateDocumentRequest(proto.Message):
 
 class DeleteDocumentRequest(proto.Message):
     r"""The request for
-    [Firestore.DeleteDocument][google.firestore.v1.Firestore.DeleteDocument].
+    [Firestore.DeleteDocument][google.cloud.firestore.v1.Firestore.DeleteDocument].
 
     Attributes:
         name (str):
@@ -263,7 +263,7 @@ class DeleteDocumentRequest(proto.Message):
 
 class BatchGetDocumentsRequest(proto.Message):
     r"""The request for
-    [Firestore.BatchGetDocuments][google.firestore.v1.Firestore.BatchGetDocuments].
+    [Firestore.BatchGetDocuments][google.cloud.firestore.v1.Firestore.BatchGetDocuments].
 
     Attributes:
         database (str):
@@ -305,7 +305,7 @@ class BatchGetDocumentsRequest(proto.Message):
 
 class BatchGetDocumentsResponse(proto.Message):
     r"""The streamed response for
-    [Firestore.BatchGetDocuments][google.firestore.v1.Firestore.BatchGetDocuments].
+    [Firestore.BatchGetDocuments][google.cloud.firestore.v1.Firestore.BatchGetDocuments].
 
     Attributes:
         found (~.gf_document.Document):
@@ -317,7 +317,7 @@ class BatchGetDocumentsResponse(proto.Message):
         transaction (bytes):
             The transaction that was started as part of this request.
             Will only be set in the first response, and only if
-            [BatchGetDocumentsRequest.new_transaction][google.firestore.v1.BatchGetDocumentsRequest.new_transaction]
+            [BatchGetDocumentsRequest.new_transaction][google.cloud.firestore.v1.BatchGetDocumentsRequest.new_transaction]
             was set in the request.
         read_time (~.timestamp.Timestamp):
             The time at which the document was read. This may be
@@ -334,7 +334,7 @@ class BatchGetDocumentsResponse(proto.Message):
 
 class BeginTransactionRequest(proto.Message):
     r"""The request for
-    [Firestore.BeginTransaction][google.firestore.v1.Firestore.BeginTransaction].
+    [Firestore.BeginTransaction][google.cloud.firestore.v1.Firestore.BeginTransaction].
 
     Attributes:
         database (str):
@@ -351,7 +351,7 @@ class BeginTransactionRequest(proto.Message):
 
 class BeginTransactionResponse(proto.Message):
     r"""The response for
-    [Firestore.BeginTransaction][google.firestore.v1.Firestore.BeginTransaction].
+    [Firestore.BeginTransaction][google.cloud.firestore.v1.Firestore.BeginTransaction].
 
     Attributes:
         transaction (bytes):
@@ -363,7 +363,7 @@ class BeginTransactionResponse(proto.Message):
 
 class CommitRequest(proto.Message):
     r"""The request for
-    [Firestore.Commit][google.firestore.v1.Firestore.Commit].
+    [Firestore.Commit][google.cloud.firestore.v1.Firestore.Commit].
 
     Attributes:
         database (str):
@@ -384,7 +384,7 @@ class CommitRequest(proto.Message):
 
 class CommitResponse(proto.Message):
     r"""The response for
-    [Firestore.Commit][google.firestore.v1.Firestore.Commit].
+    [Firestore.Commit][google.cloud.firestore.v1.Firestore.Commit].
 
     Attributes:
         write_results (Sequence[~.write.WriteResult]):
@@ -405,7 +405,7 @@ class CommitResponse(proto.Message):
 
 class RollbackRequest(proto.Message):
     r"""The request for
-    [Firestore.Rollback][google.firestore.v1.Firestore.Rollback].
+    [Firestore.Rollback][google.cloud.firestore.v1.Firestore.Rollback].
 
     Attributes:
         database (str):
@@ -421,7 +421,7 @@ class RollbackRequest(proto.Message):
 
 class RunQueryRequest(proto.Message):
     r"""The request for
-    [Firestore.RunQuery][google.firestore.v1.Firestore.RunQuery].
+    [Firestore.RunQuery][google.cloud.firestore.v1.Firestore.RunQuery].
 
     Attributes:
         parent (str):
@@ -459,13 +459,13 @@ class RunQueryRequest(proto.Message):
 
 class RunQueryResponse(proto.Message):
     r"""The response for
-    [Firestore.RunQuery][google.firestore.v1.Firestore.RunQuery].
+    [Firestore.RunQuery][google.cloud.firestore.v1.Firestore.RunQuery].
 
     Attributes:
         transaction (bytes):
             The transaction that was started as part of this request.
             Can only be set in the first response, and only if
-            [RunQueryRequest.new_transaction][google.firestore.v1.RunQueryRequest.new_transaction]
+            [RunQueryRequest.new_transaction][google.cloud.firestore.v1.RunQueryRequest.new_transaction]
             was set in the request. If set, no other fields will be set
             in this response.
         document (~.gf_document.Document):
@@ -494,7 +494,7 @@ class RunQueryResponse(proto.Message):
 
 class PartitionQueryRequest(proto.Message):
     r"""The request for
-    [Firestore.PartitionQuery][google.firestore.v1.Firestore.PartitionQuery].
+    [Firestore.PartitionQuery][google.cloud.firestore.v1.Firestore.PartitionQuery].
 
     Attributes:
         parent (str):
@@ -558,7 +558,7 @@ class PartitionQueryRequest(proto.Message):
 
 class PartitionQueryResponse(proto.Message):
     r"""The response for
-    [Firestore.PartitionQuery][google.firestore.v1.Firestore.PartitionQuery].
+    [Firestore.PartitionQuery][google.cloud.firestore.v1.Firestore.PartitionQuery].
 
     Attributes:
         partitions (Sequence[~.gf_query.Cursor]):
@@ -593,7 +593,7 @@ class PartitionQueryResponse(proto.Message):
 
 class WriteRequest(proto.Message):
     r"""The request for
-    [Firestore.Write][google.firestore.v1.Firestore.Write].
+    [Firestore.Write][google.cloud.firestore.v1.Firestore.Write].
 
     The first request creates a stream, or resumes an existing one from
     a token.
@@ -624,7 +624,7 @@ class WriteRequest(proto.Message):
             A stream token that was previously sent by the server.
 
             The client should set this field to the token from the most
-            recent [WriteResponse][google.firestore.v1.WriteResponse] it
+            recent [WriteResponse][google.cloud.firestore.v1.WriteResponse] it
             has received. This acknowledges that the client has received
             responses up to this token. After sending this token,
             earlier tokens may not be used anymore.
@@ -650,7 +650,7 @@ class WriteRequest(proto.Message):
 
 class WriteResponse(proto.Message):
     r"""The response for
-    [Firestore.Write][google.firestore.v1.Firestore.Write].
+    [Firestore.Write][google.cloud.firestore.v1.Firestore.Write].
 
     Attributes:
         stream_id (str):
@@ -682,7 +682,7 @@ class WriteResponse(proto.Message):
 
 class ListenRequest(proto.Message):
     r"""A request for
-    [Firestore.Listen][google.firestore.v1.Firestore.Listen]
+    [Firestore.Listen][google.cloud.firestore.v1.Firestore.Listen]
 
     Attributes:
         database (str):
@@ -705,17 +705,17 @@ class ListenRequest(proto.Message):
 
 class ListenResponse(proto.Message):
     r"""The response for
-    [Firestore.Listen][google.firestore.v1.Firestore.Listen].
+    [Firestore.Listen][google.cloud.firestore.v1.Firestore.Listen].
 
     Attributes:
         target_change (~.firestore.TargetChange):
             Targets have changed.
         document_change (~.write.DocumentChange):
-            A [Document][google.firestore.v1.Document] has changed.
+            A [Document][google.cloud.firestore.v1.Document] has changed.
         document_delete (~.write.DocumentDelete):
-            A [Document][google.firestore.v1.Document] has been deleted.
+            A [Document][google.cloud.firestore.v1.Document] has been deleted.
         document_remove (~.write.DocumentRemove):
-            A [Document][google.firestore.v1.Document] has been removed
+            A [Document][google.cloud.firestore.v1.Document] has been removed
             from a target (because it is no longer relevant to that
             target).
         filter (~.write.ExistenceFilter):
@@ -745,7 +745,7 @@ class Target(proto.Message):
             names.
         resume_token (bytes):
             A resume token from a prior
-            [TargetChange][google.firestore.v1.TargetChange] for an
+            [TargetChange][google.cloud.firestore.v1.TargetChange] for an
             identical target.
 
             Using a resume token with a different target is unsupported
@@ -858,7 +858,7 @@ class TargetChange(proto.Message):
 
 class ListCollectionIdsRequest(proto.Message):
     r"""The request for
-    [Firestore.ListCollectionIds][google.firestore.v1.Firestore.ListCollectionIds].
+    [Firestore.ListCollectionIds][google.cloud.firestore.v1.Firestore.ListCollectionIds].
 
     Attributes:
         parent (str):
@@ -870,7 +870,7 @@ class ListCollectionIdsRequest(proto.Message):
             The maximum number of results to return.
         page_token (str):
             A page token. Must be a value from
-            [ListCollectionIdsResponse][google.firestore.v1.ListCollectionIdsResponse].
+            [ListCollectionIdsResponse][google.cloud.firestore.v1.ListCollectionIdsResponse].
     """
 
     parent = proto.Field(proto.STRING, number=1)
@@ -880,7 +880,7 @@ class ListCollectionIdsRequest(proto.Message):
 
 class ListCollectionIdsResponse(proto.Message):
     r"""The response from
-    [Firestore.ListCollectionIds][google.firestore.v1.Firestore.ListCollectionIds].
+    [Firestore.ListCollectionIds][google.cloud.firestore.v1.Firestore.ListCollectionIds].
 
     Attributes:
         collection_ids (Sequence[str]):
@@ -900,7 +900,7 @@ class ListCollectionIdsResponse(proto.Message):
 
 class BatchWriteRequest(proto.Message):
     r"""The request for
-    [Firestore.BatchWrite][google.firestore.v1.Firestore.BatchWrite].
+    [Firestore.BatchWrite][google.cloud.firestore.v1.Firestore.BatchWrite].
 
     Attributes:
         database (str):
@@ -923,7 +923,7 @@ class BatchWriteRequest(proto.Message):
 
 class BatchWriteResponse(proto.Message):
     r"""The response from
-    [Firestore.BatchWrite][google.firestore.v1.Firestore.BatchWrite].
+    [Firestore.BatchWrite][google.cloud.firestore.v1.Firestore.BatchWrite].
 
     Attributes:
         write_results (Sequence[~.write.WriteResult]):

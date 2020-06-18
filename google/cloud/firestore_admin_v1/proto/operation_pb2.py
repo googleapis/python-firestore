@@ -25,13 +25,13 @@ from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 
 DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore/admin_v1/proto/operation.proto",
-    package="google.firestore.admin.v1",
+    package="google.cloud.firestore.admin.v1",
     syntax="proto3",
     serialized_options=_b(
-        "\n\035com.google.firestore.admin.v1B\016OperationProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1"
+        "\n\035com.google.cloud.firestore.admin.v1B\016OperationProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1"
     ),
     serialized_pb=_b(
-        '\n5google/cloud/firestore/admin_v1/proto/operation.proto\x12\x19google.firestore.admin.v1\x1a\x31google/cloud/firestore/admin_v1/proto/index.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto"\xbd\x02\n\x16IndexOperationMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05index\x18\x03 \x01(\t\x12\x38\n\x05state\x18\x04 \x01(\x0e\x32).google.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x05 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x06 \x01(\x0b\x32#.google.firestore.admin.v1.Progress"\x88\x05\n\x16\x46ieldOperationMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05\x66ield\x18\x03 \x01(\t\x12_\n\x13index_config_deltas\x18\x04 \x03(\x0b\x32\x42.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta\x12\x38\n\x05state\x18\x05 \x01(\x0e\x32).google.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x06 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x07 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x1a\xe7\x01\n\x10IndexConfigDelta\x12\x62\n\x0b\x63hange_type\x18\x01 \x01(\x0e\x32M.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType\x12/\n\x05index\x18\x02 \x01(\x0b\x32 .google.firestore.admin.v1.Index">\n\nChangeType\x12\x1b\n\x17\x43HANGE_TYPE_UNSPECIFIED\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02"\xec\x02\n\x17\x45xportDocumentsMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x42\n\x0foperation_state\x18\x03 \x01(\x0e\x32).google.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x04 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x05 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12\x16\n\x0e\x63ollection_ids\x18\x06 \x03(\t\x12\x19\n\x11output_uri_prefix\x18\x07 \x01(\t"\xeb\x02\n\x17ImportDocumentsMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x42\n\x0foperation_state\x18\x03 \x01(\x0e\x32).google.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x04 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x05 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12\x16\n\x0e\x63ollection_ids\x18\x06 \x03(\t\x12\x18\n\x10input_uri_prefix\x18\x07 \x01(\t"4\n\x17\x45xportDocumentsResponse\x12\x19\n\x11output_uri_prefix\x18\x01 \x01(\t":\n\x08Progress\x12\x16\n\x0e\x65stimated_work\x18\x01 \x01(\x03\x12\x16\n\x0e\x63ompleted_work\x18\x02 \x01(\x03*\x9e\x01\n\x0eOperationState\x12\x1f\n\x1bOPERATION_STATE_UNSPECIFIED\x10\x00\x12\x10\n\x0cINITIALIZING\x10\x01\x12\x0e\n\nPROCESSING\x10\x02\x12\x0e\n\nCANCELLING\x10\x03\x12\x0e\n\nFINALIZING\x10\x04\x12\x0e\n\nSUCCESSFUL\x10\x05\x12\n\n\x06\x46\x41ILED\x10\x06\x12\r\n\tCANCELLED\x10\x07\x42\xbc\x01\n\x1d\x63om.google.firestore.admin.v1B\x0eOperationProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1b\x06proto3'
+        '\n5google/cloud/firestore/admin_v1/proto/operation.proto\x12\x19google.cloud.firestore.admin.v1\x1a\x31google/cloud/firestore/admin_v1/proto/index.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto"\xbd\x02\n\x16IndexOperationMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05index\x18\x03 \x01(\t\x12\x38\n\x05state\x18\x04 \x01(\x0e\x32).google.cloud.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x05 \x01(\x0b\x32#.google.cloud.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x06 \x01(\x0b\x32#.google.cloud.firestore.admin.v1.Progress"\x88\x05\n\x16\x46ieldOperationMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05\x66ield\x18\x03 \x01(\t\x12_\n\x13index_config_deltas\x18\x04 \x03(\x0b\x32\x42.google.cloud.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta\x12\x38\n\x05state\x18\x05 \x01(\x0e\x32).google.cloud.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x06 \x01(\x0b\x32#.google.cloud.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x07 \x01(\x0b\x32#.google.cloud.firestore.admin.v1.Progress\x1a\xe7\x01\n\x10IndexConfigDelta\x12\x62\n\x0b\x63hange_type\x18\x01 \x01(\x0e\x32M.google.cloud.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType\x12/\n\x05index\x18\x02 \x01(\x0b\x32 .google.cloud.firestore.admin.v1.Index">\n\nChangeType\x12\x1b\n\x17\x43HANGE_TYPE_UNSPECIFIED\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02"\xec\x02\n\x17\x45xportDocumentsMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x42\n\x0foperation_state\x18\x03 \x01(\x0e\x32).google.cloud.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x04 \x01(\x0b\x32#.google.cloud.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x05 \x01(\x0b\x32#.google.cloud.firestore.admin.v1.Progress\x12\x16\n\x0e\x63ollection_ids\x18\x06 \x03(\t\x12\x19\n\x11output_uri_prefix\x18\x07 \x01(\t"\xeb\x02\n\x17ImportDocumentsMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x42\n\x0foperation_state\x18\x03 \x01(\x0e\x32).google.cloud.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x04 \x01(\x0b\x32#.google.cloud.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x05 \x01(\x0b\x32#.google.cloud.firestore.admin.v1.Progress\x12\x16\n\x0e\x63ollection_ids\x18\x06 \x03(\t\x12\x18\n\x10input_uri_prefix\x18\x07 \x01(\t"4\n\x17\x45xportDocumentsResponse\x12\x19\n\x11output_uri_prefix\x18\x01 \x01(\t":\n\x08Progress\x12\x16\n\x0e\x65stimated_work\x18\x01 \x01(\x03\x12\x16\n\x0e\x63ompleted_work\x18\x02 \x01(\x03*\x9e\x01\n\x0eOperationState\x12\x1f\n\x1bOPERATION_STATE_UNSPECIFIED\x10\x00\x12\x10\n\x0cINITIALIZING\x10\x01\x12\x0e\n\nPROCESSING\x10\x02\x12\x0e\n\nCANCELLING\x10\x03\x12\x0e\n\nFINALIZING\x10\x04\x12\x0e\n\nSUCCESSFUL\x10\x05\x12\n\n\x06\x46\x41ILED\x10\x06\x12\r\n\tCANCELLED\x10\x07\x42\xbc\x01\n\x1d\x63om.google.cloud.firestore.admin.v1B\x0eOperationProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1b\x06proto3'
     ),
     dependencies=[
         google_dot_cloud_dot_firestore_dot_admin__v1_dot_proto_dot_index__pb2.DESCRIPTOR,
@@ -42,7 +42,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
 
 _OPERATIONSTATE = _descriptor.EnumDescriptor(
     name="OperationState",
-    full_name="google.firestore.admin.v1.OperationState",
+    full_name="google.cloud.firestore.admin.v1.OperationState",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -95,7 +95,7 @@ CANCELLED = 7
 
 _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA_CHANGETYPE = _descriptor.EnumDescriptor(
     name="ChangeType",
-    full_name="google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType",
+    full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType",
     filename=None,
     file=DESCRIPTOR,
     values=[
@@ -123,14 +123,14 @@ _sym_db.RegisterEnumDescriptor(_FIELDOPERATIONMETADATA_INDEXCONFIGDELTA_CHANGETY
 
 _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
     name="IndexOperationMetadata",
-    full_name="google.firestore.admin.v1.IndexOperationMetadata",
+    full_name="google.cloud.firestore.admin.v1.IndexOperationMetadata",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
-            full_name="google.firestore.admin.v1.IndexOperationMetadata.start_time",
+            full_name="google.cloud.firestore.admin.v1.IndexOperationMetadata.start_time",
             index=0,
             number=1,
             type=11,
@@ -148,7 +148,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
-            full_name="google.firestore.admin.v1.IndexOperationMetadata.end_time",
+            full_name="google.cloud.firestore.admin.v1.IndexOperationMetadata.end_time",
             index=1,
             number=2,
             type=11,
@@ -166,7 +166,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="index",
-            full_name="google.firestore.admin.v1.IndexOperationMetadata.index",
+            full_name="google.cloud.firestore.admin.v1.IndexOperationMetadata.index",
             index=2,
             number=3,
             type=9,
@@ -184,7 +184,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="state",
-            full_name="google.firestore.admin.v1.IndexOperationMetadata.state",
+            full_name="google.cloud.firestore.admin.v1.IndexOperationMetadata.state",
             index=3,
             number=4,
             type=14,
@@ -202,7 +202,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="progress_documents",
-            full_name="google.firestore.admin.v1.IndexOperationMetadata.progress_documents",
+            full_name="google.cloud.firestore.admin.v1.IndexOperationMetadata.progress_documents",
             index=4,
             number=5,
             type=11,
@@ -220,7 +220,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="progress_bytes",
-            full_name="google.firestore.admin.v1.IndexOperationMetadata.progress_bytes",
+            full_name="google.cloud.firestore.admin.v1.IndexOperationMetadata.progress_bytes",
             index=5,
             number=6,
             type=11,
@@ -252,14 +252,14 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
 
 _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA = _descriptor.Descriptor(
     name="IndexConfigDelta",
-    full_name="google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta",
+    full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="change_type",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.change_type",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.change_type",
             index=0,
             number=1,
             type=14,
@@ -277,7 +277,7 @@ _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="index",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.index",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.index",
             index=1,
             number=2,
             type=11,
@@ -308,14 +308,14 @@ _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA = _descriptor.Descriptor(
 
 _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
     name="FieldOperationMetadata",
-    full_name="google.firestore.admin.v1.FieldOperationMetadata",
+    full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.start_time",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.start_time",
             index=0,
             number=1,
             type=11,
@@ -333,7 +333,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.end_time",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.end_time",
             index=1,
             number=2,
             type=11,
@@ -351,7 +351,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="field",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.field",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.field",
             index=2,
             number=3,
             type=9,
@@ -369,7 +369,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="index_config_deltas",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.index_config_deltas",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.index_config_deltas",
             index=3,
             number=4,
             type=11,
@@ -387,7 +387,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="state",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.state",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.state",
             index=4,
             number=5,
             type=14,
@@ -405,7 +405,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="progress_documents",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.progress_documents",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.progress_documents",
             index=5,
             number=6,
             type=11,
@@ -423,7 +423,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="progress_bytes",
-            full_name="google.firestore.admin.v1.FieldOperationMetadata.progress_bytes",
+            full_name="google.cloud.firestore.admin.v1.FieldOperationMetadata.progress_bytes",
             index=6,
             number=7,
             type=11,
@@ -455,14 +455,14 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
 
 _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
     name="ExportDocumentsMetadata",
-    full_name="google.firestore.admin.v1.ExportDocumentsMetadata",
+    full_name="google.cloud.firestore.admin.v1.ExportDocumentsMetadata",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
-            full_name="google.firestore.admin.v1.ExportDocumentsMetadata.start_time",
+            full_name="google.cloud.firestore.admin.v1.ExportDocumentsMetadata.start_time",
             index=0,
             number=1,
             type=11,
@@ -480,7 +480,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
-            full_name="google.firestore.admin.v1.ExportDocumentsMetadata.end_time",
+            full_name="google.cloud.firestore.admin.v1.ExportDocumentsMetadata.end_time",
             index=1,
             number=2,
             type=11,
@@ -498,7 +498,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="operation_state",
-            full_name="google.firestore.admin.v1.ExportDocumentsMetadata.operation_state",
+            full_name="google.cloud.firestore.admin.v1.ExportDocumentsMetadata.operation_state",
             index=2,
             number=3,
             type=14,
@@ -516,7 +516,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="progress_documents",
-            full_name="google.firestore.admin.v1.ExportDocumentsMetadata.progress_documents",
+            full_name="google.cloud.firestore.admin.v1.ExportDocumentsMetadata.progress_documents",
             index=3,
             number=4,
             type=11,
@@ -534,7 +534,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="progress_bytes",
-            full_name="google.firestore.admin.v1.ExportDocumentsMetadata.progress_bytes",
+            full_name="google.cloud.firestore.admin.v1.ExportDocumentsMetadata.progress_bytes",
             index=4,
             number=5,
             type=11,
@@ -552,7 +552,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="collection_ids",
-            full_name="google.firestore.admin.v1.ExportDocumentsMetadata.collection_ids",
+            full_name="google.cloud.firestore.admin.v1.ExportDocumentsMetadata.collection_ids",
             index=5,
             number=6,
             type=9,
@@ -570,7 +570,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="output_uri_prefix",
-            full_name="google.firestore.admin.v1.ExportDocumentsMetadata.output_uri_prefix",
+            full_name="google.cloud.firestore.admin.v1.ExportDocumentsMetadata.output_uri_prefix",
             index=6,
             number=7,
             type=9,
@@ -602,14 +602,14 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
 
 _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
     name="ImportDocumentsMetadata",
-    full_name="google.firestore.admin.v1.ImportDocumentsMetadata",
+    full_name="google.cloud.firestore.admin.v1.ImportDocumentsMetadata",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
-            full_name="google.firestore.admin.v1.ImportDocumentsMetadata.start_time",
+            full_name="google.cloud.firestore.admin.v1.ImportDocumentsMetadata.start_time",
             index=0,
             number=1,
             type=11,
@@ -627,7 +627,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
-            full_name="google.firestore.admin.v1.ImportDocumentsMetadata.end_time",
+            full_name="google.cloud.firestore.admin.v1.ImportDocumentsMetadata.end_time",
             index=1,
             number=2,
             type=11,
@@ -645,7 +645,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="operation_state",
-            full_name="google.firestore.admin.v1.ImportDocumentsMetadata.operation_state",
+            full_name="google.cloud.firestore.admin.v1.ImportDocumentsMetadata.operation_state",
             index=2,
             number=3,
             type=14,
@@ -663,7 +663,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="progress_documents",
-            full_name="google.firestore.admin.v1.ImportDocumentsMetadata.progress_documents",
+            full_name="google.cloud.firestore.admin.v1.ImportDocumentsMetadata.progress_documents",
             index=3,
             number=4,
             type=11,
@@ -681,7 +681,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="progress_bytes",
-            full_name="google.firestore.admin.v1.ImportDocumentsMetadata.progress_bytes",
+            full_name="google.cloud.firestore.admin.v1.ImportDocumentsMetadata.progress_bytes",
             index=4,
             number=5,
             type=11,
@@ -699,7 +699,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="collection_ids",
-            full_name="google.firestore.admin.v1.ImportDocumentsMetadata.collection_ids",
+            full_name="google.cloud.firestore.admin.v1.ImportDocumentsMetadata.collection_ids",
             index=5,
             number=6,
             type=9,
@@ -717,7 +717,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="input_uri_prefix",
-            full_name="google.firestore.admin.v1.ImportDocumentsMetadata.input_uri_prefix",
+            full_name="google.cloud.firestore.admin.v1.ImportDocumentsMetadata.input_uri_prefix",
             index=6,
             number=7,
             type=9,
@@ -749,14 +749,14 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
 
 _EXPORTDOCUMENTSRESPONSE = _descriptor.Descriptor(
     name="ExportDocumentsResponse",
-    full_name="google.firestore.admin.v1.ExportDocumentsResponse",
+    full_name="google.cloud.firestore.admin.v1.ExportDocumentsResponse",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="output_uri_prefix",
-            full_name="google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix",
+            full_name="google.cloud.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix",
             index=0,
             number=1,
             type=9,
@@ -788,14 +788,14 @@ _EXPORTDOCUMENTSRESPONSE = _descriptor.Descriptor(
 
 _PROGRESS = _descriptor.Descriptor(
     name="Progress",
-    full_name="google.firestore.admin.v1.Progress",
+    full_name="google.cloud.firestore.admin.v1.Progress",
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
     fields=[
         _descriptor.FieldDescriptor(
             name="estimated_work",
-            full_name="google.firestore.admin.v1.Progress.estimated_work",
+            full_name="google.cloud.firestore.admin.v1.Progress.estimated_work",
             index=0,
             number=1,
             type=3,
@@ -813,7 +813,7 @@ _PROGRESS = _descriptor.Descriptor(
         ),
         _descriptor.FieldDescriptor(
             name="completed_work",
-            full_name="google.firestore.admin.v1.Progress.completed_work",
+            full_name="google.cloud.firestore.admin.v1.Progress.completed_work",
             index=1,
             number=2,
             type=3,
@@ -911,7 +911,7 @@ IndexOperationMetadata = _reflection.GeneratedProtocolMessageType(
         __doc__="""Metadata for
   [google.longrunning.Operation][google.longrunning.Operation] results
   from
-  [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
+  [FirestoreAdmin.CreateIndex][google.cloud.firestore.admin.v1.FirestoreAdmin.CreateIndex].
   
   
   Attributes:
@@ -931,7 +931,7 @@ IndexOperationMetadata = _reflection.GeneratedProtocolMessageType(
       progress_bytes:
           The progress, in bytes, of this operation.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.IndexOperationMetadata)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.IndexOperationMetadata)
     ),
 )
 _sym_db.RegisterMessage(IndexOperationMetadata)
@@ -955,7 +955,7 @@ FieldOperationMetadata = _reflection.GeneratedProtocolMessageType(
         index:
             The index being changed.
     """,
-                # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta)
+                # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta)
             ),
         ),
         DESCRIPTOR=_FIELDOPERATIONMETADATA,
@@ -963,7 +963,7 @@ FieldOperationMetadata = _reflection.GeneratedProtocolMessageType(
         __doc__="""Metadata for
   [google.longrunning.Operation][google.longrunning.Operation] results
   from
-  [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
+  [FirestoreAdmin.UpdateField][google.cloud.firestore.admin.v1.FirestoreAdmin.UpdateField].
   
   
   Attributes:
@@ -977,7 +977,7 @@ FieldOperationMetadata = _reflection.GeneratedProtocolMessageType(
           example: ``projects/{project_id}/databases/{database_id}/colle
           ctionGroups/{collection_id}/fields/{field_path}``
       index_config_deltas:
-          A list of [IndexConfigDelta][google.firestore.admin.v1.FieldOp
+          A list of [IndexConfigDelta][google.cloud.firestore.admin.v1.FieldOp
           erationMetadata.IndexConfigDelta], which describe the intent
           of this operation.
       state:
@@ -987,7 +987,7 @@ FieldOperationMetadata = _reflection.GeneratedProtocolMessageType(
       progress_bytes:
           The progress, in bytes, of this operation.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.FieldOperationMetadata)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.FieldOperationMetadata)
     ),
 )
 _sym_db.RegisterMessage(FieldOperationMetadata)
@@ -1002,7 +1002,7 @@ ExportDocumentsMetadata = _reflection.GeneratedProtocolMessageType(
         __doc__="""Metadata for
   [google.longrunning.Operation][google.longrunning.Operation] results
   from
-  [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
+  [FirestoreAdmin.ExportDocuments][google.cloud.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
   
   
   Attributes:
@@ -1022,7 +1022,7 @@ ExportDocumentsMetadata = _reflection.GeneratedProtocolMessageType(
       output_uri_prefix:
           Where the entities are being exported to.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.ExportDocumentsMetadata)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.ExportDocumentsMetadata)
     ),
 )
 _sym_db.RegisterMessage(ExportDocumentsMetadata)
@@ -1036,7 +1036,7 @@ ImportDocumentsMetadata = _reflection.GeneratedProtocolMessageType(
         __doc__="""Metadata for
   [google.longrunning.Operation][google.longrunning.Operation] results
   from
-  [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
+  [FirestoreAdmin.ImportDocuments][google.cloud.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
   
   
   Attributes:
@@ -1056,7 +1056,7 @@ ImportDocumentsMetadata = _reflection.GeneratedProtocolMessageType(
       input_uri_prefix:
           The location of the documents being imported.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.ImportDocumentsMetadata)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.ImportDocumentsMetadata)
     ),
 )
 _sym_db.RegisterMessage(ImportDocumentsMetadata)
@@ -1078,7 +1078,7 @@ ExportDocumentsResponse = _reflection.GeneratedProtocolMessageType(
           import into Cloud Firestore (this project or another project)
           after the operation completes successfully.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.ExportDocumentsResponse)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.ExportDocumentsResponse)
     ),
 )
 _sym_db.RegisterMessage(ExportDocumentsResponse)
@@ -1091,7 +1091,7 @@ Progress = _reflection.GeneratedProtocolMessageType(
         __module__="google.cloud.firestore.admin_v1.proto.operation_pb2",
         __doc__="""Describes the progress of the operation. Unit of work is
   generic and must be interpreted based on where
-  [Progress][google.firestore.admin.v1.Progress] is used.
+  [Progress][google.cloud.firestore.admin.v1.Progress] is used.
   
   
   Attributes:
@@ -1100,7 +1100,7 @@ Progress = _reflection.GeneratedProtocolMessageType(
       completed_work:
           The amount of work completed.
   """,
-        # @@protoc_insertion_point(class_scope:google.firestore.admin.v1.Progress)
+        # @@protoc_insertion_point(class_scope:google.cloud.firestore.admin.v1.Progress)
     ),
 )
 _sym_db.RegisterMessage(Progress)

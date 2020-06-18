@@ -17,8 +17,8 @@
 
 from typing import Any, AsyncIterable, Awaitable, Callable, Iterable
 
-from google.firestore_v1beta1.types import document
-from google.firestore_v1beta1.types import firestore
+from google.cloud.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import firestore
 
 
 class ListDocumentsPager:

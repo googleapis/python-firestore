@@ -25,9 +25,9 @@ from google.auth.transport.grpc import SslCredentials  # type: ignore
 
 import grpc  # type: ignore
 
-from google.firestore_v1.types import document
-from google.firestore_v1.types import document as gf_document
-from google.firestore_v1.types import firestore
+from google.cloud.firestore_v1.types import document
+from google.cloud.firestore_v1.types import document as gf_document
+from google.cloud.firestore_v1.types import firestore
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
 from .base import FirestoreTransport
@@ -194,7 +194,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "get_document" not in self._stubs:
             self._stubs["get_document"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/GetDocument",
+                "/google.cloud.firestore.v1.Firestore/GetDocument",
                 request_serializer=firestore.GetDocumentRequest.serialize,
                 response_deserializer=document.Document.deserialize,
             )
@@ -220,7 +220,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "list_documents" not in self._stubs:
             self._stubs["list_documents"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/ListDocuments",
+                "/google.cloud.firestore.v1.Firestore/ListDocuments",
                 request_serializer=firestore.ListDocumentsRequest.serialize,
                 response_deserializer=firestore.ListDocumentsResponse.deserialize,
             )
@@ -246,7 +246,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "update_document" not in self._stubs:
             self._stubs["update_document"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/UpdateDocument",
+                "/google.cloud.firestore.v1.Firestore/UpdateDocument",
                 request_serializer=firestore.UpdateDocumentRequest.serialize,
                 response_deserializer=gf_document.Document.deserialize,
             )
@@ -272,7 +272,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "delete_document" not in self._stubs:
             self._stubs["delete_document"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/DeleteDocument",
+                "/google.cloud.firestore.v1.Firestore/DeleteDocument",
                 request_serializer=firestore.DeleteDocumentRequest.serialize,
                 response_deserializer=empty.Empty.FromString,
             )
@@ -302,7 +302,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "batch_get_documents" not in self._stubs:
             self._stubs["batch_get_documents"] = self.grpc_channel.unary_stream(
-                "/google.firestore.v1.Firestore/BatchGetDocuments",
+                "/google.cloud.firestore.v1.Firestore/BatchGetDocuments",
                 request_serializer=firestore.BatchGetDocumentsRequest.serialize,
                 response_deserializer=firestore.BatchGetDocumentsResponse.deserialize,
             )
@@ -330,7 +330,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "begin_transaction" not in self._stubs:
             self._stubs["begin_transaction"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/BeginTransaction",
+                "/google.cloud.firestore.v1.Firestore/BeginTransaction",
                 request_serializer=firestore.BeginTransactionRequest.serialize,
                 response_deserializer=firestore.BeginTransactionResponse.deserialize,
             )
@@ -355,7 +355,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "commit" not in self._stubs:
             self._stubs["commit"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/Commit",
+                "/google.cloud.firestore.v1.Firestore/Commit",
                 request_serializer=firestore.CommitRequest.serialize,
                 response_deserializer=firestore.CommitResponse.deserialize,
             )
@@ -379,7 +379,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "rollback" not in self._stubs:
             self._stubs["rollback"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/Rollback",
+                "/google.cloud.firestore.v1.Firestore/Rollback",
                 request_serializer=firestore.RollbackRequest.serialize,
                 response_deserializer=empty.Empty.FromString,
             )
@@ -405,7 +405,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "run_query" not in self._stubs:
             self._stubs["run_query"] = self.grpc_channel.unary_stream(
-                "/google.firestore.v1.Firestore/RunQuery",
+                "/google.cloud.firestore.v1.Firestore/RunQuery",
                 request_serializer=firestore.RunQueryRequest.serialize,
                 response_deserializer=firestore.RunQueryResponse.deserialize,
             )
@@ -435,7 +435,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "partition_query" not in self._stubs:
             self._stubs["partition_query"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/PartitionQuery",
+                "/google.cloud.firestore.v1.Firestore/PartitionQuery",
                 request_serializer=firestore.PartitionQueryRequest.serialize,
                 response_deserializer=firestore.PartitionQueryResponse.deserialize,
             )
@@ -460,7 +460,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "write" not in self._stubs:
             self._stubs["write"] = self.grpc_channel.stream_stream(
-                "/google.firestore.v1.Firestore/Write",
+                "/google.cloud.firestore.v1.Firestore/Write",
                 request_serializer=firestore.WriteRequest.serialize,
                 response_deserializer=firestore.WriteResponse.deserialize,
             )
@@ -484,7 +484,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "listen" not in self._stubs:
             self._stubs["listen"] = self.grpc_channel.stream_stream(
-                "/google.firestore.v1.Firestore/Listen",
+                "/google.cloud.firestore.v1.Firestore/Listen",
                 request_serializer=firestore.ListenRequest.serialize,
                 response_deserializer=firestore.ListenResponse.deserialize,
             )
@@ -512,7 +512,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "list_collection_ids" not in self._stubs:
             self._stubs["list_collection_ids"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/ListCollectionIds",
+                "/google.cloud.firestore.v1.Firestore/ListCollectionIds",
                 request_serializer=firestore.ListCollectionIdsRequest.serialize,
                 response_deserializer=firestore.ListCollectionIdsResponse.deserialize,
             )
@@ -530,11 +530,11 @@ class FirestoreGrpcTransport(FirestoreTransport):
         atomically and can apply them out of order. Method does not
         allow more than one write per document. Each write succeeds or
         fails independently. See the
-        [BatchWriteResponse][google.firestore.v1.BatchWriteResponse] for
+        [BatchWriteResponse][google.cloud.firestore.v1.BatchWriteResponse] for
         the success status of each write.
 
         If you require an atomically applied set of writes, use
-        [Commit][google.firestore.v1.Firestore.Commit] instead.
+        [Commit][google.cloud.firestore.v1.Firestore.Commit] instead.
 
         Returns:
             Callable[[~.BatchWriteRequest],
@@ -548,7 +548,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "batch_write" not in self._stubs:
             self._stubs["batch_write"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/BatchWrite",
+                "/google.cloud.firestore.v1.Firestore/BatchWrite",
                 request_serializer=firestore.BatchWriteRequest.serialize,
                 response_deserializer=firestore.BatchWriteResponse.deserialize,
             )
@@ -574,7 +574,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "create_document" not in self._stubs:
             self._stubs["create_document"] = self.grpc_channel.unary_unary(
-                "/google.firestore.v1.Firestore/CreateDocument",
+                "/google.cloud.firestore.v1.Firestore/CreateDocument",
                 request_serializer=firestore.CreateDocumentRequest.serialize,
                 response_deserializer=document.Document.deserialize,
             )

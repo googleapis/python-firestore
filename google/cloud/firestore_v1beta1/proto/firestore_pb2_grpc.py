@@ -38,67 +38,67 @@ class FirestoreStub(object):
       channel: A grpc.Channel.
     """
         self.GetDocument = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/GetDocument",
+            "/google.cloud.firestore.v1beta1.Firestore/GetDocument",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.GetDocumentRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2.Document.FromString,
         )
         self.ListDocuments = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/ListDocuments",
+            "/google.cloud.firestore.v1beta1.Firestore/ListDocuments",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.ListDocumentsRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.ListDocumentsResponse.FromString,
         )
         self.CreateDocument = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/CreateDocument",
+            "/google.cloud.firestore.v1beta1.Firestore/CreateDocument",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.CreateDocumentRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2.Document.FromString,
         )
         self.UpdateDocument = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/UpdateDocument",
+            "/google.cloud.firestore.v1beta1.Firestore/UpdateDocument",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.UpdateDocumentRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2.Document.FromString,
         )
         self.DeleteDocument = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/DeleteDocument",
+            "/google.cloud.firestore.v1beta1.Firestore/DeleteDocument",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.DeleteDocumentRequest.SerializeToString,
             response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
         )
         self.BatchGetDocuments = channel.unary_stream(
-            "/google.firestore.v1beta1.Firestore/BatchGetDocuments",
+            "/google.cloud.firestore.v1beta1.Firestore/BatchGetDocuments",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.BatchGetDocumentsRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.BatchGetDocumentsResponse.FromString,
         )
         self.BeginTransaction = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/BeginTransaction",
+            "/google.cloud.firestore.v1beta1.Firestore/BeginTransaction",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.BeginTransactionRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.BeginTransactionResponse.FromString,
         )
         self.Commit = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/Commit",
+            "/google.cloud.firestore.v1beta1.Firestore/Commit",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.CommitRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.CommitResponse.FromString,
         )
         self.Rollback = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/Rollback",
+            "/google.cloud.firestore.v1beta1.Firestore/Rollback",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.RollbackRequest.SerializeToString,
             response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
         )
         self.RunQuery = channel.unary_stream(
-            "/google.firestore.v1beta1.Firestore/RunQuery",
+            "/google.cloud.firestore.v1beta1.Firestore/RunQuery",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.RunQueryRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.RunQueryResponse.FromString,
         )
         self.Write = channel.stream_stream(
-            "/google.firestore.v1beta1.Firestore/Write",
+            "/google.cloud.firestore.v1beta1.Firestore/Write",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.WriteRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.WriteResponse.FromString,
         )
         self.Listen = channel.stream_stream(
-            "/google.firestore.v1beta1.Firestore/Listen",
+            "/google.cloud.firestore.v1beta1.Firestore/Listen",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.ListenRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.ListenResponse.FromString,
         )
         self.ListCollectionIds = channel.unary_unary(
-            "/google.firestore.v1beta1.Firestore/ListCollectionIds",
+            "/google.cloud.firestore.v1beta1.Firestore/ListCollectionIds",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.ListCollectionIdsRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_firestore__pb2.ListCollectionIdsResponse.FromString,
         )
@@ -289,6 +289,6 @@ def add_FirestoreServicer_to_server(servicer, server):
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "google.firestore.v1beta1.Firestore", rpc_method_handlers
+        "google.cloud.firestore.v1beta1.Firestore", rpc_method_handlers
     )
     server.add_generic_rpc_handlers((generic_handler,))

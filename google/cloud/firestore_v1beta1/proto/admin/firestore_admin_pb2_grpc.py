@@ -66,22 +66,22 @@ class FirestoreAdminStub(object):
       channel: A grpc.Channel.
     """
         self.CreateIndex = channel.unary_unary(
-            "/google.firestore.admin.v1beta1.FirestoreAdmin/CreateIndex",
+            "/google.cloud.firestore.admin.v1beta1.FirestoreAdmin/CreateIndex",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_firestore__admin__pb2.CreateIndexRequest.SerializeToString,
             response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
         )
         self.ListIndexes = channel.unary_unary(
-            "/google.firestore.admin.v1beta1.FirestoreAdmin/ListIndexes",
+            "/google.cloud.firestore.admin.v1beta1.FirestoreAdmin/ListIndexes",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_firestore__admin__pb2.ListIndexesRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_firestore__admin__pb2.ListIndexesResponse.FromString,
         )
         self.GetIndex = channel.unary_unary(
-            "/google.firestore.admin.v1beta1.FirestoreAdmin/GetIndex",
+            "/google.cloud.firestore.admin.v1beta1.FirestoreAdmin/GetIndex",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_firestore__admin__pb2.GetIndexRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_index__pb2.Index.FromString,
         )
         self.DeleteIndex = channel.unary_unary(
-            "/google.firestore.admin.v1beta1.FirestoreAdmin/DeleteIndex",
+            "/google.cloud.firestore.admin.v1beta1.FirestoreAdmin/DeleteIndex",
             request_serializer=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_admin_dot_firestore__admin__pb2.DeleteIndexRequest.SerializeToString,
             response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
         )
@@ -143,8 +143,8 @@ class FirestoreAdminServicer(object):
     During creation, the process could result in an error, in which case the
     index will move to the `ERROR` state. The process can be recovered by
     fixing the data that caused the error, removing the index with
-    [delete][google.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex], then re-creating the index with
-    [create][google.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
+    [delete][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.DeleteIndex], then re-creating the index with
+    [create][google.cloud.firestore.admin.v1beta1.FirestoreAdmin.CreateIndex].
 
     Indexes with a single field cannot be created.
     """
@@ -198,6 +198,6 @@ def add_FirestoreAdminServicer_to_server(servicer, server):
         ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "google.firestore.admin.v1beta1.FirestoreAdmin", rpc_method_handlers
+        "google.cloud.firestore.admin.v1beta1.FirestoreAdmin", rpc_method_handlers
     )
     server.add_generic_rpc_handlers((generic_handler,))
