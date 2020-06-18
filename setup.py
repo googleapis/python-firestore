@@ -1,6 +1,4 @@
-# -*- coding: utf-8 -*-
-
-# Copyright 2020 Google LLC
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,34 +11,75 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-#
 
-import setuptools  # type: ignore
+import io
+import os
+
+import setuptools
+
+
+# Package metadata.
+
+name = "google-cloud-firestore"
+description = "Google Cloud Firestore API client library"
+version = "1.7.0"
+release_status = "Development Status :: 5 - Production/Stable"
+dependencies = [
+    "google-api-core[grpc] >= 1.17.2, < 2.0.0dev",
+    "google-cloud-core >= 1.0.3, < 2.0dev",
+    "pytz",
+    "libcst >= 0.2.5",
+    "proto-plus >= 0.4.0",
+]
+extras = {}
+
+
+# Setup boilerplate below this line.
+
+package_root = os.path.abspath(os.path.dirname(__file__))
+readme_filename = os.path.join(package_root, "README.rst")
+with io.open(readme_filename, encoding="utf-8") as readme_file:
+    readme = readme_file.read()
+
+# Only include packages under the 'google' namespace. Do not include tests,
+# benchmarks, etc.
+packages = [
+    package for package in setuptools.find_packages() if package.startswith("google")
+]
+
+# Determine which namespaces are needed.
+namespaces = ["google"]
+if "google.cloud" in packages:
+    namespaces.append("google.cloud")
 
 
 setuptools.setup(
-    name="google-firestore",
-    version="0.0.1",
-    packages=setuptools.PEP420PackageFinder.find(),
-    namespace_packages=("google",),
-    platforms="Posix; MacOS X; Windows",
-    include_package_data=True,
-    install_requires=(
-        "google-api-core[grpc] >= 1.17.2, < 2.0.0dev",
-        "libcst >= 0.2.5",
-        "proto-plus >= 0.4.0",
-    ),
-    python_requires=">=3.6",
-    scripts=["scripts/fixup_keywords.py"],
+    name=name,
+    version=version,
+    description=description,
+    long_description=readme,
+    author="Google LLC",
+    author_email="googleapis-packages@google.com",
+    license="Apache 2.0",
+    url="https://github.com/googleapis/python-firestore",
     classifiers=[
-        "Development Status :: 3 - Alpha",
+        release_status,
         "Intended Audience :: Developers",
-        "Operating System :: OS Independent",
+        "License :: OSI Approved :: Apache Software License",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        "Operating System :: OS Independent",
         "Topic :: Internet",
         "Topic :: Software Development :: Libraries :: Python Modules",
     ],
+    platforms="Posix; MacOS X; Windows",
+    packages=packages,
+    namespace_packages=namespaces,
+    install_requires=dependencies,
+    extras_require=extras,
+    python_requires=">=3.6",
+    include_package_data=True,
     zip_safe=False,
 )

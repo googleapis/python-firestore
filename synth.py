@@ -34,16 +34,12 @@ for version in versions:
         version=version,
         proto_path=f"google/firestore/{version}"
     )
-    #     bazel_target=f"//google/firestore/{version}:firestore-{version}-py",
-    #     include_protos=True,
-    # )
-    # s.move(library)
+
     s.move(
         library / f"google/firestore_{version}",
         f"google/cloud/firestore_{version}",
-        excludes=[ library / f"google/firestore_{version}/__init__.py" ]
+        excludes=[ library / f"google/firestore_{version}/__init__.py"]
     )
-    #s.move(library / f"google/cloud/firestore_{version}/gapic")
     s.move(library / f"tests/unit/gapic")
 
     s.replace(
@@ -51,7 +47,6 @@ for version in versions:
         f"from = proto",
         f"from_ = proto",
     )
-
 
     s.replace(
         f"tests/unit/gapic/*.py",
