@@ -16,7 +16,6 @@
 #
 
 
-
 """Python idiomatic client for Google Cloud Firestore."""
 
 from pkg_resources import get_distribution
@@ -95,7 +94,6 @@ from .types.write import Write
 from .types.write import WriteResult
 
 
-
 __all__ = (
     "__version__",
     "ArrayRemove",
@@ -121,7 +119,6 @@ __all__ = (
     "Watch",
     "WriteBatch",
     "WriteOption",
-
     "ArrayValue",
     "BatchGetDocumentsRequest",
     "BatchGetDocumentsResponse",

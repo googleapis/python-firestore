@@ -20,7 +20,7 @@ import sys
 import warnings
 
 from google.cloud.firestore_admin_v1 import types
-from google.cloud.firestore_admin_v1.gapic import enums
+from google.cloud.firestore_admin_v1.service import enums
 from google.cloud.firestore_admin_v1.gapic import firestore_admin_client
 
 

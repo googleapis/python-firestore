@@ -75,7 +75,7 @@ for version in admin_versions:
         # include_protos=True,
         proto_path=f"google/firestore/admin/{version}",
     )
-    s.move(library / f"google/cloud/firestore_admin_{version}")
+    s.move(library / f"google/firestore_admin_{version}", f"google/cloud/firestore_admin_{version}")
     s.move(library / "tests")
 
     s.replace(
