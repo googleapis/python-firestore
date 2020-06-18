@@ -15,6 +15,40 @@
 # limitations under the License.
 #
 
+
+
+"""Python idiomatic client for Google Cloud Firestore."""
+
+from pkg_resources import get_distribution
+
+__version__ = get_distribution("google-cloud-firestore").version
+
+
+from google.cloud.firestore_v1 import types
+from google.cloud.firestore_v1._helpers import GeoPoint
+from google.cloud.firestore_v1._helpers import ExistsOption
+from google.cloud.firestore_v1._helpers import LastUpdateOption
+from google.cloud.firestore_v1._helpers import ReadAfterWriteError
+from google.cloud.firestore_v1._helpers import WriteOption
+from google.cloud.firestore_v1.batch import WriteBatch
+from google.cloud.firestore_v1.client import Client
+from google.cloud.firestore_v1.collection import CollectionReference
+from google.cloud.firestore_v1.transforms import ArrayRemove
+from google.cloud.firestore_v1.transforms import ArrayUnion
+from google.cloud.firestore_v1.transforms import DELETE_FIELD
+from google.cloud.firestore_v1.transforms import Increment
+from google.cloud.firestore_v1.transforms import Maximum
+from google.cloud.firestore_v1.transforms import Minimum
+from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
+from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1.document import DocumentSnapshot
+from google.cloud.firestore_v1.gapic import enums
+from google.cloud.firestore_v1.query import Query
+from google.cloud.firestore_v1.transaction import Transaction
+from google.cloud.firestore_v1.transaction import transactional
+from google.cloud.firestore_v1.watch import Watch
+
+
 from .services.firestore import FirestoreClient
 from .types.common import DocumentMask
 from .types.common import Precondition
@@ -61,7 +95,33 @@ from .types.write import Write
 from .types.write import WriteResult
 
 
+
 __all__ = (
+    "__version__",
+    "ArrayRemove",
+    "ArrayUnion",
+    "Client",
+    "CollectionReference",
+    "DELETE_FIELD",
+    "DocumentReference",
+    "DocumentSnapshot",
+    "enums",
+    "ExistsOption",
+    "GeoPoint",
+    "Increment",
+    "LastUpdateOption",
+    "Maximum",
+    "Minimum",
+    "Query",
+    "ReadAfterWriteError",
+    "SERVER_TIMESTAMP",
+    "Transaction",
+    "transactional",
+    "types",
+    "Watch",
+    "WriteBatch",
+    "WriteOption",
+
     "ArrayValue",
     "BatchGetDocumentsRequest",
     "BatchGetDocumentsResponse",

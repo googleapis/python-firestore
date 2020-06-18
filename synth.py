@@ -38,7 +38,11 @@ for version in versions:
     #     include_protos=True,
     # )
     # s.move(library)
-    s.move(library / f"google/firestore_{version}", f"google/cloud/firestore_{version}")
+    s.move(
+        library / f"google/firestore_{version}",
+        f"google/cloud/firestore_{version}",
+        excludes=[ library / f"google/firestore_{version}/__init__.py" ]
+    )
     #s.move(library / f"google/cloud/firestore_{version}/gapic")
     s.move(library / f"tests/unit/gapic")
 
