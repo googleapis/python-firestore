@@ -19,7 +19,7 @@ import warnings
 import six
 
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1 import query as query_mod
+from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import async_document
 
@@ -193,7 +193,7 @@ class AsyncCollectionReference(object):
         """Create a "select" query with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.select` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.select` for
         more information on this method.
 
         Args:
@@ -202,17 +202,17 @@ class AsyncCollectionReference(object):
                 of document fields in the query results.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A "projected" query.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.select(field_paths)
 
     def where(self, field_path, op_string, value):
         """Create a "where" query with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.where` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.where` for
         more information on this method.
 
         Args:
@@ -226,17 +226,17 @@ class AsyncCollectionReference(object):
                 allowed operation.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A filtered query.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.where(field_path, op_string, value)
 
     def order_by(self, field_path, **kwargs):
         """Create an "order by" query with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.order_by` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.order_by` for
         more information on this method.
 
         Args:
@@ -244,21 +244,21 @@ class AsyncCollectionReference(object):
                 field names) on which to order the query results.
             kwargs (Dict[str, Any]): The keyword arguments to pass along
                 to the query. The only supported keyword is ``direction``,
-                see :meth:`~google.cloud.firestore_v1.query.Query.order_by`
+                see :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.order_by`
                 for more information.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             An "order by" query.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.order_by(field_path, **kwargs)
 
     def limit(self, count):
         """Create a limited query with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.limit` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.limit` for
         more information on this method.
 
         Args:
@@ -266,17 +266,17 @@ class AsyncCollectionReference(object):
                 the query.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A limited query.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.limit(count)
 
     def offset(self, num_to_skip):
         """Skip to an offset in a query with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.offset` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.offset` for
         more information on this method.
 
         Args:
@@ -284,17 +284,17 @@ class AsyncCollectionReference(object):
                 of query results. (Must be non-negative.)
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             An offset query.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.offset(num_to_skip)
 
     def start_at(self, document_fields):
         """Start query at a cursor with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.start_at` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.start_at` for
         more information on this method.
 
         Args:
@@ -305,17 +305,17 @@ class AsyncCollectionReference(object):
                 of values that represent a position in a query result set.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A query with cursor.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.start_at(document_fields)
 
     def start_after(self, document_fields):
         """Start query after a cursor with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.start_after` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.start_after` for
         more information on this method.
 
         Args:
@@ -326,17 +326,17 @@ class AsyncCollectionReference(object):
                 of values that represent a position in a query result set.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A query with cursor.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.start_after(document_fields)
 
     def end_before(self, document_fields):
         """End query before a cursor with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.end_before` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.end_before` for
         more information on this method.
 
         Args:
@@ -347,17 +347,17 @@ class AsyncCollectionReference(object):
                 of values that represent a position in a query result set.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A query with cursor.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.end_before(document_fields)
 
     def end_at(self, document_fields):
         """End query at a cursor with this collection as parent.
 
         See
-        :meth:`~google.cloud.firestore_v1.query.Query.end_at` for
+        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.end_at` for
         more information on this method.
 
         Args:
@@ -368,10 +368,10 @@ class AsyncCollectionReference(object):
                 of values that represent a position in a query result set.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A query with cursor.
         """
-        query = query_mod.Query(self)
+        query = AsyncQuery(self)
         return query.end_at(document_fields)
 
     async def get(self, transaction=None):
@@ -381,7 +381,8 @@ class AsyncCollectionReference(object):
             DeprecationWarning,
             stacklevel=2,
         )
-        return await self.stream(transaction=transaction)
+        async for d in self.stream(transaction=transaction):
+            yield d
 
     async def stream(self, transaction=None):
         """Read the documents in this collection.
@@ -410,8 +411,9 @@ class AsyncCollectionReference(object):
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
             The next document that fulfills the query.
         """
-        query = query_mod.Query(self)
-        return query.stream(transaction=transaction)
+        query = AsyncQuery(self)
+        async for d in query.stream(transaction=transaction):
+            yield d
 
     def on_snapshot(self, callback):
         """Monitor the documents in this collection.
@@ -440,7 +442,7 @@ class AsyncCollectionReference(object):
             collection_watch.unsubscribe()
         """
         return Watch.for_query(
-            query_mod.Query(self),
+            AsyncQuery(self),
             callback,
             async_document.DocumentSnapshot,
             async_document.AsyncDocumentReference,

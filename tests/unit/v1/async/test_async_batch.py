@@ -212,7 +212,9 @@ class TestAsyncWriteBatch(unittest.TestCase):
         document1 = client.document("a", "b")
         document2 = client.document("c", "d", "e", "f")
 
-        write_pbs = asyncio.run(self._as_context_mgr_wo_error_helper(batch, document1, document2))
+        write_pbs = asyncio.run(
+            self._as_context_mgr_wo_error_helper(batch, document1, document2)
+        )
 
         self.assertEqual(batch.write_results, list(commit_response.write_results))
         self.assertEqual(batch.commit_time, timestamp)
@@ -258,7 +260,6 @@ class TestAsyncWriteBatch(unittest.TestCase):
                 ctx_mgr.create(document1, {"ten": 10, "buck": u"ets"})
                 ctx_mgr.delete(document2)
                 raise RuntimeError("testing")
-
 
 
 def _value_pb(**kwargs):

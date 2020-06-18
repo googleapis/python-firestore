@@ -31,7 +31,7 @@ from google.cloud.client import ClientWithProject
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import __version__
-from google.cloud.firestore_v1 import query
+from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
@@ -250,7 +250,7 @@ class AsyncClient(ClientWithProject):
 
     def collection_group(self, collection_id):
         """
-        Creates and returns a new Query that includes all documents in the
+        Creates and returns a new AsyncQuery that includes all documents in the
         database that are contained in a collection or subcollection with the
         given collection_id.
 
@@ -261,7 +261,7 @@ class AsyncClient(ClientWithProject):
         @param {string} collectionId Identifies the collections to query over.
         Every collection or subcollection with this ID as the last segment of its
         path will be included. Cannot contain a slash.
-        @returns {Query} The created Query.
+        @returns {AsyncQuery} The created AsyncQuery.
         """
         if "/" in collection_id:
             raise ValueError(
@@ -271,7 +271,7 @@ class AsyncClient(ClientWithProject):
             )
 
         collection = self.collection(collection_id)
-        return query.Query(collection, all_descendants=True)
+        return AsyncQuery(collection, all_descendants=True)
 
     def document(self, *document_path):
         """Get a reference to a document in a collection.
