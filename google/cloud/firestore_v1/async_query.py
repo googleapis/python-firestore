@@ -181,7 +181,7 @@ class AsyncQuery(object):
         more information on **field paths**.
 
         If the current query already has a projection set (i.e. has already
-        called :meth:`~google.cloud.firestore_v1.query.Query.select`), this
+        called :meth:`~google.cloud.firestore_v1.query.AsyncQuery.select`), this
         will overwrite it.
 
         Args:
@@ -190,7 +190,7 @@ class AsyncQuery(object):
                 of document fields in the query results.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             A "projected" query. Acts as a copy of the current query,
             modified with the newly added projection.
         Raises:
@@ -224,7 +224,7 @@ class AsyncQuery(object):
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
         more information on **field paths**.
 
-        Returns a new :class:`~google.cloud.firestore_v1.query.Query` that
+        Returns a new :class:`~google.cloud.firestore_v1.query.AsyncQuery` that
         filters on a specific field path, according to an operation (e.g.
         ``==`` or "equals") and a particular value to be paired with that
         operation.
@@ -240,7 +240,7 @@ class AsyncQuery(object):
                 allowed operation.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             A filtered query. Acts as a copy of the current query,
             modified with the newly added filter.
 
@@ -301,7 +301,7 @@ class AsyncQuery(object):
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
         more information on **field paths**.
 
-        Successive :meth:`~google.cloud.firestore_v1.query.Query.order_by`
+        Successive :meth:`~google.cloud.firestore_v1.query.AsyncQuery.order_by`
         calls will further refine the ordering of results returned by the query
         (i.e. the new "order by" fields will be added to existing ones).
 
@@ -313,7 +313,7 @@ class AsyncQuery(object):
                 :attr:`ASCENDING`.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             An ordered query. Acts as a copy of the current query, modified
             with the newly added "order by" constraint.
 
@@ -349,7 +349,7 @@ class AsyncQuery(object):
                 the query.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             A limited query. Acts as a copy of the current query, modified
             with the newly added "limit" filter.
         """
@@ -376,7 +376,7 @@ class AsyncQuery(object):
                 of query results. (Must be non-negative.)
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             An offset query. Acts as a copy of the current query, modified
             with the newly added "offset" field.
         """
@@ -412,7 +412,7 @@ class AsyncQuery(object):
 
         When the query is sent to the server, the ``document_fields`` will
         be used in the order given by fields set by
-        :meth:`~google.cloud.firestore_v1.query.Query.order_by`.
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.order_by`.
 
         Args:
             document_fields
@@ -427,7 +427,7 @@ class AsyncQuery(object):
                 cursor (:data:`True`) or an ``end_at`` cursor (:data:`False`).
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             A query with cursor. Acts as a copy of the current query, modified
             with the newly added "start at" cursor.
         """
@@ -465,12 +465,12 @@ class AsyncQuery(object):
 
         If the current query already has specified a start cursor -- either
         via this method or
-        :meth:`~google.cloud.firestore_v1.query.Query.start_after` -- this
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.start_after` -- this
         will overwrite it.
 
         When the query is sent to the server, the ``document_fields`` will
         be used in the order given by fields set by
-        :meth:`~google.cloud.firestore_v1.query.Query.order_by`.
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.order_by`.
 
         Args:
             document_fields
@@ -480,7 +480,7 @@ class AsyncQuery(object):
                 of values that represent a position in a query result set.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             A query with cursor. Acts as
             a copy of the current query, modified with the newly added
             "start at" cursor.
@@ -495,12 +495,12 @@ class AsyncQuery(object):
 
         If the current query already has specified a start cursor -- either
         via this method or
-        :meth:`~google.cloud.firestore_v1.query.Query.start_at` -- this will
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.start_at` -- this will
         overwrite it.
 
         When the query is sent to the server, the ``document_fields`` will
         be used in the order given by fields set by
-        :meth:`~google.cloud.firestore_v1.query.Query.order_by`.
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.order_by`.
 
         Args:
             document_fields
@@ -510,7 +510,7 @@ class AsyncQuery(object):
                 of values that represent a position in a query result set.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             A query with cursor. Acts as a copy of the current query, modified
             with the newly added "start after" cursor.
         """
@@ -524,12 +524,12 @@ class AsyncQuery(object):
 
         If the current query already has specified an end cursor -- either
         via this method or
-        :meth:`~google.cloud.firestore_v1.query.Query.end_at` -- this will
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.end_at` -- this will
         overwrite it.
 
         When the query is sent to the server, the ``document_fields`` will
         be used in the order given by fields set by
-        :meth:`~google.cloud.firestore_v1.query.Query.order_by`.
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.order_by`.
 
         Args:
             document_fields
@@ -539,7 +539,7 @@ class AsyncQuery(object):
                 of values that represent a position in a query result set.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             A query with cursor. Acts as a copy of the current query, modified
             with the newly added "end before" cursor.
         """
@@ -553,12 +553,12 @@ class AsyncQuery(object):
 
         If the current query already has specified an end cursor -- either
         via this method or
-        :meth:`~google.cloud.firestore_v1.query.Query.end_before` -- this will
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.end_before` -- this will
         overwrite it.
 
         When the query is sent to the server, the ``document_fields`` will
         be used in the order given by fields set by
-        :meth:`~google.cloud.firestore_v1.query.Query.order_by`.
+        :meth:`~google.cloud.firestore_v1.query.AsyncQuery.order_by`.
 
         Args:
             document_fields
@@ -568,7 +568,7 @@ class AsyncQuery(object):
                 of values that represent a position in a query result set.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.query.Query`:
+            :class:`~google.cloud.firestore_v1.query.AsyncQuery`:
             A query with cursor. Acts as a copy of the current query, modified
             with the newly added "end at" cursor.
         """
@@ -731,11 +731,12 @@ class AsyncQuery(object):
     async def get(self, transaction=None):
         """Deprecated alias for :meth:`stream`."""
         warnings.warn(
-            "'Query.get' is deprecated:  please use 'Query.stream' instead.",
+            "'AsyncQuery.get' is deprecated:  please use 'AsyncQuery.stream' instead.",
             DeprecationWarning,
             stacklevel=2,
         )
-        return await self.stream(transaction=transaction)
+        async for d in self.stream(transaction=transaction):
+            yield d
 
     async def stream(self, transaction=None):
         """Read the documents in the collection that match this query.
@@ -822,12 +823,12 @@ class AsyncQuery(object):
 
         # Add implicit sorting by name, using the last specified direction.
         if len(_orders) == 0:
-            lastDirection = Query.ASCENDING
+            lastDirection = AsyncQuery.ASCENDING
         else:
             if _orders[-1].direction == 1:
-                lastDirection = Query.ASCENDING
+                lastDirection = AsyncQuery.ASCENDING
             else:
-                lastDirection = Query.DESCENDING
+                lastDirection = AsyncQuery.DESCENDING
 
         orderBys = list(_orders)
 
@@ -912,8 +913,8 @@ def _enum_from_direction(direction):
 
     Args:
         direction (str): A direction to order by. Must be one of
-            :attr:`~google.cloud.firestore.Query.ASCENDING` or
-            :attr:`~google.cloud.firestore.Query.DESCENDING`.
+            :attr:`~google.cloud.firestore.AsyncQuery.ASCENDING` or
+            :attr:`~google.cloud.firestore.AsyncQuery.DESCENDING`.
 
     Returns:
         int: The enum corresponding to ``direction``.
@@ -929,7 +930,7 @@ def _enum_from_direction(direction):
     elif direction == AsyncQuery.DESCENDING:
         return enums.StructuredQuery.Direction.DESCENDING
     else:
-        msg = _BAD_DIR_STRING.format(direction, Query.ASCENDING, Query.DESCENDING)
+        msg = _BAD_DIR_STRING.format(direction, AsyncQuery.ASCENDING, AsyncQuery.DESCENDING)
         raise ValueError(msg)
 
 
