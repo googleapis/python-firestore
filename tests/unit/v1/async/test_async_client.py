@@ -553,11 +553,11 @@ class TestAsyncClient(unittest.TestCase):
         self.assertEqual(batch._write_pbs, [])
 
     def test_transaction(self):
-        from google.cloud.firestore_v1.transaction import Transaction
+        from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 
         client = self._make_default_one()
         transaction = client.transaction(max_attempts=3, read_only=True)
-        self.assertIsInstance(transaction, Transaction)
+        self.assertIsInstance(transaction, AsyncTransaction)
         self.assertEqual(transaction._write_pbs, [])
         self.assertEqual(transaction._max_attempts, 3)
         self.assertTrue(transaction._read_only)

@@ -40,7 +40,7 @@ from google.cloud.firestore_v1.async_document import DocumentSnapshot
 from google.cloud.firestore_v1.field_path import render_field_path
 from google.cloud.firestore_v1.gapic import firestore_client
 from google.cloud.firestore_v1.gapic.transports import firestore_grpc_transport
-from google.cloud.firestore_v1.transaction import Transaction
+from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 
 
 DEFAULT_DATABASE = "(default)"
@@ -423,7 +423,7 @@ class AsyncClient(ClientWithProject):
                 paths (``.``-delimited list of field names) to use as a
                 projection of document fields in the returned results. If
                 no value is provided, all fields will be returned.
-            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+            transaction (Optional[:class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction`]):
                 An existing transaction that these ``references`` will be
                 retrieved in.
 
@@ -471,20 +471,20 @@ class AsyncClient(ClientWithProject):
     def transaction(self, **kwargs):
         """Get a transaction that uses this client.
 
-        See :class:`~google.cloud.firestore_v1.transaction.Transaction` for
+        See :class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction` for
         more information on transactions and the constructor arguments.
 
         Args:
             kwargs (Dict[str, Any]): The keyword arguments (other than
                 ``client``) to pass along to the
-                :class:`~google.cloud.firestore_v1.transaction.Transaction`
+                :class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction`
                 constructor.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.transaction.Transaction`:
+            :class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction`:
             A transaction attached to this client.
         """
-        return Transaction(self, **kwargs)
+        return AsyncTransaction(self, **kwargs)
 
 
 def _reference_info(references):
