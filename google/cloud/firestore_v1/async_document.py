@@ -18,16 +18,22 @@ import copy
 
 import six
 
-from google.cloud.firestore_v1.document import DocumentReference, DocumentSnapshot
+from google.cloud.firestore_v1.document import (
+    DocumentReference,
+    DocumentSnapshot,
+    _get_document_path,
+    _consume_single_get,
+    _first_write_result,
+    _item_to_collection_ref,
+)
 
 from google.api_core import exceptions
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1 import field_path as field_path_module
 from google.cloud.firestore_v1.proto import common_pb2
 from google.cloud.firestore_v1.watch import Watch
 
 
-class AsyncDocumentReference(object):
+class AsyncDocumentReference(DocumentReference):
     """A reference to a document in a Firestore database.
 
     The document may already exist or can be created by this class.
@@ -52,137 +58,8 @@ class AsyncDocumentReference(object):
         TypeError: If a keyword other than ``client`` is used.
     """
 
-    _document_path_internal = None
-
     def __init__(self, *path, **kwargs):
-        _helpers.verify_path(path, is_collection=False)
-        self._path = path
-        self._client = kwargs.pop("client", None)
-        if kwargs:
-            raise TypeError(
-                "Received unexpected arguments", kwargs, "Only `client` is supported"
-            )
-
-    def __copy__(self):
-        """Shallow copy the instance.
-
-        We leave the client "as-is" but tuple-unpack the path.
-
-        Returns:
-            .AsyncDocumentReference: A copy of the current document.
-        """
-        result = self.__class__(*self._path, client=self._client)
-        result._document_path_internal = self._document_path_internal
-        return result
-
-    def __deepcopy__(self, unused_memo):
-        """Deep copy the instance.
-
-        This isn't a true deep copy, wee leave the client "as-is" but
-        tuple-unpack the path.
-
-        Returns:
-            .AsyncDocumentReference: A copy of the current document.
-        """
-        return self.__copy__()
-
-    def __eq__(self, other):
-        """Equality check against another instance.
-
-        Args:
-            other (Any): A value to compare against.
-
-        Returns:
-            Union[bool, NotImplementedType]: Indicating if the values are
-            equal.
-        """
-        if isinstance(other, AsyncDocumentReference):
-            return self._client == other._client and self._path == other._path
-        else:
-            return NotImplemented
-
-    def __hash__(self):
-        return hash(self._path) + hash(self._client)
-
-    def __ne__(self, other):
-        """Inequality check against another instance.
-
-        Args:
-            other (Any): A value to compare against.
-
-        Returns:
-            Union[bool, NotImplementedType]: Indicating if the values are
-            not equal.
-        """
-        if isinstance(other, AsyncDocumentReference):
-            return self._client != other._client or self._path != other._path
-        else:
-            return NotImplemented
-
-    @property
-    def path(self):
-        """Database-relative for this document.
-
-        Returns:
-            str: The document's relative path.
-        """
-        return "/".join(self._path)
-
-    @property
-    def _document_path(self):
-        """Create and cache the full path for this document.
-
-        Of the form:
-
-            ``projects/{project_id}/databases/{database_id}/...
-                  documents/{document_path}``
-
-        Returns:
-            str: The full document path.
-
-        Raises:
-            ValueError: If the current document reference has no ``client``.
-        """
-        if self._document_path_internal is None:
-            if self._client is None:
-                raise ValueError("A document reference requires a `client`.")
-            self._document_path_internal = _get_document_path(self._client, self._path)
-
-        return self._document_path_internal
-
-    @property
-    def id(self):
-        """The document identifier (within its collection).
-
-        Returns:
-            str: The last component of the path.
-        """
-        return self._path[-1]
-
-    @property
-    def parent(self):
-        """Collection that owns the current document.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`:
-            The parent collection.
-        """
-        parent_path = self._path[:-1]
-        return self._client.collection(*parent_path)
-
-    def collection(self, collection_id):
-        """Create a sub-collection underneath the current document.
-
-        Args:
-            collection_id (str): The sub-collection identifier (sometimes
-                referred to as the "kind").
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`:
-            The child collection.
-        """
-        child_path = self._path + (collection_id,)
-        return self._client.collection(*child_path)
+        super(AsyncDocumentReference, self).__init__(*path, **kwargs)
 
     async def create(self, document_data):
         """Create the current document in the Firestore database.
@@ -530,92 +407,3 @@ class AsyncDocumentReference(object):
         return Watch.for_document(
             self, callback, DocumentSnapshot, AsyncDocumentReference
         )
-
-
-def _get_document_path(client, path):
-    """Convert a path tuple into a full path string.
-
-    Of the form:
-
-        ``projects/{project_id}/databases/{database_id}/...
-              documents/{document_path}``
-
-    Args:
-        client (:class:`~google.cloud.firestore_v1.client.Client`):
-            The client that holds configuration details and a GAPIC client
-            object.
-        path (Tuple[str, ...]): The components in a document path.
-
-    Returns:
-        str: The fully-qualified document path.
-    """
-    parts = (client._database_string, "documents") + path
-    return _helpers.DOCUMENT_PATH_DELIMITER.join(parts)
-
-
-def _consume_single_get(response_iterator):
-    """Consume a gRPC stream that should contain a single response.
-
-    The stream will correspond to a ``BatchGetDocuments`` request made
-    for a single document.
-
-    Args:
-        response_iterator (~google.cloud.exceptions.GrpcRendezvous): A
-            streaming iterator returned from a ``BatchGetDocuments``
-            request.
-
-    Returns:
-        ~google.cloud.proto.firestore.v1.\
-            firestore_pb2.BatchGetDocumentsResponse: The single "get"
-        response in the batch.
-
-    Raises:
-        ValueError: If anything other than exactly one response is returned.
-    """
-    # Calling ``list()`` consumes the entire iterator.
-    all_responses = list(response_iterator)
-    if len(all_responses) != 1:
-        raise ValueError(
-            "Unexpected response from `BatchGetDocumentsResponse`",
-            all_responses,
-            "Expected only one result",
-        )
-
-    return all_responses[0]
-
-
-def _first_write_result(write_results):
-    """Get first write result from list.
-
-    For cases where ``len(write_results) > 1``, this assumes the writes
-    occurred at the same time (e.g. if an update and transform are sent
-    at the same time).
-
-    Args:
-        write_results (List[google.cloud.proto.firestore.v1.\
-            write_pb2.WriteResult, ...]: The write results from a
-            ``CommitResponse``.
-
-    Returns:
-        google.cloud.firestore_v1.types.WriteResult: The
-        lone write result from ``write_results``.
-
-    Raises:
-        ValueError: If there are zero write results. This is likely to
-            **never** occur, since the backend should be stable.
-    """
-    if not write_results:
-        raise ValueError("Expected at least one write result")
-
-    return write_results[0]
-
-
-def _item_to_collection_ref(iterator, item):
-    """Convert collection ID to collection ref.
-
-    Args:
-        iterator (google.api_core.page_iterator.GRPCIterator):
-            iterator response
-        item (str): ID of the collection
-    """
-    return iterator.document.collection(item)

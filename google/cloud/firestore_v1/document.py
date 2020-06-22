@@ -94,7 +94,7 @@ class DocumentReference(object):
             Union[bool, NotImplementedType]: Indicating if the values are
             equal.
         """
-        if isinstance(other, DocumentReference):
+        if isinstance(other, self.__class__):
             return self._client == other._client and self._path == other._path
         else:
             return NotImplemented
@@ -112,7 +112,7 @@ class DocumentReference(object):
             Union[bool, NotImplementedType]: Indicating if the values are
             not equal.
         """
-        if isinstance(other, DocumentReference):
+        if isinstance(other, self.__class__):
             return self._client != other._client or self._path != other._path
         else:
             return NotImplemented
