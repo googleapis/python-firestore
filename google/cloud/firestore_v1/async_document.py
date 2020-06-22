@@ -14,15 +14,11 @@
 
 """Classes for representing documents for the Google Cloud Firestore API."""
 
-import copy
-
 import six
 
 from google.cloud.firestore_v1.document import (
     DocumentReference,
     DocumentSnapshot,
-    _get_document_path,
-    _consume_single_get,
     _first_write_result,
     _item_to_collection_ref,
 )

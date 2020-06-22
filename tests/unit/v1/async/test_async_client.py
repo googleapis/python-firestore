@@ -51,7 +51,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         self.assertIsNone(client._emulator_host)
 
     def test_constructor_with_emulator_host(self):
-        from google.cloud.firestore_v1.async_client import _FIRESTORE_EMULATOR_HOST
+        from google.cloud.firestore_v1.client import _FIRESTORE_EMULATOR_HOST
 
         credentials = _make_credentials()
         emulator_host = "localhost:8081"
@@ -306,7 +306,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         self.assertTrue(option2._exists)
 
     def test_write_open_neither_arg(self):
-        from google.cloud.firestore_v1.async_client import _BAD_OPTION_ERR
+        from google.cloud.firestore_v1.client import _BAD_OPTION_ERR
 
         klass = self._get_target_class()
         with self.assertRaises(TypeError) as exc_info:
@@ -315,7 +315,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         self.assertEqual(exc_info.exception.args, (_BAD_OPTION_ERR,))
 
     def test_write_multiple_args(self):
-        from google.cloud.firestore_v1.async_client import _BAD_OPTION_ERR
+        from google.cloud.firestore_v1.client import _BAD_OPTION_ERR
 
         klass = self._get_target_class()
         with self.assertRaises(TypeError) as exc_info:
@@ -324,7 +324,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         self.assertEqual(exc_info.exception.args, (_BAD_OPTION_ERR,))
 
     def test_write_bad_arg(self):
-        from google.cloud.firestore_v1.async_client import _BAD_OPTION_ERR
+        from google.cloud.firestore_v1.client import _BAD_OPTION_ERR
 
         klass = self._get_target_class()
         with self.assertRaises(TypeError) as exc_info:
@@ -474,7 +474,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_get_all_unknown_result(self):
-        from google.cloud.firestore_v1.async_client import _BAD_DOC_TEMPLATE
+        from google.cloud.firestore_v1.client import _BAD_DOC_TEMPLATE
 
         info = self._info_for_get_all({"z": 28.5}, {})
         client, document, _, _, response = info
@@ -601,7 +601,7 @@ class Test__reference_info(aiounittest.AsyncTestCase):
 class Test__get_reference(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(document_path, reference_map):
-        from google.cloud.firestore_v1.async_client import _get_reference
+        from google.cloud.firestore_v1.client import _get_reference
 
         return _get_reference(document_path, reference_map)
 
@@ -611,7 +611,7 @@ class Test__get_reference(aiounittest.AsyncTestCase):
         self.assertIs(self._call_fut(doc_path, reference_map), mock.sentinel.reference)
 
     def test_failure(self):
-        from google.cloud.firestore_v1.async_client import _BAD_DOC_TEMPLATE
+        from google.cloud.firestore_v1.client import _BAD_DOC_TEMPLATE
 
         doc_path = "1/888/call-now"
         with self.assertRaises(ValueError) as exc_info:

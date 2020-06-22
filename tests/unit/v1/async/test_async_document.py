@@ -766,7 +766,7 @@ class TestDocumentSnapshot(aiounittest.AsyncTestCase):
 class Test__get_document_path(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(client, path):
-        from google.cloud.firestore_v1.async_document import _get_document_path
+        from google.cloud.firestore_v1.document import _get_document_path
 
         return _get_document_path(client, path)
 
@@ -785,7 +785,7 @@ class Test__get_document_path(aiounittest.AsyncTestCase):
 class Test__consume_single_get(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(response_iterator):
-        from google.cloud.firestore_v1.async_document import _consume_single_get
+        from google.cloud.firestore_v1.document import _consume_single_get
 
         return _consume_single_get(response_iterator)
 
@@ -808,7 +808,7 @@ class Test__consume_single_get(aiounittest.AsyncTestCase):
 class Test__first_write_result(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(write_results):
-        from google.cloud.firestore_v1.async_document import _first_write_result
+        from google.cloud.firestore_v1.document import _first_write_result
 
         return _first_write_result(write_results)
 

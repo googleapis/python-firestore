@@ -15,7 +15,6 @@
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
 
-from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.batch import WriteBatch
 
 

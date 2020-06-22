@@ -13,18 +13,14 @@
 # limitations under the License.
 
 """Classes for representing collections for the Google Cloud Firestore API."""
-import random
 import warnings
 
-import six
 
 from google.cloud.firestore_v1.collection import (
     CollectionReference,
-    _AUTO_ID_CHARS,
     _auto_id,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import async_document
@@ -375,25 +371,3 @@ class AsyncCollectionReference(CollectionReference):
             async_document.DocumentSnapshot,
             async_document.AsyncDocumentReference,
         )
-
-
-def _auto_id():
-    """Generate a "random" automatically generated ID.
-
-    Returns:
-        str: A 20 character string composed of digits, uppercase and
-        lowercase and letters.
-    """
-    return "".join(random.choice(_AUTO_ID_CHARS) for _ in six.moves.xrange(20))
-
-
-def _item_to_document_ref(iterator, item):
-    """Convert Document resource to document ref.
-
-    Args:
-        iterator (google.api_core.page_iterator.GRPCIterator):
-            iterator response
-        item (dict): document resource
-    """
-    document_id = item.name.split(_helpers.DOCUMENT_PATH_DELIMITER)[-1]
-    return iterator.collection.document(document_id)

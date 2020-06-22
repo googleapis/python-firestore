@@ -566,7 +566,7 @@ class Test__auto_id(aiounittest.AsyncTestCase):
 
     @mock.patch("random.choice")
     def test_it(self, mock_rand_choice):
-        from google.cloud.firestore_v1.async_collection import _AUTO_ID_CHARS
+        from google.cloud.firestore_v1.collection import _AUTO_ID_CHARS
 
         mock_result = "0123456789abcdefghij"
         mock_rand_choice.side_effect = list(mock_result)

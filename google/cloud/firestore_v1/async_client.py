@@ -23,33 +23,22 @@ In the hierarchy of API concepts
 * a :class:`~google.cloud.firestore_v1.client.Client` owns a
   :class:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference`
 """
-import os
 
 from google.cloud.firestore_v1.client import (
     Client,
     DEFAULT_DATABASE,
-    _BAD_OPTION_ERR,
-    _BAD_DOC_TEMPLATE,
     _CLIENT_INFO,
-    _FIRESTORE_EMULATOR_HOST,
     _reference_info,
-    _get_reference,
     _parse_batch_get,
     _get_doc_mask,
     _item_to_collection_ref,
 )
 
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1 import __version__
 from google.cloud.firestore_v1.async_query import AsyncQuery
-from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
-from google.cloud.firestore_v1.async_document import DocumentSnapshot
-from google.cloud.firestore_v1.field_path import render_field_path
-from google.cloud.firestore_v1.gapic import firestore_client
-from google.cloud.firestore_v1.gapic.transports import firestore_grpc_transport
 from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 
 

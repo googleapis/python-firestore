@@ -1469,7 +1469,7 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
 class Test__enum_from_op_string(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(op_string):
-        from google.cloud.firestore_v1.async_query import _enum_from_op_string
+        from google.cloud.firestore_v1.query import _enum_from_op_string
 
         return _enum_from_op_string(op_string)
 
@@ -1521,7 +1521,7 @@ class Test__enum_from_op_string(aiounittest.AsyncTestCase):
 class Test__isnan(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(value):
-        from google.cloud.firestore_v1.async_query import _isnan
+        from google.cloud.firestore_v1.query import _isnan
 
         return _isnan(value)
 
@@ -1539,7 +1539,7 @@ class Test__isnan(aiounittest.AsyncTestCase):
 class Test__enum_from_direction(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(direction):
-        from google.cloud.firestore_v1.async_query import _enum_from_direction
+        from google.cloud.firestore_v1.query import _enum_from_direction
 
         return _enum_from_direction(direction)
 
@@ -1563,7 +1563,7 @@ class Test__enum_from_direction(aiounittest.AsyncTestCase):
 class Test__filter_pb(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(field_or_unary):
-        from google.cloud.firestore_v1.async_query import _filter_pb
+        from google.cloud.firestore_v1.query import _filter_pb
 
         return _filter_pb(field_or_unary)
 
@@ -1601,7 +1601,7 @@ class Test__filter_pb(aiounittest.AsyncTestCase):
 class Test__cursor_pb(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(cursor_pair):
-        from google.cloud.firestore_v1.async_query import _cursor_pb
+        from google.cloud.firestore_v1.query import _cursor_pb
 
         return _cursor_pb(cursor_pair)
 
