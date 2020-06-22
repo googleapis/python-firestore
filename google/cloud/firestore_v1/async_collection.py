@@ -18,15 +18,19 @@ import warnings
 
 import six
 
+from google.cloud.firestore_v1.collection import (
+    CollectionReference,
+    _AUTO_ID_CHARS,
+    _auto_id,
+    _item_to_document_ref,
+)
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import async_document
 
-_AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-
-class AsyncCollectionReference(object):
+class AsyncCollectionReference(CollectionReference):
     """A reference to a collection in a Firestore database.
 
     The collection may already exist or this class can facilitate creation
@@ -53,83 +57,7 @@ class AsyncCollectionReference(object):
     """
 
     def __init__(self, *path, **kwargs):
-        _helpers.verify_path(path, is_collection=True)
-        self._path = path
-        self._client = kwargs.pop("client", None)
-        if kwargs:
-            raise TypeError(
-                "Received unexpected arguments", kwargs, "Only `client` is supported"
-            )
-
-    def __eq__(self, other):
-        if not isinstance(other, self.__class__):
-            return NotImplemented
-        return self._path == other._path and self._client == other._client
-
-    @property
-    def id(self):
-        """The collection identifier.
-
-        Returns:
-            str: The last component of the path.
-        """
-        return self._path[-1]
-
-    @property
-    def parent(self):
-        """Document that owns the current collection.
-
-        Returns:
-            Optional[:class:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference`]:
-            The parent document, if the current collection is not a
-            top-level collection.
-        """
-        if len(self._path) == 1:
-            return None
-        else:
-            parent_path = self._path[:-1]
-        return self._client.document(*parent_path)
-
-    def document(self, document_id=None):
-        """Create a sub-document underneath the current collection.
-
-        Args:
-            document_id (Optional[str]): The document identifier
-                within the current collection. If not provided, will default
-                to a random 20 character string composed of digits,
-                uppercase and lowercase and letters.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference`:
-            The child document.
-        """
-        if document_id is None:
-            document_id = _auto_id()
-
-        child_path = self._path + (document_id,)
-        return self._client.document(*child_path)
-
-    def _parent_info(self):
-        """Get fully-qualified parent path and prefix for this collection.
-
-        Returns:
-            Tuple[str, str]: Pair of
-
-            * the fully-qualified (with database and project) path to the
-              parent of this collection (will either be the database path
-              or a document path).
-            * the prefix to a document in this collection.
-        """
-        parent_doc = self.parent
-        if parent_doc is None:
-            parent_path = _helpers.DOCUMENT_PATH_DELIMITER.join(
-                (self._client._database_string, "documents")
-            )
-        else:
-            parent_path = parent_doc._document_path
-
-        expected_prefix = _helpers.DOCUMENT_PATH_DELIMITER.join((parent_path, self.id))
-        return parent_path, expected_prefix
+        super(AsyncCollectionReference, self).__init__(*path, **kwargs)
 
     async def add(self, document_data, document_id=None):
         """Create a document in the Firestore database with the provided data.

@@ -140,7 +140,7 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         self.assertEqual(child._path, (collection_id, document_id))
 
     @mock.patch(
-        "google.cloud.firestore_v1.async_collection._auto_id",
+        "google.cloud.firestore_v1.collection._auto_id",
         return_value="zorpzorpthreezorp012",
     )
     def test_document_factory_auto_id(self, mock_auto_id):
