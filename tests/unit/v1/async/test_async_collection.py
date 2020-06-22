@@ -20,6 +20,15 @@ import mock
 import six
 
 
+class MockAsyncIter:
+    def __init__(self, count):
+        self.count = count
+
+    async def __aiter__(self, **_):
+        for i in range(self.count):
+            yield i
+
+
 class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
     @staticmethod
     def _get_target_class():
@@ -495,6 +504,8 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
     async def test_get(self, query_class):
         import warnings
 
+        query_class.return_value.stream.return_value = MockAsyncIter(3)
+
         collection = self._make_one("collection")
         with warnings.catch_warnings(record=True) as warned:
             get_response = collection.get()
@@ -504,7 +515,6 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
 
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        # self.assertIs(get_response, query_instance.stream.return_value)
         query_instance.stream.assert_called_once_with(transaction=None)
 
         # Verify the deprecation
@@ -516,6 +526,8 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
     async def test_get_with_transaction(self, query_class):
         import warnings
 
+        query_class.return_value.stream.return_value = MockAsyncIter(3)
+
         collection = self._make_one("collection")
         transaction = mock.sentinel.txn
         with warnings.catch_warnings(record=True) as warned:
@@ -526,7 +538,6 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
 
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        # self.assertIs(get_response, query_instance.stream.return_value)
         query_instance.stream.assert_called_once_with(transaction=transaction)
 
         # Verify the deprecation
@@ -536,6 +547,8 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
     @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
     @pytest.mark.asyncio
     async def test_stream(self, query_class):
+        query_class.return_value.stream.return_value = MockAsyncIter(3)
+
         collection = self._make_one("collection")
         stream_response = collection.stream()
 
@@ -544,12 +557,13 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
 
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        # self.assertIs(stream_response, query_instance.stream.return_value)
         query_instance.stream.assert_called_once_with(transaction=None)
 
     @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
     @pytest.mark.asyncio
     async def test_stream_with_transaction(self, query_class):
+        query_class.return_value.stream.return_value = MockAsyncIter(3)
+
         collection = self._make_one("collection")
         transaction = mock.sentinel.txn
         stream_response = collection.stream(transaction=transaction)
@@ -559,7 +573,6 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
 
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        # self.assertIs(stream_response, query_instance.stream.return_value)
         query_instance.stream.assert_called_once_with(transaction=transaction)
 
     @mock.patch("google.cloud.firestore_v1.async_collection.Watch", autospec=True)
