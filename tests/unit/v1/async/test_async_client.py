@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
+import pytest
 import datetime
 import types
-import unittest
+import aiounittest
 
 import mock
 
 
-class TestAsyncClient(unittest.TestCase):
+class TestAsyncClient(aiounittest.AsyncTestCase):
 
     PROJECT = "my-prahjekt"
 
@@ -333,7 +333,8 @@ class TestAsyncClient(unittest.TestCase):
         extra = "{!r} was provided".format("spinach")
         self.assertEqual(exc_info.exception.args, (_BAD_OPTION_ERR, extra))
 
-    def test_collections(self):
+    @pytest.mark.asyncio
+    async def test_collections(self):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
@@ -356,7 +357,7 @@ class TestAsyncClient(unittest.TestCase):
         iterator = _Iterator(pages=[collection_ids])
         firestore_api.list_collection_ids.return_value = iterator
 
-        collections = list(asyncio.run(client.collections()))
+        collections = list(await client.collections())
 
         self.assertEqual(len(collections), len(collection_ids))
         for collection, collection_id in zip(collections, collection_ids):
@@ -398,7 +399,8 @@ class TestAsyncClient(unittest.TestCase):
 
         return client, document1, document2, response1, response2
 
-    def test_get_all(self):
+    @pytest.mark.asyncio
+    async def test_get_all(self):
         from google.cloud.firestore_v1.proto import common_pb2
         from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
@@ -409,13 +411,11 @@ class TestAsyncClient(unittest.TestCase):
 
         # Exercise the mocked ``batch_get_documents``.
         field_paths = ["a", "b"]
-        snapshots = asyncio.run(
-            self._get_all_helper(
-                client,
-                [document1, document2],
-                [response1, response2],
-                field_paths=field_paths,
-            )
+        snapshots = await self._get_all_helper(
+            client,
+            [document1, document2],
+            [response1, response2],
+            field_paths=field_paths,
         )
         self.assertEqual(len(snapshots), 2)
 
@@ -440,7 +440,8 @@ class TestAsyncClient(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_get_all_with_transaction(self):
+    @pytest.mark.asyncio
+    async def test_get_all_with_transaction(self):
         from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
         data = {"so-much": 484}
@@ -451,10 +452,8 @@ class TestAsyncClient(unittest.TestCase):
         transaction._id = txn_id
 
         # Exercise the mocked ``batch_get_documents``.
-        snapshots = asyncio.run(
-            self._get_all_helper(
-                client, [document], [response], transaction=transaction
-            )
+        snapshots = await self._get_all_helper(
+            client, [document], [response], transaction=transaction
         )
         self.assertEqual(len(snapshots), 1)
 
@@ -473,7 +472,8 @@ class TestAsyncClient(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_get_all_unknown_result(self):
+    @pytest.mark.asyncio
+    async def test_get_all_unknown_result(self):
         from google.cloud.firestore_v1.async_client import _BAD_DOC_TEMPLATE
 
         info = self._info_for_get_all({"z": 28.5}, {})
@@ -481,7 +481,7 @@ class TestAsyncClient(unittest.TestCase):
 
         # Exercise the mocked ``batch_get_documents``.
         with self.assertRaises(ValueError) as exc_info:
-            asyncio.run(self._get_all_helper(client, [document], [response]))
+            await self._get_all_helper(client, [document], [response])
 
         err_msg = _BAD_DOC_TEMPLATE.format(response.found.name)
         self.assertEqual(exc_info.exception.args, (err_msg,))
@@ -496,7 +496,8 @@ class TestAsyncClient(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_get_all_wrong_order(self):
+    @pytest.mark.asyncio
+    async def test_get_all_wrong_order(self):
         from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
         data1 = {"up": 10}
@@ -507,12 +508,8 @@ class TestAsyncClient(unittest.TestCase):
         response3 = _make_batch_response(missing=document3._document_path)
 
         # Exercise the mocked ``batch_get_documents``.
-        snapshots = asyncio.run(
-            self._get_all_helper(
-                client,
-                [document1, document2, document3],
-                [response2, response1, response3],
-            )
+        snapshots = await self._get_all_helper(
+            client, [document1, document2, document3], [response2, response1, response3]
         )
 
         self.assertEqual(len(snapshots), 3)
@@ -564,7 +561,7 @@ class TestAsyncClient(unittest.TestCase):
         self.assertIsNone(transaction._id)
 
 
-class Test__reference_info(unittest.TestCase):
+class Test__reference_info(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(references):
         from google.cloud.firestore_v1.async_client import _reference_info
@@ -601,7 +598,7 @@ class Test__reference_info(unittest.TestCase):
         self.assertEqual(reference_map, expected_map)
 
 
-class Test__get_reference(unittest.TestCase):
+class Test__get_reference(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(document_path, reference_map):
         from google.cloud.firestore_v1.async_client import _get_reference
@@ -624,7 +621,7 @@ class Test__get_reference(unittest.TestCase):
         self.assertEqual(exc_info.exception.args, (err_msg,))
 
 
-class Test__parse_batch_get(unittest.TestCase):
+class Test__parse_batch_get(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(get_doc_response, reference_map, client=mock.sentinel.client):
         from google.cloud.firestore_v1.async_client import _parse_batch_get
@@ -702,7 +699,7 @@ class Test__parse_batch_get(unittest.TestCase):
         response_pb.WhichOneof.assert_called_once_with("result")
 
 
-class Test__get_doc_mask(unittest.TestCase):
+class Test__get_doc_mask(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(field_paths):
         from google.cloud.firestore_v1.async_client import _get_doc_mask

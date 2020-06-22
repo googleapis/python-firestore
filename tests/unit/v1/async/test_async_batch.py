@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
-import unittest
+import pytest
+import aiounittest
 
 import mock
 
 
-class TestAsyncWriteBatch(unittest.TestCase):
+class TestAsyncWriteBatch(aiounittest.AsyncTestCase):
     @staticmethod
     def _get_target_class():
         from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
@@ -153,7 +153,8 @@ class TestAsyncWriteBatch(unittest.TestCase):
         new_write_pb = write_pb2.Write(delete=reference._document_path)
         self.assertEqual(batch._write_pbs, [new_write_pb])
 
-    def test_commit(self):
+    @pytest.mark.asyncio
+    async def test_commit(self):
         from google.protobuf import timestamp_pb2
         from google.cloud.firestore_v1.proto import firestore_pb2
         from google.cloud.firestore_v1.proto import write_pb2
@@ -179,7 +180,7 @@ class TestAsyncWriteBatch(unittest.TestCase):
         batch.delete(document2)
         write_pbs = batch._write_pbs[::]
 
-        write_results = asyncio.run(batch.commit())
+        write_results = await batch.commit()
         self.assertEqual(write_results, list(commit_response.write_results))
         self.assertEqual(batch.write_results, write_results)
         self.assertEqual(batch.commit_time, timestamp)
@@ -194,7 +195,8 @@ class TestAsyncWriteBatch(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_as_context_mgr_wo_error(self):
+    @pytest.mark.asyncio
+    async def test_as_context_mgr_wo_error(self):
         from google.protobuf import timestamp_pb2
         from google.cloud.firestore_v1.proto import firestore_pb2
         from google.cloud.firestore_v1.proto import write_pb2
@@ -212,9 +214,11 @@ class TestAsyncWriteBatch(unittest.TestCase):
         document1 = client.document("a", "b")
         document2 = client.document("c", "d", "e", "f")
 
-        write_pbs = asyncio.run(
-            self._as_context_mgr_wo_error_helper(batch, document1, document2)
-        )
+        async with batch as ctx_mgr:
+            self.assertIs(ctx_mgr, batch)
+            ctx_mgr.create(document1, {"ten": 10, "buck": u"ets"})
+            ctx_mgr.delete(document2)
+            write_pbs = batch._write_pbs[::]
 
         self.assertEqual(batch.write_results, list(commit_response.write_results))
         self.assertEqual(batch.commit_time, timestamp)
@@ -229,15 +233,8 @@ class TestAsyncWriteBatch(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    async def _as_context_mgr_wo_error_helper(self, batch, document1, document2):
-        async with batch as ctx_mgr:
-            self.assertIs(ctx_mgr, batch)
-            ctx_mgr.create(document1, {"ten": 10, "buck": u"ets"})
-            ctx_mgr.delete(document2)
-            write_pbs = batch._write_pbs[::]
-        return write_pbs
-
-    def test_as_context_mgr_w_error(self):
+    @pytest.mark.asyncio
+    async def test_as_context_mgr_w_error(self):
         firestore_api = mock.Mock(spec=["commit"])
         client = _make_client()
         client._firestore_api_internal = firestore_api
@@ -245,7 +242,11 @@ class TestAsyncWriteBatch(unittest.TestCase):
         document1 = client.document("a", "b")
         document2 = client.document("c", "d", "e", "f")
 
-        asyncio.run(self._as_context_mgr_w_error_helper(batch, document1, document2))
+        with self.assertRaises(RuntimeError):
+            async with batch as ctx_mgr:
+                ctx_mgr.create(document1, {"ten": 10, "buck": u"ets"})
+                ctx_mgr.delete(document2)
+                raise RuntimeError("testing")
 
         self.assertIsNone(batch.write_results)
         self.assertIsNone(batch.commit_time)
@@ -253,13 +254,6 @@ class TestAsyncWriteBatch(unittest.TestCase):
         self.assertEqual(len(batch._write_pbs), 2)
 
         firestore_api.commit.assert_not_called()
-
-    async def _as_context_mgr_w_error_helper(self, batch, document1, document2):
-        with self.assertRaises(RuntimeError):
-            async with batch as ctx_mgr:
-                ctx_mgr.create(document1, {"ten": 10, "buck": u"ets"})
-                ctx_mgr.delete(document2)
-                raise RuntimeError("testing")
 
 
 def _value_pb(**kwargs):

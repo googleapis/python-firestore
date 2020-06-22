@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
+import pytest
 import datetime
 import types
-import unittest
+import aiounittest
 
 import mock
 import six
 
 
-class TestAsyncQuery(unittest.TestCase):
+class TestAsyncQuery(aiounittest.AsyncTestCase):
 
     if six.PY2:
-        assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
+        assertRaisesRegex = aiounittest.AsyncTestCase.assertRaisesRegexp
 
     @staticmethod
     def _get_target_class():
@@ -1063,10 +1063,8 @@ class TestAsyncQuery(unittest.TestCase):
 
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test_get_simple(self):
-        asyncio.run(self._test_get_simple_helper())
-
-    async def _test_get_simple_helper(self):
+    @pytest.mark.asyncio
+    async def test_get_simple(self):
         import warnings
 
         # Create a minimal fake GAPIC.
@@ -1112,10 +1110,8 @@ class TestAsyncQuery(unittest.TestCase):
         self.assertEqual(len(warned), 1)
         self.assertIs(warned[0].category, DeprecationWarning)
 
-    def test_stream_simple(self):
-        asyncio.run(self._test_stream_simple_helper())
-
-    async def _test_stream_simple_helper(self):
+    @pytest.mark.asyncio
+    async def test_stream_simple(self):
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
 
@@ -1152,10 +1148,8 @@ class TestAsyncQuery(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_stream_with_transaction(self):
-        asyncio.run(self._test_stream_with_transaction_helper())
-
-    async def _test_stream_with_transaction_helper(self):
+    @pytest.mark.asyncio
+    async def test_stream_with_transaction(self):
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
 
@@ -1196,10 +1190,8 @@ class TestAsyncQuery(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_stream_no_results(self):
-        asyncio.run(self._test_stream_no_results_helper())
-
-    async def _test_stream_no_results_helper(self):
+    @pytest.mark.asyncio
+    async def test_stream_no_results(self):
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock(spec=["run_query"])
         empty_response = _make_query_response()
@@ -1227,10 +1219,8 @@ class TestAsyncQuery(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_stream_second_response_in_empty_stream(self):
-        asyncio.run(self._test_stream_second_response_in_empty_stream_helper())
-
-    async def _test_stream_second_response_in_empty_stream_helper(self):
+    @pytest.mark.asyncio
+    async def test_stream_second_response_in_empty_stream(self):
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock(spec=["run_query"])
         empty_response1 = _make_query_response()
@@ -1259,10 +1249,8 @@ class TestAsyncQuery(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_stream_with_skipped_results(self):
-        asyncio.run(self._test_stream_with_skipped_results_helper())
-
-    async def _test_stream_with_skipped_results_helper(self):
+    @pytest.mark.asyncio
+    async def test_stream_with_skipped_results(self):
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
 
@@ -1300,10 +1288,8 @@ class TestAsyncQuery(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_stream_empty_after_first_response(self):
-        asyncio.run(self._test_stream_empty_after_first_response_helper())
-
-    async def _test_stream_empty_after_first_response_helper(self):
+    @pytest.mark.asyncio
+    async def test_stream_empty_after_first_response(self):
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
 
@@ -1341,10 +1327,8 @@ class TestAsyncQuery(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_stream_w_collection_group(self):
-        asyncio.run(self._test_stream_w_collection_group_helper())
-
-    async def _test_stream_w_collection_group_helper(self):
+    @pytest.mark.asyncio
+    async def test_stream_w_collection_group(self):
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
 
@@ -1482,7 +1466,7 @@ class TestAsyncQuery(unittest.TestCase):
             query._comparator(doc1, doc2)
 
 
-class Test__enum_from_op_string(unittest.TestCase):
+class Test__enum_from_op_string(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(op_string):
         from google.cloud.firestore_v1.async_query import _enum_from_op_string
@@ -1534,7 +1518,7 @@ class Test__enum_from_op_string(unittest.TestCase):
             self._call_fut("?")
 
 
-class Test__isnan(unittest.TestCase):
+class Test__isnan(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(value):
         from google.cloud.firestore_v1.async_query import _isnan
@@ -1552,7 +1536,7 @@ class Test__isnan(unittest.TestCase):
         self.assertFalse(self._call_fut(1.0 + 1.0j))
 
 
-class Test__enum_from_direction(unittest.TestCase):
+class Test__enum_from_direction(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(direction):
         from google.cloud.firestore_v1.async_query import _enum_from_direction
@@ -1576,7 +1560,7 @@ class Test__enum_from_direction(unittest.TestCase):
             self._call_fut("neither-ASCENDING-nor-DESCENDING")
 
 
-class Test__filter_pb(unittest.TestCase):
+class Test__filter_pb(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(field_or_unary):
         from google.cloud.firestore_v1.async_query import _filter_pb
@@ -1614,7 +1598,7 @@ class Test__filter_pb(unittest.TestCase):
             self._call_fut(None)
 
 
-class Test__cursor_pb(unittest.TestCase):
+class Test__cursor_pb(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(cursor_pair):
         from google.cloud.firestore_v1.async_query import _cursor_pb
@@ -1639,7 +1623,7 @@ class Test__cursor_pb(unittest.TestCase):
         self.assertEqual(cursor_pb, expected_pb)
 
 
-class Test__query_response_to_snapshot(unittest.TestCase):
+class Test__query_response_to_snapshot(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(response_pb, collection, expected_prefix):
         from google.cloud.firestore_v1.async_query import _query_response_to_snapshot
@@ -1681,7 +1665,7 @@ class Test__query_response_to_snapshot(unittest.TestCase):
         self.assertEqual(snapshot.update_time, response_pb.document.update_time)
 
 
-class Test__collection_group_query_response_to_snapshot(unittest.TestCase):
+class Test__collection_group_query_response_to_snapshot(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(response_pb, collection):
         from google.cloud.firestore_v1.async_query import (

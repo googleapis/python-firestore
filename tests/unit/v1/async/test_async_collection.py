@@ -12,16 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import asyncio
 import pytest
 import types
-import unittest
+import aiounittest
 
 import mock
 import six
 
 
-class TestAsyncCollectionReference(unittest.TestCase):
+class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
     @staticmethod
     def _get_target_class():
         from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
@@ -190,7 +189,8 @@ class TestAsyncCollectionReference(unittest.TestCase):
         prefix = "{}/{}".format(expected_path, collection_id2)
         self.assertEqual(expected_prefix, prefix)
 
-    def test_add_auto_assigned(self):
+    @pytest.mark.asyncio
+    async def test_add_auto_assigned(self):
         from google.cloud.firestore_v1.proto import document_pb2
         from google.cloud.firestore_v1.async_document import AsyncDocumentReference
         from google.cloud.firestore_v1 import SERVER_TIMESTAMP
@@ -223,7 +223,7 @@ class TestAsyncCollectionReference(unittest.TestCase):
         random_doc_id = "DEADBEEF"
         with patch as patched:
             patched.return_value = random_doc_id
-            update_time, document_ref = asyncio.run(collection.add(document_data))
+            update_time, document_ref = await collection.add(document_data)
 
         # Verify the response and the mocks.
         self.assertIs(update_time, mock.sentinel.update_time)
@@ -256,7 +256,8 @@ class TestAsyncCollectionReference(unittest.TestCase):
             current_document=common_pb2.Precondition(exists=False),
         )
 
-    def test_add_explicit_id(self):
+    @pytest.mark.asyncio
+    async def test_add_explicit_id(self):
         from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
         # Create a minimal fake GAPIC with a dummy response.
@@ -279,8 +280,8 @@ class TestAsyncCollectionReference(unittest.TestCase):
         collection = self._make_one("parent", client=client)
         document_data = {"zorp": 208.75, "i-did-not": b"know that"}
         doc_id = "child"
-        update_time, document_ref = asyncio.run(
-            collection.add(document_data, document_id=doc_id)
+        update_time, document_ref = await collection.add(
+            document_data, document_id=doc_id
         )
 
         # Verify the response and the mocks.
@@ -430,7 +431,8 @@ class TestAsyncCollectionReference(unittest.TestCase):
         self.assertIs(query._parent, collection)
         self.assertEqual(query._end_at, (doc_fields, False))
 
-    def _list_documents_helper(self, page_size=None):
+    @pytest.mark.asyncio
+    async def _list_documents_helper(self, page_size=None):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.async_document import AsyncDocumentReference
@@ -460,11 +462,9 @@ class TestAsyncCollectionReference(unittest.TestCase):
         collection = self._make_one("collection", client=client)
 
         if page_size is not None:
-            documents = list(
-                asyncio.run(collection.list_documents(page_size=page_size))
-            )
+            documents = list(await collection.list_documents(page_size=page_size))
         else:
-            documents = list(asyncio.run(collection.list_documents()))
+            documents = list(await collection.list_documents())
 
         # Verify the response and the mocks.
         self.assertEqual(len(documents), len(document_ids))
@@ -482,11 +482,13 @@ class TestAsyncCollectionReference(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_list_documents_wo_page_size(self):
-        self._list_documents_helper()
+    @pytest.mark.asyncio
+    async def test_list_documents_wo_page_size(self):
+        await self._list_documents_helper()
 
-    def test_list_documents_w_page_size(self):
-        self._list_documents_helper(page_size=25)
+    @pytest.mark.asyncio
+    async def test_list_documents_w_page_size(self):
+        await self._list_documents_helper(page_size=25)
 
     @pytest.mark.skip(reason="no way of currently testing this")
     @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
@@ -555,7 +557,7 @@ class TestAsyncCollectionReference(unittest.TestCase):
         watch.for_query.assert_called_once()
 
 
-class Test__auto_id(unittest.TestCase):
+class Test__auto_id(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut():
         from google.cloud.firestore_v1.async_collection import _auto_id

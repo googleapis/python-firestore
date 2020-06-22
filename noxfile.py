@@ -98,9 +98,10 @@ def unit(session):
     )
 
 
-@nox.session(python=["3.7", "3.8"])
+@nox.session(python=["3.6", "3.7", "3.8"])
 def unit_async(session):
     """Run the unit test suite for async tests."""
+    session.install("pytest-asyncio", "aiounittest")
     default(session, os.path.join("tests", "unit", "v1", "async"), None)
 
 
