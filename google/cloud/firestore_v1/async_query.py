@@ -930,7 +930,9 @@ def _enum_from_direction(direction):
     elif direction == AsyncQuery.DESCENDING:
         return enums.StructuredQuery.Direction.DESCENDING
     else:
-        msg = _BAD_DIR_STRING.format(direction, AsyncQuery.ASCENDING, AsyncQuery.DESCENDING)
+        msg = _BAD_DIR_STRING.format(
+            direction, AsyncQuery.ASCENDING, AsyncQuery.DESCENDING
+        )
         raise ValueError(msg)
 
 

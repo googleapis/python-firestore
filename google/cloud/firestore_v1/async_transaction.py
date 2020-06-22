@@ -17,7 +17,6 @@
 
 import asyncio
 import random
-import time
 
 import six
 
@@ -198,7 +197,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch):
         if not self.in_progress:
             raise ValueError(_CANT_COMMIT)
 
-        commit_response = await _commit_with_retry(self._client, self._write_pbs, self._id)
+        commit_response = await _commit_with_retry(
+            self._client, self._write_pbs, self._id
+        )
 
         self._clean_up()
         return list(commit_response.write_results)
