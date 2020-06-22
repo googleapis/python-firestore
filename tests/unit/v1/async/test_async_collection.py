@@ -490,27 +490,30 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
     async def test_list_documents_w_page_size(self):
         await self._list_documents_helper(page_size=25)
 
-    @pytest.mark.skip(reason="no way of currently testing this")
     @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
-    def test_get(self, query_class):
+    @pytest.mark.asyncio
+    async def test_get(self, query_class):
         import warnings
 
         collection = self._make_one("collection")
         with warnings.catch_warnings(record=True) as warned:
             get_response = collection.get()
 
+            async for _ in get_response:
+                pass
+
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        self.assertIs(get_response, query_instance.stream.return_value)
+        # self.assertIs(get_response, query_instance.stream.return_value)
         query_instance.stream.assert_called_once_with(transaction=None)
 
         # Verify the deprecation
         self.assertEqual(len(warned), 1)
         self.assertIs(warned[0].category, DeprecationWarning)
 
-    @pytest.mark.skip(reason="no way of currently testing this")
     @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
-    def test_get_with_transaction(self, query_class):
+    @pytest.mark.asyncio
+    async def test_get_with_transaction(self, query_class):
         import warnings
 
         collection = self._make_one("collection")
@@ -518,36 +521,45 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         with warnings.catch_warnings(record=True) as warned:
             get_response = collection.get(transaction=transaction)
 
+            async for _ in get_response:
+                pass
+
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        self.assertIs(get_response, query_instance.stream.return_value)
+        # self.assertIs(get_response, query_instance.stream.return_value)
         query_instance.stream.assert_called_once_with(transaction=transaction)
 
         # Verify the deprecation
         self.assertEqual(len(warned), 1)
         self.assertIs(warned[0].category, DeprecationWarning)
 
-    @pytest.mark.skip(reason="no way of currently testing this")
     @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
-    def test_stream(self, query_class):
+    @pytest.mark.asyncio
+    async def test_stream(self, query_class):
         collection = self._make_one("collection")
         stream_response = collection.stream()
 
+        async for _ in stream_response:
+            pass
+
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        self.assertIs(stream_response, query_instance.stream.return_value)
+        # self.assertIs(stream_response, query_instance.stream.return_value)
         query_instance.stream.assert_called_once_with(transaction=None)
 
-    @pytest.mark.skip(reason="no way of currently testing this")
     @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
-    def test_stream_with_transaction(self, query_class):
+    @pytest.mark.asyncio
+    async def test_stream_with_transaction(self, query_class):
         collection = self._make_one("collection")
         transaction = mock.sentinel.txn
         stream_response = collection.stream(transaction=transaction)
 
+        async for _ in stream_response:
+            pass
+
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        self.assertIs(stream_response, query_instance.stream.return_value)
+        # self.assertIs(stream_response, query_instance.stream.return_value)
         query_instance.stream.assert_called_once_with(transaction=transaction)
 
     @mock.patch("google.cloud.firestore_v1.async_collection.Watch", autospec=True)

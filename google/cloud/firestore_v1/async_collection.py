@@ -21,7 +21,7 @@ from google.cloud.firestore_v1.collection import (
     _auto_id,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1.async_query import AsyncQuery
+from google.cloud.firestore_v1 import async_query
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import async_document
 
@@ -129,7 +129,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A "projected" query.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.select(field_paths)
 
     def where(self, field_path, op_string, value):
@@ -153,7 +153,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A filtered query.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.where(field_path, op_string, value)
 
     def order_by(self, field_path, **kwargs):
@@ -175,7 +175,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             An "order by" query.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.order_by(field_path, **kwargs)
 
     def limit(self, count):
@@ -193,7 +193,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A limited query.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.limit(count)
 
     def offset(self, num_to_skip):
@@ -211,7 +211,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             An offset query.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.offset(num_to_skip)
 
     def start_at(self, document_fields):
@@ -232,7 +232,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A query with cursor.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.start_at(document_fields)
 
     def start_after(self, document_fields):
@@ -253,7 +253,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A query with cursor.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.start_after(document_fields)
 
     def end_before(self, document_fields):
@@ -274,7 +274,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A query with cursor.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.end_before(document_fields)
 
     def end_at(self, document_fields):
@@ -295,7 +295,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
             A query with cursor.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         return query.end_at(document_fields)
 
     async def get(self, transaction=None):
@@ -335,7 +335,7 @@ class AsyncCollectionReference(CollectionReference):
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
             The next document that fulfills the query.
         """
-        query = AsyncQuery(self)
+        query = async_query.AsyncQuery(self)
         async for d in query.stream(transaction=transaction):
             yield d
 
@@ -366,7 +366,7 @@ class AsyncCollectionReference(CollectionReference):
             collection_watch.unsubscribe()
         """
         return Watch.for_query(
-            AsyncQuery(self),
+            async_query.AsyncQuery(self),
             callback,
             async_document.DocumentSnapshot,
             async_document.AsyncDocumentReference,
