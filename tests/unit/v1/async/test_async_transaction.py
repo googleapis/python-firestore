@@ -381,9 +381,9 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
 class Test_Transactional(aiounittest.AsyncTestCase):
     @staticmethod
     def _get_target_class():
-        from google.cloud.firestore_v1.async_transaction import _Transactional
+        from google.cloud.firestore_v1.async_transaction import _AsyncTransactional
 
-        return _Transactional
+        return _AsyncTransactional
 
     def _make_one(self, *args, **kwargs):
         klass = self._get_target_class()
@@ -806,10 +806,10 @@ class Test_transactional(aiounittest.AsyncTestCase):
         return transactional(to_wrap)
 
     def test_it(self):
-        from google.cloud.firestore_v1.async_transaction import _Transactional
+        from google.cloud.firestore_v1.async_transaction import _AsyncTransactional
 
         wrapped = self._call_fut(mock.sentinel.callable_)
-        self.assertIsInstance(wrapped, _Transactional)
+        self.assertIsInstance(wrapped, _AsyncTransactional)
         self.assertIs(wrapped.to_wrap, mock.sentinel.callable_)
 
 

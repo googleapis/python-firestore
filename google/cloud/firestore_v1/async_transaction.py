@@ -20,28 +20,24 @@ import random
 
 import six
 
+from google.cloud.firestore_v1.transaction import (
+    MAX_ATTEMPTS,
+    _CANT_BEGIN,
+    _CANT_ROLLBACK,
+    _CANT_COMMIT,
+    _WRITE_READ_ONLY,
+    _INITIAL_SLEEP,
+    _MAX_SLEEP,
+    _MULTIPLIER,
+    _EXCEED_ATTEMPTS_TEMPLATE,
+    _CANT_RETRY_READ_ONLY,
+    _Transactional,
+)
 from google.api_core import exceptions
 from google.cloud.firestore_v1 import async_batch
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
-
-
-MAX_ATTEMPTS = 5
-"""int: Default number of transaction attempts (with retries)."""
-_CANT_BEGIN = "The transaction has already begun. Current transaction ID: {!r}."
-_MISSING_ID_TEMPLATE = "The transaction has no transaction ID, so it cannot be {}."
-_CANT_ROLLBACK = _MISSING_ID_TEMPLATE.format("rolled back")
-_CANT_COMMIT = _MISSING_ID_TEMPLATE.format("committed")
-_WRITE_READ_ONLY = "Cannot perform write operation in read-only transaction."
-_INITIAL_SLEEP = 1.0
-"""float: Initial "max" for sleep interval. To be used in :func:`_sleep`."""
-_MAX_SLEEP = 30.0
-"""float: Eventual "max" sleep time. To be used in :func:`_sleep`."""
-_MULTIPLIER = 2.0
-"""float: Multiplier for exponential backoff. To be used in :func:`_sleep`."""
-_EXCEED_ATTEMPTS_TEMPLATE = "Failed to commit transaction in {:d} attempts."
-_CANT_RETRY_READ_ONLY = "Only read-write transactions can be retried."
 
 
 class AsyncTransaction(async_batch.AsyncWriteBatch):
@@ -236,7 +232,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch):
             )
 
 
-class _Transactional(object):
+class _AsyncTransactional(_Transactional):
     """Provide a callable object to use as a transactional decorater.
 
     This is surfaced via
@@ -248,16 +244,7 @@ class _Transactional(object):
     """
 
     def __init__(self, to_wrap):
-        self.to_wrap = to_wrap
-        self.current_id = None
-        """Optional[bytes]: The current transaction ID."""
-        self.retry_id = None
-        """Optional[bytes]: The ID of the first attempted transaction."""
-
-    def _reset(self):
-        """Unset the transaction IDs."""
-        self.current_id = None
-        self.retry_id = None
+        super(_AsyncTransactional, self).__init__(to_wrap)
 
     async def _pre_commit(self, transaction, *args, **kwargs):
         """Begin transaction and call the wrapped callable.
@@ -375,7 +362,7 @@ def transactional(to_wrap):
         Callable[[:class:`~google.cloud.firestore_v1.transaction.Transaction`, ...], Any]:
         the wrapped callable.
     """
-    return _Transactional(to_wrap)
+    return _AsyncTransactional(to_wrap)
 
 
 async def _commit_with_retry(client, write_pbs, transaction_id):
