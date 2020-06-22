@@ -18,14 +18,9 @@ import types
 import aiounittest
 
 import mock
-import six
 
 
 class TestAsyncQuery(aiounittest.AsyncTestCase):
-
-    if six.PY2:
-        assertRaisesRegex = aiounittest.AsyncTestCase.assertRaisesRegexp
-
     @staticmethod
     def _get_target_class():
         from google.cloud.firestore_v1.async_query import AsyncQuery
