@@ -598,29 +598,6 @@ class Test__reference_info(aiounittest.AsyncTestCase):
         self.assertEqual(reference_map, expected_map)
 
 
-class Test__get_reference(aiounittest.AsyncTestCase):
-    @staticmethod
-    def _call_fut(document_path, reference_map):
-        from google.cloud.firestore_v1.client import _get_reference
-
-        return _get_reference(document_path, reference_map)
-
-    def test_success(self):
-        doc_path = "a/b/c"
-        reference_map = {doc_path: mock.sentinel.reference}
-        self.assertIs(self._call_fut(doc_path, reference_map), mock.sentinel.reference)
-
-    def test_failure(self):
-        from google.cloud.firestore_v1.client import _BAD_DOC_TEMPLATE
-
-        doc_path = "1/888/call-now"
-        with self.assertRaises(ValueError) as exc_info:
-            self._call_fut(doc_path, {})
-
-        err_msg = _BAD_DOC_TEMPLATE.format(doc_path)
-        self.assertEqual(exc_info.exception.args, (err_msg,))
-
-
 class Test__parse_batch_get(aiounittest.AsyncTestCase):
     @staticmethod
     def _call_fut(get_doc_response, reference_map, client=mock.sentinel.client):
