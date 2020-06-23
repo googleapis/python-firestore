@@ -48,21 +48,6 @@ for version in versions:
         f"from_ = proto",
     )
 
-    s.replace(
-        f"tests/unit/gapic/*.py",
-        f"google.firestore",
-        f"google.cloud.firestore",
-    )
-    s.replace(
-        f"google/cloud/**/*.py",
-        f"google.firestore",
-        f"google.cloud.firestore",
-    )
-    s.replace(
-        f"docs/**/*.rst",
-        f"google.firestore",
-        f"google.cloud.firestore",
-    )
 
 # ----------------------------------------------------------------------------
 # Generate firestore admin GAPIC layer
@@ -79,26 +64,32 @@ for version in admin_versions:
     s.move(library / "tests")
 
     s.replace(
-        f"tests/unit/gapic/*.py",
-        f"google.firestore",
-        f"google.cloud.firestore",
-    )
-    s.replace(
-        f"google/cloud/**/*.py",
-        f"google.firestore",
-        f"google.cloud.firestore",
-    )
-    s.replace(
-        f"docs/**/*.rst",
-        f"google.firestore",
-        f"google.cloud.firestore",
-    )
-
-    s.replace(
         f"google/cloud/firestore_admin_{version}/gapic/firestore_admin_client.py",
         "'google-cloud-firestore-admin'",
         "'google-cloud-firestore'",
     )
+
+
+# ----------------------------------------------------------------------------
+# Edit paths to firestore remove after resolving 
+# https://github.com/googleapis/gapic-generator-python/issues/471
+# ----------------------------------------------------------------------------
+s.replace(
+    f"tests/unit/gapic/**/*.py",
+    f"google.firestore",
+    f"google.cloud.firestore",
+)
+s.replace(
+    f"google/cloud/**/*.py",
+    f"google.firestore",
+    f"google.cloud.firestore",
+)
+s.replace(
+    f"docs/**/*.rst",
+    f"google.firestore",
+    f"google.cloud.firestore",
+)
+
 
 # ----------------------------------------------------------------------------
 # Add templated files

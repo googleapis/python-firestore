@@ -29,17 +29,17 @@ from google.api_core import grpc_helpers
 from google.api_core import grpc_helpers_async
 from google.auth import credentials
 from google.auth.exceptions import MutualTLSChannelError
-from google.firestore_v1beta1.services.firestore import FirestoreAsyncClient
-from google.firestore_v1beta1.services.firestore import FirestoreClient
-from google.firestore_v1beta1.services.firestore import pagers
-from google.firestore_v1beta1.services.firestore import transports
-from google.firestore_v1beta1.types import common
-from google.firestore_v1beta1.types import document
-from google.firestore_v1beta1.types import document as gf_document
-from google.firestore_v1beta1.types import firestore
-from google.firestore_v1beta1.types import query
-from google.firestore_v1beta1.types import write
-from google.firestore_v1beta1.types import write as gf_write
+from google.cloud.firestore_v1beta1.services.firestore import FirestoreAsyncClient
+from google.cloud.firestore_v1beta1.services.firestore import FirestoreClient
+from google.cloud.firestore_v1beta1.services.firestore import pagers
+from google.cloud.firestore_v1beta1.services.firestore import transports
+from google.cloud.firestore_v1beta1.types import common
+from google.cloud.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import document as gf_document
+from google.cloud.firestore_v1beta1.types import firestore
+from google.cloud.firestore_v1beta1.types import query
+from google.cloud.firestore_v1beta1.types import write
+from google.cloud.firestore_v1beta1.types import write as gf_write
 from google.oauth2 import service_account
 from google.protobuf import struct_pb2 as struct  # type: ignore
 from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
@@ -221,7 +221,7 @@ def test_firestore_client_client_options(client_class, transport_class, transpor
 
 def test_firestore_client_client_options_from_dict():
     with mock.patch(
-        "google.firestore_v1beta1.services.firestore.transports.FirestoreGrpcTransport.__init__"
+        "google.cloud.firestore_v1beta1.services.firestore.transports.FirestoreGrpcTransport.__init__"
     ) as grpc_transport:
         grpc_transport.return_value = None
         client = FirestoreClient(client_options={"api_endpoint": "squid.clam.whelk"})

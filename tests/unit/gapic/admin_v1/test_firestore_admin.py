@@ -32,16 +32,20 @@ from google.api_core import operation_async
 from google.api_core import operations_v1
 from google.auth import credentials
 from google.auth.exceptions import MutualTLSChannelError
-from google.firestore.admin_v1.services.firestore_admin import FirestoreAdminAsyncClient
-from google.firestore.admin_v1.services.firestore_admin import FirestoreAdminClient
-from google.firestore.admin_v1.services.firestore_admin import pagers
-from google.firestore.admin_v1.services.firestore_admin import transports
-from google.firestore.admin_v1.types import field
-from google.firestore.admin_v1.types import field as gfa_field
-from google.firestore.admin_v1.types import firestore_admin
-from google.firestore.admin_v1.types import index
-from google.firestore.admin_v1.types import index as gfa_index
-from google.firestore.admin_v1.types import operation as gfa_operation
+from google.cloud.firestore.admin_v1.services.firestore_admin import (
+    FirestoreAdminAsyncClient,
+)
+from google.cloud.firestore.admin_v1.services.firestore_admin import (
+    FirestoreAdminClient,
+)
+from google.cloud.firestore.admin_v1.services.firestore_admin import pagers
+from google.cloud.firestore.admin_v1.services.firestore_admin import transports
+from google.cloud.firestore.admin_v1.types import field
+from google.cloud.firestore.admin_v1.types import field as gfa_field
+from google.cloud.firestore.admin_v1.types import firestore_admin
+from google.cloud.firestore.admin_v1.types import index
+from google.cloud.firestore.admin_v1.types import index as gfa_index
+from google.cloud.firestore.admin_v1.types import operation as gfa_operation
 from google.longrunning import operations_pb2
 from google.oauth2 import service_account
 from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
@@ -230,7 +234,7 @@ def test_firestore_admin_client_client_options(
 
 def test_firestore_admin_client_client_options_from_dict():
     with mock.patch(
-        "google.firestore.admin_v1.services.firestore_admin.transports.FirestoreAdminGrpcTransport.__init__"
+        "google.cloud.firestore.admin_v1.services.firestore_admin.transports.FirestoreAdminGrpcTransport.__init__"
     ) as grpc_transport:
         grpc_transport.return_value = None
         client = FirestoreAdminClient(
