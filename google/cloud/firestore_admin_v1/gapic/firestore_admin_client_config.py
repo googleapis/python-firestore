@@ -2,8 +2,9 @@ config = {
     "interfaces": {
         "google.firestore.admin.v1.FirestoreAdmin": {
             "retry_codes": {
-                "idempotent": ["DEADLINE_EXCEEDED", "UNAVAILABLE"],
+                "idempotent": ["DEADLINE_EXCEEDED", "INTERNAL", "UNAVAILABLE"],
                 "non_idempotent": [],
+                "idempotent2": ["DEADLINE_EXCEEDED", "UNAVAILABLE"],
             },
             "retry_params": {
                 "default": {
@@ -34,22 +35,22 @@ config = {
                 },
                 "ListIndexes": {
                     "timeout_millis": 60000,
-                    "retry_codes_name": "idempotent",
+                    "retry_codes_name": "idempotent2",
                     "retry_params_name": "default",
                 },
                 "GetIndex": {
                     "timeout_millis": 60000,
-                    "retry_codes_name": "idempotent",
+                    "retry_codes_name": "idempotent2",
                     "retry_params_name": "default",
                 },
                 "GetField": {
                     "timeout_millis": 60000,
-                    "retry_codes_name": "idempotent",
+                    "retry_codes_name": "idempotent2",
                     "retry_params_name": "default",
                 },
                 "ListFields": {
                     "timeout_millis": 60000,
-                    "retry_codes_name": "idempotent",
+                    "retry_codes_name": "idempotent2",
                     "retry_params_name": "default",
                 },
                 "ExportDocuments": {
