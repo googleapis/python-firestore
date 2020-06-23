@@ -20,9 +20,9 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     name="google/cloud/firestore_admin_v1/proto/location.proto",
     package="google.firestore.admin.v1",
     syntax="proto3",
-    serialized_options=b"\n\035com.google.firestore.admin.v1B\rLocationProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1",
+    serialized_options=b"\n\035com.google.firestore.admin.v1B\rLocationProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1\352\002#Google::Cloud::Firestore::Admin::V1",
     create_key=_descriptor._internal_create_key,
-    serialized_pb=b'\n4google/cloud/firestore_admin_v1/proto/location.proto\x12\x19google.firestore.admin.v1\x1a\x18google/type/latlng.proto\x1a\x1cgoogle/api/annotations.proto"\x12\n\x10LocationMetadataB\xbb\x01\n\x1d\x63om.google.firestore.admin.v1B\rLocationProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1b\x06proto3',
+    serialized_pb=b'\n4google/cloud/firestore_admin_v1/proto/location.proto\x12\x19google.firestore.admin.v1\x1a\x18google/type/latlng.proto\x1a\x1cgoogle/api/annotations.proto"\x12\n\x10LocationMetadataB\xe1\x01\n\x1d\x63om.google.firestore.admin.v1B\rLocationProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1\xea\x02#Google::Cloud::Firestore::Admin::V1b\x06proto3',
     dependencies=[
         google_dot_type_dot_latlng__pb2.DESCRIPTOR,
         google_dot_api_dot_annotations__pb2.DESCRIPTOR,
