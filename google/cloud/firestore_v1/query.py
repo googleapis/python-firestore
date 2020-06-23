@@ -766,10 +766,7 @@ class Query(object):
         """
         parent_path, expected_prefix = self._parent._parent_info()
         response_iterator = self._client._firestore_api.run_query(
-            parent_path,
-            self._to_protobuf(),
-            transaction=_helpers.get_transaction_id(transaction),
-            metadata=self._client._rpc_metadata,
+            request = {'parent': parent_path, 'structured_query': self._to_protobuf(), 'transaction': _helpers.get_transaction_id(transaction)}, metadata=self._client._rpc_metadata,
         )
 
         for response in response_iterator:

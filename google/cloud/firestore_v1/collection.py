@@ -179,11 +179,7 @@ class CollectionReference(object):
         parent, _ = self._parent_info()
 
         iterator = self._client._firestore_api.list_documents(
-            parent,
-            self.id,
-            page_size=page_size,
-            show_missing=True,
-            metadata=self._client._rpc_metadata,
+            request = {'parent': parent, 'collection_id': self.id, 'page_size': page_size, 'page_token': True}, metadata=self._client._rpc_metadata,
         )
         iterator.collection = self
         iterator.item_to_value = _item_to_document_ref

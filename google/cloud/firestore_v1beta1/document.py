@@ -199,7 +199,7 @@ class DocumentReference(object):
         """
         batch = self._client.batch()
         batch.create(self, document_data)
-        write_results = batch.commit()
+        write_results = batch.commit(request = {})
         return _first_write_result(write_results)
 
     def set(self, document_data, merge=False):
@@ -230,7 +230,7 @@ class DocumentReference(object):
         """
         batch = self._client.batch()
         batch.set(self, document_data, merge=merge)
-        write_results = batch.commit()
+        write_results = batch.commit(request = {})
         return _first_write_result(write_results)
 
     def update(self, field_updates, option=None):
@@ -377,7 +377,7 @@ class DocumentReference(object):
         """
         batch = self._client.batch()
         batch.update(self, field_updates, option=option)
-        write_results = batch.commit()
+        write_results = batch.commit(request = {})
         return _first_write_result(write_results)
 
     def delete(self, option=None):
@@ -397,10 +397,7 @@ class DocumentReference(object):
         """
         write_pb = _helpers.pb_for_delete(self._document_path, option)
         commit_response = self._client._firestore_api.commit(
-            self._client._database_string,
-            [write_pb],
-            transaction=None,
-            metadata=self._client._rpc_metadata,
+            request = {'database': self._client._database_string, 'writes': [write_pb], 'transaction': None}, metadata=self._client._rpc_metadata,
         )
 
         return commit_response.commit_time
@@ -442,10 +439,7 @@ class DocumentReference(object):
         firestore_api = self._client._firestore_api
         try:
             document_pb = firestore_api.get_document(
-                self._document_path,
-                mask=mask,
-                transaction=_helpers.get_transaction_id(transaction),
-                metadata=self._client._rpc_metadata,
+                request = {'name': self._document_path, 'mask': mask, 'transaction': _helpers.get_transaction_id(transaction)}, metadata=self._client._rpc_metadata,
             )
         except exceptions.NotFound:
             data = None
@@ -482,9 +476,7 @@ class DocumentReference(object):
                 iterator will be empty
         """
         iterator = self._client._firestore_api.list_collection_ids(
-            self._document_path,
-            page_size=page_size,
-            metadata=self._client._rpc_metadata,
+            request = {'parent': self._document_path, 'page_size': page_size}, metadata=self._client._rpc_metadata,
         )
         iterator.document = self
         iterator.item_to_value = _item_to_collection_ref

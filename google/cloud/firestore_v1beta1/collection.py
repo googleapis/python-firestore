@@ -163,12 +163,7 @@ class CollectionReference(object):
             document_pb = document_pb2.Document()
 
             created_document_pb = self._client._firestore_api.create_document(
-                parent_path,
-                collection_id=self.id,
-                document_id=None,
-                document=document_pb,
-                mask=None,
-                metadata=self._client._rpc_metadata,
+                request = {'parent': parent_path, 'collection_id': self.id, 'document': None, 'document_id': document_pb, 'mask': None}, metadata=self._client._rpc_metadata,
             )
 
             new_document_id = _helpers.get_doc_id(created_document_pb, expected_prefix)
@@ -197,11 +192,7 @@ class CollectionReference(object):
         parent, _ = self._parent_info()
 
         iterator = self._client._firestore_api.list_documents(
-            parent,
-            self.id,
-            page_size=page_size,
-            show_missing=True,
-            metadata=self._client._rpc_metadata,
+            request = {'parent': parent, 'collection_id': self.id, 'page_size': page_size, 'page_token': True}, metadata=self._client._rpc_metadata,
         )
         iterator.collection = self
         iterator.item_to_value = _item_to_document_ref
