@@ -24,14 +24,15 @@ In the hierarchy of API concepts
   :class:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference`
 """
 
-from google.cloud.firestore_v1.client import (
-    Client,
+from google.cloud.firestore_v1.base_client import (
+    BaseClient,
     DEFAULT_DATABASE,
     _CLIENT_INFO,
     _reference_info,
     _parse_batch_get,
     _get_doc_mask,
     _item_to_collection_ref,
+    _path_helper,
 )
 
 from google.cloud.firestore_v1 import _helpers
@@ -42,7 +43,7 @@ from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 
 
-class AsyncClient(Client):
+class AsyncClient(BaseClient):
     """Client for interacting with Google Cloud Firestore API.
 
     .. note::
@@ -78,9 +79,6 @@ class AsyncClient(Client):
         client_info=_CLIENT_INFO,
         client_options=None,
     ):
-        # NOTE: This API has no use for the _http argument, but sending it
-        #       will have no impact since the _http() @property only lazily
-        #       creates a working HTTP object.
         super(AsyncClient, self).__init__(
             project=project,
             credentials=credentials,
@@ -118,12 +116,7 @@ class AsyncClient(Client):
             :class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`:
             A reference to a collection in the Firestore database.
         """
-        if len(collection_path) == 1:
-            path = collection_path[0].split(_helpers.DOCUMENT_PATH_DELIMITER)
-        else:
-            path = collection_path
-
-        return AsyncCollectionReference(*path, client=self)
+        return AsyncCollectionReference(*_path_helper(collection_path), client=self)
 
     def collection_group(self, collection_id):
         """
@@ -135,20 +128,19 @@ class AsyncClient(Client):
 
             >>> query = client.collection_group('mygroup')
 
-        @param {string} collectionId Identifies the collections to query over.
-        Every collection or subcollection with this ID as the last segment of its
-        path will be included. Cannot contain a slash.
-        @returns {AsyncQuery} The created AsyncQuery.
-        """
-        if "/" in collection_id:
-            raise ValueError(
-                "Invalid collection_id "
-                + collection_id
-                + ". Collection IDs must not contain '/'."
-            )
+        Args:
+            collection_id (str) Identifies the collections to query over.
 
-        collection = self.collection(collection_id)
-        return AsyncQuery(collection, all_descendants=True)
+                Every collection or subcollection with this ID as the last segment of its
+                path will be included. Cannot contain a slash.
+
+        Returns:
+            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
+            The created AsyncQuery.
+        """
+        return AsyncQuery(
+            self._get_collection_reference(collection_id), all_descendants=True
+        )
 
     def document(self, *document_path):
         """Get a reference to a document in a collection.
@@ -181,19 +173,9 @@ class AsyncClient(Client):
             :class:`~google.cloud.firestore_v1.document.AsyncDocumentReference`:
             A reference to a document in a collection.
         """
-        if len(document_path) == 1:
-            path = document_path[0].split(_helpers.DOCUMENT_PATH_DELIMITER)
-        else:
-            path = document_path
-
-        # AsyncDocumentReference takes a relative path. Strip the database string if present.
-        base_path = self._database_string + "/documents/"
-        joined_path = _helpers.DOCUMENT_PATH_DELIMITER.join(path)
-        if joined_path.startswith(base_path):
-            joined_path = joined_path[len(base_path) :]
-        path = joined_path.split(_helpers.DOCUMENT_PATH_DELIMITER)
-
-        return AsyncDocumentReference(*path, client=self)
+        return AsyncDocumentReference(
+            *self._document_path_helper(*document_path), client=self
+        )
 
     async def get_all(self, references, field_paths=None, transaction=None):
         """Retrieve a batch of documents.
