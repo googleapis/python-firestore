@@ -38,4 +38,8 @@ class FirestoreAdminClient(firestore_admin_client.FirestoreAdminClient):
     enums = enums
 
 
-__all__ = ("enums", "types", "FirestoreAdminClient")
+__all__ = (
+    "enums",
+    "types",
+    "FirestoreAdminClient",
+)

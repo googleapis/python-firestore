@@ -45,7 +45,7 @@ from google.protobuf import timestamp_pb2
 
 
 _GAPIC_LIBRARY_VERSION = pkg_resources.get_distribution(
-    "google-cloud-firestore"
+    "google-cloud-firestore",
 ).version
 
 
@@ -184,12 +184,12 @@ class FirestoreClient(object):
                 self.transport = transport
         else:
             self.transport = firestore_grpc_transport.FirestoreGrpcTransport(
-                address=api_endpoint, channel=channel, credentials=credentials
+                address=api_endpoint, channel=channel, credentials=credentials,
             )
 
         if client_info is None:
             client_info = google.api_core.gapic_v1.client_info.ClientInfo(
-                gapic_version=_GAPIC_LIBRARY_VERSION
+                gapic_version=_GAPIC_LIBRARY_VERSION,
             )
         else:
             client_info.gapic_version = _GAPIC_LIBRARY_VERSION
@@ -200,7 +200,7 @@ class FirestoreClient(object):
         # (Ordinarily, these are the defaults specified in the `*_config.py`
         # file next to this one.)
         self._method_configs = google.api_core.gapic_v1.config.parse_method_configs(
-            client_config["interfaces"][self._INTERFACE_NAME]
+            client_config["interfaces"][self._INTERFACE_NAME],
         )
 
         # Save a dictionary of cached API call functions.
@@ -268,7 +268,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.DeleteDocumentRequest(
-            name=name, current_document=current_document
+            name=name, current_document=current_document,
         )
         if metadata is None:
             metadata = []
@@ -467,7 +467,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.BeginTransactionRequest(
-            database=database, options=options_
+            database=database, options=options_,
         )
         if metadata is None:
             metadata = []
@@ -542,7 +542,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.RollbackRequest(
-            database=database, transaction=transaction
+            database=database, transaction=transaction,
         )
         if metadata is None:
             metadata = []
@@ -642,7 +642,7 @@ class FirestoreClient(object):
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
-        google.api_core.protobuf_helpers.check_oneof(structured_query=structured_query)
+        google.api_core.protobuf_helpers.check_oneof(structured_query=structured_query,)
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
@@ -875,7 +875,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.ListCollectionIdsRequest(
-            parent=parent, page_size=page_size
+            parent=parent, page_size=page_size,
         )
         if metadata is None:
             metadata = []
@@ -977,11 +977,11 @@ class FirestoreClient(object):
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
         google.api_core.protobuf_helpers.check_oneof(
-            transaction=transaction, read_time=read_time
+            transaction=transaction, read_time=read_time,
         )
 
         request = firestore_pb2.GetDocumentRequest(
-            name=name, mask=mask, transaction=transaction, read_time=read_time
+            name=name, mask=mask, transaction=transaction, read_time=read_time,
         )
         if metadata is None:
             metadata = []
@@ -1112,7 +1112,7 @@ class FirestoreClient(object):
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
         google.api_core.protobuf_helpers.check_oneof(
-            transaction=transaction, read_time=read_time
+            transaction=transaction, read_time=read_time,
         )
 
         request = firestore_pb2.ListDocumentsRequest(
@@ -1398,7 +1398,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.CommitRequest(
-            database=database, writes=writes, transaction=transaction
+            database=database, writes=writes, transaction=transaction,
         )
         if metadata is None:
             metadata = []

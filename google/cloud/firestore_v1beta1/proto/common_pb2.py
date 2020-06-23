@@ -56,7 +56,7 @@ _DOCUMENTMASK = _descriptor.Descriptor(
             serialized_options=None,
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
-        )
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -133,7 +133,7 @@ _PRECONDITION = _descriptor.Descriptor(
             containing_type=None,
             create_key=_descriptor._internal_create_key,
             fields=[],
-        )
+        ),
     ],
     serialized_start=179,
     serialized_end=280,
@@ -166,7 +166,7 @@ _TRANSACTIONOPTIONS_READWRITE = _descriptor.Descriptor(
             serialized_options=None,
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
-        )
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -206,7 +206,7 @@ _TRANSACTIONOPTIONS_READONLY = _descriptor.Descriptor(
             serialized_options=None,
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
-        )
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -223,7 +223,7 @@ _TRANSACTIONOPTIONS_READONLY = _descriptor.Descriptor(
             containing_type=None,
             create_key=_descriptor._internal_create_key,
             fields=[],
-        )
+        ),
     ],
     serialized_start=499,
     serialized_end=582,
@@ -277,7 +277,7 @@ _TRANSACTIONOPTIONS = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_TRANSACTIONOPTIONS_READWRITE, _TRANSACTIONOPTIONS_READONLY],
+    nested_types=[_TRANSACTIONOPTIONS_READWRITE, _TRANSACTIONOPTIONS_READONLY,],
     enum_types=[],
     serialized_options=None,
     is_extendable=False,
@@ -291,7 +291,7 @@ _TRANSACTIONOPTIONS = _descriptor.Descriptor(
             containing_type=None,
             create_key=_descriptor._internal_create_key,
             fields=[],
-        )
+        ),
     ],
     serialized_start=283,
     serialized_end=590,

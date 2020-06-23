@@ -49,7 +49,7 @@ from google.protobuf import field_mask_pb2
 
 
 _GAPIC_LIBRARY_VERSION = pkg_resources.get_distribution(
-    "google-cloud-firestore"
+    "google-cloud-firestore",
 ).version
 
 
@@ -214,12 +214,12 @@ class FirestoreAdminClient(object):
                 self.transport = transport
         else:
             self.transport = firestore_admin_grpc_transport.FirestoreAdminGrpcTransport(
-                address=api_endpoint, channel=channel, credentials=credentials
+                address=api_endpoint, channel=channel, credentials=credentials,
             )
 
         if client_info is None:
             client_info = google.api_core.gapic_v1.client_info.ClientInfo(
-                gapic_version=_GAPIC_LIBRARY_VERSION
+                gapic_version=_GAPIC_LIBRARY_VERSION,
             )
         else:
             client_info.gapic_version = _GAPIC_LIBRARY_VERSION
@@ -230,7 +230,7 @@ class FirestoreAdminClient(object):
         # (Ordinarily, these are the defaults specified in the `*_config.py`
         # file next to this one.)
         self._method_configs = google.api_core.gapic_v1.config.parse_method_configs(
-            client_config["interfaces"][self._INTERFACE_NAME]
+            client_config["interfaces"][self._INTERFACE_NAME],
         )
 
         # Save a dictionary of cached API call functions.
@@ -289,7 +289,7 @@ class FirestoreAdminClient(object):
                 client_info=self._client_info,
             )
 
-        request = firestore_admin_pb2.DeleteIndexRequest(name=name)
+        request = firestore_admin_pb2.DeleteIndexRequest(name=name,)
         if metadata is None:
             metadata = []
         metadata = list(metadata)
@@ -390,7 +390,7 @@ class FirestoreAdminClient(object):
             )
 
         request = firestore_admin_pb2.UpdateFieldRequest(
-            field=field, update_mask=update_mask
+            field=field, update_mask=update_mask,
         )
         if metadata is None:
             metadata = []
@@ -487,7 +487,7 @@ class FirestoreAdminClient(object):
                 client_info=self._client_info,
             )
 
-        request = firestore_admin_pb2.CreateIndexRequest(parent=parent, index=index)
+        request = firestore_admin_pb2.CreateIndexRequest(parent=parent, index=index,)
         if metadata is None:
             metadata = []
         metadata = list(metadata)
@@ -587,7 +587,7 @@ class FirestoreAdminClient(object):
             )
 
         request = firestore_admin_pb2.ListIndexesRequest(
-            parent=parent, filter=filter_, page_size=page_size
+            parent=parent, filter=filter_, page_size=page_size,
         )
         if metadata is None:
             metadata = []
@@ -669,7 +669,7 @@ class FirestoreAdminClient(object):
                 client_info=self._client_info,
             )
 
-        request = firestore_admin_pb2.GetIndexRequest(name=name)
+        request = firestore_admin_pb2.GetIndexRequest(name=name,)
         if metadata is None:
             metadata = []
         metadata = list(metadata)
@@ -739,7 +739,7 @@ class FirestoreAdminClient(object):
                 client_info=self._client_info,
             )
 
-        request = firestore_admin_pb2.GetFieldRequest(name=name)
+        request = firestore_admin_pb2.GetFieldRequest(name=name,)
         if metadata is None:
             metadata = []
         metadata = list(metadata)
@@ -842,7 +842,7 @@ class FirestoreAdminClient(object):
             )
 
         request = firestore_admin_pb2.ListFieldsRequest(
-            parent=parent, filter=filter_, page_size=page_size
+            parent=parent, filter=filter_, page_size=page_size,
         )
         if metadata is None:
             metadata = []
@@ -1053,7 +1053,7 @@ class FirestoreAdminClient(object):
             )
 
         request = firestore_admin_pb2.ImportDocumentsRequest(
-            name=name, collection_ids=collection_ids, input_uri_prefix=input_uri_prefix
+            name=name, collection_ids=collection_ids, input_uri_prefix=input_uri_prefix,
         )
         if metadata is None:
             metadata = []

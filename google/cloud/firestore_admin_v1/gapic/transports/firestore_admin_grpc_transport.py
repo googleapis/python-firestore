@@ -57,7 +57,7 @@ class FirestoreAdminGrpcTransport(object):
         # exception (channels come with credentials baked in already).
         if channel is not None and credentials is not None:
             raise ValueError(
-                "The `channel` and `credentials` arguments are mutually " "exclusive."
+                "The `channel` and `credentials` arguments are mutually " "exclusive.",
             )
 
         # Create the channel.
@@ -76,7 +76,9 @@ class FirestoreAdminGrpcTransport(object):
         # gRPC uses objects called "stubs" that are bound to the
         # channel and provide a basic method for each RPC.
         self._stubs = {
-            "firestore_admin_stub": firestore_admin_pb2_grpc.FirestoreAdminStub(channel)
+            "firestore_admin_stub": firestore_admin_pb2_grpc.FirestoreAdminStub(
+                channel
+            ),
         }
 
         # Because this API includes a method that returns a

@@ -294,7 +294,7 @@ _GETINDEXREQUEST = _descriptor.Descriptor(
             serialized_options=b"\340A\002\372A \n\036firestore.googleapis.com/Index",
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
-        )
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -335,7 +335,7 @@ _DELETEINDEXREQUEST = _descriptor.Descriptor(
             serialized_options=b"\340A\002\372A \n\036firestore.googleapis.com/Index",
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
-        )
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -436,7 +436,7 @@ _GETFIELDREQUEST = _descriptor.Descriptor(
             serialized_options=b"\340A\002\372A \n\036firestore.googleapis.com/Field",
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
-        )
+        ),
     ],
     extensions=[],
     nested_types=[],

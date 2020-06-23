@@ -179,7 +179,7 @@ _FIELD = _descriptor.Descriptor(
         ),
     ],
     extensions=[],
-    nested_types=[_FIELD_INDEXCONFIG],
+    nested_types=[_FIELD_INDEXCONFIG,],
     enum_types=[],
     serialized_options=b"\352Av\n\036firestore.googleapis.com/Field\022Tprojects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}",
     is_extendable=False,

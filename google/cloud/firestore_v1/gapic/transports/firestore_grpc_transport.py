@@ -56,7 +56,7 @@ class FirestoreGrpcTransport(object):
         # exception (channels come with credentials baked in already).
         if channel is not None and credentials is not None:
             raise ValueError(
-                "The `channel` and `credentials` arguments are mutually " "exclusive."
+                "The `channel` and `credentials` arguments are mutually " "exclusive.",
             )
 
         # Create the channel.
@@ -74,7 +74,9 @@ class FirestoreGrpcTransport(object):
 
         # gRPC uses objects called "stubs" that are bound to the
         # channel and provide a basic method for each RPC.
-        self._stubs = {"firestore_stub": firestore_pb2_grpc.FirestoreStub(channel)}
+        self._stubs = {
+            "firestore_stub": firestore_pb2_grpc.FirestoreStub(channel),
+        }
 
     @classmethod
     def create_channel(
