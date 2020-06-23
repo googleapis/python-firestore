@@ -24,7 +24,7 @@ import six
 from google.cloud import exceptions
 from google.cloud._helpers import _datetime_to_pb_timestamp
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
-from google.cloud.firestore_v1 import DocumentTransform
+from google.cloud.firestore_v1.types.write import DocumentTransform
 from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.field_path import FieldPath
