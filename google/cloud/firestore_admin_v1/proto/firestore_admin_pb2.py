@@ -34,6 +34,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="google.firestore.admin.v1",
     syntax="proto3",
     serialized_options=b"\n\035com.google.firestore.admin.v1B\023FirestoreAdminProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1\352AL\n!firestore.googleapis.com/Database\022'projects/{project}/databases/{database}\352Aq\n(firestore.googleapis.com/CollectionGroup\022Eprojects/{project}/databases/{database}/collectionGroups/{collection}",
+    create_key=_descriptor._internal_create_key,
     serialized_pb=b'\n;google/cloud/firestore_admin_v1/proto/firestore_admin.proto\x12\x19google.firestore.admin.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x19google/api/resource.proto\x1a\x31google/cloud/firestore_admin_v1/proto/field.proto\x1a\x31google/cloud/firestore_admin_v1/proto/index.proto\x1a#google/longrunning/operations.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a google/protobuf/field_mask.proto"\x8c\x01\n\x12\x43reateIndexRequest\x12@\n\x06parent\x18\x01 \x01(\tB0\xe0\x41\x02\xfa\x41*\n(firestore.googleapis.com/CollectionGroup\x12\x34\n\x05index\x18\x02 \x01(\x0b\x32 .google.firestore.admin.v1.IndexB\x03\xe0\x41\x02"\x8d\x01\n\x12ListIndexesRequest\x12@\n\x06parent\x18\x01 \x01(\tB0\xe0\x41\x02\xfa\x41*\n(firestore.googleapis.com/CollectionGroup\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t"a\n\x13ListIndexesResponse\x12\x31\n\x07indexes\x18\x01 \x03(\x0b\x32 .google.firestore.admin.v1.Index\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"G\n\x0fGetIndexRequest\x12\x34\n\x04name\x18\x01 \x01(\tB&\xe0\x41\x02\xfa\x41 \n\x1e\x66irestore.googleapis.com/Index"J\n\x12\x44\x65leteIndexRequest\x12\x34\n\x04name\x18\x01 \x01(\tB&\xe0\x41\x02\xfa\x41 \n\x1e\x66irestore.googleapis.com/Index"{\n\x12UpdateFieldRequest\x12\x34\n\x05\x66ield\x18\x01 \x01(\x0b\x32 .google.firestore.admin.v1.FieldB\x03\xe0\x41\x02\x12/\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.FieldMask"G\n\x0fGetFieldRequest\x12\x34\n\x04name\x18\x01 \x01(\tB&\xe0\x41\x02\xfa\x41 \n\x1e\x66irestore.googleapis.com/Field"\x8c\x01\n\x11ListFieldsRequest\x12@\n\x06parent\x18\x01 \x01(\tB0\xe0\x41\x02\xfa\x41*\n(firestore.googleapis.com/CollectionGroup\x12\x0e\n\x06\x66ilter\x18\x02 \x01(\t\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t"_\n\x12ListFieldsResponse\x12\x30\n\x06\x66ields\x18\x01 \x03(\x0b\x32 .google.firestore.admin.v1.Field\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\x84\x01\n\x16\x45xportDocumentsRequest\x12\x37\n\x04name\x18\x01 \x01(\tB)\xe0\x41\x02\xfa\x41#\n!firestore.googleapis.com/Database\x12\x16\n\x0e\x63ollection_ids\x18\x02 \x03(\t\x12\x19\n\x11output_uri_prefix\x18\x03 \x01(\t"\x83\x01\n\x16ImportDocumentsRequest\x12\x37\n\x04name\x18\x01 \x01(\tB)\xe0\x41\x02\xfa\x41#\n!firestore.googleapis.com/Database\x12\x16\n\x0e\x63ollection_ids\x18\x02 \x03(\t\x12\x18\n\x10input_uri_prefix\x18\x03 \x01(\t2\xf5\x0e\n\x0e\x46irestoreAdmin\x12\xdb\x01\n\x0b\x43reateIndex\x12-.google.firestore.admin.v1.CreateIndexRequest\x1a\x1d.google.longrunning.Operation"~\x82\xd3\xe4\x93\x02G">/v1/{parent=projects/*/databases/*/collectionGroups/*}/indexes:\x05index\xda\x41\x0cparent,index\xca\x41\x1f\n\x05Index\x12\x16IndexOperationMetadata\x12\xbd\x01\n\x0bListIndexes\x12-.google.firestore.admin.v1.ListIndexesRequest\x1a..google.firestore.admin.v1.ListIndexesResponse"O\x82\xd3\xe4\x93\x02@\x12>/v1/{parent=projects/*/databases/*/collectionGroups/*}/indexes\xda\x41\x06parent\x12\xa7\x01\n\x08GetIndex\x12*.google.firestore.admin.v1.GetIndexRequest\x1a .google.firestore.admin.v1.Index"M\x82\xd3\xe4\x93\x02@\x12>/v1/{name=projects/*/databases/*/collectionGroups/*/indexes/*}\xda\x41\x04name\x12\xa3\x01\n\x0b\x44\x65leteIndex\x12-.google.firestore.admin.v1.DeleteIndexRequest\x1a\x16.google.protobuf.Empty"M\x82\xd3\xe4\x93\x02@*>/v1/{name=projects/*/databases/*/collectionGroups/*/indexes/*}\xda\x41\x04name\x12\xa6\x01\n\x08GetField\x12*.google.firestore.admin.v1.GetFieldRequest\x1a .google.firestore.admin.v1.Field"L\x82\xd3\xe4\x93\x02?\x12=/v1/{name=projects/*/databases/*/collectionGroups/*/fields/*}\xda\x41\x04name\x12\xd9\x01\n\x0bUpdateField\x12-.google.firestore.admin.v1.UpdateFieldRequest\x1a\x1d.google.longrunning.Operation"|\x82\xd3\xe4\x93\x02L2C/v1/{field.name=projects/*/databases/*/collectionGroups/*/fields/*}:\x05\x66ield\xda\x41\x05\x66ield\xca\x41\x1f\n\x05\x46ield\x12\x16\x46ieldOperationMetadata\x12\xb9\x01\n\nListFields\x12,.google.firestore.admin.v1.ListFieldsRequest\x1a-.google.firestore.admin.v1.ListFieldsResponse"N\x82\xd3\xe4\x93\x02?\x12=/v1/{parent=projects/*/databases/*/collectionGroups/*}/fields\xda\x41\x06parent\x12\xdd\x01\n\x0f\x45xportDocuments\x12\x31.google.firestore.admin.v1.ExportDocumentsRequest\x1a\x1d.google.longrunning.Operation"x\x82\xd3\xe4\x93\x02\x36"1/v1/{name=projects/*/databases/*}:exportDocuments:\x01*\xda\x41\x04name\xca\x41\x32\n\x17\x45xportDocumentsResponse\x12\x17\x45xportDocumentsMetadata\x12\xdb\x01\n\x0fImportDocuments\x12\x31.google.firestore.admin.v1.ImportDocumentsRequest\x1a\x1d.google.longrunning.Operation"v\x82\xd3\xe4\x93\x02\x36"1/v1/{name=projects/*/databases/*}:importDocuments:\x01*\xda\x41\x04name\xca\x41\x30\n\x15google.protobuf.Empty\x12\x17ImportDocumentsMetadata\x1av\xca\x41\x18\x66irestore.googleapis.com\xd2\x41Xhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastoreB\x84\x03\n\x1d\x63om.google.firestore.admin.v1B\x13\x46irestoreAdminProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1\xea\x41L\n!firestore.googleapis.com/Database\x12\'projects/{project}/databases/{database}\xea\x41q\n(firestore.googleapis.com/CollectionGroup\x12\x45projects/{project}/databases/{database}/collectionGroups/{collection}b\x06proto3',
     dependencies=[
         google_dot_api_dot_annotations__pb2.DESCRIPTOR,
@@ -55,6 +56,7 @@ _CREATEINDEXREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
@@ -73,6 +75,7 @@ _CREATEINDEXREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002\372A*\n(firestore.googleapis.com/CollectionGroup",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="index",
@@ -91,6 +94,7 @@ _CREATEINDEXREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -112,6 +116,7 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
@@ -130,6 +135,7 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002\372A*\n(firestore.googleapis.com/CollectionGroup",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="filter",
@@ -148,6 +154,7 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="page_size",
@@ -166,6 +173,7 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="page_token",
@@ -184,6 +192,7 @@ _LISTINDEXESREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -205,6 +214,7 @@ _LISTINDEXESRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="indexes",
@@ -223,6 +233,7 @@ _LISTINDEXESRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="next_page_token",
@@ -241,6 +252,7 @@ _LISTINDEXESRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -262,6 +274,7 @@ _GETINDEXREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
@@ -280,6 +293,7 @@ _GETINDEXREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002\372A \n\036firestore.googleapis.com/Index",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         )
     ],
     extensions=[],
@@ -301,6 +315,7 @@ _DELETEINDEXREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
@@ -319,6 +334,7 @@ _DELETEINDEXREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002\372A \n\036firestore.googleapis.com/Index",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         )
     ],
     extensions=[],
@@ -340,6 +356,7 @@ _UPDATEFIELDREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="field",
@@ -358,6 +375,7 @@ _UPDATEFIELDREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="update_mask",
@@ -376,6 +394,7 @@ _UPDATEFIELDREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -397,6 +416,7 @@ _GETFIELDREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
@@ -415,6 +435,7 @@ _GETFIELDREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002\372A \n\036firestore.googleapis.com/Field",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         )
     ],
     extensions=[],
@@ -436,6 +457,7 @@ _LISTFIELDSREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="parent",
@@ -454,6 +476,7 @@ _LISTFIELDSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002\372A*\n(firestore.googleapis.com/CollectionGroup",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="filter",
@@ -472,6 +495,7 @@ _LISTFIELDSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="page_size",
@@ -490,6 +514,7 @@ _LISTFIELDSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="page_token",
@@ -508,6 +533,7 @@ _LISTFIELDSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -529,6 +555,7 @@ _LISTFIELDSRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="fields",
@@ -547,6 +574,7 @@ _LISTFIELDSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="next_page_token",
@@ -565,6 +593,7 @@ _LISTFIELDSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -586,6 +615,7 @@ _EXPORTDOCUMENTSREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
@@ -604,6 +634,7 @@ _EXPORTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002\372A#\n!firestore.googleapis.com/Database",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="collection_ids",
@@ -622,6 +653,7 @@ _EXPORTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="output_uri_prefix",
@@ -640,6 +672,7 @@ _EXPORTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -661,6 +694,7 @@ _IMPORTDOCUMENTSREQUEST = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="name",
@@ -679,6 +713,7 @@ _IMPORTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=b"\340A\002\372A#\n!firestore.googleapis.com/Database",
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="collection_ids",
@@ -697,6 +732,7 @@ _IMPORTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="input_uri_prefix",
@@ -715,6 +751,7 @@ _IMPORTDOCUMENTSREQUEST = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -1037,6 +1074,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
     file=DESCRIPTOR,
     index=0,
     serialized_options=b"\312A\030firestore.googleapis.com\322AXhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore",
+    create_key=_descriptor._internal_create_key,
     serialized_start=1650,
     serialized_end=3559,
     methods=[
@@ -1048,6 +1086,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_CREATEINDEXREQUEST,
             output_type=google_dot_longrunning_dot_operations__pb2._OPERATION,
             serialized_options=b'\202\323\344\223\002G">/v1/{parent=projects/*/databases/*/collectionGroups/*}/indexes:\005index\332A\014parent,index\312A\037\n\005Index\022\026IndexOperationMetadata',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="ListIndexes",
@@ -1057,6 +1096,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_LISTINDEXESREQUEST,
             output_type=_LISTINDEXESRESPONSE,
             serialized_options=b"\202\323\344\223\002@\022>/v1/{parent=projects/*/databases/*/collectionGroups/*}/indexes\332A\006parent",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="GetIndex",
@@ -1066,6 +1106,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_GETINDEXREQUEST,
             output_type=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2._INDEX,
             serialized_options=b"\202\323\344\223\002@\022>/v1/{name=projects/*/databases/*/collectionGroups/*/indexes/*}\332A\004name",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="DeleteIndex",
@@ -1075,6 +1116,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_DELETEINDEXREQUEST,
             output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
             serialized_options=b"\202\323\344\223\002@*>/v1/{name=projects/*/databases/*/collectionGroups/*/indexes/*}\332A\004name",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="GetField",
@@ -1084,6 +1126,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_GETFIELDREQUEST,
             output_type=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2._FIELD,
             serialized_options=b"\202\323\344\223\002?\022=/v1/{name=projects/*/databases/*/collectionGroups/*/fields/*}\332A\004name",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="UpdateField",
@@ -1093,6 +1136,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_UPDATEFIELDREQUEST,
             output_type=google_dot_longrunning_dot_operations__pb2._OPERATION,
             serialized_options=b"\202\323\344\223\002L2C/v1/{field.name=projects/*/databases/*/collectionGroups/*/fields/*}:\005field\332A\005field\312A\037\n\005Field\022\026FieldOperationMetadata",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="ListFields",
@@ -1102,6 +1146,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_LISTFIELDSREQUEST,
             output_type=_LISTFIELDSRESPONSE,
             serialized_options=b"\202\323\344\223\002?\022=/v1/{parent=projects/*/databases/*/collectionGroups/*}/fields\332A\006parent",
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="ExportDocuments",
@@ -1111,6 +1156,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_EXPORTDOCUMENTSREQUEST,
             output_type=google_dot_longrunning_dot_operations__pb2._OPERATION,
             serialized_options=b'\202\323\344\223\0026"1/v1/{name=projects/*/databases/*}:exportDocuments:\001*\332A\004name\312A2\n\027ExportDocumentsResponse\022\027ExportDocumentsMetadata',
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
             name="ImportDocuments",
@@ -1120,6 +1166,7 @@ _FIRESTOREADMIN = _descriptor.ServiceDescriptor(
             input_type=_IMPORTDOCUMENTSREQUEST,
             output_type=google_dot_longrunning_dot_operations__pb2._OPERATION,
             serialized_options=b'\202\323\344\223\0026"1/v1/{name=projects/*/databases/*}:importDocuments:\001*\332A\004name\312A0\n\025google.protobuf.Empty\022\027ImportDocumentsMetadata',
+            create_key=_descriptor._internal_create_key,
         ),
     ],
 )

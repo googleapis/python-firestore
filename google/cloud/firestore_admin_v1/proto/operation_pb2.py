@@ -25,6 +25,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     package="google.firestore.admin.v1",
     syntax="proto3",
     serialized_options=b"\n\035com.google.firestore.admin.v1B\016OperationProtoP\001Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\242\002\004GCFS\252\002\037Google.Cloud.Firestore.Admin.V1\312\002\037Google\\Cloud\\Firestore\\Admin\\V1",
+    create_key=_descriptor._internal_create_key,
     serialized_pb=b'\n5google/cloud/firestore_admin_v1/proto/operation.proto\x12\x19google.firestore.admin.v1\x1a\x31google/cloud/firestore_admin_v1/proto/index.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x1cgoogle/api/annotations.proto"\xbd\x02\n\x16IndexOperationMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05index\x18\x03 \x01(\t\x12\x38\n\x05state\x18\x04 \x01(\x0e\x32).google.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x05 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x06 \x01(\x0b\x32#.google.firestore.admin.v1.Progress"\x88\x05\n\x16\x46ieldOperationMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\r\n\x05\x66ield\x18\x03 \x01(\t\x12_\n\x13index_config_deltas\x18\x04 \x03(\x0b\x32\x42.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta\x12\x38\n\x05state\x18\x05 \x01(\x0e\x32).google.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x06 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x07 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x1a\xe7\x01\n\x10IndexConfigDelta\x12\x62\n\x0b\x63hange_type\x18\x01 \x01(\x0e\x32M.google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType\x12/\n\x05index\x18\x02 \x01(\x0b\x32 .google.firestore.admin.v1.Index">\n\nChangeType\x12\x1b\n\x17\x43HANGE_TYPE_UNSPECIFIED\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02"\xec\x02\n\x17\x45xportDocumentsMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x42\n\x0foperation_state\x18\x03 \x01(\x0e\x32).google.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x04 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x05 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12\x16\n\x0e\x63ollection_ids\x18\x06 \x03(\t\x12\x19\n\x11output_uri_prefix\x18\x07 \x01(\t"\xeb\x02\n\x17ImportDocumentsMetadata\x12.\n\nstart_time\x18\x01 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nd_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x42\n\x0foperation_state\x18\x03 \x01(\x0e\x32).google.firestore.admin.v1.OperationState\x12?\n\x12progress_documents\x18\x04 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12;\n\x0eprogress_bytes\x18\x05 \x01(\x0b\x32#.google.firestore.admin.v1.Progress\x12\x16\n\x0e\x63ollection_ids\x18\x06 \x03(\t\x12\x18\n\x10input_uri_prefix\x18\x07 \x01(\t"4\n\x17\x45xportDocumentsResponse\x12\x19\n\x11output_uri_prefix\x18\x01 \x01(\t":\n\x08Progress\x12\x16\n\x0e\x65stimated_work\x18\x01 \x01(\x03\x12\x16\n\x0e\x63ompleted_work\x18\x02 \x01(\x03*\x9e\x01\n\x0eOperationState\x12\x1f\n\x1bOPERATION_STATE_UNSPECIFIED\x10\x00\x12\x10\n\x0cINITIALIZING\x10\x01\x12\x0e\n\nPROCESSING\x10\x02\x12\x0e\n\nCANCELLING\x10\x03\x12\x0e\n\nFINALIZING\x10\x04\x12\x0e\n\nSUCCESSFUL\x10\x05\x12\n\n\x06\x46\x41ILED\x10\x06\x12\r\n\tCANCELLED\x10\x07\x42\xbc\x01\n\x1d\x63om.google.firestore.admin.v1B\x0eOperationProtoP\x01Z>google.golang.org/genproto/googleapis/firestore/admin/v1;admin\xa2\x02\x04GCFS\xaa\x02\x1fGoogle.Cloud.Firestore.Admin.V1\xca\x02\x1fGoogle\\Cloud\\Firestore\\Admin\\V1b\x06proto3',
     dependencies=[
         google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2.DESCRIPTOR,
@@ -38,6 +39,7 @@ _OPERATIONSTATE = _descriptor.EnumDescriptor(
     full_name="google.firestore.admin.v1.OperationState",
     filename=None,
     file=DESCRIPTOR,
+    create_key=_descriptor._internal_create_key,
     values=[
         _descriptor.EnumValueDescriptor(
             name="OPERATION_STATE_UNSPECIFIED",
@@ -45,27 +47,63 @@ _OPERATIONSTATE = _descriptor.EnumDescriptor(
             number=0,
             serialized_options=None,
             type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="INITIALIZING", index=1, number=1, serialized_options=None, type=None
+            name="INITIALIZING",
+            index=1,
+            number=1,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="PROCESSING", index=2, number=2, serialized_options=None, type=None
+            name="PROCESSING",
+            index=2,
+            number=2,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="CANCELLING", index=3, number=3, serialized_options=None, type=None
+            name="CANCELLING",
+            index=3,
+            number=3,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="FINALIZING", index=4, number=4, serialized_options=None, type=None
+            name="FINALIZING",
+            index=4,
+            number=4,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="SUCCESSFUL", index=5, number=5, serialized_options=None, type=None
+            name="SUCCESSFUL",
+            index=5,
+            number=5,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="FAILED", index=6, number=6, serialized_options=None, type=None
+            name="FAILED",
+            index=6,
+            number=6,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="CANCELLED", index=7, number=7, serialized_options=None, type=None
+            name="CANCELLED",
+            index=7,
+            number=7,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     containing_type=None,
@@ -91,6 +129,7 @@ _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA_CHANGETYPE = _descriptor.EnumDescriptor
     full_name="google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta.ChangeType",
     filename=None,
     file=DESCRIPTOR,
+    create_key=_descriptor._internal_create_key,
     values=[
         _descriptor.EnumValueDescriptor(
             name="CHANGE_TYPE_UNSPECIFIED",
@@ -98,12 +137,23 @@ _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA_CHANGETYPE = _descriptor.EnumDescriptor
             number=0,
             serialized_options=None,
             type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="ADD", index=1, number=1, serialized_options=None, type=None
+            name="ADD",
+            index=1,
+            number=1,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.EnumValueDescriptor(
-            name="REMOVE", index=2, number=2, serialized_options=None, type=None
+            name="REMOVE",
+            index=2,
+            number=2,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     containing_type=None,
@@ -120,6 +170,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
@@ -138,6 +189,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
@@ -156,6 +208,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="index",
@@ -174,6 +227,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="state",
@@ -192,6 +246,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="progress_documents",
@@ -210,6 +265,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="progress_bytes",
@@ -228,6 +284,7 @@ _INDEXOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -249,6 +306,7 @@ _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="change_type",
@@ -267,6 +325,7 @@ _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="index",
@@ -285,6 +344,7 @@ _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -305,6 +365,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
@@ -323,6 +384,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
@@ -341,6 +403,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="field",
@@ -359,6 +422,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="index_config_deltas",
@@ -377,6 +441,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="state",
@@ -395,6 +460,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="progress_documents",
@@ -413,6 +479,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="progress_bytes",
@@ -431,6 +498,7 @@ _FIELDOPERATIONMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -452,6 +520,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
@@ -470,6 +539,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
@@ -488,6 +558,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="operation_state",
@@ -506,6 +577,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="progress_documents",
@@ -524,6 +596,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="progress_bytes",
@@ -542,6 +615,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="collection_ids",
@@ -560,6 +634,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="output_uri_prefix",
@@ -578,6 +653,7 @@ _EXPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -599,6 +675,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="start_time",
@@ -617,6 +694,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="end_time",
@@ -635,6 +713,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="operation_state",
@@ -653,6 +732,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="progress_documents",
@@ -671,6 +751,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="progress_bytes",
@@ -689,6 +770,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="collection_ids",
@@ -707,6 +789,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="input_uri_prefix",
@@ -725,6 +808,7 @@ _IMPORTDOCUMENTSMETADATA = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
@@ -746,6 +830,7 @@ _EXPORTDOCUMENTSRESPONSE = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="output_uri_prefix",
@@ -764,6 +849,7 @@ _EXPORTDOCUMENTSRESPONSE = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         )
     ],
     extensions=[],
@@ -785,6 +871,7 @@ _PROGRESS = _descriptor.Descriptor(
     filename=None,
     file=DESCRIPTOR,
     containing_type=None,
+    create_key=_descriptor._internal_create_key,
     fields=[
         _descriptor.FieldDescriptor(
             name="estimated_work",
@@ -803,6 +890,7 @@ _PROGRESS = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
         _descriptor.FieldDescriptor(
             name="completed_work",
@@ -821,6 +909,7 @@ _PROGRESS = _descriptor.Descriptor(
             extension_scope=None,
             serialized_options=None,
             file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
         ),
     ],
     extensions=[],
