@@ -30,7 +30,7 @@ from google.cloud.firestore_v1beta1 import _helpers
 from google.cloud.firestore_v1beta1 import document
 from google.cloud.firestore_v1beta1 import field_path as field_path_module
 from google.cloud.firestore_v1beta1 import transforms
-from google.cloud.firestore_v1beta1 import StructureQuery
+from google.cloud.firestore_v1beta1 import StructuredQuery
 from google.cloud.firestore_v1beta1.proto import query_pb2
 from google.cloud.firestore_v1beta1.order import Order
 from google.cloud.firestore_v1beta1.watch import Watch

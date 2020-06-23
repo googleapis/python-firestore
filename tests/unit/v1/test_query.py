@@ -321,9 +321,7 @@ class TestQuery(unittest.TestCase):
         query2 = query1.order_by(field_path2)
         self.assertIsNot(query2, query1)
         self.assertIsInstance(query2, klass)
-        order_pb2 = _make_order_pb(
-            field_path2, StructuredQuery.Direction.ASCENDING
-        )
+        order_pb2 = _make_order_pb(field_path2, StructuredQuery.Direction.ASCENDING)
         self.assertEqual(query2._orders, (order_pb2,))
         self._compare_queries(query1, query2, "_orders")
 
@@ -332,9 +330,7 @@ class TestQuery(unittest.TestCase):
         query3 = query2.order_by(field_path3, direction=klass.DESCENDING)
         self.assertIsNot(query3, query2)
         self.assertIsInstance(query3, klass)
-        order_pb3 = _make_order_pb(
-            field_path3, StructuredQuery.Direction.DESCENDING
-        )
+        order_pb3 = _make_order_pb(field_path3, StructuredQuery.Direction.DESCENDING)
         self.assertEqual(query3._orders, (order_pb2, order_pb3))
         self._compare_queries(query2, query3, "_orders")
 
@@ -897,9 +893,7 @@ class TestQuery(unittest.TestCase):
                     value=document_pb2.Value(double_value=2.5),
                 )
             ),
-            "order_by": [
-                _make_order_pb("X", StructuredQuery.Direction.ASCENDING)
-            ],
+            "order_by": [_make_order_pb("X", StructuredQuery.Direction.ASCENDING)],
             "start_at": query_pb2.Cursor(
                 values=[document_pb2.Value(integer_value=10)], before=True
             ),
@@ -971,9 +965,7 @@ class TestQuery(unittest.TestCase):
             "from": [
                 query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "order_by": [
-                _make_order_pb("abc", StructuredQuery.Direction.ASCENDING)
-            ],
+            "order_by": [_make_order_pb("abc", StructuredQuery.Direction.ASCENDING)],
         }
         expected_pb = query_pb2.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
@@ -992,9 +984,7 @@ class TestQuery(unittest.TestCase):
             "from": [
                 query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "order_by": [
-                _make_order_pb("X.Y", StructuredQuery.Direction.ASCENDING)
-            ],
+            "order_by": [_make_order_pb("X.Y", StructuredQuery.Direction.ASCENDING)],
             "start_at": query_pb2.Cursor(
                 values=[document_pb2.Value(string_value=u"Z")]
             ),
@@ -1016,9 +1006,7 @@ class TestQuery(unittest.TestCase):
             "from": [
                 query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "order_by": [
-                _make_order_pb("a", StructuredQuery.Direction.ASCENDING)
-            ],
+            "order_by": [_make_order_pb("a", StructuredQuery.Direction.ASCENDING)],
             "end_at": query_pb2.Cursor(values=[document_pb2.Value(integer_value=88)]),
         }
         expected_pb = query_pb2.StructuredQuery(**query_kwargs)

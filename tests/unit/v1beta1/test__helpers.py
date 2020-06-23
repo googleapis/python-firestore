@@ -1208,7 +1208,7 @@ class Test_pbs_for_create(unittest.TestCase):
     @staticmethod
     def _make_write_w_transform(document_path, fields):
         from google.cloud.firestore_v1beta1.proto import write_pb2
-        from google.cloud.firestore_v1beta1 import DocumentTranform
+        from google.cloud.firestore_v1beta1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
         transforms = [
