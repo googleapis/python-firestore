@@ -18,7 +18,7 @@ import unittest
 import mock
 
 
-class TestClient(unittest.TestCase):
+class TestBaseClient(unittest.TestCase):
 
     PROJECT = "my-prahjekt"
 
