@@ -211,6 +211,7 @@ Field = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _FIELD_INDEXCONFIG,
                 "__module__": "google.cloud.firestore_admin_v1.proto.field_pb2",
                 "__doc__": """The index configuration for this field.
+    
     Attributes:
         indexes:
             The indexes supported for this field.
@@ -241,6 +242,7 @@ Field = _reflection.GeneratedProtocolMessageType(
         "__doc__": """Represents a single field in the database.  Fields are grouped by
   their “Collection Group”, which represent all collections in the
   database with the same id.
+  
   Attributes:
       name:
           A field name of the form ``projects/{project_id}/databases/{da

@@ -903,6 +903,7 @@ Write = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _WRITE,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
         "__doc__": """A write on a document.
+  
   Attributes:
       operation:
           The operation to execute.
@@ -946,6 +947,7 @@ DocumentTransform = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _DOCUMENTTRANSFORM_FIELDTRANSFORM,
                 "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
                 "__doc__": """A transformation of a field of the document.
+    
     Attributes:
         field_path:
             The path of the field. See
@@ -1018,6 +1020,7 @@ DocumentTransform = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _DOCUMENTTRANSFORM,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
         "__doc__": """A transformation of a document.
+  
   Attributes:
       document:
           The name of the document to transform.
@@ -1038,6 +1041,7 @@ WriteResult = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _WRITERESULT,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
         "__doc__": """The result of applying a write.
+  
   Attributes:
       update_time:
           The last update time of the document after applying the write.
@@ -1066,6 +1070,7 @@ DocumentChange = _reflection.GeneratedProtocolMessageType(
   [DocumentChange][google.firestore.v1beta1.DocumentChange] messages may
   be returned for the same logical change, if multiple targets are
   affected.
+  
   Attributes:
       document:
           The new state of the
@@ -1095,6 +1100,7 @@ DocumentDelete = _reflection.GeneratedProtocolMessageType(
   [DocumentDelete][google.firestore.v1beta1.DocumentDelete] messages may
   be returned for the same logical delete, if multiple targets are
   affected.
+  
   Attributes:
       document:
           The resource name of the
@@ -1126,6 +1132,7 @@ DocumentRemove = _reflection.GeneratedProtocolMessageType(
   [DocumentRemove][google.firestore.v1beta1.DocumentRemove] messages may
   be returned for the same logical write or delete, if multiple targets
   are affected.
+  
   Attributes:
       document:
           The resource name of the
@@ -1150,6 +1157,7 @@ ExistenceFilter = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _EXISTENCEFILTER,
         "__module__": "google.cloud.firestore_v1beta1.proto.write_pb2",
         "__doc__": """A digest of all the documents that match a given target.
+  
   Attributes:
       target_id:
           The target ID to which this filter applies.

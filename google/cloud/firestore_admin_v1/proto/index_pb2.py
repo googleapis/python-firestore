@@ -410,6 +410,7 @@ Index = _reflection.GeneratedProtocolMessageType(
                 "__module__": "google.cloud.firestore_admin_v1.proto.index_pb2",
                 "__doc__": """A field in an index. The field_path describes which field is indexed,
     the value_mode describes how the field value is indexed.
+    
     Attributes:
         field_path:
             Can be **name**. For single field indexes, this must match the
@@ -430,6 +431,7 @@ Index = _reflection.GeneratedProtocolMessageType(
         "__module__": "google.cloud.firestore_admin_v1.proto.index_pb2",
         "__doc__": """Cloud Firestore indexes enable simple and complex queries against
   documents in a database.
+  
   Attributes:
       name:
           Output only. A server defined name for this index. The form of

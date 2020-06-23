@@ -671,6 +671,7 @@ Document = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _DOCUMENT,
         "__module__": "google.cloud.firestore_v1.proto.document_pb2",
         "__doc__": """A Firestore document.  Must not exceed 1 MiB - 4 bytes.
+  
   Attributes:
       name:
           The resource name of the document, for example ``projects/{pro
@@ -720,6 +721,7 @@ Value = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _VALUE,
         "__module__": "google.cloud.firestore_v1.proto.document_pb2",
         "__doc__": """A message that can hold any of the supported value types.
+  
   Attributes:
       value_type:
           Must have a value set.
@@ -765,6 +767,7 @@ ArrayValue = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _ARRAYVALUE,
         "__module__": "google.cloud.firestore_v1.proto.document_pb2",
         "__doc__": """An array value.
+  
   Attributes:
       values:
           Values in the array.
@@ -790,6 +793,7 @@ MapValue = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _MAPVALUE,
         "__module__": "google.cloud.firestore_v1.proto.document_pb2",
         "__doc__": """A map value.
+  
   Attributes:
       fields:
           The map’s fields.  The map keys represent field names. Field

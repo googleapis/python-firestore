@@ -994,6 +994,7 @@ IndexOperationMetadata = _reflection.GeneratedProtocolMessageType(
   [google.longrunning.Operation][google.longrunning.Operation] results
   from [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreA
   dmin.CreateIndex].
+  
   Attributes:
       start_time:
           The time this operation started.
@@ -1027,6 +1028,7 @@ FieldOperationMetadata = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _FIELDOPERATIONMETADATA_INDEXCONFIGDELTA,
                 "__module__": "google.cloud.firestore_admin_v1.proto.operation_pb2",
                 "__doc__": """Information about an index configuration change.
+    
     Attributes:
         change_type:
             Specifies how the index is changing.
@@ -1042,6 +1044,7 @@ FieldOperationMetadata = _reflection.GeneratedProtocolMessageType(
   [google.longrunning.Operation][google.longrunning.Operation] results
   from [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreA
   dmin.UpdateField].
+  
   Attributes:
       start_time:
           The time this operation started.
@@ -1079,6 +1082,7 @@ ExportDocumentsMetadata = _reflection.GeneratedProtocolMessageType(
   [google.longrunning.Operation][google.longrunning.Operation] results
   from [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.Firest
   oreAdmin.ExportDocuments].
+  
   Attributes:
       start_time:
           The time this operation started.
@@ -1111,6 +1115,7 @@ ImportDocumentsMetadata = _reflection.GeneratedProtocolMessageType(
   [google.longrunning.Operation][google.longrunning.Operation] results
   from [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.Firest
   oreAdmin.ImportDocuments].
+  
   Attributes:
       start_time:
           The time this operation started.
@@ -1142,6 +1147,7 @@ ExportDocumentsResponse = _reflection.GeneratedProtocolMessageType(
         "__doc__": """Returned in the
   [google.longrunning.Operation][google.longrunning.Operation] response
   field.
+  
   Attributes:
       output_uri_prefix:
           Location of the output files. This can be used to begin an
@@ -1162,6 +1168,7 @@ Progress = _reflection.GeneratedProtocolMessageType(
         "__doc__": """Describes the progress of the operation. Unit of work is generic and
   must be interpreted based on where
   [Progress][google.firestore.admin.v1.Progress] is used.
+  
   Attributes:
       estimated_work:
           The amount of work estimated.

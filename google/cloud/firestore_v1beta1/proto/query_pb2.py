@@ -1073,6 +1073,7 @@ StructuredQuery = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _STRUCTUREDQUERY_COLLECTIONSELECTOR,
                 "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
                 "__doc__": """A selection of a collection, such as ``messages as m1``.
+    
     Attributes:
         collection_id:
             The collection ID. When set, selects only collections with
@@ -1093,6 +1094,7 @@ StructuredQuery = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _STRUCTUREDQUERY_FILTER,
                 "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
                 "__doc__": """A filter.
+    
     Attributes:
         filter_type:
             The type of filter.
@@ -1113,6 +1115,7 @@ StructuredQuery = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _STRUCTUREDQUERY_COMPOSITEFILTER,
                 "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
                 "__doc__": """A filter that merges multiple other filters using the given operator.
+    
     Attributes:
         op:
             The operator for combining multiple filters.
@@ -1130,6 +1133,7 @@ StructuredQuery = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _STRUCTUREDQUERY_FIELDFILTER,
                 "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
                 "__doc__": """A filter on a specific field.
+    
     Attributes:
         field:
             The field to filter by.
@@ -1148,6 +1152,7 @@ StructuredQuery = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _STRUCTUREDQUERY_UNARYFILTER,
                 "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
                 "__doc__": """A filter with a single operand.
+    
     Attributes:
         op:
             The unary operator to apply.
@@ -1166,6 +1171,7 @@ StructuredQuery = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _STRUCTUREDQUERY_ORDER,
                 "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
                 "__doc__": """An order on a field.
+    
     Attributes:
         field:
             The field to order by.
@@ -1192,6 +1198,7 @@ StructuredQuery = _reflection.GeneratedProtocolMessageType(
                 "DESCRIPTOR": _STRUCTUREDQUERY_PROJECTION,
                 "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
                 "__doc__": """The projection of document’s fields to return.
+    
     Attributes:
         fields:
             The fields to return.  If empty, all fields are returned. To
@@ -1203,6 +1210,7 @@ StructuredQuery = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _STRUCTUREDQUERY,
         "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
         "__doc__": """A Firestore query.
+  
   Attributes:
       select:
           The projection to return.
@@ -1256,6 +1264,7 @@ Cursor = _reflection.GeneratedProtocolMessageType(
         "DESCRIPTOR": _CURSOR,
         "__module__": "google.cloud.firestore_v1beta1.proto.query_pb2",
         "__doc__": """A position in a query result set.
+  
   Attributes:
       values:
           The values that represent a position, in the order they appear
