@@ -29,7 +29,8 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1 import field_path as field_path_module
 from google.cloud.firestore_v1 import transforms
-from google.cloud.firestore_v1 import StructuredQuery
+from google.cloud.firestore_v1.types import StructuredQuery
+
 from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.order import Order
 from google.cloud.firestore_v1.watch import Watch

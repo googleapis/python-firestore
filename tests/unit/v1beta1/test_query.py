@@ -210,7 +210,8 @@ class TestQuery(unittest.TestCase):
             query.where("*", "==", 1)
 
     def test_where(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
@@ -250,7 +251,8 @@ class TestQuery(unittest.TestCase):
         self._compare_queries(query, new_query, "_field_filters")
 
     def test_where_eq_null(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
 
         op_enum = StructuredQuery.UnaryFilter.Operator.IS_NULL
         self._where_unary_helper(None, op_enum)
@@ -260,7 +262,8 @@ class TestQuery(unittest.TestCase):
             self._where_unary_helper(None, 0, op_string=">")
 
     def test_where_eq_nan(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
 
         op_enum = StructuredQuery.UnaryFilter.Operator.IS_NAN
         self._where_unary_helper(float("nan"), op_enum)
@@ -300,7 +303,8 @@ class TestQuery(unittest.TestCase):
             query.order_by("*")
 
     def test_order_by(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
 
         klass = self._get_target_class()
         query1 = self._make_one_all_fields(skip_fields=("orders",))
@@ -562,7 +566,8 @@ class TestQuery(unittest.TestCase):
         self.assertIsNone(query._filters_pb())
 
     def test__filters_pb_single(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
@@ -579,7 +584,8 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(filter_pb, expected_pb)
 
     def test__filters_pb_multi(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
@@ -813,7 +819,8 @@ class TestQuery(unittest.TestCase):
 
     def test__to_protobuf_all_fields(self):
         from google.protobuf import wrappers_pb2
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
@@ -880,7 +887,8 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_where_only(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
@@ -905,7 +913,8 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_order_by_only(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import query
 
         parent = mock.Mock(id="fish", spec=["id"])
@@ -924,7 +933,8 @@ class TestQuery(unittest.TestCase):
 
     def test__to_protobuf_start_at_only(self):
         # NOTE: "only" is wrong since we must have ``order_by`` as well.
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
@@ -946,7 +956,8 @@ class TestQuery(unittest.TestCase):
 
     def test__to_protobuf_end_at_only(self):
         # NOTE: "only" is wrong since we must have ``order_by`` as well.
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
@@ -1364,7 +1375,8 @@ class Test__enum_from_op_string(unittest.TestCase):
         return _enum_from_op_string(op_string)
 
     def test_success(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
 
         op_class = StructuredQuery.FieldFilter.Operator
         self.assertEqual(self._call_fut("<"), op_class.LESS_THAN)
@@ -1405,7 +1417,8 @@ class Test__enum_from_direction(unittest.TestCase):
         return _enum_from_direction(direction)
 
     def test_success(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.query import Query
 
         dir_class = StructuredQuery.Direction
@@ -1429,7 +1442,8 @@ class Test__filter_pb(unittest.TestCase):
         return _filter_pb(field_or_unary)
 
     def test_unary(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import query
 
         unary_pb = query_pb2.StructuredQuery.UnaryFilter(
@@ -1441,7 +1455,8 @@ class Test__filter_pb(unittest.TestCase):
         self.assertEqual(filter_pb, expected_pb)
 
     def test_field(self):
-        from google.cloud.firestore_v1beta1 import StructuredQuery
+        from google.cloud.firestore_v1beta1.types import StructuredQuery
+
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
