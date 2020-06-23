@@ -442,7 +442,7 @@ class TestCollectionReference(unittest.TestCase):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1beta1.document import DocumentReference
-        from google.cloud.firestore_v1beta1.gapic.firestore_client import (
+        from google.cloud.firestore_v1beta1.service.firestore_client import (
             FirestoreClient,
         )
         from google.cloud.firestore_v1beta1.proto.document_pb2 import Document

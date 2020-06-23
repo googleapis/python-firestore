@@ -37,7 +37,6 @@ from google.cloud.firestore_v1beta1.transforms import DELETE_FIELD
 from google.cloud.firestore_v1beta1.transforms import SERVER_TIMESTAMP
 from google.cloud.firestore_v1beta1.document import DocumentReference
 from google.cloud.firestore_v1beta1.document import DocumentSnapshot
-from google.cloud.firestore_v1beta1.gapic import enums
 from google.cloud.firestore_v1beta1.query import Query
 from google.cloud.firestore_v1beta1.transaction import Transaction
 from google.cloud.firestore_v1beta1.transaction import transactional
@@ -135,7 +134,6 @@ __all__ = (
     "DELETE_FIELD",
     "DocumentReference",
     "DocumentSnapshot",
-    "enums",
     "ExistsOption",
     "GeoPoint",
     "LastUpdateOption",

@@ -41,7 +41,6 @@ from google.cloud.firestore_v1.transforms import Minimum
 from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.document import DocumentSnapshot
-from google.cloud.firestore_v1.gapic import enums
 from google.cloud.firestore_v1.query import Query
 from google.cloud.firestore_v1.transaction import Transaction
 from google.cloud.firestore_v1.transaction import transactional
@@ -103,7 +102,6 @@ __all__ = (
     "DELETE_FIELD",
     "DocumentReference",
     "DocumentSnapshot",
-    "enums",
     "ExistsOption",
     "GeoPoint",
     "Increment",

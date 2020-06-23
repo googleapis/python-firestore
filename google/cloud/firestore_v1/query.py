@@ -29,13 +29,13 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1 import field_path as field_path_module
 from google.cloud.firestore_v1 import transforms
-from google.cloud.firestore_v1.gapic import enums
+from google.cloud.firestore_v1 import StructuredQuery
 from google.cloud.firestore_v1.proto import query_pb2
 from google.cloud.firestore_v1.order import Order
 from google.cloud.firestore_v1.watch import Watch
 
 _EQ_OP = "=="
-_operator_enum = enums.StructuredQuery.FieldFilter.Operator
+_operator_enum = StructuredQuery.FieldFilter.Operator
 _COMPARISON_OPERATORS = {
     "<": _operator_enum.LESS_THAN,
     "<=": _operator_enum.LESS_THAN_OR_EQUAL,
@@ -256,14 +256,14 @@ class Query(object):
                 raise ValueError(_BAD_OP_NAN_NULL)
             filter_pb = query_pb2.StructuredQuery.UnaryFilter(
                 field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
-                op=enums.StructuredQuery.UnaryFilter.Operator.IS_NULL,
+                op=StructuredQuery.UnaryFilter.Operator.IS_NULL,
             )
         elif _isnan(value):
             if op_string != _EQ_OP:
                 raise ValueError(_BAD_OP_NAN_NULL)
             filter_pb = query_pb2.StructuredQuery.UnaryFilter(
                 field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
-                op=enums.StructuredQuery.UnaryFilter.Operator.IS_NAN,
+                op=StructuredQuery.UnaryFilter.Operator.IS_NAN,
             )
         elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
             raise ValueError(_INVALID_WHERE_TRANSFORM)
@@ -591,7 +591,7 @@ class Query(object):
             return _filter_pb(self._field_filters[0])
         else:
             composite_filter = query_pb2.StructuredQuery.CompositeFilter(
-                op=enums.StructuredQuery.CompositeFilter.Operator.AND,
+                op=StructuredQuery.CompositeFilter.Operator.AND,
                 filters=[_filter_pb(filter_) for filter_ in self._field_filters],
             )
             return query_pb2.StructuredQuery.Filter(composite_filter=composite_filter)
@@ -925,9 +925,9 @@ def _enum_from_direction(direction):
         return direction
 
     if direction == Query.ASCENDING:
-        return enums.StructuredQuery.Direction.ASCENDING
+        return StructuredQuery.Direction.ASCENDING
     elif direction == Query.DESCENDING:
-        return enums.StructuredQuery.Direction.DESCENDING
+        return StructuredQuery.Direction.DESCENDING
     else:
         msg = _BAD_DIR_STRING.format(direction, Query.ASCENDING, Query.DESCENDING)
         raise ValueError(msg)

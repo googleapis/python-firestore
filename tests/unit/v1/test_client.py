@@ -88,7 +88,7 @@ class TestClient(unittest.TestCase):
         self.assertEqual(client._target, "foo-firestore.googleapis.com")
 
     @mock.patch(
-        "google.cloud.firestore_v1.gapic.firestore_client.FirestoreClient",
+        "google.cloud.firestore_v1.service.firestore_client.FirestoreClient",
         autospec=True,
         return_value=mock.sentinel.firestore_api,
     )
@@ -109,12 +109,12 @@ class TestClient(unittest.TestCase):
         self.assertEqual(mock_client.call_count, 1)
 
     @mock.patch(
-        "google.cloud.firestore_v1.gapic.firestore_client.FirestoreClient",
+        "google.cloud.firestore_v1.service.firestore_client.FirestoreClient",
         autospec=True,
         return_value=mock.sentinel.firestore_api,
     )
     @mock.patch(
-        "google.cloud.firestore_v1.gapic.transports.firestore_grpc_transport.firestore_pb2_grpc.grpc.insecure_channel",
+        "google.cloud.firestore_v1.service.transports.firestore_grpc_transport.firestore_pb2_grpc.grpc.insecure_channel",
         autospec=True,
     )
     def test__firestore_api_property_with_emulator(

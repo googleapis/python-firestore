@@ -539,7 +539,7 @@ class TestDocumentReference(unittest.TestCase):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.collection import CollectionReference
-        from google.cloud.firestore_v1.gapic.firestore_client import FirestoreClient
+        from google.cloud.firestore_v1.service.firestore_client import FirestoreClient
 
         class _Iterator(Iterator):
             def __init__(self, pages):

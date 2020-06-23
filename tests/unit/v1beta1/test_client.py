@@ -64,7 +64,7 @@ class TestClient(unittest.TestCase):
         self.assertEqual(client._database, database)
 
     @mock.patch(
-        "google.cloud.firestore_v1beta1.gapic.firestore_client." "FirestoreClient",
+        "google.cloud.firestore_v1beta1.service.firestore_client." "FirestoreClient",
         autospec=True,
         return_value=mock.sentinel.firestore_api,
     )

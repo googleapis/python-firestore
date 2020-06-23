@@ -1516,9 +1516,9 @@ class Test_pbs_for_create(unittest.TestCase):
     @staticmethod
     def _make_write_w_transform(document_path, fields):
         from google.cloud.firestore_v1.proto import write_pb2
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1 import DocumentTransform
 
-        server_val = enums.DocumentTransform.FieldTransform.ServerValue
+        server_val = DocumentTransform.FieldTransform.ServerValue
         transforms = [
             write_pb2.DocumentTransform.FieldTransform(
                 field_path=field, set_to_server_value=server_val.REQUEST_TIME
@@ -1593,9 +1593,9 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
     @staticmethod
     def _make_write_w_transform(document_path, fields):
         from google.cloud.firestore_v1.proto import write_pb2
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1 import DocumentTransform
 
-        server_val = enums.DocumentTransform.FieldTransform.ServerValue
+        server_val = DocumentTransform.FieldTransform.ServerValue
         transforms = [
             write_pb2.DocumentTransform.FieldTransform(
                 field_path=field, set_to_server_value=server_val.REQUEST_TIME
@@ -1894,9 +1894,9 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
     @staticmethod
     def _make_write_w_transform(document_path, fields):
         from google.cloud.firestore_v1.proto import write_pb2
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1 import DocumentTransform
 
-        server_val = enums.DocumentTransform.FieldTransform.ServerValue
+        server_val = DocumentTransform.FieldTransform.ServerValue
         transforms = [
             write_pb2.DocumentTransform.FieldTransform(
                 field_path=field, set_to_server_value=server_val.REQUEST_TIME
@@ -2092,7 +2092,7 @@ class Test_pbs_for_update(unittest.TestCase):
         from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.field_path import FieldPath
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1 import DocumentTransform
         from google.cloud.firestore_v1.proto import common_pb2
         from google.cloud.firestore_v1.proto import document_pb2
         from google.cloud.firestore_v1.proto import write_pb2
@@ -2125,7 +2125,7 @@ class Test_pbs_for_update(unittest.TestCase):
         expected_pbs = [expected_update_pb]
         if do_transform:
             transform_paths = FieldPath.from_string(field_path2)
-            server_val = enums.DocumentTransform.FieldTransform.ServerValue
+            server_val = DocumentTransform.FieldTransform.ServerValue
             expected_transform_pb = write_pb2.Write(
                 transform=write_pb2.DocumentTransform(
                     document=document_path,

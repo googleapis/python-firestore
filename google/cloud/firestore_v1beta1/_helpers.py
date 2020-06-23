@@ -28,7 +28,7 @@ from google.cloud.firestore_v1beta1 import transforms
 from google.cloud.firestore_v1beta1 import types
 from google.cloud.firestore_v1beta1.field_path import FieldPath
 from google.cloud.firestore_v1beta1.field_path import parse_field_path
-from google.cloud.firestore_v1beta1.gapic import enums
+from google.cloud.firestore_v1beta1 import DocumentTransform
 from google.cloud.firestore_v1beta1.proto import common_pb2
 from google.cloud.firestore_v1beta1.proto import document_pb2
 from google.cloud.firestore_v1beta1.proto import write_pb2
@@ -46,7 +46,7 @@ BAD_REFERENCE_ERROR = (
 WRONG_APP_REFERENCE = (
     "Document {!r} does not correspond to the same database " "({!r}) as the client."
 )
-REQUEST_TIME_ENUM = enums.DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME
+REQUEST_TIME_ENUM = DocumentTransform.FieldTransform.ServerValue.REQUEST_TIME
 _GRPC_ERROR_MAPPING = {
     grpc.StatusCode.ALREADY_EXISTS: exceptions.Conflict,
     grpc.StatusCode.NOT_FOUND: exceptions.NotFound,

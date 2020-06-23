@@ -20,7 +20,6 @@ import sys
 import warnings
 
 from google.cloud.firestore_admin_v1 import types
-from google.cloud.firestore_admin_v1.service import enums
 from google.cloud.firestore_admin_v1.gapic import firestore_admin_client
 
 
@@ -35,7 +34,6 @@ if sys.version_info[:2] == (2, 7):
 
 class FirestoreAdminClient(firestore_admin_client.FirestoreAdminClient):
     __doc__ = firestore_admin_client.FirestoreAdminClient.__doc__
-    enums = enums
 
 
-__all__ = ("enums", "types", "FirestoreAdminClient")
+__all__ = ("types", "FirestoreAdminClient")
