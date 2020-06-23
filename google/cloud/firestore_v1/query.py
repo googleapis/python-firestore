@@ -30,7 +30,7 @@ from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1 import field_path as field_path_module
 from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1 import StructuredQuery
-from google.cloud.firestore_v1.proto import query_pb2
+from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.order import Order
 from google.cloud.firestore_v1.watch import Watch
 
@@ -766,7 +766,12 @@ class Query(object):
         """
         parent_path, expected_prefix = self._parent._parent_info()
         response_iterator = self._client._firestore_api.run_query(
-            request = {'parent': parent_path, 'structured_query': self._to_protobuf(), 'transaction': _helpers.get_transaction_id(transaction)}, metadata=self._client._rpc_metadata,
+            request={
+                "parent": parent_path,
+                "structured_query": self._to_protobuf(),
+                "transaction": _helpers.get_transaction_id(transaction),
+            },
+            metadata=self._client._rpc_metadata,
         )
 
         for response in response_iterator:

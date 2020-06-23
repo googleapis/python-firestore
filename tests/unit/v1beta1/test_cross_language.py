@@ -21,10 +21,10 @@ import mock
 import pytest
 
 from google.protobuf import text_format
-from google.cloud.firestore_v1beta1.proto import document_pb2
-from google.cloud.firestore_v1beta1.proto import firestore_pb2
-from google.cloud.firestore_v1beta1.proto import test_v1beta1_pb2
-from google.cloud.firestore_v1beta1.proto import write_pb2
+from google.cloud.firestore_v1beta1.proto import document
+from google.cloud.firestore_v1beta1.proto import firestore
+from google.cloud.firestore_v1beta1.types import test_v1beta1
+from google.cloud.firestore_v1beta1.proto import write
 
 
 def _load_testproto(filename):
@@ -93,9 +93,7 @@ _QUERY_TESTPROTOS = [
 
 def _mock_firestore_api():
     firestore_api = mock.Mock(spec=["commit"])
-    commit_response = firestore_pb2.CommitResponse(
-        write_results=[write_pb2.WriteResult()]
-    )
+    commit_response = firestore.CommitResponse(write_results=[write.WriteResult()])
     firestore_api.commit.return_value = commit_response
     return firestore_api
 
@@ -147,7 +145,7 @@ def test_create_testprotos(test_proto):
 def test_get_testprotos(test_proto):
     testcase = test_proto.get
     firestore_api = mock.Mock(spec=["get_document"])
-    response = document_pb2.Document()
+    response = document.Document()
     firestore_api.get_document.return_value = response
     client, document = _make_client_document(firestore_api, testcase)
 
@@ -386,7 +384,7 @@ class DummyQuery(object):  # pragma: NO COVER
         self._comparator = lambda x, y: 1
 
     def _to_protobuf(self):
-        from google.cloud.firestore_v1beta1.proto import query_pb2
+        from google.cloud.firestore_v1beta1.types import query
 
         query_kwargs = {
             "select": None,
@@ -396,7 +394,7 @@ class DummyQuery(object):  # pragma: NO COVER
             "start_at": None,
             "end_at": None,
         }
-        return query_pb2.StructuredQuery(**query_kwargs)
+        return query.StructuredQuery(**query_kwargs)
 
 
 def parse_query(testcase):

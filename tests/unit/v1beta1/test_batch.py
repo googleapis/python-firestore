@@ -43,9 +43,9 @@ class TestWriteBatch(unittest.TestCase):
         self.assertEqual(batch._write_pbs, [mock.sentinel.write1, mock.sentinel.write2])
 
     def test_create(self):
-        from google.cloud.firestore_v1beta1.proto import common_pb2
-        from google.cloud.firestore_v1beta1.proto import document_pb2
-        from google.cloud.firestore_v1beta1.proto import write_pb2
+        from google.cloud.firestore_v1beta1.types import common
+        from google.cloud.firestore_v1beta1.types import document
+        from google.cloud.firestore_v1beta1.types import write
 
         client = _make_client()
         batch = self._make_one(client)
@@ -68,8 +68,8 @@ class TestWriteBatch(unittest.TestCase):
         self.assertEqual(batch._write_pbs, [new_write_pb])
 
     def test_set(self):
-        from google.cloud.firestore_v1beta1.proto import document_pb2
-        from google.cloud.firestore_v1beta1.proto import write_pb2
+        from google.cloud.firestore_v1beta1.types import document
+        from google.cloud.firestore_v1beta1.types import write
 
         client = _make_client()
         batch = self._make_one(client)
@@ -90,8 +90,8 @@ class TestWriteBatch(unittest.TestCase):
         self.assertEqual(batch._write_pbs, [new_write_pb])
 
     def test_set_merge(self):
-        from google.cloud.firestore_v1beta1.proto import document_pb2
-        from google.cloud.firestore_v1beta1.proto import write_pb2
+        from google.cloud.firestore_v1beta1.types import document
+        from google.cloud.firestore_v1beta1.types import write
 
         client = _make_client()
         batch = self._make_one(client)
@@ -113,9 +113,9 @@ class TestWriteBatch(unittest.TestCase):
         self.assertEqual(batch._write_pbs, [new_write_pb])
 
     def test_update(self):
-        from google.cloud.firestore_v1beta1.proto import common_pb2
-        from google.cloud.firestore_v1beta1.proto import document_pb2
-        from google.cloud.firestore_v1beta1.proto import write_pb2
+        from google.cloud.firestore_v1beta1.types import common
+        from google.cloud.firestore_v1beta1.types import document
+        from google.cloud.firestore_v1beta1.types import write
 
         client = _make_client()
         batch = self._make_one(client)
@@ -141,7 +141,7 @@ class TestWriteBatch(unittest.TestCase):
         self.assertEqual(batch._write_pbs, [new_write_pb])
 
     def test_delete(self):
-        from google.cloud.firestore_v1beta1.proto import write_pb2
+        from google.cloud.firestore_v1beta1.types import write
 
         client = _make_client()
         batch = self._make_one(client)
@@ -155,8 +155,8 @@ class TestWriteBatch(unittest.TestCase):
 
     def test_commit(self):
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1beta1.proto import firestore_pb2
-        from google.cloud.firestore_v1beta1.proto import write_pb2
+        from google.cloud.firestore_v1beta1.types import firestore
+        from google.cloud.firestore_v1beta1.types import write
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.Mock(spec=["commit"])
@@ -196,8 +196,8 @@ class TestWriteBatch(unittest.TestCase):
 
     def test_as_context_mgr_wo_error(self):
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1beta1.proto import firestore_pb2
-        from google.cloud.firestore_v1beta1.proto import write_pb2
+        from google.cloud.firestore_v1beta1.types import firestore
+        from google.cloud.firestore_v1beta1.types import write
 
         firestore_api = mock.Mock(spec=["commit"])
         timestamp = timestamp_pb2.Timestamp(seconds=1234567, nanos=123456798)

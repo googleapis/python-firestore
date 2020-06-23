@@ -32,9 +32,9 @@ from google.cloud.firestore_v1beta1.field_path import parse_field_path
 # from google.cloud.firestore_v1beta1 import DocumentTransform
 from google.cloud.firestore_v1beta1.types.write import DocumentTransform
 
-from google.cloud.firestore_v1beta1.proto import common_pb2
-from google.cloud.firestore_v1beta1.proto import document_pb2
-from google.cloud.firestore_v1beta1.proto import write_pb2
+from google.cloud.firestore_v1beta1.types import common
+from google.cloud.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import write
 
 
 BAD_PATH_TEMPLATE = "A path element must be a string. Received {}, which is a {}."

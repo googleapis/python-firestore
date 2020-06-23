@@ -189,7 +189,7 @@ class TestCollectionReference(unittest.TestCase):
         self.assertEqual(expected_prefix, prefix)
 
     def test_add_auto_assigned(self):
-        from google.cloud.firestore_v1.proto import document_pb2
+        from google.cloud.firestore_v1.types import document
         from google.cloud.firestore_v1.document import DocumentReference
         from google.cloud.firestore_v1 import SERVER_TIMESTAMP
         from google.cloud.firestore_v1._helpers import pbs_for_create
@@ -242,9 +242,9 @@ class TestCollectionReference(unittest.TestCase):
 
     @staticmethod
     def _write_pb_for_create(document_path, document_data):
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import _helpers
 
         return write_pb2.Write(
@@ -309,7 +309,7 @@ class TestCollectionReference(unittest.TestCase):
 
     @staticmethod
     def _make_field_filter_pb(field_path, op_string, value):
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import query
         from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.query import _enum_from_op_string
 
@@ -338,7 +338,7 @@ class TestCollectionReference(unittest.TestCase):
 
     @staticmethod
     def _make_order_pb(field_path, direction):
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import query
         from google.cloud.firestore_v1.query import _enum_from_direction
 
         return query_pb2.StructuredQuery.Order(

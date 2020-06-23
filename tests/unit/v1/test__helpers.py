@@ -444,7 +444,7 @@ class Test_decode_value(unittest.TestCase):
         self.assertEqual(self._call_fut(value), geo_pt)
 
     def test_array(self):
-        from google.cloud.firestore_v1.proto import document_pb2
+        from google.cloud.firestore_v1.types import document
 
         sub_value1 = _value_pb(boolean_value=True)
         sub_value2 = _value_pb(double_value=14.1396484375)
@@ -460,7 +460,7 @@ class Test_decode_value(unittest.TestCase):
         self.assertEqual(self._call_fut(value), expected)
 
     def test_map(self):
-        from google.cloud.firestore_v1.proto import document_pb2
+        from google.cloud.firestore_v1.types import document
 
         sub_value1 = _value_pb(integer_value=187680)
         sub_value2 = _value_pb(string_value=u"how low can you go?")
@@ -476,7 +476,7 @@ class Test_decode_value(unittest.TestCase):
         self.assertEqual(self._call_fut(value), expected)
 
     def test_nested_map(self):
-        from google.cloud.firestore_v1.proto import document_pb2
+        from google.cloud.firestore_v1.types import document
 
         actual_value1 = 1009876
         actual_value2 = u"hey you guys"
@@ -612,7 +612,7 @@ class Test_get_doc_id(unittest.TestCase):
         )
 
     def test_success(self):
-        from google.cloud.firestore_v1.proto import document_pb2
+        from google.cloud.firestore_v1.types import document
 
         prefix = self._dummy_ref_string("sub-collection")
         actual_id = "this-is-the-one"
@@ -623,7 +623,7 @@ class Test_get_doc_id(unittest.TestCase):
         self.assertEqual(document_id, actual_id)
 
     def test_failure(self):
-        from google.cloud.firestore_v1.proto import document_pb2
+        from google.cloud.firestore_v1.types import document
 
         actual_prefix = self._dummy_ref_string("the-right-one")
         wrong_prefix = self._dummy_ref_string("the-wrong-one")
@@ -1225,7 +1225,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(inst.has_transforms)
 
     def test_get_update_pb_w_exists_precondition(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
 
         document_data = {}
         inst = self._make_one(document_data)
@@ -1242,7 +1242,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(update_pb.current_document.exists)
 
     def test_get_update_pb_wo_exists_precondition(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1._helpers import encode_dict
 
         document_data = {"a": 1}
@@ -1259,7 +1259,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(update_pb.HasField("current_document"))
 
     def test_get_transform_pb_w_server_timestamp_w_exists_precondition(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
         from google.cloud.firestore_v1._helpers import REQUEST_TIME_ENUM
 
@@ -1282,7 +1282,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(transform_pb.current_document.exists)
 
     def test_get_transform_pb_w_server_timestamp_wo_exists_precondition(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
         from google.cloud.firestore_v1._helpers import REQUEST_TIME_ENUM
 
@@ -1310,7 +1310,7 @@ class TestDocumentExtractor(unittest.TestCase):
         return [decode_value(element, client=None) for element in array_value.values]
 
     def test_get_transform_pb_w_array_remove(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import ArrayRemove
 
         values = [2, 4, 8]
@@ -1333,7 +1333,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(transform_pb.HasField("current_document"))
 
     def test_get_transform_pb_w_array_union(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import ArrayUnion
 
         values = [1, 3, 5]
@@ -1356,7 +1356,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(transform_pb.HasField("current_document"))
 
     def test_get_transform_pb_w_increment_int(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import Increment
 
         value = 1
@@ -1379,7 +1379,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(transform_pb.HasField("current_document"))
 
     def test_get_transform_pb_w_increment_float(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import Increment
 
         value = 3.1415926
@@ -1402,7 +1402,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(transform_pb.HasField("current_document"))
 
     def test_get_transform_pb_w_maximum_int(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import Maximum
 
         value = 1
@@ -1425,7 +1425,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(transform_pb.HasField("current_document"))
 
     def test_get_transform_pb_w_maximum_float(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import Maximum
 
         value = 3.1415926
@@ -1448,7 +1448,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(transform_pb.HasField("current_document"))
 
     def test_get_transform_pb_w_minimum_int(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import Minimum
 
         value = 1
@@ -1471,7 +1471,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(transform_pb.HasField("current_document"))
 
     def test_get_transform_pb_w_minimum_float(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import Minimum
 
         value = 3.1415926
@@ -1503,10 +1503,10 @@ class Test_pbs_for_create(unittest.TestCase):
 
     @staticmethod
     def _make_write_w_document(document_path, **data):
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1._helpers import encode_dict
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         return write_pb2.Write(
             update=document_pb2.Document(name=document_path, fields=encode_dict(data)),
@@ -1515,7 +1515,7 @@ class Test_pbs_for_create(unittest.TestCase):
 
     @staticmethod
     def _make_write_w_transform(document_path, fields):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
@@ -1582,8 +1582,8 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
 
     @staticmethod
     def _make_write_w_document(document_path, **data):
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1._helpers import encode_dict
 
         return write_pb2.Write(
@@ -1592,7 +1592,7 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
 
     @staticmethod
     def _make_write_w_transform(document_path, fields):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
@@ -1883,8 +1883,8 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
 
     @staticmethod
     def _make_write_w_document(document_path, **data):
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1._helpers import encode_dict
 
         return write_pb2.Write(
@@ -1893,7 +1893,7 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
 
     @staticmethod
     def _make_write_w_transform(document_path, fields):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
@@ -1912,7 +1912,7 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
 
     @staticmethod
     def _update_document_mask(update_pb, field_paths):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         update_pb.update_mask.CopyFrom(
             common_pb2.DocumentMask(field_paths=sorted(field_paths))
@@ -2093,9 +2093,9 @@ class Test_pbs_for_update(unittest.TestCase):
         from google.cloud.firestore_v1.field_path import FieldPath
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
         from google.cloud.firestore_v1 import DocumentTransform
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
 
         document_path = _make_ref_string(u"toy", u"car", u"onion", u"garlic")
         field_path1 = "bitez.yum"
@@ -2141,7 +2141,7 @@ class Test_pbs_for_update(unittest.TestCase):
         self.assertEqual(write_pbs, expected_pbs)
 
     def test_without_option(self):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         precondition = common_pb2.Precondition(exists=True)
         self._helper(current_document=precondition)
@@ -2153,7 +2153,7 @@ class Test_pbs_for_update(unittest.TestCase):
         self._helper(option=option)
 
     def test_update_and_transform(self):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         precondition = common_pb2.Precondition(exists=True)
         self._helper(current_document=precondition, do_transform=True)
@@ -2167,7 +2167,7 @@ class Test_pb_for_delete(unittest.TestCase):
         return pb_for_delete(document_path, option)
 
     def _helper(self, option=None, **write_kwargs):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
 
         document_path = _make_ref_string(u"chicken", u"philly", u"one", u"two")
         write_pb = self._call_fut(document_path, option)
@@ -2180,7 +2180,7 @@ class Test_pb_for_delete(unittest.TestCase):
 
     def test_with_option(self):
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1 import _helpers
 
         update_time = timestamp_pb2.Timestamp(seconds=1309700594, nanos=822211297)
@@ -2304,8 +2304,8 @@ class TestLastUpdateOption(unittest.TestCase):
 
     def test_modify_write_update_time(self):
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import write
 
         timestamp_pb = timestamp_pb2.Timestamp(seconds=683893592, nanos=229362000)
         option = self._make_one(timestamp_pb)
@@ -2348,8 +2348,8 @@ class TestExistsOption(unittest.TestCase):
         self.assertTrue(option == other)
 
     def test_modify_write(self):
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import write
 
         for exists in (True, False):
             option = self._make_one(exists)

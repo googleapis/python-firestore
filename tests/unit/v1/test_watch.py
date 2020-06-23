@@ -15,7 +15,7 @@
 import datetime
 import unittest
 import mock
-from google.cloud.firestore_v1.proto import firestore_pb2
+from google.cloud.firestore_v1.types import firestore
 
 
 class TestWatchDocTree(unittest.TestCase):
@@ -213,7 +213,7 @@ class TestWatch(unittest.TestCase):
         self.snapshotted = (docs, changes, read_time)
 
     def test_ctor(self):
-        from google.cloud.firestore_v1.proto import firestore_pb2
+        from google.cloud.firestore_v1.types import firestore
         from google.cloud.firestore_v1.watch import _should_recover
         from google.cloud.firestore_v1.watch import _should_terminate
 
@@ -223,7 +223,7 @@ class TestWatch(unittest.TestCase):
         self.assertIs(inst._rpc.start_rpc, inst._api.transport.listen)
         self.assertIs(inst._rpc.should_recover, _should_recover)
         self.assertIs(inst._rpc.should_terminate, _should_terminate)
-        self.assertIsInstance(inst._rpc.initial_request, firestore_pb2.ListenRequest)
+        self.assertIsInstance(inst._rpc.initial_request, firestore.ListenRequest)
         self.assertEqual(inst._rpc.metadata, DummyFirestore._rpc_metadata)
 
     def test__on_rpc_done(self):
@@ -292,7 +292,7 @@ class TestWatch(unittest.TestCase):
         parent = DummyCollection(client)
         modulename = "google.cloud.firestore_v1.watch"
         pb2 = DummyPb2()
-        with mock.patch("%s.firestore_pb2" % modulename, pb2):
+        with mock.patch("%s.firestore" % modulename, pb2):
             with mock.patch("%s.Watch.ResumableBidiRpc" % modulename, DummyRpc):
                 with mock.patch(
                     "%s.Watch.BackgroundConsumer" % modulename, DummyBackgroundConsumer
@@ -320,7 +320,7 @@ class TestWatch(unittest.TestCase):
         parent = DummyCollection(client, parent=grandparent)
         modulename = "google.cloud.firestore_v1.watch"
         pb2 = DummyPb2()
-        with mock.patch("%s.firestore_pb2" % modulename, pb2):
+        with mock.patch("%s.firestore" % modulename, pb2):
             with mock.patch("%s.Watch.ResumableBidiRpc" % modulename, DummyRpc):
                 with mock.patch(
                     "%s.Watch.BackgroundConsumer" % modulename, DummyBackgroundConsumer
@@ -366,7 +366,7 @@ class TestWatch(unittest.TestCase):
     def test_on_snapshot_target_add(self):
         inst = self._makeOne()
         proto = DummyProto()
-        proto.target_change.target_change_type = firestore_pb2.TargetChange.ADD
+        proto.target_change.target_change_type = firestore.TargetChange.ADD
         proto.target_change.target_ids = [1]  # not "Py"
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
@@ -376,7 +376,7 @@ class TestWatch(unittest.TestCase):
         inst = self._makeOne()
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore_pb2.TargetChange.REMOVE
+        target_change.target_change_type = firestore.TargetChange.REMOVE
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Error 1:  hi")
@@ -386,7 +386,7 @@ class TestWatch(unittest.TestCase):
         proto = DummyProto()
         target_change = proto.target_change
         target_change.cause = None
-        target_change.target_change_type = firestore_pb2.TargetChange.REMOVE
+        target_change.target_change_type = firestore.TargetChange.REMOVE
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Error 13:  internal error")
@@ -400,7 +400,7 @@ class TestWatch(unittest.TestCase):
         inst._reset_docs = reset
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore_pb2.TargetChange.RESET
+        target_change.target_change_type = firestore.TargetChange.RESET
         inst.on_snapshot(proto)
         self.assertTrue(inst._docs_reset)
 
@@ -409,7 +409,7 @@ class TestWatch(unittest.TestCase):
         inst.current = False
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore_pb2.TargetChange.CURRENT
+        target_change.target_change_type = firestore.TargetChange.CURRENT
         inst.on_snapshot(proto)
         self.assertTrue(inst.current)
 
@@ -964,7 +964,7 @@ class DummyChange(object):
         self.target_ids = []
         self.removed_target_ids = []
         self.read_time = 0
-        self.target_change_type = firestore_pb2.TargetChange.NO_CHANGE
+        self.target_change_type = firestore.TargetChange.NO_CHANGE
         self.resume_token = None
         self.cause = DummyCause()
 

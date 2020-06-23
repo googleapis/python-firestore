@@ -149,7 +149,11 @@ class Transaction(batch.WriteBatch):
             raise ValueError(msg)
 
         transaction_response = self._client._firestore_api.begin_transaction(
-            request = {'database': self._client._database_string, 'options': self._options_protobuf(retry_id)}, metadata=self._client._rpc_metadata,
+            request={
+                "database": self._client._database_string,
+                "options": self._options_protobuf(retry_id),
+            },
+            metadata=self._client._rpc_metadata,
         )
         self._id = transaction_response.transaction
 
@@ -173,7 +177,11 @@ class Transaction(batch.WriteBatch):
         try:
             # NOTE: The response is just ``google.protobuf.Empty``.
             self._client._firestore_api.rollback(
-                request = {'database': self._client._database_string, 'transaction': self._id}, metadata=self._client._rpc_metadata,
+                request={
+                    "database": self._client._database_string,
+                    "transaction": self._id,
+                },
+                metadata=self._client._rpc_metadata,
             )
         finally:
             self._clean_up()
@@ -401,7 +409,12 @@ def _commit_with_retry(client, write_pbs, transaction_id):
     while True:
         try:
             return client._firestore_api.commit(
-                request = {'database': client._database_string, 'writes': write_pbs, 'transaction': transaction_id}, metadata=client._rpc_metadata,
+                request={
+                    "database": client._database_string,
+                    "writes": write_pbs,
+                    "transaction": transaction_id,
+                },
+                metadata=client._rpc_metadata,
             )
         except exceptions.ServiceUnavailable:
             # Retry

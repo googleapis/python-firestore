@@ -65,7 +65,7 @@ class TestTransaction(unittest.TestCase):
         self.assertEqual(batch._write_pbs, [mock.sentinel.write])
 
     def test__options_protobuf_read_only(self):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         transaction = self._make_one(mock.sentinel.client, read_only=True)
         options_pb = transaction._options_protobuf(None)
@@ -91,7 +91,7 @@ class TestTransaction(unittest.TestCase):
         self.assertIsNone(options_pb)
 
     def test__options_protobuf_on_retry(self):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         transaction = self._make_one(mock.sentinel.client)
         retry_id = b"hocus-pocus"
@@ -116,7 +116,7 @@ class TestTransaction(unittest.TestCase):
 
     def test__begin(self):
         from google.cloud.firestore_v1.services import firestore_client
-        from google.cloud.firestore_v1.proto import firestore_pb2
+        from google.cloud.firestore_v1.types import firestore
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -242,8 +242,8 @@ class TestTransaction(unittest.TestCase):
 
     def test__commit(self):
         from google.cloud.firestore_v1.services import firestore_client
-        from google.cloud.firestore_v1.proto import firestore_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import firestore
+        from google.cloud.firestore_v1.types import write
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -418,7 +418,7 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.commit.assert_not_called()
 
     def test__pre_commit_retry_id_already_set_success(self):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         to_wrap = mock.Mock(return_value=mock.sentinel.result, spec=[])
         wrapped = self._make_one(to_wrap)
@@ -673,9 +673,9 @@ class Test_Transactional(unittest.TestCase):
 
     def test___call__success_second_attempt(self):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import firestore_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import firestore
+        from google.cloud.firestore_v1.types import write
 
         to_wrap = mock.Mock(return_value=mock.sentinel.result, spec=[])
         wrapped = self._make_one(to_wrap)
@@ -994,8 +994,8 @@ def _make_client(project="feral-tom-cat"):
 def _make_transaction(txn_id, **txn_kwargs):
     from google.protobuf import empty_pb2
     from google.cloud.firestore_v1.services import firestore_client
-    from google.cloud.firestore_v1.proto import firestore_pb2
-    from google.cloud.firestore_v1.proto import write_pb2
+    from google.cloud.firestore_v1.types import firestore
+    from google.cloud.firestore_v1.types import write
     from google.cloud.firestore_v1.transaction import Transaction
 
     # Create a fake GAPIC ...

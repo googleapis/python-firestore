@@ -195,9 +195,9 @@ class TestDocumentReference(unittest.TestCase):
 
     @staticmethod
     def _write_pb_for_create(document_path, document_data):
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import _helpers
 
         return write_pb2.Write(
@@ -209,7 +209,7 @@ class TestDocumentReference(unittest.TestCase):
 
     @staticmethod
     def _make_commit_repsonse(write_results=None):
-        from google.cloud.firestore_v1.proto import firestore_pb2
+        from google.cloud.firestore_v1.types import firestore
 
         response = mock.create_autospec(firestore_pb2.CommitResponse)
         response.write_results = write_results or [mock.sentinel.write_result]
@@ -268,9 +268,9 @@ class TestDocumentReference(unittest.TestCase):
 
     @staticmethod
     def _write_pb_for_set(document_path, document_data, merge):
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import _helpers
 
         write_pbs = write_pb2.Write(
@@ -325,9 +325,9 @@ class TestDocumentReference(unittest.TestCase):
 
     @staticmethod
     def _write_pb_for_update(document_path, update_values, field_paths):
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import _helpers
 
         return write_pb2.Write(
@@ -411,7 +411,7 @@ class TestDocumentReference(unittest.TestCase):
             document.update(field_updates)
 
     def _delete_helper(self, **option_kwargs):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
 
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock(spec=["commit"])
@@ -453,8 +453,8 @@ class TestDocumentReference(unittest.TestCase):
 
     def _get_helper(self, field_paths=None, use_transaction=False, not_found=False):
         from google.api_core.exceptions import NotFound
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
         from google.cloud.firestore_v1.transaction import Transaction
 
         # Create a minimal fake GAPIC with a dummy response.
@@ -788,7 +788,7 @@ class Test__first_write_result(unittest.TestCase):
 
     def test_success(self):
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
 
         single_result = write_pb2.WriteResult(
             update_time=timestamp_pb2.Timestamp(seconds=1368767504, nanos=458000123)
@@ -803,7 +803,7 @@ class Test__first_write_result(unittest.TestCase):
             self._call_fut(write_results)
 
     def test_more_than_one(self):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
 
         result1 = write_pb2.WriteResult()
         result2 = write_pb2.WriteResult()

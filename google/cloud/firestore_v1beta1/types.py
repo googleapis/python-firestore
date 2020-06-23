@@ -26,11 +26,11 @@ from google.rpc import status_pb2
 from google.type import latlng_pb2
 
 from google.api_core.protobuf_helpers import get_messages
-from google.cloud.firestore_v1beta1.proto import common_pb2
-from google.cloud.firestore_v1beta1.proto import document_pb2
-from google.cloud.firestore_v1beta1.proto import firestore_pb2
-from google.cloud.firestore_v1beta1.proto import query_pb2
-from google.cloud.firestore_v1beta1.proto import write_pb2
+from google.cloud.firestore_v1beta1.types import common
+from google.cloud.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import firestore
+from google.cloud.firestore_v1beta1.types import query
+from google.cloud.firestore_v1beta1.types import write
 
 
 _shared_modules = [
@@ -45,7 +45,7 @@ _shared_modules = [
     latlng_pb2,
 ]
 
-_local_modules = [common_pb2, document_pb2, firestore_pb2, query_pb2, write_pb2]
+_local_modules = [common, document, firestore, query, write]
 
 names = []
 

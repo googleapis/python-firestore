@@ -319,7 +319,7 @@ class TestClient(unittest.TestCase):
         return client, document1, document2, response1, response2
 
     def test_get_all(self):
-        from google.cloud.firestore_v1beta1.proto import common_pb2
+        from google.cloud.firestore_v1beta1.types import common
         from google.cloud.firestore_v1beta1.document import DocumentSnapshot
 
         data1 = {"a": u"cheese"}
@@ -561,7 +561,7 @@ class Test__parse_batch_get(unittest.TestCase):
         )
 
     def test_found(self):
-        from google.cloud.firestore_v1beta1.proto import document_pb2
+        from google.cloud.firestore_v1beta1.types import document
         from google.cloud._helpers import _datetime_to_pb_timestamp
         from google.cloud.firestore_v1beta1.document import DocumentSnapshot
 
@@ -626,7 +626,7 @@ class Test__get_doc_mask(unittest.TestCase):
         self.assertIsNone(self._call_fut(None))
 
     def test_paths(self):
-        from google.cloud.firestore_v1beta1.proto import common_pb2
+        from google.cloud.firestore_v1beta1.types import common
 
         field_paths = ["a.b", "c"]
         result = self._call_fut(field_paths)
@@ -641,13 +641,13 @@ def _make_credentials():
 
 
 def _make_batch_response(**kwargs):
-    from google.cloud.firestore_v1beta1.proto import firestore_pb2
+    from google.cloud.firestore_v1beta1.types import firestore
 
     return firestore_pb2.BatchGetDocumentsResponse(**kwargs)
 
 
 def _doc_get_info(ref_string, values):
-    from google.cloud.firestore_v1beta1.proto import document_pb2
+    from google.cloud.firestore_v1beta1.types import document
     from google.cloud._helpers import _datetime_to_pb_timestamp
     from google.cloud.firestore_v1beta1 import _helpers
 

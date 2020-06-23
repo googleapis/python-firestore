@@ -358,7 +358,13 @@ class Client(ClientWithProject):
         document_paths, reference_map = _reference_info(references)
         mask = _get_doc_mask(field_paths)
         response_iterator = self._firestore_api.batch_get_documents(
-            request = {'database': self._database_string, 'documents': document_paths, 'mask': mask, 'transaction': _helpers.get_transaction_id(transaction)}, metadata=self._rpc_metadata,
+            request={
+                "database": self._database_string,
+                "documents": document_paths,
+                "mask": mask,
+                "transaction": _helpers.get_transaction_id(transaction),
+            },
+            metadata=self._rpc_metadata,
         )
 
         for get_doc_response in response_iterator:
@@ -372,7 +378,7 @@ class Client(ClientWithProject):
                 iterator of subcollections of the current document.
         """
         iterator = self._firestore_api.list_collection_ids(
-            request = {'parent': self._database_string}, metadata=self._rpc_metadata
+            request={"parent": self._database_string}, metadata=self._rpc_metadata
         )
         iterator.client = self
         iterator.item_to_value = _item_to_collection_ref

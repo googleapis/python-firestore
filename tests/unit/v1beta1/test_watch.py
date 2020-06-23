@@ -1,7 +1,7 @@
 import datetime
 import unittest
 import mock
-from google.cloud.firestore_v1beta1.proto import firestore_pb2
+from google.cloud.firestore_v1beta1.types import firestore
 
 
 class TestWatchDocTree(unittest.TestCase):

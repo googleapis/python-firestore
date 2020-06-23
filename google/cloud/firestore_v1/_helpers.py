@@ -29,9 +29,9 @@ from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.field_path import parse_field_path
-from google.cloud.firestore_v1.proto import common_pb2
-from google.cloud.firestore_v1.proto import document_pb2
-from google.cloud.firestore_v1.proto import write_pb2
+from google.cloud.firestore_v1.types import common
+from google.cloud.firestore_v1.types import document
+from google.cloud.firestore_v1.types import write
 
 
 BAD_PATH_TEMPLATE = "A path element must be a string. Received {}, which is a {}."
@@ -153,48 +153,48 @@ def encode_value(value):
         TypeError: If the ``value`` is not one of the accepted types.
     """
     if value is None:
-        return document_pb2.Value(null_value=struct_pb2.NULL_VALUE)
+        return document.Value(null_value=struct_pb2.NULL_VALUE)
 
     # Must come before six.integer_types since ``bool`` is an integer subtype.
     if isinstance(value, bool):
-        return document_pb2.Value(boolean_value=value)
+        return document.Value(boolean_value=value)
 
     if isinstance(value, six.integer_types):
-        return document_pb2.Value(integer_value=value)
+        return document.Value(integer_value=value)
 
     if isinstance(value, float):
-        return document_pb2.Value(double_value=value)
+        return document.Value(double_value=value)
 
     if isinstance(value, DatetimeWithNanoseconds):
-        return document_pb2.Value(timestamp_value=value.timestamp_pb())
+        return document.Value(timestamp_value=value.timestamp_pb())
 
     if isinstance(value, datetime.datetime):
-        return document_pb2.Value(timestamp_value=_datetime_to_pb_timestamp(value))
+        return document.Value(timestamp_value=_datetime_to_pb_timestamp(value))
 
     if isinstance(value, six.text_type):
-        return document_pb2.Value(string_value=value)
+        return document.Value(string_value=value)
 
     if isinstance(value, six.binary_type):
-        return document_pb2.Value(bytes_value=value)
+        return document.Value(bytes_value=value)
 
     # NOTE: We avoid doing an isinstance() check for a Document
     #       here to avoid import cycles.
     document_path = getattr(value, "_document_path", None)
     if document_path is not None:
-        return document_pb2.Value(reference_value=document_path)
+        return document.Value(reference_value=document_path)
 
     if isinstance(value, GeoPoint):
-        return document_pb2.Value(geo_point_value=value.to_protobuf())
+        return document.Value(geo_point_value=value.to_protobuf())
 
     if isinstance(value, (list, tuple, set, frozenset)):
         value_list = tuple(encode_value(element) for element in value)
-        value_pb = document_pb2.ArrayValue(values=value_list)
-        return document_pb2.Value(array_value=value_pb)
+        value_pb = document.ArrayValue(values=value_list)
+        return document.Value(array_value=value_pb)
 
     if isinstance(value, dict):
         value_dict = encode_dict(value)
-        value_pb = document_pb2.MapValue(fields=value_dict)
-        return document_pb2.Value(map_value=value_pb)
+        value_pb = document.MapValue(fields=value_dict)
+        return document.Value(map_value=value_pb)
 
     raise TypeError(
         "Cannot convert to a Firestore Value", value, "Invalid type", type(value)
@@ -319,7 +319,7 @@ def get_doc_id(document_pb, expected_prefix):
 
     Args:
         document_pb (google.cloud.proto.firestore.v1.\
-            document_pb2.Document): A protobuf for a document that
+            document.Document): A protobuf for a document that
             was created in a ``CreateDocument`` RPC.
         expected_prefix (str): The expected collection prefix for the
             fully-qualified document name.
@@ -474,12 +474,12 @@ class DocumentExtractor(object):
     def get_update_pb(self, document_path, exists=None, allow_empty_mask=False):
 
         if exists is not None:
-            current_document = common_pb2.Precondition(exists=exists)
+            current_document = common.Precondition(exists=exists)
         else:
             current_document = None
 
-        update_pb = write_pb2.Write(
-            update=document_pb2.Document(
+        update_pb = write.Write(
+            update=document.Document(
                 name=document_path, fields=encode_dict(self.set_fields)
             ),
             update_mask=self._get_update_mask(allow_empty_mask),
@@ -491,13 +491,13 @@ class DocumentExtractor(object):
     def get_transform_pb(self, document_path, exists=None):
         def make_array_value(values):
             value_list = [encode_value(element) for element in values]
-            return document_pb2.ArrayValue(values=value_list)
+            return document.ArrayValue(values=value_list)
 
         path_field_transforms = (
             [
                 (
                     path,
-                    write_pb2.DocumentTransform.FieldTransform(
+                    write.DocumentTransform.FieldTransform(
                         field_path=path.to_api_repr(),
                         set_to_server_value=REQUEST_TIME_ENUM,
                     ),
@@ -507,7 +507,7 @@ class DocumentExtractor(object):
             + [
                 (
                     path,
-                    write_pb2.DocumentTransform.FieldTransform(
+                    write.DocumentTransform.FieldTransform(
                         field_path=path.to_api_repr(),
                         remove_all_from_array=make_array_value(values),
                     ),
@@ -517,7 +517,7 @@ class DocumentExtractor(object):
             + [
                 (
                     path,
-                    write_pb2.DocumentTransform.FieldTransform(
+                    write.DocumentTransform.FieldTransform(
                         field_path=path.to_api_repr(),
                         append_missing_elements=make_array_value(values),
                     ),
@@ -527,7 +527,7 @@ class DocumentExtractor(object):
             + [
                 (
                     path,
-                    write_pb2.DocumentTransform.FieldTransform(
+                    write.DocumentTransform.FieldTransform(
                         field_path=path.to_api_repr(), increment=encode_value(value)
                     ),
                 )
@@ -536,7 +536,7 @@ class DocumentExtractor(object):
             + [
                 (
                     path,
-                    write_pb2.DocumentTransform.FieldTransform(
+                    write.DocumentTransform.FieldTransform(
                         field_path=path.to_api_repr(), maximum=encode_value(value)
                     ),
                 )
@@ -545,7 +545,7 @@ class DocumentExtractor(object):
             + [
                 (
                     path,
-                    write_pb2.DocumentTransform.FieldTransform(
+                    write.DocumentTransform.FieldTransform(
                         field_path=path.to_api_repr(), minimum=encode_value(value)
                     ),
                 )
@@ -555,15 +555,13 @@ class DocumentExtractor(object):
         field_transforms = [
             transform for path, transform in sorted(path_field_transforms)
         ]
-        transform_pb = write_pb2.Write(
-            transform=write_pb2.DocumentTransform(
+        transform_pb = write.Write(
+            transform=write.DocumentTransform(
                 document=document_path, field_transforms=field_transforms
             )
         )
         if exists is not None:
-            transform_pb.current_document.CopyFrom(
-                common_pb2.Precondition(exists=exists)
-            )
+            transform_pb.current_document.CopyFrom(common.Precondition(exists=exists))
 
         return transform_pb
 
@@ -767,7 +765,7 @@ class DocumentExtractorForMerge(DocumentExtractor):
         ]
 
         if mask_paths or allow_empty_mask:
-            return common_pb2.DocumentMask(field_paths=mask_paths)
+            return common.DocumentMask(field_paths=mask_paths)
 
 
 def pbs_for_set_with_merge(document_path, document_data, merge):
@@ -837,7 +835,7 @@ class DocumentExtractorForUpdate(DocumentExtractor):
             if field_path not in self.transform_paths:
                 mask_paths.append(field_path.to_api_repr())
 
-        return common_pb2.DocumentMask(field_paths=mask_paths)
+        return common.DocumentMask(field_paths=mask_paths)
 
 
 def pbs_for_update(document_path, field_updates, option):
@@ -894,7 +892,7 @@ def pb_for_delete(document_path, option):
         google.cloud.firestore_v1.types.Write: A
         ``Write`` protobuf instance for the ``delete()``.
     """
-    write_pb = write_pb2.Write(delete=document_path)
+    write_pb = write.Write(delete=document_path)
     if option is not None:
         option.modify_write(write_pb)
 

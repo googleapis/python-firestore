@@ -143,7 +143,12 @@ class WriteBatch(object):
             ``update_time`` field.
         """
         commit_response = self._client._firestore_api.commit(
-            request = {'database': self._client._database_string, 'writes': self._write_pbs, 'transaction': None}, metadata=self._client._rpc_metadata,
+            request={
+                "database": self._client._database_string,
+                "writes": self._write_pbs,
+                "transaction": None,
+            },
+            metadata=self._client._rpc_metadata,
         )
 
         self._write_pbs = []
@@ -156,4 +161,4 @@ class WriteBatch(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type is None:
-            self.commit(request = {})
+            self.commit(request={})

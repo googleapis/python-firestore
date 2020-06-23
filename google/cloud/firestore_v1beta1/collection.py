@@ -20,7 +20,7 @@ import six
 
 from google.cloud.firestore_v1beta1 import _helpers
 from google.cloud.firestore_v1beta1 import query as query_mod
-from google.cloud.firestore_v1beta1.proto import document_pb2
+from google.cloud.firestore_v1beta1.types import document
 from google.cloud.firestore_v1beta1.watch import Watch
 from google.cloud.firestore_v1beta1 import document
 
@@ -163,7 +163,14 @@ class CollectionReference(object):
             document_pb = document_pb2.Document()
 
             created_document_pb = self._client._firestore_api.create_document(
-                request = {'parent': parent_path, 'collection_id': self.id, 'document': None, 'document_id': document_pb, 'mask': None}, metadata=self._client._rpc_metadata,
+                request={
+                    "parent": parent_path,
+                    "collection_id": self.id,
+                    "document": None,
+                    "document_id": document_pb,
+                    "mask": None,
+                },
+                metadata=self._client._rpc_metadata,
             )
 
             new_document_id = _helpers.get_doc_id(created_document_pb, expected_prefix)
@@ -192,7 +199,13 @@ class CollectionReference(object):
         parent, _ = self._parent_info()
 
         iterator = self._client._firestore_api.list_documents(
-            request = {'parent': parent, 'collection_id': self.id, 'page_size': page_size, 'page_token': True}, metadata=self._client._rpc_metadata,
+            request={
+                "parent": parent,
+                "collection_id": self.id,
+                "page_size": page_size,
+                "page_token": True,
+            },
+            metadata=self._client._rpc_metadata,
         )
         iterator.collection = self
         iterator.item_to_value = _item_to_document_ref
