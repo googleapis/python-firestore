@@ -84,18 +84,42 @@ class StructuredQuery(object):
 
             Attributes:
               OPERATOR_UNSPECIFIED (int): Unspecified. This value must not be used.
-              LESS_THAN (int): Less than. Requires that the field come first in ``order_by``.
-              LESS_THAN_OR_EQUAL (int): Less than or equal. Requires that the field come first in
-              ``order_by``.
-              GREATER_THAN (int): Greater than. Requires that the field come first in ``order_by``.
-              GREATER_THAN_OR_EQUAL (int): Greater than or equal. Requires that the field come first in
-              ``order_by``.
-              EQUAL (int): Equal.
-              ARRAY_CONTAINS (int): Contains. Requires that the field is an array.
-              IN (int): In. Requires that ``value`` is a non-empty ArrayValue with at most
-              10 values.
-              ARRAY_CONTAINS_ANY (int): Contains any. Requires that the field is an array and ``value`` is a
-              non-empty ArrayValue with at most 10 values.
+              LESS_THAN (int): The given ``field`` is less than the given ``value``.
+
+              Requires:
+
+              -  That ``field`` come first in ``order_by``.
+              LESS_THAN_OR_EQUAL (int): The given ``field`` is less than or equal to the given ``value``.
+
+              Requires:
+
+              -  That ``field`` come first in ``order_by``.
+              GREATER_THAN (int): The given ``field`` is greater than the given ``value``.
+
+              Requires:
+
+              -  That ``field`` come first in ``order_by``.
+              GREATER_THAN_OR_EQUAL (int): The given ``field`` is greater than or equal to the given ``value``.
+
+              Requires:
+
+              -  That ``field`` come first in ``order_by``.
+              EQUAL (int): The given ``field`` is equal to the given ``value``.
+              ARRAY_CONTAINS (int): The given ``field`` is an array that contains the given ``value``.
+              IN (int): The given ``field`` is equal to at least one value in the given
+              array.
+
+              Requires:
+
+              -  That ``value`` is a non-empty ``ArrayValue`` with at most 10 values.
+              -  No other ``IN``, ``ARRAY_CONTAINS_ANY``, or ``NOT_IN``.
+              ARRAY_CONTAINS_ANY (int): The given ``field`` is an array that contains any of the values in
+              the given array.
+
+              Requires:
+
+              -  That ``value`` is a non-empty ``ArrayValue`` with at most 10 values.
+              -  No other ``IN``, ``ARRAY_CONTAINS_ANY``, or ``NOT_IN``.
             """
 
             OPERATOR_UNSPECIFIED = 0
@@ -115,8 +139,8 @@ class StructuredQuery(object):
 
             Attributes:
               OPERATOR_UNSPECIFIED (int): Unspecified. This value must not be used.
-              IS_NAN (int): Test if a field is equal to NaN.
-              IS_NULL (int): Test if an expression evaluates to Null.
+              IS_NAN (int): The given ``field`` is equal to ``NaN``.
+              IS_NULL (int): The given ``field`` is equal to ``NULL``.
             """
 
             OPERATOR_UNSPECIFIED = 0

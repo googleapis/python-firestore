@@ -38,7 +38,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax="proto3",
     serialized_options=b"\n\027com.google.firestore.v1B\016FirestoreProtoP\001Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\242\002\004GCFS\252\002\031Google.Cloud.Firestore.V1\312\002\031Google\\Cloud\\Firestore\\V1",
     create_key=_descriptor._internal_create_key,
-    serialized_pb=b'\n/google/cloud/firestore_v1/proto/firestore.proto\x12\x13google.firestore.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a,google/cloud/firestore_v1/proto/common.proto\x1a.google/cloud/firestore_v1/proto/document.proto\x1a+google/cloud/firestore_v1/proto/query.proto\x1a+google/cloud/firestore_v1/proto/write.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto"\xb8\x01\n\x12GetDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x02 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x03 \x01(\x0cH\x00\x12/\n\tread_time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xa7\x02\n\x14ListDocumentsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t\x12\x10\n\x08order_by\x18\x06 \x01(\t\x12/\n\x04mask\x18\x07 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x08 \x01(\x0cH\x00\x12/\n\tread_time\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x14\n\x0cshow_missing\x18\x0c \x01(\x08\x42\x16\n\x14\x63onsistency_selector"b\n\x15ListDocumentsResponse\x12\x30\n\tdocuments\x18\x01 \x03(\x0b\x32\x1d.google.firestore.v1.Document\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\xc4\x01\n\x15\x43reateDocumentRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12\x34\n\x08\x64ocument\x18\x04 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x05 \x01(\x0b\x32!.google.firestore.v1.DocumentMask"\xf3\x01\n\x15UpdateDocumentRequest\x12\x34\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentB\x03\xe0\x41\x02\x12\x36\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12;\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32!.google.firestore.v1.Precondition"g\n\x15\x44\x65leteDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12;\n\x10\x63urrent_document\x18\x02 \x01(\x0b\x32!.google.firestore.v1.Precondition"\x99\x02\n\x18\x42\x61tchGetDocumentsRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tdocuments\x18\x02 \x03(\t\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x04 \x01(\x0cH\x00\x12\x42\n\x0fnew_transaction\x18\x05 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptionsH\x00\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xac\x01\n\x19\x42\x61tchGetDocumentsResponse\x12.\n\x05\x66ound\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentH\x00\x12\x11\n\x07missing\x18\x02 \x01(\tH\x00\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\n\x06result"j\n\x17\x42\x65ginTransactionRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x38\n\x07options\x18\x02 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptions"/\n\x18\x42\x65ginTransactionResponse\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c"g\n\rCommitRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12*\n\x06writes\x18\x02 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c"z\n\x0e\x43ommitResponse\x12\x37\n\rwrite_results\x18\x01 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"B\n\x0fRollbackRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x18\n\x0btransaction\x18\x02 \x01(\x0c\x42\x03\xe0\x41\x02"\x9a\x02\n\x0fRunQueryRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x12\x15\n\x0btransaction\x18\x05 \x01(\x0cH\x01\x12\x42\n\x0fnew_transaction\x18\x06 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptionsH\x01\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x42\x0c\n\nquery_typeB\x16\n\x14\x63onsistency_selector"\xa0\x01\n\x10RunQueryResponse\x12\x13\n\x0btransaction\x18\x02 \x01(\x0c\x12/\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.Document\x12-\n\tread_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0fskipped_results\x18\x04 \x01(\x05"\xe8\x01\n\x0cWriteRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tstream_id\x18\x02 \x01(\t\x12*\n\x06writes\x18\x03 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x14\n\x0cstream_token\x18\x04 \x01(\x0c\x12=\n\x06labels\x18\x05 \x03(\x0b\x32-.google.firestore.v1.WriteRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xa2\x01\n\rWriteResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x14\n\x0cstream_token\x18\x02 \x01(\x0c\x12\x37\n\rwrite_results\x18\x03 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"\xf2\x01\n\rListenRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x31\n\nadd_target\x18\x02 \x01(\x0b\x32\x1b.google.firestore.v1.TargetH\x00\x12\x17\n\rremove_target\x18\x03 \x01(\x05H\x00\x12>\n\x06labels\x18\x04 \x03(\x0b\x32..google.firestore.v1.ListenRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0f\n\rtarget_change"\xd5\x02\n\x0eListenResponse\x12:\n\rtarget_change\x18\x02 \x01(\x0b\x32!.google.firestore.v1.TargetChangeH\x00\x12>\n\x0f\x64ocument_change\x18\x03 \x01(\x0b\x32#.google.firestore.v1.DocumentChangeH\x00\x12>\n\x0f\x64ocument_delete\x18\x04 \x01(\x0b\x32#.google.firestore.v1.DocumentDeleteH\x00\x12>\n\x0f\x64ocument_remove\x18\x06 \x01(\x0b\x32#.google.firestore.v1.DocumentRemoveH\x00\x12\x36\n\x06\x66ilter\x18\x05 \x01(\x0b\x32$.google.firestore.v1.ExistenceFilterH\x00\x42\x0f\n\rresponse_type"\xa1\x03\n\x06Target\x12\x38\n\x05query\x18\x02 \x01(\x0b\x32\'.google.firestore.v1.Target.QueryTargetH\x00\x12@\n\tdocuments\x18\x03 \x01(\x0b\x32+.google.firestore.v1.Target.DocumentsTargetH\x00\x12\x16\n\x0cresume_token\x18\x04 \x01(\x0cH\x01\x12/\n\tread_time\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x12\x11\n\ttarget_id\x18\x05 \x01(\x05\x12\x0c\n\x04once\x18\x06 \x01(\x08\x1a$\n\x0f\x44ocumentsTarget\x12\x11\n\tdocuments\x18\x02 \x03(\t\x1am\n\x0bQueryTarget\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x42\x0c\n\nquery_typeB\r\n\x0btarget_typeB\r\n\x0bresume_type"\xaa\x02\n\x0cTargetChange\x12N\n\x12target_change_type\x18\x01 \x01(\x0e\x32\x32.google.firestore.v1.TargetChange.TargetChangeType\x12\x12\n\ntarget_ids\x18\x02 \x03(\x05\x12!\n\x05\x63\x61use\x18\x03 \x01(\x0b\x32\x12.google.rpc.Status\x12\x14\n\x0cresume_token\x18\x04 \x01(\x0c\x12-\n\tread_time\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"N\n\x10TargetChangeType\x12\r\n\tNO_CHANGE\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02\x12\x0b\n\x07\x43URRENT\x10\x03\x12\t\n\x05RESET\x10\x04"V\n\x18ListCollectionIdsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x02 \x01(\x05\x12\x12\n\npage_token\x18\x03 \x01(\t"L\n\x19ListCollectionIdsResponse\x12\x16\n\x0e\x63ollection_ids\x18\x01 \x03(\t\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t2\xd7\x13\n\tFirestore\x12\x8f\x01\n\x0bGetDocument\x12\'.google.firestore.v1.GetDocumentRequest\x1a\x1d.google.firestore.v1.Document"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1/{name=projects/*/databases/*/documents/*/**}\x12\xb2\x01\n\rListDocuments\x12).google.firestore.v1.ListDocumentsRequest\x1a*.google.firestore.v1.ListDocumentsResponse"J\x82\xd3\xe4\x93\x02\x44\x12\x42/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}\x12\xbf\x01\n\x0eUpdateDocument\x12*.google.firestore.v1.UpdateDocumentRequest\x1a\x1d.google.firestore.v1.Document"b\x82\xd3\xe4\x93\x02\x45\x32\x39/v1/{document.name=projects/*/databases/*/documents/*/**}:\x08\x64ocument\xda\x41\x14\x64ocument,update_mask\x12\x95\x01\n\x0e\x44\x65leteDocument\x12*.google.firestore.v1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty"?\x82\xd3\xe4\x93\x02\x32*0/v1/{name=projects/*/databases/*/documents/*/**}\xda\x41\x04name\x12\xb9\x01\n\x11\x42\x61tchGetDocuments\x12-.google.firestore.v1.BatchGetDocumentsRequest\x1a..google.firestore.v1.BatchGetDocumentsResponse"C\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:batchGet:\x01*0\x01\x12\xc7\x01\n\x10\x42\x65ginTransaction\x12,.google.firestore.v1.BeginTransactionRequest\x1a-.google.firestore.v1.BeginTransactionResponse"V\x82\xd3\xe4\x93\x02\x45"@/v1/{database=projects/*/databases/*}/documents:beginTransaction:\x01*\xda\x41\x08\x64\x61tabase\x12\xa6\x01\n\x06\x43ommit\x12".google.firestore.v1.CommitRequest\x1a#.google.firestore.v1.CommitResponse"S\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:commit:\x01*\xda\x41\x0f\x64\x61tabase,writes\x12\xa4\x01\n\x08Rollback\x12$.google.firestore.v1.RollbackRequest\x1a\x16.google.protobuf.Empty"Z\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:rollback:\x01*\xda\x41\x14\x64\x61tabase,transaction\x12\xdf\x01\n\x08RunQuery\x12$.google.firestore.v1.RunQueryRequest\x1a%.google.firestore.v1.RunQueryResponse"\x83\x01\x82\xd3\xe4\x93\x02}"6/v1/{parent=projects/*/databases/*/documents}:runQuery:\x01*Z@";/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\x01*0\x01\x12\x94\x01\n\x05Write\x12!.google.firestore.v1.WriteRequest\x1a".google.firestore.v1.WriteResponse"@\x82\xd3\xe4\x93\x02:"5/v1/{database=projects/*/databases/*}/documents:write:\x01*(\x01\x30\x01\x12\x98\x01\n\x06Listen\x12".google.firestore.v1.ListenRequest\x1a#.google.firestore.v1.ListenResponse"A\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:listen:\x01*(\x01\x30\x01\x12\x94\x02\n\x11ListCollectionIds\x12-.google.firestore.v1.ListCollectionIdsRequest\x1a..google.firestore.v1.ListCollectionIdsResponse"\x9f\x01\x82\xd3\xe4\x93\x02\x8f\x01"?/v1/{parent=projects/*/databases/*/documents}:listCollectionIds:\x01*ZI"D/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\x01*\xda\x41\x06parent\x12\xaf\x01\n\x0e\x43reateDocument\x12*.google.firestore.v1.CreateDocumentRequest\x1a\x1d.google.firestore.v1.Document"R\x82\xd3\xe4\x93\x02L"@/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\x08\x64ocument\x1av\xca\x41\x18\x66irestore.googleapis.com\xd2\x41Xhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastoreB\xa8\x01\n\x17\x63om.google.firestore.v1B\x0e\x46irestoreProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3',
+    serialized_pb=b'\n/google/cloud/firestore_v1/proto/firestore.proto\x12\x13google.firestore.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a,google/cloud/firestore_v1/proto/common.proto\x1a.google/cloud/firestore_v1/proto/document.proto\x1a+google/cloud/firestore_v1/proto/query.proto\x1a+google/cloud/firestore_v1/proto/write.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto"\xb8\x01\n\x12GetDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x02 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x03 \x01(\x0cH\x00\x12/\n\tread_time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xa7\x02\n\x14ListDocumentsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t\x12\x10\n\x08order_by\x18\x06 \x01(\t\x12/\n\x04mask\x18\x07 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x08 \x01(\x0cH\x00\x12/\n\tread_time\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x14\n\x0cshow_missing\x18\x0c \x01(\x08\x42\x16\n\x14\x63onsistency_selector"b\n\x15ListDocumentsResponse\x12\x30\n\tdocuments\x18\x01 \x03(\x0b\x32\x1d.google.firestore.v1.Document\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\xc4\x01\n\x15\x43reateDocumentRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12\x34\n\x08\x64ocument\x18\x04 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentB\x03\xe0\x41\x02\x12/\n\x04mask\x18\x05 \x01(\x0b\x32!.google.firestore.v1.DocumentMask"\xf3\x01\n\x15UpdateDocumentRequest\x12\x34\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentB\x03\xe0\x41\x02\x12\x36\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12;\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32!.google.firestore.v1.Precondition"g\n\x15\x44\x65leteDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12;\n\x10\x63urrent_document\x18\x02 \x01(\x0b\x32!.google.firestore.v1.Precondition"\x99\x02\n\x18\x42\x61tchGetDocumentsRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tdocuments\x18\x02 \x03(\t\x12/\n\x04mask\x18\x03 \x01(\x0b\x32!.google.firestore.v1.DocumentMask\x12\x15\n\x0btransaction\x18\x04 \x01(\x0cH\x00\x12\x42\n\x0fnew_transaction\x18\x05 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptionsH\x00\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xac\x01\n\x19\x42\x61tchGetDocumentsResponse\x12.\n\x05\x66ound\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.DocumentH\x00\x12\x11\n\x07missing\x18\x02 \x01(\tH\x00\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\n\x06result"j\n\x17\x42\x65ginTransactionRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x38\n\x07options\x18\x02 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptions"/\n\x18\x42\x65ginTransactionResponse\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c"g\n\rCommitRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12*\n\x06writes\x18\x02 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c"z\n\x0e\x43ommitResponse\x12\x37\n\rwrite_results\x18\x01 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"B\n\x0fRollbackRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x18\n\x0btransaction\x18\x02 \x01(\x0c\x42\x03\xe0\x41\x02"\x9a\x02\n\x0fRunQueryRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x12\x15\n\x0btransaction\x18\x05 \x01(\x0cH\x01\x12\x42\n\x0fnew_transaction\x18\x06 \x01(\x0b\x32\'.google.firestore.v1.TransactionOptionsH\x01\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x42\x0c\n\nquery_typeB\x16\n\x14\x63onsistency_selector"\xa0\x01\n\x10RunQueryResponse\x12\x13\n\x0btransaction\x18\x02 \x01(\x0c\x12/\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\x1d.google.firestore.v1.Document\x12-\n\tread_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0fskipped_results\x18\x04 \x01(\x05"\xbc\x01\n\x15PartitionQueryRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x12\x17\n\x0fpartition_count\x18\x03 \x01(\x03\x12\x12\n\npage_token\x18\x04 \x01(\t\x12\x11\n\tpage_size\x18\x05 \x01(\x05\x42\x0c\n\nquery_type"b\n\x16PartitionQueryResponse\x12/\n\npartitions\x18\x01 \x03(\x0b\x32\x1b.google.firestore.v1.Cursor\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\xe8\x01\n\x0cWriteRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tstream_id\x18\x02 \x01(\t\x12*\n\x06writes\x18\x03 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x14\n\x0cstream_token\x18\x04 \x01(\x0c\x12=\n\x06labels\x18\x05 \x03(\x0b\x32-.google.firestore.v1.WriteRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xa2\x01\n\rWriteResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x14\n\x0cstream_token\x18\x02 \x01(\x0c\x12\x37\n\rwrite_results\x18\x03 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"\xf2\x01\n\rListenRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x31\n\nadd_target\x18\x02 \x01(\x0b\x32\x1b.google.firestore.v1.TargetH\x00\x12\x17\n\rremove_target\x18\x03 \x01(\x05H\x00\x12>\n\x06labels\x18\x04 \x03(\x0b\x32..google.firestore.v1.ListenRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0f\n\rtarget_change"\xd5\x02\n\x0eListenResponse\x12:\n\rtarget_change\x18\x02 \x01(\x0b\x32!.google.firestore.v1.TargetChangeH\x00\x12>\n\x0f\x64ocument_change\x18\x03 \x01(\x0b\x32#.google.firestore.v1.DocumentChangeH\x00\x12>\n\x0f\x64ocument_delete\x18\x04 \x01(\x0b\x32#.google.firestore.v1.DocumentDeleteH\x00\x12>\n\x0f\x64ocument_remove\x18\x06 \x01(\x0b\x32#.google.firestore.v1.DocumentRemoveH\x00\x12\x36\n\x06\x66ilter\x18\x05 \x01(\x0b\x32$.google.firestore.v1.ExistenceFilterH\x00\x42\x0f\n\rresponse_type"\xa1\x03\n\x06Target\x12\x38\n\x05query\x18\x02 \x01(\x0b\x32\'.google.firestore.v1.Target.QueryTargetH\x00\x12@\n\tdocuments\x18\x03 \x01(\x0b\x32+.google.firestore.v1.Target.DocumentsTargetH\x00\x12\x16\n\x0cresume_token\x18\x04 \x01(\x0cH\x01\x12/\n\tread_time\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x12\x11\n\ttarget_id\x18\x05 \x01(\x05\x12\x0c\n\x04once\x18\x06 \x01(\x08\x1a$\n\x0f\x44ocumentsTarget\x12\x11\n\tdocuments\x18\x02 \x03(\t\x1am\n\x0bQueryTarget\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12@\n\x10structured_query\x18\x02 \x01(\x0b\x32$.google.firestore.v1.StructuredQueryH\x00\x42\x0c\n\nquery_typeB\r\n\x0btarget_typeB\r\n\x0bresume_type"\xaa\x02\n\x0cTargetChange\x12N\n\x12target_change_type\x18\x01 \x01(\x0e\x32\x32.google.firestore.v1.TargetChange.TargetChangeType\x12\x12\n\ntarget_ids\x18\x02 \x03(\x05\x12!\n\x05\x63\x61use\x18\x03 \x01(\x0b\x32\x12.google.rpc.Status\x12\x14\n\x0cresume_token\x18\x04 \x01(\x0c\x12-\n\tread_time\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"N\n\x10TargetChangeType\x12\r\n\tNO_CHANGE\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02\x12\x0b\n\x07\x43URRENT\x10\x03\x12\t\n\x05RESET\x10\x04"V\n\x18ListCollectionIdsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x02 \x01(\x05\x12\x12\n\npage_token\x18\x03 \x01(\t"L\n\x19ListCollectionIdsResponse\x12\x16\n\x0e\x63ollection_ids\x18\x01 \x03(\t\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\xc9\x01\n\x11\x42\x61tchWriteRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12*\n\x06writes\x18\x02 \x03(\x0b\x32\x1a.google.firestore.v1.Write\x12\x42\n\x06labels\x18\x03 \x03(\x0b\x32\x32.google.firestore.v1.BatchWriteRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"q\n\x12\x42\x61tchWriteResponse\x12\x37\n\rwrite_results\x18\x01 \x03(\x0b\x32 .google.firestore.v1.WriteResult\x12"\n\x06status\x18\x02 \x03(\x0b\x32\x12.google.rpc.Status2\xfd\x16\n\tFirestore\x12\x8f\x01\n\x0bGetDocument\x12\'.google.firestore.v1.GetDocumentRequest\x1a\x1d.google.firestore.v1.Document"8\x82\xd3\xe4\x93\x02\x32\x12\x30/v1/{name=projects/*/databases/*/documents/*/**}\x12\xb2\x01\n\rListDocuments\x12).google.firestore.v1.ListDocumentsRequest\x1a*.google.firestore.v1.ListDocumentsResponse"J\x82\xd3\xe4\x93\x02\x44\x12\x42/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}\x12\xbf\x01\n\x0eUpdateDocument\x12*.google.firestore.v1.UpdateDocumentRequest\x1a\x1d.google.firestore.v1.Document"b\x82\xd3\xe4\x93\x02\x45\x32\x39/v1/{document.name=projects/*/databases/*/documents/*/**}:\x08\x64ocument\xda\x41\x14\x64ocument,update_mask\x12\x95\x01\n\x0e\x44\x65leteDocument\x12*.google.firestore.v1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty"?\x82\xd3\xe4\x93\x02\x32*0/v1/{name=projects/*/databases/*/documents/*/**}\xda\x41\x04name\x12\xb9\x01\n\x11\x42\x61tchGetDocuments\x12-.google.firestore.v1.BatchGetDocumentsRequest\x1a..google.firestore.v1.BatchGetDocumentsResponse"C\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:batchGet:\x01*0\x01\x12\xc7\x01\n\x10\x42\x65ginTransaction\x12,.google.firestore.v1.BeginTransactionRequest\x1a-.google.firestore.v1.BeginTransactionResponse"V\x82\xd3\xe4\x93\x02\x45"@/v1/{database=projects/*/databases/*}/documents:beginTransaction:\x01*\xda\x41\x08\x64\x61tabase\x12\xa6\x01\n\x06\x43ommit\x12".google.firestore.v1.CommitRequest\x1a#.google.firestore.v1.CommitResponse"S\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:commit:\x01*\xda\x41\x0f\x64\x61tabase,writes\x12\xa4\x01\n\x08Rollback\x12$.google.firestore.v1.RollbackRequest\x1a\x16.google.protobuf.Empty"Z\x82\xd3\xe4\x93\x02="8/v1/{database=projects/*/databases/*}/documents:rollback:\x01*\xda\x41\x14\x64\x61tabase,transaction\x12\xdf\x01\n\x08RunQuery\x12$.google.firestore.v1.RunQueryRequest\x1a%.google.firestore.v1.RunQueryResponse"\x83\x01\x82\xd3\xe4\x93\x02}"6/v1/{parent=projects/*/databases/*/documents}:runQuery:\x01*Z@";/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\x01*0\x01\x12\xfc\x01\n\x0ePartitionQuery\x12*.google.firestore.v1.PartitionQueryRequest\x1a+.google.firestore.v1.PartitionQueryResponse"\x90\x01\x82\xd3\xe4\x93\x02\x89\x01"</v1/{parent=projects/*/databases/*/documents}:partitionQuery:\x01*ZF"A/v1/{parent=projects/*/databases/*/documents/*/**}:partitionQuery:\x01*\x12\x94\x01\n\x05Write\x12!.google.firestore.v1.WriteRequest\x1a".google.firestore.v1.WriteResponse"@\x82\xd3\xe4\x93\x02:"5/v1/{database=projects/*/databases/*}/documents:write:\x01*(\x01\x30\x01\x12\x98\x01\n\x06Listen\x12".google.firestore.v1.ListenRequest\x1a#.google.firestore.v1.ListenResponse"A\x82\xd3\xe4\x93\x02;"6/v1/{database=projects/*/databases/*}/documents:listen:\x01*(\x01\x30\x01\x12\x94\x02\n\x11ListCollectionIds\x12-.google.firestore.v1.ListCollectionIdsRequest\x1a..google.firestore.v1.ListCollectionIdsResponse"\x9f\x01\x82\xd3\xe4\x93\x02\x8f\x01"?/v1/{parent=projects/*/databases/*/documents}:listCollectionIds:\x01*ZI"D/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\x01*\xda\x41\x06parent\x12\xa4\x01\n\nBatchWrite\x12&.google.firestore.v1.BatchWriteRequest\x1a\'.google.firestore.v1.BatchWriteResponse"E\x82\xd3\xe4\x93\x02?":/v1/{database=projects/*/databases/*}/documents:batchWrite:\x01*\x12\xaf\x01\n\x0e\x43reateDocument\x12*.google.firestore.v1.CreateDocumentRequest\x1a\x1d.google.firestore.v1.Document"R\x82\xd3\xe4\x93\x02L"@/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\x08\x64ocument\x1av\xca\x41\x18\x66irestore.googleapis.com\xd2\x41Xhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastoreB\xa8\x01\n\x17\x63om.google.firestore.v1B\x0e\x46irestoreProtoP\x01Z<google.golang.org/genproto/googleapis/firestore/v1;firestore\xa2\x02\x04GCFS\xaa\x02\x19Google.Cloud.Firestore.V1\xca\x02\x19Google\\Cloud\\Firestore\\V1b\x06proto3',
     dependencies=[
         google_dot_api_dot_annotations__pb2.DESCRIPTOR,
         google_dot_api_dot_client__pb2.DESCRIPTOR,
@@ -104,8 +104,8 @@ _TARGETCHANGE_TARGETCHANGETYPE = _descriptor.EnumDescriptor(
     ],
     containing_type=None,
     serialized_options=None,
-    serialized_start=4557,
-    serialized_end=4635,
+    serialized_start=4848,
+    serialized_end=4926,
 )
 _sym_db.RegisterEnumDescriptor(_TARGETCHANGE_TARGETCHANGETYPE)
 
@@ -1538,6 +1538,192 @@ _RUNQUERYRESPONSE = _descriptor.Descriptor(
 )
 
 
+_PARTITIONQUERYREQUEST = _descriptor.Descriptor(
+    name="PartitionQueryRequest",
+    full_name="google.firestore.v1.PartitionQueryRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="parent",
+            full_name="google.firestore.v1.PartitionQueryRequest.parent",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="structured_query",
+            full_name="google.firestore.v1.PartitionQueryRequest.structured_query",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="partition_count",
+            full_name="google.firestore.v1.PartitionQueryRequest.partition_count",
+            index=2,
+            number=3,
+            type=3,
+            cpp_type=2,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="page_token",
+            full_name="google.firestore.v1.PartitionQueryRequest.page_token",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="page_size",
+            full_name="google.firestore.v1.PartitionQueryRequest.page_size",
+            index=4,
+            number=5,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="query_type",
+            full_name="google.firestore.v1.PartitionQueryRequest.query_type",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        )
+    ],
+    serialized_start=2928,
+    serialized_end=3116,
+)
+
+
+_PARTITIONQUERYRESPONSE = _descriptor.Descriptor(
+    name="PartitionQueryResponse",
+    full_name="google.firestore.v1.PartitionQueryResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="partitions",
+            full_name="google.firestore.v1.PartitionQueryResponse.partitions",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="next_page_token",
+            full_name="google.firestore.v1.PartitionQueryResponse.next_page_token",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3118,
+    serialized_end=3216,
+)
+
+
 _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
     name="LabelsEntry",
     full_name="google.firestore.v1.WriteRequest.LabelsEntry",
@@ -1593,8 +1779,8 @@ _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3115,
-    serialized_end=3160,
+    serialized_start=3406,
+    serialized_end=3451,
 )
 
 _WRITEREQUEST = _descriptor.Descriptor(
@@ -1709,8 +1895,8 @@ _WRITEREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=2928,
-    serialized_end=3160,
+    serialized_start=3219,
+    serialized_end=3451,
 )
 
 
@@ -1807,8 +1993,8 @@ _WRITERESPONSE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3163,
-    serialized_end=3325,
+    serialized_start=3454,
+    serialized_end=3616,
 )
 
 
@@ -1867,8 +2053,8 @@ _LISTENREQUEST_LABELSENTRY = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=3115,
-    serialized_end=3160,
+    serialized_start=3406,
+    serialized_end=3451,
 )
 
 _LISTENREQUEST = _descriptor.Descriptor(
@@ -1973,8 +2159,8 @@ _LISTENREQUEST = _descriptor.Descriptor(
             fields=[],
         )
     ],
-    serialized_start=3328,
-    serialized_end=3570,
+    serialized_start=3619,
+    serialized_end=3861,
 )
 
 
@@ -2099,8 +2285,8 @@ _LISTENRESPONSE = _descriptor.Descriptor(
             fields=[],
         )
     ],
-    serialized_start=3573,
-    serialized_end=3914,
+    serialized_start=3864,
+    serialized_end=4205,
 )
 
 
@@ -2140,8 +2326,8 @@ _TARGET_DOCUMENTSTARGET = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4157,
-    serialized_end=4193,
+    serialized_start=4448,
+    serialized_end=4484,
 )
 
 _TARGET_QUERYTARGET = _descriptor.Descriptor(
@@ -2208,8 +2394,8 @@ _TARGET_QUERYTARGET = _descriptor.Descriptor(
             fields=[],
         )
     ],
-    serialized_start=4195,
-    serialized_end=4304,
+    serialized_start=4486,
+    serialized_end=4595,
 )
 
 _TARGET = _descriptor.Descriptor(
@@ -2360,8 +2546,8 @@ _TARGET = _descriptor.Descriptor(
             fields=[],
         ),
     ],
-    serialized_start=3917,
-    serialized_end=4334,
+    serialized_start=4208,
+    serialized_end=4625,
 )
 
 
@@ -2477,8 +2663,8 @@ _TARGETCHANGE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4337,
-    serialized_end=4635,
+    serialized_start=4628,
+    serialized_end=4926,
 )
 
 
@@ -2556,8 +2742,8 @@ _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4637,
-    serialized_end=4723,
+    serialized_start=4928,
+    serialized_end=5014,
 )
 
 
@@ -2616,8 +2802,206 @@ _LISTCOLLECTIONIDSRESPONSE = _descriptor.Descriptor(
     syntax="proto3",
     extension_ranges=[],
     oneofs=[],
-    serialized_start=4725,
-    serialized_end=4801,
+    serialized_start=5016,
+    serialized_end=5092,
+)
+
+
+_BATCHWRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
+    name="LabelsEntry",
+    full_name="google.firestore.v1.BatchWriteRequest.LabelsEntry",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="key",
+            full_name="google.firestore.v1.BatchWriteRequest.LabelsEntry.key",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="value",
+            full_name="google.firestore.v1.BatchWriteRequest.LabelsEntry.value",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=b"8\001",
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3406,
+    serialized_end=3451,
+)
+
+_BATCHWRITEREQUEST = _descriptor.Descriptor(
+    name="BatchWriteRequest",
+    full_name="google.firestore.v1.BatchWriteRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="database",
+            full_name="google.firestore.v1.BatchWriteRequest.database",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="writes",
+            full_name="google.firestore.v1.BatchWriteRequest.writes",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="labels",
+            full_name="google.firestore.v1.BatchWriteRequest.labels",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_BATCHWRITEREQUEST_LABELSENTRY],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5095,
+    serialized_end=5296,
+)
+
+
+_BATCHWRITERESPONSE = _descriptor.Descriptor(
+    name="BatchWriteResponse",
+    full_name="google.firestore.v1.BatchWriteResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="write_results",
+            full_name="google.firestore.v1.BatchWriteResponse.write_results",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="status",
+            full_name="google.firestore.v1.BatchWriteResponse.status",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=5298,
+    serialized_end=5411,
 )
 
 _GETDOCUMENTREQUEST.fields_by_name[
@@ -2812,6 +3196,20 @@ _RUNQUERYRESPONSE.fields_by_name[
 _RUNQUERYRESPONSE.fields_by_name[
     "read_time"
 ].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_PARTITIONQUERYREQUEST.fields_by_name[
+    "structured_query"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1_dot_proto_dot_query__pb2._STRUCTUREDQUERY
+)
+_PARTITIONQUERYREQUEST.oneofs_by_name["query_type"].fields.append(
+    _PARTITIONQUERYREQUEST.fields_by_name["structured_query"]
+)
+_PARTITIONQUERYREQUEST.fields_by_name[
+    "structured_query"
+].containing_oneof = _PARTITIONQUERYREQUEST.oneofs_by_name["query_type"]
+_PARTITIONQUERYRESPONSE.fields_by_name[
+    "partitions"
+].message_type = google_dot_cloud_dot_firestore__v1_dot_proto_dot_query__pb2._CURSOR
 _WRITEREQUEST_LABELSENTRY.containing_type = _WRITEREQUEST
 _WRITEREQUEST.fields_by_name[
     "writes"
@@ -2935,6 +3333,21 @@ _TARGETCHANGE.fields_by_name[
     "read_time"
 ].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _TARGETCHANGE_TARGETCHANGETYPE.containing_type = _TARGETCHANGE
+_BATCHWRITEREQUEST_LABELSENTRY.containing_type = _BATCHWRITEREQUEST
+_BATCHWRITEREQUEST.fields_by_name[
+    "writes"
+].message_type = google_dot_cloud_dot_firestore__v1_dot_proto_dot_write__pb2._WRITE
+_BATCHWRITEREQUEST.fields_by_name[
+    "labels"
+].message_type = _BATCHWRITEREQUEST_LABELSENTRY
+_BATCHWRITERESPONSE.fields_by_name[
+    "write_results"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1_dot_proto_dot_write__pb2._WRITERESULT
+)
+_BATCHWRITERESPONSE.fields_by_name[
+    "status"
+].message_type = google_dot_rpc_dot_status__pb2._STATUS
 DESCRIPTOR.message_types_by_name["GetDocumentRequest"] = _GETDOCUMENTREQUEST
 DESCRIPTOR.message_types_by_name["ListDocumentsRequest"] = _LISTDOCUMENTSREQUEST
 DESCRIPTOR.message_types_by_name["ListDocumentsResponse"] = _LISTDOCUMENTSRESPONSE
@@ -2952,6 +3365,8 @@ DESCRIPTOR.message_types_by_name["CommitResponse"] = _COMMITRESPONSE
 DESCRIPTOR.message_types_by_name["RollbackRequest"] = _ROLLBACKREQUEST
 DESCRIPTOR.message_types_by_name["RunQueryRequest"] = _RUNQUERYREQUEST
 DESCRIPTOR.message_types_by_name["RunQueryResponse"] = _RUNQUERYRESPONSE
+DESCRIPTOR.message_types_by_name["PartitionQueryRequest"] = _PARTITIONQUERYREQUEST
+DESCRIPTOR.message_types_by_name["PartitionQueryResponse"] = _PARTITIONQUERYRESPONSE
 DESCRIPTOR.message_types_by_name["WriteRequest"] = _WRITEREQUEST
 DESCRIPTOR.message_types_by_name["WriteResponse"] = _WRITERESPONSE
 DESCRIPTOR.message_types_by_name["ListenRequest"] = _LISTENREQUEST
@@ -2962,6 +3377,8 @@ DESCRIPTOR.message_types_by_name["ListCollectionIdsRequest"] = _LISTCOLLECTIONID
 DESCRIPTOR.message_types_by_name[
     "ListCollectionIdsResponse"
 ] = _LISTCOLLECTIONIDSRESPONSE
+DESCRIPTOR.message_types_by_name["BatchWriteRequest"] = _BATCHWRITEREQUEST
+DESCRIPTOR.message_types_by_name["BatchWriteResponse"] = _BATCHWRITERESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
 GetDocumentRequest = _reflection.GeneratedProtocolMessageType(
@@ -2988,7 +3405,7 @@ GetDocumentRequest = _reflection.GeneratedProtocolMessageType(
           Reads the document in a transaction.
       read_time:
           Reads the version of the document at the given time. This may
-          not be older than 60 seconds.
+          not be older than 270 seconds.
   """,
         # @@protoc_insertion_point(class_scope:google.firestore.v1.GetDocumentRequest)
     },
@@ -3034,7 +3451,7 @@ ListDocumentsRequest = _reflection.GeneratedProtocolMessageType(
           Reads documents in a transaction.
       read_time:
           Reads documents as they were at the given time. This may not
-          be older than 60 seconds.
+          be older than 270 seconds.
       show_missing:
           If the list should show missing documents. A missing document
           is a document that does not exist but has sub-documents. These
@@ -3188,7 +3605,7 @@ BatchGetDocumentsRequest = _reflection.GeneratedProtocolMessageType(
           returned as the first response in the stream.
       read_time:
           Reads documents as they were at the given time. This may not
-          be older than 60 seconds.
+          be older than 270 seconds.
   """,
         # @@protoc_insertion_point(class_scope:google.firestore.v1.BatchGetDocumentsRequest)
     },
@@ -3364,7 +3781,7 @@ RunQueryRequest = _reflection.GeneratedProtocolMessageType(
           returned as the first response in the stream.
       read_time:
           Reads documents as they were at the given time. This may not
-          be older than 60 seconds.
+          be older than 270 seconds.
   """,
         # @@protoc_insertion_point(class_scope:google.firestore.v1.RunQueryRequest)
     },
@@ -3404,6 +3821,90 @@ RunQueryResponse = _reflection.GeneratedProtocolMessageType(
     },
 )
 _sym_db.RegisterMessage(RunQueryResponse)
+
+PartitionQueryRequest = _reflection.GeneratedProtocolMessageType(
+    "PartitionQueryRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PARTITIONQUERYREQUEST,
+        "__module__": "google.cloud.firestore_v1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.PartitionQuery][google.firestore.v1.Firesto
+  re.PartitionQuery].
+  Attributes:
+      parent:
+          Required. The parent resource name. In the format:
+          ``projects/{project_id}/databases/{database_id}/documents``.
+          Document resource names are not supported; only database
+          resource names can be specified.
+      query_type:
+          The query to partition.
+      structured_query:
+          A structured query. Filters, order bys, limits, offsets, and
+          start/end cursors are not supported.
+      partition_count:
+          The desired maximum number of partition points. The partitions
+          may be returned across multiple pages of results. The number
+          must be strictly positive. The actual number of partitions
+          returned may be fewer.  For example, this may be set to one
+          fewer than the number of parallel queries to be run, or in
+          running a data pipeline job, one fewer than the number of
+          workers or compute instances available.
+      page_token:
+          The ``next_page_token`` value returned from a previous call to
+          PartitionQuery that may be used to get an additional set of
+          results. There are no ordering guarantees between sets of
+          results. Thus, using multiple sets of results will require
+          merging the different result sets.  For example, two
+          subsequent calls using a page_token may return:  -  cursor B,
+          cursor M, cursor Q -  cursor A, cursor U, cursor W  To obtain
+          a complete result set ordered with respect to the results of
+          the query supplied to PartitionQuery, the results sets should
+          be merged: cursor A, cursor B, cursor M, cursor Q, cursor U,
+          cursor W
+      page_size:
+          The maximum number of partitions to return in this call,
+          subject to ``partition_count``.  For example, if
+          ``partition_count`` = 10 and ``page_size`` = 8, the first call
+          to PartitionQuery will return up to 8 partitions and a
+          ``next_page_token`` if more results exist. A second call to
+          PartitionQuery will return up to 2 partitions, to complete the
+          total of 10 specified in ``partition_count``.
+  """,
+        # @@protoc_insertion_point(class_scope:google.firestore.v1.PartitionQueryRequest)
+    },
+)
+_sym_db.RegisterMessage(PartitionQueryRequest)
+
+PartitionQueryResponse = _reflection.GeneratedProtocolMessageType(
+    "PartitionQueryResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _PARTITIONQUERYRESPONSE,
+        "__module__": "google.cloud.firestore_v1.proto.firestore_pb2",
+        "__doc__": """The response for [Firestore.PartitionQuery][google.firestore.v1.Firest
+  ore.PartitionQuery].
+  Attributes:
+      partitions:
+          Partition results. Each partition is a split point that can be
+          used by RunQuery as a starting or end point for the query
+          results. The RunQuery requests must be made with the same
+          query supplied to this PartitionQuery request. The partition
+          cursors will be ordered according to same ordering as the
+          results of the query supplied to PartitionQuery.  For example,
+          if a PartitionQuery request returns partition cursors A and B,
+          running the following three queries will return the entire
+          result set of the original query:  -  query, end_at A -
+          query, start_at A, end_at B -  query, start_at B
+      next_page_token:
+          A page token that may be used to request an additional set of
+          results, up to the number specified by ``partition_count`` in
+          the PartitionQuery request. If blank, there are no more
+          results.
+  """,
+        # @@protoc_insertion_point(class_scope:google.firestore.v1.PartitionQueryResponse)
+    },
+)
+_sym_db.RegisterMessage(PartitionQueryResponse)
 
 WriteRequest = _reflection.GeneratedProtocolMessageType(
     "WriteRequest",
@@ -3720,6 +4221,62 @@ ListCollectionIdsResponse = _reflection.GeneratedProtocolMessageType(
 )
 _sym_db.RegisterMessage(ListCollectionIdsResponse)
 
+BatchWriteRequest = _reflection.GeneratedProtocolMessageType(
+    "BatchWriteRequest",
+    (_message.Message,),
+    {
+        "LabelsEntry": _reflection.GeneratedProtocolMessageType(
+            "LabelsEntry",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _BATCHWRITEREQUEST_LABELSENTRY,
+                "__module__": "google.cloud.firestore_v1.proto.firestore_pb2"
+                # @@protoc_insertion_point(class_scope:google.firestore.v1.BatchWriteRequest.LabelsEntry)
+            },
+        ),
+        "DESCRIPTOR": _BATCHWRITEREQUEST,
+        "__module__": "google.cloud.firestore_v1.proto.firestore_pb2",
+        "__doc__": """The request for
+  [Firestore.BatchWrite][google.firestore.v1.Firestore.BatchWrite].
+  Attributes:
+      database:
+          Required. The database name. In the format:
+          ``projects/{project_id}/databases/{database_id}``.
+      writes:
+          The writes to apply.  Method does not apply writes atomically
+          and does not guarantee ordering. Each write succeeds or fails
+          independently. You cannot write to the same document more than
+          once per request.
+      labels:
+          Labels associated with this batch write.
+  """,
+        # @@protoc_insertion_point(class_scope:google.firestore.v1.BatchWriteRequest)
+    },
+)
+_sym_db.RegisterMessage(BatchWriteRequest)
+_sym_db.RegisterMessage(BatchWriteRequest.LabelsEntry)
+
+BatchWriteResponse = _reflection.GeneratedProtocolMessageType(
+    "BatchWriteResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BATCHWRITERESPONSE,
+        "__module__": "google.cloud.firestore_v1.proto.firestore_pb2",
+        "__doc__": """The response from
+  [Firestore.BatchWrite][google.firestore.v1.Firestore.BatchWrite].
+  Attributes:
+      write_results:
+          The result of applying the writes.  This i-th write result
+          corresponds to the i-th write in the request.
+      status:
+          The status of applying the writes.  This i-th write status
+          corresponds to the i-th write in the request.
+  """,
+        # @@protoc_insertion_point(class_scope:google.firestore.v1.BatchWriteResponse)
+    },
+)
+_sym_db.RegisterMessage(BatchWriteResponse)
+
 
 DESCRIPTOR._options = None
 _GETDOCUMENTREQUEST.fields_by_name["name"]._options = None
@@ -3736,11 +4293,14 @@ _COMMITREQUEST.fields_by_name["database"]._options = None
 _ROLLBACKREQUEST.fields_by_name["database"]._options = None
 _ROLLBACKREQUEST.fields_by_name["transaction"]._options = None
 _RUNQUERYREQUEST.fields_by_name["parent"]._options = None
+_PARTITIONQUERYREQUEST.fields_by_name["parent"]._options = None
 _WRITEREQUEST_LABELSENTRY._options = None
 _WRITEREQUEST.fields_by_name["database"]._options = None
 _LISTENREQUEST_LABELSENTRY._options = None
 _LISTENREQUEST.fields_by_name["database"]._options = None
 _LISTCOLLECTIONIDSREQUEST.fields_by_name["parent"]._options = None
+_BATCHWRITEREQUEST_LABELSENTRY._options = None
+_BATCHWRITEREQUEST.fields_by_name["database"]._options = None
 
 _FIRESTORE = _descriptor.ServiceDescriptor(
     name="Firestore",
@@ -3749,8 +4309,8 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
     index=0,
     serialized_options=b"\312A\030firestore.googleapis.com\322AXhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore",
     create_key=_descriptor._internal_create_key,
-    serialized_start=4804,
-    serialized_end=7323,
+    serialized_start=5414,
+    serialized_end=8355,
     methods=[
         _descriptor.MethodDescriptor(
             name="GetDocument",
@@ -3843,9 +4403,19 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
+            name="PartitionQuery",
+            full_name="google.firestore.v1.Firestore.PartitionQuery",
+            index=9,
+            containing_service=None,
+            input_type=_PARTITIONQUERYREQUEST,
+            output_type=_PARTITIONQUERYRESPONSE,
+            serialized_options=b'\202\323\344\223\002\211\001"</v1/{parent=projects/*/databases/*/documents}:partitionQuery:\001*ZF"A/v1/{parent=projects/*/databases/*/documents/*/**}:partitionQuery:\001*',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
             name="Write",
             full_name="google.firestore.v1.Firestore.Write",
-            index=9,
+            index=10,
             containing_service=None,
             input_type=_WRITEREQUEST,
             output_type=_WRITERESPONSE,
@@ -3855,7 +4425,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         _descriptor.MethodDescriptor(
             name="Listen",
             full_name="google.firestore.v1.Firestore.Listen",
-            index=10,
+            index=11,
             containing_service=None,
             input_type=_LISTENREQUEST,
             output_type=_LISTENRESPONSE,
@@ -3865,7 +4435,7 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
         _descriptor.MethodDescriptor(
             name="ListCollectionIds",
             full_name="google.firestore.v1.Firestore.ListCollectionIds",
-            index=11,
+            index=12,
             containing_service=None,
             input_type=_LISTCOLLECTIONIDSREQUEST,
             output_type=_LISTCOLLECTIONIDSRESPONSE,
@@ -3873,9 +4443,19 @@ _FIRESTORE = _descriptor.ServiceDescriptor(
             create_key=_descriptor._internal_create_key,
         ),
         _descriptor.MethodDescriptor(
+            name="BatchWrite",
+            full_name="google.firestore.v1.Firestore.BatchWrite",
+            index=13,
+            containing_service=None,
+            input_type=_BATCHWRITEREQUEST,
+            output_type=_BATCHWRITERESPONSE,
+            serialized_options=b'\202\323\344\223\002?":/v1/{database=projects/*/databases/*}/documents:batchWrite:\001*',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
             name="CreateDocument",
             full_name="google.firestore.v1.Firestore.CreateDocument",
-            index=12,
+            index=14,
             containing_service=None,
             input_type=_CREATEDOCUMENTREQUEST,
             output_type=google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2._DOCUMENT,

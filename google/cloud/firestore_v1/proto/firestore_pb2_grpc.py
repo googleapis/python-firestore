@@ -74,6 +74,11 @@ class FirestoreStub(object):
             request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.RunQueryRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.RunQueryResponse.FromString,
         )
+        self.PartitionQuery = channel.unary_unary(
+            "/google.firestore.v1.Firestore/PartitionQuery",
+            request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.PartitionQueryRequest.SerializeToString,
+            response_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.PartitionQueryResponse.FromString,
+        )
         self.Write = channel.stream_stream(
             "/google.firestore.v1.Firestore/Write",
             request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.WriteRequest.SerializeToString,
@@ -88,6 +93,11 @@ class FirestoreStub(object):
             "/google.firestore.v1.Firestore/ListCollectionIds",
             request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListCollectionIdsRequest.SerializeToString,
             response_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListCollectionIdsResponse.FromString,
+        )
+        self.BatchWrite = channel.unary_unary(
+            "/google.firestore.v1.Firestore/BatchWrite",
+            request_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.BatchWriteRequest.SerializeToString,
+            response_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.BatchWriteResponse.FromString,
         )
         self.CreateDocument = channel.unary_unary(
             "/google.firestore.v1.Firestore/CreateDocument",
@@ -175,6 +185,15 @@ class FirestoreServicer(object):
         context.set_details("Method not implemented!")
         raise NotImplementedError("Method not implemented!")
 
+    def PartitionQuery(self, request, context):
+        """Partitions a query by returning partition cursors that can be used to run
+    the query in parallel. The returned partition cursors are split points that
+    can be used by RunQuery as starting/end points for the query results.
+    """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
     def Write(self, request_iterator, context):
         """Streams batches of document updates and deletes, in order.
     """
@@ -191,6 +210,21 @@ class FirestoreServicer(object):
 
     def ListCollectionIds(self, request, context):
         """Lists all the collection IDs underneath a document.
+    """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details("Method not implemented!")
+        raise NotImplementedError("Method not implemented!")
+
+    def BatchWrite(self, request, context):
+        """Applies a batch of write operations.
+
+    The BatchWrite method does not apply the write operations atomically
+    and can apply them out of order. Method does not allow more than one write
+    per document. Each write succeeds or fails independently. See the
+    [BatchWriteResponse][google.firestore.v1.BatchWriteResponse] for the success status of each write.
+
+    If you require an atomically applied set of writes, use
+    [Commit][google.firestore.v1.Firestore.Commit] instead.
     """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details("Method not implemented!")
@@ -251,6 +285,11 @@ def add_FirestoreServicer_to_server(servicer, server):
             request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.RunQueryRequest.FromString,
             response_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.RunQueryResponse.SerializeToString,
         ),
+        "PartitionQuery": grpc.unary_unary_rpc_method_handler(
+            servicer.PartitionQuery,
+            request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.PartitionQueryRequest.FromString,
+            response_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.PartitionQueryResponse.SerializeToString,
+        ),
         "Write": grpc.stream_stream_rpc_method_handler(
             servicer.Write,
             request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.WriteRequest.FromString,
@@ -265,6 +304,11 @@ def add_FirestoreServicer_to_server(servicer, server):
             servicer.ListCollectionIds,
             request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListCollectionIdsRequest.FromString,
             response_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.ListCollectionIdsResponse.SerializeToString,
+        ),
+        "BatchWrite": grpc.unary_unary_rpc_method_handler(
+            servicer.BatchWrite,
+            request_deserializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.BatchWriteRequest.FromString,
+            response_serializer=google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.BatchWriteResponse.SerializeToString,
         ),
         "CreateDocument": grpc.unary_unary_rpc_method_handler(
             servicer.CreateDocument,
