@@ -360,8 +360,7 @@ Precondition = _reflection.GeneratedProtocolMessageType(
     {
         "DESCRIPTOR": _PRECONDITION,
         "__module__": "google.cloud.firestore_v1beta1.proto.common_pb2",
-        "__doc__": """A precondition on a document, used for conditional
-  operations.
+        "__doc__": """A precondition on a document, used for conditional operations.
   
   
   Attributes:
@@ -389,7 +388,8 @@ TransactionOptions = _reflection.GeneratedProtocolMessageType(
             {
                 "DESCRIPTOR": _TRANSACTIONOPTIONS_READWRITE,
                 "__module__": "google.cloud.firestore_v1beta1.proto.common_pb2",
-                "__doc__": """Options for a transaction that can be used to read and write documents.
+                "__doc__": """Options for a transaction that can be used to read and
+    write documents.
     
     
     Attributes:
