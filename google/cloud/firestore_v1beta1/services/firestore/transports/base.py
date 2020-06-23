@@ -67,7 +67,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def get_document(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.GetDocumentRequest],
         typing.Union[document.Document, typing.Awaitable[document.Document]],
@@ -76,7 +76,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def list_documents(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.ListDocumentsRequest],
         typing.Union[
@@ -88,7 +88,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def create_document(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.CreateDocumentRequest],
         typing.Union[document.Document, typing.Awaitable[document.Document]],
@@ -97,7 +97,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def update_document(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.UpdateDocumentRequest],
         typing.Union[gf_document.Document, typing.Awaitable[gf_document.Document]],
@@ -106,7 +106,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def delete_document(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.DeleteDocumentRequest],
         typing.Union[empty.Empty, typing.Awaitable[empty.Empty]],
@@ -115,7 +115,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def batch_get_documents(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.BatchGetDocumentsRequest],
         typing.Union[
@@ -127,7 +127,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def begin_transaction(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.BeginTransactionRequest],
         typing.Union[
@@ -139,7 +139,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def commit(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.CommitRequest],
         typing.Union[
@@ -150,7 +150,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def rollback(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.RollbackRequest],
         typing.Union[empty.Empty, typing.Awaitable[empty.Empty]],
@@ -159,7 +159,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def run_query(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.RunQueryRequest],
         typing.Union[
@@ -170,7 +170,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def write(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.WriteRequest],
         typing.Union[
@@ -181,7 +181,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def listen(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.ListenRequest],
         typing.Union[
@@ -192,7 +192,7 @@ class FirestoreTransport(abc.ABC):
 
     @property
     def list_collection_ids(
-        self
+        self,
     ) -> typing.Callable[
         [firestore.ListCollectionIdsRequest],
         typing.Union[

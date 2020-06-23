@@ -79,6 +79,22 @@ for version in admin_versions:
     s.move(library / "tests")
 
     s.replace(
+        f"tests/unit/gapic/*.py",
+        f"google.firestore",
+        f"google.cloud.firestore",
+    )
+    s.replace(
+        f"google/cloud/**/*.py",
+        f"google.firestore",
+        f"google.cloud.firestore",
+    )
+    s.replace(
+        f"docs/**/*.rst",
+        f"google.firestore",
+        f"google.cloud.firestore",
+    )
+
+    s.replace(
         f"google/cloud/firestore_admin_{version}/gapic/firestore_admin_client.py",
         "'google-cloud-firestore-admin'",
         "'google-cloud-firestore'",

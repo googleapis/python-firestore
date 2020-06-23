@@ -23,7 +23,7 @@ from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 
 __protobuf__ = proto.module(
     package="google.cloud.firestore.v1",
-    manifest={"DocumentMask", "Precondition", "TransactionOptions"},
+    manifest={"DocumentMask", "Precondition", "TransactionOptions",},
 )
 
 
@@ -58,7 +58,7 @@ class Precondition(proto.Message):
     """
 
     exists = proto.Field(proto.BOOL, number=1)
-    update_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp)
+    update_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp,)
 
 
 class TransactionOptions(proto.Message):
@@ -94,10 +94,10 @@ class TransactionOptions(proto.Message):
                 This may not be older than 60 seconds.
         """
 
-        read_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp)
+        read_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp,)
 
-    read_only = proto.Field(proto.MESSAGE, number=2, message=ReadOnly)
-    read_write = proto.Field(proto.MESSAGE, number=3, message=ReadWrite)
+    read_only = proto.Field(proto.MESSAGE, number=2, message=ReadOnly,)
+    read_write = proto.Field(proto.MESSAGE, number=3, message=ReadWrite,)
 
 
 __all__ = tuple(sorted(__protobuf__.manifest))

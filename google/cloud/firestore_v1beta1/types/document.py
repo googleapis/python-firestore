@@ -25,7 +25,7 @@ from google.type import latlng_pb2 as latlng  # type: ignore
 
 __protobuf__ = proto.module(
     package="google.cloud.firestore.v1beta1",
-    manifest={"Document", "Value", "ArrayValue", "MapValue"},
+    manifest={"Document", "Value", "ArrayValue", "MapValue",},
 )
 
 
@@ -81,9 +81,9 @@ class Document(proto.Message):
     """
 
     name = proto.Field(proto.STRING, number=1)
-    fields = proto.MapField(proto.STRING, proto.MESSAGE, number=2, message="Value")
-    create_time = proto.Field(proto.MESSAGE, number=3, message=timestamp.Timestamp)
-    update_time = proto.Field(proto.MESSAGE, number=4, message=timestamp.Timestamp)
+    fields = proto.MapField(proto.STRING, proto.MESSAGE, number=2, message="Value",)
+    create_time = proto.Field(proto.MESSAGE, number=3, message=timestamp.Timestamp,)
+    update_time = proto.Field(proto.MESSAGE, number=4, message=timestamp.Timestamp,)
 
 
 class Value(proto.Message):
@@ -128,17 +128,19 @@ class Value(proto.Message):
             A map value.
     """
 
-    null_value = proto.Field(proto.ENUM, number=11, enum=struct.NullValue)
+    null_value = proto.Field(proto.ENUM, number=11, enum=struct.NullValue,)
     boolean_value = proto.Field(proto.BOOL, number=1)
     integer_value = proto.Field(proto.INT64, number=2)
     double_value = proto.Field(proto.DOUBLE, number=3)
-    timestamp_value = proto.Field(proto.MESSAGE, number=10, message=timestamp.Timestamp)
+    timestamp_value = proto.Field(
+        proto.MESSAGE, number=10, message=timestamp.Timestamp,
+    )
     string_value = proto.Field(proto.STRING, number=17)
     bytes_value = proto.Field(proto.BYTES, number=18)
     reference_value = proto.Field(proto.STRING, number=5)
-    geo_point_value = proto.Field(proto.MESSAGE, number=8, message=latlng.LatLng)
-    array_value = proto.Field(proto.MESSAGE, number=9, message="ArrayValue")
-    map_value = proto.Field(proto.MESSAGE, number=6, message="MapValue")
+    geo_point_value = proto.Field(proto.MESSAGE, number=8, message=latlng.LatLng,)
+    array_value = proto.Field(proto.MESSAGE, number=9, message="ArrayValue",)
+    map_value = proto.Field(proto.MESSAGE, number=6, message="MapValue",)
 
 
 class ArrayValue(proto.Message):
@@ -149,7 +151,7 @@ class ArrayValue(proto.Message):
             Values in the array.
     """
 
-    values = proto.RepeatedField(proto.MESSAGE, number=1, message=Value)
+    values = proto.RepeatedField(proto.MESSAGE, number=1, message=Value,)
 
 
 class MapValue(proto.Message):
@@ -166,7 +168,7 @@ class MapValue(proto.Message):
             bytes and cannot be empty.
     """
 
-    fields = proto.MapField(proto.STRING, proto.MESSAGE, number=1, message=Value)
+    fields = proto.MapField(proto.STRING, proto.MESSAGE, number=1, message=Value,)
 
 
 __all__ = tuple(sorted(__protobuf__.manifest))

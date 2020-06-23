@@ -55,7 +55,7 @@ class FirestoreClientMeta(type):
     _transport_registry["grpc"] = FirestoreGrpcTransport
     _transport_registry["grpc_asyncio"] = FirestoreGrpcAsyncIOTransport
 
-    def get_transport_class(cls, label: str = None) -> Type[FirestoreTransport]:
+    def get_transport_class(cls, label: str = None,) -> Type[FirestoreTransport]:
         """Return an appropriate transport class.
 
         Args:
@@ -264,7 +264,9 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.get_document, default_timeout=None, client_info=_client_info
+            self._transport.get_document,
+            default_timeout=None,
+            client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -274,7 +276,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -328,12 +330,12 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # This method is paged; wrap the response in a pager, which provides
         # an `__iter__` convenience method.
         response = pagers.ListDocumentsPager(
-            method=rpc, request=request, response=response
+            method=rpc, request=request, response=response,
         )
 
         # Done; return the response.
@@ -385,7 +387,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -475,7 +477,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -541,7 +543,9 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        rpc(
+            request, retry=retry, timeout=timeout, metadata=metadata,
+        )
 
     def batch_get_documents(
         self,
@@ -591,7 +595,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -662,7 +666,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -731,7 +735,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.commit, default_timeout=None, client_info=_client_info
+            self._transport.commit, default_timeout=None, client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -741,7 +745,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -803,7 +807,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.rollback, default_timeout=None, client_info=_client_info
+            self._transport.rollback, default_timeout=None, client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -813,7 +817,9 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        rpc(
+            request, retry=retry, timeout=timeout, metadata=metadata,
+        )
 
     def run_query(
         self,
@@ -849,7 +855,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.run_query, default_timeout=None, client_info=_client_info
+            self._transport.run_query, default_timeout=None, client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -859,7 +865,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -905,7 +911,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.write, default_timeout=None, client_info=_client_info
+            self._transport.write, default_timeout=None, client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -913,7 +919,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         metadata = tuple(metadata) + (gapic_v1.routing_header.to_grpc_metadata(()),)
 
         # Send the request.
-        response = rpc(requests, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(requests, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -948,7 +954,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.listen, default_timeout=None, client_info=_client_info
+            self._transport.listen, default_timeout=None, client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -956,7 +962,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         metadata = tuple(metadata) + (gapic_v1.routing_header.to_grpc_metadata(()),)
 
         # Send the request.
-        response = rpc(requests, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(requests, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -1029,7 +1035,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata)
+        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Done; return the response.
         return response
@@ -1037,7 +1043,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
 try:
     _client_info = gapic_v1.client_info.ClientInfo(
-        gapic_version=pkg_resources.get_distribution("google.cloud.firestore").version
+        gapic_version=pkg_resources.get_distribution("google.cloud.firestore",).version,
     )
 except pkg_resources.DistributionNotFound:
     _client_info = gapic_v1.client_info.ClientInfo()

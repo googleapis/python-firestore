@@ -168,7 +168,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         # have one.
         if not hasattr(self, "_grpc_channel"):
             self._grpc_channel = self.create_channel(
-                self._host, credentials=self._credentials
+                self._host, credentials=self._credentials,
             )
 
         # Return the channel from cache.
@@ -176,7 +176,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def get_document(
-        self
+        self,
     ) -> Callable[[firestore.GetDocumentRequest], document.Document]:
         r"""Return a callable for the get document method over gRPC.
 
@@ -202,7 +202,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def list_documents(
-        self
+        self,
     ) -> Callable[[firestore.ListDocumentsRequest], firestore.ListDocumentsResponse]:
         r"""Return a callable for the list documents method over gRPC.
 
@@ -228,7 +228,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def update_document(
-        self
+        self,
     ) -> Callable[[firestore.UpdateDocumentRequest], gf_document.Document]:
         r"""Return a callable for the update document method over gRPC.
 
@@ -254,7 +254,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def delete_document(
-        self
+        self,
     ) -> Callable[[firestore.DeleteDocumentRequest], empty.Empty]:
         r"""Return a callable for the delete document method over gRPC.
 
@@ -280,7 +280,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def batch_get_documents(
-        self
+        self,
     ) -> Callable[
         [firestore.BatchGetDocumentsRequest], firestore.BatchGetDocumentsResponse
     ]:
@@ -310,7 +310,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def begin_transaction(
-        self
+        self,
     ) -> Callable[
         [firestore.BeginTransactionRequest], firestore.BeginTransactionResponse
     ]:
@@ -387,7 +387,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def run_query(
-        self
+        self,
     ) -> Callable[[firestore.RunQueryRequest], firestore.RunQueryResponse]:
         r"""Return a callable for the run query method over gRPC.
 
@@ -413,7 +413,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def partition_query(
-        self
+        self,
     ) -> Callable[[firestore.PartitionQueryRequest], firestore.PartitionQueryResponse]:
         r"""Return a callable for the partition query method over gRPC.
 
@@ -492,7 +492,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def list_collection_ids(
-        self
+        self,
     ) -> Callable[
         [firestore.ListCollectionIdsRequest], firestore.ListCollectionIdsResponse
     ]:
@@ -520,7 +520,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def batch_write(
-        self
+        self,
     ) -> Callable[[firestore.BatchWriteRequest], firestore.BatchWriteResponse]:
         r"""Return a callable for the batch write method over gRPC.
 
@@ -556,7 +556,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
 
     @property
     def create_document(
-        self
+        self,
     ) -> Callable[[firestore.CreateDocumentRequest], document.Document]:
         r"""Return a callable for the create document method over gRPC.
 

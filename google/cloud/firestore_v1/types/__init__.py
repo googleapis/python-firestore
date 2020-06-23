@@ -15,8 +15,17 @@
 # limitations under the License.
 #
 
-from .common import DocumentMask, Precondition, TransactionOptions
-from .document import Document, Value, ArrayValue, MapValue
+from .common import (
+    DocumentMask,
+    Precondition,
+    TransactionOptions,
+)
+from .document import (
+    Document,
+    Value,
+    ArrayValue,
+    MapValue,
+)
 from .write import (
     Write,
     DocumentTransform,
@@ -26,7 +35,10 @@ from .write import (
     DocumentRemove,
     ExistenceFilter,
 )
-from .query import StructuredQuery, Cursor
+from .query import (
+    StructuredQuery,
+    Cursor,
+)
 from .firestore import (
     GetDocumentRequest,
     ListDocumentsRequest,
