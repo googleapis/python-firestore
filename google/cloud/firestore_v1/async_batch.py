@@ -15,10 +15,10 @@
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
 
-from google.cloud.firestore_v1.batch import WriteBatch
+from google.cloud.firestore_v1.base_batch import BaseWriteBatch
 
 
-class AsyncWriteBatch(WriteBatch):
+class AsyncWriteBatch(BaseWriteBatch):
     """Accumulate write operations to be sent in a batch.
 
     This has the same set of methods for write operations that
