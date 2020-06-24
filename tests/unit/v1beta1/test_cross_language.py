@@ -21,10 +21,10 @@ import mock
 import pytest
 
 from google.protobuf import text_format
-from google.cloud.firestore_v1beta1.proto import document
-from google.cloud.firestore_v1beta1.proto import firestore
-from google.cloud.firestore_v1beta1.types import test_v1beta1
-from google.cloud.firestore_v1beta1.proto import write
+from google.cloud.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import firestore
+from google.cloud.firestore_v1beta1.proto import test_v1beta1_pb2
+from google.cloud.firestore_v1beta1.types import write
 
 
 def _load_testproto(filename):

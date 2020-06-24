@@ -18,16 +18,16 @@ _sym_db = _symbol_database.Default()
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.api import client_pb2 as google_dot_api_dot_client__pb2
 from google.api import field_behavior_pb2 as google_dot_api_dot_field__behavior__pb2
-from google.cloud.firestore_v1beta1.proto import (
+from google.cloud.firestore_v1beta1.types import (
     common_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2,
 )
-from google.cloud.firestore_v1beta1.proto import (
+from google.cloud.firestore_v1beta1.types import (
     document_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2,
 )
-from google.cloud.firestore_v1beta1.proto import (
+from google.cloud.firestore_v1beta1.types import (
     query_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2,
 )
-from google.cloud.firestore_v1beta1.proto import (
+from google.cloud.firestore_v1beta1.types import (
     write_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2,
 )
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2

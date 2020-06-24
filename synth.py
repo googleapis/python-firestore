@@ -68,6 +68,12 @@ for version in admin_versions:
         "'google-cloud-firestore-admin'",
         "'google-cloud-firestore'",
     )
+    s.replace(
+        f"tests/unit/gapic/**/*.py",
+        f"google.firestore.admin_v1",
+        f"google.cloud.firestore_admin_v1",
+    )
+
 
 
 # ----------------------------------------------------------------------------

@@ -253,7 +253,6 @@ class TestQuery(unittest.TestCase):
     def test_where_eq_null(self):
         from google.cloud.firestore_v1beta1.types import StructuredQuery
 
-
         op_enum = StructuredQuery.UnaryFilter.Operator.IS_NULL
         self._where_unary_helper(None, op_enum)
 
@@ -263,7 +262,6 @@ class TestQuery(unittest.TestCase):
 
     def test_where_eq_nan(self):
         from google.cloud.firestore_v1beta1.types import StructuredQuery
-
 
         op_enum = StructuredQuery.UnaryFilter.Operator.IS_NAN
         self._where_unary_helper(float("nan"), op_enum)
@@ -304,7 +302,6 @@ class TestQuery(unittest.TestCase):
 
     def test_order_by(self):
         from google.cloud.firestore_v1beta1.types import StructuredQuery
-
 
         klass = self._get_target_class()
         query1 = self._make_one_all_fields(skip_fields=("orders",))
@@ -1376,7 +1373,6 @@ class Test__enum_from_op_string(unittest.TestCase):
 
     def test_success(self):
         from google.cloud.firestore_v1beta1.types import StructuredQuery
-
 
         op_class = StructuredQuery.FieldFilter.Operator
         self.assertEqual(self._call_fut("<"), op_class.LESS_THAN)

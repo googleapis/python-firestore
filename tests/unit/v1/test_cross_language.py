@@ -23,7 +23,7 @@ import pytest
 from google.protobuf import json_format
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import firestore
-from google.cloud.firestore_v1.types import tests
+from google.cloud.firestore_v1.proto import tests_pb2
 from google.cloud.firestore_v1.types import write
 
 

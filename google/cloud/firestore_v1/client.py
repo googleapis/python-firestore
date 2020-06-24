@@ -38,8 +38,10 @@ from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.document import DocumentSnapshot
 from google.cloud.firestore_v1.field_path import render_field_path
-from google.cloud.firestore_v1.services import firestore_client
-from google.cloud.firestore_v1.service.transports import firestore_grpc_transport
+from google.cloud.firestore_v1.services.firestore import client as firestore_client
+from google.cloud.firestore_v1.services.firestore.transports import (
+    grpc as firestore_grpc_transport,
+)
 from google.cloud.firestore_v1.transaction import Transaction
 
 

@@ -21,7 +21,7 @@ from google.cloud.firestore_v1beta1._helpers import encode_value, GeoPoint
 from google.cloud.firestore_v1beta1.order import Order
 from google.cloud.firestore_v1beta1.order import TypeOrder
 
-from google.cloud.firestore_v1beta1.proto import document
+from google.cloud.firestore_v1beta1.types import document
 
 from google.protobuf import timestamp_pb2
 

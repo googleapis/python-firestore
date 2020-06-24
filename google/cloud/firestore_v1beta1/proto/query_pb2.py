@@ -15,7 +15,7 @@ from google.protobuf import symbol_database as _symbol_database
 _sym_db = _symbol_database.Default()
 
 
-from google.cloud.firestore_v1beta1.proto import (
+from google.cloud.firestore_v1beta1.types import (
     document_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2,
 )
 from google.protobuf import wrappers_pb2 as google_dot_protobuf_dot_wrappers__pb2

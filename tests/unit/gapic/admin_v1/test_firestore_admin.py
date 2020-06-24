@@ -32,23 +32,23 @@ from google.api_core import operation_async
 from google.api_core import operations_v1
 from google.auth import credentials
 from google.auth.exceptions import MutualTLSChannelError
-from google.cloud.firestore.admin_v1.services.firestore_admin import (
+from google.cloud.firestore_admin_v1.services.firestore_admin import (
     FirestoreAdminAsyncClient,
 )
-from google.cloud.firestore.admin_v1.services.firestore_admin import (
+from google.cloud.firestore_admin_v1.services.firestore_admin import (
     FirestoreAdminClient,
 )
-from google.cloud.firestore.admin_v1.services.firestore_admin import pagers
-from google.cloud.firestore.admin_v1.services.firestore_admin import transports
-from google.cloud.firestore.admin_v1.types import field
-from google.cloud.firestore.admin_v1.types import field as gfa_field
-from google.cloud.firestore.admin_v1.types import firestore_admin
-from google.cloud.firestore.admin_v1.types import index
-from google.cloud.firestore.admin_v1.types import index as gfa_index
-from google.cloud.firestore.admin_v1.types import operation as gfa_operation
-from google.longrunning import operations
+from google.cloud.firestore_admin_v1.services.firestore_admin import pagers
+from google.cloud.firestore_admin_v1.services.firestore_admin import transports
+from google.cloud.firestore_admin_v1.types import field
+from google.cloud.firestore_admin_v1.types import field as gfa_field
+from google.cloud.firestore_admin_v1.types import firestore_admin
+from google.cloud.firestore_admin_v1.types import index
+from google.cloud.firestore_admin_v1.types import index as gfa_index
+from google.cloud.firestore_admin_v1.types import operation as gfa_operation
+from google.longrunning import operations_pb2
 from google.oauth2 import service_account
-from google.protobuf import field_mask as field_mask  # type: ignore
+from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
 
 def client_cert_source_callback():
@@ -234,7 +234,7 @@ def test_firestore_admin_client_client_options(
 
 def test_firestore_admin_client_client_options_from_dict():
     with mock.patch(
-        "google.cloud.firestore.admin_v1.services.firestore_admin.transports.FirestoreAdminGrpcTransport.__init__"
+        "google.cloud.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminGrpcTransport.__init__"
     ) as grpc_transport:
         grpc_transport.return_value = None
         client = FirestoreAdminClient(
@@ -260,7 +260,7 @@ def test_create_index(transport: str = "grpc"):
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client._transport.create_index), "__call__") as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/spam")
+        call.return_value = operations_pb2.Operation(name="operations/spam")
 
         response = client.create_index(request)
 
@@ -290,7 +290,7 @@ async def test_create_index_async(transport: str = "grpc_asyncio"):
     ) as call:
         # Designate an appropriate return value for the call.
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/spam")
+            operations_pb2.Operation(name="operations/spam")
         )
 
         response = await client.create_index(request)
@@ -315,7 +315,7 @@ def test_create_index_field_headers():
 
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client._transport.create_index), "__call__") as call:
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         client.create_index(request)
 
@@ -343,7 +343,7 @@ async def test_create_index_field_headers_async():
         type(client._client._transport.create_index), "__call__"
     ) as call:
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/op")
+            operations_pb2.Operation(name="operations/op")
         )
 
         await client.create_index(request)
@@ -364,7 +364,7 @@ def test_create_index_flattened():
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client._transport.create_index), "__call__") as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         # Call the method with a truthy value for each flattened field,
         # using the keyword arguments to the method.
@@ -402,10 +402,10 @@ async def test_create_index_flattened_async():
         type(client._client._transport.create_index), "__call__"
     ) as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/spam")
+            operations_pb2.Operation(name="operations/spam")
         )
         # Call the method with a truthy value for each flattened field,
         # using the keyword arguments to the method.
@@ -1280,7 +1280,7 @@ def test_update_field(transport: str = "grpc"):
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client._transport.update_field), "__call__") as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/spam")
+        call.return_value = operations_pb2.Operation(name="operations/spam")
 
         response = client.update_field(request)
 
@@ -1310,7 +1310,7 @@ async def test_update_field_async(transport: str = "grpc_asyncio"):
     ) as call:
         # Designate an appropriate return value for the call.
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/spam")
+            operations_pb2.Operation(name="operations/spam")
         )
 
         response = await client.update_field(request)
@@ -1335,7 +1335,7 @@ def test_update_field_field_headers():
 
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client._transport.update_field), "__call__") as call:
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         client.update_field(request)
 
@@ -1363,7 +1363,7 @@ async def test_update_field_field_headers_async():
         type(client._client._transport.update_field), "__call__"
     ) as call:
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/op")
+            operations_pb2.Operation(name="operations/op")
         )
 
         await client.update_field(request)
@@ -1384,7 +1384,7 @@ def test_update_field_flattened():
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client._transport.update_field), "__call__") as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         # Call the method with a truthy value for each flattened field,
         # using the keyword arguments to the method.
@@ -1418,10 +1418,10 @@ async def test_update_field_flattened_async():
         type(client._client._transport.update_field), "__call__"
     ) as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/spam")
+            operations_pb2.Operation(name="operations/spam")
         )
         # Call the method with a truthy value for each flattened field,
         # using the keyword arguments to the method.
@@ -1751,7 +1751,7 @@ def test_export_documents(transport: str = "grpc"):
         type(client._transport.export_documents), "__call__"
     ) as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/spam")
+        call.return_value = operations_pb2.Operation(name="operations/spam")
 
         response = client.export_documents(request)
 
@@ -1781,7 +1781,7 @@ async def test_export_documents_async(transport: str = "grpc_asyncio"):
     ) as call:
         # Designate an appropriate return value for the call.
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/spam")
+            operations_pb2.Operation(name="operations/spam")
         )
 
         response = await client.export_documents(request)
@@ -1808,7 +1808,7 @@ def test_export_documents_field_headers():
     with mock.patch.object(
         type(client._transport.export_documents), "__call__"
     ) as call:
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         client.export_documents(request)
 
@@ -1836,7 +1836,7 @@ async def test_export_documents_field_headers_async():
         type(client._client._transport.export_documents), "__call__"
     ) as call:
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/op")
+            operations_pb2.Operation(name="operations/op")
         )
 
         await client.export_documents(request)
@@ -1859,7 +1859,7 @@ def test_export_documents_flattened():
         type(client._transport.export_documents), "__call__"
     ) as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         # Call the method with a truthy value for each flattened field,
         # using the keyword arguments to the method.
@@ -1892,10 +1892,10 @@ async def test_export_documents_flattened_async():
         type(client._client._transport.export_documents), "__call__"
     ) as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/spam")
+            operations_pb2.Operation(name="operations/spam")
         )
         # Call the method with a truthy value for each flattened field,
         # using the keyword arguments to the method.
@@ -1934,7 +1934,7 @@ def test_import_documents(transport: str = "grpc"):
         type(client._transport.import_documents), "__call__"
     ) as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/spam")
+        call.return_value = operations_pb2.Operation(name="operations/spam")
 
         response = client.import_documents(request)
 
@@ -1964,7 +1964,7 @@ async def test_import_documents_async(transport: str = "grpc_asyncio"):
     ) as call:
         # Designate an appropriate return value for the call.
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/spam")
+            operations_pb2.Operation(name="operations/spam")
         )
 
         response = await client.import_documents(request)
@@ -1991,7 +1991,7 @@ def test_import_documents_field_headers():
     with mock.patch.object(
         type(client._transport.import_documents), "__call__"
     ) as call:
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         client.import_documents(request)
 
@@ -2019,7 +2019,7 @@ async def test_import_documents_field_headers_async():
         type(client._client._transport.import_documents), "__call__"
     ) as call:
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/op")
+            operations_pb2.Operation(name="operations/op")
         )
 
         await client.import_documents(request)
@@ -2042,7 +2042,7 @@ def test_import_documents_flattened():
         type(client._transport.import_documents), "__call__"
     ) as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         # Call the method with a truthy value for each flattened field,
         # using the keyword arguments to the method.
@@ -2075,10 +2075,10 @@ async def test_import_documents_flattened_async():
         type(client._client._transport.import_documents), "__call__"
     ) as call:
         # Designate an appropriate return value for the call.
-        call.return_value = operations.Operation(name="operations/op")
+        call.return_value = operations_pb2.Operation(name="operations/op")
 
         call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations.Operation(name="operations/spam")
+            operations_pb2.Operation(name="operations/spam")
         )
         # Call the method with a truthy value for each flattened field,
         # using the keyword arguments to the method.
