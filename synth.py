@@ -104,6 +104,7 @@ templated_files = common.py_library(
     samples=False,  # set to True only if there are samples
     unit_test_python_versions=["3.6", "3.7", "3.8"],
     system_test_python_versions=["3.7"],
+    microgenerator=True,
 )
 
 s.move(
