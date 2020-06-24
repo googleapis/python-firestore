@@ -32,13 +32,13 @@ from google.oauth2 import service_account  # type: ignore
 
 from google.api_core import operation as ga_operation
 from google.api_core import operation_async
-from google.cloud.firestore.admin_v1.services.firestore_admin import pagers
-from google.cloud.firestore.admin_v1.types import field
-from google.cloud.firestore.admin_v1.types import field as gfa_field
-from google.cloud.firestore.admin_v1.types import firestore_admin
-from google.cloud.firestore.admin_v1.types import index
-from google.cloud.firestore.admin_v1.types import index as gfa_index
-from google.cloud.firestore.admin_v1.types import operation as gfa_operation
+from google.cloud.firestore_admin_v1.services.firestore_admin import pagers
+from google.cloud.firestore_admin_v1.types import field
+from google.cloud.firestore_admin_v1.types import field as gfa_field
+from google.cloud.firestore_admin_v1.types import firestore_admin
+from google.cloud.firestore_admin_v1.types import index
+from google.cloud.firestore_admin_v1.types import index as gfa_index
+from google.cloud.firestore_admin_v1.types import operation as gfa_operation
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
 from .transports.base import FirestoreAdminTransport

@@ -66,17 +66,15 @@ for version in admin_versions:
     s.move(library / "scripts/fixup_keywords.py", f"scripts/fixup_keywords_admin_{version}.py" )
 
     s.replace(
-        f"google/cloud/firestore_admin_{version}/gapic/firestore_admin_client.py",
-        "'google-cloud-firestore-admin'",
-        "'google-cloud-firestore'",
+        f"google/cloud/**/*.py",
+        f"google.firestore.admin_v1",
+        f"google.cloud.firestore_admin_v1",
     )
     s.replace(
         f"tests/unit/gapic/**/*.py",
         f"google.firestore.admin_v1",
         f"google.cloud.firestore_admin_v1",
     )
-
-
 
 # ----------------------------------------------------------------------------
 # Edit paths to firestore remove after resolving 

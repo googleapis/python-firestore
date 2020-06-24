@@ -22,9 +22,9 @@ from google import auth
 from google.api_core import operations_v1  # type: ignore
 from google.auth import credentials  # type: ignore
 
-from google.cloud.firestore.admin_v1.types import field
-from google.cloud.firestore.admin_v1.types import firestore_admin
-from google.cloud.firestore.admin_v1.types import index
+from google.cloud.firestore_admin_v1.types import field
+from google.cloud.firestore_admin_v1.types import firestore_admin
+from google.cloud.firestore_admin_v1.types import index
 from google.longrunning import operations_pb2 as operations  # type: ignore
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
