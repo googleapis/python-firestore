@@ -26,7 +26,7 @@ import nox
 BLACK_VERSION = "black==19.10b0"
 BLACK_PATHS = ["docs", "google", "tests", "noxfile.py", "setup.py"]
 
-DEFAULT_PYTHON_VERSION = "3.7"
+DEFAULT_PYTHON_VERSION = "3.8"
 SYSTEM_TEST_PYTHON_VERSIONS = ["3.7"]
 UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8"]
 
