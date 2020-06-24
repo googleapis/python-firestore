@@ -15,17 +15,18 @@ from google.protobuf import descriptor_pb2
 _sym_db = _symbol_database.Default()
 
 
-from google.cloud.firestore_v1.proto import (
-    common_pb2 as google_dot_cloud_dot_firestore__v1_dot_proto_dot_common__pb2,
+from google.cloud.firestore_v1.types import (
+    common as google_dot_cloud_dot_firestore__v1_dot_proto_dot_common__pb2,
 )
-from google.cloud.firestore_v1.proto import (
-    document_pb2 as google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2,
+
+from google.cloud.firestore_v1.types import (
+    document as google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2,
 )
-from google.cloud.firestore_v1.proto import (
-    firestore_pb2 as google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2,
+from google.cloud.firestore_v1.types import (
+    firestore as google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2,
 )
-from google.cloud.firestore_v1.proto import (
-    query_pb2 as google_dot_cloud_dot_firestore__v1_dot_proto_dot_query__pb2,
+from google.cloud.firestore_v1.types import (
+    query as google_dot_cloud_dot_firestore__v1_dot_proto_dot_query__pb2,
 )
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
@@ -38,10 +39,10 @@ DESCRIPTOR = _descriptor.FileDescriptor(
         '\n+google/cloud/firestore_v1/proto/tests.proto\x12\x1fgoogle.cloud.firestore_v1.proto\x1a,google/cloud/firestore_v1/proto/common.proto\x1a.google/cloud/firestore_v1/proto/document.proto\x1a/google/cloud/firestore_v1/proto/firestore.proto\x1a+google/cloud/firestore_v1/proto/query.proto\x1a\x1fgoogle/protobuf/timestamp.proto"@\n\x08TestFile\x12\x34\n\x05tests\x18\x01 \x03(\x0b\x32%.google.cloud.firestore_v1.proto.Test"\xa9\x04\n\x04Test\x12\x13\n\x0b\x64\x65scription\x18\x01 \x01(\t\x12\x0f\n\x07\x63omment\x18\n \x01(\t\x12\x37\n\x03get\x18\x02 \x01(\x0b\x32(.google.cloud.firestore_v1.proto.GetTestH\x00\x12=\n\x06\x63reate\x18\x03 \x01(\x0b\x32+.google.cloud.firestore_v1.proto.CreateTestH\x00\x12\x37\n\x03set\x18\x04 \x01(\x0b\x32(.google.cloud.firestore_v1.proto.SetTestH\x00\x12=\n\x06update\x18\x05 \x01(\x0b\x32+.google.cloud.firestore_v1.proto.UpdateTestH\x00\x12H\n\x0cupdate_paths\x18\x06 \x01(\x0b\x32\x30.google.cloud.firestore_v1.proto.UpdatePathsTestH\x00\x12=\n\x06\x64\x65lete\x18\x07 \x01(\x0b\x32+.google.cloud.firestore_v1.proto.DeleteTestH\x00\x12;\n\x05query\x18\x08 \x01(\x0b\x32*.google.cloud.firestore_v1.proto.QueryTestH\x00\x12=\n\x06listen\x18\t \x01(\x0b\x32+.google.cloud.firestore_v1.proto.ListenTestH\x00\x42\x06\n\x04test"Y\n\x07GetTest\x12\x14\n\x0c\x64oc_ref_path\x18\x01 \x01(\t\x12\x38\n\x07request\x18\x02 \x01(\x0b\x32\'.google.cloud.firestore.v1.GetDocumentRequest"|\n\nCreateTest\x12\x14\n\x0c\x64oc_ref_path\x18\x01 \x01(\t\x12\x11\n\tjson_data\x18\x02 \x01(\t\x12\x33\n\x07request\x18\x03 \x01(\x0b\x32".google.cloud.firestore.v1.CommitRequest\x12\x10\n\x08is_error\x18\x04 \x01(\x08"\xb5\x01\n\x07SetTest\x12\x14\n\x0c\x64oc_ref_path\x18\x01 \x01(\t\x12:\n\x06option\x18\x02 \x01(\x0b\x32*.google.cloud.firestore_v1.proto.SetOption\x12\x11\n\tjson_data\x18\x03 \x01(\t\x12\x33\n\x07request\x18\x04 \x01(\x0b\x32".google.cloud.firestore.v1.CommitRequest\x12\x10\n\x08is_error\x18\x05 \x01(\x08"\xb5\x01\n\nUpdateTest\x12\x14\n\x0c\x64oc_ref_path\x18\x01 \x01(\t\x12\x37\n\x0cprecondition\x18\x02 \x01(\x0b\x32!.google.cloud.firestore.v1.Precondition\x12\x11\n\tjson_data\x18\x03 \x01(\t\x12\x33\n\x07request\x18\x04 \x01(\x0b\x32".google.cloud.firestore.v1.CommitRequest\x12\x10\n\x08is_error\x18\x05 \x01(\x08"\xfd\x01\n\x0fUpdatePathsTest\x12\x14\n\x0c\x64oc_ref_path\x18\x01 \x01(\t\x12\x37\n\x0cprecondition\x18\x02 \x01(\x0b\x32!.google.cloud.firestore.v1.Precondition\x12?\n\x0b\x66ield_paths\x18\x03 \x03(\x0b\x32*.google.cloud.firestore_v1.proto.FieldPath\x12\x13\n\x0bjson_values\x18\x04 \x03(\t\x12\x33\n\x07request\x18\x05 \x01(\x0b\x32".google.cloud.firestore.v1.CommitRequest\x12\x10\n\x08is_error\x18\x06 \x01(\x08"\xa2\x01\n\nDeleteTest\x12\x14\n\x0c\x64oc_ref_path\x18\x01 \x01(\t\x12\x37\n\x0cprecondition\x18\x02 \x01(\x0b\x32!.google.cloud.firestore.v1.Precondition\x12\x33\n\x07request\x18\x03 \x01(\x0b\x32".google.cloud.firestore.v1.CommitRequest\x12\x10\n\x08is_error\x18\x04 \x01(\x08"T\n\tSetOption\x12\x0b\n\x03\x61ll\x18\x01 \x01(\x08\x12:\n\x06\x66ields\x18\x02 \x03(\x0b\x32*.google.cloud.firestore_v1.proto.FieldPath"\x9f\x01\n\tQueryTest\x12\x11\n\tcoll_path\x18\x01 \x01(\t\x12\x38\n\x07\x63lauses\x18\x02 \x03(\x0b\x32\'.google.cloud.firestore_v1.proto.Clause\x12\x33\n\x05query\x18\x03 \x01(\x0b\x32$.google.cloud.firestore.v1.StructuredQuery\x12\x10\n\x08is_error\x18\x04 \x01(\x08"\xde\x03\n\x06\x43lause\x12\x39\n\x06select\x18\x01 \x01(\x0b\x32\'.google.cloud.firestore_v1.proto.SelectH\x00\x12\x37\n\x05where\x18\x02 \x01(\x0b\x32&.google.cloud.firestore_v1.proto.WhereH\x00\x12<\n\x08order_by\x18\x03 \x01(\x0b\x32(.google.cloud.firestore_v1.proto.OrderByH\x00\x12\x10\n\x06offset\x18\x04 \x01(\x05H\x00\x12\x0f\n\x05limit\x18\x05 \x01(\x05H\x00\x12;\n\x08start_at\x18\x06 \x01(\x0b\x32\'.google.cloud.firestore_v1.proto.CursorH\x00\x12>\n\x0bstart_after\x18\x07 \x01(\x0b\x32\'.google.cloud.firestore_v1.proto.CursorH\x00\x12\x39\n\x06\x65nd_at\x18\x08 \x01(\x0b\x32\'.google.cloud.firestore_v1.proto.CursorH\x00\x12=\n\nend_before\x18\t \x01(\x0b\x32\'.google.cloud.firestore_v1.proto.CursorH\x00\x42\x08\n\x06\x63lause"D\n\x06Select\x12:\n\x06\x66ields\x18\x01 \x03(\x0b\x32*.google.cloud.firestore_v1.proto.FieldPath"a\n\x05Where\x12\x38\n\x04path\x18\x01 \x01(\x0b\x32*.google.cloud.firestore_v1.proto.FieldPath\x12\n\n\x02op\x18\x02 \x01(\t\x12\x12\n\njson_value\x18\x03 \x01(\t"V\n\x07OrderBy\x12\x38\n\x04path\x18\x01 \x01(\x0b\x32*.google.cloud.firestore_v1.proto.FieldPath\x12\x11\n\tdirection\x18\x02 \x01(\t"a\n\x06\x43ursor\x12\x42\n\x0c\x64oc_snapshot\x18\x01 \x01(\x0b\x32,.google.cloud.firestore_v1.proto.DocSnapshot\x12\x13\n\x0bjson_values\x18\x02 \x03(\t".\n\x0b\x44ocSnapshot\x12\x0c\n\x04path\x18\x01 \x01(\t\x12\x11\n\tjson_data\x18\x02 \x01(\t"\x1a\n\tFieldPath\x12\r\n\x05\x66ield\x18\x01 \x03(\t"\x94\x01\n\nListenTest\x12\x36\n\tresponses\x18\x01 \x03(\x0b\x32#.google.cloud.firestore.v1.ListenResponse\x12<\n\tsnapshots\x18\x02 \x03(\x0b\x32).google.cloud.firestore_v1.proto.Snapshot\x12\x10\n\x08is_error\x18\x03 \x01(\x08"\xa3\x01\n\x08Snapshot\x12+\n\x04\x64ocs\x18\x01 \x03(\x0b\x32\x1d.google.cloud.firestore.v1.Document\x12;\n\x07\x63hanges\x18\x02 \x03(\x0b\x32*.google.cloud.firestore_v1.proto.DocChange\x12-\n\tread_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"\xe0\x01\n\tDocChange\x12=\n\x04kind\x18\x01 \x01(\x0e\x32/.google.cloud.firestore_v1.proto.DocChange.Kind\x12*\n\x03\x64oc\x18\x02 \x01(\x0b\x32\x1d.google.cloud.firestore.v1.Document\x12\x11\n\told_index\x18\x03 \x01(\x05\x12\x11\n\tnew_index\x18\x04 \x01(\x05"B\n\x04Kind\x12\x14\n\x10KIND_UNSPECIFIED\x10\x00\x12\t\n\x05\x41\x44\x44\x45\x44\x10\x01\x12\x0b\n\x07REMOVED\x10\x02\x12\x0c\n\x08MODIFIED\x10\x03\x42\x8b\x01\n)com.google.cloud.conformance.firestore.v1B\x0eTestDefinition\xaa\x02"Google.Cloud.Firestore.Tests.Proto\xca\x02(Google\\Cloud\\Firestore\\Tests\\Conformanceb\x06proto3'
     ),
     dependencies=[
-        google_dot_cloud_dot_firestore__v1_dot_proto_dot_common__pb2.DESCRIPTOR,
-        google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2.DESCRIPTOR,
-        google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.DESCRIPTOR,
-        google_dot_cloud_dot_firestore__v1_dot_proto_dot_query__pb2.DESCRIPTOR,
+        google_dot_cloud_dot_firestore__v1_dot_proto_dot_common__pb2.__protobuf__,
+        google_dot_cloud_dot_firestore__v1_dot_proto_dot_document__pb2.__protobuf__,
+        google_dot_cloud_dot_firestore__v1_dot_proto_dot_firestore__pb2.__protobuf__,
+        google_dot_cloud_dot_firestore__v1_dot_proto_dot_query__pb2.__protobuf__,
         google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,
     ],
 )
