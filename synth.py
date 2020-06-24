@@ -61,8 +61,7 @@ for version in admin_versions:
         # include_protos=True,
         proto_path=f"google/firestore/admin/{version}",
     )
-    #s.move(library)
-    s.move(library / f"google/firestore/admin/{version}", f"google/cloud/firestore_admin_{version}")
+    s.move(library / f"google/firestore/admin_{version}", f"google/cloud/firestore_admin_{version}")
     s.move(library / "tests")
     s.move(library / f"scripts/fixup_keywords.py", library / f"scripts/fixup_keywords_admin_{version}.py")
 
