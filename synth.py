@@ -41,7 +41,7 @@ for version in versions:
         excludes=[ library / f"google/firestore_{version}/__init__.py"]
     )
     s.move(library / f"tests/unit/gapic")
-    s.move(library / f"scripts/fixup_keywords.py", library / f"scripts/fixup_keywords_{version}.py")
+    s.move(library / "scripts/fixup_keywords.py", f"scripts/fixup_keywords_{version}.py" )
 
     s.replace(
         f"google/cloud/firestore_{version}/types/query.py",
@@ -63,7 +63,7 @@ for version in admin_versions:
     )
     s.move(library / f"google/firestore/admin_{version}", f"google/cloud/firestore_admin_{version}")
     s.move(library / "tests")
-    s.move(library / f"scripts/fixup_keywords.py", library / f"scripts/fixup_keywords_admin_{version}.py")
+    s.move(library / "scripts/fixup_keywords.py", f"scripts/fixup_keywords_admin_{version}.py" )
 
     s.replace(
         f"google/cloud/firestore_admin_{version}/gapic/firestore_admin_client.py",

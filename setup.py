@@ -80,7 +80,11 @@ setuptools.setup(
     install_requires=dependencies,
     extras_require=extras,
     python_requires=">=3.6",
-    scripts=["scripts/fixup_keywords.py"],
+    scripts=[
+        "scripts/fixup_keywords_v1.py",
+        "scripts/fixup_keywords_v1beta1.py",
+        "scripts/fixup_keywords_admin_v1.py",
+    ],
     include_package_data=True,
     zip_safe=False,
 )
