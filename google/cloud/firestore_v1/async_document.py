@@ -16,8 +16,8 @@
 
 import six
 
-from google.cloud.firestore_v1.document import (
-    DocumentReference,
+from google.cloud.firestore_v1.base_document import (
+    BaseDocumentReference,
     DocumentSnapshot,
     _first_write_result,
     _item_to_collection_ref,
@@ -29,7 +29,7 @@ from google.cloud.firestore_v1.proto import common_pb2
 from google.cloud.firestore_v1.watch import Watch
 
 
-class AsyncDocumentReference(DocumentReference):
+class AsyncDocumentReference(BaseDocumentReference):
     """A reference to a document in a Firestore database.
 
     The document may already exist or can be created by this class.
