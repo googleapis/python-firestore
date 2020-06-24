@@ -42,10 +42,18 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
 
     @staticmethod
     def _get_public_methods(klass):
-        return set(
-            name
-            for name, value in six.iteritems(klass.__dict__)
-            if (not name.startswith("_") and isinstance(value, types.FunctionType))
+        return set().union(
+            *(
+                (
+                    name
+                    for name, value in six.iteritems(class_.__dict__)
+                    if (
+                        not name.startswith("_")
+                        and isinstance(value, types.FunctionType)
+                    )
+                )
+                for class_ in (klass,) + klass.__bases__
+            )
         )
 
     def test_query_method_matching(self):
@@ -84,119 +92,6 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
     def test_constructor_invalid_kwarg(self):
         with self.assertRaises(TypeError):
             self._make_one("Coh-lek-shun", donut=True)
-
-    def test___eq___other_type(self):
-        client = mock.sentinel.client
-        collection = self._make_one("name", client=client)
-        other = object()
-        self.assertFalse(collection == other)
-
-    def test___eq___different_path_same_client(self):
-        client = mock.sentinel.client
-        collection = self._make_one("name", client=client)
-        other = self._make_one("other", client=client)
-        self.assertFalse(collection == other)
-
-    def test___eq___same_path_different_client(self):
-        client = mock.sentinel.client
-        other_client = mock.sentinel.other_client
-        collection = self._make_one("name", client=client)
-        other = self._make_one("name", client=other_client)
-        self.assertFalse(collection == other)
-
-    def test___eq___same_path_same_client(self):
-        client = mock.sentinel.client
-        collection = self._make_one("name", client=client)
-        other = self._make_one("name", client=client)
-        self.assertTrue(collection == other)
-
-    def test_id_property(self):
-        collection_id = "hi-bob"
-        collection = self._make_one(collection_id)
-        self.assertEqual(collection.id, collection_id)
-
-    def test_parent_property(self):
-        from google.cloud.firestore_v1.async_document import AsyncDocumentReference
-
-        collection_id1 = "grocery-store"
-        document_id = "market"
-        collection_id2 = "darth"
-        client = _make_client()
-        collection = self._make_one(
-            collection_id1, document_id, collection_id2, client=client
-        )
-
-        parent = collection.parent
-        self.assertIsInstance(parent, AsyncDocumentReference)
-        self.assertIs(parent._client, client)
-        self.assertEqual(parent._path, (collection_id1, document_id))
-
-    def test_parent_property_top_level(self):
-        collection = self._make_one("tahp-leh-vull")
-        self.assertIsNone(collection.parent)
-
-    def test_document_factory_explicit_id(self):
-        from google.cloud.firestore_v1.async_document import AsyncDocumentReference
-
-        collection_id = "grocery-store"
-        document_id = "market"
-        client = _make_client()
-        collection = self._make_one(collection_id, client=client)
-
-        child = collection.document(document_id)
-        self.assertIsInstance(child, AsyncDocumentReference)
-        self.assertIs(child._client, client)
-        self.assertEqual(child._path, (collection_id, document_id))
-
-    @mock.patch(
-        "google.cloud.firestore_v1.collection._auto_id",
-        return_value="zorpzorpthreezorp012",
-    )
-    def test_document_factory_auto_id(self, mock_auto_id):
-        from google.cloud.firestore_v1.async_document import AsyncDocumentReference
-
-        collection_name = "space-town"
-        client = _make_client()
-        collection = self._make_one(collection_name, client=client)
-
-        child = collection.document()
-        self.assertIsInstance(child, AsyncDocumentReference)
-        self.assertIs(child._client, client)
-        self.assertEqual(child._path, (collection_name, mock_auto_id.return_value))
-
-        mock_auto_id.assert_called_once_with()
-
-    def test__parent_info_top_level(self):
-        client = _make_client()
-        collection_id = "soap"
-        collection = self._make_one(collection_id, client=client)
-
-        parent_path, expected_prefix = collection._parent_info()
-
-        expected_path = "projects/{}/databases/{}/documents".format(
-            client.project, client._database
-        )
-        self.assertEqual(parent_path, expected_path)
-        prefix = "{}/{}".format(expected_path, collection_id)
-        self.assertEqual(expected_prefix, prefix)
-
-    def test__parent_info_nested(self):
-        collection_id1 = "bar"
-        document_id = "baz"
-        collection_id2 = "chunk"
-        client = _make_client()
-        collection = self._make_one(
-            collection_id1, document_id, collection_id2, client=client
-        )
-
-        parent_path, expected_prefix = collection._parent_info()
-
-        expected_path = "projects/{}/databases/{}/documents/{}/{}".format(
-            client.project, client._database, collection_id1, document_id
-        )
-        self.assertEqual(parent_path, expected_path)
-        prefix = "{}/{}".format(expected_path, collection_id2)
-        self.assertEqual(expected_prefix, prefix)
 
     @pytest.mark.asyncio
     async def test_add_auto_assigned(self):
@@ -580,26 +475,6 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         collection = self._make_one("collection")
         collection.on_snapshot(None)
         watch.for_query.assert_called_once()
-
-
-class Test__auto_id(aiounittest.AsyncTestCase):
-    @staticmethod
-    def _call_fut():
-        from google.cloud.firestore_v1.async_collection import _auto_id
-
-        return _auto_id()
-
-    @mock.patch("random.choice")
-    def test_it(self, mock_rand_choice):
-        from google.cloud.firestore_v1.collection import _AUTO_ID_CHARS
-
-        mock_result = "0123456789abcdefghij"
-        mock_rand_choice.side_effect = list(mock_result)
-        result = self._call_fut()
-        self.assertEqual(result, mock_result)
-
-        mock_calls = [mock.call(_AUTO_ID_CHARS)] * 20
-        self.assertEqual(mock_rand_choice.mock_calls, mock_calls)
 
 
 def _make_credentials():

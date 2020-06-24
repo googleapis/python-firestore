@@ -16,8 +16,8 @@
 import warnings
 
 
-from google.cloud.firestore_v1.collection import (
-    CollectionReference,
+from google.cloud.firestore_v1.base_collection import (
+    BaseCollectionReference,
     _auto_id,
     _item_to_document_ref,
 )
@@ -26,7 +26,7 @@ from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import async_document
 
 
-class AsyncCollectionReference(CollectionReference):
+class AsyncCollectionReference(BaseCollectionReference):
     """A reference to a collection in a Firestore database.
 
     The collection may already exist or this class can facilitate creation
@@ -54,6 +54,14 @@ class AsyncCollectionReference(CollectionReference):
 
     def __init__(self, *path, **kwargs):
         super(AsyncCollectionReference, self).__init__(*path, **kwargs)
+
+    def _query(self):
+        """Query factory.
+
+        Returns:
+            :class:`~google.cloud.firestore_v1.query.Query`
+        """
+        return async_query.AsyncQuery(self)
 
     async def add(self, document_data, document_id=None):
         """Create a document in the Firestore database with the provided data.
@@ -112,191 +120,6 @@ class AsyncCollectionReference(CollectionReference):
         iterator.collection = self
         iterator.item_to_value = _item_to_document_ref
         return iterator
-
-    def select(self, field_paths):
-        """Create a "select" query with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.select` for
-        more information on this method.
-
-        Args:
-            field_paths (Iterable[str, ...]): An iterable of field paths
-                (``.``-delimited list of field names) to use as a projection
-                of document fields in the query results.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            A "projected" query.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.select(field_paths)
-
-    def where(self, field_path, op_string, value):
-        """Create a "where" query with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.where` for
-        more information on this method.
-
-        Args:
-            field_path (str): A field path (``.``-delimited list of
-                field names) for the field to filter on.
-            op_string (str): A comparison operation in the form of a string.
-                Acceptable values are ``<``, ``<=``, ``==``, ``>=``
-                and ``>``.
-            value (Any): The value to compare the field against in the filter.
-                If ``value`` is :data:`None` or a NaN, then ``==`` is the only
-                allowed operation.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            A filtered query.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.where(field_path, op_string, value)
-
-    def order_by(self, field_path, **kwargs):
-        """Create an "order by" query with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.order_by` for
-        more information on this method.
-
-        Args:
-            field_path (str): A field path (``.``-delimited list of
-                field names) on which to order the query results.
-            kwargs (Dict[str, Any]): The keyword arguments to pass along
-                to the query. The only supported keyword is ``direction``,
-                see :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.order_by`
-                for more information.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            An "order by" query.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.order_by(field_path, **kwargs)
-
-    def limit(self, count):
-        """Create a limited query with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.limit` for
-        more information on this method.
-
-        Args:
-            count (int): Maximum number of documents to return that match
-                the query.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            A limited query.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.limit(count)
-
-    def offset(self, num_to_skip):
-        """Skip to an offset in a query with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.offset` for
-        more information on this method.
-
-        Args:
-            num_to_skip (int): The number of results to skip at the beginning
-                of query results. (Must be non-negative.)
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            An offset query.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.offset(num_to_skip)
-
-    def start_at(self, document_fields):
-        """Start query at a cursor with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.start_at` for
-        more information on this method.
-
-        Args:
-            document_fields (Union[:class:`~google.cloud.firestore_v1.\
-                document.DocumentSnapshot`, dict, list, tuple]):
-                A document snapshot or a dictionary/list/tuple of fields
-                representing a query results cursor. A cursor is a collection
-                of values that represent a position in a query result set.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            A query with cursor.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.start_at(document_fields)
-
-    def start_after(self, document_fields):
-        """Start query after a cursor with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.start_after` for
-        more information on this method.
-
-        Args:
-            document_fields (Union[:class:`~google.cloud.firestore_v1.\
-                document.DocumentSnapshot`, dict, list, tuple]):
-                A document snapshot or a dictionary/list/tuple of fields
-                representing a query results cursor. A cursor is a collection
-                of values that represent a position in a query result set.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            A query with cursor.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.start_after(document_fields)
-
-    def end_before(self, document_fields):
-        """End query before a cursor with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.end_before` for
-        more information on this method.
-
-        Args:
-            document_fields (Union[:class:`~google.cloud.firestore_v1.\
-                document.DocumentSnapshot`, dict, list, tuple]):
-                A document snapshot or a dictionary/list/tuple of fields
-                representing a query results cursor. A cursor is a collection
-                of values that represent a position in a query result set.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            A query with cursor.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.end_before(document_fields)
-
-    def end_at(self, document_fields):
-        """End query at a cursor with this collection as parent.
-
-        See
-        :meth:`~google.cloud.firestore_v1.async_query.AsyncQuery.end_at` for
-        more information on this method.
-
-        Args:
-            document_fields (Union[:class:`~google.cloud.firestore_v1.\
-                document.DocumentSnapshot`, dict, list, tuple]):
-                A document snapshot or a dictionary/list/tuple of fields
-                representing a query results cursor. A cursor is a collection
-                of values that represent a position in a query result set.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_query.AsyncQuery`:
-            A query with cursor.
-        """
-        query = async_query.AsyncQuery(self)
-        return query.end_at(document_fields)
 
     async def get(self, transaction=None):
         """Deprecated alias for :meth:`stream`."""
@@ -366,7 +189,7 @@ class AsyncCollectionReference(CollectionReference):
             collection_watch.unsubscribe()
         """
         return Watch.for_query(
-            async_query.AsyncQuery(self),
+            self._query(),
             callback,
             async_document.DocumentSnapshot,
             async_document.AsyncDocumentReference,
