@@ -168,6 +168,136 @@ class TestCollectionReference(unittest.TestCase):
         prefix = "{}/{}".format(expected_path, collection_id2)
         self.assertEqual(expected_prefix, prefix)
 
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_select(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            field_paths = ["a", "b"]
+            query = collection.select(field_paths)
+
+            mock_query.select.assert_called_once_with(field_paths)
+            self.assertEqual(query, mock_query.select.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_where(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            field_path = "foo"
+            op_string = "=="
+            value = 45
+            query = collection.where(field_path, op_string, value)
+
+            mock_query.where.assert_called_once_with(field_path, op_string, value)
+            self.assertEqual(query, mock_query.where.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_order_by(self, mock_query):
+        from google.cloud.firestore_v1.base_query import BaseQuery
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            field_path = "foo"
+            direction = BaseQuery.DESCENDING
+            query = collection.order_by(field_path, direction=direction)
+
+            mock_query.order_by.assert_called_once_with(field_path, direction=direction)
+            self.assertEqual(query, mock_query.order_by.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_limit(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            limit = 15
+            query = collection.limit(limit)
+
+            mock_query.limit.assert_called_once_with(limit)
+            self.assertEqual(query, mock_query.limit.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_offset(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            offset = 113
+            query = collection.offset(offset)
+
+            mock_query.offset.assert_called_once_with(offset)
+            self.assertEqual(query, mock_query.offset.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_start_at(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            doc_fields = {"a": "b"}
+            query = collection.start_at(doc_fields)
+
+            mock_query.start_at.assert_called_once_with(doc_fields)
+            self.assertEqual(query, mock_query.start_at.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_start_after(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            doc_fields = {"d": "foo", "e": 10}
+            query = collection.start_after(doc_fields)
+
+            mock_query.start_after.assert_called_once_with(doc_fields)
+            self.assertEqual(query, mock_query.start_after.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_end_before(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            doc_fields = {"bar": 10.5}
+            query = collection.end_before(doc_fields)
+
+            mock_query.end_before.assert_called_once_with(doc_fields)
+            self.assertEqual(query, mock_query.end_before.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_end_at(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            collection = self._make_one("collection")
+            doc_fields = {"opportunity": True, "reason": 9}
+            query = collection.end_at(doc_fields)
+
+            mock_query.end_at.assert_called_once_with(doc_fields)
+            self.assertEqual(query, mock_query.end_at.return_value)
+
 
 class Test__auto_id(unittest.TestCase):
     @staticmethod
