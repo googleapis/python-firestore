@@ -427,7 +427,7 @@ class Test_Transactional(unittest.TestCase):
         firestore_api = transaction._client._firestore_api
         firestore_api.begin_transaction.assert_called_once_with(
             request = {
-                'database': client._database_string,
+                'database': transaction._client._database_string,
                 'options': None,
             },
             metadata=transaction._client._rpc_metadata,
@@ -462,8 +462,8 @@ class Test_Transactional(unittest.TestCase):
         )
         firestore_api.begin_transaction.assert_called_once_with(
             request = {
-                'database': client._database_string,
-                'options': None,
+                'database': transaction._client._database_string,
+                'options': options_,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -490,14 +490,14 @@ class Test_Transactional(unittest.TestCase):
         firestore_api = transaction._client._firestore_api
         firestore_api.begin_transaction.assert_called_once_with(
             request = {
-                'database': transaction.client._database_string,
+                'database': transaction._client._database_string,
                 'options': None,
             },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.rollback.assert_called_once_with(
             request = {
-                'database': transaction.client._database_string,
+                'database': transaction._client._database_string,
                 'transaction': txn_id,
             },
             metadata=transaction._client._rpc_metadata,
@@ -531,14 +531,14 @@ class Test_Transactional(unittest.TestCase):
         to_wrap.assert_called_once_with(transaction, a="b", c="zebra")
         firestore_api.begin_transaction.assert_called_once_with(
             request = {
-                'database': client._database_string,
+                'database': transaction._client._database_string,
                 'options': None,
             },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.rollback.assert_called_once_with(
             request = {
-                'database': client._database_string,
+                'database': transaction._client._database_string,
                 'transaction': txn_id,
             },
             metadata=transaction._client._rpc_metadata,
@@ -562,9 +562,11 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.begin_transaction.assert_not_called()
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            transaction._client._database_string,
-            [],
-            transaction=txn_id,
+            request = {
+                'database': transaction._client._database_string,
+                'writes': [],
+                'transaction': txn_id,
+            },
             metadata=transaction._client._rpc_metadata,
         )
 
@@ -597,9 +599,11 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.begin_transaction.assert_not_called()
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            transaction._client._database_string,
-            [],
-            transaction=txn_id,
+            request = {
+                'database': transaction._client._database_string,
+                'writes': [],
+                'transaction': txn_id,
+            },
             metadata=transaction._client._rpc_metadata,
         )
 
@@ -630,9 +634,11 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.begin_transaction.assert_not_called()
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            transaction._client._database_string,
-            [],
-            transaction=txn_id,
+            request = {
+                'database': transaction._client._database_string,
+                'writes': [],
+                'transaction': txn_id,
+            },
             metadata=transaction._client._rpc_metadata,
         )
 
@@ -664,9 +670,11 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.begin_transaction.assert_not_called()
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            transaction._client._database_string,
-            [],
-            transaction=txn_id,
+            request = {
+                'database': transaction._client._database_string,
+                'writes': [],
+                'transaction': txn_id,
+            },
             metadata=transaction._client._rpc_metadata,
         )
 
@@ -687,15 +695,19 @@ class Test_Transactional(unittest.TestCase):
         to_wrap.assert_called_once_with(transaction, "a", b="c")
         firestore_api = transaction._client._firestore_api
         firestore_api.begin_transaction.assert_called_once_with(
-            transaction._client._database_string,
-            options_=None,
+            request = {
+                'database': transaction._client._database_string,
+                'options': None
+            },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            transaction._client._database_string,
-            [],
-            transaction=txn_id,
+            request = {
+                'database': transaction._client._database_string,
+                'writes': [],
+                'transaction': txn_id,
+            },
             metadata=transaction._client._rpc_metadata,
         )
 
@@ -739,18 +751,23 @@ class Test_Transactional(unittest.TestCase):
             firestore_api.begin_transaction.mock_calls,
             [
                 mock.call(
-                    db_str, options_=None, metadata=transaction._client._rpc_metadata
+                    request = {'database': db_str, 'options':None},
+                    metadata=transaction._client._rpc_metadata
                 ),
                 mock.call(
-                    db_str,
-                    options_=options_,
+                    request = {'database': db_str, 'options':options_},
                     metadata=transaction._client._rpc_metadata,
                 ),
             ],
         )
         firestore_api.rollback.assert_not_called()
         commit_call = mock.call(
-            db_str, [], transaction=txn_id, metadata=transaction._client._rpc_metadata
+            request = {
+                'database': db_str,
+                'writes': [],
+                'transaction': txn_id
+            },
+            metadata=transaction._client._rpc_metadata
         )
         self.assertEqual(firestore_api.commit.mock_calls, [commit_call, commit_call])
 
@@ -783,19 +800,25 @@ class Test_Transactional(unittest.TestCase):
         # Verify mocks.
         to_wrap.assert_called_once_with(transaction, "here", there=1.5)
         firestore_api.begin_transaction.assert_called_once_with(
-            transaction._client._database_string,
-            options_=None,
+            request = {
+                'database': transaction._client._database_string,
+                'options': None,
+            },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.rollback.assert_called_once_with(
-            transaction._client._database_string,
-            txn_id,
+            request = {
+                'database': transaction._client._database_string,
+                'transaction': txn_id,
+            },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.commit.assert_called_once_with(
-            transaction._client._database_string,
-            [],
-            transaction=txn_id,
+            request = {
+                'database': transaction._client._database_string,
+                'writes': [],
+                'transaction': txn_id,
+            },
             metadata=transaction._client._rpc_metadata,
         )
 
@@ -843,9 +866,11 @@ class Test__commit_with_retry(unittest.TestCase):
         # Verify mocks used.
         _sleep.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            mock.sentinel.write_pbs,
-            transaction=txn_id,
+            request = {
+                'database': client._database_string,
+                'writes': mock.sentinel.write_pbs,
+                'transaction': txn_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -880,9 +905,11 @@ class Test__commit_with_retry(unittest.TestCase):
         _sleep.assert_any_call(2.0)
         # commit() called same way 3 times.
         commit_call = mock.call(
-            client._database_string,
-            mock.sentinel.write_pbs,
-            transaction=txn_id,
+            request = {
+                'database': client._database_string,
+                'writes': mock.sentinel.write_pbs,
+                'transaction': txn_id,
+            },
             metadata=client._rpc_metadata,
         )
         self.assertEqual(
@@ -916,9 +943,11 @@ class Test__commit_with_retry(unittest.TestCase):
         # Verify mocks used.
         _sleep.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            mock.sentinel.write_pbs,
-            transaction=txn_id,
+            request = {
+                'database': client._database_string,
+                'writes': mock.sentinel.write_pbs,
+                'transaction': txn_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -952,9 +981,11 @@ class Test__commit_with_retry(unittest.TestCase):
         _sleep.assert_called_once_with(1.0)
         # commit() called same way 2 times.
         commit_call = mock.call(
-            client._database_string,
-            mock.sentinel.write_pbs,
-            transaction=txn_id,
+            request = {
+                'database': client._database_string,
+                'writes': mock.sentinel.write_pbs,
+                'transaction': txn_id,
+            },
             metadata=client._rpc_metadata,
         )
         self.assertEqual(firestore_api.commit.mock_calls, [commit_call, commit_call])
