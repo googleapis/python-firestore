@@ -115,7 +115,7 @@ class TestTransaction(unittest.TestCase):
         self.assertIs(transaction.id, mock.sentinel.eye_dee)
 
     def test__begin(self):
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
         from google.cloud.firestore_v1.types import firestore
 
         # Create a minimal fake GAPIC with a dummy result.
@@ -171,7 +171,7 @@ class TestTransaction(unittest.TestCase):
 
     def test__rollback(self):
         from google.protobuf import empty_pb2 as empty_pb2
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -210,7 +210,7 @@ class TestTransaction(unittest.TestCase):
 
     def test__rollback_failure(self):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
         # Create a minimal fake GAPIC with a dummy failure.
         firestore_api = mock.create_autospec(
@@ -241,7 +241,7 @@ class TestTransaction(unittest.TestCase):
         )
 
     def test__commit(self):
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
         from google.cloud.firestore_v1.types import firestore
         from google.cloud.firestore_v1.types import write
 
@@ -292,7 +292,7 @@ class TestTransaction(unittest.TestCase):
 
     def test__commit_failure(self):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
         # Create a minimal fake GAPIC with a dummy failure.
         firestore_api = mock.create_autospec(
@@ -796,7 +796,7 @@ class Test__commit_with_retry(unittest.TestCase):
 
     @mock.patch("google.cloud.firestore_v1.transaction._sleep")
     def test_success_first_attempt(self, _sleep):
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -824,7 +824,7 @@ class Test__commit_with_retry(unittest.TestCase):
     @mock.patch("google.cloud.firestore_v1.transaction._sleep", side_effect=[2.0, 4.0])
     def test_success_third_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -864,7 +864,7 @@ class Test__commit_with_retry(unittest.TestCase):
     @mock.patch("google.cloud.firestore_v1.transaction._sleep")
     def test_failure_first_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -897,7 +897,7 @@ class Test__commit_with_retry(unittest.TestCase):
     @mock.patch("google.cloud.firestore_v1.transaction._sleep", return_value=2.0)
     def test_failure_second_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services import firestore_client
+        from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -993,7 +993,7 @@ def _make_client(project="feral-tom-cat"):
 
 def _make_transaction(txn_id, **txn_kwargs):
     from google.protobuf import empty_pb2 as empty_pb2
-    from google.cloud.firestore_v1.services import firestore_client
+    from google.cloud.firestore_v1.services.firestore import client as firestore_client
     from google.cloud.firestore_v1.types import firestore
     from google.cloud.firestore_v1.types import write
     from google.cloud.firestore_v1.transaction import Transaction

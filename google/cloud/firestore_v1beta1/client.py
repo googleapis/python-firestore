@@ -24,7 +24,7 @@ In the hierarchy of API concepts
   :class:`~google.cloud.firestore_v1beta1.document.DocumentReference`
 """
 import warnings
-
+import google.api_core.path_template
 from google.cloud.client import ClientWithProject
 
 from google.cloud.firestore_v1beta1 import _helpers
@@ -150,10 +150,10 @@ class Client(ClientWithProject):
             project. (The default database is also in this string.)
         """
         if self._database_string_internal is None:
-            # NOTE: database_root_path() is a classmethod, so we don't use
-            #       self._firestore_api (it isn't necessary).
-            db_str = firestore_client.FirestoreClient.database_root_path(
-                self.project, self._database
+            db_str = google.api_core.path_template.expand(
+                "projects/{project}/databases/{database}/documents",
+                project=self.project,
+                database=self._database,
             )
             self._database_string_internal = db_str
 
