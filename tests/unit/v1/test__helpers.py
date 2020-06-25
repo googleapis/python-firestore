@@ -219,7 +219,7 @@ class Test_encode_value(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_array(self):
-        from google.cloud.firestore_v1.proto.document import ArrayValue
+        from google.cloud.firestore_v1.types.document import ArrayValue
 
         result = self._call_fut([99, True, 118.5])
 
@@ -234,7 +234,7 @@ class Test_encode_value(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_map(self):
-        from google.cloud.firestore_v1.proto.document import MapValue
+        from google.cloud.firestore_v1.types.document import MapValue
 
         result = self._call_fut({"abc": 285, "def": b"piglatin"})
 
@@ -263,8 +263,8 @@ class Test_encode_dict(unittest.TestCase):
     def test_many_types(self):
         from google.protobuf import struct_pb2
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1.proto.document import ArrayValue
-        from google.cloud.firestore_v1.proto.document import MapValue
+        from google.cloud.firestore_v1.types.document import ArrayValue
+        from google.cloud.firestore_v1.types.document import MapValue
 
         dt_seconds = 1497397225
         dt_nanos = 465964000
@@ -537,8 +537,8 @@ class Test_decode_dict(unittest.TestCase):
     def test_many_types(self):
         from google.protobuf import struct_pb2
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1.proto.document import ArrayValue
-        from google.cloud.firestore_v1.proto.document import MapValue
+        from google.cloud.firestore_v1.types.document import ArrayValue
+        from google.cloud.firestore_v1.types.document import MapValue
         from google.cloud._helpers import UTC
         from google.cloud.firestore_v1.field_path import FieldPath
 
@@ -2362,7 +2362,7 @@ class TestExistsOption(unittest.TestCase):
 
 
 def _value_pb(**kwargs):
-    from google.cloud.firestore_v1.proto.document import Value
+    from google.cloud.firestore_v1.types.document import Value
 
     return Value(**kwargs)
 

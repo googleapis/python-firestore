@@ -20,6 +20,7 @@ import mock
 import six
 
 
+
 class TestQuery(unittest.TestCase):
 
     if six.PY2:
@@ -243,6 +244,7 @@ class TestQuery(unittest.TestCase):
 
     def _where_unary_helper(self, value, op_enum, op_string="=="):
         from google.cloud.firestore_v1.types import query
+        from google.cloud.firestore_v1.types import StructuredQuery
 
         query = self._make_one_all_fields(skip_fields=("field_filters",))
         field_path = "feeeld"
@@ -253,8 +255,8 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(len(new_query._field_filters), 1)
 
         field_pb = new_query._field_filters[0]
-        expected_pb = query.StructuredQuery.UnaryFilter(
-            field=query.StructuredQuery.FieldReference(field_path=field_path),
+        expected_pb = StructuredQuery.UnaryFilter(
+            field=StructuredQuery.FieldReference(field_path=field_path),
             op=op_enum,
         )
         self.assertEqual(field_pb, expected_pb)

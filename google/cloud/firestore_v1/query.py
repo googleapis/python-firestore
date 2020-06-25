@@ -998,7 +998,7 @@ def _query_response_to_snapshot(response_pb, collection, expected_prefix):
         A snapshot of the data returned in the query. If
         ``response_pb.document`` is not set, the snapshot will be :data:`None`.
     """
-    if not response_pb.HasField("document"):
+    if not response_pb._pb.HasField("document"):
         return None
 
     document_id = _helpers.get_doc_id(response_pb.document, expected_prefix)
