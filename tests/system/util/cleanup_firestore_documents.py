@@ -23,7 +23,7 @@ def zap_document(document):
 
 
 def zap_collection(collection):
-    for document in collection.list_documents():
+    for document in collection.list_documents(request={}):
         zap_document(document)
 
 
