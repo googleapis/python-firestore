@@ -17,7 +17,7 @@ import unittest
 import mock
 
 
-class TestDocumentReference(unittest.TestCase):
+class TestBaseDocumentReference(unittest.TestCase):
     @staticmethod
     def _get_target_class():
         from google.cloud.firestore_v1.document import DocumentReference
