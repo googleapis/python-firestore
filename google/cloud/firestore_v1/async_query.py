@@ -20,8 +20,8 @@ a more common way to create a query than direct usage of the constructor.
 """
 import warnings
 
-from google.cloud.firestore_v1.query import (
-    Query,
+from google.cloud.firestore_v1.base_query import (
+    BaseQuery,
     _query_response_to_snapshot,
     _collection_group_query_response_to_snapshot,
 )
@@ -31,7 +31,7 @@ from google.cloud.firestore_v1 import async_document
 from google.cloud.firestore_v1.watch import Watch
 
 
-class AsyncQuery(Query):
+class AsyncQuery(BaseQuery):
     """Represents a query to the Firestore API.
 
     Instances of this class are considered immutable: all methods that
