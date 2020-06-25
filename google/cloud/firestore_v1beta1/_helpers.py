@@ -905,13 +905,13 @@ def metadata_with_prefix(prefix, **kw):
 class WriteOption(object):
     """Option used to assert a condition on a write operation."""
 
-    def modify_write(self, write_pb, no_create_msg=None):
+    def modify_write(self, write, no_create_msg=None):
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         This is a virtual method intended to be implemented by subclasses.
 
         Args:
-            write_pb (google.cloud.firestore_v1beta1.types.Write): A
+            write (google.cloud.firestore_v1beta1.types.Write): A
                 ``Write`` protobuf instance to be modified with a precondition
                 determined by the state of this option.
             no_create_msg (Optional[str]): A message to use to indicate that
@@ -945,7 +945,7 @@ class LastUpdateOption(WriteOption):
             return NotImplemented
         return self._last_update_time == other._last_update_time
 
-    def modify_write(self, write_pb, **unused_kwargs):
+    def modify_write(self, write, **unused_kwargs):
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         The ``last_update_time`` is added to ``write_pb`` as an "update time"
@@ -953,14 +953,14 @@ class LastUpdateOption(WriteOption):
         last updated at that time.
 
         Args:
-            write_pb (google.cloud.firestore_v1beta1.types.Write): A
+            write (google.cloud.firestore_v1beta1.types.Write): A
                 ``Write`` protobuf instance to be modified with a precondition
                 determined by the state of this option.
             unused_kwargs (Dict[str, Any]): Keyword arguments accepted by
                 other subclasses that are unused here.
         """
         current_doc = types.Precondition(update_time=self._last_update_time)
-        write_pb.current_document.CopyFrom(current_doc)
+        write._pb.current_document.CopyFrom(current_doc._pb)
 
 
 class ExistsOption(WriteOption):
@@ -982,7 +982,7 @@ class ExistsOption(WriteOption):
             return NotImplemented
         return self._exists == other._exists
 
-    def modify_write(self, write_pb, **unused_kwargs):
+    def modify_write(self, write, **unused_kwargs):
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         If:
@@ -991,7 +991,7 @@ class ExistsOption(WriteOption):
         * ``exists=False``, adds a precondition that requires non-existence
 
         Args:
-            write_pb (google.cloud.firestore_v1beta1.types.Write): A
+            write (google.cloud.firestore_v1beta1.types.Write): A
                 ``Write`` protobuf instance to be modified with a precondition
                 determined by the state of this option.
             unused_kwargs (Dict[str, Any]): Keyword arguments accepted by
