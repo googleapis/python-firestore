@@ -69,7 +69,7 @@ class Transaction(batch.WriteBatch):
 
         Args:
             write_pbs (List[google.cloud.proto.firestore.v1.\
-                write_pb2.Write]): A list of write protobufs to be added.
+                write.Write]): A list of write protobufs to be added.
 
         Raises:
             ValueError: If this transaction is read-only.
@@ -190,7 +190,7 @@ class Transaction(batch.WriteBatch):
         """Transactionally commit the changes accumulated.
 
         Returns:
-            List[:class:`google.cloud.proto.firestore.v1.write_pb2.WriteResult`, ...]:
+            List[:class:`google.cloud.proto.firestore.v1.write.WriteResult`, ...]:
             The write results corresponding to the changes committed, returned
             in the same order as the changes were applied to this transaction.
             A write result contains an ``update_time`` field.
@@ -392,7 +392,7 @@ def _commit_with_retry(client, write_pbs, transaction_id):
     Args:
         client (:class:`~google.cloud.firestore_v1.client.Client`):
             A client with GAPIC client and configuration details.
-        write_pbs (List[:class:`google.cloud.proto.firestore.v1.write_pb2.Write`, ...]):
+        write_pbs (List[:class:`google.cloud.proto.firestore.v1.write.Write`, ...]):
             A ``Write`` protobuf instance to be committed.
         transaction_id (bytes):
             ID of an existing transaction that this commit will run in.

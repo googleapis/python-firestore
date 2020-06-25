@@ -201,11 +201,11 @@ class TestDocumentReference(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import write
         from google.cloud.firestore_v1beta1 import _helpers
 
-        return write_pb2.Write(
-            update=document_pb2.Document(
+        return write.Write(
+            update=document.Document(
                 name=document_path, fields=_helpers.encode_dict(document_data)
             ),
-            current_document=common_pb2.Precondition(exists=False),
+            current_document=common.Precondition(exists=False),
         )
 
     @staticmethod
@@ -274,8 +274,8 @@ class TestDocumentReference(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import write
         from google.cloud.firestore_v1beta1 import _helpers
 
-        write_pbs = write_pb2.Write(
-            update=document_pb2.Document(
+        write_pbs = write.Write(
+            update=document.Document(
                 name=document_path, fields=_helpers.encode_dict(document_data)
             )
         )
@@ -289,7 +289,7 @@ class TestDocumentReference(unittest.TestCase):
             field_paths = [
                 field_path.to_api_repr() for field_path in sorted(field_paths)
             ]
-            mask = common_pb2.DocumentMask(field_paths=sorted(field_paths))
+            mask = common.DocumentMask(field_paths=sorted(field_paths))
             write_pbs.update_mask.CopyFrom(mask)
         return write_pbs
 
@@ -331,12 +331,12 @@ class TestDocumentReference(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import write
         from google.cloud.firestore_v1beta1 import _helpers
 
-        return write_pb2.Write(
-            update=document_pb2.Document(
+        return write.Write(
+            update=document.Document(
                 name=document_path, fields=_helpers.encode_dict(update_values)
             ),
-            update_mask=common_pb2.DocumentMask(field_paths=field_paths),
-            current_document=common_pb2.Precondition(exists=True),
+            update_mask=common.DocumentMask(field_paths=field_paths),
+            current_document=common.Precondition(exists=True),
         )
 
     def _update_helper(self, **option_kwargs):
@@ -433,7 +433,7 @@ class TestDocumentReference(unittest.TestCase):
 
         # Verify the response and the mocks.
         self.assertIs(delete_time, mock.sentinel.commit_time)
-        write_pb = write_pb2.Write(delete=document._document_path)
+        write_pb = write.Write(delete=document._document_path)
         if option is not None:
             option.modify_write(write_pb)
         firestore_api.commit.assert_called_once_with(
@@ -462,7 +462,7 @@ class TestDocumentReference(unittest.TestCase):
         create_time = 123
         update_time = 234
         firestore_api = mock.Mock(spec=["get_document"])
-        response = mock.create_autospec(document_pb2.Document)
+        response = mock.create_autospec(document.Document)
         response.fields = {}
         response.create_time = create_time
         response.update_time = update_time
@@ -501,7 +501,7 @@ class TestDocumentReference(unittest.TestCase):
 
         # Verify the request made to the API
         if field_paths is not None:
-            mask = common_pb2.DocumentMask(field_paths=sorted(field_paths))
+            mask = common.DocumentMask(field_paths=sorted(field_paths))
         else:
             mask = None
 
@@ -793,7 +793,7 @@ class Test__first_write_result(unittest.TestCase):
         from google.protobuf import timestamp_pb2
         from google.cloud.firestore_v1beta1.types import write
 
-        single_result = write_pb2.WriteResult(
+        single_result = write.WriteResult(
             update_time=timestamp_pb2.Timestamp(seconds=1368767504, nanos=458000123)
         )
         write_results = [single_result]
@@ -808,8 +808,8 @@ class Test__first_write_result(unittest.TestCase):
     def test_more_than_one(self):
         from google.cloud.firestore_v1beta1.types import write
 
-        result1 = write_pb2.WriteResult()
-        result2 = write_pb2.WriteResult()
+        result1 = write.WriteResult()
+        result2 = write.WriteResult()
         write_results = [result1, result2]
         result = self._call_fut(write_results)
         self.assertIs(result, result1)

@@ -160,7 +160,7 @@ class CollectionReference(object):
         if document_id is None:
             parent_path, expected_prefix = self._parent_info()
 
-            document_pb = document_pb2.Document()
+            document_pb = document.Document()
 
             created_document_pb = self._client._firestore_api.create_document(
                 request={

@@ -43,7 +43,7 @@ class WriteBatch(object):
 
         Args:
             write_pbs (List[google.cloud.proto.firestore.v1.\
-                write_pb2.Write]): A list of write protobufs to be added.
+                write.Write]): A list of write protobufs to be added.
         """
         self._write_pbs.extend(write_pbs)
 
@@ -135,7 +135,7 @@ class WriteBatch(object):
         """Commit the changes accumulated in this batch.
 
         Returns:
-            List[:class:`google.cloud.proto.firestore.v1.write_pb2.WriteResult`, ...]:
+            List[:class:`google.cloud.proto.firestore.v1.write.WriteResult`, ...]:
             The write results corresponding to the changes committed, returned
             in the same order as the changes were applied to this batch. A
             write result contains an ``update_time`` field.

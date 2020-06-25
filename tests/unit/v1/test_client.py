@@ -392,8 +392,8 @@ class TestClient(unittest.TestCase):
         document_pb1, read_time = _doc_get_info(document1._document_path, data1)
         response1 = _make_batch_response(found=document_pb1, read_time=read_time)
 
-        document_pb2, read_time = _doc_get_info(document2._document_path, data2)
-        response2 = _make_batch_response(found=document_pb2, read_time=read_time)
+        document, read_time = _doc_get_info(document2._document_path, data2)
+        response2 = _make_batch_response(found=document, read_time=read_time)
 
         return client, document1, document2, response1, response2
 
@@ -428,7 +428,7 @@ class TestClient(unittest.TestCase):
 
         # Verify the call to the mock.
         doc_paths = [document1._document_path, document2._document_path]
-        mask = common_pb2.DocumentMask(field_paths=field_paths)
+        mask = common.DocumentMask(field_paths=field_paths)
         client._firestore_api.batch_get_documents.assert_called_once_with(
             client._database_string,
             doc_paths,
@@ -645,11 +645,11 @@ class Test__parse_batch_get(unittest.TestCase):
         create_time = _datetime_to_pb_timestamp(now - 2 * delta)
 
         ref_string = self._dummy_ref_string()
-        document_pb = document_pb2.Document(
+        document_pb = document.Document(
             name=ref_string,
             fields={
-                "foo": document_pb2.Value(double_value=1.5),
-                "bar": document_pb2.Value(string_value=u"skillz"),
+                "foo": document.Value(double_value=1.5),
+                "bar": document.Value(string_value=u"skillz"),
             },
             create_time=create_time,
             update_time=update_time,
@@ -708,7 +708,7 @@ class Test__get_doc_mask(unittest.TestCase):
 
         field_paths = ["a.b", "c"]
         result = self._call_fut(field_paths)
-        expected = common_pb2.DocumentMask(field_paths=field_paths)
+        expected = common.DocumentMask(field_paths=field_paths)
         self.assertEqual(result, expected)
 
 
@@ -735,7 +735,7 @@ def _doc_get_info(ref_string, values):
     update_time = _datetime_to_pb_timestamp(now - delta)
     create_time = _datetime_to_pb_timestamp(now - 2 * delta)
 
-    document_pb = document_pb2.Document(
+    document_pb = document.Document(
         name=ref_string,
         fields=_helpers.encode_dict(values),
         create_time=create_time,

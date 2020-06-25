@@ -207,7 +207,7 @@ class TestCollectionReference(unittest.TestCase):
             commit_time=mock.sentinel.commit_time,
         )
         firestore_api.commit.return_value = commit_response
-        create_doc_response = document_pb2.Document()
+        create_doc_response = document.Document()
         firestore_api.create_document.return_value = create_doc_response
         client = _make_client()
         client._firestore_api_internal = firestore_api
@@ -219,7 +219,7 @@ class TestCollectionReference(unittest.TestCase):
         parent_path = collection.parent._document_path
         auto_assigned_id = "cheezburger"
         name = "{}/{}/{}".format(parent_path, collection.id, auto_assigned_id)
-        create_doc_response = document_pb2.Document(name=name)
+        create_doc_response = document.Document(name=name)
         create_doc_response.update_time.FromDatetime(datetime.datetime.utcnow())
         firestore_api.create_document.return_value = create_doc_response
 
@@ -235,7 +235,7 @@ class TestCollectionReference(unittest.TestCase):
         expected_path = collection._path + (auto_assigned_id,)
         self.assertEqual(document_ref._path, expected_path)
 
-        expected_document_pb = document_pb2.Document()
+        expected_document_pb = document.Document()
         firestore_api.create_document.assert_called_once_with(
             parent_path,
             collection_id=collection.id,
@@ -259,11 +259,11 @@ class TestCollectionReference(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import write
         from google.cloud.firestore_v1beta1 import _helpers
 
-        return write_pb2.Write(
-            update=document_pb2.Document(
+        return write.Write(
+            update=document.Document(
                 name=document_path, fields=_helpers.encode_dict(document_data)
             ),
-            current_document=common_pb2.Precondition(exists=False),
+            current_document=common.Precondition(exists=False),
         )
 
     def test_add_explicit_id(self):
@@ -325,8 +325,8 @@ class TestCollectionReference(unittest.TestCase):
         from google.cloud.firestore_v1beta1 import _helpers
         from google.cloud.firestore_v1beta1.query import _enum_from_op_string
 
-        return query_pb2.StructuredQuery.FieldFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+        return query.StructuredQuery.FieldFilter(
+            field=query.StructuredQuery.FieldReference(field_path=field_path),
             op=_enum_from_op_string(op_string),
             value=_helpers.encode_value(value),
         )
@@ -353,8 +353,8 @@ class TestCollectionReference(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import query
         from google.cloud.firestore_v1beta1.query import _enum_from_direction
 
-        return query_pb2.StructuredQuery.Order(
-            field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+        return query.StructuredQuery.Order(
+            field=query.StructuredQuery.FieldReference(field_path=field_path),
             direction=_enum_from_direction(direction),
         )
 
@@ -445,7 +445,7 @@ class TestCollectionReference(unittest.TestCase):
         from google.cloud.firestore_v1beta1.service.firestore_client import (
             FirestoreClient,
         )
-        from google.cloud.firestore_v1beta1.proto.document_pb2 import Document
+        from google.cloud.firestore_v1beta1.proto.document import Document
 
         class _Iterator(Iterator):
             def __init__(self, pages):

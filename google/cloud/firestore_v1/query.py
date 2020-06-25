@@ -77,13 +77,13 @@ class Query(object):
         parent (:class:`~google.cloud.firestore_v1.collection.CollectionReference`):
             The collection that this query applies to.
         projection (Optional[:class:`google.cloud.proto.firestore.v1.\
-            query_pb2.StructuredQuery.Projection`]):
+            query.StructuredQuery.Projection`]):
             A projection of document fields to limit the query results to.
         field_filters (Optional[Tuple[:class:`google.cloud.proto.firestore.v1.\
-            query_pb2.StructuredQuery.FieldFilter`, ...]]):
+            query.StructuredQuery.FieldFilter`, ...]]):
             The filters to be applied in the query.
         orders (Optional[Tuple[:class:`google.cloud.proto.firestore.v1.\
-            query_pb2.StructuredQuery.Order`, ...]]):
+            query.StructuredQuery.Order`, ...]]):
             The "order by" entries to use in the query.
         limit (Optional[int]):
             The maximum number of documents the query is allowed to return.
@@ -201,9 +201,9 @@ class Query(object):
         for field_path in field_paths:
             field_path_module.split_field_path(field_path)  # raises
 
-        new_projection = query_pb2.StructuredQuery.Projection(
+        new_projection = query.StructuredQuery.Projection(
             fields=[
-                query_pb2.StructuredQuery.FieldReference(field_path=field_path)
+                query.StructuredQuery.FieldReference(field_path=field_path)
                 for field_path in field_paths
             ]
         )
@@ -255,22 +255,22 @@ class Query(object):
         if value is None:
             if op_string != _EQ_OP:
                 raise ValueError(_BAD_OP_NAN_NULL)
-            filter_pb = query_pb2.StructuredQuery.UnaryFilter(
-                field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+            filter_pb = query.StructuredQuery.UnaryFilter(
+                field=query.StructuredQuery.FieldReference(field_path=field_path),
                 op=StructuredQuery.UnaryFilter.Operator.IS_NULL,
             )
         elif _isnan(value):
             if op_string != _EQ_OP:
                 raise ValueError(_BAD_OP_NAN_NULL)
-            filter_pb = query_pb2.StructuredQuery.UnaryFilter(
-                field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+            filter_pb = query.StructuredQuery.UnaryFilter(
+                field=query.StructuredQuery.FieldReference(field_path=field_path),
                 op=StructuredQuery.UnaryFilter.Operator.IS_NAN,
             )
         elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
             raise ValueError(_INVALID_WHERE_TRANSFORM)
         else:
-            filter_pb = query_pb2.StructuredQuery.FieldFilter(
-                field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+            filter_pb = query.StructuredQuery.FieldFilter(
+                field=query.StructuredQuery.FieldReference(field_path=field_path),
                 op=_enum_from_op_string(op_string),
                 value=_helpers.encode_value(value),
             )
@@ -291,8 +291,8 @@ class Query(object):
     @staticmethod
     def _make_order(field_path, direction):
         """Helper for :meth:`order_by`."""
-        return query_pb2.StructuredQuery.Order(
-            field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+        return query.StructuredQuery.Order(
+            field=query.StructuredQuery.FieldReference(field_path=field_path),
             direction=_enum_from_direction(direction),
         )
 
@@ -591,11 +591,11 @@ class Query(object):
         elif num_filters == 1:
             return _filter_pb(self._field_filters[0])
         else:
-            composite_filter = query_pb2.StructuredQuery.CompositeFilter(
+            composite_filter = query.StructuredQuery.CompositeFilter(
                 op=StructuredQuery.CompositeFilter.Operator.AND,
                 filters=[_filter_pb(filter_) for filter_ in self._field_filters],
             )
-            return query_pb2.StructuredQuery.Filter(composite_filter=composite_filter)
+            return query.StructuredQuery.Filter(composite_filter=composite_filter)
 
     @staticmethod
     def _normalize_projection(projection):
@@ -605,10 +605,10 @@ class Query(object):
             fields = list(projection.fields)
 
             if not fields:
-                field_ref = query_pb2.StructuredQuery.FieldReference(
+                field_ref = query.StructuredQuery.FieldReference(
                     field_path="__name__"
                 )
-                return query_pb2.StructuredQuery.Projection(fields=[field_ref])
+                return query.StructuredQuery.Projection(fields=[field_ref])
 
         return projection
 
@@ -713,7 +713,7 @@ class Query(object):
         query_kwargs = {
             "select": projection,
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(
+                query.StructuredQuery.CollectionSelector(
                     collection_id=self._parent.id, all_descendants=self._all_descendants
                 )
             ],
@@ -727,7 +727,7 @@ class Query(object):
         if self._limit is not None:
             query_kwargs["limit"] = wrappers_pb2.Int32Value(value=self._limit)
 
-        return query_pb2.StructuredQuery(**query_kwargs)
+        return query.StructuredQuery(**query_kwargs)
 
     def get(self, transaction=None):
         """Deprecated alias for :meth:`stream`."""
@@ -834,8 +834,8 @@ class Query(object):
 
         orderBys = list(_orders)
 
-        order_pb = query_pb2.StructuredQuery.Order(
-            field=query_pb2.StructuredQuery.FieldReference(field_path="id"),
+        order_pb = query.StructuredQuery.Order(
+            field=query.StructuredQuery.FieldReference(field_path="id"),
             direction=_enum_from_direction(lastDirection),
         )
         orderBys.append(order_pb)
@@ -941,8 +941,8 @@ def _filter_pb(field_or_unary):
 
     Args:
         field_or_unary (Union[google.cloud.proto.firestore.v1.\
-            query_pb2.StructuredQuery.FieldFilter, google.cloud.proto.\
-            firestore.v1.query_pb2.StructuredQuery.FieldFilter]): A
+            query.StructuredQuery.FieldFilter, google.cloud.proto.\
+            firestore.v1.query.StructuredQuery.FieldFilter]): A
             field or unary filter to convert to a generic filter.
 
     Returns:
@@ -952,10 +952,10 @@ def _filter_pb(field_or_unary):
     Raises:
         ValueError: If ``field_or_unary`` is not a field or unary filter.
     """
-    if isinstance(field_or_unary, query_pb2.StructuredQuery.FieldFilter):
-        return query_pb2.StructuredQuery.Filter(field_filter=field_or_unary)
-    elif isinstance(field_or_unary, query_pb2.StructuredQuery.UnaryFilter):
-        return query_pb2.StructuredQuery.Filter(unary_filter=field_or_unary)
+    if isinstance(field_or_unary, query.StructuredQuery.FieldFilter):
+        return query.StructuredQuery.Filter(field_filter=field_or_unary)
+    elif isinstance(field_or_unary, query.StructuredQuery.UnaryFilter):
+        return query.StructuredQuery.Filter(unary_filter=field_or_unary)
     else:
         raise ValueError("Unexpected filter type", type(field_or_unary), field_or_unary)
 
@@ -978,7 +978,7 @@ def _cursor_pb(cursor_pair):
     if cursor_pair is not None:
         data, before = cursor_pair
         value_pbs = [_helpers.encode_value(value) for value in data]
-        return query_pb2.Cursor(values=value_pbs, before=before)
+        return query.Cursor(values=value_pbs, before=before)
 
 
 def _query_response_to_snapshot(response_pb, collection, expected_prefix):

@@ -437,7 +437,7 @@ class DocumentReference(object):
             raise ValueError("'field_paths' must be a sequence of paths, not a string.")
 
         if field_paths is not None:
-            mask = common_pb2.DocumentMask(field_paths=sorted(field_paths))
+            mask = common.DocumentMask(field_paths=sorted(field_paths))
         else:
             mask = None
 
@@ -755,7 +755,7 @@ def _first_write_result(write_results):
 
     Args:
         write_results (List[google.cloud.proto.firestore.v1beta1.\
-            write_pb2.WriteResult, ...]: The write results from a
+            write.WriteResult, ...]: The write results from a
             ``CommitResponse``.
 
     Returns:

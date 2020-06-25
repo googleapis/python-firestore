@@ -54,15 +54,15 @@ class TestWriteBatch(unittest.TestCase):
         document_data = {"a": 10, "b": 2.5}
         ret_val = batch.create(reference, document_data)
         self.assertIsNone(ret_val)
-        new_write_pb = write_pb2.Write(
-            update=document_pb2.Document(
+        new_write_pb = write.Write(
+            update=document.Document(
                 name=reference._document_path,
                 fields={
                     "a": _value_pb(integer_value=document_data["a"]),
                     "b": _value_pb(double_value=document_data["b"]),
                 },
             ),
-            current_document=common_pb2.Precondition(exists=False),
+            current_document=common.Precondition(exists=False),
         )
         self.assertEqual(batch._write_pbs, [new_write_pb])
 
@@ -80,8 +80,8 @@ class TestWriteBatch(unittest.TestCase):
         document_data = {field: value}
         ret_val = batch.set(reference, document_data)
         self.assertIsNone(ret_val)
-        new_write_pb = write_pb2.Write(
-            update=document_pb2.Document(
+        new_write_pb = write.Write(
+            update=document.Document(
                 name=reference._document_path,
                 fields={field: _value_pb(string_value=value)},
             )
@@ -102,8 +102,8 @@ class TestWriteBatch(unittest.TestCase):
         document_data = {field: value}
         ret_val = batch.set(reference, document_data, merge=True)
         self.assertIsNone(ret_val)
-        new_write_pb = write_pb2.Write(
-            update=document_pb2.Document(
+        new_write_pb = write.Write(
+            update=document.Document(
                 name=reference._document_path,
                 fields={field: _value_pb(string_value=value)},
             ),
@@ -128,14 +128,14 @@ class TestWriteBatch(unittest.TestCase):
         ret_val = batch.update(reference, field_updates)
         self.assertIsNone(ret_val)
 
-        map_pb = document_pb2.MapValue(fields={"foot": _value_pb(string_value=value)})
-        new_write_pb = write_pb2.Write(
-            update=document_pb2.Document(
+        map_pb = document.MapValue(fields={"foot": _value_pb(string_value=value)})
+        new_write_pb = write.Write(
+            update=document.Document(
                 name=reference._document_path,
                 fields={"head": _value_pb(map_value=map_pb)},
             ),
-            update_mask=common_pb2.DocumentMask(field_paths=[field_path]),
-            current_document=common_pb2.Precondition(exists=True),
+            update_mask=common.DocumentMask(field_paths=[field_path]),
+            current_document=common.Precondition(exists=True),
         )
         self.assertEqual(batch._write_pbs, [new_write_pb])
 
@@ -149,7 +149,7 @@ class TestWriteBatch(unittest.TestCase):
         reference = client.document("early", "mornin", "dawn", "now")
         ret_val = batch.delete(reference)
         self.assertIsNone(ret_val)
-        new_write_pb = write_pb2.Write(delete=reference._document_path)
+        new_write_pb = write.Write(delete=reference._document_path)
         self.assertEqual(batch._write_pbs, [new_write_pb])
 
     def test_commit(self):
@@ -161,7 +161,7 @@ class TestWriteBatch(unittest.TestCase):
         firestore_api = mock.Mock(spec=["commit"])
         timestamp = timestamp_pb2.Timestamp(seconds=1234567, nanos=123456798)
         commit_response = firestore.CommitResponse(
-            write_results=[write_pb2.WriteResult(), write_pb2.WriteResult()],
+            write_results=[write.WriteResult(), write.WriteResult()],
             commit_time=timestamp,
         )
         firestore_api.commit.return_value = commit_response
@@ -201,7 +201,7 @@ class TestWriteBatch(unittest.TestCase):
         firestore_api = mock.Mock(spec=["commit"])
         timestamp = timestamp_pb2.Timestamp(seconds=1234567, nanos=123456798)
         commit_response = firestore.CommitResponse(
-            write_results=[write_pb2.WriteResult(), write_pb2.WriteResult()],
+            write_results=[write.WriteResult(), write.WriteResult()],
             commit_time=timestamp,
         )
         firestore_api.commit.return_value = commit_response
@@ -253,7 +253,7 @@ class TestWriteBatch(unittest.TestCase):
 
 
 def _value_pb(**kwargs):
-    from google.cloud.firestore_v1.proto.document_pb2 import Value
+    from google.cloud.firestore_v1.proto.document import Value
 
     return Value(**kwargs)
 

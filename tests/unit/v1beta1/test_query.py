@@ -168,9 +168,9 @@ class TestQuery(unittest.TestCase):
     def _make_projection_for_select(field_paths):
         from google.cloud.firestore_v1beta1.types import query
 
-        return query_pb2.StructuredQuery.Projection(
+        return query.StructuredQuery.Projection(
             fields=[
-                query_pb2.StructuredQuery.FieldReference(field_path=field_path)
+                query.StructuredQuery.FieldReference(field_path=field_path)
                 for field_path in field_paths
             ]
         )
@@ -223,10 +223,10 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(len(new_query._field_filters), 1)
 
         field_pb = new_query._field_filters[0]
-        expected_pb = query_pb2.StructuredQuery.FieldFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path="power.level"),
+        expected_pb = query.StructuredQuery.FieldFilter(
+            field=query.StructuredQuery.FieldReference(field_path="power.level"),
             op=StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-            value=document_pb2.Value(integer_value=9000),
+            value=document.Value(integer_value=9000),
         )
         self.assertEqual(field_pb, expected_pb)
         self._compare_queries(query, new_query, "_field_filters")
@@ -243,8 +243,8 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(len(new_query._field_filters), 1)
 
         field_pb = new_query._field_filters[0]
-        expected_pb = query_pb2.StructuredQuery.UnaryFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+        expected_pb = query.StructuredQuery.UnaryFilter(
+            field=query.StructuredQuery.FieldReference(field_path=field_path),
             op=op_enum,
         )
         self.assertEqual(field_pb, expected_pb)
@@ -310,8 +310,8 @@ class TestQuery(unittest.TestCase):
         query2 = query1.order_by(field_path2)
         self.assertIsNot(query2, query1)
         self.assertIsInstance(query2, klass)
-        order_pb2 = _make_order_pb(field_path2, StructuredQuery.Direction.ASCENDING)
-        self.assertEqual(query2._orders, (order_pb2,))
+        order = _make_order_pb(field_path2, StructuredQuery.Direction.ASCENDING)
+        self.assertEqual(query2._orders, (order,))
         self._compare_queries(query1, query2, "_orders")
 
         # Make sure it appends to the orders.
@@ -320,7 +320,7 @@ class TestQuery(unittest.TestCase):
         self.assertIsNot(query3, query2)
         self.assertIsInstance(query3, klass)
         order_pb3 = _make_order_pb(field_path3, StructuredQuery.Direction.DESCENDING)
-        self.assertEqual(query3._orders, (order_pb2, order_pb3))
+        self.assertEqual(query3._orders, (order, order_pb3))
         self._compare_queries(query2, query3, "_orders")
 
     def test_limit(self):
@@ -571,11 +571,11 @@ class TestQuery(unittest.TestCase):
         query1 = self._make_one(mock.sentinel.parent)
         query2 = query1.where("x.y", ">", 50.5)
         filter_pb = query2._filters_pb()
-        expected_pb = query_pb2.StructuredQuery.Filter(
-            field_filter=query_pb2.StructuredQuery.FieldFilter(
-                field=query_pb2.StructuredQuery.FieldReference(field_path="x.y"),
+        expected_pb = query.StructuredQuery.Filter(
+            field_filter=query.StructuredQuery.FieldFilter(
+                field=query.StructuredQuery.FieldReference(field_path="x.y"),
                 op=StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-                value=document_pb2.Value(double_value=50.5),
+                value=document.Value(double_value=50.5),
             )
         )
         self.assertEqual(filter_pb, expected_pb)
@@ -592,26 +592,26 @@ class TestQuery(unittest.TestCase):
 
         filter_pb = query3._filters_pb()
         op_class = StructuredQuery.FieldFilter.Operator
-        expected_pb = query_pb2.StructuredQuery.Filter(
-            composite_filter=query_pb2.StructuredQuery.CompositeFilter(
+        expected_pb = query.StructuredQuery.Filter(
+            composite_filter=query.StructuredQuery.CompositeFilter(
                 op=StructuredQuery.CompositeFilter.Operator.AND,
                 filters=[
-                    query_pb2.StructuredQuery.Filter(
-                        field_filter=query_pb2.StructuredQuery.FieldFilter(
-                            field=query_pb2.StructuredQuery.FieldReference(
+                    query.StructuredQuery.Filter(
+                        field_filter=query.StructuredQuery.FieldFilter(
+                            field=query.StructuredQuery.FieldReference(
                                 field_path="x.y"
                             ),
                             op=op_class.GREATER_THAN,
-                            value=document_pb2.Value(double_value=50.5),
+                            value=document.Value(double_value=50.5),
                         )
                     ),
-                    query_pb2.StructuredQuery.Filter(
-                        field_filter=query_pb2.StructuredQuery.FieldFilter(
-                            field=query_pb2.StructuredQuery.FieldReference(
+                    query.StructuredQuery.Filter(
+                        field_filter=query.StructuredQuery.FieldFilter(
+                            field=query.StructuredQuery.FieldReference(
                                 field_path="ABC"
                             ),
                             op=op_class.EQUAL,
-                            value=document_pb2.Value(integer_value=123),
+                            value=document.Value(integer_value=123),
                         )
                     ),
                 ],
@@ -834,30 +834,30 @@ class TestQuery(unittest.TestCase):
         structured_query_pb = query8._to_protobuf()
         query_kwargs = {
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "select": query_pb2.StructuredQuery.Projection(
+            "select": query.StructuredQuery.Projection(
                 fields=[
-                    query_pb2.StructuredQuery.FieldReference(field_path=field_path)
+                    query.StructuredQuery.FieldReference(field_path=field_path)
                     for field_path in ["X", "Y", "Z"]
                 ]
             ),
-            "where": query_pb2.StructuredQuery.Filter(
-                field_filter=query_pb2.StructuredQuery.FieldFilter(
-                    field=query_pb2.StructuredQuery.FieldReference(field_path="Y"),
+            "where": query.StructuredQuery.Filter(
+                field_filter=query.StructuredQuery.FieldFilter(
+                    field=query.StructuredQuery.FieldReference(field_path="Y"),
                     op=StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-                    value=document_pb2.Value(double_value=2.5),
+                    value=document.Value(double_value=2.5),
                 )
             ),
             "order_by": [_make_order_pb("X", StructuredQuery.Direction.ASCENDING)],
-            "start_at": query_pb2.Cursor(
-                values=[document_pb2.Value(integer_value=10)], before=True
+            "start_at": query.Cursor(
+                values=[document.Value(integer_value=10)], before=True
             ),
-            "end_at": query_pb2.Cursor(values=[document_pb2.Value(integer_value=25)]),
+            "end_at": query.Cursor(values=[document.Value(integer_value=25)]),
             "offset": 3,
             "limit": wrappers_pb2.Int32Value(value=17),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_select_only(self):
@@ -871,16 +871,16 @@ class TestQuery(unittest.TestCase):
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "select": query_pb2.StructuredQuery.Projection(
+            "select": query.StructuredQuery.Projection(
                 fields=[
-                    query_pb2.StructuredQuery.FieldReference(field_path=field_path)
+                    query.StructuredQuery.FieldReference(field_path=field_path)
                     for field_path in field_paths
                 ]
             ),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_where_only(self):
@@ -896,17 +896,17 @@ class TestQuery(unittest.TestCase):
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "where": query_pb2.StructuredQuery.Filter(
-                field_filter=query_pb2.StructuredQuery.FieldFilter(
-                    field=query_pb2.StructuredQuery.FieldReference(field_path="a"),
+            "where": query.StructuredQuery.Filter(
+                field_filter=query.StructuredQuery.FieldFilter(
+                    field=query.StructuredQuery.FieldReference(field_path="a"),
                     op=StructuredQuery.FieldFilter.Operator.EQUAL,
-                    value=document_pb2.Value(string_value=u"b"),
+                    value=document.Value(string_value=u"b"),
                 )
             ),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_order_by_only(self):
@@ -921,11 +921,11 @@ class TestQuery(unittest.TestCase):
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "order_by": [_make_order_pb("abc", StructuredQuery.Direction.ASCENDING)],
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_start_at_only(self):
@@ -941,14 +941,14 @@ class TestQuery(unittest.TestCase):
         structured_query_pb = query._to_protobuf()
         query_kwargs = {
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "order_by": [_make_order_pb("X.Y", StructuredQuery.Direction.ASCENDING)],
-            "start_at": query_pb2.Cursor(
-                values=[document_pb2.Value(string_value=u"Z")]
+            "start_at": query.Cursor(
+                values=[document.Value(string_value=u"Z")]
             ),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_end_at_only(self):
@@ -964,12 +964,12 @@ class TestQuery(unittest.TestCase):
         structured_query_pb = query._to_protobuf()
         query_kwargs = {
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "order_by": [_make_order_pb("a", StructuredQuery.Direction.ASCENDING)],
-            "end_at": query_pb2.Cursor(values=[document_pb2.Value(integer_value=88)]),
+            "end_at": query.Cursor(values=[document.Value(integer_value=88)]),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_offset_only(self):
@@ -983,11 +983,11 @@ class TestQuery(unittest.TestCase):
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "offset": offset,
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_limit_only(self):
@@ -1002,11 +1002,11 @@ class TestQuery(unittest.TestCase):
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
             "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "limit": wrappers_pb2.Int32Value(value=limit),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
 
         self.assertEqual(structured_query_pb, expected_pb)
 
@@ -1442,12 +1442,12 @@ class Test__filter_pb(unittest.TestCase):
 
         from google.cloud.firestore_v1beta1.types import query
 
-        unary_pb = query_pb2.StructuredQuery.UnaryFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path="a.b.c"),
+        unary_pb = query.StructuredQuery.UnaryFilter(
+            field=query.StructuredQuery.FieldReference(field_path="a.b.c"),
             op=StructuredQuery.UnaryFilter.Operator.IS_NULL,
         )
         filter_pb = self._call_fut(unary_pb)
-        expected_pb = query_pb2.StructuredQuery.Filter(unary_filter=unary_pb)
+        expected_pb = query.StructuredQuery.Filter(unary_filter=unary_pb)
         self.assertEqual(filter_pb, expected_pb)
 
     def test_field(self):
@@ -1456,13 +1456,13 @@ class Test__filter_pb(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
-        field_filter_pb = query_pb2.StructuredQuery.FieldFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path="XYZ"),
+        field_filter_pb = query.StructuredQuery.FieldFilter(
+            field=query.StructuredQuery.FieldReference(field_path="XYZ"),
             op=StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-            value=document_pb2.Value(double_value=90.75),
+            value=document.Value(double_value=90.75),
         )
         filter_pb = self._call_fut(field_filter_pb)
-        expected_pb = query_pb2.StructuredQuery.Filter(field_filter=field_filter_pb)
+        expected_pb = query.StructuredQuery.Filter(field_filter=field_filter_pb)
         self.assertEqual(filter_pb, expected_pb)
 
     def test_bad_type(self):
@@ -1489,7 +1489,7 @@ class Test__cursor_pb(unittest.TestCase):
 
         cursor_pb = self._call_fut(cursor_pair)
 
-        expected_pb = query_pb2.Cursor(
+        expected_pb = query.Cursor(
             values=[_helpers.encode_value(value) for value in data], before=True
         )
         self.assertEqual(cursor_pb, expected_pb)
@@ -1555,8 +1555,8 @@ def _make_client(project="project-project"):
 def _make_order_pb(field_path, direction):
     from google.cloud.firestore_v1beta1.types import query
 
-    return query_pb2.StructuredQuery.Order(
-        field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+    return query.StructuredQuery.Order(
+        field=query.StructuredQuery.FieldReference(field_path=field_path),
         direction=direction,
     )
 
@@ -1575,7 +1575,7 @@ def _make_query_response(**kwargs):
     name = kwargs.pop("name", None)
     data = kwargs.pop("data", None)
     if name is not None and data is not None:
-        document_pb = document_pb2.Document(
+        document_pb = document.Document(
             name=name, fields=_helpers.encode_dict(data)
         )
         delta = datetime.timedelta(seconds=100)

@@ -69,8 +69,8 @@ class TestTransaction(unittest.TestCase):
 
         transaction = self._make_one(mock.sentinel.client, read_only=True)
         options_pb = transaction._options_protobuf(None)
-        expected_pb = common_pb2.TransactionOptions(
-            read_only=common_pb2.TransactionOptions.ReadOnly()
+        expected_pb = common.TransactionOptions(
+            read_only=common.TransactionOptions.ReadOnly()
         )
         self.assertEqual(options_pb, expected_pb)
 
@@ -96,8 +96,8 @@ class TestTransaction(unittest.TestCase):
         transaction = self._make_one(mock.sentinel.client)
         retry_id = b"hocus-pocus"
         options_pb = transaction._options_protobuf(retry_id)
-        expected_pb = common_pb2.TransactionOptions(
-            read_write=common_pb2.TransactionOptions.ReadWrite(
+        expected_pb = common.TransactionOptions(
+            read_write=common.TransactionOptions.ReadWrite(
                 retry_transaction=retry_id
             )
         )
@@ -159,7 +159,7 @@ class TestTransaction(unittest.TestCase):
     def test__clean_up(self):
         transaction = self._make_one(mock.sentinel.client)
         transaction._write_pbs.extend(
-            [mock.sentinel.write_pb1, mock.sentinel.write_pb2]
+            [mock.sentinel.write_pb1, mock.sentinel.write]
         )
         transaction._id = b"not-this-time-my-friend"
 
@@ -170,7 +170,7 @@ class TestTransaction(unittest.TestCase):
         self.assertIsNone(transaction._id)
 
     def test__rollback(self):
-        from google.protobuf import empty_pb2
+        from google.protobuf import empty_pb2 as empty_pb2
         from google.cloud.firestore_v1.services import firestore_client
 
         # Create a minimal fake GAPIC with a dummy result.
@@ -250,7 +250,7 @@ class TestTransaction(unittest.TestCase):
             firestore_client.FirestoreClient, instance=True
         )
         commit_response = firestore.CommitResponse(
-            write_results=[write_pb2.WriteResult()]
+            write_results=[write.WriteResult()]
         )
         firestore_api.commit.return_value = commit_response
 
@@ -437,8 +437,8 @@ class Test_Transactional(unittest.TestCase):
         # Verify mocks.
         to_wrap.assert_called_once_with(transaction)
         firestore_api = transaction._client._firestore_api
-        options_ = common_pb2.TransactionOptions(
-            read_write=common_pb2.TransactionOptions.ReadWrite(
+        options_ = common.TransactionOptions(
+            read_write=common.TransactionOptions.ReadWrite(
                 retry_transaction=txn_id1
             )
         )
@@ -688,7 +688,7 @@ class Test_Transactional(unittest.TestCase):
         firestore_api = transaction._client._firestore_api
         firestore_api.commit.side_effect = [
             exc,
-            firestore.CommitResponse(write_results=[write_pb2.WriteResult()]),
+            firestore.CommitResponse(write_results=[write.WriteResult()]),
         ]
 
         # Call the __call__-able ``wrapped``.
@@ -704,8 +704,8 @@ class Test_Transactional(unittest.TestCase):
         self.assertEqual(to_wrap.mock_calls, [wrapped_call, wrapped_call])
         firestore_api = transaction._client._firestore_api
         db_str = transaction._client._database_string
-        options_ = common_pb2.TransactionOptions(
-            read_write=common_pb2.TransactionOptions.ReadWrite(retry_transaction=txn_id)
+        options_ = common.TransactionOptions(
+            read_write=common.TransactionOptions.ReadWrite(retry_transaction=txn_id)
         )
         self.assertEqual(
             firestore_api.begin_transaction.mock_calls,
@@ -992,7 +992,7 @@ def _make_client(project="feral-tom-cat"):
 
 
 def _make_transaction(txn_id, **txn_kwargs):
-    from google.protobuf import empty_pb2
+    from google.protobuf import empty_pb2 as empty_pb2
     from google.cloud.firestore_v1.services import firestore_client
     from google.cloud.firestore_v1.types import firestore
     from google.cloud.firestore_v1.types import write
@@ -1009,7 +1009,7 @@ def _make_transaction(txn_id, **txn_kwargs):
     firestore_api.rollback.return_value = empty_pb2.Empty()
     # ... and a dummy ``Commit`` result.
     commit_response = firestore.CommitResponse(
-        write_results=[write_pb2.WriteResult()]
+        write_results=[write.WriteResult()]
     )
     firestore_api.commit.return_value = commit_response
 

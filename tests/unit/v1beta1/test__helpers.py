@@ -220,7 +220,7 @@ class Test_encode_value(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_array(self):
-        from google.cloud.firestore_v1beta1.proto.document_pb2 import ArrayValue
+        from google.cloud.firestore_v1beta1.proto.document import ArrayValue
 
         result = self._call_fut([99, True, 118.5])
 
@@ -235,7 +235,7 @@ class Test_encode_value(unittest.TestCase):
         self.assertEqual(result, expected)
 
     def test_map(self):
-        from google.cloud.firestore_v1beta1.proto.document_pb2 import MapValue
+        from google.cloud.firestore_v1beta1.proto.document import MapValue
 
         result = self._call_fut({"abc": 285, "def": b"piglatin"})
 
@@ -264,8 +264,8 @@ class Test_encode_dict(unittest.TestCase):
     def test_many_types(self):
         from google.protobuf import struct_pb2
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1beta1.proto.document_pb2 import ArrayValue
-        from google.cloud.firestore_v1beta1.proto.document_pb2 import MapValue
+        from google.cloud.firestore_v1beta1.proto.document import ArrayValue
+        from google.cloud.firestore_v1beta1.proto.document import MapValue
 
         dt_seconds = 1497397225
         dt_nanos = 465964000
@@ -450,7 +450,7 @@ class Test_decode_value(unittest.TestCase):
         sub_value1 = _value_pb(boolean_value=True)
         sub_value2 = _value_pb(double_value=14.1396484375)
         sub_value3 = _value_pb(bytes_value=b"\xde\xad\xbe\xef")
-        array_pb = document_pb2.ArrayValue(values=[sub_value1, sub_value2, sub_value3])
+        array_pb = document.ArrayValue(values=[sub_value1, sub_value2, sub_value3])
         value = _value_pb(array_value=array_pb)
 
         expected = [
@@ -465,7 +465,7 @@ class Test_decode_value(unittest.TestCase):
 
         sub_value1 = _value_pb(integer_value=187680)
         sub_value2 = _value_pb(string_value=u"how low can you go?")
-        map_pb = document_pb2.MapValue(
+        map_pb = document.MapValue(
             fields={"first": sub_value1, "second": sub_value2}
         )
         value = _value_pb(map_value=map_pb)
@@ -482,19 +482,19 @@ class Test_decode_value(unittest.TestCase):
         actual_value1 = 1009876
         actual_value2 = u"hey you guys"
         actual_value3 = 90.875
-        map_pb1 = document_pb2.MapValue(
+        map_pb1 = document.MapValue(
             fields={
                 "lowest": _value_pb(integer_value=actual_value1),
                 "aside": _value_pb(string_value=actual_value2),
             }
         )
-        map_pb2 = document_pb2.MapValue(
+        map_pb2 = document.MapValue(
             fields={
                 "middle": _value_pb(map_value=map_pb1),
                 "aside": _value_pb(boolean_value=True),
             }
         )
-        map_pb3 = document_pb2.MapValue(
+        map_pb3 = document.MapValue(
             fields={
                 "highest": _value_pb(map_value=map_pb2),
                 "aside": _value_pb(double_value=actual_value3),
@@ -538,8 +538,8 @@ class Test_decode_dict(unittest.TestCase):
     def test_many_types(self):
         from google.protobuf import struct_pb2
         from google.protobuf import timestamp_pb2
-        from google.cloud.firestore_v1beta1.proto.document_pb2 import ArrayValue
-        from google.cloud.firestore_v1beta1.proto.document_pb2 import MapValue
+        from google.cloud.firestore_v1beta1.proto.document import ArrayValue
+        from google.cloud.firestore_v1beta1.proto.document import MapValue
         from google.cloud._helpers import UTC
         from google.cloud.firestore_v1beta1.field_path import FieldPath
 
@@ -619,7 +619,7 @@ class Test_get_doc_id(unittest.TestCase):
         actual_id = "this-is-the-one"
         name = "{}/{}".format(prefix, actual_id)
 
-        document_pb = document_pb2.Document(name=name)
+        document_pb = document.Document(name=name)
         document_id = self._call_fut(document_pb, prefix)
         self.assertEqual(document_id, actual_id)
 
@@ -630,7 +630,7 @@ class Test_get_doc_id(unittest.TestCase):
         wrong_prefix = self._dummy_ref_string("the-wrong-one")
         name = "{}/{}".format(actual_prefix, "sorry-wont-works")
 
-        document_pb = document_pb2.Document(name=name)
+        document_pb = document.Document(name=name)
         with self.assertRaises(ValueError) as exc_info:
             self._call_fut(document_pb, wrong_prefix)
 
@@ -1065,7 +1065,7 @@ class TestDocumentExtractor(unittest.TestCase):
 
         update_pb = inst.get_update_pb(document_path, exists=False)
 
-        self.assertIsInstance(update_pb, write_pb2.Write)
+        self.assertIsInstance(update_pb, write.Write)
         self.assertEqual(update_pb.update.name, document_path)
         self.assertEqual(update_pb.update.fields, document_data)
         self.assertTrue(update_pb.HasField("current_document"))
@@ -1083,7 +1083,7 @@ class TestDocumentExtractor(unittest.TestCase):
 
         update_pb = inst.get_update_pb(document_path)
 
-        self.assertIsInstance(update_pb, write_pb2.Write)
+        self.assertIsInstance(update_pb, write.Write)
         self.assertEqual(update_pb.update.name, document_path)
         self.assertEqual(update_pb.update.fields, encode_dict(document_data))
         self.assertFalse(update_pb.HasField("current_document"))
@@ -1101,7 +1101,7 @@ class TestDocumentExtractor(unittest.TestCase):
 
         transform_pb = inst.get_transform_pb(document_path, exists=False)
 
-        self.assertIsInstance(transform_pb, write_pb2.Write)
+        self.assertIsInstance(transform_pb, write.Write)
         self.assertEqual(transform_pb.transform.document, document_path)
         transforms = transform_pb.transform.field_transforms
         self.assertEqual(len(transforms), 1)
@@ -1124,7 +1124,7 @@ class TestDocumentExtractor(unittest.TestCase):
 
         transform_pb = inst.get_transform_pb(document_path)
 
-        self.assertIsInstance(transform_pb, write_pb2.Write)
+        self.assertIsInstance(transform_pb, write.Write)
         self.assertEqual(transform_pb.transform.document, document_path)
         transforms = transform_pb.transform.field_transforms
         self.assertEqual(len(transforms), 1)
@@ -1152,7 +1152,7 @@ class TestDocumentExtractor(unittest.TestCase):
 
         transform_pb = inst.get_transform_pb(document_path)
 
-        self.assertIsInstance(transform_pb, write_pb2.Write)
+        self.assertIsInstance(transform_pb, write.Write)
         self.assertEqual(transform_pb.transform.document, document_path)
         transforms = transform_pb.transform.field_transforms
         self.assertEqual(len(transforms), 1)
@@ -1175,7 +1175,7 @@ class TestDocumentExtractor(unittest.TestCase):
 
         transform_pb = inst.get_transform_pb(document_path)
 
-        self.assertIsInstance(transform_pb, write_pb2.Write)
+        self.assertIsInstance(transform_pb, write.Write)
         self.assertEqual(transform_pb.transform.document, document_path)
         transforms = transform_pb.transform.field_transforms
         self.assertEqual(len(transforms), 1)
@@ -1200,9 +1200,9 @@ class Test_pbs_for_create(unittest.TestCase):
         from google.cloud.firestore_v1beta1._helpers import encode_dict
         from google.cloud.firestore_v1beta1.types import common
 
-        return write_pb2.Write(
-            update=document_pb2.Document(name=document_path, fields=encode_dict(data)),
-            current_document=common_pb2.Precondition(exists=False),
+        return write.Write(
+            update=document.Document(name=document_path, fields=encode_dict(data)),
+            current_document=common.Precondition(exists=False),
         )
 
     @staticmethod
@@ -1212,14 +1212,14 @@ class Test_pbs_for_create(unittest.TestCase):
 
         server_val = DocumentTransform.FieldTransform.ServerValue
         transforms = [
-            write_pb2.DocumentTransform.FieldTransform(
+            write.DocumentTransform.FieldTransform(
                 field_path=field, set_to_server_value=server_val.REQUEST_TIME
             )
             for field in fields
         ]
 
-        return write_pb2.Write(
-            transform=write_pb2.DocumentTransform(
+        return write.Write(
+            transform=write.DocumentTransform(
                 document=document_path, field_transforms=transforms
             )
         )
@@ -1278,8 +1278,8 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import write
         from google.cloud.firestore_v1beta1._helpers import encode_dict
 
-        return write_pb2.Write(
-            update=document_pb2.Document(name=document_path, fields=encode_dict(data))
+        return write.Write(
+            update=document.Document(name=document_path, fields=encode_dict(data))
         )
 
     @staticmethod
@@ -1289,14 +1289,14 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
 
         server_val = DocumentTransform.FieldTransform.ServerValue
         transforms = [
-            write_pb2.DocumentTransform.FieldTransform(
+            write.DocumentTransform.FieldTransform(
                 field_path=field, set_to_server_value=server_val.REQUEST_TIME
             )
             for field in fields
         ]
 
-        return write_pb2.Write(
-            transform=write_pb2.DocumentTransform(
+        return write.Write(
+            transform=write.DocumentTransform(
                 document=document_path, field_transforms=transforms
             )
         )
@@ -1579,8 +1579,8 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import write
         from google.cloud.firestore_v1beta1._helpers import encode_dict
 
-        return write_pb2.Write(
-            update=document_pb2.Document(name=document_path, fields=encode_dict(data))
+        return write.Write(
+            update=document.Document(name=document_path, fields=encode_dict(data))
         )
 
     @staticmethod
@@ -1590,14 +1590,14 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
 
         server_val = DocumentTransform.FieldTransform.ServerValue
         transforms = [
-            write_pb2.DocumentTransform.FieldTransform(
+            write.DocumentTransform.FieldTransform(
                 field_path=field, set_to_server_value=server_val.REQUEST_TIME
             )
             for field in fields
         ]
 
-        return write_pb2.Write(
-            transform=write_pb2.DocumentTransform(
+        return write.Write(
+            transform=write.DocumentTransform(
                 document=document_path, field_transforms=transforms
             )
         )
@@ -1607,7 +1607,7 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import common
 
         update_pb.update_mask.CopyFrom(
-            common_pb2.DocumentMask(field_paths=sorted(field_paths))
+            common.DocumentMask(field_paths=sorted(field_paths))
         )
 
     def test_with_merge_true_wo_transform(self):
@@ -1800,29 +1800,29 @@ class Test_pbs_for_update(unittest.TestCase):
 
         write_pbs = self._call_fut(document_path, field_updates, option)
 
-        map_pb = document_pb2.MapValue(fields={"yum": _value_pb(bytes_value=value)})
+        map_pb = document.MapValue(fields={"yum": _value_pb(bytes_value=value)})
 
         field_paths = [field_path1]
 
-        expected_update_pb = write_pb2.Write(
-            update=document_pb2.Document(
+        expected_update_pb = write.Write(
+            update=document.Document(
                 name=document_path, fields={"bitez": _value_pb(map_value=map_pb)}
             ),
-            update_mask=common_pb2.DocumentMask(field_paths=field_paths),
+            update_mask=common.DocumentMask(field_paths=field_paths),
             **write_kwargs
         )
         if isinstance(option, _helpers.ExistsOption):
-            precondition = common_pb2.Precondition(exists=False)
+            precondition = common.Precondition(exists=False)
             expected_update_pb.current_document.CopyFrom(precondition)
         expected_pbs = [expected_update_pb]
         if do_transform:
             transform_paths = FieldPath.from_string(field_path2)
             server_val = DocumentTransform.FieldTransform.ServerValue
-            expected_transform_pb = write_pb2.Write(
-                transform=write_pb2.DocumentTransform(
+            expected_transform_pb = write.Write(
+                transform=write.DocumentTransform(
                     document=document_path,
                     field_transforms=[
-                        write_pb2.DocumentTransform.FieldTransform(
+                        write.DocumentTransform.FieldTransform(
                             field_path=transform_paths.to_api_repr(),
                             set_to_server_value=server_val.REQUEST_TIME,
                         )
@@ -1835,7 +1835,7 @@ class Test_pbs_for_update(unittest.TestCase):
     def test_without_option(self):
         from google.cloud.firestore_v1beta1.types import common
 
-        precondition = common_pb2.Precondition(exists=True)
+        precondition = common.Precondition(exists=True)
         self._helper(current_document=precondition)
 
     def test_with_exists_option(self):
@@ -1847,7 +1847,7 @@ class Test_pbs_for_update(unittest.TestCase):
     def test_update_and_transform(self):
         from google.cloud.firestore_v1beta1.types import common
 
-        precondition = common_pb2.Precondition(exists=True)
+        precondition = common.Precondition(exists=True)
         self._helper(current_document=precondition, do_transform=True)
 
 
@@ -1864,7 +1864,7 @@ class Test_pb_for_delete(unittest.TestCase):
         document_path = _make_ref_string(u"chicken", u"philly", u"one", u"two")
         write_pb = self._call_fut(document_path, option)
 
-        expected_pb = write_pb2.Write(delete=document_path, **write_kwargs)
+        expected_pb = write.Write(delete=document_path, **write_kwargs)
         self.assertEqual(write_pb, expected_pb)
 
     def test_without_option(self):
@@ -1877,7 +1877,7 @@ class Test_pb_for_delete(unittest.TestCase):
 
         update_time = timestamp_pb2.Timestamp(seconds=1309700594, nanos=822211297)
         option = _helpers.LastUpdateOption(update_time)
-        precondition = common_pb2.Precondition(update_time=update_time)
+        precondition = common.Precondition(update_time=update_time)
         self._helper(option=option, current_document=precondition)
 
 
@@ -2001,11 +2001,11 @@ class TestLastUpdateOption(unittest.TestCase):
 
         timestamp_pb = timestamp_pb2.Timestamp(seconds=683893592, nanos=229362000)
         option = self._make_one(timestamp_pb)
-        write_pb = write_pb2.Write()
+        write_pb = write.Write()
         ret_val = option.modify_write(write_pb)
 
         self.assertIsNone(ret_val)
-        expected_doc = common_pb2.Precondition(update_time=timestamp_pb)
+        expected_doc = common.Precondition(update_time=timestamp_pb)
         self.assertEqual(write_pb.current_document, expected_doc)
 
 
@@ -2045,16 +2045,16 @@ class TestExistsOption(unittest.TestCase):
 
         for exists in (True, False):
             option = self._make_one(exists)
-            write_pb = write_pb2.Write()
+            write_pb = write.Write()
             ret_val = option.modify_write(write_pb)
 
             self.assertIsNone(ret_val)
-            expected_doc = common_pb2.Precondition(exists=exists)
+            expected_doc = common.Precondition(exists=exists)
             self.assertEqual(write_pb.current_document, expected_doc)
 
 
 def _value_pb(**kwargs):
-    from google.cloud.firestore_v1beta1.proto.document_pb2 import Value
+    from google.cloud.firestore_v1beta1.proto.document import Value
 
     return Value(**kwargs)
 
