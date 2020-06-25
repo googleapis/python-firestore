@@ -128,19 +128,19 @@ class Value(proto.Message):
             A map value.
     """
 
-    null_value = proto.Field(proto.ENUM, number=11, enum=struct.NullValue,)
-    boolean_value = proto.Field(proto.BOOL, number=1)
-    integer_value = proto.Field(proto.INT64, number=2)
-    double_value = proto.Field(proto.DOUBLE, number=3)
+    null_value = proto.Field(proto.ENUM, number=11, enum=struct.NullValue, oneof="value_type")
+    boolean_value = proto.Field(proto.BOOL, number=1, oneof="value_type")
+    integer_value = proto.Field(proto.INT64, number=2, oneof="value_type")
+    double_value = proto.Field(proto.DOUBLE, number=3, oneof="value_type")
     timestamp_value = proto.Field(
-        proto.MESSAGE, number=10, message=timestamp.Timestamp,
+        proto.MESSAGE, number=10, message=timestamp.Timestamp, oneof="value_type"
     )
-    string_value = proto.Field(proto.STRING, number=17)
-    bytes_value = proto.Field(proto.BYTES, number=18)
-    reference_value = proto.Field(proto.STRING, number=5)
-    geo_point_value = proto.Field(proto.MESSAGE, number=8, message=latlng.LatLng,)
-    array_value = proto.Field(proto.MESSAGE, number=9, message="ArrayValue",)
-    map_value = proto.Field(proto.MESSAGE, number=6, message="MapValue",)
+    string_value = proto.Field(proto.STRING, number=17, oneof="value_type")
+    bytes_value = proto.Field(proto.BYTES, number=18, oneof="value_type")
+    reference_value = proto.Field(proto.STRING, number=5, oneof="value_type")
+    geo_point_value = proto.Field(proto.MESSAGE, number=8, message=latlng.LatLng, oneof="value_type")
+    array_value = proto.Field(proto.MESSAGE, number=9, message="ArrayValue", oneof="value_type")
+    map_value = proto.Field(proto.MESSAGE, number=6, message="MapValue", oneof="value_type")
 
 
 class ArrayValue(proto.Message):

@@ -267,7 +267,7 @@ def decode_value(value, client):
         NotImplementedError: If the ``value_type`` is ``reference_value``.
         ValueError: If the ``value_type`` is unknown.
     """
-    value_type = value.WhichOneof("value_type")
+    value_type = value._pb.WhichOneof("value_type")
 
     if value_type == "null_value":
         return None
