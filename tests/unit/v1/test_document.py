@@ -211,7 +211,7 @@ class TestDocumentReference(unittest.TestCase):
     def _make_commit_repsonse(write_results=None):
         from google.cloud.firestore_v1.types import firestore
 
-        response = mock.create_autospec(firestore_pb2.CommitResponse)
+        response = mock.create_autospec(firestore.CommitResponse)
         response.write_results = write_results or [mock.sentinel.write_result]
         response.commit_time = mock.sentinel.commit_time
         return response

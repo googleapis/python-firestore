@@ -1586,4 +1586,4 @@ def _make_query_response(**kwargs):
 
         kwargs["document"] = document_pb
 
-    return firestore_pb2.RunQueryResponse(**kwargs)
+    return firestore.RunQueryResponse(**kwargs)

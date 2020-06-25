@@ -734,7 +734,7 @@ def _consume_single_get(response_iterator):
 
     Returns:
         ~google.cloud.proto.firestore.v1.\
-            firestore_pb2.BatchGetDocumentsResponse: The single "get"
+            firestore.BatchGetDocumentsResponse: The single "get"
         response in the batch.
 
     Raises:

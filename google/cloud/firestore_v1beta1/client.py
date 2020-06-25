@@ -473,7 +473,7 @@ def _parse_batch_get(get_doc_response, reference_map, client):
 
     Args:
         get_doc_response (~google.cloud.proto.firestore.v1beta1.\
-            firestore_pb2.BatchGetDocumentsResponse): A single response (from
+            firestore.BatchGetDocumentsResponse): A single response (from
             a stream) containing the "get" response for a document.
         reference_map (Dict[str, .DocumentReference]): A mapping (produced
             by :func:`_reference_info`) of fully-qualified document paths to

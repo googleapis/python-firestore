@@ -366,7 +366,7 @@ class TestWatch(unittest.TestCase):
     def test_on_snapshot_target_add(self):
         inst = self._makeOne()
         proto = DummyProto()
-        proto.target_change.target_change_type = firestore.TargetChange.ADD
+        proto.target_change.target_change_type = firestore.TargetChange.TargetChangeType.ADD
         proto.target_change.target_ids = [1]  # not "Py"
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
@@ -376,7 +376,7 @@ class TestWatch(unittest.TestCase):
         inst = self._makeOne()
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore.TargetChange.REMOVE
+        target_change.target_change_type = firestore.TargetChange.TargetChangeType.REMOVE
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Error 1:  hi")
@@ -386,7 +386,7 @@ class TestWatch(unittest.TestCase):
         proto = DummyProto()
         target_change = proto.target_change
         target_change.cause = None
-        target_change.target_change_type = firestore.TargetChange.REMOVE
+        target_change.target_change_type = firestore.TargetChange.TargetChangeType.REMOVE
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Error 13:  internal error")
@@ -400,7 +400,7 @@ class TestWatch(unittest.TestCase):
         inst._reset_docs = reset
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore.TargetChange.RESET
+        target_change.target_change_type = firestore.TargetChange.TargetChangeType.RESET
         inst.on_snapshot(proto)
         self.assertTrue(inst._docs_reset)
 
@@ -409,7 +409,7 @@ class TestWatch(unittest.TestCase):
         inst.current = False
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore.TargetChange.CURRENT
+        target_change.target_change_type = firestore.TargetChange.TargetChangeType.CURRENT
         inst.on_snapshot(proto)
         self.assertTrue(inst.current)
 
@@ -864,6 +864,9 @@ class DummyFirestore(object):
     _database_string = "abc://bar/"
     _rpc_metadata = None
 
+    def ListenRequest(self, **kw):  # pragma: NO COVER
+        pass
+
     def document(self, *document_path):  # pragma: NO COVER
         if len(document_path) == 1:
             path = document_path[0].split("/")
@@ -964,7 +967,7 @@ class DummyChange(object):
         self.target_ids = []
         self.removed_target_ids = []
         self.read_time = 0
-        self.target_change_type = firestore.TargetChange.NO_CHANGE
+        self.target_change_type = firestore.TargetChange.TargetChangeType.NO_CHANGE
         self.resume_token = None
         self.cause = DummyCause()
 

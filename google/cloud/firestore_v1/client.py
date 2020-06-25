@@ -135,7 +135,7 @@ class Client(ClientWithProject):
             # We need this in order to set appropriate keepalive options.
 
             if self._emulator_host is not None:
-                channel = firestore_grpc_transport.firestore_pb2_grpc.grpc.insecure_channel(
+                channel = firestore_grpc_transport.firestore_grpc.grpc.insecure_channel(
                     self._emulator_host
                 )
             else:
@@ -550,7 +550,7 @@ def _parse_batch_get(get_doc_response, reference_map, client):
 
     Args:
         get_doc_response (~google.cloud.proto.firestore.v1.\
-            firestore_pb2.BatchGetDocumentsResponse): A single response (from
+            firestore.BatchGetDocumentsResponse): A single response (from
             a stream) containing the "get" response for a document.
         reference_map (Dict[str, .DocumentReference]): A mapping (produced
             by :func:`_reference_info`) of fully-qualified document paths to

@@ -125,7 +125,7 @@ class TestTransaction(unittest.TestCase):
             firestore_client.FirestoreClient, instance=True
         )
         txn_id = b"to-begin"
-        response = firestore_pb2.BeginTransactionResponse(transaction=txn_id)
+        response = firestore.BeginTransactionResponse(transaction=txn_id)
         firestore_api.begin_transaction.return_value = response
 
         # Attach the fake GAPIC to a real client.
@@ -251,7 +251,7 @@ class TestTransaction(unittest.TestCase):
         firestore_api = mock.create_autospec(
             firestore_client.FirestoreClient, instance=True
         )
-        commit_response = firestore_pb2.CommitResponse(
+        commit_response = firestore.CommitResponse(
             write_results=[write_pb2.WriteResult()]
         )
         firestore_api.commit.return_value = commit_response
@@ -654,7 +654,7 @@ class Test_Transactional(unittest.TestCase):
         firestore_api = transaction._client._firestore_api
         firestore_api.commit.side_effect = [
             exc,
-            firestore_pb2.CommitResponse(write_results=[write_pb2.WriteResult()]),
+            firestore.CommitResponse(write_results=[write_pb2.WriteResult()]),
         ]
 
         # Call the __call__-able ``wrapped``.
@@ -973,12 +973,12 @@ def _make_transaction(txn_id, **txn_kwargs):
         firestore_client.FirestoreClient, instance=True
     )
     # ... with a dummy ``BeginTransactionResponse`` result ...
-    begin_response = firestore_pb2.BeginTransactionResponse(transaction=txn_id)
+    begin_response = firestore.BeginTransactionResponse(transaction=txn_id)
     firestore_api.begin_transaction.return_value = begin_response
     # ... and a dummy ``Rollback`` result ...
     firestore_api.rollback.return_value = empty_pb2.Empty()
     # ... and a dummy ``Commit`` result.
-    commit_response = firestore_pb2.CommitResponse(
+    commit_response = firestore.CommitResponse(
         write_results=[write_pb2.WriteResult()]
     )
     firestore_api.commit.return_value = commit_response

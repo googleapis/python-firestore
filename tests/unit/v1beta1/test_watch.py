@@ -229,7 +229,7 @@ class TestWatch(unittest.TestCase):
         document_reference_class_instance = DummyDocumentReference
         modulename = "google.cloud.firestore_v1beta1.watch"
         pb2 = DummyPb2()
-        with mock.patch("%s.firestore_pb2" % modulename, pb2):
+        with mock.patch("%s.firestore" % modulename, pb2):
             with mock.patch("%s.Watch.ResumableBidiRpc" % modulename, DummyRpc):
                 with mock.patch(
                     "%s.Watch.BackgroundConsumer" % modulename, DummyBackgroundConsumer
@@ -268,7 +268,7 @@ class TestWatch(unittest.TestCase):
     def test_on_snapshot_target_add(self):
         inst = self._makeOne()
         proto = DummyProto()
-        proto.target_change.target_change_type = firestore_pb2.TargetChange.ADD
+        proto.target_change.target_change_type = firestore.TargetChange.TargetChangeType.ADD
         proto.target_change.target_ids = [1]  # not "Py"
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
@@ -278,7 +278,7 @@ class TestWatch(unittest.TestCase):
         inst = self._makeOne()
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore_pb2.TargetChange.REMOVE
+        target_change.target_change_type = firestore.TargetChange.TargetChangeType.REMOVE
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Error 1:  hi")
@@ -288,7 +288,7 @@ class TestWatch(unittest.TestCase):
         proto = DummyProto()
         target_change = proto.target_change
         target_change.cause = None
-        target_change.target_change_type = firestore_pb2.TargetChange.REMOVE
+        target_change.target_change_type = firestore.TargetChange.TargetChangeType.REMOVE
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Error 13:  internal error")
@@ -302,7 +302,7 @@ class TestWatch(unittest.TestCase):
         inst._reset_docs = reset
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore_pb2.TargetChange.RESET
+        target_change.target_change_type = firestore.TargetChange.TargetChangeType.RESET
         inst.on_snapshot(proto)
         self.assertTrue(inst._docs_reset)
 
@@ -311,7 +311,7 @@ class TestWatch(unittest.TestCase):
         inst.current = False
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore_pb2.TargetChange.CURRENT
+        target_change.target_change_type = firestore.TargetChange.TargetChangeType.CURRENT
         inst.on_snapshot(proto)
         self.assertTrue(inst.current)
 
@@ -679,7 +679,7 @@ class DummyFirestoreStub(object):
 class DummyFirestoreClient(object):
     def __init__(self):
         self.transport = mock.Mock(_stubs={"firestore_stub": DummyFirestoreStub()})
-
+    
 
 class DummyDocumentReference(object):
     def __init__(self, *document_path, **kw):
@@ -714,6 +714,9 @@ class DummyFirestore(object):
     _firestore_api = DummyFirestoreClient()
     _database_string = "abc://bar/"
     _rpc_metadata = None
+
+    def ListenRequest(self, **kw):  # pragma: NO COVER
+        pass
 
     def document(self, *document_path):  # pragma: NO COVER
         if len(document_path) == 1:
@@ -807,7 +810,7 @@ class DummyChange(object):
         self.target_ids = []
         self.removed_target_ids = []
         self.read_time = 0
-        self.target_change_type = firestore_pb2.TargetChange.NO_CHANGE
+        self.target_change_type = firestore.TargetChange.TargetChangeType.NO_CHANGE
         self.resume_token = None
         self.cause = DummyCause()
 

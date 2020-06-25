@@ -643,7 +643,7 @@ def _make_credentials():
 def _make_batch_response(**kwargs):
     from google.cloud.firestore_v1beta1.types import firestore
 
-    return firestore_pb2.BatchGetDocumentsResponse(**kwargs)
+    return firestore.BatchGetDocumentsResponse(**kwargs)
 
 
 def _doc_get_info(ref_string, values):

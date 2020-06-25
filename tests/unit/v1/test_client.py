@@ -114,7 +114,7 @@ class TestClient(unittest.TestCase):
         return_value=mock.sentinel.firestore_api,
     )
     @mock.patch(
-        "google.cloud.firestore_v1.service.transports.firestore_grpc_transport.firestore_pb2_grpc.grpc.insecure_channel",
+        "google.cloud.firestore_v1.service.transports.firestore_grpc_transport.firestore_grpc.grpc.insecure_channel",
         autospec=True,
     )
     def test__firestore_api_property_with_emulator(
@@ -721,7 +721,7 @@ def _make_credentials():
 def _make_batch_response(**kwargs):
     from google.cloud.firestore_v1.types import firestore
 
-    return firestore_pb2.BatchGetDocumentsResponse(**kwargs)
+    return firestore.BatchGetDocumentsResponse(**kwargs)
 
 
 def _doc_get_info(ref_string, values):

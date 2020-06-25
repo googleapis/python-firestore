@@ -944,7 +944,7 @@ def _query_response_to_snapshot(response_pb, collection, expected_prefix):
 
     Args:
         response_pb (google.cloud.proto.firestore.v1beta1.\
-            firestore_pb2.RunQueryResponse): A
+            firestore.RunQueryResponse): A
         collection (~.firestore_v1beta1.collection.CollectionReference): A
             reference to the collection that initiated the query.
         expected_prefix (str): The expected prefix for fully-qualified

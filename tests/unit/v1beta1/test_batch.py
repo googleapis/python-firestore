@@ -161,7 +161,7 @@ class TestWriteBatch(unittest.TestCase):
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.Mock(spec=["commit"])
         timestamp = timestamp_pb2.Timestamp(seconds=1234567, nanos=123456798)
-        commit_response = firestore_pb2.CommitResponse(
+        commit_response = firestore.CommitResponse(
             write_results=[write_pb2.WriteResult(), write_pb2.WriteResult()],
             commit_time=timestamp,
         )
@@ -201,7 +201,7 @@ class TestWriteBatch(unittest.TestCase):
 
         firestore_api = mock.Mock(spec=["commit"])
         timestamp = timestamp_pb2.Timestamp(seconds=1234567, nanos=123456798)
-        commit_response = firestore_pb2.CommitResponse(
+        commit_response = firestore.CommitResponse(
             write_results=[write_pb2.WriteResult(), write_pb2.WriteResult()],
             commit_time=timestamp,
         )
