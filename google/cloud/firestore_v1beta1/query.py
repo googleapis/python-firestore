@@ -576,9 +576,7 @@ class Query(object):
             fields = list(projection.fields)
 
             if not fields:
-                field_ref = query.StructuredQuery.FieldReference(
-                    field_path="__name__"
-                )
+                field_ref = query.StructuredQuery.FieldReference(field_path="__name__")
                 return query.StructuredQuery.Projection(fields=[field_ref])
 
         return projection
@@ -679,9 +677,7 @@ class Query(object):
         query_kwargs = {
             "select": projection,
             "from_": [
-                query.StructuredQuery.CollectionSelector(
-                    collection_id=self._parent.id
-                )
+                query.StructuredQuery.CollectionSelector(collection_id=self._parent.id)
             ],
             "where": self._filters_pb(),
             "order_by": orders,

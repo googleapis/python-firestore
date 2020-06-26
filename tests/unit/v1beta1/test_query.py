@@ -944,9 +944,7 @@ class TestQuery(unittest.TestCase):
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "order_by": [_make_order_pb("X.Y", StructuredQuery.Direction.ASCENDING)],
-            "start_at": query.Cursor(
-                values=[document.Value(string_value=u"Z")]
-            ),
+            "start_at": query.Cursor(values=[document.Value(string_value=u"Z")]),
         }
         expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
@@ -1575,9 +1573,7 @@ def _make_query_response(**kwargs):
     name = kwargs.pop("name", None)
     data = kwargs.pop("data", None)
     if name is not None and data is not None:
-        document_pb = document.Document(
-            name=name, fields=_helpers.encode_dict(data)
-        )
+        document_pb = document.Document(name=name, fields=_helpers.encode_dict(data))
         delta = datetime.timedelta(seconds=100)
         update_time = _datetime_to_pb_timestamp(now - delta)
         create_time = _datetime_to_pb_timestamp(now - 2 * delta)

@@ -268,7 +268,9 @@ class TestWatch(unittest.TestCase):
     def test_on_snapshot_target_add(self):
         inst = self._makeOne()
         proto = DummyProto()
-        proto.target_change.target_change_type = firestore.TargetChange.TargetChangeType.ADD
+        proto.target_change.target_change_type = (
+            firestore.TargetChange.TargetChangeType.ADD
+        )
         proto.target_change.target_ids = [1]  # not "Py"
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
@@ -278,7 +280,9 @@ class TestWatch(unittest.TestCase):
         inst = self._makeOne()
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore.TargetChange.TargetChangeType.REMOVE
+        target_change.target_change_type = (
+            firestore.TargetChange.TargetChangeType.REMOVE
+        )
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Error 1:  hi")
@@ -288,7 +292,9 @@ class TestWatch(unittest.TestCase):
         proto = DummyProto()
         target_change = proto.target_change
         target_change.cause = None
-        target_change.target_change_type = firestore.TargetChange.TargetChangeType.REMOVE
+        target_change.target_change_type = (
+            firestore.TargetChange.TargetChangeType.REMOVE
+        )
         with self.assertRaises(Exception) as exc:
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Error 13:  internal error")
@@ -311,7 +317,9 @@ class TestWatch(unittest.TestCase):
         inst.current = False
         proto = DummyProto()
         target_change = proto.target_change
-        target_change.target_change_type = firestore.TargetChange.TargetChangeType.CURRENT
+        target_change.target_change_type = (
+            firestore.TargetChange.TargetChangeType.CURRENT
+        )
         inst.on_snapshot(proto)
         self.assertTrue(inst.current)
 
@@ -679,7 +687,7 @@ class DummyFirestoreStub(object):
 class DummyFirestoreClient(object):
     def __init__(self):
         self.transport = mock.Mock(_stubs={"firestore_stub": DummyFirestoreStub()})
-    
+
 
 class DummyDocumentReference(object):
     def __init__(self, *document_path, **kw):

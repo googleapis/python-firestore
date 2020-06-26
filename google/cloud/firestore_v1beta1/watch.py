@@ -371,7 +371,7 @@ class Watch(object):
 
         no_target_ids = change.target_ids is None or len(change.target_ids) == 0
         if no_target_ids and change.read_time and self.current:
-            # TargetChange.TargetChangeType.CURRENT followed by 
+            # TargetChange.TargetChangeType.CURRENT followed by
             # TargetChange.TargetChangeType.NO_CHANGE
             # signals a consistent state. Invoke the onSnapshot
             # callback as specified by the user.

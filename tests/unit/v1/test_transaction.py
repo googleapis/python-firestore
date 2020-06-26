@@ -97,9 +97,7 @@ class TestTransaction(unittest.TestCase):
         retry_id = b"hocus-pocus"
         options_pb = transaction._options_protobuf(retry_id)
         expected_pb = common.TransactionOptions(
-            read_write=common.TransactionOptions.ReadWrite(
-                retry_transaction=retry_id
-            )
+            read_write=common.TransactionOptions.ReadWrite(retry_transaction=retry_id)
         )
         self.assertEqual(options_pb, expected_pb)
 
@@ -115,7 +113,9 @@ class TestTransaction(unittest.TestCase):
         self.assertIs(transaction.id, mock.sentinel.eye_dee)
 
     def test__begin(self):
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
         from google.cloud.firestore_v1.types import firestore
 
         # Create a minimal fake GAPIC with a dummy result.
@@ -140,11 +140,8 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.begin_transaction.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'options': None,
-            },
-            metadata=client._rpc_metadata
+            request={"database": client._database_string, "options": None,},
+            metadata=client._rpc_metadata,
         )
 
     def test__begin_failure(self):
@@ -162,9 +159,7 @@ class TestTransaction(unittest.TestCase):
 
     def test__clean_up(self):
         transaction = self._make_one(mock.sentinel.client)
-        transaction._write_pbs.extend(
-            [mock.sentinel.write_pb1, mock.sentinel.write]
-        )
+        transaction._write_pbs.extend([mock.sentinel.write_pb1, mock.sentinel.write])
         transaction._id = b"not-this-time-my-friend"
 
         ret_val = transaction._clean_up()
@@ -175,7 +170,9 @@ class TestTransaction(unittest.TestCase):
 
     def test__rollback(self):
         from google.protobuf import empty_pb2 as empty_pb2
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -197,11 +194,8 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.rollback.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'transaction': txn_id,
-            },
-            metadata=client._rpc_metadata
+            request={"database": client._database_string, "transaction": txn_id,},
+            metadata=client._rpc_metadata,
         )
 
     def test__rollback_not_allowed(self):
@@ -218,7 +212,9 @@ class TestTransaction(unittest.TestCase):
 
     def test__rollback_failure(self):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
 
         # Create a minimal fake GAPIC with a dummy failure.
         firestore_api = mock.create_autospec(
@@ -245,15 +241,14 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.rollback.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'transaction': txn_id,
-            },
-            metadata=client._rpc_metadata
+            request={"database": client._database_string, "transaction": txn_id,},
+            metadata=client._rpc_metadata,
         )
 
     def test__commit(self):
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
         from google.cloud.firestore_v1.types import firestore
         from google.cloud.firestore_v1.types import write
 
@@ -261,9 +256,7 @@ class TestTransaction(unittest.TestCase):
         firestore_api = mock.create_autospec(
             firestore_client.FirestoreClient, instance=True
         )
-        commit_response = firestore.CommitResponse(
-            write_results=[write.WriteResult()]
-        )
+        commit_response = firestore.CommitResponse(write_results=[write.WriteResult()])
         firestore_api.commit.return_value = commit_response
 
         # Attach the fake GAPIC to a real client.
@@ -286,10 +279,10 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the mocks.
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'writes': write_pbs,
-                'transaction': txn_id,
+            request={
+                "database": client._database_string,
+                "writes": write_pbs,
+                "transaction": txn_id,
             },
             metadata=client._rpc_metadata,
         )
@@ -306,7 +299,9 @@ class TestTransaction(unittest.TestCase):
 
     def test__commit_failure(self):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
 
         # Create a minimal fake GAPIC with a dummy failure.
         firestore_api = mock.create_autospec(
@@ -336,10 +331,10 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'writes': write_pbs,
-                'transaction': txn_id,
+            request={
+                "database": client._database_string,
+                "writes": write_pbs,
+                "transaction": txn_id,
             },
             metadata=client._rpc_metadata,
         )
@@ -426,9 +421,9 @@ class Test_Transactional(unittest.TestCase):
         to_wrap.assert_called_once_with(transaction, "pos", key="word")
         firestore_api = transaction._client._firestore_api
         firestore_api.begin_transaction.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'options': None,
+            request={
+                "database": transaction._client._database_string,
+                "options": None,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -456,14 +451,12 @@ class Test_Transactional(unittest.TestCase):
         to_wrap.assert_called_once_with(transaction)
         firestore_api = transaction._client._firestore_api
         options_ = common.TransactionOptions(
-            read_write=common.TransactionOptions.ReadWrite(
-                retry_transaction=txn_id1
-            )
+            read_write=common.TransactionOptions.ReadWrite(retry_transaction=txn_id1)
         )
         firestore_api.begin_transaction.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'options': options_,
+            request={
+                "database": transaction._client._database_string,
+                "options": options_,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -489,16 +482,16 @@ class Test_Transactional(unittest.TestCase):
         to_wrap.assert_called_once_with(transaction, 10, 20)
         firestore_api = transaction._client._firestore_api
         firestore_api.begin_transaction.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'options': None,
+            request={
+                "database": transaction._client._database_string,
+                "options": None,
             },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.rollback.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -530,16 +523,16 @@ class Test_Transactional(unittest.TestCase):
         # Verify mocks.
         to_wrap.assert_called_once_with(transaction, a="b", c="zebra")
         firestore_api.begin_transaction.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'options': None,
+            request={
+                "database": transaction._client._database_string,
+                "options": None,
             },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.rollback.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -562,10 +555,10 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.begin_transaction.assert_not_called()
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'writes': [],
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "writes": [],
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -599,10 +592,10 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.begin_transaction.assert_not_called()
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'writes': [],
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "writes": [],
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -634,10 +627,10 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.begin_transaction.assert_not_called()
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'writes': [],
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "writes": [],
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -670,10 +663,10 @@ class Test_Transactional(unittest.TestCase):
         firestore_api.begin_transaction.assert_not_called()
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'writes': [],
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "writes": [],
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -695,18 +688,15 @@ class Test_Transactional(unittest.TestCase):
         to_wrap.assert_called_once_with(transaction, "a", b="c")
         firestore_api = transaction._client._firestore_api
         firestore_api.begin_transaction.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'options': None
-            },
+            request={"database": transaction._client._database_string, "options": None},
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.rollback.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'writes': [],
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "writes": [],
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -751,23 +741,19 @@ class Test_Transactional(unittest.TestCase):
             firestore_api.begin_transaction.mock_calls,
             [
                 mock.call(
-                    request = {'database': db_str, 'options':None},
-                    metadata=transaction._client._rpc_metadata
+                    request={"database": db_str, "options": None},
+                    metadata=transaction._client._rpc_metadata,
                 ),
                 mock.call(
-                    request = {'database': db_str, 'options':options_},
+                    request={"database": db_str, "options": options_},
                     metadata=transaction._client._rpc_metadata,
                 ),
             ],
         )
         firestore_api.rollback.assert_not_called()
         commit_call = mock.call(
-            request = {
-                'database': db_str,
-                'writes': [],
-                'transaction': txn_id
-            },
-            metadata=transaction._client._rpc_metadata
+            request={"database": db_str, "writes": [], "transaction": txn_id},
+            metadata=transaction._client._rpc_metadata,
         )
         self.assertEqual(firestore_api.commit.mock_calls, [commit_call, commit_call])
 
@@ -800,24 +786,24 @@ class Test_Transactional(unittest.TestCase):
         # Verify mocks.
         to_wrap.assert_called_once_with(transaction, "here", there=1.5)
         firestore_api.begin_transaction.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'options': None,
+            request={
+                "database": transaction._client._database_string,
+                "options": None,
             },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.rollback.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': transaction._client._database_string,
-                'writes': [],
-                'transaction': txn_id,
+            request={
+                "database": transaction._client._database_string,
+                "writes": [],
+                "transaction": txn_id,
             },
             metadata=transaction._client._rpc_metadata,
         )
@@ -847,7 +833,9 @@ class Test__commit_with_retry(unittest.TestCase):
 
     @mock.patch("google.cloud.firestore_v1.transaction._sleep")
     def test_success_first_attempt(self, _sleep):
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -866,10 +854,10 @@ class Test__commit_with_retry(unittest.TestCase):
         # Verify mocks used.
         _sleep.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'writes': mock.sentinel.write_pbs,
-                'transaction': txn_id,
+            request={
+                "database": client._database_string,
+                "writes": mock.sentinel.write_pbs,
+                "transaction": txn_id,
             },
             metadata=client._rpc_metadata,
         )
@@ -877,7 +865,9 @@ class Test__commit_with_retry(unittest.TestCase):
     @mock.patch("google.cloud.firestore_v1.transaction._sleep", side_effect=[2.0, 4.0])
     def test_success_third_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -905,10 +895,10 @@ class Test__commit_with_retry(unittest.TestCase):
         _sleep.assert_any_call(2.0)
         # commit() called same way 3 times.
         commit_call = mock.call(
-            request = {
-                'database': client._database_string,
-                'writes': mock.sentinel.write_pbs,
-                'transaction': txn_id,
+            request={
+                "database": client._database_string,
+                "writes": mock.sentinel.write_pbs,
+                "transaction": txn_id,
             },
             metadata=client._rpc_metadata,
         )
@@ -919,7 +909,9 @@ class Test__commit_with_retry(unittest.TestCase):
     @mock.patch("google.cloud.firestore_v1.transaction._sleep")
     def test_failure_first_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -943,10 +935,10 @@ class Test__commit_with_retry(unittest.TestCase):
         # Verify mocks used.
         _sleep.assert_not_called()
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'writes': mock.sentinel.write_pbs,
-                'transaction': txn_id,
+            request={
+                "database": client._database_string,
+                "writes": mock.sentinel.write_pbs,
+                "transaction": txn_id,
             },
             metadata=client._rpc_metadata,
         )
@@ -954,7 +946,9 @@ class Test__commit_with_retry(unittest.TestCase):
     @mock.patch("google.cloud.firestore_v1.transaction._sleep", return_value=2.0)
     def test_failure_second_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import client as firestore_client
+        from google.cloud.firestore_v1.services.firestore import (
+            client as firestore_client,
+        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = mock.create_autospec(
@@ -981,10 +975,10 @@ class Test__commit_with_retry(unittest.TestCase):
         _sleep.assert_called_once_with(1.0)
         # commit() called same way 2 times.
         commit_call = mock.call(
-            request = {
-                'database': client._database_string,
-                'writes': mock.sentinel.write_pbs,
-                'transaction': txn_id,
+            request={
+                "database": client._database_string,
+                "writes": mock.sentinel.write_pbs,
+                "transaction": txn_id,
             },
             metadata=client._rpc_metadata,
         )
@@ -1067,9 +1061,7 @@ def _make_transaction(txn_id, **txn_kwargs):
     # ... and a dummy ``Rollback`` result ...
     firestore_api.rollback.return_value = empty_pb2.Empty()
     # ... and a dummy ``Commit`` result.
-    commit_response = firestore.CommitResponse(
-        write_results=[write.WriteResult()]
-    )
+    commit_response = firestore.CommitResponse(write_results=[write.WriteResult()])
     firestore_api.commit.return_value = commit_response
 
     # Attach the fake GAPIC to a real client.

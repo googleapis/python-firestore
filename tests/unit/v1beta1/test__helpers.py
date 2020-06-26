@@ -465,9 +465,7 @@ class Test_decode_value(unittest.TestCase):
 
         sub_value1 = _value_pb(integer_value=187680)
         sub_value2 = _value_pb(string_value=u"how low can you go?")
-        map_pb = document.MapValue(
-            fields={"first": sub_value1, "second": sub_value2}
-        )
+        map_pb = document.MapValue(fields={"first": sub_value1, "second": sub_value2})
         value = _value_pb(map_value=map_pb)
 
         expected = {
