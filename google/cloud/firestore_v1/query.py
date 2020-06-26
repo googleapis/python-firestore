@@ -712,7 +712,7 @@ class Query(object):
 
         query_kwargs = {
             "select": projection,
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(
                     collection_id=self._parent.id, all_descendants=self._all_descendants
                 )

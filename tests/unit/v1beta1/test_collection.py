@@ -505,9 +505,9 @@ class TestCollectionReference(unittest.TestCase):
             get_response = collection.get()
 
         query_class.assert_called_once_with(collection)
-        query_instance = query_class.return_value
-        self.assertIs(get_response, query_instance.stream.return_value)
-        query_instance.stream.assert_called_once_with(transaction=None)
+        query_inst = query_class.return_value
+        self.assertIs(get_response, query_inst.stream.return_value)
+        query_inst.stream.assert_called_once_with(transaction=None)
 
         # Verify the deprecation
         self.assertEqual(len(warned), 1)
@@ -523,9 +523,9 @@ class TestCollectionReference(unittest.TestCase):
             get_response = collection.get(transaction=transaction)
 
         query_class.assert_called_once_with(collection)
-        query_instance = query_class.return_value
-        self.assertIs(get_response, query_instance.stream.return_value)
-        query_instance.stream.assert_called_once_with(transaction=transaction)
+        query_inst = query_class.return_value
+        self.assertIs(get_response, query_inst.stream.return_value)
+        query_inst.stream.assert_called_once_with(transaction=transaction)
 
         # Verify the deprecation
         self.assertEqual(len(warned), 1)
@@ -537,9 +537,9 @@ class TestCollectionReference(unittest.TestCase):
         stream_response = collection.stream()
 
         query_class.assert_called_once_with(collection)
-        query_instance = query_class.return_value
-        self.assertIs(stream_response, query_instance.stream.return_value)
-        query_instance.stream.assert_called_once_with(transaction=None)
+        query_inst = query_class.return_value
+        self.assertIs(stream_response, query_inst.stream.return_value)
+        query_inst.stream.assert_called_once_with(transaction=None)
 
     @mock.patch("google.cloud.firestore_v1beta1.query.Query", autospec=True)
     def test_stream_with_transaction(self, query_class):
@@ -548,9 +548,9 @@ class TestCollectionReference(unittest.TestCase):
         stream_response = collection.stream(transaction=transaction)
 
         query_class.assert_called_once_with(collection)
-        query_instance = query_class.return_value
-        self.assertIs(stream_response, query_instance.stream.return_value)
-        query_instance.stream.assert_called_once_with(transaction=transaction)
+        query_inst = query_class.return_value
+        self.assertIs(stream_response, query_inst.stream.return_value)
+        query_inst.stream.assert_called_once_with(transaction=transaction)
 
     @mock.patch("google.cloud.firestore_v1beta1.collection.Watch", autospec=True)
     def test_on_snapshot(self, watch):

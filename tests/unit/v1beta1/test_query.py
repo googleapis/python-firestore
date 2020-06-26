@@ -215,10 +215,10 @@ class TestQuery(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import document
         from google.cloud.firestore_v1beta1.types import query
 
-        query = self._make_one_all_fields(skip_fields=("field_filters",))
-        new_query = query.where("power.level", ">", 9000)
+        query_inst = self._make_one_all_fields(skip_fields=("field_filters",))
+        new_query = query_inst.where("power.level", ">", 9000)
 
-        self.assertIsNot(query, new_query)
+        self.assertIsNot(query_inst, new_query)
         self.assertIsInstance(new_query, self._get_target_class())
         self.assertEqual(len(new_query._field_filters), 1)
 
@@ -234,11 +234,11 @@ class TestQuery(unittest.TestCase):
     def _where_unary_helper(self, value, op_enum, op_string="=="):
         from google.cloud.firestore_v1beta1.types import query
 
-        query = self._make_one_all_fields(skip_fields=("field_filters",))
+        query_inst = self._make_one_all_fields(skip_fields=("field_filters",))
         field_path = "feeeld"
-        new_query = query.where(field_path, op_string, value)
+        new_query = query_inst.where(field_path, op_string, value)
 
-        self.assertIsNot(query, new_query)
+        self.assertIsNot(query_inst, new_query)
         self.assertIsInstance(new_query, self._get_target_class())
         self.assertEqual(len(new_query._field_filters), 1)
 
@@ -833,7 +833,7 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query8._to_protobuf()
         query_kwargs = {
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "select": query.StructuredQuery.Projection(
@@ -870,7 +870,7 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "select": query.StructuredQuery.Projection(
@@ -895,7 +895,7 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "where": query.StructuredQuery.Filter(
@@ -920,7 +920,7 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "order_by": [_make_order_pb("abc", StructuredQuery.Direction.ASCENDING)],
@@ -940,7 +940,7 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query._to_protobuf()
         query_kwargs = {
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "order_by": [_make_order_pb("X.Y", StructuredQuery.Direction.ASCENDING)],
@@ -959,11 +959,11 @@ class TestQuery(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import query
 
         parent = mock.Mock(id="ghoti", spec=["id"])
-        query = self._make_one(parent).order_by("a").end_at({"a": 88})
+        query_inst = self._make_one(parent).order_by("a").end_at({"a": 88})
 
-        structured_query_pb = query._to_protobuf()
+        structured_query_pb = query_inst._to_protobuf()
         query_kwargs = {
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "order_by": [_make_order_pb("a", StructuredQuery.Direction.ASCENDING)],
@@ -982,7 +982,7 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "offset": offset,
@@ -1001,7 +1001,7 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
+            "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "limit": wrappers_pb2.Int32Value(value=limit),

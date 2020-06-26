@@ -407,7 +407,7 @@ class DummyQuery(object):  # pragma: NO COVER
 
         query_kwargs = {
             "select": None,
-            "from": None,
+            "from_": None,
             "where": None,
             "order_by": None,
             "start_at": None,

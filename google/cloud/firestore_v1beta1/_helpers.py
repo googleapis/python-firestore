@@ -270,7 +270,7 @@ def decode_value(value, client):
         NotImplementedError: If the ``value_type`` is ``reference_value``.
         ValueError: If the ``value_type`` is unknown.
     """
-    value_type = value.WhichOneof("value_type")
+    value_type = value._pb.WhichOneof("value_type")
 
     if value_type == "null_value":
         return None
@@ -998,4 +998,4 @@ class ExistsOption(WriteOption):
                 other subclasses that are unused here.
         """
         current_doc = types.Precondition(exists=self._exists)
-        write_pb.current_document.CopyFrom(current_doc)
+        write._pb.current_document.CopyFrom(current_doc._pb)

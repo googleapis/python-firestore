@@ -1006,7 +1006,7 @@ class LastUpdateOption(WriteOption):
                 other subclasses that are unused here.
         """
         current_doc = types.Precondition(update_time=self._last_update_time)
-        write_pb.current_document.CopyFrom(current_doc)
+        write._pb.current_document.CopyFrom(current_doc._pb)
 
 
 class ExistsOption(WriteOption):

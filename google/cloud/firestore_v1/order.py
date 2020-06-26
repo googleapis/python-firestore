@@ -33,7 +33,7 @@ class TypeOrder(Enum):
     @staticmethod
     def from_value(value):
         #return TypeOrder.OBJECT
-        v = value.WhichOneof("value_type")
+        v = value._pb.WhichOneof("value_type")
 
         lut = {
             "null_value": TypeOrder.NULL,

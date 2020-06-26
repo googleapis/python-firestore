@@ -376,9 +376,11 @@ class TestDocumentReference(unittest.TestCase):
         if option is not None:
             option.modify_write(write_pb)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request = {
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
