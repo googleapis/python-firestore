@@ -57,8 +57,10 @@ class Precondition(proto.Message):
             have been last updated at that time.
     """
 
-    exists = proto.Field(proto.BOOL, number=1)
-    update_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp,)
+    exists = proto.Field(proto.BOOL, number=1, oneof="condition_type")
+    update_time = proto.Field(
+        proto.MESSAGE, number=2, message=timestamp.Timestamp, oneof="condition_type"
+    )
 
 
 class TransactionOptions(proto.Message):
@@ -94,10 +96,15 @@ class TransactionOptions(proto.Message):
                 This may not be older than 60 seconds.
         """
 
-        read_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp,)
+        read_time = proto.Field(
+            proto.MESSAGE,
+            number=2,
+            message=timestamp.Timestamp,
+            oneof="consistency_selector",
+        )
 
-    read_only = proto.Field(proto.MESSAGE, number=2, message=ReadOnly,)
-    read_write = proto.Field(proto.MESSAGE, number=3, message=ReadWrite,)
+    read_only = proto.Field(proto.MESSAGE, number=2, message=ReadOnly, oneof="mode")
+    read_write = proto.Field(proto.MESSAGE, number=3, message=ReadWrite, oneof="mode")
 
 
 __all__ = tuple(sorted(__protobuf__.manifest))

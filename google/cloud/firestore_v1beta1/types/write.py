@@ -68,9 +68,13 @@ class Write(proto.Message):
             by the target document.
     """
 
-    update = proto.Field(proto.MESSAGE, number=1, message=gf_document.Document,)
-    delete = proto.Field(proto.STRING, number=2)
-    transform = proto.Field(proto.MESSAGE, number=6, message="DocumentTransform",)
+    update = proto.Field(
+        proto.MESSAGE, number=1, message=gf_document.Document, oneof="operation"
+    )
+    delete = proto.Field(proto.STRING, number=2, oneof="operation")
+    transform = proto.Field(
+        proto.MESSAGE, number=6, message="DocumentTransform", oneof="operation"
+    )
     update_mask = proto.Field(proto.MESSAGE, number=3, message=common.DocumentMask,)
     current_document = proto.Field(
         proto.MESSAGE, number=4, message=common.Precondition,
@@ -181,16 +185,31 @@ class DocumentTransform(proto.Message):
 
         field_path = proto.Field(proto.STRING, number=1)
         set_to_server_value = proto.Field(
-            proto.ENUM, number=2, enum="DocumentTransform.FieldTransform.ServerValue",
+            proto.ENUM,
+            number=2,
+            enum="DocumentTransform.FieldTransform.ServerValue",
+            oneof="transform_type",
         )
-        increment = proto.Field(proto.MESSAGE, number=3, message=gf_document.Value,)
-        maximum = proto.Field(proto.MESSAGE, number=4, message=gf_document.Value,)
-        minimum = proto.Field(proto.MESSAGE, number=5, message=gf_document.Value,)
+        increment = proto.Field(
+            proto.MESSAGE, number=3, message=gf_document.Value, oneof="transform_type"
+        )
+        maximum = proto.Field(
+            proto.MESSAGE, number=4, message=gf_document.Value, oneof="transform_type"
+        )
+        minimum = proto.Field(
+            proto.MESSAGE, number=5, message=gf_document.Value, oneof="transform_type"
+        )
         append_missing_elements = proto.Field(
-            proto.MESSAGE, number=6, message=gf_document.ArrayValue,
+            proto.MESSAGE,
+            number=6,
+            message=gf_document.ArrayValue,
+            oneof="transform_type",
         )
         remove_all_from_array = proto.Field(
-            proto.MESSAGE, number=7, message=gf_document.ArrayValue,
+            proto.MESSAGE,
+            number=7,
+            message=gf_document.ArrayValue,
+            oneof="transform_type",
         )
 
     document = proto.Field(proto.STRING, number=1)

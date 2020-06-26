@@ -81,8 +81,13 @@ class GetDocumentRequest(proto.Message):
 
     name = proto.Field(proto.STRING, number=1)
     mask = proto.Field(proto.MESSAGE, number=2, message=common.DocumentMask,)
-    transaction = proto.Field(proto.BYTES, number=3)
-    read_time = proto.Field(proto.MESSAGE, number=5, message=timestamp.Timestamp,)
+    transaction = proto.Field(proto.BYTES, number=3, oneof="consistency_selector")
+    read_time = proto.Field(
+        proto.MESSAGE,
+        number=5,
+        message=timestamp.Timestamp,
+        oneof="consistency_selector",
+    )
 
 
 class ListDocumentsRequest(proto.Message):
@@ -140,8 +145,13 @@ class ListDocumentsRequest(proto.Message):
     page_token = proto.Field(proto.STRING, number=4)
     order_by = proto.Field(proto.STRING, number=6)
     mask = proto.Field(proto.MESSAGE, number=7, message=common.DocumentMask,)
-    transaction = proto.Field(proto.BYTES, number=8)
-    read_time = proto.Field(proto.MESSAGE, number=10, message=timestamp.Timestamp,)
+    transaction = proto.Field(proto.BYTES, number=8, oneof="consistency_selector")
+    read_time = proto.Field(
+        proto.MESSAGE,
+        number=10,
+        message=timestamp.Timestamp,
+        oneof="consistency_selector",
+    )
     show_missing = proto.Field(proto.BOOL, number=12)
 
 
@@ -296,11 +306,19 @@ class BatchGetDocumentsRequest(proto.Message):
     database = proto.Field(proto.STRING, number=1)
     documents = proto.RepeatedField(proto.STRING, number=2)
     mask = proto.Field(proto.MESSAGE, number=3, message=common.DocumentMask,)
-    transaction = proto.Field(proto.BYTES, number=4)
+    transaction = proto.Field(proto.BYTES, number=4, oneof="consistency_selector")
     new_transaction = proto.Field(
-        proto.MESSAGE, number=5, message=common.TransactionOptions,
+        proto.MESSAGE,
+        number=5,
+        message=common.TransactionOptions,
+        oneof="consistency_selector",
     )
-    read_time = proto.Field(proto.MESSAGE, number=7, message=timestamp.Timestamp,)
+    read_time = proto.Field(
+        proto.MESSAGE,
+        number=7,
+        message=timestamp.Timestamp,
+        oneof="consistency_selector",
+    )
 
 
 class BatchGetDocumentsResponse(proto.Message):
@@ -326,8 +344,10 @@ class BatchGetDocumentsResponse(proto.Message):
             between their read_time and this one.
     """
 
-    found = proto.Field(proto.MESSAGE, number=1, message=gf_document.Document,)
-    missing = proto.Field(proto.STRING, number=2)
+    found = proto.Field(
+        proto.MESSAGE, number=1, message=gf_document.Document, oneof="result"
+    )
+    missing = proto.Field(proto.STRING, number=2, oneof="result")
     transaction = proto.Field(proto.BYTES, number=3)
     read_time = proto.Field(proto.MESSAGE, number=4, message=timestamp.Timestamp,)
 
@@ -446,13 +466,21 @@ class RunQueryRequest(proto.Message):
 
     parent = proto.Field(proto.STRING, number=1)
     structured_query = proto.Field(
-        proto.MESSAGE, number=2, message=gf_query.StructuredQuery,
+        proto.MESSAGE, number=2, message=gf_query.StructuredQuery, oneof="query_type"
     )
-    transaction = proto.Field(proto.BYTES, number=5)
+    transaction = proto.Field(proto.BYTES, number=5, oneof="consistency_selector")
     new_transaction = proto.Field(
-        proto.MESSAGE, number=6, message=common.TransactionOptions,
+        proto.MESSAGE,
+        number=6,
+        message=common.TransactionOptions,
+        oneof="consistency_selector",
     )
-    read_time = proto.Field(proto.MESSAGE, number=7, message=timestamp.Timestamp,)
+    read_time = proto.Field(
+        proto.MESSAGE,
+        number=7,
+        message=timestamp.Timestamp,
+        oneof="consistency_selector",
+    )
 
 
 class RunQueryResponse(proto.Message):
@@ -596,8 +624,10 @@ class ListenRequest(proto.Message):
     """
 
     database = proto.Field(proto.STRING, number=1)
-    add_target = proto.Field(proto.MESSAGE, number=2, message="Target",)
-    remove_target = proto.Field(proto.INT32, number=3)
+    add_target = proto.Field(
+        proto.MESSAGE, number=2, message="Target", oneof="target_change"
+    )
+    remove_target = proto.Field(proto.INT32, number=3, oneof="target_change")
     labels = proto.MapField(proto.STRING, proto.STRING, number=4)
 
 
@@ -626,17 +656,21 @@ class ListenResponse(proto.Message):
             are unknown.
     """
 
-    target_change = proto.Field(proto.MESSAGE, number=2, message="TargetChange",)
+    target_change = proto.Field(
+        proto.MESSAGE, number=2, message="TargetChange", oneof="response_type"
+    )
     document_change = proto.Field(
-        proto.MESSAGE, number=3, message=write.DocumentChange,
+        proto.MESSAGE, number=3, message=write.DocumentChange, oneof="response_type"
     )
     document_delete = proto.Field(
-        proto.MESSAGE, number=4, message=write.DocumentDelete,
+        proto.MESSAGE, number=4, message=write.DocumentDelete, oneof="response_type"
     )
     document_remove = proto.Field(
-        proto.MESSAGE, number=6, message=write.DocumentRemove,
+        proto.MESSAGE, number=6, message=write.DocumentRemove, oneof="response_type"
     )
-    filter = proto.Field(proto.MESSAGE, number=5, message=write.ExistenceFilter,)
+    filter = proto.Field(
+        proto.MESSAGE, number=5, message=write.ExistenceFilter, oneof="response_type"
+    )
 
 
 class Target(proto.Message):
@@ -701,13 +735,22 @@ class Target(proto.Message):
 
         parent = proto.Field(proto.STRING, number=1)
         structured_query = proto.Field(
-            proto.MESSAGE, number=2, message=gf_query.StructuredQuery,
+            proto.MESSAGE,
+            number=2,
+            message=gf_query.StructuredQuery,
+            oneof="query_type",
         )
 
-    query = proto.Field(proto.MESSAGE, number=2, message=QueryTarget,)
-    documents = proto.Field(proto.MESSAGE, number=3, message=DocumentsTarget,)
-    resume_token = proto.Field(proto.BYTES, number=4)
-    read_time = proto.Field(proto.MESSAGE, number=11, message=timestamp.Timestamp,)
+    query = proto.Field(
+        proto.MESSAGE, number=2, message=QueryTarget, oneof="target_type"
+    )
+    documents = proto.Field(
+        proto.MESSAGE, number=3, message=DocumentsTarget, oneof="target_type"
+    )
+    resume_token = proto.Field(proto.BYTES, number=4, oneof="resume_type")
+    read_time = proto.Field(
+        proto.MESSAGE, number=11, message=timestamp.Timestamp, oneof="resume_type"
+    )
     target_id = proto.Field(proto.INT32, number=5)
     once = proto.Field(proto.BOOL, number=6)
 
