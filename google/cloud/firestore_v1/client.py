@@ -188,7 +188,7 @@ class Client(ClientWithProject):
         """
         if self._database_string_internal is None:
             db_str = google.api_core.path_template.expand(
-                "projects/{project}/databases/{database}/documents",
+                "projects/{project}/databases/{database}",
                 project=self.project,
                 database=self._database,
             )
