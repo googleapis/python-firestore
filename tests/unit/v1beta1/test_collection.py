@@ -445,7 +445,7 @@ class TestCollectionReference(unittest.TestCase):
         from google.cloud.firestore_v1beta1.services.firestore_client import (
             FirestoreClient,
         )
-        from google.cloud.firestore_v1beta1.proto.document import Document
+        from google.cloud.firestore_v1beta1.types.document import Document
 
         class _Iterator(Iterator):
             def __init__(self, pages):

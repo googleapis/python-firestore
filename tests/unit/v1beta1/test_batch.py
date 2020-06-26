@@ -254,7 +254,7 @@ class TestWriteBatch(unittest.TestCase):
 
 
 def _value_pb(**kwargs):
-    from google.cloud.firestore_v1beta1.proto.document import Value
+    from google.cloud.firestore_v1beta1.types.document import Value
 
     return Value(**kwargs)
 
