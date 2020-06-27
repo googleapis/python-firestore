@@ -20,7 +20,7 @@ import six
 
 from google.cloud.firestore_v1beta1 import _helpers
 from google.cloud.firestore_v1beta1 import query as query_mod
-from google.cloud.firestore_v1beta1.types import document
+from google.cloud.firestore_v1beta1.types import document as document_pb2
 from google.cloud.firestore_v1beta1.watch import Watch
 from google.cloud.firestore_v1beta1 import document
 
@@ -160,7 +160,7 @@ class CollectionReference(object):
         if document_id is None:
             parent_path, expected_prefix = self._parent_info()
 
-            document_pb = document.Document()
+            document_pb = document_pb2.Document()
 
             created_document_pb = self._client._firestore_api.create_document(
                 request={

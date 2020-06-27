@@ -229,7 +229,7 @@ class TestQuery(unittest.TestCase):
             value=document.Value(integer_value=9000),
         )
         self.assertEqual(field_pb, expected_pb)
-        self._compare_queries(query, new_query, "_field_filters")
+        self._compare_queries(query_inst, new_query, "_field_filters")
 
     def _where_unary_helper(self, value, op_enum, op_string="=="):
         from google.cloud.firestore_v1beta1.types import query
@@ -248,7 +248,7 @@ class TestQuery(unittest.TestCase):
             op=op_enum,
         )
         self.assertEqual(field_pb, expected_pb)
-        self._compare_queries(query, new_query, "_field_filters")
+        self._compare_queries(query_inst, new_query, "_field_filters")
 
     def test_where_eq_null(self):
         from google.cloud.firestore_v1beta1.types import StructuredQuery
@@ -936,9 +936,9 @@ class TestQuery(unittest.TestCase):
         from google.cloud.firestore_v1beta1.types import query
 
         parent = mock.Mock(id="phish", spec=["id"])
-        query = self._make_one(parent).order_by("X.Y").start_after({"X": {"Y": u"Z"}})
+        query_inst = self._make_one(parent).order_by("X.Y").start_after({"X": {"Y": u"Z"}})
 
-        structured_query_pb = query._to_protobuf()
+        structured_query_pb = query_inst._to_protobuf()
         query_kwargs = {
             "from_": [
                 query.StructuredQuery.CollectionSelector(collection_id=parent.id)

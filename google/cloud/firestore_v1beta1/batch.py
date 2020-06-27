@@ -153,7 +153,7 @@ class WriteBatch(object):
 
         self._write_pbs = []
         self.write_results = results = list(commit_response.write_results)
-        self.commit_time = commit_response._pb.commit_time
+        self.commit_time = commit_response.commit_time
         return results
 
     def __enter__(self):

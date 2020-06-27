@@ -220,7 +220,7 @@ class TestCollectionReference(unittest.TestCase):
         auto_assigned_id = "cheezburger"
         name = "{}/{}/{}".format(parent_path, collection.id, auto_assigned_id)
         create_doc_response = document.Document(name=name)
-        create_doc_response.update_time.FromDatetime(datetime.datetime.utcnow())
+        create_doc_response._pb.update_time.FromDatetime(datetime.datetime.utcnow())
         firestore_api.create_document.return_value = create_doc_response
 
         # Actually call add() on our collection; include a transform to make
@@ -237,18 +237,22 @@ class TestCollectionReference(unittest.TestCase):
 
         expected_document_pb = document.Document()
         firestore_api.create_document.assert_called_once_with(
-            parent_path,
-            collection_id=collection.id,
-            document_id=None,
-            document=expected_document_pb,
-            mask=None,
+            request={
+                "parent": parent_path,
+                "collection_id": collection.id,
+                "document_id": None,
+                "document": expected_document_pb,
+                "mask": None,
+            },
             metadata=client._rpc_metadata,
         )
         write_pbs = pbs_for_set_no_merge(document_ref._document_path, document_data)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            write_pbs,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "writes": write_pbs,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -485,10 +489,13 @@ class TestCollectionReference(unittest.TestCase):
 
         parent, _ = collection._parent_info()
         api_client.list_documents.assert_called_once_with(
-            parent,
-            collection.id,
-            page_size=page_size,
-            show_missing=True,
+            request={
+                "parent": parent,
+                "collection_id": collection.id,
+                "page_size": page_size,
+                "page_token": True,
+
+            },
             metadata=client._rpc_metadata,
         )
 

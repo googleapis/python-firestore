@@ -281,7 +281,7 @@ def decode_value(value, client):
     elif value_type == "double_value":
         return value.double_value
     elif value_type == "timestamp_value":
-        return DatetimeWithNanoseconds.from_timestamp_pb(value.timestamp_value)
+        return DatetimeWithNanoseconds.from_timestamp_pb(value._pb.timestamp_value)
     elif value_type == "string_value":
         return value.string_value
     elif value_type == "bytes_value":
