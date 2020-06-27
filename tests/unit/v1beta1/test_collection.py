@@ -470,7 +470,7 @@ class TestCollectionReference(unittest.TestCase):
         collection = self._make_one("collection", client=client)
 
         if page_size is not None:
-            documents = list(collection.list_documents(request={"parent": page_size}))
+            documents = list(collection.list_documents(page_size))
         else:
             documents = list(collection.list_documents())
 

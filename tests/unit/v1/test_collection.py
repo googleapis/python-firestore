@@ -460,7 +460,7 @@ class TestCollectionReference(unittest.TestCase):
         collection = self._make_one("collection", client=client)
 
         if page_size is not None:
-            documents = list(collection.list_documents(request={"parent": page_size}))
+            documents = list(collection.list_documents(page_size))
         else:
             documents = list(collection.list_documents())
 
@@ -473,10 +473,13 @@ class TestCollectionReference(unittest.TestCase):
 
         parent, _ = collection._parent_info()
         api_client.list_documents.assert_called_once_with(
-            parent,
-            collection.id,
-            page_size=page_size,
-            show_missing=True,
+            request={
+                "parent": parent,
+                "collection_id": collection.id,
+                "page_size": page_size,
+                "page_token": True,
+
+            },
             metadata=client._rpc_metadata,
         )
 
