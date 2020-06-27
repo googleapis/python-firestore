@@ -151,8 +151,9 @@ class Client(ClientWithProject):
             )
 
             self._firestore_api_internal = firestore_client.FirestoreClient(
-                transport=self._transport, client_info=self._client_info
+                transport=self._transport, client_options=self._client_options
             )
+            firestore_client._client_info = self._client_info
 
         return self._firestore_api_internal
 
@@ -168,7 +169,7 @@ class Client(ClientWithProject):
         elif self._client_options and self._client_options.api_endpoint:
             return self._client_options.api_endpoint
         else:
-            return firestore_client.FirestoreClient.SERVICE_ADDRESS
+            return firestore_client.FirestoreClient.DEFAULT_ENDPOINT
 
     @property
     def _database_string(self):

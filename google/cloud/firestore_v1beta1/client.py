@@ -131,7 +131,7 @@ class Client(ClientWithProject):
         Returns:
             str: The location of the API.
         """
-        return firestore_client.FirestoreClient.SERVICE_ADDRESS
+        return firestore_client.FirestoreClient.DEFAULT_ENDPOINT
 
     @property
     def _database_string(self):

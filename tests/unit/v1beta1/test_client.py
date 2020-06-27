@@ -69,7 +69,7 @@ class TestClient(unittest.TestCase):
         return_value=mock.sentinel.firestore_api,
     )
     def test__firestore_api_property(self, mock_client):
-        mock_client.SERVICE_ADDRESS = "endpoint"
+        mock_client.DEFAULT_ENDPOINT = "endpoint"
 
         with pytest.deprecated_call():
             client = self._make_default_one()
