@@ -239,7 +239,7 @@ class TestQuery(unittest.TestCase):
             value=document.Value(integer_value=9000),
         )
         self.assertEqual(field_pb, expected_pb)
-        self._compare_queries(query, new_query, "_field_filters")
+        self._compare_queries(query_inst, new_query, "_field_filters")
 
     def _where_unary_helper(self, value, op_enum, op_string="=="):
         from google.cloud.firestore_v1.types import query
@@ -258,7 +258,7 @@ class TestQuery(unittest.TestCase):
             field=StructuredQuery.FieldReference(field_path=field_path), op=op_enum,
         )
         self.assertEqual(field_pb, expected_pb)
-        self._compare_queries(query, new_query, "_field_filters")
+        self._compare_queries(query_inst, new_query, "_field_filters")
 
     def test_where_eq_null(self):
         from google.cloud.firestore_v1.types import StructuredQuery
