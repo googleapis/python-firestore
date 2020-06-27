@@ -235,10 +235,10 @@ class TestDocumentReference(unittest.TestCase):
         self.assertIs(write_result, mock.sentinel.write_result)
         write_pb = self._write_pb_for_create(document._document_path, document_data)
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'writes': [write_pb],
-                'transaction': None
+            request={
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
             },
             metadata=client._rpc_metadata,
         )
@@ -314,10 +314,10 @@ class TestDocumentReference(unittest.TestCase):
         write_pb = self._write_pb_for_set(document._document_path, document_data, merge)
 
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'writes': [write_pb],
-                'transaction': None,
+            request={
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
             },
             metadata=client._rpc_metadata,
         )
@@ -443,10 +443,10 @@ class TestDocumentReference(unittest.TestCase):
         if option is not None:
             option.modify_write(write_pb)
         firestore_api.commit.assert_called_once_with(
-            request = {
-                'database': client._database_string,
-                'writes': [write_pb],
-                'transaction': None,
+            request={
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
             },
             metadata=client._rpc_metadata,
         )
@@ -519,10 +519,10 @@ class TestDocumentReference(unittest.TestCase):
             expected_transaction_id = None
 
         firestore_api.get_document.assert_called_once_with(
-            request = {
-                'name': document._document_path,
-                'mask': mask,
-                'transaction': expected_transaction_id,
+            request={
+                "name": document._document_path,
+                "mask": mask,
+                "transaction": expected_transaction_id,
             },
             metadata=client._rpc_metadata,
         )
@@ -587,11 +587,8 @@ class TestDocumentReference(unittest.TestCase):
             self.assertEqual(collection.id, collection_id)
 
         api_client.list_collection_ids.assert_called_once_with(
-            request = {
-                'parent': document._document_path,
-                'page_size': page_size,
-            },
-            metadata=client._rpc_metadata
+            request={"parent": document._document_path, "page_size": page_size,},
+            metadata=client._rpc_metadata,
         )
 
     def test_collections_wo_page_size(self):

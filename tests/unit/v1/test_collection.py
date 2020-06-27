@@ -199,11 +199,13 @@ class TestCollectionReference(unittest.TestCase):
         write_result = mock.Mock(
             update_time=mock.sentinel.update_time, spec=["update_time"]
         )
+
         commit_response = mock.Mock(
             write_results=[write_result],
             spec=["write_results", "commit_time"],
             commit_time=mock.sentinel.commit_time,
         )
+
         firestore_api.commit.return_value = commit_response
         create_doc_response = document.Document()
         firestore_api.create_document.return_value = create_doc_response
@@ -232,9 +234,11 @@ class TestCollectionReference(unittest.TestCase):
 
         write_pbs = pbs_for_create(document_ref._document_path, document_data)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            write_pbs,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "writes": write_pbs,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
         # Since we generate the ID locally, we don't call 'create_document'.
@@ -458,7 +462,7 @@ class TestCollectionReference(unittest.TestCase):
         if page_size is not None:
             documents = list(collection.list_documents(request={"parent": page_size}))
         else:
-            documents = list(collection.list_documents(request={}))
+            documents = list(collection.list_documents())
 
         # Verify the response and the mocks.
         self.assertEqual(len(documents), len(document_ids))

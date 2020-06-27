@@ -472,7 +472,7 @@ class TestCollectionReference(unittest.TestCase):
         if page_size is not None:
             documents = list(collection.list_documents(request={"parent": page_size}))
         else:
-            documents = list(collection.list_documents(request={}))
+            documents = list(collection.list_documents())
 
         # Verify the response and the mocks.
         self.assertEqual(len(documents), len(document_ids))

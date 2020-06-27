@@ -407,7 +407,7 @@ class DocumentReference(object):
             metadata=self._client._rpc_metadata,
         )
 
-        return commit_response.commit_time
+        return commit_response._pb.commit_time
 
     def get(self, field_paths=None, transaction=None):
         """Retrieve a snapshot of the current document.

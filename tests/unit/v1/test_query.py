@@ -984,17 +984,17 @@ class TestQuery(unittest.TestCase):
         from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="phish", spec=["id"])
-        query = self._make_one(parent).order_by("X.Y").start_after({"X": {"Y": u"Z"}})
+        query_inst = self._make_one(parent).order_by("X.Y").start_after({"X": {"Y": u"Z"}})
 
-        structured_query_pb = query._to_protobuf()
+        structured_query_pb = query_inst._to_protobuf()
         query_kwargs = {
             "from_": [
-                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
+                StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "order_by": [_make_order_pb("X.Y", StructuredQuery.Direction.ASCENDING)],
             "start_at": query.Cursor(values=[document.Value(string_value=u"Z")]),
         }
-        expected_pb = query.StructuredQuery(**query_kwargs)
+        expected_pb = StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_end_at_only(self):
@@ -1092,9 +1092,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request = {
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1133,9 +1135,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request = {
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1174,9 +1178,11 @@ class TestQuery(unittest.TestCase):
 
         # Verify the mock call.
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=txn_id,
+            request = {
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": txn_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1202,9 +1208,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request = {
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1231,9 +1239,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request = {
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1269,9 +1279,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request = {
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1307,9 +1319,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request = {
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1348,9 +1362,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request = {
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 

@@ -147,7 +147,7 @@ class Client(ClientWithProject):
                 )
 
             self._transport = firestore_grpc_transport.FirestoreGrpcTransport(
-                address=self._target, channel=channel
+                host=self._target, channel=channel
             )
 
             self._firestore_api_internal = firestore_client.FirestoreClient(

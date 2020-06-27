@@ -151,7 +151,7 @@ class WriteBatch(object):
 
         self._write_pbs = []
         self.write_results = results = list(commit_response.write_results)
-        self.commit_time = commit_response.commit_time
+        self.commit_time = commit_response._pb.commit_time
         return results
 
     def __enter__(self):
@@ -159,4 +159,4 @@ class WriteBatch(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type is None:
-            self.commit(request={})
+            self.commit()

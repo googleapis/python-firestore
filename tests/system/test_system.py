@@ -413,17 +413,17 @@ def test_collection_add(client, cleanup):
     collection3 = client.collection(collection_id, "table", "child")
     explicit_doc_id = "hula" + UNIQUE_RESOURCE_ID
 
-    assert set(collection1.list_documents(request={})) == set()
-    assert set(collection2.list_documents(request={})) == set()
-    assert set(collection3.list_documents(request={})) == set()
+    assert set(collection1.list_documents()) == set()
+    assert set(collection2.list_documents()) == set()
+    assert set(collection3.list_documents()) == set()
 
     # Auto-ID at top-level.
     data1 = {"foo": "bar"}
     update_time1, document_ref1 = collection1.add(data1)
     cleanup(document_ref1.delete)
-    assert set(collection1.list_documents(request={})) == {document_ref1}
-    assert set(collection2.list_documents(request={})) == set()
-    assert set(collection3.list_documents(request={})) == set()
+    assert set(collection1.list_documents()) == {document_ref1}
+    assert set(collection2.list_documents()) == set()
+    assert set(collection3.list_documents()) == set()
     snapshot1 = document_ref1.get()
     assert snapshot1.to_dict() == data1
     assert snapshot1.update_time == update_time1
@@ -433,9 +433,9 @@ def test_collection_add(client, cleanup):
     data2 = {"baz": 999}
     update_time2, document_ref2 = collection1.add(data2, document_id=explicit_doc_id)
     cleanup(document_ref2.delete)
-    assert set(collection1.list_documents(request={})) == {document_ref1, document_ref2}
-    assert set(collection2.list_documents(request={})) == set()
-    assert set(collection3.list_documents(request={})) == set()
+    assert set(collection1.list_documents()) == {document_ref1, document_ref2}
+    assert set(collection2.list_documents()) == set()
+    assert set(collection3.list_documents()) == set()
     snapshot2 = document_ref2.get()
     assert snapshot2.to_dict() == data2
     assert snapshot2.create_time == update_time2
@@ -448,13 +448,13 @@ def test_collection_add(client, cleanup):
     data3 = {"quux": b"\x00\x01\x02\x03"}
     update_time3, document_ref3 = collection2.add(data3)
     cleanup(document_ref3.delete)
-    assert set(collection1.list_documents(request={})) == {
+    assert set(collection1.list_documents()) == {
         document_ref1,
         document_ref2,
         nested_ref,
     }
-    assert set(collection2.list_documents(request={})) == {document_ref3}
-    assert set(collection3.list_documents(request={})) == set()
+    assert set(collection2.list_documents()) == {document_ref3}
+    assert set(collection3.list_documents()) == set()
     snapshot3 = document_ref3.get()
     assert snapshot3.to_dict() == data3
     assert snapshot3.update_time == update_time3
@@ -464,13 +464,13 @@ def test_collection_add(client, cleanup):
     data4 = {"kazaam": None, "bad": False}
     update_time4, document_ref4 = collection2.add(data4, document_id=explicit_doc_id)
     cleanup(document_ref4.delete)
-    assert set(collection1.list_documents(request={})) == {
+    assert set(collection1.list_documents()) == {
         document_ref1,
         document_ref2,
         nested_ref,
     }
-    assert set(collection2.list_documents(request={})) == {document_ref3, document_ref4}
-    assert set(collection3.list_documents(request={})) == set()
+    assert set(collection2.list_documents()) == {document_ref3, document_ref4}
+    assert set(collection3.list_documents()) == set()
     snapshot4 = document_ref4.get()
     assert snapshot4.to_dict() == data4
     assert snapshot4.create_time == update_time4
@@ -482,14 +482,14 @@ def test_collection_add(client, cleanup):
     update_time5, document_ref5 = collection3.add(data5)
     cleanup(document_ref5.delete)
     missing_ref = collection1.document("table")
-    assert set(collection1.list_documents(request={})) == {
+    assert set(collection1.list_documents()) == {
         document_ref1,
         document_ref2,
         nested_ref,
         missing_ref,
     }
-    assert set(collection2.list_documents(request={})) == {document_ref3, document_ref4}
-    assert set(collection3.list_documents(request={})) == {document_ref5}
+    assert set(collection2.list_documents()) == {document_ref3, document_ref4}
+    assert set(collection3.list_documents()) == {document_ref5}
 
 
 @pytest.fixture
