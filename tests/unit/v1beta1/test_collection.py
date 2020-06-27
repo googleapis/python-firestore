@@ -299,9 +299,11 @@ class TestCollectionReference(unittest.TestCase):
 
         write_pb = self._write_pb_for_create(document_ref._document_path, document_data)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 

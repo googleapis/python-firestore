@@ -136,8 +136,10 @@ class Client(ClientWithProject):
             # We need this in order to set appropriate keepalive options.
 
             if self._emulator_host is not None:
-                channel = firestore_grpc_transport.firestore_grpc.grpc.insecure_channel(
-                    self._emulator_host
+                # TODO(crwilcox): this likely needs to be adapted to use insecure_channel
+                # on new generated surface.
+                channel = firestore_grpc_transport.FirestoreGrpcTransport.create_channel(
+                    host=self._emulator_host
                 )
             else:
                 channel = firestore_grpc_transport.FirestoreGrpcTransport.create_channel(
