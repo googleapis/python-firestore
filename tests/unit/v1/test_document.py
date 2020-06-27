@@ -218,7 +218,8 @@ class TestDocumentReference(unittest.TestCase):
 
     def test_create(self):
         # Create a minimal fake GAPIC with a dummy response.
-        firestore_api = mock.Mock(spec=["commit"])
+        firestore_api = mock.Mock()
+        firestore_api.commit.mock_add_spec(spec=["commit"])
         firestore_api.commit.return_value = self._make_commit_repsonse()
 
         # Attach the fake GAPIC to a real client.
