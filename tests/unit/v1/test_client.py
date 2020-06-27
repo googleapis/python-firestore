@@ -88,7 +88,7 @@ class TestClient(unittest.TestCase):
         self.assertEqual(client._target, "foo-firestore.googleapis.com")
 
     @mock.patch(
-        "google.cloud.firestore_v1.services.firestore_client.FirestoreClient",
+        "google.cloud.firestore_v1.services.firestore.client.FirestoreClient",
         autospec=True,
         return_value=mock.sentinel.firestore_api,
     )
@@ -109,7 +109,7 @@ class TestClient(unittest.TestCase):
         self.assertEqual(mock_client.call_count, 1)
 
     @mock.patch(
-        "google.cloud.firestore_v1.services.firestore_client.FirestoreClient",
+        "google.cloud.firestore_v1.services.firestore.client.FirestoreClient",
         autospec=True,
         return_value=mock.sentinel.firestore_api,
     )

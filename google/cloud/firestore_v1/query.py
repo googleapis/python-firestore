@@ -1027,7 +1027,7 @@ def _collection_group_query_response_to_snapshot(response_pb, collection):
         A snapshot of the data returned in the query. If
         ``response_pb.document`` is not set, the snapshot will be :data:`None`.
     """
-    if not response_pb.HasField("document"):
+    if not response_pb._pb.HasField("document"):
         return None
     reference = collection._client.document(response_pb.document.name)
     data = _helpers.decode_dict(response_pb.document.fields, collection._client)
@@ -1035,8 +1035,8 @@ def _collection_group_query_response_to_snapshot(response_pb, collection):
         reference,
         data,
         exists=True,
-        read_time=response_pb.read_time,
-        create_time=response_pb.document.create_time,
-        update_time=response_pb.document.update_time,
+        read_time=response_pb._pb.read_time,
+        create_time=response_pb._pb.document.create_time,
+        update_time=response_pb._pb.document.update_time,
     )
     return snapshot

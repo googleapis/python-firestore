@@ -235,9 +235,11 @@ class TestDocumentReference(unittest.TestCase):
         self.assertIs(write_result, mock.sentinel.write_result)
         write_pb = self._write_pb_for_create(document._document_path, document_data)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request = {
+                'database': client._database_string,
+                'writes': [write_pb],
+                'transaction': None
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -290,7 +292,7 @@ class TestDocumentReference(unittest.TestCase):
                 field_path.to_api_repr() for field_path in sorted(field_paths)
             ]
             mask = common.DocumentMask(field_paths=sorted(field_paths))
-            write_pbs.update_mask.CopyFrom(mask)
+            write_pbs._pb.update_mask.CopyFrom(mask._pb)
         return write_pbs
 
     def _set_helper(self, merge=False, **option_kwargs):
@@ -312,9 +314,11 @@ class TestDocumentReference(unittest.TestCase):
         write_pb = self._write_pb_for_set(document._document_path, document_data, merge)
 
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request = {
+                'database': client._database_string,
+                'writes': [write_pb],
+                'transaction': None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -439,9 +443,11 @@ class TestDocumentReference(unittest.TestCase):
         if option is not None:
             option.modify_write(write_pb)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request = {
+                'database': client._database_string,
+                'writes': [write_pb],
+                'transaction': None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -513,9 +519,11 @@ class TestDocumentReference(unittest.TestCase):
             expected_transaction_id = None
 
         firestore_api.get_document.assert_called_once_with(
-            document._document_path,
-            mask=mask,
-            transaction=expected_transaction_id,
+            request = {
+                'name': document._document_path,
+                'mask': mask,
+                'transaction': expected_transaction_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -542,7 +550,7 @@ class TestDocumentReference(unittest.TestCase):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1beta1.collection import CollectionReference
-        from google.cloud.firestore_v1beta1.services.firestore_client import (
+        from google.cloud.firestore_v1beta1.services.firestore.client import (
             FirestoreClient,
         )
 
@@ -579,7 +587,11 @@ class TestDocumentReference(unittest.TestCase):
             self.assertEqual(collection.id, collection_id)
 
         api_client.list_collection_ids.assert_called_once_with(
-            document._document_path, page_size=page_size, metadata=client._rpc_metadata
+            request = {
+                'parent': document._document_path,
+                'page_size': page_size,
+            },
+            metadata=client._rpc_metadata
         )
 
     def test_collections_wo_page_size(self):

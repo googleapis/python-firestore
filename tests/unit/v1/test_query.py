@@ -1688,9 +1688,9 @@ class Test__collection_group_query_response_to_snapshot(unittest.TestCase):
         self.assertEqual(snapshot.reference._document_path, to_match._document_path)
         self.assertEqual(snapshot.to_dict(), data)
         self.assertTrue(snapshot.exists)
-        self.assertEqual(snapshot.read_time, response_pb.read_time)
-        self.assertEqual(snapshot.create_time, response_pb.document.create_time)
-        self.assertEqual(snapshot.update_time, response_pb.document.update_time)
+        self.assertEqual(snapshot.read_time, response_pb._pb.read_time)
+        self.assertEqual(snapshot.create_time, response_pb._pb.document.create_time)
+        self.assertEqual(snapshot.update_time, response_pb._pb.document.update_time)
 
 
 def _make_credentials():
@@ -1733,8 +1733,8 @@ def _make_query_response(**kwargs):
         delta = datetime.timedelta(seconds=100)
         update_time = _datetime_to_pb_timestamp(now - delta)
         create_time = _datetime_to_pb_timestamp(now - 2 * delta)
-        document_pb.update_time.CopyFrom(update_time)
-        document_pb.create_time.CopyFrom(create_time)
+        document_pb._pb.update_time.CopyFrom(update_time)
+        document_pb._pb.create_time.CopyFrom(create_time)
 
         kwargs["document"] = document_pb
 

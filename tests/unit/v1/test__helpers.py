@@ -513,13 +513,13 @@ class Test_decode_value(unittest.TestCase):
             self._call_fut(_value_pb())
 
     def test_unknown_value_type(self):
-        value_pb = mock.Mock(spec=["WhichOneof"])
-        value_pb.WhichOneof.return_value = "zoob_value"
+        value_pb = mock.Mock()
+        value_pb._pb.WhichOneof.return_value = "zoob_value"
 
         with self.assertRaises(ValueError):
             self._call_fut(value_pb)
 
-        value_pb.WhichOneof.assert_called_once_with("value_type")
+        value_pb._pb.WhichOneof.assert_called_once_with("value_type")
 
 
 class Test_decode_dict(unittest.TestCase):
@@ -1236,7 +1236,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertIsInstance(update_pb, write.Write)
         self.assertEqual(update_pb.update.name, document_path)
         self.assertEqual(update_pb.update.fields, document_data)
-        self.assertTrue(update_pb.HasField("current_document"))
+        self.assertTrue(update_pb._pb.HasField("current_document"))
         self.assertFalse(update_pb.current_document.exists)
 
     def test_get_update_pb_wo_exists_precondition(self):
@@ -1254,7 +1254,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertIsInstance(update_pb, write.Write)
         self.assertEqual(update_pb.update.name, document_path)
         self.assertEqual(update_pb.update.fields, encode_dict(document_data))
-        self.assertFalse(update_pb.HasField("current_document"))
+        self.assertFalse(update_pb._pb.HasField("current_document"))
 
     def test_get_transform_pb_w_server_timestamp_w_exists_precondition(self):
         from google.cloud.firestore_v1.types import write
@@ -1276,7 +1276,7 @@ class TestDocumentExtractor(unittest.TestCase):
         transform = transforms[0]
         self.assertEqual(transform.field_path, "a")
         self.assertEqual(transform.set_to_server_value, REQUEST_TIME_ENUM)
-        self.assertTrue(transform_pb.HasField("current_document"))
+        self.assertTrue(transform_pb._pb.HasField("current_document"))
         self.assertFalse(transform_pb.current_document.exists)
 
     def test_get_transform_pb_w_server_timestamp_wo_exists_precondition(self):
@@ -1299,7 +1299,7 @@ class TestDocumentExtractor(unittest.TestCase):
         transform = transforms[0]
         self.assertEqual(transform.field_path, "a.b.c")
         self.assertEqual(transform.set_to_server_value, REQUEST_TIME_ENUM)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
     @staticmethod
     def _array_value_to_list(array_value):
@@ -1328,7 +1328,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(transform.field_path, "a.b.c")
         removed = self._array_value_to_list(transform.remove_all_from_array)
         self.assertEqual(removed, values)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
     def test_get_transform_pb_w_array_union(self):
         from google.cloud.firestore_v1.types import write
@@ -1351,7 +1351,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(transform.field_path, "a.b.c")
         added = self._array_value_to_list(transform.append_missing_elements)
         self.assertEqual(added, values)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
     def test_get_transform_pb_w_increment_int(self):
         from google.cloud.firestore_v1.types import write
@@ -1374,7 +1374,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(transform.field_path, "a.b.c")
         added = transform.increment.integer_value
         self.assertEqual(added, value)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
     def test_get_transform_pb_w_increment_float(self):
         from google.cloud.firestore_v1.types import write
@@ -1397,7 +1397,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(transform.field_path, "a.b.c")
         added = transform.increment.double_value
         self.assertEqual(added, value)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
     def test_get_transform_pb_w_maximum_int(self):
         from google.cloud.firestore_v1.types import write
@@ -1420,7 +1420,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(transform.field_path, "a.b.c")
         added = transform.maximum.integer_value
         self.assertEqual(added, value)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
     def test_get_transform_pb_w_maximum_float(self):
         from google.cloud.firestore_v1.types import write
@@ -1443,7 +1443,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(transform.field_path, "a.b.c")
         added = transform.maximum.double_value
         self.assertEqual(added, value)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
     def test_get_transform_pb_w_minimum_int(self):
         from google.cloud.firestore_v1.types import write
@@ -1466,7 +1466,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(transform.field_path, "a.b.c")
         added = transform.minimum.integer_value
         self.assertEqual(added, value)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
     def test_get_transform_pb_w_minimum_float(self):
         from google.cloud.firestore_v1.types import write
@@ -1489,7 +1489,7 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(transform.field_path, "a.b.c")
         added = transform.minimum.double_value
         self.assertEqual(added, value)
-        self.assertFalse(transform_pb.HasField("current_document"))
+        self.assertFalse(transform_pb._pb.HasField("current_document"))
 
 
 class Test_pbs_for_create(unittest.TestCase):
@@ -1912,8 +1912,8 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
     def _update_document_mask(update_pb, field_paths):
         from google.cloud.firestore_v1.types import common
 
-        update_pb.update_mask.CopyFrom(
-            common.DocumentMask(field_paths=sorted(field_paths))
+        update_pb._pb.update_mask.CopyFrom(
+            common.DocumentMask(field_paths=sorted(field_paths))._pb
         )
 
     def test_with_merge_true_wo_transform(self):
@@ -2119,7 +2119,7 @@ class Test_pbs_for_update(unittest.TestCase):
         )
         if isinstance(option, _helpers.ExistsOption):
             precondition = common.Precondition(exists=False)
-            expected_update_pb.current_document.CopyFrom(precondition)
+            expected_update_pb._pb.current_document.CopyFrom(precondition._pb)
         expected_pbs = [expected_update_pb]
         if do_transform:
             transform_paths = FieldPath.from_string(field_path2)

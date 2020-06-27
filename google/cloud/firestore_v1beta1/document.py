@@ -199,7 +199,7 @@ class DocumentReference(object):
         """
         batch = self._client.batch()
         batch.create(self, document_data)
-        write_results = batch.commit(request={})
+        write_results = batch.commit()
         return _first_write_result(write_results)
 
     def set(self, document_data, merge=False):
@@ -230,7 +230,7 @@ class DocumentReference(object):
         """
         batch = self._client.batch()
         batch.set(self, document_data, merge=merge)
-        write_results = batch.commit(request={})
+        write_results = batch.commit()
         return _first_write_result(write_results)
 
     def update(self, field_updates, option=None):
@@ -377,7 +377,7 @@ class DocumentReference(object):
         """
         batch = self._client.batch()
         batch.update(self, field_updates, option=option)
-        write_results = batch.commit(request={})
+        write_results = batch.commit()
         return _first_write_result(write_results)
 
     def delete(self, option=None):

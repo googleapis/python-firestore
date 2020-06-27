@@ -759,7 +759,7 @@ def test_collection_group_queries(client, cleanup):
         batch.set(doc_ref, {"x": 1})
         cleanup(doc_ref.delete)
 
-    batch.commit(request={})
+    batch.commit()
 
     query = client.collection_group(collection_group)
     snapshots = list(query.stream())
@@ -787,7 +787,7 @@ def test_collection_group_queries_startat_endat(client, cleanup):
         batch.set(doc_ref, {"x": doc_path})
         cleanup(doc_ref.delete)
 
-    batch.commit(request={})
+    batch.commit()
 
     query = (
         client.collection_group(collection_group)
@@ -830,7 +830,7 @@ def test_collection_group_queries_filters(client, cleanup):
         batch.set(doc_ref, {"x": index})
         cleanup(doc_ref.delete)
 
-    batch.commit(request={})
+    batch.commit()
 
     query = (
         client.collection_group(collection_group)
@@ -933,7 +933,7 @@ def test_batch(client, cleanup):
     new_value = "there"
     batch.update(document2, {"some.and": new_value})
     batch.delete(document3)
-    write_results = batch.commit(request={})
+    write_results = batch.commit()
 
     assert len(write_results) == 3
 

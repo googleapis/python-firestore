@@ -430,7 +430,7 @@ class TestCollectionReference(unittest.TestCase):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.document import DocumentReference
-        from google.cloud.firestore_v1.services.firestore_client import FirestoreClient
+        from google.cloud.firestore_v1.services.firestore.client import FirestoreClient
         from google.cloud.firestore_v1.types.document import Document
 
         class _Iterator(Iterator):

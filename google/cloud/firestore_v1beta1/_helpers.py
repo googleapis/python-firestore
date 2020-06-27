@@ -513,7 +513,7 @@ class DocumentExtractor(object):
             )
         )
         if exists is not None:
-            transform_pb.current_document.CopyFrom(common.Precondition(exists=exists))
+            transform_pb._pb.current_document.CopyFrom(common.Precondition(exists=exists)._pb)
 
         return transform_pb
 

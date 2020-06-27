@@ -179,7 +179,7 @@ class TestWriteBatch(unittest.TestCase):
         batch.delete(document2)
         write_pbs = batch._write_pbs[::]
 
-        write_results = batch.commit(request={})
+        write_results = batch.commit()
         self.assertEqual(write_results, list(commit_response.write_results))
         self.assertEqual(batch.write_results, write_results)
         self.assertEqual(batch.commit_time, timestamp)
