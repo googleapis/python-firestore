@@ -212,14 +212,14 @@ class TestClient(unittest.TestCase):
         self.assertIs(collection2._client, client)
         self.assertIsInstance(collection2, CollectionReference)
 
-    def test_collection_group(self):
+    def test_collection_group(self):        
         client = self._make_default_one()
         query = client.collection_group("collectionId").where("foo", "==", u"bar")
 
         assert query._all_descendants
         assert query._field_filters[0].field.field_path == "foo"
         assert query._field_filters[0].value.string_value == u"bar"
-        assert query._field_filters[0].op == query._field_filters[0].EQUAL
+        assert query._field_filters[0].op == query._field_filters[0].Operator.EQUAL
         assert query._parent.id == "collectionId"
 
     def test_collection_group_no_slashes(self):
@@ -430,10 +430,12 @@ class TestClient(unittest.TestCase):
         doc_paths = [document1._document_path, document2._document_path]
         mask = common.DocumentMask(field_paths=field_paths)
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            mask,
-            transaction=None,
+             request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": mask,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -461,10 +463,12 @@ class TestClient(unittest.TestCase):
         # Verify the call to the mock.
         doc_paths = [document._document_path]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=txn_id,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": txn_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -484,10 +488,12 @@ class TestClient(unittest.TestCase):
         # Verify the call to the mock.
         doc_paths = [document._document_path]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -527,10 +533,12 @@ class TestClient(unittest.TestCase):
             document3._document_path,
         ]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 

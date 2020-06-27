@@ -567,7 +567,7 @@ def _parse_batch_get(get_doc_response, reference_map, client):
         ValueError: If the response has a ``result`` field (a oneof) other
             than ``found`` or ``missing``.
     """
-    result_type = get_doc_response.WhichOneof("result")
+    result_type = get_doc_response._pb.WhichOneof("result")
     if result_type == "found":
         reference = _get_reference(get_doc_response.found.name, reference_map)
         data = _helpers.decode_dict(get_doc_response.found.fields, client)

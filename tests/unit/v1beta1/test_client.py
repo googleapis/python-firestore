@@ -351,10 +351,12 @@ class TestClient(unittest.TestCase):
         doc_paths = [document1._document_path, document2._document_path]
         mask = common.DocumentMask(field_paths=field_paths)
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            mask,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": mask,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -382,10 +384,12 @@ class TestClient(unittest.TestCase):
         # Verify the call to the mock.
         doc_paths = [document._document_path]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=txn_id,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": txn_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -405,10 +409,12 @@ class TestClient(unittest.TestCase):
         # Verify the call to the mock.
         doc_paths = [document._document_path]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -448,10 +454,12 @@ class TestClient(unittest.TestCase):
             document3._document_path,
         ]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
