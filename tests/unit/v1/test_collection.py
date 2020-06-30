@@ -371,6 +371,18 @@ class TestCollectionReference(unittest.TestCase):
         self.assertIs(query._parent, collection)
         self.assertEqual(query._limit, limit)
 
+    def test_limit_to_last(self):
+        from google.cloud.firestore_v1.query import Query
+
+        LIMIT = 15
+        collection = self._make_one("collection")
+        query = collection.limit_to_last(LIMIT)
+
+        self.assertIsInstance(query, Query)
+        self.assertIs(query._parent, collection)
+        self.assertEqual(query._limit, LIMIT)
+        self.assertTrue(query._limit_to_last)
+
     def test_offset(self):
         from google.cloud.firestore_v1.query import Query
 
@@ -484,38 +496,26 @@ class TestCollectionReference(unittest.TestCase):
 
     @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
     def test_get(self, query_class):
-        import warnings
-
         collection = self._make_one("collection")
-        with warnings.catch_warnings(record=True) as warned:
-            get_response = collection.get()
+        get_response = collection.get()
 
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        self.assertIs(get_response, query_instance.stream.return_value)
-        query_instance.stream.assert_called_once_with(transaction=None)
 
-        # Verify the deprecation
-        self.assertEqual(len(warned), 1)
-        self.assertIs(warned[0].category, DeprecationWarning)
+        self.assertIs(get_response, query_instance.get.return_value)
+        query_instance.get.assert_called_once_with(transaction=None)
 
     @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
     def test_get_with_transaction(self, query_class):
-        import warnings
-
         collection = self._make_one("collection")
         transaction = mock.sentinel.txn
-        with warnings.catch_warnings(record=True) as warned:
-            get_response = collection.get(transaction=transaction)
+        get_response = collection.get(transaction=transaction)
 
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
-        self.assertIs(get_response, query_instance.stream.return_value)
-        query_instance.stream.assert_called_once_with(transaction=transaction)
 
-        # Verify the deprecation
-        self.assertEqual(len(warned), 1)
-        self.assertIs(warned[0].category, DeprecationWarning)
+        self.assertIs(get_response, query_instance.get.return_value)
+        query_instance.get.assert_called_once_with(transaction=transaction)
 
     @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
     def test_stream(self, query_class):
