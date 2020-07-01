@@ -54,9 +54,10 @@ for version in versions:
 
 # TODO(busunkim): remove during microgenerator transition
 # This re-adds a resource helpers that were removed in a regeneration
-n = s.replace("google/cloud/**/firestore_client.py",
-"""\s+def __init__\(""",
-''' 
+n = s.replace(
+    "google/cloud/**/firestore_client.py",
+    """\s+def __init__\(""",
+    ''' 
     @classmethod
     def any_path_path(cls, project, database, document, any_path):
         """Return a fully-qualified any_path string."""
@@ -96,7 +97,7 @@ n = s.replace("google/cloud/**/firestore_client.py",
             database=database,
         )
     
-    def __init__('''
+    def __init__(''',
 )
 
 if n != 2:
@@ -117,7 +118,7 @@ n = s.replace(
 \s+retry=google.api_core.gapic_v1.method.DEFAULT,
 \s+timeout=google.api_core.gapic_v1.method.DEFAULT,
 \s+metadata=None\):""",
-"""def create_document(
+    """def create_document(
         self,
         parent,
         collection_id,
@@ -126,22 +127,23 @@ n = s.replace(
         mask=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
         timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None):"""
-
+        metadata=None):""",
 )
 
 if n != 2:
     raise Exception("Required replacement was not made in firestore_client.py")
 
 # Fix unit tests for replacement above
-s.replace("tests/**/test_firestore_client_*.py",
-"""client\.create_document\(parent, collection_id, document\)""",
-"""client.create_document(parent, collection_id, "documentid", document)""")
+s.replace(
+    "tests/**/test_firestore_client_*.py",
+    """client\.create_document\(parent, collection_id, document\)""",
+    """client.create_document(parent, collection_id, "documentid", document)""",
+)
 
 s.replace(
     "tests/**/test_firestore_client_*.py",
     """firestore_pb2\.CreateDocumentRequest\(parent=parent, collection_id=collection_id, document=document\)""",
-    """firestore_pb2.CreateDocumentRequest(parent=parent, collection_id=collection_id, document_id="documentid", document=document)"""
+    """firestore_pb2.CreateDocumentRequest(parent=parent, collection_id=collection_id, document_id="documentid", document=document)""",
 )
 # ----------------------------------------------------------------------------
 # Generate firestore admin GAPIC layer
@@ -164,9 +166,10 @@ for version in admin_versions:
 
 # TODO(busunkim): remove during microgenerator transition
 # This re-adds a resource helper that was removed in a regeneration
-n = s.replace("google/cloud/**/firestore_admin_client.py",
-"""\s+def __init__\(""",
-'''     
+n = s.replace(
+    "google/cloud/**/firestore_admin_client.py",
+    """\s+def __init__\(""",
+    '''     
     @classmethod
     def parent_path(cls, project, database, collection_id):
         """Return a fully-qualified parent string."""
@@ -177,8 +180,7 @@ n = s.replace("google/cloud/**/firestore_admin_client.py",
             collection_id=collection_id,
         )
 
-    def __init__('''
-
+    def __init__(''',
 )
 
 if n != 1:
@@ -190,15 +192,11 @@ templated_files = common.py_library(unit_cov_level=97, cov_level=99)
 s.move(templated_files)
 
 s.replace(
-    "noxfile.py",
-    "GOOGLE_APPLICATION_CREDENTIALS",
-    "FIRESTORE_APPLICATION_CREDENTIALS",
+    "noxfile.py", "GOOGLE_APPLICATION_CREDENTIALS", "FIRESTORE_APPLICATION_CREDENTIALS",
 )
 
 s.replace(
-    "noxfile.py",
-    '"--quiet", system_test',
-    '"--verbose", system_test',
+    "noxfile.py", '"--quiet", system_test', '"--verbose", system_test',
 )
 
 
