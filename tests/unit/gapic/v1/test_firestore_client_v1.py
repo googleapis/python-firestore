@@ -174,12 +174,15 @@ class TestFirestoreClient(object):
         collection_id = "collectionId-821242276"
         document = {}
 
-        response = client.create_document(parent, collection_id, document)
+        response = client.create_document(parent, collection_id, "documentid", document)
         assert expected_response == response
 
         assert len(channel.requests) == 1
         expected_request = firestore_pb2.CreateDocumentRequest(
-            parent=parent, collection_id=collection_id, document=document
+            parent=parent,
+            collection_id=collection_id,
+            document_id="documentid",
+            document=document,
         )
         actual_request = channel.requests[0][1]
         assert expected_request == actual_request
@@ -198,7 +201,7 @@ class TestFirestoreClient(object):
         document = {}
 
         with pytest.raises(CustomException):
-            client.create_document(parent, collection_id, document)
+            client.create_document(parent, collection_id, "documentid", document)
 
     def test_update_document(self):
         # Setup Expected Response

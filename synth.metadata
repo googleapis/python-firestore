@@ -4,7 +4,7 @@
       "git": {
         "name": ".",
         "remote": "git@github.com:googleapis/python-firestore",
-        "sha": "86abc9b780464bd87154051071ddb68523685b59"
+        "sha": "894939f56ba0071f89e7070123b8fbe4358ae55d"
       }
     },
     {

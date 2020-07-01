@@ -97,6 +97,45 @@ class FirestoreClient(object):
 
     from_service_account_json = from_service_account_file
 
+    @classmethod
+    def any_path_path(cls, project, database, document, any_path):
+        """Return a fully-qualified any_path string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents/{document}/{any_path=**}",
+            project=project,
+            database=database,
+            document=document,
+            any_path=any_path,
+        )
+
+    @classmethod
+    def database_root_path(cls, project, database):
+        """Return a fully-qualified database_root string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}",
+            project=project,
+            database=database,
+        )
+
+    @classmethod
+    def document_path_path(cls, project, database, document_path):
+        """Return a fully-qualified document_path string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents/{document_path=**}",
+            project=project,
+            database=database,
+            document_path=document_path,
+        )
+
+    @classmethod
+    def document_root_path(cls, project, database):
+        """Return a fully-qualified document_root string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents",
+            project=project,
+            database=database,
+        )
+
     def __init__(
         self,
         transport=None,

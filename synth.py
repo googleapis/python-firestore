@@ -52,53 +52,56 @@ for version in versions:
         "client = firestore_client.FirestoreClient",
     )
 
-# # TODO(busunkim): remove during microgenerator transition
-# # This re-adds a resource helpers that were removed in a regeneration
-# n = s.replace("google/cloud/**/firestore_client.py",
-# """\s+def __init__\(""",
-# '''     @classmethod
-#     def any_path_path(cls, project, database, document, any_path):
-#         """Return a fully-qualified any_path string."""
-#         return google.api_core.path_template.expand(
-#             "projects/{project}/databases/{database}/documents/{document}/{any_path=**}",
-#             project=project,
-#             database=database,
-#             document=document,
-#             any_path=any_path,
-#         )
+# TODO(busunkim): remove during microgenerator transition
+# This re-adds a resource helpers that were removed in a regeneration
+n = s.replace("google/cloud/**/firestore_client.py",
+"""\s+def __init__\(""",
+''' 
+    @classmethod
+    def any_path_path(cls, project, database, document, any_path):
+        """Return a fully-qualified any_path string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents/{document}/{any_path=**}",
+            project=project,
+            database=database,
+            document=document,
+            any_path=any_path,
+        )
 
-#     @classmethod
-#     def database_root_path(cls, project, database):
-#         """Return a fully-qualified database_root string."""
-#         return google.api_core.path_template.expand(
-#             "projects/{project}/databases/{database}",
-#             project=project,
-#             database=database,
-#         )
+    @classmethod
+    def database_root_path(cls, project, database):
+        """Return a fully-qualified database_root string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}",
+            project=project,
+            database=database,
+        )
 
-#     @classmethod
-#     def document_path_path(cls, project, database, document_path):
-#         """Return a fully-qualified document_path string."""
-#         return google.api_core.path_template.expand(
-#             "projects/{project}/databases/{database}/documents/{document_path=**}",
-#             project=project,
-#             database=database,
-#             document_path=document_path,
-#         )
+    @classmethod
+    def document_path_path(cls, project, database, document_path):
+        """Return a fully-qualified document_path string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents/{document_path=**}",
+            project=project,
+            database=database,
+            document_path=document_path,
+        )
 
-#     @classmethod
-#     def document_root_path(cls, project, database):
-#         """Return a fully-qualified document_root string."""
-#         return google.api_core.path_template.expand(
-#             "projects/{project}/databases/{database}/documents",
-#             project=project,
-#             database=database,
-#         )'''
+    @classmethod
+    def document_root_path(cls, project, database):
+        """Return a fully-qualified document_root string."""
+        return google.api_core.path_template.expand(
+            "projects/{project}/databases/{database}/documents",
+            project=project,
+            database=database,
+        )
+    
+    def __init__('''
+)
 
-# )
+if n != 2:
+    raise Exception("Required replacement in firestore_client.py not made.")
 
-# if n != 1:
-#     raise Exception("Required replacement in firestore_admin_client.py not made.")
 
 # TODO(busunkim): Remve during microgenerator transition
 # Preserve parameter order
@@ -130,7 +133,16 @@ n = s.replace(
 if n != 2:
     raise Exception("Required replacement was not made in firestore_client.py")
 
+# Fix unit tests for replacement above
+s.replace("tests/**/test_firestore_client_*.py",
+"""client\.create_document\(parent, collection_id, document\)""",
+"""client.create_document(parent, collection_id, "documentid", document)""")
 
+s.replace(
+    "tests/**/test_firestore_client_*.py",
+    """firestore_pb2\.CreateDocumentRequest\(parent=parent, collection_id=collection_id, document=document\)""",
+    """firestore_pb2.CreateDocumentRequest(parent=parent, collection_id=collection_id, document_id="documentid", document=document)"""
+)
 # ----------------------------------------------------------------------------
 # Generate firestore admin GAPIC layer
 # ----------------------------------------------------------------------------
@@ -154,7 +166,8 @@ for version in admin_versions:
 # This re-adds a resource helper that was removed in a regeneration
 n = s.replace("google/cloud/**/firestore_admin_client.py",
 """\s+def __init__\(""",
-'''    @classmethod
+'''     
+    @classmethod
     def parent_path(cls, project, database, collection_id):
         """Return a fully-qualified parent string."""
         return google.api_core.path_template.expand(
