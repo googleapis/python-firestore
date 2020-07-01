@@ -1063,7 +1063,48 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test_get_simple(self):
-        import warnings
+        # Create a minimal fake GAPIC.
+        firestore_api = mock.Mock(spec=["run_query"])
+
+        # Attach the fake GAPIC to a real client.
+        client = _make_client()
+        client._firestore_api_internal = firestore_api
+
+        # Make a **real** collection reference as parent.
+        parent = client.collection("dee")
+
+        # Add a dummy response to the minimal fake GAPIC.
+        _, expected_prefix = parent._parent_info()
+        name = "{}/sleep".format(expected_prefix)
+        data = {"snooze": 10}
+
+        response_pb = _make_query_response(name=name, data=data)
+
+        firestore_api.run_query.return_value = iter([response_pb])
+
+        # Execute the query and check the response.
+        query = self._make_one(parent)
+        returned = query.get()
+
+        self.assertIsInstance(returned, list)
+        self.assertEqual(len(returned), 1)
+
+        snapshot = returned[0]
+        self.assertEqual(snapshot.reference._path, ("dee", "sleep"))
+        self.assertEqual(snapshot.to_dict(), data)
+
+        # Verify the mock call.
+        parent_path, _ = parent._parent_info()
+        firestore_api.run_query.assert_called_once_with(
+            parent_path,
+            query._to_protobuf(),
+            transaction=None,
+            metadata=client._rpc_metadata,
+        )
+
+    def test_get_limit_to_last(self):
+        from google.cloud import firestore
+        from google.cloud.firestore_v1.query import _enum_from_direction
 
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
@@ -1079,21 +1120,33 @@ class TestQuery(unittest.TestCase):
         _, expected_prefix = parent._parent_info()
         name = "{}/sleep".format(expected_prefix)
         data = {"snooze": 10}
+        data2 = {"snooze": 20}
+
         response_pb = _make_query_response(name=name, data=data)
-        firestore_api.run_query.return_value = iter([response_pb])
+        response_pb2 = _make_query_response(name=name, data=data2)
+
+        firestore_api.run_query.return_value = iter([response_pb2, response_pb])
 
         # Execute the query and check the response.
         query = self._make_one(parent)
+        query = query.order_by(
+            u"snooze", direction=firestore.Query.DESCENDING
+        ).limit_to_last(2)
+        returned = query.get()
 
-        with warnings.catch_warnings(record=True) as warned:
-            get_response = query.get()
+        self.assertIsInstance(returned, list)
+        self.assertEqual(
+            query._orders[0].direction, _enum_from_direction(firestore.Query.ASCENDING)
+        )
+        self.assertEqual(len(returned), 2)
 
-        self.assertIsInstance(get_response, types.GeneratorType)
-        returned = list(get_response)
-        self.assertEqual(len(returned), 1)
         snapshot = returned[0]
         self.assertEqual(snapshot.reference._path, ("dee", "sleep"))
         self.assertEqual(snapshot.to_dict(), data)
+
+        snapshot2 = returned[1]
+        self.assertEqual(snapshot2.reference._path, ("dee", "sleep"))
+        self.assertEqual(snapshot2.to_dict(), data2)
 
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
@@ -1103,10 +1156,6 @@ class TestQuery(unittest.TestCase):
             transaction=None,
             metadata=client._rpc_metadata,
         )
-
-        # Verify the deprecation
-        self.assertEqual(len(warned), 1)
-        self.assertIs(warned[0].category, DeprecationWarning)
 
     def test_stream_simple(self):
         # Create a minimal fake GAPIC.
@@ -1144,6 +1193,20 @@ class TestQuery(unittest.TestCase):
             transaction=None,
             metadata=client._rpc_metadata,
         )
+
+    def test_stream_with_limit_to_last(self):
+        # Attach the fake GAPIC to a real client.
+        client = _make_client()
+        # Make a **real** collection reference as parent.
+        parent = client.collection("dee")
+        # Execute the query and check the response.
+        query = self._make_one(parent)
+        query = query.limit_to_last(2)
+
+        stream_response = query.stream()
+
+        with self.assertRaises(ValueError):
+            list(stream_response)
 
     def test_stream_with_transaction(self):
         # Create a minimal fake GAPIC.
