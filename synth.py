@@ -199,5 +199,10 @@ s.replace(
     "noxfile.py", '"--quiet", system_test', '"--verbose", system_test',
 )
 
+s.replace(
+    "noxfile.py",
+    """["']sphinx['"]""",
+    '''"sphinx<3.0.0"''',
+)
 
 s.shell.run(["nox", "-s", "blacken"], hide_output=False)
