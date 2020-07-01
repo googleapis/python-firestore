@@ -119,12 +119,24 @@ class FirestoreAdminClient(object):
     @classmethod
     def index_path(cls, project, database, collection, index):
         """Return a fully-qualified index string."""
+        return (
+            google.api_core.path_template.expand(
+                "projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}",
+                project=project,
+                database=database,
+                collection=collection,
+                index=index,
+            )
+            @ classmethod
+        )
+
+    def parent_path(cls, project, database, collection_id):
+        """Return a fully-qualified parent string."""
         return google.api_core.path_template.expand(
-            "projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}",
+            "projects/{project}/databases/{database}/collectionGroups/{collection_id}",
             project=project,
             database=database,
-            collection=collection,
-            index=index,
+            collection_id=collection_id,
         )
 
     def __init__(

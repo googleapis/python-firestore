@@ -440,8 +440,8 @@ class FirestoreClient(object):
         self,
         parent,
         collection_id,
+        document_id,
         document,
-        document_id=None,
         mask=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
         timeout=google.api_core.gapic_v1.method.DEFAULT,
@@ -825,6 +825,98 @@ class FirestoreClient(object):
             metadata.append(routing_metadata)
 
         return self._inner_api_calls["batch_get_documents"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )
+
+    def batch_write(
+        self,
+        database,
+        writes=None,
+        labels=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Applies a batch of write operations.
+
+        The BatchWrite method does not apply the write operations atomically and
+        can apply them out of order. Method does not allow more than one write
+        per document. Each write succeeds or fails independently. See the
+        ``BatchWriteResponse`` for the success status of each write.
+
+        If you require an atomically applied set of writes, use ``Commit``
+        instead.
+
+        Example:
+            >>> from google.cloud import firestore_v1
+            >>>
+            >>> client = firestore_v1.FirestoreClient()
+            >>>
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
+            >>>
+            >>> response = client.batch_write(database)
+
+        Args:
+            database (str): Required. The database name. In the format:
+                ``projects/{project_id}/databases/{database_id}``.
+            writes (list[Union[dict, ~google.cloud.firestore_v1.types.Write]]): The writes to apply.
+
+                Method does not apply writes atomically and does not guarantee ordering.
+                Each write succeeds or fails independently. You cannot write to the same
+                document more than once per request.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1.types.Write`
+            labels (dict[str -> str]): Labels associated with this batch write.
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.cloud.firestore_v1.types.BatchWriteResponse` instance.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "batch_write" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "batch_write"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.batch_write,
+                default_retry=self._method_configs["BatchWrite"].retry,
+                default_timeout=self._method_configs["BatchWrite"].timeout,
+                client_info=self._client_info,
+            )
+
+        request = firestore_pb2.BatchWriteRequest(
+            database=database, writes=writes, labels=labels,
+        )
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("database", database)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        return self._inner_api_calls["batch_write"](
             request, retry=retry, timeout=timeout, metadata=metadata
         )
 
@@ -1539,95 +1631,3 @@ class FirestoreClient(object):
             response_token_field="next_page_token",
         )
         return iterator
-
-    def batch_write(
-        self,
-        database,
-        writes=None,
-        labels=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Applies a batch of write operations.
-
-        The BatchWrite method does not apply the write operations atomically and
-        can apply them out of order. Method does not allow more than one write
-        per document. Each write succeeds or fails independently. See the
-        ``BatchWriteResponse`` for the success status of each write.
-
-        If you require an atomically applied set of writes, use ``Commit``
-        instead.
-
-        Example:
-            >>> from google.cloud import firestore_v1
-            >>>
-            >>> client = firestore_v1.FirestoreClient()
-            >>>
-            >>> # TODO: Initialize `database`:
-            >>> database = ''
-            >>>
-            >>> response = client.batch_write(database)
-
-        Args:
-            database (str): Required. The database name. In the format:
-                ``projects/{project_id}/databases/{database_id}``.
-            writes (list[Union[dict, ~google.cloud.firestore_v1.types.Write]]): The writes to apply.
-
-                Method does not apply writes atomically and does not guarantee ordering.
-                Each write succeeds or fails independently. You cannot write to the same
-                document more than once per request.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1.types.Write`
-            labels (dict[str -> str]): Labels associated with this batch write.
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Returns:
-            A :class:`~google.cloud.firestore_v1.types.BatchWriteResponse` instance.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "batch_write" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "batch_write"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.batch_write,
-                default_retry=self._method_configs["BatchWrite"].retry,
-                default_timeout=self._method_configs["BatchWrite"].timeout,
-                client_info=self._client_info,
-            )
-
-        request = firestore_pb2.BatchWriteRequest(
-            database=database, writes=writes, labels=labels,
-        )
-        if metadata is None:
-            metadata = []
-        metadata = list(metadata)
-        try:
-            routing_header = [("database", database)]
-        except AttributeError:
-            pass
-        else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
-            metadata.append(routing_metadata)
-
-        return self._inner_api_calls["batch_write"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )

@@ -310,6 +310,43 @@ class TestFirestoreClient(object):
         with pytest.raises(CustomException):
             client.batch_get_documents(database)
 
+    def test_batch_write(self):
+        # Setup Expected Response
+        expected_response = {}
+        expected_response = firestore_pb2.BatchWriteResponse(**expected_response)
+
+        # Mock the API response
+        channel = ChannelStub(responses=[expected_response])
+        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
+        with patch as create_channel:
+            create_channel.return_value = channel
+            client = firestore_client.FirestoreClient()
+
+        # Setup Request
+        database = "database1789464955"
+
+        response = client.batch_write(database)
+        assert expected_response == response
+
+        assert len(channel.requests) == 1
+        expected_request = firestore_pb2.BatchWriteRequest(database=database)
+        actual_request = channel.requests[0][1]
+        assert expected_request == actual_request
+
+    def test_batch_write_exception(self):
+        # Mock the API response
+        channel = ChannelStub(responses=[CustomException()])
+        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
+        with patch as create_channel:
+            create_channel.return_value = channel
+            client = firestore_client.FirestoreClient()
+
+        # Setup request
+        database = "database1789464955"
+
+        with pytest.raises(CustomException):
+            client.batch_write(database)
+
     def test_begin_transaction(self):
         # Setup Expected Response
         transaction = b"-34"
@@ -651,40 +688,3 @@ class TestFirestoreClient(object):
         paged_list_response = client.partition_query(parent)
         with pytest.raises(CustomException):
             list(paged_list_response)
-
-    def test_batch_write(self):
-        # Setup Expected Response
-        expected_response = {}
-        expected_response = firestore_pb2.BatchWriteResponse(**expected_response)
-
-        # Mock the API response
-        channel = ChannelStub(responses=[expected_response])
-        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
-        with patch as create_channel:
-            create_channel.return_value = channel
-            client = firestore_client.FirestoreClient()
-
-        # Setup Request
-        database = "database1789464955"
-
-        response = client.batch_write(database)
-        assert expected_response == response
-
-        assert len(channel.requests) == 1
-        expected_request = firestore_pb2.BatchWriteRequest(database=database)
-        actual_request = channel.requests[0][1]
-        assert expected_request == actual_request
-
-    def test_batch_write_exception(self):
-        # Mock the API response
-        channel = ChannelStub(responses=[CustomException()])
-        patch = mock.patch("google.api_core.grpc_helpers.create_channel")
-        with patch as create_channel:
-            create_channel.return_value = channel
-            client = firestore_client.FirestoreClient()
-
-        # Setup request
-        database = "database1789464955"
-
-        with pytest.raises(CustomException):
-            client.batch_write(database)

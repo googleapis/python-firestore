@@ -192,6 +192,27 @@ class FirestoreGrpcTransport(object):
         return self._stubs["firestore_stub"].BatchGetDocuments
 
     @property
+    def batch_write(self):
+        """Return the gRPC stub for :meth:`FirestoreClient.batch_write`.
+
+        Applies a batch of write operations.
+
+        The BatchWrite method does not apply the write operations atomically and
+        can apply them out of order. Method does not allow more than one write
+        per document. Each write succeeds or fails independently. See the
+        ``BatchWriteResponse`` for the success status of each write.
+
+        If you require an atomically applied set of writes, use ``Commit``
+        instead.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_stub"].BatchWrite
+
+    @property
     def begin_transaction(self):
         """Return the gRPC stub for :meth:`FirestoreClient.begin_transaction`.
 
@@ -296,24 +317,3 @@ class FirestoreGrpcTransport(object):
                 deserialized response object.
         """
         return self._stubs["firestore_stub"].PartitionQuery
-
-    @property
-    def batch_write(self):
-        """Return the gRPC stub for :meth:`FirestoreClient.batch_write`.
-
-        Applies a batch of write operations.
-
-        The BatchWrite method does not apply the write operations atomically and
-        can apply them out of order. Method does not allow more than one write
-        per document. Each write succeeds or fails independently. See the
-        ``BatchWriteResponse`` for the success status of each write.
-
-        If you require an atomically applied set of writes, use ``Commit``
-        instead.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_stub"].BatchWrite
