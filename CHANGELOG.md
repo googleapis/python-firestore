@@ -5,6 +5,22 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [1.8.0](https://www.github.com/googleapis/python-firestore/compare/v1.7.0...v1.8.0) (2020-07-01)
+
+
+### Features
+
+* support limit to last feature ([#57](https://www.github.com/googleapis/python-firestore/issues/57)) ([8c75e21](https://www.github.com/googleapis/python-firestore/commit/8c75e218331fda25ea3a789e84ba8dc11af2db02))
+* **firestore:** add support of emulator to run system tests on emulator ([#31](https://www.github.com/googleapis/python-firestore/issues/31)) ([891edc7](https://www.github.com/googleapis/python-firestore/commit/891edc7a9fd576cf0b61286502b0ba02223f89c6))
+* **firestore:** add v1beta1 deprecation annotation ([#34](https://www.github.com/googleapis/python-firestore/issues/34)) ([b9e2ab5](https://www.github.com/googleapis/python-firestore/commit/b9e2ab58a41c7bbab28028cb88f84bd6013816ed))
+* **v1:** add batch write ([#62](https://www.github.com/googleapis/python-firestore/issues/62)) ([1415bc4](https://www.github.com/googleapis/python-firestore/commit/1415bc47a7b9742c4a522ab2be67bbcb5ce39db4))
+
+
+### Bug Fixes
+
+* Support more Python sequence types when encoding to Protobuf ([#21](https://www.github.com/googleapis/python-firestore/issues/21)) ([b1c5987](https://www.github.com/googleapis/python-firestore/commit/b1c5987c606a14874b412e70f93015e161e278d6))
+* **firestore:** use specific naming convention ([#58](https://www.github.com/googleapis/python-firestore/issues/58)) ([c97a168](https://www.github.com/googleapis/python-firestore/commit/c97a168d9b1e4f2cd8625b02f66d6978381652dd))
+
 ## [1.7.0](https://www.github.com/googleapis/python-firestore/compare/v1.6.2...v1.7.0) (2020-05-18)
 
 
