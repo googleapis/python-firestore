@@ -28,7 +28,6 @@ import google.api_core.gapic_v1.method
 import google.api_core.gapic_v1.routing_header
 import google.api_core.grpc_helpers
 import google.api_core.page_iterator
-import google.api_core.path_template
 import google.api_core.protobuf_helpers
 import grpc
 
@@ -46,7 +45,7 @@ from google.protobuf import timestamp_pb2
 
 
 _GAPIC_LIBRARY_VERSION = pkg_resources.get_distribution(
-    "google-cloud-firestore"
+    "google-cloud-firestore",
 ).version
 
 
@@ -224,12 +223,12 @@ class FirestoreClient(object):
                 self.transport = transport
         else:
             self.transport = firestore_grpc_transport.FirestoreGrpcTransport(
-                address=api_endpoint, channel=channel, credentials=credentials
+                address=api_endpoint, channel=channel, credentials=credentials,
             )
 
         if client_info is None:
             client_info = google.api_core.gapic_v1.client_info.ClientInfo(
-                gapic_version=_GAPIC_LIBRARY_VERSION
+                gapic_version=_GAPIC_LIBRARY_VERSION,
             )
         else:
             client_info.gapic_version = _GAPIC_LIBRARY_VERSION
@@ -240,7 +239,7 @@ class FirestoreClient(object):
         # (Ordinarily, these are the defaults specified in the `*_config.py`
         # file next to this one.)
         self._method_configs = google.api_core.gapic_v1.config.parse_method_configs(
-            client_config["interfaces"][self._INTERFACE_NAME]
+            client_config["interfaces"][self._INTERFACE_NAME],
         )
 
         # Save a dictionary of cached API call functions.
@@ -250,439 +249,6 @@ class FirestoreClient(object):
         self._inner_api_calls = {}
 
     # Service calls
-    def get_document(
-        self,
-        name,
-        mask=None,
-        transaction=None,
-        read_time=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Gets a single document.
-
-        Example:
-            >>> from google.cloud import firestore_v1beta1
-            >>>
-            >>> client = firestore_v1beta1.FirestoreClient()
-            >>>
-            >>> name = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
-            >>>
-            >>> response = client.get_document(name)
-
-        Args:
-            name (str): Required. The resource name of the Document to get. In the format:
-                ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
-            mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to return. If not set, returns all fields.
-
-                If the document has a field that is not present in this mask, that field
-                will not be returned in the response.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
-            transaction (bytes): Reads the document in a transaction.
-            read_time (Union[dict, ~google.cloud.firestore_v1beta1.types.Timestamp]): Reads the version of the document at the given time.
-                This may not be older than 60 seconds.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.Timestamp`
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Returns:
-            A :class:`~google.cloud.firestore_v1beta1.types.Document` instance.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "get_document" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "get_document"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.get_document,
-                default_retry=self._method_configs["GetDocument"].retry,
-                default_timeout=self._method_configs["GetDocument"].timeout,
-                client_info=self._client_info,
-            )
-
-        # Sanity check: We have some fields which are mutually exclusive;
-        # raise ValueError if more than one is sent.
-        google.api_core.protobuf_helpers.check_oneof(
-            transaction=transaction, read_time=read_time
-        )
-
-        request = firestore_pb2.GetDocumentRequest(
-            name=name, mask=mask, transaction=transaction, read_time=read_time
-        )
-        if metadata is None:
-            metadata = []
-        metadata = list(metadata)
-        try:
-            routing_header = [("name", name)]
-        except AttributeError:
-            pass
-        else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
-            metadata.append(routing_metadata)
-
-        return self._inner_api_calls["get_document"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
-
-    def list_documents(
-        self,
-        parent,
-        collection_id,
-        page_size=None,
-        order_by=None,
-        mask=None,
-        transaction=None,
-        read_time=None,
-        show_missing=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Lists documents.
-
-        Example:
-            >>> from google.cloud import firestore_v1beta1
-            >>>
-            >>> client = firestore_v1beta1.FirestoreClient()
-            >>>
-            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
-            >>>
-            >>> # TODO: Initialize `collection_id`:
-            >>> collection_id = ''
-            >>>
-            >>> # Iterate over all results
-            >>> for element in client.list_documents(parent, collection_id):
-            ...     # process element
-            ...     pass
-            >>>
-            >>>
-            >>> # Alternatively:
-            >>>
-            >>> # Iterate over results one page at a time
-            >>> for page in client.list_documents(parent, collection_id).pages:
-            ...     for element in page:
-            ...         # process element
-            ...         pass
-
-        Args:
-            parent (str): Required. The parent resource name. In the format:
-                ``projects/{project_id}/databases/{database_id}/documents`` or
-                ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
-                For example: ``projects/my-project/databases/my-database/documents`` or
-                ``projects/my-project/databases/my-database/documents/chatrooms/my-chatroom``
-            collection_id (str): Required. The collection ID, relative to ``parent``, to list. For
-                example: ``chatrooms`` or ``messages``.
-            page_size (int): The maximum number of resources contained in the
-                underlying API response. If page streaming is performed per-
-                resource, this parameter does not affect the return value. If page
-                streaming is performed per-page, this determines the maximum number
-                of resources in a page.
-            order_by (str): The order to sort results by. For example: ``priority desc, name``.
-            mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to return. If not set, returns all fields.
-
-                If a document has a field that is not present in this mask, that field
-                will not be returned in the response.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
-            transaction (bytes): Reads documents in a transaction.
-            read_time (Union[dict, ~google.cloud.firestore_v1beta1.types.Timestamp]): Reads documents as they were at the given time.
-                This may not be older than 60 seconds.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.Timestamp`
-            show_missing (bool): If the list should show missing documents. A missing document is a
-                document that does not exist but has sub-documents. These documents will
-                be returned with a key but will not have fields,
-                ``Document.create_time``, or ``Document.update_time`` set.
-
-                Requests with ``show_missing`` may not specify ``where`` or
-                ``order_by``.
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Returns:
-            A :class:`~google.api_core.page_iterator.PageIterator` instance.
-            An iterable of :class:`~google.cloud.firestore_v1beta1.types.Document` instances.
-            You can also iterate over the pages of the response
-            using its `pages` property.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "list_documents" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "list_documents"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.list_documents,
-                default_retry=self._method_configs["ListDocuments"].retry,
-                default_timeout=self._method_configs["ListDocuments"].timeout,
-                client_info=self._client_info,
-            )
-
-        # Sanity check: We have some fields which are mutually exclusive;
-        # raise ValueError if more than one is sent.
-        google.api_core.protobuf_helpers.check_oneof(
-            transaction=transaction, read_time=read_time
-        )
-
-        request = firestore_pb2.ListDocumentsRequest(
-            parent=parent,
-            collection_id=collection_id,
-            page_size=page_size,
-            order_by=order_by,
-            mask=mask,
-            transaction=transaction,
-            read_time=read_time,
-            show_missing=show_missing,
-        )
-        iterator = google.api_core.page_iterator.GRPCIterator(
-            client=None,
-            method=functools.partial(
-                self._inner_api_calls["list_documents"],
-                retry=retry,
-                timeout=timeout,
-                metadata=metadata,
-            ),
-            request=request,
-            items_field="documents",
-            request_token_field="page_token",
-            response_token_field="next_page_token",
-        )
-        return iterator
-
-    def create_document(
-        self,
-        parent,
-        collection_id,
-        document_id,
-        document,
-        mask=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Creates a new document.
-
-        Example:
-            >>> from google.cloud import firestore_v1beta1
-            >>>
-            >>> client = firestore_v1beta1.FirestoreClient()
-            >>>
-            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
-            >>>
-            >>> # TODO: Initialize `collection_id`:
-            >>> collection_id = ''
-            >>>
-            >>> # TODO: Initialize `document_id`:
-            >>> document_id = ''
-            >>>
-            >>> # TODO: Initialize `document`:
-            >>> document = {}
-            >>>
-            >>> response = client.create_document(parent, collection_id, document_id, document)
-
-        Args:
-            parent (str): Required. The parent resource. For example:
-                ``projects/{project_id}/databases/{database_id}/documents`` or
-                ``projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}``
-            collection_id (str): Required. The collection ID, relative to ``parent``, to list. For
-                example: ``chatrooms``.
-            document_id (str): The client-assigned document ID to use for this document.
-
-                Optional. If not specified, an ID will be assigned by the service.
-            document (Union[dict, ~google.cloud.firestore_v1beta1.types.Document]): Required. The document to create. ``name`` must not be set.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.Document`
-            mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to return. If not set, returns all fields.
-
-                If the document has a field that is not present in this mask, that field
-                will not be returned in the response.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Returns:
-            A :class:`~google.cloud.firestore_v1beta1.types.Document` instance.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "create_document" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "create_document"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.create_document,
-                default_retry=self._method_configs["CreateDocument"].retry,
-                default_timeout=self._method_configs["CreateDocument"].timeout,
-                client_info=self._client_info,
-            )
-
-        request = firestore_pb2.CreateDocumentRequest(
-            parent=parent,
-            collection_id=collection_id,
-            document_id=document_id,
-            document=document,
-            mask=mask,
-        )
-        return self._inner_api_calls["create_document"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
-
-    def update_document(
-        self,
-        document,
-        update_mask,
-        mask=None,
-        current_document=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Updates or inserts a document.
-
-        Example:
-            >>> from google.cloud import firestore_v1beta1
-            >>>
-            >>> client = firestore_v1beta1.FirestoreClient()
-            >>>
-            >>> # TODO: Initialize `document`:
-            >>> document = {}
-            >>>
-            >>> # TODO: Initialize `update_mask`:
-            >>> update_mask = {}
-            >>>
-            >>> response = client.update_document(document, update_mask)
-
-        Args:
-            document (Union[dict, ~google.cloud.firestore_v1beta1.types.Document]): Required. The updated document.
-                Creates the document if it does not already exist.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.Document`
-            update_mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to update.
-                None of the field paths in the mask may contain a reserved name.
-
-                If the document exists on the server and has fields not referenced in the
-                mask, they are left unchanged.
-                Fields referenced in the mask, but not present in the input document, are
-                deleted from the document on the server.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
-            mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to return. If not set, returns all fields.
-
-                If the document has a field that is not present in this mask, that field
-                will not be returned in the response.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
-            current_document (Union[dict, ~google.cloud.firestore_v1beta1.types.Precondition]): An optional precondition on the document.
-                The request will fail if this is set and not met by the target document.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.Precondition`
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Returns:
-            A :class:`~google.cloud.firestore_v1beta1.types.Document` instance.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "update_document" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "update_document"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.update_document,
-                default_retry=self._method_configs["UpdateDocument"].retry,
-                default_timeout=self._method_configs["UpdateDocument"].timeout,
-                client_info=self._client_info,
-            )
-
-        request = firestore_pb2.UpdateDocumentRequest(
-            document=document,
-            update_mask=update_mask,
-            mask=mask,
-            current_document=current_document,
-        )
-        if metadata is None:
-            metadata = []
-        metadata = list(metadata)
-        try:
-            routing_header = [("document.name", document.name)]
-        except AttributeError:
-            pass
-        else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
-            metadata.append(routing_metadata)
-
-        return self._inner_api_calls["update_document"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
-
     def delete_document(
         self,
         name,
@@ -699,12 +265,14 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1beta1.FirestoreClient()
             >>>
-            >>> name = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `name`:
+            >>> name = ''
             >>>
             >>> client.delete_document(name)
 
         Args:
-            name (str): Required. The resource name of the Document to delete. In the format:
+            name (str): Required. The resource name of the Document to delete. In the
+                format:
                 ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
             current_document (Union[dict, ~google.cloud.firestore_v1beta1.types.Precondition]): An optional precondition on the document.
                 The request will fail if this is set and not met by the target document.
@@ -739,7 +307,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.DeleteDocumentRequest(
-            name=name, current_document=current_document
+            name=name, current_document=current_document,
         )
         if metadata is None:
             metadata = []
@@ -761,7 +329,7 @@ class FirestoreClient(object):
     def batch_get_documents(
         self,
         database,
-        documents,
+        documents=None,
         mask=None,
         transaction=None,
         new_transaction=None,
@@ -781,12 +349,10 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1beta1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>>
-            >>> # TODO: Initialize `documents`:
-            >>> documents = []
-            >>>
-            >>> for element in client.batch_get_documents(database, documents):
+            >>> for element in client.batch_get_documents(database):
             ...     # process element
             ...     pass
 
@@ -896,7 +462,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1beta1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>>
             >>> response = client.begin_transaction(database)
 
@@ -939,7 +506,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.BeginTransactionRequest(
-            database=database, options=options_
+            database=database, options=options_,
         )
         if metadata is None:
             metadata = []
@@ -955,90 +522,6 @@ class FirestoreClient(object):
             metadata.append(routing_metadata)
 
         return self._inner_api_calls["begin_transaction"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
-
-    def commit(
-        self,
-        database,
-        writes,
-        transaction=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
-        """
-        Commits a transaction, while optionally updating documents.
-
-        Example:
-            >>> from google.cloud import firestore_v1beta1
-            >>>
-            >>> client = firestore_v1beta1.FirestoreClient()
-            >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
-            >>>
-            >>> # TODO: Initialize `writes`:
-            >>> writes = []
-            >>>
-            >>> response = client.commit(database, writes)
-
-        Args:
-            database (str): Required. The database name. In the format:
-                ``projects/{project_id}/databases/{database_id}``.
-            writes (list[Union[dict, ~google.cloud.firestore_v1beta1.types.Write]]): The writes to apply.
-
-                Always executed atomically and in order.
-
-                If a dict is provided, it must be of the same form as the protobuf
-                message :class:`~google.cloud.firestore_v1beta1.types.Write`
-            transaction (bytes): If set, applies all writes in this transaction, and commits it.
-            retry (Optional[google.api_core.retry.Retry]):  A retry object used
-                to retry requests. If ``None`` is specified, requests will
-                be retried using a default configuration.
-            timeout (Optional[float]): The amount of time, in seconds, to wait
-                for the request to complete. Note that if ``retry`` is
-                specified, the timeout applies to each individual attempt.
-            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
-                that is provided to the method.
-
-        Returns:
-            A :class:`~google.cloud.firestore_v1beta1.types.CommitResponse` instance.
-
-        Raises:
-            google.api_core.exceptions.GoogleAPICallError: If the request
-                    failed for any reason.
-            google.api_core.exceptions.RetryError: If the request failed due
-                    to a retryable error and retry attempts failed.
-            ValueError: If the parameters are invalid.
-        """
-        # Wrap the transport method to add retry and timeout logic.
-        if "commit" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "commit"
-            ] = google.api_core.gapic_v1.method.wrap_method(
-                self.transport.commit,
-                default_retry=self._method_configs["Commit"].retry,
-                default_timeout=self._method_configs["Commit"].timeout,
-                client_info=self._client_info,
-            )
-
-        request = firestore_pb2.CommitRequest(
-            database=database, writes=writes, transaction=transaction
-        )
-        if metadata is None:
-            metadata = []
-        metadata = list(metadata)
-        try:
-            routing_header = [("database", database)]
-        except AttributeError:
-            pass
-        else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
-            metadata.append(routing_metadata)
-
-        return self._inner_api_calls["commit"](
             request, retry=retry, timeout=timeout, metadata=metadata
         )
 
@@ -1058,7 +541,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1beta1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>>
             >>> # TODO: Initialize `transaction`:
             >>> transaction = b''
@@ -1097,7 +581,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.RollbackRequest(
-            database=database, transaction=transaction
+            database=database, transaction=transaction,
         )
         if metadata is None:
             metadata = []
@@ -1135,7 +619,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1beta1.FirestoreClient()
             >>>
-            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
             >>>
             >>> for element in client.run_query(parent):
             ...     # process element
@@ -1196,7 +681,7 @@ class FirestoreClient(object):
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
-        google.api_core.protobuf_helpers.check_oneof(structured_query=structured_query)
+        google.api_core.protobuf_helpers.check_oneof(structured_query=structured_query,)
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
@@ -1240,14 +725,13 @@ class FirestoreClient(object):
         """
         Streams batches of document updates and deletes, in order.
 
-        EXPERIMENTAL: This method interface might change in the future.
-
         Example:
             >>> from google.cloud import firestore_v1beta1
             >>>
             >>> client = firestore_v1beta1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>> request = {'database': database}
             >>>
             >>> requests = [request]
@@ -1302,14 +786,13 @@ class FirestoreClient(object):
         """
         Listens to changes.
 
-        EXPERIMENTAL: This method interface might change in the future.
-
         Example:
             >>> from google.cloud import firestore_v1beta1
             >>>
             >>> client = firestore_v1beta1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>> request = {'database': database}
             >>>
             >>> requests = [request]
@@ -1370,7 +853,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1beta1.FirestoreClient()
             >>>
-            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
             >>>
             >>> # Iterate over all results
             >>> for element in client.list_collection_ids(parent):
@@ -1430,7 +914,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.ListCollectionIdsRequest(
-            parent=parent, page_size=page_size
+            parent=parent, page_size=page_size,
         )
         if metadata is None:
             metadata = []
@@ -1459,3 +943,515 @@ class FirestoreClient(object):
             response_token_field="next_page_token",
         )
         return iterator
+
+    def get_document(
+        self,
+        name,
+        mask=None,
+        transaction=None,
+        read_time=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Gets a single document.
+
+        Example:
+            >>> from google.cloud import firestore_v1beta1
+            >>>
+            >>> client = firestore_v1beta1.FirestoreClient()
+            >>>
+            >>> # TODO: Initialize `name`:
+            >>> name = ''
+            >>>
+            >>> response = client.get_document(name)
+
+        Args:
+            name (str): Required. The resource name of the Document to get. In the format:
+                ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
+            mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to return. If not set, returns all fields.
+
+                If the document has a field that is not present in this mask, that field
+                will not be returned in the response.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
+            transaction (bytes): Reads the document in a transaction.
+            read_time (Union[dict, ~google.cloud.firestore_v1beta1.types.Timestamp]): Reads the version of the document at the given time.
+                This may not be older than 60 seconds.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.Timestamp`
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.cloud.firestore_v1beta1.types.Document` instance.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "get_document" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "get_document"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.get_document,
+                default_retry=self._method_configs["GetDocument"].retry,
+                default_timeout=self._method_configs["GetDocument"].timeout,
+                client_info=self._client_info,
+            )
+
+        # Sanity check: We have some fields which are mutually exclusive;
+        # raise ValueError if more than one is sent.
+        google.api_core.protobuf_helpers.check_oneof(
+            transaction=transaction, read_time=read_time,
+        )
+
+        request = firestore_pb2.GetDocumentRequest(
+            name=name, mask=mask, transaction=transaction, read_time=read_time,
+        )
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("name", name)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        return self._inner_api_calls["get_document"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )
+
+    def list_documents(
+        self,
+        parent,
+        collection_id,
+        page_size=None,
+        order_by=None,
+        mask=None,
+        transaction=None,
+        read_time=None,
+        show_missing=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Lists documents.
+
+        Example:
+            >>> from google.cloud import firestore_v1beta1
+            >>>
+            >>> client = firestore_v1beta1.FirestoreClient()
+            >>>
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
+            >>>
+            >>> # TODO: Initialize `collection_id`:
+            >>> collection_id = ''
+            >>>
+            >>> # Iterate over all results
+            >>> for element in client.list_documents(parent, collection_id):
+            ...     # process element
+            ...     pass
+            >>>
+            >>>
+            >>> # Alternatively:
+            >>>
+            >>> # Iterate over results one page at a time
+            >>> for page in client.list_documents(parent, collection_id).pages:
+            ...     for element in page:
+            ...         # process element
+            ...         pass
+
+        Args:
+            parent (str): Required. The parent resource name. In the format:
+                ``projects/{project_id}/databases/{database_id}/documents`` or
+                ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
+                For example: ``projects/my-project/databases/my-database/documents`` or
+                ``projects/my-project/databases/my-database/documents/chatrooms/my-chatroom``
+            collection_id (str): Required. The collection ID, relative to ``parent``, to list. For
+                example: ``chatrooms`` or ``messages``.
+            page_size (int): The maximum number of resources contained in the
+                underlying API response. If page streaming is performed per-
+                resource, this parameter does not affect the return value. If page
+                streaming is performed per-page, this determines the maximum number
+                of resources in a page.
+            order_by (str): The order to sort results by. For example: ``priority desc, name``.
+            mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to return. If not set, returns all fields.
+
+                If a document has a field that is not present in this mask, that field
+                will not be returned in the response.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
+            transaction (bytes): Reads documents in a transaction.
+            read_time (Union[dict, ~google.cloud.firestore_v1beta1.types.Timestamp]): Reads documents as they were at the given time.
+                This may not be older than 60 seconds.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.Timestamp`
+            show_missing (bool): If the list should show missing documents. A missing document is a
+                document that does not exist but has sub-documents. These documents will
+                be returned with a key but will not have fields,
+                ``Document.create_time``, or ``Document.update_time`` set.
+
+                Requests with ``show_missing`` may not specify ``where`` or
+                ``order_by``.
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.api_core.page_iterator.PageIterator` instance.
+            An iterable of :class:`~google.cloud.firestore_v1beta1.types.Document` instances.
+            You can also iterate over the pages of the response
+            using its `pages` property.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "list_documents" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "list_documents"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.list_documents,
+                default_retry=self._method_configs["ListDocuments"].retry,
+                default_timeout=self._method_configs["ListDocuments"].timeout,
+                client_info=self._client_info,
+            )
+
+        # Sanity check: We have some fields which are mutually exclusive;
+        # raise ValueError if more than one is sent.
+        google.api_core.protobuf_helpers.check_oneof(
+            transaction=transaction, read_time=read_time,
+        )
+
+        request = firestore_pb2.ListDocumentsRequest(
+            parent=parent,
+            collection_id=collection_id,
+            page_size=page_size,
+            order_by=order_by,
+            mask=mask,
+            transaction=transaction,
+            read_time=read_time,
+            show_missing=show_missing,
+        )
+        iterator = google.api_core.page_iterator.GRPCIterator(
+            client=None,
+            method=functools.partial(
+                self._inner_api_calls["list_documents"],
+                retry=retry,
+                timeout=timeout,
+                metadata=metadata,
+            ),
+            request=request,
+            items_field="documents",
+            request_token_field="page_token",
+            response_token_field="next_page_token",
+        )
+        return iterator
+
+    def create_document(
+        self,
+        parent,
+        collection_id,
+        document_id,
+        document,
+        mask=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Creates a new document.
+
+        Example:
+            >>> from google.cloud import firestore_v1beta1
+            >>>
+            >>> client = firestore_v1beta1.FirestoreClient()
+            >>>
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
+            >>>
+            >>> # TODO: Initialize `collection_id`:
+            >>> collection_id = ''
+            >>>
+            >>> # TODO: Initialize `document`:
+            >>> document = {}
+            >>>
+            >>> response = client.create_document(parent, collection_id, document)
+
+        Args:
+            parent (str): Required. The parent resource. For example:
+                ``projects/{project_id}/databases/{database_id}/documents`` or
+                ``projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}``
+            collection_id (str): Required. The collection ID, relative to ``parent``, to list. For
+                example: ``chatrooms``.
+            document (Union[dict, ~google.cloud.firestore_v1beta1.types.Document]): Required. The document to create. ``name`` must not be set.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.Document`
+            document_id (str): The client-assigned document ID to use for this document.
+
+                Optional. If not specified, an ID will be assigned by the service.
+            mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to return. If not set, returns all fields.
+
+                If the document has a field that is not present in this mask, that field
+                will not be returned in the response.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.cloud.firestore_v1beta1.types.Document` instance.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "create_document" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "create_document"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.create_document,
+                default_retry=self._method_configs["CreateDocument"].retry,
+                default_timeout=self._method_configs["CreateDocument"].timeout,
+                client_info=self._client_info,
+            )
+
+        request = firestore_pb2.CreateDocumentRequest(
+            parent=parent,
+            collection_id=collection_id,
+            document=document,
+            document_id=document_id,
+            mask=mask,
+        )
+        return self._inner_api_calls["create_document"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )
+
+    def update_document(
+        self,
+        document,
+        update_mask=None,
+        mask=None,
+        current_document=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Updates or inserts a document.
+
+        Example:
+            >>> from google.cloud import firestore_v1beta1
+            >>>
+            >>> client = firestore_v1beta1.FirestoreClient()
+            >>>
+            >>> # TODO: Initialize `document`:
+            >>> document = {}
+            >>>
+            >>> response = client.update_document(document)
+
+        Args:
+            document (Union[dict, ~google.cloud.firestore_v1beta1.types.Document]): Required. The updated document.
+                Creates the document if it does not already exist.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.Document`
+            update_mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to update.
+                None of the field paths in the mask may contain a reserved name.
+
+                If the document exists on the server and has fields not referenced in the
+                mask, they are left unchanged.
+                Fields referenced in the mask, but not present in the input document, are
+                deleted from the document on the server.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
+            mask (Union[dict, ~google.cloud.firestore_v1beta1.types.DocumentMask]): The fields to return. If not set, returns all fields.
+
+                If the document has a field that is not present in this mask, that field
+                will not be returned in the response.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.DocumentMask`
+            current_document (Union[dict, ~google.cloud.firestore_v1beta1.types.Precondition]): An optional precondition on the document.
+                The request will fail if this is set and not met by the target document.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.Precondition`
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.cloud.firestore_v1beta1.types.Document` instance.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "update_document" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "update_document"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.update_document,
+                default_retry=self._method_configs["UpdateDocument"].retry,
+                default_timeout=self._method_configs["UpdateDocument"].timeout,
+                client_info=self._client_info,
+            )
+
+        request = firestore_pb2.UpdateDocumentRequest(
+            document=document,
+            update_mask=update_mask,
+            mask=mask,
+            current_document=current_document,
+        )
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("document.name", document.name)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        return self._inner_api_calls["update_document"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )
+
+    def commit(
+        self,
+        database,
+        writes=None,
+        transaction=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Commits a transaction, while optionally updating documents.
+
+        Example:
+            >>> from google.cloud import firestore_v1beta1
+            >>>
+            >>> client = firestore_v1beta1.FirestoreClient()
+            >>>
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
+            >>>
+            >>> response = client.commit(database)
+
+        Args:
+            database (str): Required. The database name. In the format:
+                ``projects/{project_id}/databases/{database_id}``.
+            writes (list[Union[dict, ~google.cloud.firestore_v1beta1.types.Write]]): The writes to apply.
+
+                Always executed atomically and in order.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1beta1.types.Write`
+            transaction (bytes): If set, applies all writes in this transaction, and commits it.
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.cloud.firestore_v1beta1.types.CommitResponse` instance.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "commit" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "commit"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.commit,
+                default_retry=self._method_configs["Commit"].retry,
+                default_timeout=self._method_configs["Commit"].timeout,
+                client_info=self._client_info,
+            )
+
+        request = firestore_pb2.CommitRequest(
+            database=database, writes=writes, transaction=transaction,
+        )
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("database", database)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        return self._inner_api_calls["commit"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )

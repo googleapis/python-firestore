@@ -21,8 +21,8 @@ import enum
 
 class NullValue(enum.IntEnum):
     """
-    ``NullValue`` is a singleton enumeration to represent the null value for
-    the ``Value`` type union.
+    ``NullValue`` is a singleton enumeration to represent the null value
+    for the ``Value`` type union.
 
     The JSON representation for ``NullValue`` is JSON ``null``.
 
@@ -85,14 +85,15 @@ class StructuredQuery(object):
             Attributes:
               OPERATOR_UNSPECIFIED (int): Unspecified. This value must not be used.
               LESS_THAN (int): Less than. Requires that the field come first in ``order_by``.
-              LESS_THAN_OR_EQUAL (int): Less than or equal. Requires that the field come first in ``order_by``.
+              LESS_THAN_OR_EQUAL (int): Less than or equal. Requires that the field come first in
+              ``order_by``.
               GREATER_THAN (int): Greater than. Requires that the field come first in ``order_by``.
               GREATER_THAN_OR_EQUAL (int): Greater than or equal. Requires that the field come first in
               ``order_by``.
               EQUAL (int): Equal.
               ARRAY_CONTAINS (int): Contains. Requires that the field is an array.
-              IN (int): In. Requires that ``value`` is a non-empty ArrayValue with at most 10
-              values.
+              IN (int): In. Requires that ``value`` is a non-empty ArrayValue with at most
+              10 values.
               ARRAY_CONTAINS_ANY (int): Contains any. Requires that the field is an array and ``value`` is a
               non-empty ArrayValue with at most 10 values.
             """
@@ -129,11 +130,12 @@ class TargetChange(object):
         The type of change.
 
         Attributes:
-          NO_CHANGE (int): No change has occurred. Used only to send an updated ``resume_token``.
+          NO_CHANGE (int): No change has occurred. Used only to send an updated
+          ``resume_token``.
           ADD (int): The targets have been added.
           REMOVE (int): The targets have been removed.
-          CURRENT (int): The targets reflect all changes committed before the targets were added
-          to the stream.
+          CURRENT (int): The targets reflect all changes committed before the targets were
+          added to the stream.
 
           This will be sent after or with a ``read_time`` that is greater than or
           equal to the time at which the targets were added.

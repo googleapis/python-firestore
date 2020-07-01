@@ -56,7 +56,7 @@ class FirestoreGrpcTransport(object):
         # exception (channels come with credentials baked in already).
         if channel is not None and credentials is not None:
             raise ValueError(
-                "The `channel` and `credentials` arguments are mutually " "exclusive."
+                "The `channel` and `credentials` arguments are mutually " "exclusive.",
             )
 
         # Create the channel.
@@ -74,7 +74,9 @@ class FirestoreGrpcTransport(object):
 
         # gRPC uses objects called "stubs" that are bound to the
         # channel and provide a basic method for each RPC.
-        self._stubs = {"firestore_stub": firestore_pb2_grpc.FirestoreStub(channel)}
+        self._stubs = {
+            "firestore_stub": firestore_pb2_grpc.FirestoreStub(channel),
+        }
 
     @classmethod
     def create_channel(
@@ -107,58 +109,6 @@ class FirestoreGrpcTransport(object):
             grpc.Channel: A gRPC channel object.
         """
         return self._channel
-
-    @property
-    def get_document(self):
-        """Return the gRPC stub for :meth:`FirestoreClient.get_document`.
-
-        Gets a single document.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_stub"].GetDocument
-
-    @property
-    def list_documents(self):
-        """Return the gRPC stub for :meth:`FirestoreClient.list_documents`.
-
-        Lists documents.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_stub"].ListDocuments
-
-    @property
-    def create_document(self):
-        """Return the gRPC stub for :meth:`FirestoreClient.create_document`.
-
-        Creates a new document.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_stub"].CreateDocument
-
-    @property
-    def update_document(self):
-        """Return the gRPC stub for :meth:`FirestoreClient.update_document`.
-
-        Updates or inserts a document.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_stub"].UpdateDocument
 
     @property
     def delete_document(self):
@@ -201,19 +151,6 @@ class FirestoreGrpcTransport(object):
                 deserialized response object.
         """
         return self._stubs["firestore_stub"].BeginTransaction
-
-    @property
-    def commit(self):
-        """Return the gRPC stub for :meth:`FirestoreClient.commit`.
-
-        Commits a transaction, while optionally updating documents.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_stub"].Commit
 
     @property
     def rollback(self):
@@ -279,3 +216,68 @@ class FirestoreGrpcTransport(object):
                 deserialized response object.
         """
         return self._stubs["firestore_stub"].ListCollectionIds
+
+    @property
+    def get_document(self):
+        """Return the gRPC stub for :meth:`FirestoreClient.get_document`.
+
+        Gets a single document.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_stub"].GetDocument
+
+    @property
+    def list_documents(self):
+        """Return the gRPC stub for :meth:`FirestoreClient.list_documents`.
+
+        Lists documents.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_stub"].ListDocuments
+
+    @property
+    def create_document(self):
+        """Return the gRPC stub for :meth:`FirestoreClient.create_document`.
+
+        Creates a new document.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_stub"].CreateDocument
+
+    @property
+    def update_document(self):
+        """Return the gRPC stub for :meth:`FirestoreClient.update_document`.
+
+        Updates or inserts a document.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_stub"].UpdateDocument
+
+    @property
+    def commit(self):
+        """Return the gRPC stub for :meth:`FirestoreClient.commit`.
+
+        Commits a transaction, while optionally updating documents.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_stub"].Commit

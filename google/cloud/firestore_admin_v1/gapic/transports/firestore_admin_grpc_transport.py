@@ -16,6 +16,7 @@
 
 
 import google.api_core.grpc_helpers
+import google.api_core.operations_v1
 
 from google.cloud.firestore_admin_v1.proto import firestore_admin_pb2_grpc
 
@@ -56,7 +57,7 @@ class FirestoreAdminGrpcTransport(object):
         # exception (channels come with credentials baked in already).
         if channel is not None and credentials is not None:
             raise ValueError(
-                "The `channel` and `credentials` arguments are mutually " "exclusive."
+                "The `channel` and `credentials` arguments are mutually " "exclusive.",
             )
 
         # Create the channel.
@@ -75,8 +76,17 @@ class FirestoreAdminGrpcTransport(object):
         # gRPC uses objects called "stubs" that are bound to the
         # channel and provide a basic method for each RPC.
         self._stubs = {
-            "firestore_admin_stub": firestore_admin_pb2_grpc.FirestoreAdminStub(channel)
+            "firestore_admin_stub": firestore_admin_pb2_grpc.FirestoreAdminStub(
+                channel
+            ),
         }
+
+        # Because this API includes a method that returns a
+        # long-running operation (proto: google.longrunning.Operation),
+        # instantiate an LRO client.
+        self._operations_client = google.api_core.operations_v1.OperationsClient(
+            channel
+        )
 
     @classmethod
     def create_channel(
@@ -109,6 +119,44 @@ class FirestoreAdminGrpcTransport(object):
             grpc.Channel: A gRPC channel object.
         """
         return self._channel
+
+    @property
+    def delete_index(self):
+        """Return the gRPC stub for :meth:`FirestoreAdminClient.delete_index`.
+
+        Deletes a composite index.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_admin_stub"].DeleteIndex
+
+    @property
+    def update_field(self):
+        """Return the gRPC stub for :meth:`FirestoreAdminClient.update_field`.
+
+        Updates a field configuration. Currently, field updates apply only
+        to single field index configuration. However, calls to
+        ``FirestoreAdmin.UpdateField`` should provide a field mask to avoid
+        changing any configuration that the caller isn't aware of. The field
+        mask should be specified as: ``{ paths: "index_config" }``.
+
+        This call returns a ``google.longrunning.Operation`` which may be used
+        to track the status of the field update. The metadata for the operation
+        will be the type ``FieldOperationMetadata``.
+
+        To configure the default field settings for the database, use the
+        special ``Field`` with resource name:
+        ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_admin_stub"].UpdateField
 
     @property
     def create_index(self):
@@ -153,56 +201,6 @@ class FirestoreAdminGrpcTransport(object):
         return self._stubs["firestore_admin_stub"].GetIndex
 
     @property
-    def delete_index(self):
-        """Return the gRPC stub for :meth:`FirestoreAdminClient.delete_index`.
-
-        Deletes a composite index.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_admin_stub"].DeleteIndex
-
-    @property
-    def import_documents(self):
-        """Return the gRPC stub for :meth:`FirestoreAdminClient.import_documents`.
-
-        Imports documents into Google Cloud Firestore. Existing documents with the
-        same name are overwritten. The import occurs in the background and its
-        progress can be monitored and managed via the Operation resource that is
-        created. If an ImportDocuments operation is cancelled, it is possible
-        that a subset of the data has already been imported to Cloud Firestore.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_admin_stub"].ImportDocuments
-
-    @property
-    def export_documents(self):
-        """Return the gRPC stub for :meth:`FirestoreAdminClient.export_documents`.
-
-        Exports a copy of all or a subset of documents from Google Cloud Firestore
-        to another storage system, such as Google Cloud Storage. Recent updates to
-        documents may not be reflected in the export. The export occurs in the
-        background and its progress can be monitored and managed via the
-        Operation resource that is created. The output of an export may only be
-        used once the associated operation is done. If an export operation is
-        cancelled before completion it may leave partial data behind in Google
-        Cloud Storage.
-
-        Returns:
-            Callable: A callable which accepts the appropriate
-                deserialized request object and returns a
-                deserialized response object.
-        """
-        return self._stubs["firestore_admin_stub"].ExportDocuments
-
-    @property
     def get_field(self):
         """Return the gRPC stub for :meth:`FirestoreAdminClient.get_field`.
 
@@ -234,26 +232,38 @@ class FirestoreAdminGrpcTransport(object):
         return self._stubs["firestore_admin_stub"].ListFields
 
     @property
-    def update_field(self):
-        """Return the gRPC stub for :meth:`FirestoreAdminClient.update_field`.
+    def export_documents(self):
+        """Return the gRPC stub for :meth:`FirestoreAdminClient.export_documents`.
 
-        Updates a field configuration. Currently, field updates apply only to
-        single field index configuration. However, calls to
-        ``FirestoreAdmin.UpdateField`` should provide a field mask to avoid
-        changing any configuration that the caller isn't aware of. The field
-        mask should be specified as: ``{ paths: "index_config" }``.
-
-        This call returns a ``google.longrunning.Operation`` which may be used
-        to track the status of the field update. The metadata for the operation
-        will be the type ``FieldOperationMetadata``.
-
-        To configure the default field settings for the database, use the
-        special ``Field`` with resource name:
-        ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
+        Exports a copy of all or a subset of documents from Google Cloud Firestore
+        to another storage system, such as Google Cloud Storage. Recent updates to
+        documents may not be reflected in the export. The export occurs in the
+        background and its progress can be monitored and managed via the
+        Operation resource that is created. The output of an export may only be
+        used once the associated operation is done. If an export operation is
+        cancelled before completion it may leave partial data behind in Google
+        Cloud Storage.
 
         Returns:
             Callable: A callable which accepts the appropriate
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].UpdateField
+        return self._stubs["firestore_admin_stub"].ExportDocuments
+
+    @property
+    def import_documents(self):
+        """Return the gRPC stub for :meth:`FirestoreAdminClient.import_documents`.
+
+        Imports documents into Google Cloud Firestore. Existing documents with the
+        same name are overwritten. The import occurs in the background and its
+        progress can be monitored and managed via the Operation resource that is
+        created. If an ImportDocuments operation is cancelled, it is possible
+        that a subset of the data has already been imported to Cloud Firestore.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_admin_stub"].ImportDocuments

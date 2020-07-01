@@ -56,7 +56,7 @@ class FirestoreGrpcTransport(object):
         # exception (channels come with credentials baked in already).
         if channel is not None and credentials is not None:
             raise ValueError(
-                "The `channel` and `credentials` arguments are mutually " "exclusive."
+                "The `channel` and `credentials` arguments are mutually " "exclusive.",
             )
 
         # Create the channel.
@@ -74,7 +74,9 @@ class FirestoreGrpcTransport(object):
 
         # gRPC uses objects called "stubs" that are bound to the
         # channel and provide a basic method for each RPC.
-        self._stubs = {"firestore_stub": firestore_pb2_grpc.FirestoreStub(channel)}
+        self._stubs = {
+            "firestore_stub": firestore_pb2_grpc.FirestoreStub(channel),
+        }
 
     @classmethod
     def create_channel(
@@ -190,6 +192,27 @@ class FirestoreGrpcTransport(object):
         return self._stubs["firestore_stub"].BatchGetDocuments
 
     @property
+    def batch_write(self):
+        """Return the gRPC stub for :meth:`FirestoreClient.batch_write`.
+
+        Applies a batch of write operations.
+
+        The BatchWrite method does not apply the write operations atomically and
+        can apply them out of order. Method does not allow more than one write
+        per document. Each write succeeds or fails independently. See the
+        ``BatchWriteResponse`` for the success status of each write.
+
+        If you require an atomically applied set of writes, use ``Commit``
+        instead.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_stub"].BatchWrite
+
+    @property
     def begin_transaction(self):
         """Return the gRPC stub for :meth:`FirestoreClient.begin_transaction`.
 
@@ -279,3 +302,18 @@ class FirestoreGrpcTransport(object):
                 deserialized response object.
         """
         return self._stubs["firestore_stub"].ListCollectionIds
+
+    @property
+    def partition_query(self):
+        """Return the gRPC stub for :meth:`FirestoreClient.partition_query`.
+
+        Partitions a query by returning partition cursors that can be used to run
+        the query in parallel. The returned partition cursors are split points that
+        can be used by RunQuery as starting/end points for the query results.
+
+        Returns:
+            Callable: A callable which accepts the appropriate
+                deserialized request object and returns a
+                deserialized response object.
+        """
+        return self._stubs["firestore_stub"].PartitionQuery
