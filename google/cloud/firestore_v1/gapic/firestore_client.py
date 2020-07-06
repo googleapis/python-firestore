@@ -28,7 +28,6 @@ import google.api_core.gapic_v1.method
 import google.api_core.gapic_v1.routing_header
 import google.api_core.grpc_helpers
 import google.api_core.page_iterator
-import google.api_core.path_template
 import google.api_core.protobuf_helpers
 import grpc
 
@@ -46,7 +45,7 @@ from google.protobuf import timestamp_pb2
 
 
 _GAPIC_LIBRARY_VERSION = pkg_resources.get_distribution(
-    "google-cloud-firestore"
+    "google-cloud-firestore",
 ).version
 
 
@@ -215,12 +214,12 @@ class FirestoreClient(object):
                 self.transport = transport
         else:
             self.transport = firestore_grpc_transport.FirestoreGrpcTransport(
-                address=api_endpoint, channel=channel, credentials=credentials
+                address=api_endpoint, channel=channel, credentials=credentials,
             )
 
         if client_info is None:
             client_info = google.api_core.gapic_v1.client_info.ClientInfo(
-                gapic_version=_GAPIC_LIBRARY_VERSION
+                gapic_version=_GAPIC_LIBRARY_VERSION,
             )
         else:
             client_info.gapic_version = _GAPIC_LIBRARY_VERSION
@@ -231,7 +230,7 @@ class FirestoreClient(object):
         # (Ordinarily, these are the defaults specified in the `*_config.py`
         # file next to this one.)
         self._method_configs = google.api_core.gapic_v1.config.parse_method_configs(
-            client_config["interfaces"][self._INTERFACE_NAME]
+            client_config["interfaces"][self._INTERFACE_NAME],
         )
 
         # Save a dictionary of cached API call functions.
@@ -259,7 +258,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> name = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `name`:
+            >>> name = ''
             >>>
             >>> response = client.get_document(name)
 
@@ -275,7 +275,7 @@ class FirestoreClient(object):
                 message :class:`~google.cloud.firestore_v1.types.DocumentMask`
             transaction (bytes): Reads the document in a transaction.
             read_time (Union[dict, ~google.cloud.firestore_v1.types.Timestamp]): Reads the version of the document at the given time.
-                This may not be older than 60 seconds.
+                This may not be older than 270 seconds.
 
                 If a dict is provided, it must be of the same form as the protobuf
                 message :class:`~google.cloud.firestore_v1.types.Timestamp`
@@ -312,11 +312,11 @@ class FirestoreClient(object):
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
         google.api_core.protobuf_helpers.check_oneof(
-            transaction=transaction, read_time=read_time
+            transaction=transaction, read_time=read_time,
         )
 
         request = firestore_pb2.GetDocumentRequest(
-            name=name, mask=mask, transaction=transaction, read_time=read_time
+            name=name, mask=mask, transaction=transaction, read_time=read_time,
         )
         if metadata is None:
             metadata = []
@@ -357,7 +357,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
             >>>
             >>> # TODO: Initialize `collection_id`:
             >>> collection_id = ''
@@ -399,7 +400,7 @@ class FirestoreClient(object):
                 message :class:`~google.cloud.firestore_v1.types.DocumentMask`
             transaction (bytes): Reads documents in a transaction.
             read_time (Union[dict, ~google.cloud.firestore_v1.types.Timestamp]): Reads documents as they were at the given time.
-                This may not be older than 60 seconds.
+                This may not be older than 270 seconds.
 
                 If a dict is provided, it must be of the same form as the protobuf
                 message :class:`~google.cloud.firestore_v1.types.Timestamp`
@@ -446,7 +447,7 @@ class FirestoreClient(object):
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
         google.api_core.protobuf_helpers.check_oneof(
-            transaction=transaction, read_time=read_time
+            transaction=transaction, read_time=read_time,
         )
 
         request = firestore_pb2.ListDocumentsRequest(
@@ -493,18 +494,16 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
             >>>
             >>> # TODO: Initialize `collection_id`:
             >>> collection_id = ''
             >>>
-            >>> # TODO: Initialize `document_id`:
-            >>> document_id = ''
-            >>>
             >>> # TODO: Initialize `document`:
             >>> document = {}
             >>>
-            >>> response = client.create_document(parent, collection_id, document_id, document)
+            >>> response = client.create_document(parent, collection_id, document)
 
         Args:
             parent (str): Required. The parent resource. For example:
@@ -512,13 +511,13 @@ class FirestoreClient(object):
                 ``projects/{project_id}/databases/{database_id}/documents/chatrooms/{chatroom_id}``
             collection_id (str): Required. The collection ID, relative to ``parent``, to list. For
                 example: ``chatrooms``.
-            document_id (str): The client-assigned document ID to use for this document.
-
-                Optional. If not specified, an ID will be assigned by the service.
             document (Union[dict, ~google.cloud.firestore_v1.types.Document]): Required. The document to create. ``name`` must not be set.
 
                 If a dict is provided, it must be of the same form as the protobuf
                 message :class:`~google.cloud.firestore_v1.types.Document`
+            document_id (str): The client-assigned document ID to use for this document.
+
+                Optional. If not specified, an ID will be assigned by the service.
             mask (Union[dict, ~google.cloud.firestore_v1.types.DocumentMask]): The fields to return. If not set, returns all fields.
 
                 If the document has a field that is not present in this mask, that field
@@ -559,8 +558,8 @@ class FirestoreClient(object):
         request = firestore_pb2.CreateDocumentRequest(
             parent=parent,
             collection_id=collection_id,
-            document_id=document_id,
             document=document,
+            document_id=document_id,
             mask=mask,
         )
         return self._inner_api_calls["create_document"](
@@ -570,7 +569,7 @@ class FirestoreClient(object):
     def update_document(
         self,
         document,
-        update_mask,
+        update_mask=None,
         mask=None,
         current_document=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
@@ -588,10 +587,7 @@ class FirestoreClient(object):
             >>> # TODO: Initialize `document`:
             >>> document = {}
             >>>
-            >>> # TODO: Initialize `update_mask`:
-            >>> update_mask = {}
-            >>>
-            >>> response = client.update_document(document, update_mask)
+            >>> response = client.update_document(document)
 
         Args:
             document (Union[dict, ~google.cloud.firestore_v1.types.Document]): Required. The updated document.
@@ -690,12 +686,14 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> name = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `name`:
+            >>> name = ''
             >>>
             >>> client.delete_document(name)
 
         Args:
-            name (str): Required. The resource name of the Document to delete. In the format:
+            name (str): Required. The resource name of the Document to delete. In the
+                format:
                 ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
             current_document (Union[dict, ~google.cloud.firestore_v1.types.Precondition]): An optional precondition on the document.
                 The request will fail if this is set and not met by the target document.
@@ -730,7 +728,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.DeleteDocumentRequest(
-            name=name, current_document=current_document
+            name=name, current_document=current_document,
         )
         if metadata is None:
             metadata = []
@@ -752,7 +750,7 @@ class FirestoreClient(object):
     def batch_get_documents(
         self,
         database,
-        documents,
+        documents=None,
         mask=None,
         transaction=None,
         new_transaction=None,
@@ -772,12 +770,10 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>>
-            >>> # TODO: Initialize `documents`:
-            >>> documents = []
-            >>>
-            >>> for element in client.batch_get_documents(database, documents):
+            >>> for element in client.batch_get_documents(database):
             ...     # process element
             ...     pass
 
@@ -804,7 +800,7 @@ class FirestoreClient(object):
                 If a dict is provided, it must be of the same form as the protobuf
                 message :class:`~google.cloud.firestore_v1.types.TransactionOptions`
             read_time (Union[dict, ~google.cloud.firestore_v1.types.Timestamp]): Reads documents as they were at the given time.
-                This may not be older than 60 seconds.
+                This may not be older than 270 seconds.
 
                 If a dict is provided, it must be of the same form as the protobuf
                 message :class:`~google.cloud.firestore_v1.types.Timestamp`
@@ -871,6 +867,98 @@ class FirestoreClient(object):
             request, retry=retry, timeout=timeout, metadata=metadata
         )
 
+    def batch_write(
+        self,
+        database,
+        writes=None,
+        labels=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Applies a batch of write operations.
+
+        The BatchWrite method does not apply the write operations atomically and
+        can apply them out of order. Method does not allow more than one write
+        per document. Each write succeeds or fails independently. See the
+        ``BatchWriteResponse`` for the success status of each write.
+
+        If you require an atomically applied set of writes, use ``Commit``
+        instead.
+
+        Example:
+            >>> from google.cloud import firestore_v1
+            >>>
+            >>> client = firestore_v1.FirestoreClient()
+            >>>
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
+            >>>
+            >>> response = client.batch_write(database)
+
+        Args:
+            database (str): Required. The database name. In the format:
+                ``projects/{project_id}/databases/{database_id}``.
+            writes (list[Union[dict, ~google.cloud.firestore_v1.types.Write]]): The writes to apply.
+
+                Method does not apply writes atomically and does not guarantee ordering.
+                Each write succeeds or fails independently. You cannot write to the same
+                document more than once per request.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1.types.Write`
+            labels (dict[str -> str]): Labels associated with this batch write.
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.cloud.firestore_v1.types.BatchWriteResponse` instance.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "batch_write" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "batch_write"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.batch_write,
+                default_retry=self._method_configs["BatchWrite"].retry,
+                default_timeout=self._method_configs["BatchWrite"].timeout,
+                client_info=self._client_info,
+            )
+
+        request = firestore_pb2.BatchWriteRequest(
+            database=database, writes=writes, labels=labels,
+        )
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("database", database)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        return self._inner_api_calls["batch_write"](
+            request, retry=retry, timeout=timeout, metadata=metadata
+        )
+
     def begin_transaction(
         self,
         database,
@@ -887,7 +975,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>>
             >>> response = client.begin_transaction(database)
 
@@ -930,7 +1019,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.BeginTransactionRequest(
-            database=database, options=options_
+            database=database, options=options_,
         )
         if metadata is None:
             metadata = []
@@ -952,7 +1041,7 @@ class FirestoreClient(object):
     def commit(
         self,
         database,
-        writes,
+        writes=None,
         transaction=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
         timeout=google.api_core.gapic_v1.method.DEFAULT,
@@ -966,12 +1055,10 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>>
-            >>> # TODO: Initialize `writes`:
-            >>> writes = []
-            >>>
-            >>> response = client.commit(database, writes)
+            >>> response = client.commit(database)
 
         Args:
             database (str): Required. The database name. In the format:
@@ -1014,7 +1101,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.CommitRequest(
-            database=database, writes=writes, transaction=transaction
+            database=database, writes=writes, transaction=transaction,
         )
         if metadata is None:
             metadata = []
@@ -1049,7 +1136,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>>
             >>> # TODO: Initialize `transaction`:
             >>> transaction = b''
@@ -1088,7 +1176,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.RollbackRequest(
-            database=database, transaction=transaction
+            database=database, transaction=transaction,
         )
         if metadata is None:
             metadata = []
@@ -1126,7 +1214,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
             >>>
             >>> for element in client.run_query(parent):
             ...     # process element
@@ -1151,7 +1240,7 @@ class FirestoreClient(object):
                 If a dict is provided, it must be of the same form as the protobuf
                 message :class:`~google.cloud.firestore_v1.types.TransactionOptions`
             read_time (Union[dict, ~google.cloud.firestore_v1.types.Timestamp]): Reads documents as they were at the given time.
-                This may not be older than 60 seconds.
+                This may not be older than 270 seconds.
 
                 If a dict is provided, it must be of the same form as the protobuf
                 message :class:`~google.cloud.firestore_v1.types.Timestamp`
@@ -1187,7 +1276,7 @@ class FirestoreClient(object):
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
-        google.api_core.protobuf_helpers.check_oneof(structured_query=structured_query)
+        google.api_core.protobuf_helpers.check_oneof(structured_query=structured_query,)
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
@@ -1231,14 +1320,13 @@ class FirestoreClient(object):
         """
         Streams batches of document updates and deletes, in order.
 
-        EXPERIMENTAL: This method interface might change in the future.
-
         Example:
             >>> from google.cloud import firestore_v1
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>> request = {'database': database}
             >>>
             >>> requests = [request]
@@ -1293,14 +1381,13 @@ class FirestoreClient(object):
         """
         Listens to changes.
 
-        EXPERIMENTAL: This method interface might change in the future.
-
         Example:
             >>> from google.cloud import firestore_v1
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> database = client.database_root_path('[PROJECT]', '[DATABASE]')
+            >>> # TODO: Initialize `database`:
+            >>> database = ''
             >>> request = {'database': database}
             >>>
             >>> requests = [request]
@@ -1361,7 +1448,8 @@ class FirestoreClient(object):
             >>>
             >>> client = firestore_v1.FirestoreClient()
             >>>
-            >>> parent = client.any_path_path('[PROJECT]', '[DATABASE]', '[DOCUMENT]', '[ANY_PATH]')
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
             >>>
             >>> # Iterate over all results
             >>> for element in client.list_collection_ids(parent):
@@ -1421,7 +1509,7 @@ class FirestoreClient(object):
             )
 
         request = firestore_pb2.ListCollectionIdsRequest(
-            parent=parent, page_size=page_size
+            parent=parent, page_size=page_size,
         )
         if metadata is None:
             metadata = []
@@ -1446,6 +1534,138 @@ class FirestoreClient(object):
             ),
             request=request,
             items_field="collection_ids",
+            request_token_field="page_token",
+            response_token_field="next_page_token",
+        )
+        return iterator
+
+    def partition_query(
+        self,
+        parent,
+        structured_query=None,
+        partition_count=None,
+        page_size=None,
+        retry=google.api_core.gapic_v1.method.DEFAULT,
+        timeout=google.api_core.gapic_v1.method.DEFAULT,
+        metadata=None,
+    ):
+        """
+        Partitions a query by returning partition cursors that can be used to run
+        the query in parallel. The returned partition cursors are split points that
+        can be used by RunQuery as starting/end points for the query results.
+
+        Example:
+            >>> from google.cloud import firestore_v1
+            >>>
+            >>> client = firestore_v1.FirestoreClient()
+            >>>
+            >>> # TODO: Initialize `parent`:
+            >>> parent = ''
+            >>>
+            >>> # Iterate over all results
+            >>> for element in client.partition_query(parent):
+            ...     # process element
+            ...     pass
+            >>>
+            >>>
+            >>> # Alternatively:
+            >>>
+            >>> # Iterate over results one page at a time
+            >>> for page in client.partition_query(parent).pages:
+            ...     for element in page:
+            ...         # process element
+            ...         pass
+
+        Args:
+            parent (str): Required. The parent resource name. In the format:
+                ``projects/{project_id}/databases/{database_id}/documents``. Document
+                resource names are not supported; only database resource names can be
+                specified.
+            structured_query (Union[dict, ~google.cloud.firestore_v1.types.StructuredQuery]): A structured query.
+                Filters, order bys, limits, offsets, and start/end cursors are not
+                supported.
+
+                If a dict is provided, it must be of the same form as the protobuf
+                message :class:`~google.cloud.firestore_v1.types.StructuredQuery`
+            partition_count (long): The desired maximum number of partition points.
+                The partitions may be returned across multiple pages of results.
+                The number must be strictly positive. The actual number of partitions
+                returned may be fewer.
+
+                For example, this may be set to one fewer than the number of parallel
+                queries to be run, or in running a data pipeline job, one fewer than the
+                number of workers or compute instances available.
+            page_size (int): The maximum number of resources contained in the
+                underlying API response. If page streaming is performed per-
+                resource, this parameter does not affect the return value. If page
+                streaming is performed per-page, this determines the maximum number
+                of resources in a page.
+            retry (Optional[google.api_core.retry.Retry]):  A retry object used
+                to retry requests. If ``None`` is specified, requests will
+                be retried using a default configuration.
+            timeout (Optional[float]): The amount of time, in seconds, to wait
+                for the request to complete. Note that if ``retry`` is
+                specified, the timeout applies to each individual attempt.
+            metadata (Optional[Sequence[Tuple[str, str]]]): Additional metadata
+                that is provided to the method.
+
+        Returns:
+            A :class:`~google.api_core.page_iterator.PageIterator` instance.
+            An iterable of :class:`~google.cloud.firestore_v1.types.Cursor` instances.
+            You can also iterate over the pages of the response
+            using its `pages` property.
+
+        Raises:
+            google.api_core.exceptions.GoogleAPICallError: If the request
+                    failed for any reason.
+            google.api_core.exceptions.RetryError: If the request failed due
+                    to a retryable error and retry attempts failed.
+            ValueError: If the parameters are invalid.
+        """
+        # Wrap the transport method to add retry and timeout logic.
+        if "partition_query" not in self._inner_api_calls:
+            self._inner_api_calls[
+                "partition_query"
+            ] = google.api_core.gapic_v1.method.wrap_method(
+                self.transport.partition_query,
+                default_retry=self._method_configs["PartitionQuery"].retry,
+                default_timeout=self._method_configs["PartitionQuery"].timeout,
+                client_info=self._client_info,
+            )
+
+        # Sanity check: We have some fields which are mutually exclusive;
+        # raise ValueError if more than one is sent.
+        google.api_core.protobuf_helpers.check_oneof(structured_query=structured_query,)
+
+        request = firestore_pb2.PartitionQueryRequest(
+            parent=parent,
+            structured_query=structured_query,
+            partition_count=partition_count,
+            page_size=page_size,
+        )
+        if metadata is None:
+            metadata = []
+        metadata = list(metadata)
+        try:
+            routing_header = [("parent", parent)]
+        except AttributeError:
+            pass
+        else:
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
+                routing_header
+            )
+            metadata.append(routing_metadata)
+
+        iterator = google.api_core.page_iterator.GRPCIterator(
+            client=None,
+            method=functools.partial(
+                self._inner_api_calls["partition_query"],
+                retry=retry,
+                timeout=timeout,
+                metadata=metadata,
+            ),
+            request=request,
+            items_field="partitions",
             request_token_field="page_token",
             response_token_field="next_page_token",
         )
