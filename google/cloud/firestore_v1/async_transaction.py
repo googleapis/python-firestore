@@ -20,7 +20,9 @@ import random
 
 import six
 
-from google.cloud.firestore_v1.transaction import (
+from google.cloud.firestore_v1.base_transaction import (
+    _BaseTransactional,
+    BaseTransaction,
     MAX_ATTEMPTS,
     _CANT_BEGIN,
     _CANT_ROLLBACK,
@@ -30,17 +32,15 @@ from google.cloud.firestore_v1.transaction import (
     _MAX_SLEEP,
     _MULTIPLIER,
     _EXCEED_ATTEMPTS_TEMPLATE,
-    _CANT_RETRY_READ_ONLY,
-    _Transactional,
 )
+
 from google.api_core import exceptions
 from google.cloud.firestore_v1 import async_batch
-from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
 
 
-class AsyncTransaction(async_batch.AsyncWriteBatch):
+class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
     """Accumulate read-and-write operations to be sent in a transaction.
 
     Args:
@@ -56,9 +56,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch):
 
     def __init__(self, client, max_attempts=MAX_ATTEMPTS, read_only=False):
         super(AsyncTransaction, self).__init__(client)
-        self._max_attempts = max_attempts
-        self._read_only = read_only
-        self._id = None
+        BaseTransaction.__init__(self, max_attempts, read_only)
 
     def _add_write_pbs(self, write_pbs):
         """Add `Write`` protobufs to this transaction.
@@ -74,61 +72,6 @@ class AsyncTransaction(async_batch.AsyncWriteBatch):
             raise ValueError(_WRITE_READ_ONLY)
 
         super(AsyncTransaction, self)._add_write_pbs(write_pbs)
-
-    def _options_protobuf(self, retry_id):
-        """Convert the current object to protobuf.
-
-        The ``retry_id`` value is used when retrying a transaction that
-        failed (e.g. due to contention). It is intended to be the "first"
-        transaction that failed (i.e. if multiple retries are needed).
-
-        Args:
-            retry_id (Union[bytes, NoneType]): Transaction ID of a transaction
-                to be retried.
-
-        Returns:
-            Optional[google.cloud.firestore_v1.types.TransactionOptions]:
-            The protobuf ``TransactionOptions`` if ``read_only==True`` or if
-            there is a transaction ID to be retried, else :data:`None`.
-
-        Raises:
-            ValueError: If ``retry_id`` is not :data:`None` but the
-                transaction is read-only.
-        """
-        if retry_id is not None:
-            if self._read_only:
-                raise ValueError(_CANT_RETRY_READ_ONLY)
-
-            return types.TransactionOptions(
-                read_write=types.TransactionOptions.ReadWrite(
-                    retry_transaction=retry_id
-                )
-            )
-        elif self._read_only:
-            return types.TransactionOptions(
-                read_only=types.TransactionOptions.ReadOnly()
-            )
-        else:
-            return None
-
-    @property
-    def in_progress(self):
-        """Determine if this transaction has already begun.
-
-        Returns:
-            bool: Indicates if the transaction has started.
-        """
-        return self._id is not None
-
-    @property
-    def id(self):
-        """Get the current transaction ID.
-
-        Returns:
-            Optional[bytes]: The transaction ID (or :data:`None` if the
-            current transaction is not in progress).
-        """
-        return self._id
 
     async def _begin(self, retry_id=None):
         """Begin the transaction.
@@ -150,14 +93,6 @@ class AsyncTransaction(async_batch.AsyncWriteBatch):
             metadata=self._client._rpc_metadata,
         )
         self._id = transaction_response.transaction
-
-    def _clean_up(self):
-        """Clean up the instance after :meth:`_rollback`` or :meth:`_commit``.
-
-        This intended to occur on success or failure of the associated RPCs.
-        """
-        self._write_pbs = []
-        self._id = None
 
     async def _rollback(self):
         """Roll back the transaction.
@@ -232,7 +167,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch):
             )
 
 
-class _AsyncTransactional(_Transactional):
+class _AsyncTransactional(_BaseTransactional):
     """Provide a callable object to use as a transactional decorater.
 
     This is surfaced via
