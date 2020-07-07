@@ -5,6 +5,13 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+### [1.8.1](https://www.github.com/googleapis/python-firestore/compare/v1.8.0...v1.8.1) (2020-07-07)
+
+
+### Bug Fixes
+
+* **#82:** Add import back to generated client ([#83](https://www.github.com/googleapis/python-firestore/issues/83)) ([2d0ee60](https://www.github.com/googleapis/python-firestore/commit/2d0ee603926ffad484c9874e8745ea97d3c384eb)), closes [#82](https://www.github.com/googleapis/python-firestore/issues/82)
+
 ## [1.8.0](https://www.github.com/googleapis/python-firestore/compare/v1.7.0...v1.8.0) (2020-07-06)
 
 
