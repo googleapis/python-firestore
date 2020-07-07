@@ -3,8 +3,8 @@
     {
       "git": {
         "name": ".",
-        "remote": "git@github.com:googleapis/python-firestore",
-        "sha": "6f9c325f5804f10d51fe711302a1fd18ca1807d9"
+        "remote": "https://github.com/googleapis/python-firestore.git",
+        "sha": "71737a60eab55d755d6f784d460bfa0b2c1215f5"
       }
     },
     {
