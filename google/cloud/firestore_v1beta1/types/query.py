@@ -94,6 +94,7 @@ class StructuredQuery(proto.Message):
         """
 
         collection_id = proto.Field(proto.STRING, number=2)
+
         all_descendants = proto.Field(proto.BOOL, number=3)
 
     class Filter(proto.Message):
@@ -109,22 +110,15 @@ class StructuredQuery(proto.Message):
         """
 
         composite_filter = proto.Field(
-            proto.MESSAGE,
-            number=1,
-            message="StructuredQuery.CompositeFilter",
-            oneof="filter_type",
+            proto.MESSAGE, number=1, message="StructuredQuery.CompositeFilter",
         )
+
         field_filter = proto.Field(
-            proto.MESSAGE,
-            number=2,
-            message="StructuredQuery.FieldFilter",
-            oneof="filter_type",
+            proto.MESSAGE, number=2, message="StructuredQuery.FieldFilter",
         )
+
         unary_filter = proto.Field(
-            proto.MESSAGE,
-            number=3,
-            message="StructuredQuery.UnaryFilter",
-            oneof="filter_type",
+            proto.MESSAGE, number=3, message="StructuredQuery.UnaryFilter",
         )
 
     class CompositeFilter(proto.Message):
@@ -147,6 +141,7 @@ class StructuredQuery(proto.Message):
         op = proto.Field(
             proto.ENUM, number=1, enum="StructuredQuery.CompositeFilter.Operator",
         )
+
         filters = proto.RepeatedField(
             proto.MESSAGE, number=2, message="StructuredQuery.Filter",
         )
@@ -178,9 +173,11 @@ class StructuredQuery(proto.Message):
         field = proto.Field(
             proto.MESSAGE, number=1, message="StructuredQuery.FieldReference",
         )
+
         op = proto.Field(
             proto.ENUM, number=2, enum="StructuredQuery.FieldFilter.Operator",
         )
+
         value = proto.Field(proto.MESSAGE, number=3, message=document.Value,)
 
     class UnaryFilter(proto.Message):
@@ -202,11 +199,9 @@ class StructuredQuery(proto.Message):
         op = proto.Field(
             proto.ENUM, number=1, enum="StructuredQuery.UnaryFilter.Operator",
         )
+
         field = proto.Field(
-            proto.MESSAGE,
-            number=2,
-            message="StructuredQuery.FieldReference",
-            oneof="operand_type",
+            proto.MESSAGE, number=2, message="StructuredQuery.FieldReference",
         )
 
     class Order(proto.Message):
@@ -222,6 +217,7 @@ class StructuredQuery(proto.Message):
         field = proto.Field(
             proto.MESSAGE, number=1, message="StructuredQuery.FieldReference",
         )
+
         direction = proto.Field(proto.ENUM, number=2, enum="StructuredQuery.Direction",)
 
     class FieldReference(proto.Message):
@@ -250,12 +246,19 @@ class StructuredQuery(proto.Message):
         )
 
     select = proto.Field(proto.MESSAGE, number=1, message=Projection,)
+
     from_ = proto.RepeatedField(proto.MESSAGE, number=2, message=CollectionSelector,)
+
     where = proto.Field(proto.MESSAGE, number=3, message=Filter,)
+
     order_by = proto.RepeatedField(proto.MESSAGE, number=4, message=Order,)
+
     start_at = proto.Field(proto.MESSAGE, number=7, message="Cursor",)
+
     end_at = proto.Field(proto.MESSAGE, number=8, message="Cursor",)
+
     offset = proto.Field(proto.INT32, number=6)
+
     limit = proto.Field(proto.MESSAGE, number=5, message=wrappers.Int32Value,)
 
 
@@ -276,6 +279,7 @@ class Cursor(proto.Message):
     """
 
     values = proto.RepeatedField(proto.MESSAGE, number=1, message=document.Value,)
+
     before = proto.Field(proto.BOOL, number=2)
 
 

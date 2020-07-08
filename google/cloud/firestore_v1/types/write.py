@@ -72,17 +72,18 @@ class Write(proto.Message):
             by the target document.
     """
 
-    update = proto.Field(
-        proto.MESSAGE, number=1, message=gf_document.Document, oneof="operation"
-    )
-    delete = proto.Field(proto.STRING, number=2, oneof="operation")
-    transform = proto.Field(
-        proto.MESSAGE, number=6, message="DocumentTransform", oneof="operation"
-    )
+    update = proto.Field(proto.MESSAGE, number=1, message=gf_document.Document,)
+
+    delete = proto.Field(proto.STRING, number=2)
+
+    transform = proto.Field(proto.MESSAGE, number=6, message="DocumentTransform",)
+
     update_mask = proto.Field(proto.MESSAGE, number=3, message=common.DocumentMask,)
+
     update_transforms = proto.RepeatedField(
         proto.MESSAGE, number=7, message="DocumentTransform.FieldTransform",
     )
+
     current_document = proto.Field(
         proto.MESSAGE, number=4, message=common.Precondition,
     )
@@ -191,35 +192,27 @@ class DocumentTransform(proto.Message):
             REQUEST_TIME = 1
 
         field_path = proto.Field(proto.STRING, number=1)
+
         set_to_server_value = proto.Field(
-            proto.ENUM,
-            number=2,
-            enum="DocumentTransform.FieldTransform.ServerValue",
-            oneof="transform_type",
+            proto.ENUM, number=2, enum="DocumentTransform.FieldTransform.ServerValue",
         )
-        increment = proto.Field(
-            proto.MESSAGE, number=3, message=gf_document.Value, oneof="transform_type"
-        )
-        maximum = proto.Field(
-            proto.MESSAGE, number=4, message=gf_document.Value, oneof="transform_type"
-        )
-        minimum = proto.Field(
-            proto.MESSAGE, number=5, message=gf_document.Value, oneof="transform_type"
-        )
+
+        increment = proto.Field(proto.MESSAGE, number=3, message=gf_document.Value,)
+
+        maximum = proto.Field(proto.MESSAGE, number=4, message=gf_document.Value,)
+
+        minimum = proto.Field(proto.MESSAGE, number=5, message=gf_document.Value,)
+
         append_missing_elements = proto.Field(
-            proto.MESSAGE,
-            number=6,
-            message=gf_document.ArrayValue,
-            oneof="transform_type",
+            proto.MESSAGE, number=6, message=gf_document.ArrayValue,
         )
+
         remove_all_from_array = proto.Field(
-            proto.MESSAGE,
-            number=7,
-            message=gf_document.ArrayValue,
-            oneof="transform_type",
+            proto.MESSAGE, number=7, message=gf_document.ArrayValue,
         )
 
     document = proto.Field(proto.STRING, number=1)
+
     field_transforms = proto.RepeatedField(
         proto.MESSAGE, number=2, message=FieldTransform,
     )
@@ -242,6 +235,7 @@ class WriteResult(proto.Message):
     """
 
     update_time = proto.Field(proto.MESSAGE, number=1, message=timestamp.Timestamp,)
+
     transform_results = proto.RepeatedField(
         proto.MESSAGE, number=2, message=gf_document.Value,
     )
@@ -274,7 +268,9 @@ class DocumentChange(proto.Message):
     """
 
     document = proto.Field(proto.MESSAGE, number=1, message=gf_document.Document,)
+
     target_ids = proto.RepeatedField(proto.INT32, number=5)
+
     removed_target_ids = proto.RepeatedField(proto.INT32, number=6)
 
 
@@ -303,7 +299,9 @@ class DocumentDelete(proto.Message):
     """
 
     document = proto.Field(proto.STRING, number=1)
+
     removed_target_ids = proto.RepeatedField(proto.INT32, number=6)
+
     read_time = proto.Field(proto.MESSAGE, number=4, message=timestamp.Timestamp,)
 
 
@@ -335,7 +333,9 @@ class DocumentRemove(proto.Message):
     """
 
     document = proto.Field(proto.STRING, number=1)
+
     removed_target_ids = proto.RepeatedField(proto.INT32, number=2)
+
     read_time = proto.Field(proto.MESSAGE, number=4, message=timestamp.Timestamp,)
 
 
@@ -355,6 +355,7 @@ class ExistenceFilter(proto.Message):
     """
 
     target_id = proto.Field(proto.INT32, number=1)
+
     count = proto.Field(proto.INT32, number=2)
 
 

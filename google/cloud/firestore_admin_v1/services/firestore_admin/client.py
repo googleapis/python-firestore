@@ -237,17 +237,24 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # instance provides an extensibility point for unusual situations.
         if isinstance(transport, FirestoreAdminTransport):
             # transport is a FirestoreAdminTransport instance.
-            if credentials:
+            if credentials or client_options.credentials_file:
                 raise ValueError(
                     "When providing a transport instance, "
                     "provide its credentials directly."
+                )
+            if client_options.scopes:
+                raise ValueError(
+                    "When providing a transport instance, "
+                    "provide its scopes directly."
                 )
             self._transport = transport
         else:
             Transport = type(self).get_transport_class(transport)
             self._transport = Transport(
                 credentials=credentials,
+                credentials_file=client_options.credentials_file,
                 host=client_options.api_endpoint,
+                scopes=client_options.scopes,
                 api_mtls_endpoint=client_options.api_endpoint,
                 client_cert_source=client_options.client_cert_source,
             )
@@ -422,7 +429,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # This method is paged; wrap the response in a pager, which provides
         # an `__iter__` convenience method.
         response = pagers.ListIndexesPager(
-            method=rpc, request=request, response=response,
+            method=rpc, request=request, response=response, metadata=metadata,
         )
 
         # Done; return the response.
@@ -815,7 +822,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # This method is paged; wrap the response in a pager, which provides
         # an `__iter__` convenience method.
         response = pagers.ListFieldsPager(
-            method=rpc, request=request, response=response,
+            method=rpc, request=request, response=response, metadata=metadata,
         )
 
         # Done; return the response.

@@ -216,7 +216,7 @@ class TestClient(unittest.TestCase):
         self.assertIs(collection2._client, client)
         self.assertIsInstance(collection2, CollectionReference)
 
-    def test_collection_group(self):        
+    def test_collection_group(self):
         client = self._make_default_one()
         query = client.collection_group("collectionId").where("foo", "==", u"bar")
 
@@ -369,10 +369,7 @@ class TestClient(unittest.TestCase):
 
         base_path = client._database_string + "/documents"
         firestore_api.list_collection_ids.assert_called_once_with(
-            request={
-                "parent": base_path
-            },
-            metadata=client._rpc_metadata
+            request={"parent": base_path}, metadata=client._rpc_metadata
         )
 
     def _get_all_helper(self, client, references, document_pbs, **kwargs):
@@ -437,7 +434,7 @@ class TestClient(unittest.TestCase):
         doc_paths = [document1._document_path, document2._document_path]
         mask = common.DocumentMask(field_paths=field_paths)
         client._firestore_api.batch_get_documents.assert_called_once_with(
-             request={
+            request={
                 "database": client._database_string,
                 "documents": doc_paths,
                 "mask": mask,

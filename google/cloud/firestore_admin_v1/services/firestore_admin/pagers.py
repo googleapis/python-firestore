@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from typing import Any, AsyncIterable, Awaitable, Callable, Iterable
+from typing import Any, AsyncIterable, Awaitable, Callable, Iterable, Sequence, Tuple
 
 from google.cloud.firestore_admin_v1.types import field
 from google.cloud.firestore_admin_v1.types import firestore_admin
@@ -42,11 +42,11 @@ class ListIndexesPager:
 
     def __init__(
         self,
-        method: Callable[
-            [firestore_admin.ListIndexesRequest], firestore_admin.ListIndexesResponse
-        ],
+        method: Callable[..., firestore_admin.ListIndexesResponse],
         request: firestore_admin.ListIndexesRequest,
         response: firestore_admin.ListIndexesResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
     ):
         """Instantiate the pager.
 
@@ -57,10 +57,13 @@ class ListIndexesPager:
                 The initial request object.
             response (:class:`~.firestore_admin.ListIndexesResponse`):
                 The initial response object.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
         """
         self._method = method
         self._request = firestore_admin.ListIndexesRequest(request)
         self._response = response
+        self._metadata = metadata
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._response, name)
@@ -70,7 +73,7 @@ class ListIndexesPager:
         yield self._response
         while self._response.next_page_token:
             self._request.page_token = self._response.next_page_token
-            self._response = self._method(self._request)
+            self._response = self._method(self._request, metadata=self._metadata)
             yield self._response
 
     def __iter__(self) -> Iterable[index.Index]:
@@ -101,12 +104,11 @@ class ListIndexesAsyncPager:
 
     def __init__(
         self,
-        method: Callable[
-            [firestore_admin.ListIndexesRequest],
-            Awaitable[firestore_admin.ListIndexesResponse],
-        ],
+        method: Callable[..., Awaitable[firestore_admin.ListIndexesResponse]],
         request: firestore_admin.ListIndexesRequest,
         response: firestore_admin.ListIndexesResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
     ):
         """Instantiate the pager.
 
@@ -117,10 +119,13 @@ class ListIndexesAsyncPager:
                 The initial request object.
             response (:class:`~.firestore_admin.ListIndexesResponse`):
                 The initial response object.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
         """
         self._method = method
         self._request = firestore_admin.ListIndexesRequest(request)
         self._response = response
+        self._metadata = metadata
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._response, name)
@@ -130,7 +135,7 @@ class ListIndexesAsyncPager:
         yield self._response
         while self._response.next_page_token:
             self._request.page_token = self._response.next_page_token
-            self._response = await self._method(self._request)
+            self._response = await self._method(self._request, metadata=self._metadata)
             yield self._response
 
     def __aiter__(self) -> AsyncIterable[index.Index]:
@@ -165,11 +170,11 @@ class ListFieldsPager:
 
     def __init__(
         self,
-        method: Callable[
-            [firestore_admin.ListFieldsRequest], firestore_admin.ListFieldsResponse
-        ],
+        method: Callable[..., firestore_admin.ListFieldsResponse],
         request: firestore_admin.ListFieldsRequest,
         response: firestore_admin.ListFieldsResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
     ):
         """Instantiate the pager.
 
@@ -180,10 +185,13 @@ class ListFieldsPager:
                 The initial request object.
             response (:class:`~.firestore_admin.ListFieldsResponse`):
                 The initial response object.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
         """
         self._method = method
         self._request = firestore_admin.ListFieldsRequest(request)
         self._response = response
+        self._metadata = metadata
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._response, name)
@@ -193,7 +201,7 @@ class ListFieldsPager:
         yield self._response
         while self._response.next_page_token:
             self._request.page_token = self._response.next_page_token
-            self._response = self._method(self._request)
+            self._response = self._method(self._request, metadata=self._metadata)
             yield self._response
 
     def __iter__(self) -> Iterable[field.Field]:
@@ -224,12 +232,11 @@ class ListFieldsAsyncPager:
 
     def __init__(
         self,
-        method: Callable[
-            [firestore_admin.ListFieldsRequest],
-            Awaitable[firestore_admin.ListFieldsResponse],
-        ],
+        method: Callable[..., Awaitable[firestore_admin.ListFieldsResponse]],
         request: firestore_admin.ListFieldsRequest,
         response: firestore_admin.ListFieldsResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
     ):
         """Instantiate the pager.
 
@@ -240,10 +247,13 @@ class ListFieldsAsyncPager:
                 The initial request object.
             response (:class:`~.firestore_admin.ListFieldsResponse`):
                 The initial response object.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
         """
         self._method = method
         self._request = firestore_admin.ListFieldsRequest(request)
         self._response = response
+        self._metadata = metadata
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._response, name)
@@ -253,7 +263,7 @@ class ListFieldsAsyncPager:
         yield self._response
         while self._response.next_page_token:
             self._request.page_token = self._response.next_page_token
-            self._response = await self._method(self._request)
+            self._response = await self._method(self._request, metadata=self._metadata)
             yield self._response
 
     def __aiter__(self) -> AsyncIterable[field.Field]:

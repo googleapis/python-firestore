@@ -69,6 +69,8 @@ class FirestoreGrpcTransport(FirestoreTransport):
         *,
         host: str = "firestore.googleapis.com",
         credentials: credentials.Credentials = None,
+        credentials_file: str = None,
+        scopes: Sequence[str] = None,
         channel: grpc.Channel = None,
         api_mtls_endpoint: str = None,
         client_cert_source: Callable[[], Tuple[bytes, bytes]] = None
@@ -83,6 +85,11 @@ class FirestoreGrpcTransport(FirestoreTransport):
                 are specified, the client will attempt to ascertain the
                 credentials from the environment.
                 This argument is ignored if ``channel`` is provided.
+            credentials_file (Optional[str]): A file with credentials that can
+                be loaded with :func:`google.auth.load_credentials_from_file`.
+                This argument is ignored if ``channel`` is provided.
+            scopes (Optional(Sequence[str])): A list of scopes. This argument is
+                ignored if ``channel`` is provided.
             channel (Optional[grpc.Channel]): A ``Channel`` instance through
                 which to make calls.
             api_mtls_endpoint (Optional[str]): The mutual TLS endpoint. If
@@ -95,8 +102,10 @@ class FirestoreGrpcTransport(FirestoreTransport):
                 is None.
 
         Raises:
-            google.auth.exceptions.MutualTlsChannelError: If mutual TLS transport
-                creation failed for any reason.
+          google.auth.exceptions.MutualTLSChannelError: If mutual TLS transport
+              creation failed for any reason.
+          google.api_core.exceptions.DuplicateCredentialArgs: If both ``credentials``
+              and ``credentials_file`` are passed.
         """
         if channel:
             # Sanity check: Ensure that channel and credentials are not both
@@ -129,12 +138,19 @@ class FirestoreGrpcTransport(FirestoreTransport):
             self._grpc_channel = type(self).create_channel(
                 host,
                 credentials=credentials,
+                credentials_file=credentials_file,
                 ssl_credentials=ssl_credentials,
-                scopes=self.AUTH_SCOPES,
+                scopes=scopes or self.AUTH_SCOPES,
             )
 
         # Run the base constructor.
-        super().__init__(host=host, credentials=credentials)
+        super().__init__(
+            host=host,
+            credentials=credentials,
+            credentials_file=credentials_file,
+            scopes=scopes or self.AUTH_SCOPES,
+        )
+
         self._stubs = {}  # type: Dict[str, Callable]
 
     @classmethod
@@ -142,6 +158,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         cls,
         host: str = "firestore.googleapis.com",
         credentials: credentials.Credentials = None,
+        credentials_file: str = None,
         scopes: Optional[Sequence[str]] = None,
         **kwargs
     ) -> grpc.Channel:
@@ -153,6 +170,9 @@ class FirestoreGrpcTransport(FirestoreTransport):
                 credentials identify this application to the service. If
                 none are specified, the client will attempt to ascertain
                 the credentials from the environment.
+            credentials_file (Optional[str]): A file with credentials that can
+                be loaded with :func:`google.auth.load_credentials_from_file`.
+                This argument is mutually exclusive with credentials.
             scopes (Optional[Sequence[str]]): A optional list of scopes needed for this
                 service. These are only used when credentials are not specified and
                 are passed to :func:`google.auth.default`.
@@ -160,10 +180,18 @@ class FirestoreGrpcTransport(FirestoreTransport):
                 channel creation.
         Returns:
             grpc.Channel: A gRPC channel object.
+
+        Raises:
+            google.api_core.exceptions.DuplicateCredentialArgs: If both ``credentials``
+              and ``credentials_file`` are passed.
         """
         scopes = scopes or cls.AUTH_SCOPES
         return grpc_helpers.create_channel(
-            host, credentials=credentials, scopes=scopes, **kwargs
+            host,
+            credentials=credentials,
+            credentials_file=credentials_file,
+            scopes=scopes,
+            **kwargs
         )
 
     @property

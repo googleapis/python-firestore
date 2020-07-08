@@ -283,10 +283,7 @@ class TestClient(unittest.TestCase):
             self.assertEqual(collection.id, collection_id)
 
         firestore_api.list_collection_ids.assert_called_once_with(
-            request={
-                "parent":client._database_string
-            },
-            metadata=client._rpc_metadata
+            request={"parent": client._database_string}, metadata=client._rpc_metadata
         )
 
     def _get_all_helper(self, client, references, document_pbs, **kwargs):

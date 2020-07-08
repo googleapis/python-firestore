@@ -92,11 +92,15 @@ class Field(proto.Message):
         """
 
         indexes = proto.RepeatedField(proto.MESSAGE, number=1, message=index.Index,)
+
         uses_ancestor_config = proto.Field(proto.BOOL, number=2)
+
         ancestor_field = proto.Field(proto.STRING, number=3)
+
         reverting = proto.Field(proto.BOOL, number=4)
 
     name = proto.Field(proto.STRING, number=1)
+
     index_config = proto.Field(proto.MESSAGE, number=2, message=IndexConfig,)
 
 

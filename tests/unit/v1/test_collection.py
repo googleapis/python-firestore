@@ -480,7 +480,6 @@ class TestCollectionReference(unittest.TestCase):
                 "collection_id": collection.id,
                 "page_size": page_size,
                 "page_token": True,
-
             },
             metadata=client._rpc_metadata,
         )

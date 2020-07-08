@@ -15,7 +15,7 @@
 # limitations under the License.
 #
 
-from typing import Any, AsyncIterable, Awaitable, Callable, Iterable
+from typing import Any, AsyncIterable, Awaitable, Callable, Iterable, Sequence, Tuple
 
 from google.cloud.firestore_v1beta1.types import document
 from google.cloud.firestore_v1beta1.types import firestore
@@ -41,11 +41,11 @@ class ListDocumentsPager:
 
     def __init__(
         self,
-        method: Callable[
-            [firestore.ListDocumentsRequest], firestore.ListDocumentsResponse
-        ],
+        method: Callable[..., firestore.ListDocumentsResponse],
         request: firestore.ListDocumentsRequest,
         response: firestore.ListDocumentsResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
     ):
         """Instantiate the pager.
 
@@ -56,10 +56,13 @@ class ListDocumentsPager:
                 The initial request object.
             response (:class:`~.firestore.ListDocumentsResponse`):
                 The initial response object.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
         """
         self._method = method
         self._request = firestore.ListDocumentsRequest(request)
         self._response = response
+        self._metadata = metadata
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._response, name)
@@ -69,7 +72,7 @@ class ListDocumentsPager:
         yield self._response
         while self._response.next_page_token:
             self._request.page_token = self._response.next_page_token
-            self._response = self._method(self._request)
+            self._response = self._method(self._request, metadata=self._metadata)
             yield self._response
 
     def __iter__(self) -> Iterable[document.Document]:
@@ -100,11 +103,11 @@ class ListDocumentsAsyncPager:
 
     def __init__(
         self,
-        method: Callable[
-            [firestore.ListDocumentsRequest], Awaitable[firestore.ListDocumentsResponse]
-        ],
+        method: Callable[..., Awaitable[firestore.ListDocumentsResponse]],
         request: firestore.ListDocumentsRequest,
         response: firestore.ListDocumentsResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
     ):
         """Instantiate the pager.
 
@@ -115,10 +118,13 @@ class ListDocumentsAsyncPager:
                 The initial request object.
             response (:class:`~.firestore.ListDocumentsResponse`):
                 The initial response object.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
         """
         self._method = method
         self._request = firestore.ListDocumentsRequest(request)
         self._response = response
+        self._metadata = metadata
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._response, name)
@@ -128,7 +134,7 @@ class ListDocumentsAsyncPager:
         yield self._response
         while self._response.next_page_token:
             self._request.page_token = self._response.next_page_token
-            self._response = await self._method(self._request)
+            self._response = await self._method(self._request, metadata=self._metadata)
             yield self._response
 
     def __aiter__(self) -> AsyncIterable[document.Document]:

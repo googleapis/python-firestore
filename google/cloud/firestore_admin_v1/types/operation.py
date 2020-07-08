@@ -74,10 +74,15 @@ class IndexOperationMetadata(proto.Message):
     """
 
     start_time = proto.Field(proto.MESSAGE, number=1, message=timestamp.Timestamp,)
+
     end_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp,)
+
     index = proto.Field(proto.STRING, number=3)
+
     state = proto.Field(proto.ENUM, number=4, enum="OperationState",)
+
     progress_documents = proto.Field(proto.MESSAGE, number=5, message="Progress",)
+
     progress_bytes = proto.Field(proto.MESSAGE, number=6, message="Progress",)
 
 
@@ -131,16 +136,23 @@ class FieldOperationMetadata(proto.Message):
             number=1,
             enum="FieldOperationMetadata.IndexConfigDelta.ChangeType",
         )
+
         index = proto.Field(proto.MESSAGE, number=2, message=gfa_index.Index,)
 
     start_time = proto.Field(proto.MESSAGE, number=1, message=timestamp.Timestamp,)
+
     end_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp,)
+
     field = proto.Field(proto.STRING, number=3)
+
     index_config_deltas = proto.RepeatedField(
         proto.MESSAGE, number=4, message=IndexConfigDelta,
     )
+
     state = proto.Field(proto.ENUM, number=5, enum="OperationState",)
+
     progress_documents = proto.Field(proto.MESSAGE, number=6, message="Progress",)
+
     progress_bytes = proto.Field(proto.MESSAGE, number=7, message="Progress",)
 
 
@@ -170,11 +182,17 @@ class ExportDocumentsMetadata(proto.Message):
     """
 
     start_time = proto.Field(proto.MESSAGE, number=1, message=timestamp.Timestamp,)
+
     end_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp,)
+
     operation_state = proto.Field(proto.ENUM, number=3, enum="OperationState",)
+
     progress_documents = proto.Field(proto.MESSAGE, number=4, message="Progress",)
+
     progress_bytes = proto.Field(proto.MESSAGE, number=5, message="Progress",)
+
     collection_ids = proto.RepeatedField(proto.STRING, number=6)
+
     output_uri_prefix = proto.Field(proto.STRING, number=7)
 
 
@@ -204,11 +222,17 @@ class ImportDocumentsMetadata(proto.Message):
     """
 
     start_time = proto.Field(proto.MESSAGE, number=1, message=timestamp.Timestamp,)
+
     end_time = proto.Field(proto.MESSAGE, number=2, message=timestamp.Timestamp,)
+
     operation_state = proto.Field(proto.ENUM, number=3, enum="OperationState",)
+
     progress_documents = proto.Field(proto.MESSAGE, number=4, message="Progress",)
+
     progress_bytes = proto.Field(proto.MESSAGE, number=5, message="Progress",)
+
     collection_ids = proto.RepeatedField(proto.STRING, number=6)
+
     input_uri_prefix = proto.Field(proto.STRING, number=7)
 
 
@@ -241,6 +265,7 @@ class Progress(proto.Message):
     """
 
     estimated_work = proto.Field(proto.INT64, number=1)
+
     completed_work = proto.Field(proto.INT64, number=2)
 
 

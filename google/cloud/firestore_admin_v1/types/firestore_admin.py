@@ -54,6 +54,7 @@ class CreateIndexRequest(proto.Message):
     """
 
     parent = proto.Field(proto.STRING, number=1)
+
     index = proto.Field(proto.MESSAGE, number=2, message=gfa_index.Index,)
 
 
@@ -76,8 +77,11 @@ class ListIndexesRequest(proto.Message):
     """
 
     parent = proto.Field(proto.STRING, number=1)
+
     filter = proto.Field(proto.STRING, number=2)
+
     page_size = proto.Field(proto.INT32, number=3)
+
     page_token = proto.Field(proto.STRING, number=4)
 
 
@@ -99,6 +103,7 @@ class ListIndexesResponse(proto.Message):
         return self
 
     indexes = proto.RepeatedField(proto.MESSAGE, number=1, message=gfa_index.Index,)
+
     next_page_token = proto.Field(proto.STRING, number=2)
 
 
@@ -142,6 +147,7 @@ class UpdateFieldRequest(proto.Message):
     """
 
     field = proto.Field(proto.MESSAGE, number=1, message=gfa_field.Field,)
+
     update_mask = proto.Field(proto.MESSAGE, number=2, message=field_mask.FieldMask,)
 
 
@@ -183,8 +189,11 @@ class ListFieldsRequest(proto.Message):
     """
 
     parent = proto.Field(proto.STRING, number=1)
+
     filter = proto.Field(proto.STRING, number=2)
+
     page_size = proto.Field(proto.INT32, number=3)
+
     page_token = proto.Field(proto.STRING, number=4)
 
 
@@ -206,6 +215,7 @@ class ListFieldsResponse(proto.Message):
         return self
 
     fields = proto.RepeatedField(proto.MESSAGE, number=1, message=gfa_field.Field,)
+
     next_page_token = proto.Field(proto.STRING, number=2)
 
 
@@ -233,7 +243,9 @@ class ExportDocumentsRequest(proto.Message):
     """
 
     name = proto.Field(proto.STRING, number=1)
+
     collection_ids = proto.RepeatedField(proto.STRING, number=2)
+
     output_uri_prefix = proto.Field(proto.STRING, number=3)
 
 
@@ -256,7 +268,9 @@ class ImportDocumentsRequest(proto.Message):
     """
 
     name = proto.Field(proto.STRING, number=1)
+
     collection_ids = proto.RepeatedField(proto.STRING, number=2)
+
     input_uri_prefix = proto.Field(proto.STRING, number=3)
 
 

@@ -112,19 +112,19 @@ class Index(proto.Message):
             CONTAINS = 1
 
         field_path = proto.Field(proto.STRING, number=1)
-        order = proto.Field(
-            proto.ENUM, number=2, enum="Index.IndexField.Order", oneof="value_mode"
-        )
+
+        order = proto.Field(proto.ENUM, number=2, enum="Index.IndexField.Order",)
+
         array_config = proto.Field(
-            proto.ENUM,
-            number=3,
-            enum="Index.IndexField.ArrayConfig",
-            oneof="value_mode",
+            proto.ENUM, number=3, enum="Index.IndexField.ArrayConfig",
         )
 
     name = proto.Field(proto.STRING, number=1)
+
     query_scope = proto.Field(proto.ENUM, number=2, enum=QueryScope,)
+
     fields = proto.RepeatedField(proto.MESSAGE, number=3, message=IndexField,)
+
     state = proto.Field(proto.ENUM, number=4, enum=State,)
 
 
