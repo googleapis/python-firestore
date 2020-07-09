@@ -351,7 +351,9 @@ class BatchGetDocumentsResponse(proto.Message):
             between their read_time and this one.
     """
 
-    found = proto.Field(proto.MESSAGE, number=1, message=gf_document.Document, oneof="result")
+    found = proto.Field(
+        proto.MESSAGE, number=1, message=gf_document.Document, oneof="result"
+    )
 
     missing = proto.Field(proto.STRING, number=2, oneof="result")
 

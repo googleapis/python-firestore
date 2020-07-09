@@ -136,7 +136,7 @@ class Client(ClientWithProject):
             # We need this in order to set appropriate keepalive options.
 
             if self._emulator_host is not None:
-                # TODO(crwilcox): this likely needs to be adapted to use insecure_channel
+                # TODO(microgen): this likely needs to be adapted to use insecure_channel
                 # on new generated surface.
                 channel = firestore_grpc_transport.FirestoreGrpcTransport.create_channel(
                     host=self._emulator_host
@@ -453,7 +453,7 @@ class Client(ClientWithProject):
         for get_doc_response in response_iterator:
             yield _parse_batch_get(get_doc_response, reference_map, self)
 
-    def collections(self):
+    def collections(self,):
         """List top-level collections of the client's database.
 
         Returns:
@@ -461,12 +461,31 @@ class Client(ClientWithProject):
                 iterator of subcollections of the current document.
         """
         iterator = self._firestore_api.list_collection_ids(
-            request={"parent": "{}/documents".format(self._database_string)},
+            request={
+                "parent": "{}/documents".format(self._database_string),
+            },
             metadata=self._rpc_metadata,
         )
-        iterator.client = self
-        iterator.item_to_value = _item_to_collection_ref
-        return iterator
+
+        while True:
+            for i in iterator.collection_ids:
+                yield self.collection(i)
+            if iterator.next_page_token:
+                iterator = self._firestore_api.list_collection_ids(
+                    request={
+                        "parent": "{}/documents".format(self._database_string),
+                        "page_token": iterator.next_page_token,
+                    },
+                    metadata=self._rpc_metadata,
+                )
+            else:
+                return
+
+        # TODO(microgen): currently this method is rewritten to iterate/page itself.
+        # it seems the generator ought to be able to do this itself.
+        # iterator.client = self
+        # iterator.item_to_value = _item_to_collection_ref
+        # return iterator
 
     def batch(self):
         """Get a batch instance from this client.

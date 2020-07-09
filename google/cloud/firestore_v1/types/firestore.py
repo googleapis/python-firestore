@@ -357,7 +357,7 @@ class BatchGetDocumentsResponse(proto.Message):
 
     found = proto.Field(proto.MESSAGE, number=1, message=gf_document.Document, oneof="result")
 
-    missing = proto.Field(proto.STRING, number=2, oneof="result")
+    missing = proto.Field(proto.STRING, number=2,  oneof="result")
 
     transaction = proto.Field(proto.BYTES, number=3)
 

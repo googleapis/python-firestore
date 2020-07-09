@@ -209,9 +209,9 @@ def test_delete_testprotos(test_proto):
 @pytest.mark.parametrize("test_proto", _LISTEN_TESTPROTOS)
 def test_listen_testprotos(test_proto):  # pragma: NO COVER
     # test_proto.listen has 'reponses' messages,
-    # 'google.firestore.v1beta1.ListenResponse'
+    # 'google.cloud.firestore.v1beta1.ListenResponse'
     # and then an expected list of 'snapshots' (local 'Snapshot'), containing
-    # 'docs' (list of 'google.firestore.v1beta1.Document'),
+    # 'docs' (list of 'google.cloud.firestore.v1beta1.Document'),
     # 'changes' (list lof local 'DocChange', and 'read_time' timestamp.
     from google.cloud.firestore_v1beta1 import Client
     from google.cloud.firestore_v1beta1 import DocumentReference
@@ -401,7 +401,7 @@ def parse_query(testcase):
     # 'query' testcase contains:
     # - 'coll_path':  collection ref path.
     # - 'clauses':  array of one or more 'Clause' elements
-    # - 'query': the actual google.firestore.v1beta1.StructuredQuery message
+    # - 'query': the actual google.cloud.firestore.v1beta1.StructuredQuery message
     #            to be constructed.
     # - 'is_error' (as other testcases).
     #

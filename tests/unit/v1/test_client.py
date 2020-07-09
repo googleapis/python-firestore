@@ -674,7 +674,7 @@ class Test__parse_batch_get(unittest.TestCase):
         self.assertIs(snapshot._reference, mock.sentinel.reference)
         self.assertEqual(snapshot._data, {"foo": 1.5, "bar": u"skillz"})
         self.assertTrue(snapshot._exists)
-        # TODO(crwilcox): v2: datetime with nanos implementation needed.
+        # TODO(microgen): v2: datetime with nanos implementation needed.
         # self.assertEqual(snapshot.read_time, read_time)
         # self.assertEqual(snapshot.create_time, create_time)
         # self.assertEqual(snapshot.update_time, update_time)

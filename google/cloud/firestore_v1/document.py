@@ -492,9 +492,27 @@ class DocumentReference(object):
             request={"parent": self._document_path, "page_size": page_size},
             metadata=self._client._rpc_metadata,
         )
-        iterator.document = self
-        iterator.item_to_value = _item_to_collection_ref
-        return iterator
+
+        while True:
+            for i in iterator.collection_ids:
+                yield self.collection(i)
+            if iterator.next_page_token:
+                iterator = self._client._firestore_api.list_collection_ids(
+                    request={
+                        "parent": self._document_path,
+                        "page_size": page_size,
+                        "page_token": iterator.next_page_token,
+                    },
+                    metadata=self._client._rpc_metadata,
+                )
+            else:
+                return
+
+        # TODO(microgen): currently this method is rewritten to iterate/page itself.
+        # it seems the generator ought to be able to do this itself.
+        # iterator.document = self
+        # iterator.item_to_value = _item_to_collection_ref
+        # return iterator
 
     def on_snapshot(self, callback):
         """Watch this document.

@@ -25,7 +25,7 @@ from google.type import latlng_pb2 as latlng  # type: ignore
 
 __protobuf__ = proto.module(
     package="google.cloud.firestore.v1",
-    manifest={"Document", "Value", "ArrayValue", "MapValue"},
+    manifest={"Document", "Value", "ArrayValue", "MapValue",},
 )
 
 
@@ -82,11 +82,11 @@ class Document(proto.Message):
 
     name = proto.Field(proto.STRING, number=1)
 
-    fields = proto.MapField(proto.STRING, proto.MESSAGE, number=2, message="Value")
+    fields = proto.MapField(proto.STRING, proto.MESSAGE, number=2, message="Value",)
 
-    create_time = proto.Field(proto.MESSAGE, number=3, message=timestamp.Timestamp)
+    create_time = proto.Field(proto.MESSAGE, number=3, message=timestamp.Timestamp,)
 
-    update_time = proto.Field(proto.MESSAGE, number=4, message=timestamp.Timestamp)
+    update_time = proto.Field(proto.MESSAGE, number=4, message=timestamp.Timestamp,)
 
 
 class Value(proto.Message):
@@ -172,7 +172,7 @@ class ArrayValue(proto.Message):
             Values in the array.
     """
 
-    values = proto.RepeatedField(proto.MESSAGE, number=1, message=Value)
+    values = proto.RepeatedField(proto.MESSAGE, number=1, message=Value,)
 
 
 class MapValue(proto.Message):
@@ -189,7 +189,7 @@ class MapValue(proto.Message):
             bytes and cannot be empty.
     """
 
-    fields = proto.MapField(proto.STRING, proto.MESSAGE, number=1, message=Value)
+    fields = proto.MapField(proto.STRING, proto.MESSAGE, number=1, message=Value,)
 
 
 __all__ = tuple(sorted(__protobuf__.manifest))
