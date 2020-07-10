@@ -568,13 +568,12 @@ class TestWatch(unittest.TestCase):
     def test_push_callback_called_no_changes(self):
         import pytz
 
-        dummy_time = datetime.datetime.fromtimestamp(1534858278, pytz.utc),
+        dummy_time = (datetime.datetime.fromtimestamp(1534858278, pytz.utc),)
 
         inst = self._makeOne()
         inst.push(dummy_time, "token")
         self.assertEqual(
-            self.snapshotted,
-            ([], [], dummy_time),
+            self.snapshotted, ([], [], dummy_time),
         )
         self.assertTrue(inst.has_pushed)
         self.assertEqual(inst.resume_token, "token")
@@ -989,10 +988,13 @@ class DummyTarget(object):
     def QueryTarget(self, **kw):
         self.kw = kw
         return DummyQueryTarget()
+
+
 class DummyQueryTarget(object):
     @property
     def _pb(self):
         return "dummy query target"
+
 
 class DummyPb2(object):
 

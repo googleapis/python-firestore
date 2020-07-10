@@ -235,7 +235,7 @@ class TestCollectionReference(unittest.TestCase):
         expected_path = collection._path + (auto_assigned_id,)
         self.assertEqual(document_ref._path, expected_path)
 
-        # TODO(microgen): For now relax test. 
+        # TODO(microgen): For now relax test.
         # Expected: create_document(request={'parent': 'projects/project-project/databases/(default)/documents/grand-parent/parent', 'collection_id': 'child', 'document': , 'document_id': None, 'mask': None}, metadata=[('google-cloud-resource-prefix', 'projects/project-project/databases/(default)')])
         # Actual: create_document(request={'parent': 'projects/project-project/databases/(default)/documents/grand-parent/parent', 'collection_id': 'child', 'document': None, 'document_id': , 'mask': None}, metadata=[('google-cloud-resource-prefix', 'projects/project-project/databases/(default)')])
 

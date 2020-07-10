@@ -676,8 +676,6 @@ class TestDocumentSnapshot(unittest.TestCase):
         self.assertTrue(snapshot == other)
 
     def test___hash__(self):
-        from google.protobuf import timestamp_pb2
-
         client = mock.MagicMock()
         client.__hash__.return_value = 234566789
         reference = self._make_reference("hi", "bye", client=client)
@@ -686,9 +684,7 @@ class TestDocumentSnapshot(unittest.TestCase):
         snapshot = self._make_one(
             reference, data, True, None, mock.sentinel.create_time, update_time
         )
-        self.assertEqual(
-            hash(snapshot), hash(reference) + hash(123456) + hash(0)
-        )
+        self.assertEqual(hash(snapshot), hash(reference) + hash(123456) + hash(0))
 
     def test__client_property(self):
         reference = self._make_reference(

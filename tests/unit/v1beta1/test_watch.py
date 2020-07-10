@@ -828,14 +828,18 @@ class DummyProto(object):
         self.target_change = DummyChange()
         self.document_change = DummyChange()
 
+
 class DummyTarget(object):
     def QueryTarget(self, **kw):
         self.kw = kw
         return DummyQueryTarget()
+
+
 class DummyQueryTarget(object):
     @property
     def _pb(self):
         return "dummy query target"
+
 
 class DummyPb2(object):
 
