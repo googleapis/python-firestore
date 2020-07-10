@@ -226,7 +226,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "get_document" not in self._stubs:
             self._stubs["get_document"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/GetDocument",
+                "/google.firestore.v1beta1.Firestore/GetDocument",
                 request_serializer=firestore.GetDocumentRequest.serialize,
                 response_deserializer=document.Document.deserialize,
             )
@@ -254,7 +254,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "list_documents" not in self._stubs:
             self._stubs["list_documents"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/ListDocuments",
+                "/google.firestore.v1beta1.Firestore/ListDocuments",
                 request_serializer=firestore.ListDocumentsRequest.serialize,
                 response_deserializer=firestore.ListDocumentsResponse.deserialize,
             )
@@ -280,7 +280,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "create_document" not in self._stubs:
             self._stubs["create_document"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/CreateDocument",
+                "/google.firestore.v1beta1.Firestore/CreateDocument",
                 request_serializer=firestore.CreateDocumentRequest.serialize,
                 response_deserializer=document.Document.deserialize,
             )
@@ -306,7 +306,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "update_document" not in self._stubs:
             self._stubs["update_document"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/UpdateDocument",
+                "/google.firestore.v1beta1.Firestore/UpdateDocument",
                 request_serializer=firestore.UpdateDocumentRequest.serialize,
                 response_deserializer=gf_document.Document.deserialize,
             )
@@ -332,7 +332,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "delete_document" not in self._stubs:
             self._stubs["delete_document"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/DeleteDocument",
+                "/google.firestore.v1beta1.Firestore/DeleteDocument",
                 request_serializer=firestore.DeleteDocumentRequest.serialize,
                 response_deserializer=empty.Empty.FromString,
             )
@@ -363,7 +363,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "batch_get_documents" not in self._stubs:
             self._stubs["batch_get_documents"] = self.grpc_channel.unary_stream(
-                "/google.cloud.firestore.v1beta1.Firestore/BatchGetDocuments",
+                "/google.firestore.v1beta1.Firestore/BatchGetDocuments",
                 request_serializer=firestore.BatchGetDocumentsRequest.serialize,
                 response_deserializer=firestore.BatchGetDocumentsResponse.deserialize,
             )
@@ -392,7 +392,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "begin_transaction" not in self._stubs:
             self._stubs["begin_transaction"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/BeginTransaction",
+                "/google.firestore.v1beta1.Firestore/BeginTransaction",
                 request_serializer=firestore.BeginTransactionRequest.serialize,
                 response_deserializer=firestore.BeginTransactionResponse.deserialize,
             )
@@ -419,7 +419,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "commit" not in self._stubs:
             self._stubs["commit"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/Commit",
+                "/google.firestore.v1beta1.Firestore/Commit",
                 request_serializer=firestore.CommitRequest.serialize,
                 response_deserializer=firestore.CommitResponse.deserialize,
             )
@@ -443,7 +443,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "rollback" not in self._stubs:
             self._stubs["rollback"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/Rollback",
+                "/google.firestore.v1beta1.Firestore/Rollback",
                 request_serializer=firestore.RollbackRequest.serialize,
                 response_deserializer=empty.Empty.FromString,
             )
@@ -469,7 +469,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "run_query" not in self._stubs:
             self._stubs["run_query"] = self.grpc_channel.unary_stream(
-                "/google.cloud.firestore.v1beta1.Firestore/RunQuery",
+                "/google.firestore.v1beta1.Firestore/RunQuery",
                 request_serializer=firestore.RunQueryRequest.serialize,
                 response_deserializer=firestore.RunQueryResponse.deserialize,
             )
@@ -496,7 +496,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "write" not in self._stubs:
             self._stubs["write"] = self.grpc_channel.stream_stream(
-                "/google.cloud.firestore.v1beta1.Firestore/Write",
+                "/google.firestore.v1beta1.Firestore/Write",
                 request_serializer=firestore.WriteRequest.serialize,
                 response_deserializer=firestore.WriteResponse.deserialize,
             )
@@ -522,7 +522,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "listen" not in self._stubs:
             self._stubs["listen"] = self.grpc_channel.stream_stream(
-                "/google.cloud.firestore.v1beta1.Firestore/Listen",
+                "/google.firestore.v1beta1.Firestore/Listen",
                 request_serializer=firestore.ListenRequest.serialize,
                 response_deserializer=firestore.ListenResponse.deserialize,
             )
@@ -551,7 +551,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # to pass in the functions for each.
         if "list_collection_ids" not in self._stubs:
             self._stubs["list_collection_ids"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1beta1.Firestore/ListCollectionIds",
+                "/google.firestore.v1beta1.Firestore/ListCollectionIds",
                 request_serializer=firestore.ListCollectionIdsRequest.serialize,
                 response_deserializer=firestore.ListCollectionIdsResponse.deserialize,
             )

@@ -224,7 +224,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         [google.longrunning.Operation][google.longrunning.Operation]
         which may be used to track the status of the creation. The
         metadata for the operation will be the type
-        [IndexOperationMetadata][google.cloud.firestore.admin.v1.IndexOperationMetadata].
+        [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
 
         Returns:
             Callable[[~.CreateIndexRequest],
@@ -238,7 +238,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "create_index" not in self._stubs:
             self._stubs["create_index"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/CreateIndex",
+                "/google.firestore.admin.v1.FirestoreAdmin/CreateIndex",
                 request_serializer=firestore_admin.CreateIndexRequest.serialize,
                 response_deserializer=operations.Operation.FromString,
             )
@@ -266,7 +266,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "list_indexes" not in self._stubs:
             self._stubs["list_indexes"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/ListIndexes",
+                "/google.firestore.admin.v1.FirestoreAdmin/ListIndexes",
                 request_serializer=firestore_admin.ListIndexesRequest.serialize,
                 response_deserializer=firestore_admin.ListIndexesResponse.deserialize,
             )
@@ -290,7 +290,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "get_index" not in self._stubs:
             self._stubs["get_index"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/GetIndex",
+                "/google.firestore.admin.v1.FirestoreAdmin/GetIndex",
                 request_serializer=firestore_admin.GetIndexRequest.serialize,
                 response_deserializer=index.Index.deserialize,
             )
@@ -316,7 +316,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "delete_index" not in self._stubs:
             self._stubs["delete_index"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/DeleteIndex",
+                "/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex",
                 request_serializer=firestore_admin.DeleteIndexRequest.serialize,
                 response_deserializer=empty.Empty.FromString,
             )
@@ -340,7 +340,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "get_field" not in self._stubs:
             self._stubs["get_field"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/GetField",
+                "/google.firestore.admin.v1.FirestoreAdmin/GetField",
                 request_serializer=firestore_admin.GetFieldRequest.serialize,
                 response_deserializer=field.Field.deserialize,
             )
@@ -354,7 +354,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
 
         Updates a field configuration. Currently, field updates apply
         only to single field index configuration. However, calls to
-        [FirestoreAdmin.UpdateField][google.cloud.firestore.admin.v1.FirestoreAdmin.UpdateField]
+        [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField]
         should provide a field mask to avoid changing any configuration
         that the caller isn't aware of. The field mask should be
         specified as: ``{ paths: "index_config" }``.
@@ -363,7 +363,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         [google.longrunning.Operation][google.longrunning.Operation]
         which may be used to track the status of the field update. The
         metadata for the operation will be the type
-        [FieldOperationMetadata][google.cloud.firestore.admin.v1.FieldOperationMetadata].
+        [FieldOperationMetadata][google.firestore.admin.v1.FieldOperationMetadata].
 
         To configure the default field settings for the database, use
         the special ``Field`` with resource name:
@@ -381,7 +381,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "update_field" not in self._stubs:
             self._stubs["update_field"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/UpdateField",
+                "/google.firestore.admin.v1.FirestoreAdmin/UpdateField",
                 request_serializer=firestore_admin.UpdateFieldRequest.serialize,
                 response_deserializer=operations.Operation.FromString,
             )
@@ -398,10 +398,10 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         Lists the field configuration and metadata for this database.
 
         Currently,
-        [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields]
+        [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
         only supports listing fields that have been explicitly
         overridden. To issue this query, call
-        [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields]
+        [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
         with the filter set to ``indexConfig.usesAncestorConfig:false``.
 
         Returns:
@@ -416,7 +416,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "list_fields" not in self._stubs:
             self._stubs["list_fields"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/ListFields",
+                "/google.firestore.admin.v1.FirestoreAdmin/ListFields",
                 request_serializer=firestore_admin.ListFieldsRequest.serialize,
                 response_deserializer=firestore_admin.ListFieldsResponse.deserialize,
             )
@@ -451,7 +451,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "export_documents" not in self._stubs:
             self._stubs["export_documents"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/ExportDocuments",
+                "/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments",
                 request_serializer=firestore_admin.ExportDocumentsRequest.serialize,
                 response_deserializer=operations.Operation.FromString,
             )
@@ -483,7 +483,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         # to pass in the functions for each.
         if "import_documents" not in self._stubs:
             self._stubs["import_documents"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.admin.v1.FirestoreAdmin/ImportDocuments",
+                "/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments",
                 request_serializer=firestore_admin.ImportDocumentsRequest.serialize,
                 response_deserializer=operations.Operation.FromString,
             )

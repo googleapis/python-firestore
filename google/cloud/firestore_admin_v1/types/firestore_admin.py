@@ -24,7 +24,7 @@ from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.cloud.firestore.admin.v1",
+    package="google.firestore.admin.v1",
     manifest={
         "CreateIndexRequest",
         "ListIndexesRequest",
@@ -43,7 +43,7 @@ __protobuf__ = proto.module(
 
 class CreateIndexRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.CreateIndex][google.cloud.firestore.admin.v1.FirestoreAdmin.CreateIndex].
+    [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
 
     Attributes:
         parent (str):
@@ -60,7 +60,7 @@ class CreateIndexRequest(proto.Message):
 
 class ListIndexesRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.ListIndexes][google.cloud.firestore.admin.v1.FirestoreAdmin.ListIndexes].
+    [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
 
     Attributes:
         parent (str):
@@ -72,7 +72,7 @@ class ListIndexesRequest(proto.Message):
             The number of results to return.
         page_token (str):
             A page token, returned from a previous call to
-            [FirestoreAdmin.ListIndexes][google.cloud.firestore.admin.v1.FirestoreAdmin.ListIndexes],
+            [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes],
             that may be used to get the next page of results.
     """
 
@@ -87,7 +87,7 @@ class ListIndexesRequest(proto.Message):
 
 class ListIndexesResponse(proto.Message):
     r"""The response for
-    [FirestoreAdmin.ListIndexes][google.cloud.firestore.admin.v1.FirestoreAdmin.ListIndexes].
+    [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
 
     Attributes:
         indexes (Sequence[~.gfa_index.Index]):
@@ -109,7 +109,7 @@ class ListIndexesResponse(proto.Message):
 
 class GetIndexRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.GetIndex][google.cloud.firestore.admin.v1.FirestoreAdmin.GetIndex].
+    [FirestoreAdmin.GetIndex][google.firestore.admin.v1.FirestoreAdmin.GetIndex].
 
     Attributes:
         name (str):
@@ -122,7 +122,7 @@ class GetIndexRequest(proto.Message):
 
 class DeleteIndexRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.DeleteIndex][google.cloud.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
+    [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
 
     Attributes:
         name (str):
@@ -135,7 +135,7 @@ class DeleteIndexRequest(proto.Message):
 
 class UpdateFieldRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.UpdateField][google.cloud.firestore.admin.v1.FirestoreAdmin.UpdateField].
+    [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
 
     Attributes:
         field (~.gfa_field.Field):
@@ -153,7 +153,7 @@ class UpdateFieldRequest(proto.Message):
 
 class GetFieldRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.GetField][google.cloud.firestore.admin.v1.FirestoreAdmin.GetField].
+    [FirestoreAdmin.GetField][google.firestore.admin.v1.FirestoreAdmin.GetField].
 
     Attributes:
         name (str):
@@ -166,7 +166,7 @@ class GetFieldRequest(proto.Message):
 
 class ListFieldsRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields].
+    [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
 
     Attributes:
         parent (str):
@@ -174,17 +174,17 @@ class ListFieldsRequest(proto.Message):
             ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}``
         filter (str):
             The filter to apply to list results. Currently,
-            [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields]
+            [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
             only supports listing fields that have been explicitly
             overridden. To issue this query, call
-            [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields]
+            [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
             with the filter set to
             ``indexConfig.usesAncestorConfig:false``.
         page_size (int):
             The number of results to return.
         page_token (str):
             A page token, returned from a previous call to
-            [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields],
+            [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields],
             that may be used to get the next page of results.
     """
 
@@ -199,7 +199,7 @@ class ListFieldsRequest(proto.Message):
 
 class ListFieldsResponse(proto.Message):
     r"""The response for
-    [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields].
+    [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
 
     Attributes:
         fields (Sequence[~.gfa_field.Field]):
@@ -221,7 +221,7 @@ class ListFieldsResponse(proto.Message):
 
 class ExportDocumentsRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.ExportDocuments][google.cloud.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
+    [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
 
     Attributes:
         name (str):
@@ -251,7 +251,7 @@ class ExportDocumentsRequest(proto.Message):
 
 class ImportDocumentsRequest(proto.Message):
     r"""The request for
-    [FirestoreAdmin.ImportDocuments][google.cloud.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
+    [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
 
     Attributes:
         name (str):
@@ -264,7 +264,7 @@ class ImportDocumentsRequest(proto.Message):
             Location of the exported files. This must match the
             output_uri_prefix of an ExportDocumentsResponse from an
             export that has completed successfully. See:
-            [google.cloud.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix][google.cloud.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix].
+            [google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix][google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix].
     """
 
     name = proto.Field(proto.STRING, number=1)

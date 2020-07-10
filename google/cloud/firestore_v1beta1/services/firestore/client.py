@@ -250,7 +250,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.GetDocumentRequest`):
                 The request object. The request for
-                [Firestore.GetDocument][google.cloud.firestore.v1beta1.Firestore.GetDocument].
+                [Firestore.GetDocument][google.firestore.v1beta1.Firestore.GetDocument].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -301,7 +301,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.ListDocumentsRequest`):
                 The request object. The request for
-                [Firestore.ListDocuments][google.cloud.firestore.v1beta1.Firestore.ListDocuments].
+                [Firestore.ListDocuments][google.firestore.v1beta1.Firestore.ListDocuments].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -312,7 +312,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             ~.pagers.ListDocumentsPager:
                 The response for
-                [Firestore.ListDocuments][google.cloud.firestore.v1beta1.Firestore.ListDocuments].
+                [Firestore.ListDocuments][google.firestore.v1beta1.Firestore.ListDocuments].
 
                 Iterating over this object will yield results and
                 resolve additional pages automatically.
@@ -361,7 +361,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.CreateDocumentRequest`):
                 The request object. The request for
-                [Firestore.CreateDocument][google.cloud.firestore.v1beta1.Firestore.CreateDocument].
+                [Firestore.CreateDocument][google.firestore.v1beta1.Firestore.CreateDocument].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -414,7 +414,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.UpdateDocumentRequest`):
                 The request object. The request for
-                [Firestore.UpdateDocument][google.cloud.firestore.v1beta1.Firestore.UpdateDocument].
+                [Firestore.UpdateDocument][google.firestore.v1beta1.Firestore.UpdateDocument].
             document (:class:`~.gf_document.Document`):
                 Required. The updated document.
                 Creates the document if it does not
@@ -503,7 +503,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.DeleteDocumentRequest`):
                 The request object. The request for
-                [Firestore.DeleteDocument][google.cloud.firestore.v1beta1.Firestore.DeleteDocument].
+                [Firestore.DeleteDocument][google.firestore.v1beta1.Firestore.DeleteDocument].
             name (:class:`str`):
                 Required. The resource name of the Document to delete.
                 In the format:
@@ -569,7 +569,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.BatchGetDocumentsRequest`):
                 The request object. The request for
-                [Firestore.BatchGetDocuments][google.cloud.firestore.v1beta1.Firestore.BatchGetDocuments].
+                [Firestore.BatchGetDocuments][google.firestore.v1beta1.Firestore.BatchGetDocuments].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -580,7 +580,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             Iterable[~.firestore.BatchGetDocumentsResponse]:
                 The streamed response for
-                [Firestore.BatchGetDocuments][google.cloud.firestore.v1beta1.Firestore.BatchGetDocuments].
+                [Firestore.BatchGetDocuments][google.firestore.v1beta1.Firestore.BatchGetDocuments].
 
         """
         # Create or coerce a protobuf request object.
@@ -621,7 +621,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.BeginTransactionRequest`):
                 The request object. The request for
-                [Firestore.BeginTransaction][google.cloud.firestore.v1beta1.Firestore.BeginTransaction].
+                [Firestore.BeginTransaction][google.firestore.v1beta1.Firestore.BeginTransaction].
             database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
@@ -638,7 +638,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             ~.firestore.BeginTransactionResponse:
                 The response for
-                [Firestore.BeginTransaction][google.cloud.firestore.v1beta1.Firestore.BeginTransaction].
+                [Firestore.BeginTransaction][google.firestore.v1beta1.Firestore.BeginTransaction].
 
         """
         # Create or coerce a protobuf request object.
@@ -694,7 +694,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.CommitRequest`):
                 The request object. The request for
-                [Firestore.Commit][google.cloud.firestore.v1beta1.Firestore.Commit].
+                [Firestore.Commit][google.firestore.v1beta1.Firestore.Commit].
             database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
@@ -717,7 +717,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             ~.firestore.CommitResponse:
                 The response for
-                [Firestore.Commit][google.cloud.firestore.v1beta1.Firestore.Commit].
+                [Firestore.Commit][google.firestore.v1beta1.Firestore.Commit].
 
         """
         # Create or coerce a protobuf request object.
@@ -772,7 +772,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.RollbackRequest`):
                 The request object. The request for
-                [Firestore.Rollback][google.cloud.firestore.v1beta1.Firestore.Rollback].
+                [Firestore.Rollback][google.firestore.v1beta1.Firestore.Rollback].
             database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
@@ -841,7 +841,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.RunQueryRequest`):
                 The request object. The request for
-                [Firestore.RunQuery][google.cloud.firestore.v1beta1.Firestore.RunQuery].
+                [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
 
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
@@ -852,7 +852,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             Iterable[~.firestore.RunQueryResponse]:
                 The response for
-                [Firestore.RunQuery][google.cloud.firestore.v1beta1.Firestore.RunQuery].
+                [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
 
         """
         # Create or coerce a protobuf request object.
@@ -891,7 +891,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             requests (Iterator[`~.firestore.WriteRequest`]):
                 The request object iterator. The request for
-                [Firestore.Write][google.cloud.firestore.v1beta1.Firestore.Write].
+                [Firestore.Write][google.firestore.v1beta1.Firestore.Write].
                 The first request creates a stream, or resumes an
                 existing one from a token.
                 When creating a new stream, the server replies with a
@@ -911,7 +911,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             Iterable[~.firestore.WriteResponse]:
                 The response for
-                [Firestore.Write][google.cloud.firestore.v1beta1.Firestore.Write].
+                [Firestore.Write][google.firestore.v1beta1.Firestore.Write].
 
         """
 
@@ -944,7 +944,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             requests (Iterator[`~.firestore.ListenRequest`]):
                 The request object iterator. A request for
-                [Firestore.Listen][google.cloud.firestore.v1beta1.Firestore.Listen]
+                [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen]
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -954,7 +954,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             Iterable[~.firestore.ListenResponse]:
                 The response for
-                [Firestore.Listen][google.cloud.firestore.v1beta1.Firestore.Listen].
+                [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen].
 
         """
 
@@ -988,7 +988,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Args:
             request (:class:`~.firestore.ListCollectionIdsRequest`):
                 The request object. The request for
-                [Firestore.ListCollectionIds][google.cloud.firestore.v1beta1.Firestore.ListCollectionIds].
+                [Firestore.ListCollectionIds][google.firestore.v1beta1.Firestore.ListCollectionIds].
             parent (:class:`str`):
                 Required. The parent document. In the format:
                 ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
@@ -1007,7 +1007,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             ~.firestore.ListCollectionIdsResponse:
                 The response from
-                [Firestore.ListCollectionIds][google.cloud.firestore.v1beta1.Firestore.ListCollectionIds].
+                [Firestore.ListCollectionIds][google.firestore.v1beta1.Firestore.ListCollectionIds].
 
         """
         # Create or coerce a protobuf request object.
@@ -1050,7 +1050,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
 try:
     _client_info = gapic_v1.client_info.ClientInfo(
-        gapic_version=pkg_resources.get_distribution("google.cloud.firestore",).version,
+        gapic_version=pkg_resources.get_distribution("google-cloud-firestore",).version,
     )
 except pkg_resources.DistributionNotFound:
     _client_info = gapic_v1.client_info.ClientInfo()

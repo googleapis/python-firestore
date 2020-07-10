@@ -23,7 +23,7 @@ from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.cloud.firestore.admin.v1",
+    package="google.firestore.admin.v1",
     manifest={
         "OperationState",
         "IndexOperationMetadata",
@@ -52,7 +52,7 @@ class IndexOperationMetadata(proto.Message):
     r"""Metadata for
     [google.longrunning.Operation][google.longrunning.Operation] results
     from
-    [FirestoreAdmin.CreateIndex][google.cloud.firestore.admin.v1.FirestoreAdmin.CreateIndex].
+    [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
 
     Attributes:
         start_time (~.timestamp.Timestamp):
@@ -90,7 +90,7 @@ class FieldOperationMetadata(proto.Message):
     r"""Metadata for
     [google.longrunning.Operation][google.longrunning.Operation] results
     from
-    [FirestoreAdmin.UpdateField][google.cloud.firestore.admin.v1.FirestoreAdmin.UpdateField].
+    [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
 
     Attributes:
         start_time (~.timestamp.Timestamp):
@@ -104,7 +104,7 @@ class FieldOperationMetadata(proto.Message):
             ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/fields/{field_path}``
         index_config_deltas (Sequence[~.operation.FieldOperationMetadata.IndexConfigDelta]):
             A list of
-            [IndexConfigDelta][google.cloud.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta],
+            [IndexConfigDelta][google.firestore.admin.v1.FieldOperationMetadata.IndexConfigDelta],
             which describe the intent of this operation.
         state (~.operation.OperationState):
             The state of the operation.
@@ -160,7 +160,7 @@ class ExportDocumentsMetadata(proto.Message):
     r"""Metadata for
     [google.longrunning.Operation][google.longrunning.Operation] results
     from
-    [FirestoreAdmin.ExportDocuments][google.cloud.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
+    [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
 
     Attributes:
         start_time (~.timestamp.Timestamp):
@@ -200,7 +200,7 @@ class ImportDocumentsMetadata(proto.Message):
     r"""Metadata for
     [google.longrunning.Operation][google.longrunning.Operation] results
     from
-    [FirestoreAdmin.ImportDocuments][google.cloud.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
+    [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
 
     Attributes:
         start_time (~.timestamp.Timestamp):
@@ -255,7 +255,7 @@ class ExportDocumentsResponse(proto.Message):
 class Progress(proto.Message):
     r"""Describes the progress of the operation. Unit of work is generic and
     must be interpreted based on where
-    [Progress][google.cloud.firestore.admin.v1.Progress] is used.
+    [Progress][google.firestore.admin.v1.Progress] is used.
 
     Attributes:
         estimated_work (int):

@@ -273,12 +273,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         [google.longrunning.Operation][google.longrunning.Operation]
         which may be used to track the status of the creation. The
         metadata for the operation will be the type
-        [IndexOperationMetadata][google.cloud.firestore.admin.v1.IndexOperationMetadata].
+        [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
 
         Args:
             request (:class:`~.firestore_admin.CreateIndexRequest`):
                 The request object. The request for
-                [FirestoreAdmin.CreateIndex][google.cloud.firestore.admin.v1.FirestoreAdmin.CreateIndex].
+                [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
             parent (:class:`str`):
                 Required. A parent name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}``
@@ -369,7 +369,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Args:
             request (:class:`~.firestore_admin.ListIndexesRequest`):
                 The request object. The request for
-                [FirestoreAdmin.ListIndexes][google.cloud.firestore.admin.v1.FirestoreAdmin.ListIndexes].
+                [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
             parent (:class:`str`):
                 Required. A parent name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}``
@@ -386,7 +386,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Returns:
             ~.pagers.ListIndexesPager:
                 The response for
-                [FirestoreAdmin.ListIndexes][google.cloud.firestore.admin.v1.FirestoreAdmin.ListIndexes].
+                [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
 
                 Iterating over this object will yield results and
                 resolve additional pages automatically.
@@ -449,7 +449,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Args:
             request (:class:`~.firestore_admin.GetIndexRequest`):
                 The request object. The request for
-                [FirestoreAdmin.GetIndex][google.cloud.firestore.admin.v1.FirestoreAdmin.GetIndex].
+                [FirestoreAdmin.GetIndex][google.firestore.admin.v1.FirestoreAdmin.GetIndex].
             name (:class:`str`):
                 Required. A name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}``
@@ -519,7 +519,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Args:
             request (:class:`~.firestore_admin.DeleteIndexRequest`):
                 The request object. The request for
-                [FirestoreAdmin.DeleteIndex][google.cloud.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
+                [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
             name (:class:`str`):
                 Required. A name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}``
@@ -583,7 +583,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Args:
             request (:class:`~.firestore_admin.GetFieldRequest`):
                 The request object. The request for
-                [FirestoreAdmin.GetField][google.cloud.firestore.admin.v1.FirestoreAdmin.GetField].
+                [FirestoreAdmin.GetField][google.firestore.admin.v1.FirestoreAdmin.GetField].
             name (:class:`str`):
                 Required. A name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/fields/{field_id}``
@@ -652,7 +652,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     ) -> ga_operation.Operation:
         r"""Updates a field configuration. Currently, field updates apply
         only to single field index configuration. However, calls to
-        [FirestoreAdmin.UpdateField][google.cloud.firestore.admin.v1.FirestoreAdmin.UpdateField]
+        [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField]
         should provide a field mask to avoid changing any configuration
         that the caller isn't aware of. The field mask should be
         specified as: ``{ paths: "index_config" }``.
@@ -661,7 +661,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         [google.longrunning.Operation][google.longrunning.Operation]
         which may be used to track the status of the field update. The
         metadata for the operation will be the type
-        [FieldOperationMetadata][google.cloud.firestore.admin.v1.FieldOperationMetadata].
+        [FieldOperationMetadata][google.firestore.admin.v1.FieldOperationMetadata].
 
         To configure the default field settings for the database, use
         the special ``Field`` with resource name:
@@ -670,7 +670,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Args:
             request (:class:`~.firestore_admin.UpdateFieldRequest`):
                 The request object. The request for
-                [FirestoreAdmin.UpdateField][google.cloud.firestore.admin.v1.FirestoreAdmin.UpdateField].
+                [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
             field (:class:`~.gfa_field.Field`):
                 Required. The field to be updated.
                 This corresponds to the ``field`` field
@@ -755,16 +755,16 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Lists the field configuration and metadata for this database.
 
         Currently,
-        [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields]
+        [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
         only supports listing fields that have been explicitly
         overridden. To issue this query, call
-        [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields]
+        [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
         with the filter set to ``indexConfig.usesAncestorConfig:false``.
 
         Args:
             request (:class:`~.firestore_admin.ListFieldsRequest`):
                 The request object. The request for
-                [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields].
+                [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
             parent (:class:`str`):
                 Required. A parent name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}``
@@ -781,7 +781,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Returns:
             ~.pagers.ListFieldsPager:
                 The response for
-                [FirestoreAdmin.ListFields][google.cloud.firestore.admin.v1.FirestoreAdmin.ListFields].
+                [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
 
                 Iterating over this object will yield results and
                 resolve additional pages automatically.
@@ -851,7 +851,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Args:
             request (:class:`~.firestore_admin.ExportDocumentsRequest`):
                 The request object. The request for
-                [FirestoreAdmin.ExportDocuments][google.cloud.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
+                [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
             name (:class:`str`):
                 Required. Database to export. Should be of the form:
                 ``projects/{project_id}/databases/{database_id}``.
@@ -941,7 +941,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Args:
             request (:class:`~.firestore_admin.ImportDocumentsRequest`):
                 The request object. The request for
-                [FirestoreAdmin.ImportDocuments][google.cloud.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
+                [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
             name (:class:`str`):
                 Required. Database to import into. Should be of the
                 form: ``projects/{project_id}/databases/{database_id}``.
@@ -1024,9 +1024,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
 try:
     _client_info = gapic_v1.client_info.ClientInfo(
-        gapic_version=pkg_resources.get_distribution(
-            "google.cloud.firestore-admin",
-        ).version,
+        gapic_version=pkg_resources.get_distribution("google-cloud-firestore",).version,
     )
 except pkg_resources.DistributionNotFound:
     _client_info = gapic_v1.client_info.ClientInfo()

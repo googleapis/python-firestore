@@ -23,7 +23,7 @@ from google.protobuf import wrappers_pb2 as wrappers  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.cloud.firestore.v1beta1", manifest={"StructuredQuery", "Cursor",},
+    package="google.firestore.v1beta1", manifest={"StructuredQuery", "Cursor",},
 )
 
 

@@ -24,7 +24,7 @@ from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.cloud.firestore.v1beta1",
+    package="google.firestore.v1beta1",
     manifest={
         "Write",
         "DocumentTransform",
@@ -103,7 +103,7 @@ class DocumentTransform(proto.Message):
         Attributes:
             field_path (str):
                 The path of the field. See
-                [Document.fields][google.cloud.firestore.v1beta1.Document.fields]
+                [Document.fields][google.firestore.v1beta1.Document.fields]
                 for the field path syntax reference.
             set_to_server_value (~.write.DocumentTransform.FieldTransform.ServerValue):
                 Sets the field to the given server value.
@@ -241,7 +241,7 @@ class WriteResult(proto.Message):
             be the previous update_time.
         transform_results (Sequence[~.gf_document.Value]):
             The results of applying each
-            [DocumentTransform.FieldTransform][google.cloud.firestore.v1beta1.DocumentTransform.FieldTransform],
+            [DocumentTransform.FieldTransform][google.firestore.v1beta1.DocumentTransform.FieldTransform],
             in the same order.
     """
 
@@ -253,21 +253,21 @@ class WriteResult(proto.Message):
 
 
 class DocumentChange(proto.Message):
-    r"""A [Document][google.cloud.firestore.v1beta1.Document] has changed.
+    r"""A [Document][google.firestore.v1beta1.Document] has changed.
 
     May be the result of multiple
-    [writes][google.cloud.firestore.v1beta1.Write], including deletes, that
+    [writes][google.firestore.v1beta1.Write], including deletes, that
     ultimately resulted in a new value for the
-    [Document][google.cloud.firestore.v1beta1.Document].
+    [Document][google.firestore.v1beta1.Document].
 
-    Multiple [DocumentChange][google.cloud.firestore.v1beta1.DocumentChange]
+    Multiple [DocumentChange][google.firestore.v1beta1.DocumentChange]
     messages may be returned for the same logical change, if multiple
     targets are affected.
 
     Attributes:
         document (~.gf_document.Document):
             The new state of the
-            [Document][google.cloud.firestore.v1beta1.Document].
+            [Document][google.firestore.v1beta1.Document].
 
             If ``mask`` is set, contains only fields that were updated
             or added.
@@ -287,21 +287,21 @@ class DocumentChange(proto.Message):
 
 
 class DocumentDelete(proto.Message):
-    r"""A [Document][google.cloud.firestore.v1beta1.Document] has been deleted.
+    r"""A [Document][google.firestore.v1beta1.Document] has been deleted.
 
     May be the result of multiple
-    [writes][google.cloud.firestore.v1beta1.Write], including updates, the
+    [writes][google.firestore.v1beta1.Write], including updates, the
     last of which deleted the
-    [Document][google.cloud.firestore.v1beta1.Document].
+    [Document][google.firestore.v1beta1.Document].
 
-    Multiple [DocumentDelete][google.cloud.firestore.v1beta1.DocumentDelete]
+    Multiple [DocumentDelete][google.firestore.v1beta1.DocumentDelete]
     messages may be returned for the same logical delete, if multiple
     targets are affected.
 
     Attributes:
         document (str):
             The resource name of the
-            [Document][google.cloud.firestore.v1beta1.Document] that was
+            [Document][google.firestore.v1beta1.Document] that was
             deleted.
         removed_target_ids (Sequence[int]):
             A set of target IDs for targets that
@@ -320,21 +320,21 @@ class DocumentDelete(proto.Message):
 
 
 class DocumentRemove(proto.Message):
-    r"""A [Document][google.cloud.firestore.v1beta1.Document] has been removed
+    r"""A [Document][google.firestore.v1beta1.Document] has been removed
     from the view of the targets.
 
     Sent if the document is no longer relevant to a target and is out of
     view. Can be sent instead of a DocumentDelete or a DocumentChange if
     the server can not send the new value of the document.
 
-    Multiple [DocumentRemove][google.cloud.firestore.v1beta1.DocumentRemove]
+    Multiple [DocumentRemove][google.firestore.v1beta1.DocumentRemove]
     messages may be returned for the same logical write or delete, if
     multiple targets are affected.
 
     Attributes:
         document (str):
             The resource name of the
-            [Document][google.cloud.firestore.v1beta1.Document] that has gone
+            [Document][google.firestore.v1beta1.Document] that has gone
             out of view.
         removed_target_ids (Sequence[int]):
             A set of target IDs for targets that
@@ -361,7 +361,7 @@ class ExistenceFilter(proto.Message):
             The target ID to which this filter applies.
         count (int):
             The total count of documents that match
-            [target_id][google.cloud.firestore.v1beta1.ExistenceFilter.target_id].
+            [target_id][google.firestore.v1beta1.ExistenceFilter.target_id].
 
             If different from the count of documents in the client that
             match, the client must manually determine which documents no

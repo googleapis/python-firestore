@@ -18,9 +18,7 @@
 import proto  # type: ignore
 
 
-__protobuf__ = proto.module(
-    package="google.cloud.firestore.admin.v1", manifest={"Index",},
-)
+__protobuf__ = proto.module(package="google.firestore.admin.v1", manifest={"Index",},)
 
 
 class Index(proto.Message):

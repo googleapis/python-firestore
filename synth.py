@@ -99,8 +99,19 @@ s.replace(
 )
 s.replace(
     f"google/cloud/**/*.py",
-    f"google.firestore",
-    f"google.cloud.firestore",
+    f"google-firestore-admin",
+    f"google-cloud-firestore",
+)
+s.replace(
+    f"google/cloud/**/*.py",
+    f"google-firestore",
+    f"google-cloud-firestore",
+)
+# TODO(https://github.com/googleapis/gapic-generator-python/issues/471)
+s.replace(
+    f"google/cloud/**/*.py",
+    f"from google.firestore",
+    f"from google.cloud.firestore",
 )
 s.replace(
     f"docs/**/*.rst",
