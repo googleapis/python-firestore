@@ -346,10 +346,13 @@ class TestClient(unittest.TestCase):
         firestore_api = mock.Mock(spec=["list_collection_ids"])
         client._firestore_api_internal = firestore_api
 
+        # TODO(microgen): list_collection_ids isn't a pager.
+        # https://github.com/googleapis/gapic-generator-python/issues/516
         class _Iterator(Iterator):
             def __init__(self, pages):
                 super(_Iterator, self).__init__(client=None)
                 self._pages = pages
+                self.collection_ids = pages[0]
 
             def _next_page(self):
                 if self._pages:

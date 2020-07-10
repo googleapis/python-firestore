@@ -686,7 +686,7 @@ class DummyFirestoreStub(object):
 
 class DummyFirestoreClient(object):
     def __init__(self):
-        self.transport = mock.Mock(_stubs={"firestore_stub": DummyFirestoreStub()})
+        self._transport = mock.Mock(_stubs={"firestore_stub": DummyFirestoreStub()})
 
 
 class DummyDocumentReference(object):

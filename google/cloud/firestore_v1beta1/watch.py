@@ -213,7 +213,7 @@ class Watch(object):
             ResumableBidiRpc = self.ResumableBidiRpc  # FBO unit tests
 
         self._rpc = ResumableBidiRpc(
-            self._api.transport.listen,
+            self._api._transport.listen,
             initial_request=initial_request,
             should_recover=should_recover,
             metadata=self._firestore._rpc_metadata,

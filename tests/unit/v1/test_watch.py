@@ -220,7 +220,7 @@ class TestWatch(unittest.TestCase):
         inst = self._makeOne()
         self.assertTrue(inst._consumer.started)
         self.assertTrue(inst._rpc.callbacks, [inst._on_rpc_done])
-        self.assertIs(inst._rpc.start_rpc, inst._api.transport.listen)
+        self.assertIs(inst._rpc.start_rpc, inst._api._transport.listen)
         self.assertIs(inst._rpc.should_recover, _should_recover)
         self.assertIs(inst._rpc.should_terminate, _should_terminate)
         self.assertIsInstance(inst._rpc.initial_request, firestore.ListenRequest)

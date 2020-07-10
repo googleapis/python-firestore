@@ -480,6 +480,7 @@ class Client(ClientWithProject):
                 return
 
         # TODO(microgen): currently this method is rewritten to iterate/page itself.
+        # https://github.com/googleapis/gapic-generator-python/issues/516
         # it seems the generator ought to be able to do this itself.
         # iterator.client = self
         # iterator.item_to_value = _item_to_collection_ref

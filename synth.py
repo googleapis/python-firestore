@@ -87,6 +87,12 @@ for version in admin_versions:
         f"google.firestore.admin_v1",
         f"google.cloud.firestore_admin_v1",
     )
+    s.replace(
+        f"google/cloud/firestore_admin_v1/services/firestore_admin/client.py",
+        f"from google.api_core import operation as ga_operation",
+        f"from google.api_core import operation as ga_operation\nfrom google.api_core import operation",
+    )
+
 
 # ----------------------------------------------------------------------------
 # Edit paths to firestore remove after resolving 
