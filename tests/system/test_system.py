@@ -27,7 +27,7 @@ from google.api_core.exceptions import AlreadyExists
 from google.api_core.exceptions import FailedPrecondition
 from google.api_core.exceptions import InvalidArgument
 from google.api_core.exceptions import NotFound
-from google.cloud._helpers import _pb_timestamp_to_datetime
+from google.cloud._helpers import _pb_timestamp_to_datetime, _datetime_to_pb_timestamp
 from google.cloud._helpers import UTC
 from google.cloud import firestore_v1 as firestore
 from test_utils.system import unique_resource_id
@@ -78,15 +78,13 @@ def test_create_document(client, cleanup):
         "also": {"nestednow": firestore.SERVER_TIMESTAMP, "quarter": 0.25},
     }
     write_result = document.create(data)
-    updated = _pb_timestamp_to_datetime(write_result.update_time)
+    updated = write_result.update_time
     delta = updated - now
     # Allow a bit of clock skew, but make sure timestamps are close.
     assert -300.0 < delta.total_seconds() < 300.0
 
-    # TODO(microgen): after gen, this no longer raises already exists, simply
-    # updates.
-    # with pytest.raises(AlreadyExists):
-    document.create(data)
+    with pytest.raises(AlreadyExists):
+        document.create(data)
 
     # Verify the server times.
     snapshot = document.get()
@@ -146,9 +144,9 @@ def test_cannot_use_foreign_key(client, cleanup):
 
 
 def assert_timestamp_less(timestamp_pb1, timestamp_pb2):
-    dt_val1 = _pb_timestamp_to_datetime(timestamp_pb1)
-    dt_val2 = _pb_timestamp_to_datetime(timestamp_pb2)
-    assert dt_val1 < dt_val2
+    # dt_val1 = _pb_timestamp_to_datetime(timestamp_pb1)
+    # dt_val2 = _pb_timestamp_to_datetime(timestamp_pb2)
+    assert timestamp_pb1 < timestamp_pb2
 
 
 def test_no_document(client):
@@ -337,11 +335,17 @@ def test_update_document(client, cleanup):
         document.update({"bad": "time-past"}, option=option4)
 
     # 6. Call ``update()`` with invalid (in future) "last timestamp" option.
-    timestamp_pb = timestamp_pb2.Timestamp(
-        seconds=snapshot4.update_time.nanos + 3600, nanos=snapshot4.update_time.nanos
-    )
+    # TODO(microgen): start using custom datetime with nanos in protoplus?
+    # timestamp_pb = timestamp_pb2.Timestamp(
+    #     seconds=snapshot4.update_time.nanos + 3600, nanos=snapshot4.update_time.nanos
+    # )
+    timestamp_pb = _datetime_to_pb_timestamp(snapshot4.update_time)
+    timestamp_pb.seconds += 3600
+
     option6 = client.write_option(last_update_time=timestamp_pb)
-    with pytest.raises(FailedPrecondition) as exc_info:
+    # TODO(microgen):invalid argument thrown after microgen.
+    # with pytest.raises(FailedPrecondition) as exc_info:
+    with pytest.raises(InvalidArgument) as exc_info:
         document.update({"bad": "time-future"}, option=option6)
 
 
@@ -387,19 +391,23 @@ def test_document_delete(client, cleanup):
 
     # 1. Call ``delete()`` with invalid (in the past) "last timestamp" option.
     snapshot1 = document.get()
-    timestamp_pb = timestamp_pb2.Timestamp(
-        seconds=snapshot1.update_time.nanos - 3600, nanos=snapshot1.update_time.nanos
-    )
+    timestamp_pb = _datetime_to_pb_timestamp(snapshot1.update_time)
+    timestamp_pb.seconds += 3600
+
     option1 = client.write_option(last_update_time=timestamp_pb)
-    with pytest.raises(FailedPrecondition):
+    # TODO(microgen):invalid argument thrown after microgen.
+    # with pytest.raises(FailedPrecondition):
+    with pytest.raises(InvalidArgument):
         document.delete(option=option1)
 
     # 2. Call ``delete()`` with invalid (in future) "last timestamp" option.
-    timestamp_pb = timestamp_pb2.Timestamp(
-        seconds=snapshot1.update_time.nanos + 3600, nanos=snapshot1.update_time.nanos
-    )
+    timestamp_pb = _datetime_to_pb_timestamp(snapshot1.update_time)
+    timestamp_pb.seconds += 3600
+
     option2 = client.write_option(last_update_time=timestamp_pb)
-    with pytest.raises(FailedPrecondition):
+    # TODO(microgen):invalid argument thrown after microgen.
+    # with pytest.raises(FailedPrecondition):
+    with pytest.raises(InvalidArgument):
         document.delete(option=option2)
 
     # 3. Actually ``delete()`` the document.
@@ -411,6 +419,8 @@ def test_document_delete(client, cleanup):
 
 
 def test_collection_add(client, cleanup):
+    # TODO(microgen): list_documents is returning a generator, not a list.
+    # Consider if this is desired. Also, Document isn't hashable.
     collection_id = "coll-add" + UNIQUE_RESOURCE_ID
     collection1 = client.collection(collection_id)
     collection2 = client.collection(collection_id, "doc", "child")

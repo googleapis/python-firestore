@@ -25,12 +25,12 @@ from .grpc_asyncio import FirestoreGrpcAsyncIOTransport
 
 # Compile a registry of transports.
 _transport_registry = OrderedDict()  # type: Dict[str, Type[FirestoreTransport]]
-_transport_registry['grpc'] = FirestoreGrpcTransport
-_transport_registry['grpc_asyncio'] = FirestoreGrpcAsyncIOTransport
+_transport_registry["grpc"] = FirestoreGrpcTransport
+_transport_registry["grpc_asyncio"] = FirestoreGrpcAsyncIOTransport
 
 
 __all__ = (
-    'FirestoreTransport',
-    'FirestoreGrpcTransport',
-    'FirestoreGrpcAsyncIOTransport',
+    "FirestoreTransport",
+    "FirestoreGrpcTransport",
+    "FirestoreGrpcAsyncIOTransport",
 )

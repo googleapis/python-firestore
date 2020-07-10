@@ -183,13 +183,11 @@ class CollectionReference(object):
                 "parent": parent,
                 "collection_id": self.id,
                 "page_size": page_size,
-                "page_token": True,
+                "show_missing": True,
             },
             metadata=self._client._rpc_metadata,
         )
-        iterator.collection = self
-        iterator.item_to_value = _item_to_document_ref
-        return iterator
+        return (_item_to_document_ref(self, i) for i in iterator)
 
     def select(self, field_paths):
         """Create a "select" query with this collection as parent.
@@ -459,7 +457,7 @@ def _auto_id():
     return "".join(random.choice(_AUTO_ID_CHARS) for _ in six.moves.xrange(20))
 
 
-def _item_to_document_ref(iterator, item):
+def _item_to_document_ref(collection_reference, item):
     """Convert Document resource to document ref.
 
     Args:
@@ -468,4 +466,4 @@ def _item_to_document_ref(iterator, item):
         item (dict): document resource
     """
     document_id = item.name.split(_helpers.DOCUMENT_PATH_DELIMITER)[-1]
-    return iterator.collection.document(document_id)
+    return collection_reference.document(document_id)
