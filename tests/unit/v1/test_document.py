@@ -567,8 +567,9 @@ class TestDocumentReference(unittest.TestCase):
         # iterator = _Iterator(pages=[collection_ids])
         api_client = mock.create_autospec(FirestoreClient)
         # api_client.list_collection_ids.return_value = iterator
-        api_client.list_collection_ids.collection_ids.return_value = (i for i in collection_ids)
-
+        api_client.list_collection_ids.collection_ids.return_value = (
+            i for i in collection_ids
+        )
 
         client = _make_client()
         client._firestore_api_internal = api_client

@@ -55,12 +55,6 @@ for version in versions:
     
     s.move(library / "scripts/fixup_keywords.py", f"scripts/fixup_keywords_{version}.py" )
 
-    s.replace(
-        f"google/cloud/firestore_{version}/types/query.py",
-        f"from = proto",
-        f"from_ = proto",
-    )
-
 
 # ----------------------------------------------------------------------------
 # Generate firestore admin GAPIC layer

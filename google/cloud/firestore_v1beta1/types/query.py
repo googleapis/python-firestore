@@ -33,7 +33,7 @@ class StructuredQuery(proto.Message):
     Attributes:
         select (~.query.StructuredQuery.Projection):
             The projection to return.
-        from (Sequence[~.query.StructuredQuery.CollectionSelector]):
+        from_ (Sequence[~.query.StructuredQuery.CollectionSelector]):
             The collections to query.
         where (~.query.StructuredQuery.Filter):
             The filter to apply.
