@@ -174,11 +174,11 @@ class TestQuery(unittest.TestCase):
 
     @staticmethod
     def _make_projection_for_select(field_paths):
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import query
 
-        return query_pb2.StructuredQuery.Projection(
+        return query.StructuredQuery.Projection(
             fields=[
-                query_pb2.StructuredQuery.FieldReference(field_path=field_path)
+                query.StructuredQuery.FieldReference(field_path=field_path)
                 for field_path in field_paths
             ]
         )
@@ -218,51 +218,51 @@ class TestQuery(unittest.TestCase):
             query.where("*", "==", 1)
 
     def test_where(self):
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
 
-        query = self._make_one_all_fields(
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import query
+
+        query_inst = self._make_one_all_fields(
             skip_fields=("field_filters",), all_descendants=True
         )
-        new_query = query.where("power.level", ">", 9000)
+        new_query = query_inst.where("power.level", ">", 9000)
 
-        self.assertIsNot(query, new_query)
+        self.assertIsNot(query_inst, new_query)
         self.assertIsInstance(new_query, self._get_target_class())
         self.assertEqual(len(new_query._field_filters), 1)
 
         field_pb = new_query._field_filters[0]
-        expected_pb = query_pb2.StructuredQuery.FieldFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path="power.level"),
-            op=enums.StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-            value=document_pb2.Value(integer_value=9000),
+        expected_pb = query.StructuredQuery.FieldFilter(
+            field=query.StructuredQuery.FieldReference(field_path="power.level"),
+            op=StructuredQuery.FieldFilter.Operator.GREATER_THAN,
+            value=document.Value(integer_value=9000),
         )
         self.assertEqual(field_pb, expected_pb)
-        self._compare_queries(query, new_query, "_field_filters")
+        self._compare_queries(query_inst, new_query, "_field_filters")
 
     def _where_unary_helper(self, value, op_enum, op_string="=="):
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
 
-        query = self._make_one_all_fields(skip_fields=("field_filters",))
+        query_inst = self._make_one_all_fields(skip_fields=("field_filters",))
         field_path = "feeeld"
-        new_query = query.where(field_path, op_string, value)
+        new_query = query_inst.where(field_path, op_string, value)
 
-        self.assertIsNot(query, new_query)
+        self.assertIsNot(query_inst, new_query)
         self.assertIsInstance(new_query, self._get_target_class())
         self.assertEqual(len(new_query._field_filters), 1)
 
         field_pb = new_query._field_filters[0]
-        expected_pb = query_pb2.StructuredQuery.UnaryFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
-            op=op_enum,
+        expected_pb = StructuredQuery.UnaryFilter(
+            field=StructuredQuery.FieldReference(field_path=field_path), op=op_enum,
         )
         self.assertEqual(field_pb, expected_pb)
-        self._compare_queries(query, new_query, "_field_filters")
+        self._compare_queries(query_inst, new_query, "_field_filters")
 
     def test_where_eq_null(self):
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1.types import StructuredQuery
 
-        op_enum = enums.StructuredQuery.UnaryFilter.Operator.IS_NULL
+        op_enum = StructuredQuery.UnaryFilter.Operator.IS_NULL
         self._where_unary_helper(None, op_enum)
 
     def test_where_gt_null(self):
@@ -270,9 +270,9 @@ class TestQuery(unittest.TestCase):
             self._where_unary_helper(None, 0, op_string=">")
 
     def test_where_eq_nan(self):
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1.types import StructuredQuery
 
-        op_enum = enums.StructuredQuery.UnaryFilter.Operator.IS_NAN
+        op_enum = StructuredQuery.UnaryFilter.Operator.IS_NAN
         self._where_unary_helper(float("nan"), op_enum)
 
     def test_where_le_nan(self):
@@ -310,7 +310,7 @@ class TestQuery(unittest.TestCase):
             query.order_by("*")
 
     def test_order_by(self):
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1.types import StructuredQuery
 
         klass = self._get_target_class()
         query1 = self._make_one_all_fields(
@@ -321,10 +321,8 @@ class TestQuery(unittest.TestCase):
         query2 = query1.order_by(field_path2)
         self.assertIsNot(query2, query1)
         self.assertIsInstance(query2, klass)
-        order_pb2 = _make_order_pb(
-            field_path2, enums.StructuredQuery.Direction.ASCENDING
-        )
-        self.assertEqual(query2._orders, (order_pb2,))
+        order = _make_order_pb(field_path2, StructuredQuery.Direction.ASCENDING)
+        self.assertEqual(query2._orders, (order,))
         self._compare_queries(query1, query2, "_orders")
 
         # Make sure it appends to the orders.
@@ -332,10 +330,8 @@ class TestQuery(unittest.TestCase):
         query3 = query2.order_by(field_path3, direction=klass.DESCENDING)
         self.assertIsNot(query3, query2)
         self.assertIsInstance(query3, klass)
-        order_pb3 = _make_order_pb(
-            field_path3, enums.StructuredQuery.Direction.DESCENDING
-        )
-        self.assertEqual(query3._orders, (order_pb2, order_pb3))
+        order_pb3 = _make_order_pb(field_path3, StructuredQuery.Direction.DESCENDING)
+        self.assertEqual(query3._orders, (order, order_pb3))
         self._compare_queries(query2, query3, "_orders")
 
     def test_limit(self):
@@ -604,53 +600,55 @@ class TestQuery(unittest.TestCase):
         self.assertIsNone(query._filters_pb())
 
     def test__filters_pb_single(self):
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
+
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import query
 
         query1 = self._make_one(mock.sentinel.parent)
         query2 = query1.where("x.y", ">", 50.5)
         filter_pb = query2._filters_pb()
-        expected_pb = query_pb2.StructuredQuery.Filter(
-            field_filter=query_pb2.StructuredQuery.FieldFilter(
-                field=query_pb2.StructuredQuery.FieldReference(field_path="x.y"),
-                op=enums.StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-                value=document_pb2.Value(double_value=50.5),
+        expected_pb = query.StructuredQuery.Filter(
+            field_filter=query.StructuredQuery.FieldFilter(
+                field=query.StructuredQuery.FieldReference(field_path="x.y"),
+                op=StructuredQuery.FieldFilter.Operator.GREATER_THAN,
+                value=document.Value(double_value=50.5),
             )
         )
         self.assertEqual(filter_pb, expected_pb)
 
     def test__filters_pb_multi(self):
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
+
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import query
 
         query1 = self._make_one(mock.sentinel.parent)
         query2 = query1.where("x.y", ">", 50.5)
         query3 = query2.where("ABC", "==", 123)
 
         filter_pb = query3._filters_pb()
-        op_class = enums.StructuredQuery.FieldFilter.Operator
-        expected_pb = query_pb2.StructuredQuery.Filter(
-            composite_filter=query_pb2.StructuredQuery.CompositeFilter(
-                op=enums.StructuredQuery.CompositeFilter.Operator.AND,
+        op_class = StructuredQuery.FieldFilter.Operator
+        expected_pb = query.StructuredQuery.Filter(
+            composite_filter=query.StructuredQuery.CompositeFilter(
+                op=StructuredQuery.CompositeFilter.Operator.AND,
                 filters=[
-                    query_pb2.StructuredQuery.Filter(
-                        field_filter=query_pb2.StructuredQuery.FieldFilter(
-                            field=query_pb2.StructuredQuery.FieldReference(
+                    query.StructuredQuery.Filter(
+                        field_filter=query.StructuredQuery.FieldFilter(
+                            field=query.StructuredQuery.FieldReference(
                                 field_path="x.y"
                             ),
                             op=op_class.GREATER_THAN,
-                            value=document_pb2.Value(double_value=50.5),
+                            value=document.Value(double_value=50.5),
                         )
                     ),
-                    query_pb2.StructuredQuery.Filter(
-                        field_filter=query_pb2.StructuredQuery.FieldFilter(
-                            field=query_pb2.StructuredQuery.FieldReference(
+                    query.StructuredQuery.Filter(
+                        field_filter=query.StructuredQuery.FieldFilter(
+                            field=query.StructuredQuery.FieldReference(
                                 field_path="ABC"
                             ),
                             op=op_class.EQUAL,
-                            value=document_pb2.Value(integer_value=123),
+                            value=document.Value(integer_value=123),
                         )
                     ),
                 ],
@@ -865,9 +863,10 @@ class TestQuery(unittest.TestCase):
 
     def test__to_protobuf_all_fields(self):
         from google.protobuf import wrappers_pb2
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
+
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="cat", spec=["id"])
         query1 = self._make_one(parent)
@@ -881,37 +880,35 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query8._to_protobuf()
         query_kwargs = {
-            "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+            "from_": [
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "select": query_pb2.StructuredQuery.Projection(
+            "select": query.StructuredQuery.Projection(
                 fields=[
-                    query_pb2.StructuredQuery.FieldReference(field_path=field_path)
+                    query.StructuredQuery.FieldReference(field_path=field_path)
                     for field_path in ["X", "Y", "Z"]
                 ]
             ),
-            "where": query_pb2.StructuredQuery.Filter(
-                field_filter=query_pb2.StructuredQuery.FieldFilter(
-                    field=query_pb2.StructuredQuery.FieldReference(field_path="Y"),
-                    op=enums.StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-                    value=document_pb2.Value(double_value=2.5),
+            "where": query.StructuredQuery.Filter(
+                field_filter=query.StructuredQuery.FieldFilter(
+                    field=query.StructuredQuery.FieldReference(field_path="Y"),
+                    op=StructuredQuery.FieldFilter.Operator.GREATER_THAN,
+                    value=document.Value(double_value=2.5),
                 )
             ),
-            "order_by": [
-                _make_order_pb("X", enums.StructuredQuery.Direction.ASCENDING)
-            ],
-            "start_at": query_pb2.Cursor(
-                values=[document_pb2.Value(integer_value=10)], before=True
+            "order_by": [_make_order_pb("X", StructuredQuery.Direction.ASCENDING)],
+            "start_at": query.Cursor(
+                values=[document.Value(integer_value=10)], before=True
             ),
-            "end_at": query_pb2.Cursor(values=[document_pb2.Value(integer_value=25)]),
+            "end_at": query.Cursor(values=[document.Value(integer_value=25)]),
             "offset": 3,
             "limit": wrappers_pb2.Int32Value(value=17),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_select_only(self):
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="cat", spec=["id"])
         query1 = self._make_one(parent)
@@ -920,23 +917,24 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+            "from_": [
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "select": query_pb2.StructuredQuery.Projection(
+            "select": query.StructuredQuery.Projection(
                 fields=[
-                    query_pb2.StructuredQuery.FieldReference(field_path=field_path)
+                    query.StructuredQuery.FieldReference(field_path=field_path)
                     for field_path in field_paths
                 ]
             ),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_where_only(self):
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
+
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="dog", spec=["id"])
         query1 = self._make_one(parent)
@@ -944,23 +942,24 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+            "from_": [
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "where": query_pb2.StructuredQuery.Filter(
-                field_filter=query_pb2.StructuredQuery.FieldFilter(
-                    field=query_pb2.StructuredQuery.FieldReference(field_path="a"),
-                    op=enums.StructuredQuery.FieldFilter.Operator.EQUAL,
-                    value=document_pb2.Value(string_value=u"b"),
+            "where": query.StructuredQuery.Filter(
+                field_filter=query.StructuredQuery.FieldFilter(
+                    field=query.StructuredQuery.FieldReference(field_path="a"),
+                    op=StructuredQuery.FieldFilter.Operator.EQUAL,
+                    value=document.Value(string_value=u"b"),
                 )
             ),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_order_by_only(self):
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
+
+        from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="fish", spec=["id"])
         query1 = self._make_one(parent)
@@ -968,64 +967,58 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+            "from_": [
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "order_by": [
-                _make_order_pb("abc", enums.StructuredQuery.Direction.ASCENDING)
-            ],
+            "order_by": [_make_order_pb("abc", StructuredQuery.Direction.ASCENDING)],
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_start_at_only(self):
         # NOTE: "only" is wrong since we must have ``order_by`` as well.
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
+
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="phish", spec=["id"])
-        query = self._make_one(parent).order_by("X.Y").start_after({"X": {"Y": u"Z"}})
+        query_inst = (
+            self._make_one(parent).order_by("X.Y").start_after({"X": {"Y": u"Z"}})
+        )
 
-        structured_query_pb = query._to_protobuf()
+        structured_query_pb = query_inst._to_protobuf()
         query_kwargs = {
-            "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
-            ],
-            "order_by": [
-                _make_order_pb("X.Y", enums.StructuredQuery.Direction.ASCENDING)
-            ],
-            "start_at": query_pb2.Cursor(
-                values=[document_pb2.Value(string_value=u"Z")]
-            ),
+            "from_": [StructuredQuery.CollectionSelector(collection_id=parent.id)],
+            "order_by": [_make_order_pb("X.Y", StructuredQuery.Direction.ASCENDING)],
+            "start_at": query.Cursor(values=[document.Value(string_value=u"Z")]),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_end_at_only(self):
         # NOTE: "only" is wrong since we must have ``order_by`` as well.
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
+
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="ghoti", spec=["id"])
-        query = self._make_one(parent).order_by("a").end_at({"a": 88})
+        query_inst = self._make_one(parent).order_by("a").end_at({"a": 88})
 
-        structured_query_pb = query._to_protobuf()
+        structured_query_pb = query_inst._to_protobuf()
         query_kwargs = {
-            "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+            "from_": [
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
-            "order_by": [
-                _make_order_pb("a", enums.StructuredQuery.Direction.ASCENDING)
-            ],
-            "end_at": query_pb2.Cursor(values=[document_pb2.Value(integer_value=88)]),
+            "order_by": [_make_order_pb("a", StructuredQuery.Direction.ASCENDING)],
+            "end_at": query.Cursor(values=[document.Value(integer_value=88)]),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_offset_only(self):
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="cartt", spec=["id"])
         query1 = self._make_one(parent)
@@ -1034,17 +1027,17 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+            "from_": [
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "offset": offset,
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
     def test__to_protobuf_limit_only(self):
         from google.protobuf import wrappers_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="donut", spec=["id"])
         query1 = self._make_one(parent)
@@ -1053,12 +1046,12 @@ class TestQuery(unittest.TestCase):
 
         structured_query_pb = query2._to_protobuf()
         query_kwargs = {
-            "from": [
-                query_pb2.StructuredQuery.CollectionSelector(collection_id=parent.id)
+            "from_": [
+                query.StructuredQuery.CollectionSelector(collection_id=parent.id)
             ],
             "limit": wrappers_pb2.Int32Value(value=limit),
         }
-        expected_pb = query_pb2.StructuredQuery(**query_kwargs)
+        expected_pb = query.StructuredQuery(**query_kwargs)
 
         self.assertEqual(structured_query_pb, expected_pb)
 
@@ -1098,9 +1091,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1139,9 +1134,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1180,9 +1177,11 @@ class TestQuery(unittest.TestCase):
 
         # Verify the mock call.
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=txn_id,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": txn_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1208,9 +1207,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1237,9 +1238,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1275,9 +1278,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1313,9 +1318,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1354,9 +1361,11 @@ class TestQuery(unittest.TestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -1466,9 +1475,9 @@ class Test__enum_from_op_string(unittest.TestCase):
 
     @staticmethod
     def _get_op_class():
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1.types import StructuredQuery
 
-        return enums.StructuredQuery.FieldFilter.Operator
+        return StructuredQuery.FieldFilter.Operator
 
     def test_lt(self):
         op_class = self._get_op_class()
@@ -1535,10 +1544,11 @@ class Test__enum_from_direction(unittest.TestCase):
         return _enum_from_direction(direction)
 
     def test_success(self):
-        from google.cloud.firestore_v1.gapic import enums
+        from google.cloud.firestore_v1.types import StructuredQuery
+
         from google.cloud.firestore_v1.query import Query
 
-        dir_class = enums.StructuredQuery.Direction
+        dir_class = StructuredQuery.Direction
         self.assertEqual(self._call_fut(Query.ASCENDING), dir_class.ASCENDING)
         self.assertEqual(self._call_fut(Query.DESCENDING), dir_class.DESCENDING)
 
@@ -1559,29 +1569,31 @@ class Test__filter_pb(unittest.TestCase):
         return _filter_pb(field_or_unary)
 
     def test_unary(self):
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
 
-        unary_pb = query_pb2.StructuredQuery.UnaryFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path="a.b.c"),
-            op=enums.StructuredQuery.UnaryFilter.Operator.IS_NULL,
+        from google.cloud.firestore_v1.types import query
+
+        unary_pb = query.StructuredQuery.UnaryFilter(
+            field=query.StructuredQuery.FieldReference(field_path="a.b.c"),
+            op=StructuredQuery.UnaryFilter.Operator.IS_NULL,
         )
         filter_pb = self._call_fut(unary_pb)
-        expected_pb = query_pb2.StructuredQuery.Filter(unary_filter=unary_pb)
+        expected_pb = query.StructuredQuery.Filter(unary_filter=unary_pb)
         self.assertEqual(filter_pb, expected_pb)
 
     def test_field(self):
-        from google.cloud.firestore_v1.gapic import enums
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import StructuredQuery
 
-        field_filter_pb = query_pb2.StructuredQuery.FieldFilter(
-            field=query_pb2.StructuredQuery.FieldReference(field_path="XYZ"),
-            op=enums.StructuredQuery.FieldFilter.Operator.GREATER_THAN,
-            value=document_pb2.Value(double_value=90.75),
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import query
+
+        field_filter_pb = query.StructuredQuery.FieldFilter(
+            field=query.StructuredQuery.FieldReference(field_path="XYZ"),
+            op=StructuredQuery.FieldFilter.Operator.GREATER_THAN,
+            value=document.Value(double_value=90.75),
         )
         filter_pb = self._call_fut(field_filter_pb)
-        expected_pb = query_pb2.StructuredQuery.Filter(field_filter=field_filter_pb)
+        expected_pb = query.StructuredQuery.Filter(field_filter=field_filter_pb)
         self.assertEqual(filter_pb, expected_pb)
 
     def test_bad_type(self):
@@ -1600,7 +1612,7 @@ class Test__cursor_pb(unittest.TestCase):
         self.assertIsNone(self._call_fut(None))
 
     def test_success(self):
-        from google.cloud.firestore_v1.proto import query_pb2
+        from google.cloud.firestore_v1.types import query
         from google.cloud.firestore_v1 import _helpers
 
         data = [1.5, 10, True]
@@ -1608,7 +1620,7 @@ class Test__cursor_pb(unittest.TestCase):
 
         cursor_pb = self._call_fut(cursor_pair)
 
-        expected_pb = query_pb2.Cursor(
+        expected_pb = query.Cursor(
             values=[_helpers.encode_value(value) for value in data], before=True
         )
         self.assertEqual(cursor_pb, expected_pb)
@@ -1691,9 +1703,9 @@ class Test__collection_group_query_response_to_snapshot(unittest.TestCase):
         self.assertEqual(snapshot.reference._document_path, to_match._document_path)
         self.assertEqual(snapshot.to_dict(), data)
         self.assertTrue(snapshot.exists)
-        self.assertEqual(snapshot.read_time, response_pb.read_time)
-        self.assertEqual(snapshot.create_time, response_pb.document.create_time)
-        self.assertEqual(snapshot.update_time, response_pb.document.update_time)
+        self.assertEqual(snapshot.read_time, response_pb._pb.read_time)
+        self.assertEqual(snapshot.create_time, response_pb._pb.document.create_time)
+        self.assertEqual(snapshot.update_time, response_pb._pb.document.update_time)
 
 
 def _make_credentials():
@@ -1710,18 +1722,18 @@ def _make_client(project="project-project"):
 
 
 def _make_order_pb(field_path, direction):
-    from google.cloud.firestore_v1.proto import query_pb2
+    from google.cloud.firestore_v1.types import query
 
-    return query_pb2.StructuredQuery.Order(
-        field=query_pb2.StructuredQuery.FieldReference(field_path=field_path),
+    return query.StructuredQuery.Order(
+        field=query.StructuredQuery.FieldReference(field_path=field_path),
         direction=direction,
     )
 
 
 def _make_query_response(**kwargs):
     # kwargs supported are ``skipped_results``, ``name`` and ``data``
-    from google.cloud.firestore_v1.proto import document_pb2
-    from google.cloud.firestore_v1.proto import firestore_pb2
+    from google.cloud.firestore_v1.types import document
+    from google.cloud.firestore_v1.types import firestore
     from google.cloud._helpers import _datetime_to_pb_timestamp
     from google.cloud.firestore_v1 import _helpers
 
@@ -1732,15 +1744,13 @@ def _make_query_response(**kwargs):
     name = kwargs.pop("name", None)
     data = kwargs.pop("data", None)
     if name is not None and data is not None:
-        document_pb = document_pb2.Document(
-            name=name, fields=_helpers.encode_dict(data)
-        )
+        document_pb = document.Document(name=name, fields=_helpers.encode_dict(data))
         delta = datetime.timedelta(seconds=100)
         update_time = _datetime_to_pb_timestamp(now - delta)
         create_time = _datetime_to_pb_timestamp(now - 2 * delta)
-        document_pb.update_time.CopyFrom(update_time)
-        document_pb.create_time.CopyFrom(create_time)
+        document_pb._pb.update_time.CopyFrom(update_time)
+        document_pb._pb.create_time.CopyFrom(create_time)
 
         kwargs["document"] = document_pb
 
-    return firestore_pb2.RunQueryResponse(**kwargs)
+    return firestore.RunQueryResponse(**kwargs)

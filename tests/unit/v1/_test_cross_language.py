@@ -20,27 +20,30 @@ import os
 import mock
 import pytest
 
-from google.protobuf import text_format
-from google.cloud.firestore_v1beta1.proto import document_pb2
-from google.cloud.firestore_v1beta1.proto import firestore_pb2
-from google.cloud.firestore_v1beta1.proto import test_v1beta1_pb2
-from google.cloud.firestore_v1beta1.proto import write_pb2
+from google.protobuf import json_format
+from google.cloud.firestore_v1.types import document
+from google.cloud.firestore_v1.types import firestore
+from google.cloud.firestore_v1.proto import tests_pb2
+from google.cloud.firestore_v1.types import write
 
 
-def _load_testproto(filename):
+def _load_test_json(filename):
     with open(filename, "r") as tp_file:
-        tp_text = tp_file.read()
-    test_proto = test_v1beta1_pb2.Test()
-    text_format.Merge(tp_text, test_proto)
+        tp_json = json.load(tp_file)
+    test_file = tests_pb2.TestFile()
+    json_format.ParseDict(tp_json, test_file)
     shortname = os.path.split(filename)[-1]
-    test_proto.description = test_proto.description + " (%s)" % shortname
-    return test_proto
+    for test_proto in test_file.tests:
+        test_proto.description = test_proto.description + " (%s)" % shortname
+        yield test_proto
 
 
 _here = os.path.dirname(__file__)
-_glob_expr = "{}/testdata/*.textproto".format(_here)
+_glob_expr = "{}/testdata/*.json".format(_here)
 _globs = glob.glob(_glob_expr)
-ALL_TESTPROTOS = [_load_testproto(filename) for filename in sorted(_globs)]
+ALL_TESTPROTOS = []
+for filename in sorted(_globs):
+    ALL_TESTPROTOS.extend(_load_test_json(filename))
 
 _CREATE_TESTPROTOS = [
     test_proto
@@ -93,16 +96,14 @@ _QUERY_TESTPROTOS = [
 
 def _mock_firestore_api():
     firestore_api = mock.Mock(spec=["commit"])
-    commit_response = firestore_pb2.CommitResponse(
-        write_results=[write_pb2.WriteResult()]
-    )
+    commit_response = firestore.CommitResponse(write_results=[write.WriteResult()])
     firestore_api.commit.return_value = commit_response
     return firestore_api
 
 
 def _make_client_document(firestore_api, testcase):
-    from google.cloud.firestore_v1beta1 import Client
-    from google.cloud.firestore_v1beta1.client import DEFAULT_DATABASE
+    from google.cloud.firestore_v1 import Client
+    from google.cloud.firestore_v1.client import DEFAULT_DATABASE
     import google.auth.credentials
 
     _, project, _, database, _, doc_path = testcase.doc_ref_path.split("/", 5)
@@ -110,10 +111,7 @@ def _make_client_document(firestore_api, testcase):
 
     # Attach the fake GAPIC to a real client.
     credentials = mock.Mock(spec=google.auth.credentials.Credentials)
-
-    with pytest.deprecated_call():
-        client = Client(project=project, credentials=credentials)
-
+    client = Client(project=project, credentials=credentials)
     client._firestore_api_internal = firestore_api
     return client, client.document(doc_path)
 
@@ -137,9 +135,9 @@ def _run_testcase(testcase, call, firestore_api, client):
 def test_create_testprotos(test_proto):
     testcase = test_proto.create
     firestore_api = _mock_firestore_api()
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
     data = convert_data(json.loads(testcase.json_data))
-    call = functools.partial(document.create, data)
+    call = functools.partial(doc.create, data)
     _run_testcase(testcase, call, firestore_api, client)
 
 
@@ -147,17 +145,14 @@ def test_create_testprotos(test_proto):
 def test_get_testprotos(test_proto):
     testcase = test_proto.get
     firestore_api = mock.Mock(spec=["get_document"])
-    response = document_pb2.Document()
+    response = document.Document()
     firestore_api.get_document.return_value = response
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
 
-    document.get()  # No '.textprotos' for errors, field_paths.
+    doc.get()  # No '.textprotos' for errors, field_paths.
 
     firestore_api.get_document.assert_called_once_with(
-        document._document_path,
-        mask=None,
-        transaction=None,
-        metadata=client._rpc_metadata,
+        doc._document_path, mask=None, transaction=None, metadata=client._rpc_metadata,
     )
 
 
@@ -165,13 +160,13 @@ def test_get_testprotos(test_proto):
 def test_set_testprotos(test_proto):
     testcase = test_proto.set
     firestore_api = _mock_firestore_api()
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
     data = convert_data(json.loads(testcase.json_data))
     if testcase.HasField("option"):
         merge = convert_set_option(testcase.option)
     else:
         merge = False
-    call = functools.partial(document.set, data, merge=merge)
+    call = functools.partial(doc.set, data, merge=merge)
     _run_testcase(testcase, call, firestore_api, client)
 
 
@@ -179,13 +174,13 @@ def test_set_testprotos(test_proto):
 def test_update_testprotos(test_proto):
     testcase = test_proto.update
     firestore_api = _mock_firestore_api()
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
     data = convert_data(json.loads(testcase.json_data))
     if testcase.HasField("precondition"):
         option = convert_precondition(testcase.precondition)
     else:
         option = None
-    call = functools.partial(document.update, data, option)
+    call = functools.partial(doc.update, data, option)
     _run_testcase(testcase, call, firestore_api, client)
 
 
@@ -199,37 +194,34 @@ def test_update_paths_testprotos(test_proto):  # pragma: NO COVER
 def test_delete_testprotos(test_proto):
     testcase = test_proto.delete
     firestore_api = _mock_firestore_api()
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
     if testcase.HasField("precondition"):
         option = convert_precondition(testcase.precondition)
     else:
         option = None
-    call = functools.partial(document.delete, option)
+    call = functools.partial(doc.delete, option)
     _run_testcase(testcase, call, firestore_api, client)
 
 
 @pytest.mark.parametrize("test_proto", _LISTEN_TESTPROTOS)
 def test_listen_testprotos(test_proto):  # pragma: NO COVER
     # test_proto.listen has 'reponses' messages,
-    # 'google.firestore.v1beta1.ListenResponse'
+    # 'google.firestore_v1.ListenResponse'
     # and then an expected list of 'snapshots' (local 'Snapshot'), containing
-    # 'docs' (list of 'google.firestore.v1beta1.Document'),
+    # 'docs' (list of 'google.firestore_v1.Document'),
     # 'changes' (list lof local 'DocChange', and 'read_time' timestamp.
-    from google.cloud.firestore_v1beta1 import Client
-    from google.cloud.firestore_v1beta1 import DocumentReference
-    from google.cloud.firestore_v1beta1 import DocumentSnapshot
-    from google.cloud.firestore_v1beta1 import Watch
+    from google.cloud.firestore_v1 import Client
+    from google.cloud.firestore_v1 import DocumentReference
+    from google.cloud.firestore_v1 import DocumentSnapshot
+    from google.cloud.firestore_v1 import Watch
     import google.auth.credentials
 
     testcase = test_proto.listen
     testname = test_proto.description
 
     credentials = mock.Mock(spec=google.auth.credentials.Credentials)
-
-    with pytest.deprecated_call():
-        client = Client(project="project", credentials=credentials)
-
-    modulename = "google.cloud.firestore_v1beta1.watch"
+    client = Client(project="project", credentials=credentials)
+    modulename = "google.cloud.firestore_v1.watch"
     with mock.patch("%s.Watch.ResumableBidiRpc" % modulename, DummyRpc):
         with mock.patch(
             "%s.Watch.BackgroundConsumer" % modulename, DummyBackgroundConsumer
@@ -242,7 +234,8 @@ def test_listen_testprotos(test_proto):  # pragma: NO COVER
                 def callback(keys, applied_changes, read_time):
                     snapshots.append((keys, applied_changes, read_time))
 
-                query = DummyQuery(client=client)
+                collection = DummyCollection(client=client)
+                query = DummyQuery(parent=collection)
                 watch = Watch.for_query(
                     query, callback, DocumentSnapshot, DocumentReference
                 )
@@ -302,10 +295,10 @@ def test_query_testprotos(test_proto):  # pragma: NO COVER
 def convert_data(v):
     # Replace the strings 'ServerTimestamp' and 'Delete' with the corresponding
     # sentinels.
-    from google.cloud.firestore_v1beta1 import ArrayRemove
-    from google.cloud.firestore_v1beta1 import ArrayUnion
-    from google.cloud.firestore_v1beta1 import DELETE_FIELD
-    from google.cloud.firestore_v1beta1 import SERVER_TIMESTAMP
+    from google.cloud.firestore_v1 import ArrayRemove
+    from google.cloud.firestore_v1 import ArrayUnion
+    from google.cloud.firestore_v1 import DELETE_FIELD
+    from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 
     if v == "ServerTimestamp":
         return SERVER_TIMESTAMP
@@ -326,7 +319,7 @@ def convert_data(v):
 
 
 def convert_set_option(option):
-    from google.cloud.firestore_v1beta1 import _helpers
+    from google.cloud.firestore_v1 import _helpers
 
     if option.fields:
         return [
@@ -338,7 +331,7 @@ def convert_set_option(option):
 
 
 def convert_precondition(precond):
-    from google.cloud.firestore_v1beta1 import Client
+    from google.cloud.firestore_v1 import Client
 
     if precond.HasField("exists"):
         return Client.write_option(exists=precond.exists)
@@ -348,10 +341,18 @@ def convert_precondition(precond):
 
 
 class DummyRpc(object):  # pragma: NO COVER
-    def __init__(self, listen, initial_request, should_recover, metadata=None):
+    def __init__(
+        self,
+        listen,
+        should_recover,
+        should_terminate=None,
+        initial_request=None,
+        metadata=None,
+    ):
         self.listen = listen
         self.initial_request = initial_request
         self.should_recover = should_recover
+        self.should_terminate = should_terminate
         self.closed = False
         self.callbacks = []
         self._metadata = metadata
@@ -380,30 +381,43 @@ class DummyBackgroundConsumer(object):  # pragma: NO COVER
         self.is_active = False
 
 
+class DummyCollection(object):
+    def __init__(self, client, parent=None):
+        self._client = client
+        self._parent = parent
+
+    def _parent_info(self):
+        return "{}/documents".format(self._client._database_string), None
+
+
 class DummyQuery(object):  # pragma: NO COVER
-    def __init__(self, **kw):
-        self._client = kw["client"]
+    def __init__(self, parent):
+        self._parent = parent
         self._comparator = lambda x, y: 1
 
+    @property
+    def _client(self):
+        return self._parent._client
+
     def _to_protobuf(self):
-        from google.cloud.firestore_v1beta1.proto import query_pb2
+        from google.cloud.firestore_v1.types import query
 
         query_kwargs = {
             "select": None,
-            "from": None,
+            "from_": None,
             "where": None,
             "order_by": None,
             "start_at": None,
             "end_at": None,
         }
-        return query_pb2.StructuredQuery(**query_kwargs)
+        return query.StructuredQuery(**query_kwargs)
 
 
 def parse_query(testcase):
     # 'query' testcase contains:
     # - 'coll_path':  collection ref path.
     # - 'clauses':  array of one or more 'Clause' elements
-    # - 'query': the actual google.firestore.v1beta1.StructuredQuery message
+    # - 'query': the actual google.firestore_v1.StructuredQuery message
     #            to be constructed.
     # - 'is_error' (as other testcases).
     #
@@ -426,16 +440,13 @@ def parse_query(testcase):
     # 'path': str
     # 'json_data': str
     from google.auth.credentials import Credentials
-    from google.cloud.firestore_v1beta1 import Client
-    from google.cloud.firestore_v1beta1 import Query
+    from google.cloud.firestore_v1 import Client
+    from google.cloud.firestore_v1 import Query
 
     _directions = {"asc": Query.ASCENDING, "desc": Query.DESCENDING}
 
     credentials = mock.create_autospec(Credentials)
-
-    with pytest.deprecated_call():
-        client = Client("projectID", credentials)
-
+    client = Client("projectID", credentials)
     path = parse_path(testcase.coll_path)
     collection = client.collection(*path)
     query = collection
@@ -485,8 +496,8 @@ def parse_path(path):
 
 
 def parse_cursor(cursor, client):
-    from google.cloud.firestore_v1beta1 import DocumentReference
-    from google.cloud.firestore_v1beta1 import DocumentSnapshot
+    from google.cloud.firestore_v1 import DocumentReference
+    from google.cloud.firestore_v1 import DocumentSnapshot
 
     if cursor.HasField("doc_snapshot"):
         path = parse_path(cursor.doc_snapshot.path)
