@@ -954,7 +954,7 @@ def test_batch(client, cleanup):
     write_result1 = write_results[0]
     write_result2 = write_results[1]
     write_result3 = write_results[2]
-    assert not write_result3.HasField("update_time")
+    assert not write_result3._pb.HasField("update_time")
 
     snapshot1 = document1.get()
     assert snapshot1.to_dict() == data1
