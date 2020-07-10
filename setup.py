@@ -25,7 +25,7 @@ description = "Google Cloud Firestore API client library"
 version = "1.7.0"
 release_status = "Development Status :: 5 - Production/Stable"
 dependencies = [
-    "google-api-core[grpc] >= 1.17.2, < 2.0.0dev",
+    "google-api-core[grpc] >= 1.21.0, < 2.0.0dev",
     "google-cloud-core >= 1.0.3, < 2.0dev",
     "pytz",
     "libcst >= 0.2.5",
