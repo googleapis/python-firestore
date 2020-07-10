@@ -39,15 +39,12 @@ class ListDocumentsPager:
     attributes are available on the pager. If multiple requests are made, only
     the most recent response is retained, and thus used for attribute lookup.
     """
-
-    def __init__(
-        self,
-        method: Callable[..., firestore.ListDocumentsResponse],
-        request: firestore.ListDocumentsRequest,
-        response: firestore.ListDocumentsResponse,
-        *,
-        metadata: Sequence[Tuple[str, str]] = ()
-    ):
+    def __init__(self,
+            method: Callable[..., firestore.ListDocumentsResponse],
+            request: firestore.ListDocumentsRequest,
+            response: firestore.ListDocumentsResponse,
+            *,
+            metadata: Sequence[Tuple[str, str]] = ()):
         """Instantiate the pager.
 
         Args:
@@ -81,7 +78,7 @@ class ListDocumentsPager:
             yield from page.documents
 
     def __repr__(self) -> str:
-        return "{0}<{1!r}>".format(self.__class__.__name__, self._response)
+        return '{0}<{1!r}>'.format(self.__class__.__name__, self._response)
 
 
 class ListDocumentsAsyncPager:
@@ -101,15 +98,12 @@ class ListDocumentsAsyncPager:
     attributes are available on the pager. If multiple requests are made, only
     the most recent response is retained, and thus used for attribute lookup.
     """
-
-    def __init__(
-        self,
-        method: Callable[..., Awaitable[firestore.ListDocumentsResponse]],
-        request: firestore.ListDocumentsRequest,
-        response: firestore.ListDocumentsResponse,
-        *,
-        metadata: Sequence[Tuple[str, str]] = ()
-    ):
+    def __init__(self,
+            method: Callable[..., Awaitable[firestore.ListDocumentsResponse]],
+            request: firestore.ListDocumentsRequest,
+            response: firestore.ListDocumentsResponse,
+            *,
+            metadata: Sequence[Tuple[str, str]] = ()):
         """Instantiate the pager.
 
         Args:
@@ -147,7 +141,7 @@ class ListDocumentsAsyncPager:
         return async_generator()
 
     def __repr__(self) -> str:
-        return "{0}<{1!r}>".format(self.__class__.__name__, self._response)
+        return '{0}<{1!r}>'.format(self.__class__.__name__, self._response)
 
 
 class PartitionQueryPager:
@@ -167,15 +161,12 @@ class PartitionQueryPager:
     attributes are available on the pager. If multiple requests are made, only
     the most recent response is retained, and thus used for attribute lookup.
     """
-
-    def __init__(
-        self,
-        method: Callable[..., firestore.PartitionQueryResponse],
-        request: firestore.PartitionQueryRequest,
-        response: firestore.PartitionQueryResponse,
-        *,
-        metadata: Sequence[Tuple[str, str]] = ()
-    ):
+    def __init__(self,
+            method: Callable[..., firestore.PartitionQueryResponse],
+            request: firestore.PartitionQueryRequest,
+            response: firestore.PartitionQueryResponse,
+            *,
+            metadata: Sequence[Tuple[str, str]] = ()):
         """Instantiate the pager.
 
         Args:
@@ -209,7 +200,7 @@ class PartitionQueryPager:
             yield from page.partitions
 
     def __repr__(self) -> str:
-        return "{0}<{1!r}>".format(self.__class__.__name__, self._response)
+        return '{0}<{1!r}>'.format(self.__class__.__name__, self._response)
 
 
 class PartitionQueryAsyncPager:
@@ -229,15 +220,12 @@ class PartitionQueryAsyncPager:
     attributes are available on the pager. If multiple requests are made, only
     the most recent response is retained, and thus used for attribute lookup.
     """
-
-    def __init__(
-        self,
-        method: Callable[..., Awaitable[firestore.PartitionQueryResponse]],
-        request: firestore.PartitionQueryRequest,
-        response: firestore.PartitionQueryResponse,
-        *,
-        metadata: Sequence[Tuple[str, str]] = ()
-    ):
+    def __init__(self,
+            method: Callable[..., Awaitable[firestore.PartitionQueryResponse]],
+            request: firestore.PartitionQueryRequest,
+            response: firestore.PartitionQueryResponse,
+            *,
+            metadata: Sequence[Tuple[str, str]] = ()):
         """Instantiate the pager.
 
         Args:
@@ -275,4 +263,4 @@ class PartitionQueryAsyncPager:
         return async_generator()
 
     def __repr__(self) -> str:
-        return "{0}<{1!r}>".format(self.__class__.__name__, self._response)
+        return '{0}<{1!r}>'.format(self.__class__.__name__, self._response)

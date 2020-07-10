@@ -19,6 +19,6 @@ from .client import FirestoreClient
 from .async_client import FirestoreAsyncClient
 
 __all__ = (
-    "FirestoreClient",
-    "FirestoreAsyncClient",
+    'FirestoreClient',
+    'FirestoreAsyncClient',
 )

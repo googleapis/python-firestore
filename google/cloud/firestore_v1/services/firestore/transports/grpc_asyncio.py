@@ -17,11 +17,11 @@
 
 from typing import Awaitable, Callable, Dict, Optional, Sequence, Tuple
 
-from google.api_core import grpc_helpers_async  # type: ignore
-from google.auth import credentials  # type: ignore
+from google.api_core import grpc_helpers_async         # type: ignore
+from google.auth import credentials                    # type: ignore
 from google.auth.transport.grpc import SslCredentials  # type: ignore
 
-import grpc  # type: ignore
+import grpc                        # type: ignore
 from grpc.experimental import aio  # type: ignore
 
 from google.cloud.firestore_v1.types import document
@@ -57,14 +57,12 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     _stubs: Dict[str, Callable] = {}
 
     @classmethod
-    def create_channel(
-        cls,
-        host: str = "firestore.googleapis.com",
-        credentials: credentials.Credentials = None,
-        credentials_file: Optional[str] = None,
-        scopes: Optional[Sequence[str]] = None,
-        **kwargs
-    ) -> aio.Channel:
+    def create_channel(cls,
+                       host: str = 'firestore.googleapis.com',
+                       credentials: credentials.Credentials = None,
+                       credentials_file: Optional[str] = None,
+                       scopes: Optional[Sequence[str]] = None,
+                       **kwargs) -> aio.Channel:
         """Create and return a gRPC AsyncIO channel object.
         Args:
             address (Optional[str]): The host for the channel to use.
@@ -93,17 +91,14 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
             **kwargs
         )
 
-    def __init__(
-        self,
-        *,
-        host: str = "firestore.googleapis.com",
-        credentials: credentials.Credentials = None,
-        credentials_file: Optional[str] = None,
-        scopes: Optional[Sequence[str]] = None,
-        channel: aio.Channel = None,
-        api_mtls_endpoint: str = None,
-        client_cert_source: Callable[[], Tuple[bytes, bytes]] = None
-    ) -> None:
+    def __init__(self, *,
+            host: str = 'firestore.googleapis.com',
+            credentials: credentials.Credentials = None,
+            credentials_file: Optional[str] = None,
+            scopes: Optional[Sequence[str]] = None,
+            channel: aio.Channel = None,
+            api_mtls_endpoint: str = None,
+            client_cert_source: Callable[[], Tuple[bytes, bytes]] = None) -> None:
         """Instantiate the transport.
 
         Args:
@@ -145,11 +140,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
             # If a channel was explicitly provided, set it.
             self._grpc_channel = channel
         elif api_mtls_endpoint:
-            host = (
-                api_mtls_endpoint
-                if ":" in api_mtls_endpoint
-                else api_mtls_endpoint + ":443"
-            )
+            host = api_mtls_endpoint if ":" in api_mtls_endpoint else api_mtls_endpoint + ":443"
 
             # Create SSL credentials with client_cert_source or application
             # default SSL credentials.
@@ -175,7 +166,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
             host=host,
             credentials=credentials,
             credentials_file=credentials_file,
-            scopes=scopes or self.AUTH_SCOPES,
+            scopes=scopes or self.AUTH_SCOPES
         )
 
         self._stubs = {}
@@ -189,18 +180,19 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         """
         # Sanity check: Only create a new channel if we do not already
         # have one.
-        if not hasattr(self, "_grpc_channel"):
+        if not hasattr(self, '_grpc_channel'):
             self._grpc_channel = self.create_channel(
-                self._host, credentials=self._credentials,
+                self._host,
+                credentials=self._credentials,
             )
 
         # Return the channel from cache.
         return self._grpc_channel
 
     @property
-    def get_document(
-        self,
-    ) -> Callable[[firestore.GetDocumentRequest], Awaitable[document.Document]]:
+    def get_document(self) -> Callable[
+            [firestore.GetDocumentRequest],
+            Awaitable[document.Document]]:
         r"""Return a callable for the get document method over gRPC.
 
         Gets a single document.
@@ -215,20 +207,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "get_document" not in self._stubs:
-            self._stubs["get_document"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/GetDocument",
+        if 'get_document' not in self._stubs:
+            self._stubs['get_document'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/GetDocument',
                 request_serializer=firestore.GetDocumentRequest.serialize,
                 response_deserializer=document.Document.deserialize,
             )
-        return self._stubs["get_document"]
+        return self._stubs['get_document']
 
     @property
-    def list_documents(
-        self,
-    ) -> Callable[
-        [firestore.ListDocumentsRequest], Awaitable[firestore.ListDocumentsResponse]
-    ]:
+    def list_documents(self) -> Callable[
+            [firestore.ListDocumentsRequest],
+            Awaitable[firestore.ListDocumentsResponse]]:
         r"""Return a callable for the list documents method over gRPC.
 
         Lists documents.
@@ -243,18 +233,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "list_documents" not in self._stubs:
-            self._stubs["list_documents"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/ListDocuments",
+        if 'list_documents' not in self._stubs:
+            self._stubs['list_documents'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/ListDocuments',
                 request_serializer=firestore.ListDocumentsRequest.serialize,
                 response_deserializer=firestore.ListDocumentsResponse.deserialize,
             )
-        return self._stubs["list_documents"]
+        return self._stubs['list_documents']
 
     @property
-    def update_document(
-        self,
-    ) -> Callable[[firestore.UpdateDocumentRequest], Awaitable[gf_document.Document]]:
+    def update_document(self) -> Callable[
+            [firestore.UpdateDocumentRequest],
+            Awaitable[gf_document.Document]]:
         r"""Return a callable for the update document method over gRPC.
 
         Updates or inserts a document.
@@ -269,18 +259,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "update_document" not in self._stubs:
-            self._stubs["update_document"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/UpdateDocument",
+        if 'update_document' not in self._stubs:
+            self._stubs['update_document'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/UpdateDocument',
                 request_serializer=firestore.UpdateDocumentRequest.serialize,
                 response_deserializer=gf_document.Document.deserialize,
             )
-        return self._stubs["update_document"]
+        return self._stubs['update_document']
 
     @property
-    def delete_document(
-        self,
-    ) -> Callable[[firestore.DeleteDocumentRequest], Awaitable[empty.Empty]]:
+    def delete_document(self) -> Callable[
+            [firestore.DeleteDocumentRequest],
+            Awaitable[empty.Empty]]:
         r"""Return a callable for the delete document method over gRPC.
 
         Deletes a document.
@@ -295,21 +285,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "delete_document" not in self._stubs:
-            self._stubs["delete_document"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/DeleteDocument",
+        if 'delete_document' not in self._stubs:
+            self._stubs['delete_document'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/DeleteDocument',
                 request_serializer=firestore.DeleteDocumentRequest.serialize,
                 response_deserializer=empty.Empty.FromString,
             )
-        return self._stubs["delete_document"]
+        return self._stubs['delete_document']
 
     @property
-    def batch_get_documents(
-        self,
-    ) -> Callable[
-        [firestore.BatchGetDocumentsRequest],
-        Awaitable[firestore.BatchGetDocumentsResponse],
-    ]:
+    def batch_get_documents(self) -> Callable[
+            [firestore.BatchGetDocumentsRequest],
+            Awaitable[firestore.BatchGetDocumentsResponse]]:
         r"""Return a callable for the batch get documents method over gRPC.
 
         Gets multiple documents.
@@ -326,21 +313,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "batch_get_documents" not in self._stubs:
-            self._stubs["batch_get_documents"] = self.grpc_channel.unary_stream(
-                "/google.cloud.firestore.v1.Firestore/BatchGetDocuments",
+        if 'batch_get_documents' not in self._stubs:
+            self._stubs['batch_get_documents'] = self.grpc_channel.unary_stream(
+                '/google.firestore.v1.Firestore/BatchGetDocuments',
                 request_serializer=firestore.BatchGetDocumentsRequest.serialize,
                 response_deserializer=firestore.BatchGetDocumentsResponse.deserialize,
             )
-        return self._stubs["batch_get_documents"]
+        return self._stubs['batch_get_documents']
 
     @property
-    def begin_transaction(
-        self,
-    ) -> Callable[
-        [firestore.BeginTransactionRequest],
-        Awaitable[firestore.BeginTransactionResponse],
-    ]:
+    def begin_transaction(self) -> Callable[
+            [firestore.BeginTransactionRequest],
+            Awaitable[firestore.BeginTransactionResponse]]:
         r"""Return a callable for the begin transaction method over gRPC.
 
         Starts a new transaction.
@@ -355,18 +339,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "begin_transaction" not in self._stubs:
-            self._stubs["begin_transaction"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/BeginTransaction",
+        if 'begin_transaction' not in self._stubs:
+            self._stubs['begin_transaction'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/BeginTransaction',
                 request_serializer=firestore.BeginTransactionRequest.serialize,
                 response_deserializer=firestore.BeginTransactionResponse.deserialize,
             )
-        return self._stubs["begin_transaction"]
+        return self._stubs['begin_transaction']
 
     @property
-    def commit(
-        self,
-    ) -> Callable[[firestore.CommitRequest], Awaitable[firestore.CommitResponse]]:
+    def commit(self) -> Callable[
+            [firestore.CommitRequest],
+            Awaitable[firestore.CommitResponse]]:
         r"""Return a callable for the commit method over gRPC.
 
         Commits a transaction, while optionally updating
@@ -382,16 +366,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "commit" not in self._stubs:
-            self._stubs["commit"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/Commit",
+        if 'commit' not in self._stubs:
+            self._stubs['commit'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/Commit',
                 request_serializer=firestore.CommitRequest.serialize,
                 response_deserializer=firestore.CommitResponse.deserialize,
             )
-        return self._stubs["commit"]
+        return self._stubs['commit']
 
     @property
-    def rollback(self) -> Callable[[firestore.RollbackRequest], Awaitable[empty.Empty]]:
+    def rollback(self) -> Callable[
+            [firestore.RollbackRequest],
+            Awaitable[empty.Empty]]:
         r"""Return a callable for the rollback method over gRPC.
 
         Rolls back a transaction.
@@ -406,18 +392,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "rollback" not in self._stubs:
-            self._stubs["rollback"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/Rollback",
+        if 'rollback' not in self._stubs:
+            self._stubs['rollback'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/Rollback',
                 request_serializer=firestore.RollbackRequest.serialize,
                 response_deserializer=empty.Empty.FromString,
             )
-        return self._stubs["rollback"]
+        return self._stubs['rollback']
 
     @property
-    def run_query(
-        self,
-    ) -> Callable[[firestore.RunQueryRequest], Awaitable[firestore.RunQueryResponse]]:
+    def run_query(self) -> Callable[
+            [firestore.RunQueryRequest],
+            Awaitable[firestore.RunQueryResponse]]:
         r"""Return a callable for the run query method over gRPC.
 
         Runs a query.
@@ -432,20 +418,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "run_query" not in self._stubs:
-            self._stubs["run_query"] = self.grpc_channel.unary_stream(
-                "/google.cloud.firestore.v1.Firestore/RunQuery",
+        if 'run_query' not in self._stubs:
+            self._stubs['run_query'] = self.grpc_channel.unary_stream(
+                '/google.firestore.v1.Firestore/RunQuery',
                 request_serializer=firestore.RunQueryRequest.serialize,
                 response_deserializer=firestore.RunQueryResponse.deserialize,
             )
-        return self._stubs["run_query"]
+        return self._stubs['run_query']
 
     @property
-    def partition_query(
-        self,
-    ) -> Callable[
-        [firestore.PartitionQueryRequest], Awaitable[firestore.PartitionQueryResponse]
-    ]:
+    def partition_query(self) -> Callable[
+            [firestore.PartitionQueryRequest],
+            Awaitable[firestore.PartitionQueryResponse]]:
         r"""Return a callable for the partition query method over gRPC.
 
         Partitions a query by returning partition cursors
@@ -464,18 +448,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "partition_query" not in self._stubs:
-            self._stubs["partition_query"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/PartitionQuery",
+        if 'partition_query' not in self._stubs:
+            self._stubs['partition_query'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/PartitionQuery',
                 request_serializer=firestore.PartitionQueryRequest.serialize,
                 response_deserializer=firestore.PartitionQueryResponse.deserialize,
             )
-        return self._stubs["partition_query"]
+        return self._stubs['partition_query']
 
     @property
-    def write(
-        self,
-    ) -> Callable[[firestore.WriteRequest], Awaitable[firestore.WriteResponse]]:
+    def write(self) -> Callable[
+            [firestore.WriteRequest],
+            Awaitable[firestore.WriteResponse]]:
         r"""Return a callable for the write method over gRPC.
 
         Streams batches of document updates and deletes, in
@@ -491,18 +475,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "write" not in self._stubs:
-            self._stubs["write"] = self.grpc_channel.stream_stream(
-                "/google.cloud.firestore.v1.Firestore/Write",
+        if 'write' not in self._stubs:
+            self._stubs['write'] = self.grpc_channel.stream_stream(
+                '/google.firestore.v1.Firestore/Write',
                 request_serializer=firestore.WriteRequest.serialize,
                 response_deserializer=firestore.WriteResponse.deserialize,
             )
-        return self._stubs["write"]
+        return self._stubs['write']
 
     @property
-    def listen(
-        self,
-    ) -> Callable[[firestore.ListenRequest], Awaitable[firestore.ListenResponse]]:
+    def listen(self) -> Callable[
+            [firestore.ListenRequest],
+            Awaitable[firestore.ListenResponse]]:
         r"""Return a callable for the listen method over gRPC.
 
         Listens to changes.
@@ -517,21 +501,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "listen" not in self._stubs:
-            self._stubs["listen"] = self.grpc_channel.stream_stream(
-                "/google.cloud.firestore.v1.Firestore/Listen",
+        if 'listen' not in self._stubs:
+            self._stubs['listen'] = self.grpc_channel.stream_stream(
+                '/google.firestore.v1.Firestore/Listen',
                 request_serializer=firestore.ListenRequest.serialize,
                 response_deserializer=firestore.ListenResponse.deserialize,
             )
-        return self._stubs["listen"]
+        return self._stubs['listen']
 
     @property
-    def list_collection_ids(
-        self,
-    ) -> Callable[
-        [firestore.ListCollectionIdsRequest],
-        Awaitable[firestore.ListCollectionIdsResponse],
-    ]:
+    def list_collection_ids(self) -> Callable[
+            [firestore.ListCollectionIdsRequest],
+            Awaitable[firestore.ListCollectionIdsResponse]]:
         r"""Return a callable for the list collection ids method over gRPC.
 
         Lists all the collection IDs underneath a document.
@@ -546,20 +527,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "list_collection_ids" not in self._stubs:
-            self._stubs["list_collection_ids"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/ListCollectionIds",
+        if 'list_collection_ids' not in self._stubs:
+            self._stubs['list_collection_ids'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/ListCollectionIds',
                 request_serializer=firestore.ListCollectionIdsRequest.serialize,
                 response_deserializer=firestore.ListCollectionIdsResponse.deserialize,
             )
-        return self._stubs["list_collection_ids"]
+        return self._stubs['list_collection_ids']
 
     @property
-    def batch_write(
-        self,
-    ) -> Callable[
-        [firestore.BatchWriteRequest], Awaitable[firestore.BatchWriteResponse]
-    ]:
+    def batch_write(self) -> Callable[
+            [firestore.BatchWriteRequest],
+            Awaitable[firestore.BatchWriteResponse]]:
         r"""Return a callable for the batch write method over gRPC.
 
         Applies a batch of write operations.
@@ -568,11 +547,11 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         atomically and can apply them out of order. Method does not
         allow more than one write per document. Each write succeeds or
         fails independently. See the
-        [BatchWriteResponse][google.cloud.firestore.v1.BatchWriteResponse] for
+        [BatchWriteResponse][google.firestore.v1.BatchWriteResponse] for
         the success status of each write.
 
         If you require an atomically applied set of writes, use
-        [Commit][google.cloud.firestore.v1.Firestore.Commit] instead.
+        [Commit][google.firestore.v1.Firestore.Commit] instead.
 
         Returns:
             Callable[[~.BatchWriteRequest],
@@ -584,18 +563,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "batch_write" not in self._stubs:
-            self._stubs["batch_write"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/BatchWrite",
+        if 'batch_write' not in self._stubs:
+            self._stubs['batch_write'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/BatchWrite',
                 request_serializer=firestore.BatchWriteRequest.serialize,
                 response_deserializer=firestore.BatchWriteResponse.deserialize,
             )
-        return self._stubs["batch_write"]
+        return self._stubs['batch_write']
 
     @property
-    def create_document(
-        self,
-    ) -> Callable[[firestore.CreateDocumentRequest], Awaitable[document.Document]]:
+    def create_document(self) -> Callable[
+            [firestore.CreateDocumentRequest],
+            Awaitable[document.Document]]:
         r"""Return a callable for the create document method over gRPC.
 
         Creates a new document.
@@ -610,13 +589,15 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "create_document" not in self._stubs:
-            self._stubs["create_document"] = self.grpc_channel.unary_unary(
-                "/google.cloud.firestore.v1.Firestore/CreateDocument",
+        if 'create_document' not in self._stubs:
+            self._stubs['create_document'] = self.grpc_channel.unary_unary(
+                '/google.firestore.v1.Firestore/CreateDocument',
                 request_serializer=firestore.CreateDocumentRequest.serialize,
                 response_deserializer=document.Document.deserialize,
             )
-        return self._stubs["create_document"]
+        return self._stubs['create_document']
 
 
-__all__ = ("FirestoreGrpcAsyncIOTransport",)
+__all__ = (
+    'FirestoreGrpcAsyncIOTransport',
+)
