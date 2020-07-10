@@ -15,11 +15,8 @@
 import logging
 import collections
 import threading
-import datetime
 from enum import Enum
 import functools
-
-import pytz
 
 from google.api_core.bidi import ResumableBidiRpc
 from google.api_core.bidi import BackgroundConsumer

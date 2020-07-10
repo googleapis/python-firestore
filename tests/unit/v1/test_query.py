@@ -242,7 +242,6 @@ class TestQuery(unittest.TestCase):
         self._compare_queries(query_inst, new_query, "_field_filters")
 
     def _where_unary_helper(self, value, op_enum, op_string="=="):
-        from google.cloud.firestore_v1.types import query
         from google.cloud.firestore_v1.types import StructuredQuery
 
         query_inst = self._make_one_all_fields(skip_fields=("field_filters",))

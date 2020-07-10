@@ -19,7 +19,6 @@ import os
 import re
 
 from google.oauth2 import service_account
-from google.protobuf import timestamp_pb2
 import pytest
 import six
 
@@ -27,7 +26,7 @@ from google.api_core.exceptions import AlreadyExists
 from google.api_core.exceptions import FailedPrecondition
 from google.api_core.exceptions import InvalidArgument
 from google.api_core.exceptions import NotFound
-from google.cloud._helpers import _pb_timestamp_to_datetime, _datetime_to_pb_timestamp
+from google.cloud._helpers import _datetime_to_pb_timestamp
 from google.cloud._helpers import UTC
 from google.cloud import firestore_v1 as firestore
 from test_utils.system import unique_resource_id
@@ -144,8 +143,6 @@ def test_cannot_use_foreign_key(client, cleanup):
 
 
 def assert_timestamp_less(timestamp_pb1, timestamp_pb2):
-    # dt_val1 = _pb_timestamp_to_datetime(timestamp_pb1)
-    # dt_val2 = _pb_timestamp_to_datetime(timestamp_pb2)
     assert timestamp_pb1 < timestamp_pb2
 
 

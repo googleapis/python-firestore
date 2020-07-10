@@ -135,9 +135,9 @@ def _run_testcase(testcase, call, firestore_api, client):
 def test_create_testprotos(test_proto):
     testcase = test_proto.create
     firestore_api = _mock_firestore_api()
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
     data = convert_data(json.loads(testcase.json_data))
-    call = functools.partial(document.create, data)
+    call = functools.partial(doc.create, data)
     _run_testcase(testcase, call, firestore_api, client)
 
 
@@ -147,15 +147,12 @@ def test_get_testprotos(test_proto):
     firestore_api = mock.Mock(spec=["get_document"])
     response = document.Document()
     firestore_api.get_document.return_value = response
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
 
-    document.get()  # No '.textprotos' for errors, field_paths.
+    doc.get()  # No '.textprotos' for errors, field_paths.
 
     firestore_api.get_document.assert_called_once_with(
-        document._document_path,
-        mask=None,
-        transaction=None,
-        metadata=client._rpc_metadata,
+        doc._document_path, mask=None, transaction=None, metadata=client._rpc_metadata,
     )
 
 
@@ -163,13 +160,13 @@ def test_get_testprotos(test_proto):
 def test_set_testprotos(test_proto):
     testcase = test_proto.set
     firestore_api = _mock_firestore_api()
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
     data = convert_data(json.loads(testcase.json_data))
     if testcase.HasField("option"):
         merge = convert_set_option(testcase.option)
     else:
         merge = False
-    call = functools.partial(document.set, data, merge=merge)
+    call = functools.partial(doc.set, data, merge=merge)
     _run_testcase(testcase, call, firestore_api, client)
 
 
@@ -177,13 +174,13 @@ def test_set_testprotos(test_proto):
 def test_update_testprotos(test_proto):
     testcase = test_proto.update
     firestore_api = _mock_firestore_api()
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
     data = convert_data(json.loads(testcase.json_data))
     if testcase.HasField("precondition"):
         option = convert_precondition(testcase.precondition)
     else:
         option = None
-    call = functools.partial(document.update, data, option)
+    call = functools.partial(doc.update, data, option)
     _run_testcase(testcase, call, firestore_api, client)
 
 
@@ -197,12 +194,12 @@ def test_update_paths_testprotos(test_proto):  # pragma: NO COVER
 def test_delete_testprotos(test_proto):
     testcase = test_proto.delete
     firestore_api = _mock_firestore_api()
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
     if testcase.HasField("precondition"):
         option = convert_precondition(testcase.precondition)
     else:
         option = None
-    call = functools.partial(document.delete, option)
+    call = functools.partial(doc.delete, option)
     _run_testcase(testcase, call, firestore_api, client)
 
 

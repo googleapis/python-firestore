@@ -147,9 +147,9 @@ def test_get_testprotos(test_proto):
     firestore_api = mock.Mock(spec=["get_document"])
     response = document.Document()
     firestore_api.get_document.return_value = response
-    client, document = _make_client_document(firestore_api, testcase)
+    client, doc = _make_client_document(firestore_api, testcase)
 
-    document.get()  # No '.textprotos' for errors, field_paths.
+    doc.get()  # No '.textprotos' for errors, field_paths.
 
     firestore_api.get_document.assert_called_once_with(
         document._document_path,
