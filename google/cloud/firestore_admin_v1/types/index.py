@@ -113,10 +113,15 @@ class Index(proto.Message):
 
         field_path = proto.Field(proto.STRING, number=1)
 
-        order = proto.Field(proto.ENUM, number=2, enum="Index.IndexField.Order",)
+        order = proto.Field(
+            proto.ENUM, number=2, oneof="value_mode", enum="Index.IndexField.Order",
+        )
 
         array_config = proto.Field(
-            proto.ENUM, number=3, enum="Index.IndexField.ArrayConfig",
+            proto.ENUM,
+            number=3,
+            oneof="value_mode",
+            enum="Index.IndexField.ArrayConfig",
         )
 
     name = proto.Field(proto.STRING, number=1)

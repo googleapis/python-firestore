@@ -461,9 +461,7 @@ class Client(ClientWithProject):
                 iterator of subcollections of the current document.
         """
         iterator = self._firestore_api.list_collection_ids(
-            request={
-                "parent": "{}/documents".format(self._database_string),
-            },
+            request={"parent": "{}/documents".format(self._database_string),},
             metadata=self._rpc_metadata,
         )
 

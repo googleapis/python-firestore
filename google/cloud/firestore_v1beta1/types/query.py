@@ -110,15 +110,24 @@ class StructuredQuery(proto.Message):
         """
 
         composite_filter = proto.Field(
-            proto.MESSAGE, number=1, message="StructuredQuery.CompositeFilter",
+            proto.MESSAGE,
+            number=1,
+            oneof="filter_type",
+            message="StructuredQuery.CompositeFilter",
         )
 
         field_filter = proto.Field(
-            proto.MESSAGE, number=2, message="StructuredQuery.FieldFilter",
+            proto.MESSAGE,
+            number=2,
+            oneof="filter_type",
+            message="StructuredQuery.FieldFilter",
         )
 
         unary_filter = proto.Field(
-            proto.MESSAGE, number=3, message="StructuredQuery.UnaryFilter",
+            proto.MESSAGE,
+            number=3,
+            oneof="filter_type",
+            message="StructuredQuery.UnaryFilter",
         )
 
     class CompositeFilter(proto.Message):
@@ -201,7 +210,10 @@ class StructuredQuery(proto.Message):
         )
 
         field = proto.Field(
-            proto.MESSAGE, number=2, message="StructuredQuery.FieldReference",
+            proto.MESSAGE,
+            number=2,
+            oneof="operand_type",
+            message="StructuredQuery.FieldReference",
         )
 
     class Order(proto.Message):

@@ -132,7 +132,7 @@ class Value(proto.Message):
     """
 
     null_value = proto.Field(
-        proto.ENUM, number=11, enum=struct.NullValue, oneof="value_type"
+        proto.ENUM, number=11, oneof="value_type", enum=struct.NullValue,
     )
 
     boolean_value = proto.Field(proto.BOOL, number=1, oneof="value_type")
@@ -142,7 +142,7 @@ class Value(proto.Message):
     double_value = proto.Field(proto.DOUBLE, number=3, oneof="value_type")
 
     timestamp_value = proto.Field(
-        proto.MESSAGE, number=10, message=timestamp.Timestamp, oneof="value_type"
+        proto.MESSAGE, number=10, oneof="value_type", message=timestamp.Timestamp,
     )
 
     string_value = proto.Field(proto.STRING, number=17, oneof="value_type")
@@ -152,15 +152,15 @@ class Value(proto.Message):
     reference_value = proto.Field(proto.STRING, number=5, oneof="value_type")
 
     geo_point_value = proto.Field(
-        proto.MESSAGE, number=8, message=latlng.LatLng, oneof="value_type"
+        proto.MESSAGE, number=8, oneof="value_type", message=latlng.LatLng,
     )
 
     array_value = proto.Field(
-        proto.MESSAGE, number=9, message="ArrayValue", oneof="value_type"
+        proto.MESSAGE, number=9, oneof="value_type", message="ArrayValue",
     )
 
     map_value = proto.Field(
-        proto.MESSAGE, number=6, message="MapValue", oneof="value_type"
+        proto.MESSAGE, number=6, oneof="value_type", message="MapValue",
     )
 
 

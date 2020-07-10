@@ -345,7 +345,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Wrap the response in an operation future.
-        response = ga_operation.from_gapic(
+        response = operation.from_gapic(
             response,
             self._transport.operations_client,
             gfa_index.Index,
@@ -733,7 +733,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Wrap the response in an operation future.
-        response = ga_operation.from_gapic(
+        response = operation.from_gapic(
             response,
             self._transport.operations_client,
             gfa_field.Field,
@@ -911,7 +911,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Wrap the response in an operation future.
-        response = ga_operation.from_gapic(
+        response = operation.from_gapic(
             response,
             self._transport.operations_client,
             gfa_operation.ExportDocumentsResponse,
@@ -1011,7 +1011,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Wrap the response in an operation future.
-        response = ga_operation.from_gapic(
+        response = operation.from_gapic(
             response,
             self._transport.operations_client,
             empty.Empty,

@@ -926,7 +926,9 @@ def test_update_document_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].document == gf_document.Document(name="name_value")
+
         assert args[0].update_mask == common.DocumentMask(
             field_paths=["field_paths_value"]
         )
@@ -970,7 +972,9 @@ async def test_update_document_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].document == gf_document.Document(name="name_value")
+
         assert args[0].update_mask == common.DocumentMask(
             field_paths=["field_paths_value"]
         )
@@ -1112,6 +1116,7 @@ def test_delete_document_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -1146,6 +1151,7 @@ async def test_delete_document_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -1417,6 +1423,7 @@ def test_begin_transaction_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].database == "database_value"
 
 
@@ -1453,6 +1460,7 @@ async def test_begin_transaction_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].database == "database_value"
 
 
@@ -1593,7 +1601,9 @@ def test_commit_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].database == "database_value"
+
         assert args[0].writes == [
             gf_write.Write(update=gf_document.Document(name="name_value"))
         ]
@@ -1635,7 +1645,9 @@ async def test_commit_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].database == "database_value"
+
         assert args[0].writes == [
             gf_write.Write(update=gf_document.Document(name="name_value"))
         ]
@@ -1779,7 +1791,9 @@ def test_rollback_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].database == "database_value"
+
         assert args[0].transaction == b"transaction_blob"
 
 
@@ -1818,7 +1832,9 @@ async def test_rollback_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].database == "database_value"
+
         assert args[0].transaction == b"transaction_blob"
 
 
@@ -2218,6 +2234,7 @@ def test_list_collection_ids_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].parent == "parent_value"
 
 
@@ -2254,6 +2271,7 @@ async def test_list_collection_ids_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].parent == "parent_value"
 
 

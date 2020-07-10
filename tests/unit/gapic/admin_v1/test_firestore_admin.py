@@ -450,7 +450,9 @@ def test_create_index_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].parent == "parent_value"
+
         assert args[0].index == gfa_index.Index(name="name_value")
 
 
@@ -491,7 +493,9 @@ async def test_create_index_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].parent == "parent_value"
+
         assert args[0].index == gfa_index.Index(name="name_value")
 
 
@@ -643,6 +647,7 @@ def test_list_indexes_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].parent == "parent_value"
 
 
@@ -679,6 +684,7 @@ async def test_list_indexes_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].parent == "parent_value"
 
 
@@ -964,6 +970,7 @@ def test_get_index_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -998,6 +1005,7 @@ async def test_get_index_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -1135,6 +1143,7 @@ def test_delete_index_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -1169,6 +1178,7 @@ async def test_delete_index_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -1312,6 +1322,7 @@ def test_get_field_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -1346,6 +1357,7 @@ async def test_get_field_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -1487,6 +1499,7 @@ def test_update_field_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].field == gfa_field.Field(name="name_value")
 
 
@@ -1524,6 +1537,7 @@ async def test_update_field_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].field == gfa_field.Field(name="name_value")
 
 
@@ -1672,6 +1686,7 @@ def test_list_fields_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].parent == "parent_value"
 
 
@@ -1708,6 +1723,7 @@ async def test_list_fields_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].parent == "parent_value"
 
 
@@ -1973,6 +1989,7 @@ def test_export_documents_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -2009,6 +2026,7 @@ async def test_export_documents_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -2156,6 +2174,7 @@ def test_import_documents_flattened():
         # request object values.
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -2192,6 +2211,7 @@ async def test_import_documents_flattened_async():
         # request object values.
         assert len(call.mock_calls)
         _, args, _ = call.mock_calls[0]
+
         assert args[0].name == "name_value"
 
 
@@ -2580,33 +2600,6 @@ def test_firestore_admin_grpc_lro_async_client():
     assert transport.operations_client is transport.operations_client
 
 
-def test_field_path():
-    project = "squid"
-    database = "clam"
-    collection = "whelk"
-    field = "octopus"
-
-    expected = "projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}".format(
-        project=project, database=database, collection=collection, field=field,
-    )
-    actual = FirestoreAdminClient.field_path(project, database, collection, field)
-    assert expected == actual
-
-
-def test_parse_field_path():
-    expected = {
-        "project": "oyster",
-        "database": "nudibranch",
-        "collection": "cuttlefish",
-        "field": "mussel",
-    }
-    path = FirestoreAdminClient.field_path(**expected)
-
-    # Check that the path construction is reversible.
-    actual = FirestoreAdminClient.parse_field_path(path)
-    assert expected == actual
-
-
 def test_index_path():
     project = "squid"
     database = "clam"
@@ -2631,4 +2624,31 @@ def test_parse_index_path():
 
     # Check that the path construction is reversible.
     actual = FirestoreAdminClient.parse_index_path(path)
+    assert expected == actual
+
+
+def test_field_path():
+    project = "squid"
+    database = "clam"
+    collection = "whelk"
+    field = "octopus"
+
+    expected = "projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}".format(
+        project=project, database=database, collection=collection, field=field,
+    )
+    actual = FirestoreAdminClient.field_path(project, database, collection, field)
+    assert expected == actual
+
+
+def test_parse_field_path():
+    expected = {
+        "project": "oyster",
+        "database": "nudibranch",
+        "collection": "cuttlefish",
+        "field": "mussel",
+    }
+    path = FirestoreAdminClient.field_path(**expected)
+
+    # Check that the path construction is reversible.
+    actual = FirestoreAdminClient.parse_field_path(path)
     assert expected == actual
