@@ -16,6 +16,8 @@ import collections
 import unittest
 
 import mock
+import datetime
+import pytz
 
 
 class TestDocumentReference(unittest.TestCase):
@@ -553,23 +555,21 @@ class TestDocumentReference(unittest.TestCase):
         from google.cloud.firestore_v1.services.firestore.client import FirestoreClient
 
         # TODO(microgen): https://github.com/googleapis/gapic-generator-python/issues/516
-        # class _Iterator(Iterator):
-        #     def __init__(self, pages):
-        #         super(_Iterator, self).__init__(client=None)
-        #         self._pages = pages
+        class _Iterator(Iterator):
+            def __init__(self, pages):
+                super(_Iterator, self).__init__(client=None)
+                self._pages = pages
+                self.collection_ids = pages[0]
 
-        #     def _next_page(self):
-        #         if self._pages:
-        #             page, self._pages = self._pages[0], self._pages[1:]
-        #             return Page(self, page, self.item_to_value)
+            def _next_page(self):
+                if self._pages:
+                    page, self._pages = self._pages[0], self._pages[1:]
+                    return Page(self, page, self.item_to_value)
 
         collection_ids = ["coll-1", "coll-2"]
-        # iterator = _Iterator(pages=[collection_ids])
+        iterator = _Iterator(pages=[collection_ids])
         api_client = mock.create_autospec(FirestoreClient)
-        # api_client.list_collection_ids.return_value = iterator
-        api_client.list_collection_ids.collection_ids.return_value = (
-            i for i in collection_ids
-        )
+        api_client.list_collection_ids.return_value = iterator
 
         client = _make_client()
         client._firestore_api_internal = api_client
@@ -682,12 +682,12 @@ class TestDocumentSnapshot(unittest.TestCase):
         client.__hash__.return_value = 234566789
         reference = self._make_reference("hi", "bye", client=client)
         data = {"zoop": 83}
-        update_time = timestamp_pb2.Timestamp(seconds=123456, nanos=123456789)
+        update_time = datetime.datetime.fromtimestamp(123456, pytz.utc)
         snapshot = self._make_one(
             reference, data, True, None, mock.sentinel.create_time, update_time
         )
         self.assertEqual(
-            hash(snapshot), hash(reference) + hash(123456) + hash(123456789)
+            hash(snapshot), hash(reference) + hash(123456) + hash(0)
         )
 
     def test__client_property(self):

@@ -243,7 +243,7 @@ class TestWatch(unittest.TestCase):
                     )
         self.assertTrue(inst._consumer.started)
         self.assertTrue(inst._rpc.callbacks, [inst._on_rpc_done])
-        self.assertEqual(inst._targets["query"], "dummy query target")
+        self.assertEqual(inst._targets["query"]._pb, "dummy query target")
 
     def test_on_snapshot_target_no_change_no_target_ids_not_current(self):
         inst = self._makeOne()
@@ -828,12 +828,14 @@ class DummyProto(object):
         self.target_change = DummyChange()
         self.document_change = DummyChange()
 
-
 class DummyTarget(object):
     def QueryTarget(self, **kw):
         self.kw = kw
+        return DummyQueryTarget()
+class DummyQueryTarget(object):
+    @property
+    def _pb(self):
         return "dummy query target"
-
 
 class DummyPb2(object):
 

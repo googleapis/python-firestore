@@ -479,7 +479,7 @@ class TestCollectionReference(unittest.TestCase):
                 "parent": parent,
                 "collection_id": collection.id,
                 "page_size": page_size,
-                "page_token": True,
+                "show_missing": True,
             },
             metadata=client._rpc_metadata,
         )

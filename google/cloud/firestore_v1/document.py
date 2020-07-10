@@ -596,7 +596,7 @@ class DocumentSnapshot(object):
         # TODO(microgen): maybe add datetime_with_nanos to protoplus, revisit
         # seconds = self.update_time.seconds
         # nanos = self.update_time.nanos
-        seconds = self.update_time.second
+        seconds = int(self.update_time.timestamp())
         nanos = 0
         return hash(self._reference) + hash(seconds) + hash(nanos)
 
