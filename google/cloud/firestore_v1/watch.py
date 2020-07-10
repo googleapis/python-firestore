@@ -221,7 +221,7 @@ class Watch(object):
             ResumableBidiRpc = self.ResumableBidiRpc  # FBO unit tests
 
         self._rpc = ResumableBidiRpc(
-            self._api.transport.listen,
+            self._api._transport.listen,
             should_recover=_should_recover,
             should_terminate=_should_terminate,
             initial_request=rpc_request,
@@ -261,6 +261,7 @@ class Watch(object):
     def _get_rpc_request(self):
         if self.resume_token is not None:
             self._targets["resume_token"] = self.resume_token
+
         return firestore.ListenRequest(
             database=self._firestore._database_string, add_target=self._targets
         )
@@ -374,7 +375,7 @@ class Watch(object):
         return cls(
             query,
             query._client,
-            {"query": query_target, "target_id": WATCH_TARGET_ID},
+            {"query": query_target._pb, "target_id": WATCH_TARGET_ID},
             query._comparator,
             snapshot_callback,
             snapshot_class_instance,
@@ -570,7 +571,9 @@ class Watch(object):
             self._snapshot_callback(
                 keys,
                 appliedChanges,
-                datetime.datetime.fromtimestamp(read_time.seconds, pytz.utc),
+                read_time
+                # TODO(microgen): now a datetime
+                # datetime.datetime.fromtimestamp(read_time.seconds, pytz.utc),
             )
             self.has_pushed = True
 
