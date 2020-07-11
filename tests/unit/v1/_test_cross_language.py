@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# TODO(microgen): currently cross language tests don't run as part of test pass
+# This should be updated (and its makefile) to generate like other proto classes
 import functools
 import glob
 import json
