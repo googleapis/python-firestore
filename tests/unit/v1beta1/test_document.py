@@ -589,7 +589,7 @@ class TestDocumentReference(unittest.TestCase):
             self.assertEqual(collection.id, collection_id)
 
         api_client.list_collection_ids.assert_called_once_with(
-            request={"parent": document._document_path, "page_size": page_size,},
+            request={"parent": document._document_path, "page_size": page_size},
             metadata=client._rpc_metadata,
         )
 

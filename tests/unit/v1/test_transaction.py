@@ -140,7 +140,7 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.begin_transaction.assert_called_once_with(
-            request={"database": client._database_string, "options": None,},
+            request={"database": client._database_string, "options": None},
             metadata=client._rpc_metadata,
         )
 
@@ -169,7 +169,7 @@ class TestTransaction(unittest.TestCase):
         self.assertIsNone(transaction._id)
 
     def test__rollback(self):
-        from google.protobuf import empty_pb2 as empty_pb2
+        from google.protobuf import empty_pb2
         from google.cloud.firestore_v1.services.firestore import (
             client as firestore_client,
         )
@@ -194,7 +194,7 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.rollback.assert_called_once_with(
-            request={"database": client._database_string, "transaction": txn_id,},
+            request={"database": client._database_string, "transaction": txn_id},
             metadata=client._rpc_metadata,
         )
 
@@ -241,7 +241,7 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.rollback.assert_called_once_with(
-            request={"database": client._database_string, "transaction": txn_id,},
+            request={"database": client._database_string, "transaction": txn_id},
             metadata=client._rpc_metadata,
         )
 
@@ -1045,7 +1045,7 @@ def _make_client(project="feral-tom-cat"):
 
 
 def _make_transaction(txn_id, **txn_kwargs):
-    from google.protobuf import empty_pb2 as empty_pb2
+    from google.protobuf import empty_pb2
     from google.cloud.firestore_v1.services.firestore import client as firestore_client
     from google.cloud.firestore_v1.types import firestore
     from google.cloud.firestore_v1.types import write

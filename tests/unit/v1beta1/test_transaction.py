@@ -171,7 +171,7 @@ class TestTransaction(unittest.TestCase):
         self.assertIsNone(transaction._id)
 
     def test__rollback(self):
-        from google.protobuf import empty_pb2 as empty_pb2
+        from google.protobuf import empty_pb2
         from google.cloud.firestore_v1beta1.services.firestore import (
             client as firestore_client,
         )
@@ -196,7 +196,7 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.rollback.assert_called_once_with(
-            request={"database": client._database_string, "transaction": txn_id,},
+            request={"database": client._database_string, "transaction": txn_id},
             metadata=client._rpc_metadata,
         )
 
@@ -243,7 +243,7 @@ class TestTransaction(unittest.TestCase):
 
         # Verify the called mock.
         firestore_api.rollback.assert_called_once_with(
-            request={"database": client._database_string, "transaction": txn_id,},
+            request={"database": client._database_string, "transaction": txn_id},
             metadata=client._rpc_metadata,
         )
 
@@ -711,18 +711,18 @@ class Test_Transactional(unittest.TestCase):
             firestore_api.begin_transaction.mock_calls,
             [
                 mock.call(
-                    request={"database": db_str, "options": None,},
+                    request={"database": db_str, "options": None},
                     metadata=transaction._client._rpc_metadata,
                 ),
                 mock.call(
-                    request={"database": db_str, "options": options_,},
+                    request={"database": db_str, "options": options_},
                     metadata=transaction._client._rpc_metadata,
                 ),
             ],
         )
         firestore_api.rollback.assert_not_called()
         commit_call = mock.call(
-            request={"database": db_str, "writes": [], "transaction": txn_id,},
+            request={"database": db_str, "writes": [], "transaction": txn_id},
             metadata=transaction._client._rpc_metadata,
         )
         self.assertEqual(firestore_api.commit.mock_calls, [commit_call, commit_call])
@@ -1019,7 +1019,7 @@ def _make_client(project="feral-tom-cat"):
 
 
 def _make_transaction(txn_id, **txn_kwargs):
-    from google.protobuf import empty_pb2 as empty_pb2
+    from google.protobuf import empty_pb2
     from google.cloud.firestore_v1beta1.services.firestore import (
         client as firestore_client,
     )
