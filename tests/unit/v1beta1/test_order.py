@@ -188,7 +188,7 @@ class TestOrder(unittest.TestCase):
         # expect this to fail with value error.
         with mock.patch.object(TypeOrder, "from_value") as to:
             to.value = None
-            with self.assertRaisesRegex(ValueError, "'Unknown ``value_type``"):
+            with self.assertRaisesRegex(ValueError, "Unknown ``value_type``"):
                 target.compare(left, right)
 
     def test_compare_objects_different_keys(self):
