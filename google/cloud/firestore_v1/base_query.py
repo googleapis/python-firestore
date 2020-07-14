@@ -778,50 +778,6 @@ class BaseQuery(object):
                 return orderBy.direction * comp
 
         return 0
-        _orders = self._orders
-
-        # Add implicit sorting by name, using the last specified direction.
-        if len(_orders) == 0:
-            lastDirection = BaseQuery.ASCENDING
-        else:
-            if _orders[-1].direction == 1:
-                lastDirection = BaseQuery.ASCENDING
-            else:
-                lastDirection = BaseQuery.DESCENDING
-
-        orderBys = list(_orders)
-
-        order_pb = query.StructuredQuery.Order(
-            field=query.StructuredQuery.FieldReference(field_path="id"),
-            direction=_enum_from_direction(lastDirection),
-        )
-        orderBys.append(order_pb)
-
-        for orderBy in orderBys:
-            if orderBy.field.field_path == "id":
-                # If ordering by docuent id, compare resource paths.
-                comp = Order()._compare_to(doc1.reference._path, doc2.reference._path)
-            else:
-                if (
-                    orderBy.field.field_path not in doc1._data
-                    or orderBy.field.field_path not in doc2._data
-                ):
-                    raise ValueError(
-                        "Can only compare fields that exist in the "
-                        "DocumentSnapshot. Please include the fields you are "
-                        "ordering on in your select() call."
-                    )
-                v1 = doc1._data[orderBy.field.field_path]
-                v2 = doc2._data[orderBy.field.field_path]
-                encoded_v1 = _helpers.encode_value(v1)
-                encoded_v2 = _helpers.encode_value(v2)
-                comp = Order().compare(encoded_v1, encoded_v2)
-
-            if comp != 0:
-                # 1 == Ascending, -1 == Descending
-                return orderBy.direction * comp
-
-        return 0
 
 
 def _enum_from_op_string(op_string):

@@ -50,7 +50,7 @@ class TypeOrder(Enum):
         }
 
         if v not in lut:
-            raise ValueError("Could not detect value type for " + str(v))
+            raise ValueError(f"Could not detect value type for {v}")
         return lut[v]
 
 
@@ -99,7 +99,7 @@ class Order(object):
         elif value_type == "map_value":
             return cls.compare_objects(left, right)
         else:
-            raise ValueError("Unknown ``value_type``", str(value_type))
+            raise ValueError(f"Unknown ``value_type`` {value_type}")
 
     @staticmethod
     def compare_blobs(left, right):

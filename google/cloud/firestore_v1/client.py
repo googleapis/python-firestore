@@ -226,7 +226,7 @@ class Client(BaseClient):
         for get_doc_response in response_iterator:
             yield _parse_batch_get(get_doc_response, reference_map, self)
 
-    def collections(self,):
+    def collections(self):
         """List top-level collections of the client's database.
 
         Returns:

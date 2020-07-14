@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Copyright 2020 Google LLC
+# Copyright 2019 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,7 +47,7 @@ from google.cloud.firestore_v1.transaction import transactional
 from google.cloud.firestore_v1.watch import Watch
 
 
-# TODO(microgen): this is all on the generated surface. We require this to match
+# TODO(https://github.com/googleapis/python-firestore/issues/93): this is all on the generated surface. We require this to match
 # firestore.py. So comment out until needed on customer level for certain.
 # from .services.firestore import FirestoreClient
 # from .types.common import DocumentMask
