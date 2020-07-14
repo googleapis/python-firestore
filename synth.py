@@ -21,7 +21,7 @@ AUTOSYNTH_MULTIPLE_COMMITS = True
 
 gapic = gcp.GAPICMicrogenerator()
 common = gcp.CommonTemplates()
-versions = ["v1beta1", "v1"]
+versions = ["v1"]
 admin_versions = ["v1"]
 
 
