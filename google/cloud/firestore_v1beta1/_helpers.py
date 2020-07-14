@@ -29,7 +29,6 @@ from google.cloud.firestore_v1beta1 import types
 from google.cloud.firestore_v1beta1.field_path import FieldPath
 from google.cloud.firestore_v1beta1.field_path import parse_field_path
 
-# from google.cloud.firestore_v1beta1 import DocumentTransform
 from google.cloud.firestore_v1beta1.types.write import DocumentTransform
 
 from google.cloud.firestore_v1beta1.types import common

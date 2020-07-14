@@ -333,9 +333,6 @@ def test_update_document(client, cleanup):
 
     # 6. Call ``update()`` with invalid (in future) "last timestamp" option.
     # TODO(microgen): start using custom datetime with nanos in protoplus?
-    # timestamp_pb = timestamp_pb2.Timestamp(
-    #     seconds=snapshot4.update_time.nanos + 3600, nanos=snapshot4.update_time.nanos
-    # )
     timestamp_pb = _datetime_to_pb_timestamp(snapshot4.update_time)
     timestamp_pb.seconds += 3600
 
