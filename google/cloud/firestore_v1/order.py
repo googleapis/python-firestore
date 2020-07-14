@@ -32,7 +32,6 @@ class TypeOrder(Enum):
 
     @staticmethod
     def from_value(value):
-        # return TypeOrder.OBJECT
         v = value._pb.WhichOneof("value_type")
 
         lut = {
