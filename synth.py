@@ -107,7 +107,6 @@ s.replace(
     f"google-firestore",
     f"google-cloud-firestore",
 )
-# TODO(https://github.com/googleapis/gapic-generator-python/issues/471)
 s.replace(
     f"google/cloud/**/*.py",
     f"from google.firestore",
