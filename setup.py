@@ -25,9 +25,11 @@ description = "Google Cloud Firestore API client library"
 version = "1.7.0"
 release_status = "Development Status :: 5 - Production/Stable"
 dependencies = [
-    "google-api-core[grpc] >= 1.14.0, < 2.0.0dev",
+    "google-api-core[grpc] >= 1.21.0, < 2.0.0dev",
     "google-cloud-core >= 1.0.3, < 2.0dev",
     "pytz",
+    "libcst >= 0.2.5",
+    "proto-plus >= 0.4.0",
 ]
 extras = {}
 
@@ -65,21 +67,23 @@ setuptools.setup(
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Operating System :: OS Independent",
         "Topic :: Internet",
+        "Topic :: Software Development :: Libraries :: Python Modules",
     ],
     platforms="Posix; MacOS X; Windows",
     packages=packages,
     namespace_packages=namespaces,
     install_requires=dependencies,
     extras_require=extras,
-    python_requires=">=2.7,!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*",
+    python_requires=">=3.6",
+    scripts=[
+        "scripts/fixup_firestore_v1_keywords.py",
+        "scripts/fixup_admin_v1_keywords.py",
+    ],
     include_package_data=True,
     zip_safe=False,
 )

@@ -42,12 +42,12 @@ class TestBaseTransaction(unittest.TestCase):
         self.assertIsNone(transaction._id)
 
     def test__options_protobuf_read_only(self):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         transaction = self._make_one(read_only=True)
         options_pb = transaction._options_protobuf(None)
-        expected_pb = common_pb2.TransactionOptions(
-            read_only=common_pb2.TransactionOptions.ReadOnly()
+        expected_pb = common.TransactionOptions(
+            read_only=common.TransactionOptions.ReadOnly()
         )
         self.assertEqual(options_pb, expected_pb)
 
@@ -68,15 +68,13 @@ class TestBaseTransaction(unittest.TestCase):
         self.assertIsNone(options_pb)
 
     def test__options_protobuf_on_retry(self):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
 
         transaction = self._make_one()
         retry_id = b"hocus-pocus"
         options_pb = transaction._options_protobuf(retry_id)
-        expected_pb = common_pb2.TransactionOptions(
-            read_write=common_pb2.TransactionOptions.ReadWrite(
-                retry_transaction=retry_id
-            )
+        expected_pb = common.TransactionOptions(
+            read_write=common.TransactionOptions.ReadWrite(retry_transaction=retry_id)
         )
         self.assertEqual(options_pb, expected_pb)
 
