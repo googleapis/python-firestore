@@ -133,9 +133,9 @@ class TestWriteBatch(unittest.TestCase):
                 ctx_mgr.delete(document2)
                 raise RuntimeError("testing")
 
+        # batch still has its changes, as _exit_ is not invoked
         self.assertIsNone(batch.write_results)
         self.assertIsNone(batch.commit_time)
-        # batch still has its changes
         self.assertEqual(len(batch._write_pbs), 2)
 
         firestore_api.commit.assert_not_called()
