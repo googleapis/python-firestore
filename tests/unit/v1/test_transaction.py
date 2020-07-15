@@ -831,6 +831,7 @@ class Test__commit_with_retry(unittest.TestCase):
         self.assertIs(commit_response, mock.sentinel.commit_response)
 
         # Verify mocks used.
+        # Ensure _sleep is called after commit failures, with intervals of 1 and 2 seconds
         self.assertEqual(_sleep.call_count, 2)
         _sleep.assert_any_call(1.0)
         _sleep.assert_any_call(2.0)
