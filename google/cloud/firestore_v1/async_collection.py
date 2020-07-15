@@ -111,15 +111,15 @@ class AsyncCollectionReference(BaseCollectionReference):
         parent, _ = self._parent_info()
 
         iterator = self._client._firestore_api.list_documents(
-            parent,
-            self.id,
-            page_size=page_size,
-            show_missing=True,
+            request={
+                "parent": parent,
+                "collection_id": self.id,
+                "page_size": page_size,
+                "show_missing": True,
+            },
             metadata=self._client._rpc_metadata,
         )
-        iterator.collection = self
-        iterator.item_to_value = _item_to_document_ref
-        return iterator
+        return (_item_to_document_ref(self, i) for i in iterator)
 
     async def get(self, transaction=None):
         """Deprecated alias for :meth:`stream`."""

@@ -63,31 +63,32 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
 
     @staticmethod
     def _make_commit_repsonse(write_results=None):
-        from google.cloud.firestore_v1.proto import firestore_pb2
+        from google.cloud.firestore_v1.types import firestore
 
-        response = mock.create_autospec(firestore_pb2.CommitResponse)
+        response = mock.create_autospec(firestore.CommitResponse)
         response.write_results = write_results or [mock.sentinel.write_result]
         response.commit_time = mock.sentinel.commit_time
         return response
 
     @staticmethod
     def _write_pb_for_create(document_path, document_data):
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import _helpers
 
-        return write_pb2.Write(
-            update=document_pb2.Document(
+        return write.Write(
+            update=document.Document(
                 name=document_path, fields=_helpers.encode_dict(document_data)
             ),
-            current_document=common_pb2.Precondition(exists=False),
+            current_document=common.Precondition(exists=False),
         )
 
     @pytest.mark.asyncio
     async def test_create(self):
         # Create a minimal fake GAPIC with a dummy response.
-        firestore_api = mock.Mock(spec=["commit"])
+        firestore_api = mock.Mock()
+        firestore_api.commit.mock_add_spec(spec=["commit"])
         firestore_api.commit.return_value = self._make_commit_repsonse()
 
         # Attach the fake GAPIC to a real client.
@@ -103,9 +104,11 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         self.assertIs(write_result, mock.sentinel.write_result)
         write_pb = self._write_pb_for_create(document._document_path, document_data)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -138,13 +141,13 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
 
     @staticmethod
     def _write_pb_for_set(document_path, document_data, merge):
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import _helpers
 
-        write_pbs = write_pb2.Write(
-            update=document_pb2.Document(
+        write_pbs = write.Write(
+            update=document.Document(
                 name=document_path, fields=_helpers.encode_dict(document_data)
             )
         )
@@ -158,8 +161,8 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
             field_paths = [
                 field_path.to_api_repr() for field_path in sorted(field_paths)
             ]
-            mask = common_pb2.DocumentMask(field_paths=sorted(field_paths))
-            write_pbs.update_mask.CopyFrom(mask)
+            mask = common.DocumentMask(field_paths=sorted(field_paths))
+            write_pbs._pb.update_mask.CopyFrom(mask._pb)
         return write_pbs
 
     @pytest.mark.asyncio
@@ -182,9 +185,11 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         write_pb = self._write_pb_for_set(document._document_path, document_data, merge)
 
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -198,17 +203,17 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
 
     @staticmethod
     def _write_pb_for_update(document_path, update_values, field_paths):
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
+        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import _helpers
 
-        return write_pb2.Write(
-            update=document_pb2.Document(
+        return write.Write(
+            update=document.Document(
                 name=document_path, fields=_helpers.encode_dict(update_values)
             ),
-            update_mask=common_pb2.DocumentMask(field_paths=field_paths),
-            current_document=common_pb2.Precondition(exists=True),
+            update_mask=common.DocumentMask(field_paths=field_paths),
+            current_document=common.Precondition(exists=True),
         )
 
     @pytest.mark.asyncio
@@ -249,9 +254,11 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         if option is not None:
             option.modify_write(write_pb)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -290,7 +297,7 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
 
     @pytest.mark.asyncio
     async def _delete_helper(self, **option_kwargs):
-        from google.cloud.firestore_v1.proto import write_pb2
+        from google.cloud.firestore_v1.types import write
 
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock(spec=["commit"])
@@ -311,13 +318,15 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
 
         # Verify the response and the mocks.
         self.assertIs(delete_time, mock.sentinel.commit_time)
-        write_pb = write_pb2.Write(delete=document._document_path)
+        write_pb = write.Write(delete=document._document_path)
         if option is not None:
             option.modify_write(write_pb)
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            [write_pb],
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "writes": [write_pb],
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -337,15 +346,15 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         self, field_paths=None, use_transaction=False, not_found=False
     ):
         from google.api_core.exceptions import NotFound
-        from google.cloud.firestore_v1.proto import common_pb2
-        from google.cloud.firestore_v1.proto import document_pb2
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.types import document
         from google.cloud.firestore_v1.transaction import Transaction
 
         # Create a minimal fake GAPIC with a dummy response.
         create_time = 123
         update_time = 234
         firestore_api = mock.Mock(spec=["get_document"])
-        response = mock.create_autospec(document_pb2.Document)
+        response = mock.create_autospec(document.Document)
         response.fields = {}
         response.create_time = create_time
         response.update_time = update_time
@@ -384,7 +393,7 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
 
         # Verify the request made to the API
         if field_paths is not None:
-            mask = common_pb2.DocumentMask(field_paths=sorted(field_paths))
+            mask = common.DocumentMask(field_paths=sorted(field_paths))
         else:
             mask = None
 
@@ -394,9 +403,11 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
             expected_transaction_id = None
 
         firestore_api.get_document.assert_called_once_with(
-            document._document_path,
-            mask=mask,
-            transaction=expected_transaction_id,
+            request={
+                "name": document._document_path,
+                "mask": mask,
+                "transaction": expected_transaction_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -430,12 +441,14 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
-        from google.cloud.firestore_v1.gapic.firestore_client import FirestoreClient
+        from google.cloud.firestore_v1.services.firestore.client import FirestoreClient
 
+        # TODO(microgen): https://github.com/googleapis/gapic-generator-python/issues/516
         class _Iterator(Iterator):
             def __init__(self, pages):
                 super(_Iterator, self).__init__(client=None)
                 self._pages = pages
+                self.collection_ids = pages[0]
 
             def _next_page(self):
                 if self._pages:
@@ -453,9 +466,9 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         # Actually make a document and call delete().
         document = self._make_one("where", "we-are", client=client)
         if page_size is not None:
-            collections = list(await document.collections(page_size=page_size))
+            collections = [c async for c in document.collections(page_size=page_size)]
         else:
-            collections = list(await document.collections())
+            collections = [c async for c in document.collections()]
 
         # Verify the response and the mocks.
         self.assertEqual(len(collections), len(collection_ids))
@@ -465,7 +478,8 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
             self.assertEqual(collection.id, collection_id)
 
         api_client.list_collection_ids.assert_called_once_with(
-            document._document_path, page_size=page_size, metadata=client._rpc_metadata
+            request={"parent": document._document_path, "page_size": page_size},
+            metadata=client._rpc_metadata,
         )
 
     @pytest.mark.asyncio

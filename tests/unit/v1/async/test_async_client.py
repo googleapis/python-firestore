@@ -133,7 +133,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         assert query._all_descendants
         assert query._field_filters[0].field.field_path == "foo"
         assert query._field_filters[0].value.string_value == u"bar"
-        assert query._field_filters[0].op == query._field_filters[0].EQUAL
+        assert query._field_filters[0].op == query._field_filters[0].Operator.EQUAL
         assert query._parent.id == "collectionId"
 
     def test_collection_group_no_slashes(self):
@@ -201,10 +201,13 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         firestore_api = mock.Mock(spec=["list_collection_ids"])
         client._firestore_api_internal = firestore_api
 
+        # TODO(microgen): list_collection_ids isn't a pager.
+        # https://github.com/googleapis/gapic-generator-python/issues/516
         class _Iterator(Iterator):
             def __init__(self, pages):
                 super(_Iterator, self).__init__(client=None)
                 self._pages = pages
+                self.collection_ids = pages[0]
 
             def _next_page(self):
                 if self._pages:
@@ -214,7 +217,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         iterator = _Iterator(pages=[collection_ids])
         firestore_api.list_collection_ids.return_value = iterator
 
-        collections = list(await client.collections())
+        collections = [c async for c in client.collections()]
 
         self.assertEqual(len(collections), len(collection_ids))
         for collection, collection_id in zip(collections, collection_ids):
@@ -224,7 +227,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
 
         base_path = client._database_string + "/documents"
         firestore_api.list_collection_ids.assert_called_once_with(
-            base_path, metadata=client._rpc_metadata
+            request={"parent": base_path}, metadata=client._rpc_metadata
         )
 
     async def _get_all_helper(self, client, references, document_pbs, **kwargs):
@@ -251,14 +254,14 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         document_pb1, read_time = _doc_get_info(document1._document_path, data1)
         response1 = _make_batch_response(found=document_pb1, read_time=read_time)
 
-        document_pb2, read_time = _doc_get_info(document2._document_path, data2)
-        response2 = _make_batch_response(found=document_pb2, read_time=read_time)
+        document, read_time = _doc_get_info(document2._document_path, data2)
+        response2 = _make_batch_response(found=document, read_time=read_time)
 
         return client, document1, document2, response1, response2
 
     @pytest.mark.asyncio
     async def test_get_all(self):
-        from google.cloud.firestore_v1.proto import common_pb2
+        from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
         data1 = {"a": u"cheese"}
@@ -288,12 +291,14 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
 
         # Verify the call to the mock.
         doc_paths = [document1._document_path, document2._document_path]
-        mask = common_pb2.DocumentMask(field_paths=field_paths)
+        mask = common.DocumentMask(field_paths=field_paths)
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            mask,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": mask,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -322,10 +327,12 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         # Verify the call to the mock.
         doc_paths = [document._document_path]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=txn_id,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": txn_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -346,10 +353,12 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         # Verify the call to the mock.
         doc_paths = [document._document_path]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -390,10 +399,12 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
             document3._document_path,
         ]
         client._firestore_api.batch_get_documents.assert_called_once_with(
-            client._database_string,
-            doc_paths,
-            None,
-            transaction=None,
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": None,
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -425,13 +436,13 @@ def _make_credentials():
 
 
 def _make_batch_response(**kwargs):
-    from google.cloud.firestore_v1.proto import firestore_pb2
+    from google.cloud.firestore_v1.types import firestore
 
-    return firestore_pb2.BatchGetDocumentsResponse(**kwargs)
+    return firestore.BatchGetDocumentsResponse(**kwargs)
 
 
 def _doc_get_info(ref_string, values):
-    from google.cloud.firestore_v1.proto import document_pb2
+    from google.cloud.firestore_v1.types import document
     from google.cloud._helpers import _datetime_to_pb_timestamp
     from google.cloud.firestore_v1 import _helpers
 
@@ -441,7 +452,7 @@ def _doc_get_info(ref_string, values):
     update_time = _datetime_to_pb_timestamp(now - delta)
     create_time = _datetime_to_pb_timestamp(now - 2 * delta)
 
-    document_pb = document_pb2.Document(
+    document_pb = document.Document(
         name=ref_string,
         fields=_helpers.encode_dict(values),
         create_time=create_time,

@@ -81,9 +81,11 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -123,9 +125,11 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -165,9 +169,11 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
 
         # Verify the mock call.
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=txn_id,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": txn_id,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -194,9 +200,11 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -224,9 +232,11 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -263,9 +273,11 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -302,9 +314,11 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 
@@ -344,9 +358,11 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
         # Verify the mock call.
         parent_path, _ = parent._parent_info()
         firestore_api.run_query.assert_called_once_with(
-            parent_path,
-            query._to_protobuf(),
-            transaction=None,
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
             metadata=client._rpc_metadata,
         )
 

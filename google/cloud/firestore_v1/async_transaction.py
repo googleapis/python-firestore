@@ -63,7 +63,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
         Args:
             write_pbs (List[google.cloud.proto.firestore.v1.\
-                write_pb2.Write]): A list of write protobufs to be added.
+                write.Write]): A list of write protobufs to be added.
 
         Raises:
             ValueError: If this transaction is read-only.
@@ -88,8 +88,10 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
             raise ValueError(msg)
 
         transaction_response = self._client._firestore_api.begin_transaction(
-            self._client._database_string,
-            options_=self._options_protobuf(retry_id),
+            request={
+                "database": self._client._database_string,
+                "options": self._options_protobuf(retry_id),
+            },
             metadata=self._client._rpc_metadata,
         )
         self._id = transaction_response.transaction
@@ -106,8 +108,10 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         try:
             # NOTE: The response is just ``google.protobuf.Empty``.
             self._client._firestore_api.rollback(
-                self._client._database_string,
-                self._id,
+                request={
+                    "database": self._client._database_string,
+                    "transaction": self._id,
+                },
                 metadata=self._client._rpc_metadata,
             )
         finally:
@@ -117,7 +121,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         """Transactionally commit the changes accumulated.
 
         Returns:
-            List[:class:`google.cloud.proto.firestore.v1.write_pb2.WriteResult`, ...]:
+            List[:class:`google.cloud.proto.firestore.v1.write.WriteResult`, ...]:
             The write results corresponding to the changes committed, returned
             in the same order as the changes were applied to this transaction.
             A write result contains an ``update_time`` field.
@@ -312,7 +316,7 @@ async def _commit_with_retry(client, write_pbs, transaction_id):
     Args:
         client (:class:`~google.cloud.firestore_v1.client.Client`):
             A client with GAPIC client and configuration details.
-        write_pbs (List[:class:`google.cloud.proto.firestore.v1.write_pb2.Write`, ...]):
+        write_pbs (List[:class:`google.cloud.proto.firestore.v1.write.Write`, ...]):
             A ``Write`` protobuf instance to be committed.
         transaction_id (bytes):
             ID of an existing transaction that this commit will run in.
@@ -329,9 +333,11 @@ async def _commit_with_retry(client, write_pbs, transaction_id):
     while True:
         try:
             return client._firestore_api.commit(
-                client._database_string,
-                write_pbs,
-                transaction=transaction_id,
+                request={
+                    "database": client._database_string,
+                    "writes": write_pbs,
+                    "transaction": transaction_id,
+                },
                 metadata=client._rpc_metadata,
             )
         except exceptions.ServiceUnavailable:
