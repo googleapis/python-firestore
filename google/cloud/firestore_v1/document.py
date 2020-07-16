@@ -14,8 +14,6 @@
 
 """Classes for representing documents for the Google Cloud Firestore API."""
 
-import six
-
 from google.cloud.firestore_v1.base_document import (
     BaseDocumentReference,
     DocumentSnapshot,

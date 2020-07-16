@@ -18,8 +18,6 @@
 import random
 import time
 
-import six
-
 from google.cloud.firestore_v1.base_transaction import (
     _BaseTransactional,
     BaseTransaction,
