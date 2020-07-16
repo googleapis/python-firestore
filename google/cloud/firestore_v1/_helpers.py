@@ -159,7 +159,7 @@ def encode_value(value):
         return document.Value(boolean_value=value)
 
     if isinstance(value, int):
-        return document_pb2.Value(integer_value=value)
+        return document.Value(integer_value=value)
 
     if isinstance(value, float):
         return document.Value(double_value=value)
@@ -171,10 +171,10 @@ def encode_value(value):
         return document.Value(timestamp_value=_datetime_to_pb_timestamp(value))
 
     if isinstance(value, str):
-        return document_pb2.Value(string_value=value)
+        return document.Value(string_value=value)
 
     if isinstance(value, bytes):
-        return document_pb2.Value(bytes_value=value)
+        return document.Value(bytes_value=value)
 
     # NOTE: We avoid doing an isinstance() check for a Document
     #       here to avoid import cycles.
