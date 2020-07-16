@@ -68,12 +68,8 @@ def cleanup():
         operation()
 
 
-def test_collections():
-    from google.cloud import firestore
-
-    client = firestore.Client()
+def test_collections(client):
     collections = list(client.collections())
-
     assert isinstance(collections, list)
 
 
