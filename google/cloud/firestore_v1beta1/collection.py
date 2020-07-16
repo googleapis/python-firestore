@@ -16,8 +16,6 @@
 import random
 import warnings
 
-import six
-
 from google.cloud.firestore_v1beta1 import _helpers
 from google.cloud.firestore_v1beta1 import query as query_mod
 from google.cloud.firestore_v1beta1.proto import document_pb2
@@ -463,7 +461,7 @@ def _auto_id():
         str: A 20 character string composed of digits, uppercase and
         lowercase and letters.
     """
-    return "".join(random.choice(_AUTO_ID_CHARS) for _ in six.moves.xrange(20))
+    return "".join(random.choice(_AUTO_ID_CHARS) for _ in range(20))
 
 
 def _item_to_document_ref(iterator, item):

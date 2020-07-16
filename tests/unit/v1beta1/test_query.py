@@ -18,14 +18,9 @@ import unittest
 
 import mock
 import pytest
-import six
 
 
 class TestQuery(unittest.TestCase):
-
-    if six.PY2:
-        assertRaisesRegex = unittest.TestCase.assertRaisesRegexp
-
     @staticmethod
     def _get_target_class():
         from google.cloud.firestore_v1beta1.query import Query

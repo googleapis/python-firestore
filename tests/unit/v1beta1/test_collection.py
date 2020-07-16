@@ -18,7 +18,6 @@ import unittest
 
 import mock
 import pytest
-import six
 
 
 class TestCollectionReference(unittest.TestCase):
@@ -36,7 +35,7 @@ class TestCollectionReference(unittest.TestCase):
     def _get_public_methods(klass):
         return set(
             name
-            for name, value in six.iteritems(klass.__dict__)
+            for name, value in klass.__dict__.items()
             if (not name.startswith("_") and isinstance(value, types.FunctionType))
         )
 

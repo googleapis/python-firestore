@@ -16,8 +16,6 @@
 
 import copy
 
-import six
-
 from google.api_core import exceptions
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
@@ -434,7 +432,7 @@ class DocumentReference(object):
                 :attr:`create_time` attributes will all be ``None`` and
                 its :attr:`exists` attribute will be ``False``.
         """
-        if isinstance(field_paths, six.string_types):
+        if isinstance(field_paths, str):
             raise ValueError("'field_paths' must be a sequence of paths, not a string.")
 
         if field_paths is not None:
