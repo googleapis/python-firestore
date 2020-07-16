@@ -133,7 +133,8 @@ class TestWriteBatch(unittest.TestCase):
                 ctx_mgr.delete(document2)
                 raise RuntimeError("testing")
 
-        # batch still has its changes, as _exit_ is not invoked
+        # batch still has its changes, as _exit_ (and commit) is not invoked
+        # changes are preserved so commit can be retried
         self.assertIsNone(batch.write_results)
         self.assertIsNone(batch.commit_time)
         self.assertEqual(len(batch._write_pbs), 2)
