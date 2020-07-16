@@ -16,7 +16,6 @@ import types
 import unittest
 
 import mock
-import six
 
 
 class TestCollectionReference(unittest.TestCase):
