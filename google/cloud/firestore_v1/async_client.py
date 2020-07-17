@@ -40,9 +40,11 @@ from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_transaction import AsyncTransaction
-from google.cloud.firestore_v1.services.firestore import client as firestore_client
+from google.cloud.firestore_v1.services.firestore import (
+    async_client as firestore_client,
+)
 from google.cloud.firestore_v1.services.firestore.transports import (
-    grpc as firestore_grpc_transport,
+    grpc_asyncio as firestore_grpc_transport,
 )
 
 
@@ -94,7 +96,7 @@ class AsyncClient(BaseClient):
     def _firestore_api(self):
         """Lazy-loading getter GAPIC Firestore API.
         Returns:
-            :class:`~google.cloud.gapic.firestore.v1`.firestore_client.FirestoreClient:
+            :class:`~google.cloud.gapic.firestore.v1`.async_firestore_client.FirestoreAsyncClient:
             <The GAPIC client with the credentials of the current client.
         """
         if self._firestore_api_internal is None:
@@ -104,21 +106,21 @@ class AsyncClient(BaseClient):
             if self._emulator_host is not None:
                 # TODO(microgen): this likely needs to be adapted to use insecure_channel
                 # on new generated surface.
-                channel = firestore_grpc_transport.FirestoreGrpcTransport.create_channel(
+                channel = firestore_grpc_transport.FirestoreGrpcAsyncIOTransport.create_channel(
                     host=self._emulator_host
                 )
             else:
-                channel = firestore_grpc_transport.FirestoreGrpcTransport.create_channel(
+                channel = firestore_grpc_transport.FirestoreGrpcAsyncIOTransport.create_channel(
                     self._target,
                     credentials=self._credentials,
                     options={"grpc.keepalive_time_ms": 30000}.items(),
                 )
 
-            self._transport = firestore_grpc_transport.FirestoreGrpcTransport(
+            self._transport = firestore_grpc_transport.FirestoreGrpcAsyncIOTransport(
                 host=self._target, channel=channel
             )
 
-            self._firestore_api_internal = firestore_client.FirestoreClient(
+            self._firestore_api_internal = firestore_client.FirestoreAsyncClient(
                 transport=self._transport, client_options=self._client_options
             )
             firestore_client._client_info = self._client_info
@@ -137,7 +139,7 @@ class AsyncClient(BaseClient):
         elif self._client_options and self._client_options.api_endpoint:
             return self._client_options.api_endpoint
         else:
-            return firestore_client.FirestoreClient.DEFAULT_ENDPOINT
+            return firestore_client.FirestoreAsyncClient.DEFAULT_ENDPOINT
 
     def collection(self, *collection_path):
         """Get a reference to a collection.
