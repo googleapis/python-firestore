@@ -271,11 +271,14 @@ class TestDocumentSnapshot(unittest.TestCase):
         reference = self._make_reference("hi", "bye", client=client)
         data = {"zoop": 83}
         update_time = DatetimeWithNanoseconds.from_timestamp_pb(
-            timestamp_pb2.Timestamp(seconds=123456, nanos=123456789))
+            timestamp_pb2.Timestamp(seconds=123456, nanos=123456789)
+        )
         snapshot = self._make_one(
             reference, data, True, None, mock.sentinel.create_time, update_time
         )
-        self.assertEqual(hash(snapshot), hash(reference) + hash(123456) + hash(123456789))
+        self.assertEqual(
+            hash(snapshot), hash(reference) + hash(123456) + hash(123456789)
+        )
 
     def test__client_property(self):
         reference = self._make_reference(

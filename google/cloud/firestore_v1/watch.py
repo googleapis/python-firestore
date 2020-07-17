@@ -565,11 +565,7 @@ class Watch(object):
             key = functools.cmp_to_key(self._comparator)
             keys = sorted(updated_tree.keys(), key=key)
 
-            self._snapshot_callback(
-                keys,
-                appliedChanges,
-                read_time
-            )
+            self._snapshot_callback(keys, appliedChanges, read_time)
             self.has_pushed = True
 
         self.doc_tree = updated_tree
