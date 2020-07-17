@@ -569,8 +569,6 @@ class Watch(object):
                 keys,
                 appliedChanges,
                 read_time
-                # TODO(microgen): now a datetime
-                # datetime.datetime.fromtimestamp(read_time.seconds, pytz.utc),
             )
             self.has_pushed = True
 
