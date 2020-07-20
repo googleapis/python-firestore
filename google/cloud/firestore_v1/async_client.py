@@ -288,7 +288,7 @@ class AsyncClient(BaseClient):
             Sequence[:class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`]:
                 iterator of subcollections of the current document.
         """
-        iterator = self._firestore_api.list_collection_ids(
+        iterator = await self._firestore_api.list_collection_ids(
             request={"parent": "{}/documents".format(self._database_string)},
             metadata=self._rpc_metadata,
         )
@@ -297,7 +297,7 @@ class AsyncClient(BaseClient):
             for i in iterator.collection_ids:
                 yield self.collection(i)
             if iterator.next_page_token:
-                iterator = self._firestore_api.list_collection_ids(
+                iterator = await self._firestore_api.list_collection_ids(
                     request={
                         "parent": "{}/documents".format(self._database_string),
                         "page_token": iterator.next_page_token,
