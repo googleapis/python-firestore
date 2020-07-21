@@ -18,11 +18,7 @@ import types
 import aiounittest
 
 import mock
-
-
-class AsyncMock(mock.MagicMock):
-    async def __call__(self, *args, **kwargs):
-        return super(AsyncMock, self).__call__(*args, **kwargs)
+from tests.unit.v1.test__helpers import AsyncMock
 
 
 class TestAsyncClient(aiounittest.AsyncTestCase):
