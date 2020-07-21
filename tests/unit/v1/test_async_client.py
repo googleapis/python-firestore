@@ -21,11 +21,6 @@ import mock
 from tests.unit.v1.test__helpers import AsyncMock
 
 
-class AsyncMock(mock.MagicMock):
-    async def __call__(self, *args, **kwargs):
-        return super(AsyncMock, self).__call__(*args, **kwargs)
-
-
 class TestAsyncClient(aiounittest.AsyncTestCase):
 
     PROJECT = "my-prahjekt"
