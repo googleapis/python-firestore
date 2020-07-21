@@ -14,7 +14,9 @@
 
 import pytest
 import aiounittest
+
 import mock
+from tests.unit.v1.test__helpers import AsyncMock
 
 
 class TestAsyncTransaction(aiounittest.AsyncTestCase):
@@ -86,9 +88,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
         from google.cloud.firestore_v1.types import firestore
 
         # Create a minimal fake GAPIC with a dummy result.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
         txn_id = b"to-begin"
         response = firestore.BeginTransactionResponse(transaction=txn_id)
         firestore_api.begin_transaction.return_value = response
@@ -133,9 +133,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
         )
 
         # Create a minimal fake GAPIC with a dummy result.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
         firestore_api.rollback.return_value = empty_pb2.Empty()
 
         # Attach the fake GAPIC to a real client.
@@ -177,9 +175,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
         )
 
         # Create a minimal fake GAPIC with a dummy failure.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
         exc = exceptions.InternalServerError("Fire during rollback.")
         firestore_api.rollback.side_effect = exc
 
@@ -214,9 +210,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
         from google.cloud.firestore_v1.types import write
 
         # Create a minimal fake GAPIC with a dummy result.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
         commit_response = firestore.CommitResponse(write_results=[write.WriteResult()])
         firestore_api.commit.return_value = commit_response
 
@@ -267,9 +261,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
         )
 
         # Create a minimal fake GAPIC with a dummy failure.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
         exc = exceptions.InternalServerError("Fire during commit.")
         firestore_api.commit.side_effect = exc
 
@@ -304,7 +296,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
 
     @pytest.mark.asyncio
     async def test_get_all(self):
-        client = mock.Mock(spec=["get_all"])
+        client = AsyncMock(spec=["get_all"])
         transaction = self._make_one(client)
         ref1, ref2 = mock.Mock(), mock.Mock()
         result = await transaction.get_all([ref1, ref2])
@@ -315,7 +307,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
     async def test_get_document_ref(self):
         from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
-        client = mock.Mock(spec=["get_all"])
+        client = AsyncMock(spec=["get_all"])
         transaction = self._make_one(client)
         ref = AsyncDocumentReference("documents", "doc-id")
         result = await transaction.get(ref)
@@ -326,10 +318,10 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
     async def test_get_w_query(self):
         from google.cloud.firestore_v1.async_query import AsyncQuery
 
-        client = mock.Mock(spec=[])
+        client = AsyncMock(spec=[])
         transaction = self._make_one(client)
-        query = AsyncQuery(parent=mock.Mock(spec=[]))
-        query.stream = mock.MagicMock()
+        query = AsyncQuery(parent=AsyncMock(spec=[]))
+        query.stream = AsyncMock()
         result = await transaction.get(query)
         query.stream.assert_called_once_with(transaction=transaction)
         self.assertIs(result, query.stream.return_value)
@@ -809,9 +801,7 @@ class Test__commit_with_retry(aiounittest.AsyncTestCase):
         )
 
         # Create a minimal fake GAPIC with a dummy result.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
 
         # Attach the fake GAPIC to a real client.
         client = _make_client("summer")
@@ -844,9 +834,8 @@ class Test__commit_with_retry(aiounittest.AsyncTestCase):
         )
 
         # Create a minimal fake GAPIC with a dummy result.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
+
         # Make sure the first two requests fail and the third succeeds.
         firestore_api.commit.side_effect = [
             exceptions.ServiceUnavailable("Server sleepy."),
@@ -890,9 +879,8 @@ class Test__commit_with_retry(aiounittest.AsyncTestCase):
         )
 
         # Create a minimal fake GAPIC with a dummy result.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
+
         # Make sure the first request fails with an un-retryable error.
         exc = exceptions.ResourceExhausted("We ran out of fries.")
         firestore_api.commit.side_effect = exc
@@ -928,9 +916,8 @@ class Test__commit_with_retry(aiounittest.AsyncTestCase):
         )
 
         # Create a minimal fake GAPIC with a dummy result.
-        firestore_api = mock.create_autospec(
-            firestore_client.FirestoreClient, instance=True
-        )
+        firestore_api = AsyncMock()
+
         # Make sure the first request fails retry-able and second
         # fails non-retryable.
         exc1 = exceptions.ServiceUnavailable("Come back next time.")
@@ -1037,9 +1024,7 @@ def _make_transaction(txn_id, **txn_kwargs):
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 
     # Create a fake GAPIC ...
-    firestore_api = mock.create_autospec(
-        firestore_client.FirestoreClient, instance=True
-    )
+    firestore_api = AsyncMock()
     # ... with a dummy ``BeginTransactionResponse`` result ...
     begin_response = firestore.BeginTransactionResponse(transaction=txn_id)
     firestore_api.begin_transaction.return_value = begin_response
