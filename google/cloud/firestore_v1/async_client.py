@@ -99,33 +99,11 @@ class AsyncClient(BaseClient):
             :class:`~google.cloud.gapic.firestore.v1`.async_firestore_client.FirestoreAsyncClient:
             <The GAPIC client with the credentials of the current client.
         """
-        if self._firestore_api_internal is None:
-            # Use a custom channel.
-            # We need this in order to set appropriate keepalive options.
-
-            if self._emulator_host is not None:
-                # TODO(microgen): this likely needs to be adapted to use insecure_channel
-                # on new generated surface.
-                channel = firestore_grpc_transport.FirestoreGrpcAsyncIOTransport.create_channel(
-                    host=self._emulator_host
-                )
-            else:
-                channel = firestore_grpc_transport.FirestoreGrpcAsyncIOTransport.create_channel(
-                    self._target,
-                    credentials=self._credentials,
-                    options={"grpc.keepalive_time_ms": 30000}.items(),
-                )
-
-            self._transport = firestore_grpc_transport.FirestoreGrpcAsyncIOTransport(
-                host=self._target, channel=channel
-            )
-
-            self._firestore_api_internal = firestore_client.FirestoreAsyncClient(
-                transport=self._transport, client_options=self._client_options
-            )
-            firestore_client._client_info = self._client_info
-
-        return self._firestore_api_internal
+        return self._firestore_api_helper(
+            firestore_grpc_transport.FirestoreGrpcAsyncIOTransport,
+            firestore_client.FirestoreAsyncClient,
+            firestore_client,
+        )
 
     @property
     def _target(self):
@@ -134,12 +112,7 @@ class AsyncClient(BaseClient):
         Returns:
             str: The location of the API.
         """
-        if self._emulator_host is not None:
-            return self._emulator_host
-        elif self._client_options and self._client_options.api_endpoint:
-            return self._client_options.api_endpoint
-        else:
-            return firestore_client.FirestoreAsyncClient.DEFAULT_ENDPOINT
+        return self._target_helper(firestore_client.FirestoreAsyncClient)
 
     def collection(self, *collection_path):
         """Get a reference to a collection.
