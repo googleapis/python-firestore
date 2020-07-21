@@ -272,7 +272,7 @@ class AsyncDocumentReference(BaseDocumentReference):
             still return the time that the request was received by the server.
         """
         write_pb = _helpers.pb_for_delete(self._document_path, option)
-        commit_response = self._client._firestore_api.commit(
+        commit_response = await self._client._firestore_api.commit(
             request={
                 "database": self._client._database_string,
                 "writes": [write_pb],
@@ -320,7 +320,7 @@ class AsyncDocumentReference(BaseDocumentReference):
 
         firestore_api = self._client._firestore_api
         try:
-            document_pb = firestore_api.get_document(
+            document_pb = await firestore_api.get_document(
                 request={
                     "name": self._document_path,
                     "mask": mask,
@@ -362,7 +362,7 @@ class AsyncDocumentReference(BaseDocumentReference):
                 document does not exist at the time of `snapshot`, the
                 iterator will be empty
         """
-        iterator = self._client._firestore_api.list_collection_ids(
+        iterator = await self._client._firestore_api.list_collection_ids(
             request={"parent": self._document_path, "page_size": page_size},
             metadata=self._client._rpc_metadata,
         )
@@ -371,7 +371,7 @@ class AsyncDocumentReference(BaseDocumentReference):
             for i in iterator.collection_ids:
                 yield self.collection(i)
             if iterator.next_page_token:
-                iterator = self._client._firestore_api.list_collection_ids(
+                iterator = await self._client._firestore_api.list_collection_ids(
                     request={
                         "parent": self._document_path,
                         "page_size": page_size,
