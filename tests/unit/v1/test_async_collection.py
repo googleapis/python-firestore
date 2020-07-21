@@ -17,6 +17,7 @@ import types
 import aiounittest
 
 import mock
+from tests.unit.v1.test__helpers import AsyncMock
 import six
 
 
@@ -217,9 +218,10 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
             Document(name=template.format(document_id)) for document_id in document_ids
         ]
         iterator = _Iterator(pages=[documents])
-        api_client = mock.create_autospec(FirestoreClient)
-        api_client.list_documents.return_value = iterator
-        client._firestore_api_internal = api_client
+        firestore_api = AsyncMock()
+        firestore_api.mock_add_spec(spec=["list_documents"])
+        firestore_api.list_documents.return_value = iterator
+        client._firestore_api_internal = firestore_api
         collection = self._make_one("collection", client=client)
 
         if page_size is not None:
@@ -235,7 +237,7 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
             self.assertEqual(document.id, document_id)
 
         parent, _ = collection._parent_info()
-        api_client.list_documents.assert_called_once_with(
+        firestore_api.list_documents.assert_called_once_with(
             request={
                 "parent": parent,
                 "collection_id": collection.id,
