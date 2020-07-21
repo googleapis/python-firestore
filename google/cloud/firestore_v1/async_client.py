@@ -97,7 +97,7 @@ class AsyncClient(BaseClient):
         """Lazy-loading getter GAPIC Firestore API.
         Returns:
             :class:`~google.cloud.gapic.firestore.v1`.async_firestore_client.FirestoreAsyncClient:
-            <The GAPIC client with the credentials of the current client.
+            The GAPIC client with the credentials of the current client.
         """
         return self._firestore_api_helper(
             firestore_grpc_transport.FirestoreGrpcAsyncIOTransport,
