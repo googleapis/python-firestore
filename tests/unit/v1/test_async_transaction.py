@@ -82,9 +82,6 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
 
     @pytest.mark.asyncio
     async def test__begin(self):
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
         from google.cloud.firestore_v1.types import firestore
 
         # Create a minimal fake GAPIC with a dummy result.
@@ -128,9 +125,6 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
     @pytest.mark.asyncio
     async def test__rollback(self):
         from google.protobuf import empty_pb2
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = AsyncMock()
@@ -170,9 +164,6 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
     @pytest.mark.asyncio
     async def test__rollback_failure(self):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
 
         # Create a minimal fake GAPIC with a dummy failure.
         firestore_api = AsyncMock()
@@ -203,9 +194,6 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
 
     @pytest.mark.asyncio
     async def test__commit(self):
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
         from google.cloud.firestore_v1.types import firestore
         from google.cloud.firestore_v1.types import write
 
@@ -256,9 +244,6 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
     @pytest.mark.asyncio
     async def test__commit_failure(self):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
 
         # Create a minimal fake GAPIC with a dummy failure.
         firestore_api = AsyncMock()
@@ -796,9 +781,6 @@ class Test__commit_with_retry(aiounittest.AsyncTestCase):
     @mock.patch("google.cloud.firestore_v1.async_transaction._sleep")
     @pytest.mark.asyncio
     async def test_success_first_attempt(self, _sleep):
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = AsyncMock()
@@ -829,9 +811,6 @@ class Test__commit_with_retry(aiounittest.AsyncTestCase):
     @pytest.mark.asyncio
     async def test_success_third_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = AsyncMock()
@@ -874,9 +853,6 @@ class Test__commit_with_retry(aiounittest.AsyncTestCase):
     @pytest.mark.asyncio
     async def test_failure_first_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = AsyncMock()
@@ -911,9 +887,6 @@ class Test__commit_with_retry(aiounittest.AsyncTestCase):
     @pytest.mark.asyncio
     async def test_failure_second_attempt(self, _sleep):
         from google.api_core import exceptions
-        from google.cloud.firestore_v1.services.firestore import (
-            client as firestore_client,
-        )
 
         # Create a minimal fake GAPIC with a dummy result.
         firestore_api = AsyncMock()
@@ -1018,7 +991,6 @@ def _make_client(project="feral-tom-cat"):
 
 def _make_transaction(txn_id, **txn_kwargs):
     from google.protobuf import empty_pb2
-    from google.cloud.firestore_v1.services.firestore import client as firestore_client
     from google.cloud.firestore_v1.types import firestore
     from google.cloud.firestore_v1.types import write
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
