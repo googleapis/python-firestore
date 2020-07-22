@@ -144,6 +144,7 @@ class BaseClient(ClientWithProject):
 
     def _target_helper(self, client_class):
         """Return the target (where the API is).
+        Eg. "firestore.googleapis.com"
 
         Returns:
             str: The location of the API.

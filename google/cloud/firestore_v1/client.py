@@ -106,6 +106,7 @@ class Client(BaseClient):
     @property
     def _target(self):
         """Return the target (where the API is).
+        Eg. "firestore.googleapis.com"
 
         Returns:
             str: The location of the API.
