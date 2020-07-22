@@ -284,7 +284,7 @@ class AsyncDocumentReference(BaseDocumentReference):
     async def get(self, field_paths=None, transaction=None):
         """Retrieve a snapshot of the current document.
 
-        See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
+        See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for
         more information on **field paths**.
 
         If a ``transaction`` is used and it already has write operations
@@ -296,12 +296,12 @@ class AsyncDocumentReference(BaseDocumentReference):
                 paths (``.``-delimited list of field names) to use as a
                 projection of document fields in the returned results. If
                 no value is provided, all fields will be returned.
-            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+            transaction (Optional[:class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction`]):
                 An existing transaction that this reference
                 will be retrieved in.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
+            :class:`~google.cloud.firestore_v1.base_document.DocumentSnapshot`:
                 A snapshot of the current document. If the document does not
                 exist at the time of the snapshot is taken, the snapshot's
                 :attr:`reference`, :attr:`data`, :attr:`update_time`, and
