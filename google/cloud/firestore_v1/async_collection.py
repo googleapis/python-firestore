@@ -119,7 +119,8 @@ class AsyncCollectionReference(BaseCollectionReference):
             },
             metadata=self._client._rpc_metadata,
         )
-        return (_item_to_document_ref(self, i) for i in iterator)
+        async for i in iterator:
+            yield _item_to_document_ref(self, i)
 
     async def get(self, transaction=None):
         """Deprecated alias for :meth:`stream`."""
