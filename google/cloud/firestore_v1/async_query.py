@@ -149,7 +149,7 @@ class AsyncQuery(BaseQuery):
             The next document that fulfills the query.
         """
         parent_path, expected_prefix = self._parent._parent_info()
-        response_iterator = self._client._firestore_api.run_query(
+        response_iterator = await self._client._firestore_api.run_query(
             request={
                 "parent": parent_path,
                 "structured_query": self._to_protobuf(),
