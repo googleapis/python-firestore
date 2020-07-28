@@ -214,7 +214,9 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         collection = self._make_one("collection", client=client)
 
         if page_size is not None:
-            documents = [i async for i in collection.list_documents(page_size=page_size)]
+            documents = [
+                i async for i in collection.list_documents(page_size=page_size)
+            ]
         else:
             documents = [i async for i in collection.list_documents()]
 

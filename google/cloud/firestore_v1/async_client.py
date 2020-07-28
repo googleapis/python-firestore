@@ -105,7 +105,7 @@ class AsyncClient(BaseClient):
             firestore_client,
         )
         # Add _transport to FirestoreAsyncClient interface for use in Watch
-        if hasattr(firestore_api, '_client'):
+        if hasattr(firestore_api, "_client"):
             firestore_api._transport = firestore_api._client._transport
         return firestore_api
 
