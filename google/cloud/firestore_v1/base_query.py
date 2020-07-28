@@ -29,7 +29,22 @@ from google.cloud.firestore_v1 import field_path as field_path_module
 from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1.types import StructuredQuery
 from google.cloud.firestore_v1.types import query
+from google.cloud.firestore_v1.types import Cursor
 from google.cloud.firestore_v1.order import Order
+from typing import Any, Dict, NoReturn, Optional, Tuple, TypeVar
+
+_BAD_DIR_STRING: str
+_BAD_OP_NAN_NULL: str
+_BAD_OP_STRING: str
+_COMPARISON_OPERATORS: Dict[str, Any]
+_EQ_OP: str
+_INVALID_CURSOR_TRANSFORM: str
+_INVALID_WHERE_TRANSFORM: str
+_MISMATCH_CURSOR_W_ORDER_BY: str
+_MISSING_ORDER_BY: str
+_NO_ORDERS_FOR_CURSOR: str
+_helpers: module
+_operator_enum: Any
 
 _EQ_OP = "=="
 _operator_enum = StructuredQuery.FieldFilter.Operator
@@ -124,6 +139,8 @@ class BaseQuery(object):
     DESCENDING = "DESCENDING"
     """str: Sort query results in descending order on a field."""
 
+
+
     def __init__(
         self,
         parent,
@@ -135,7 +152,7 @@ class BaseQuery(object):
         start_at=None,
         end_at=None,
         all_descendants=False,
-    ):
+    ) -> None:
         self._parent = parent
         self._projection = projection
         self._field_filters = field_filters
@@ -171,7 +188,7 @@ class BaseQuery(object):
         """
         return self._parent._client
 
-    def select(self, field_paths):
+    def select(self, field_paths) -> 'BaseQuery':
         """Project documents matching query to a limited set of fields.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -215,7 +232,7 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    def where(self, field_path, op_string, value):
+    def where(self, field_path, op_string, value) -> 'BaseQuery':
         """Filter the query on a field.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -285,14 +302,14 @@ class BaseQuery(object):
         )
 
     @staticmethod
-    def _make_order(field_path, direction):
+    def _make_order(field_path, direction) -> Any:
         """Helper for :meth:`order_by`."""
         return query.StructuredQuery.Order(
             field=query.StructuredQuery.FieldReference(field_path=field_path),
             direction=_enum_from_direction(direction),
         )
 
-    def order_by(self, field_path, direction=ASCENDING):
+    def order_by(self, field_path, direction=ASCENDING) -> 'BaseQuery':
         """Modify the query to add an order clause on a specific field.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -336,7 +353,7 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    def limit(self, count):
+    def limit(self, count) -> 'BaseQuery':
         """Limit a query to return a fixed number of results.
 
         If the current query already has a limit set, this will overwrite it.
@@ -362,7 +379,7 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    def offset(self, num_to_skip):
+    def offset(self, num_to_skip) -> 'BaseQuery':
         """Skip to an offset in a query.
 
         If the current query already has specified an offset, this will
@@ -389,7 +406,7 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    def _check_snapshot(self, document_fields):
+    def _check_snapshot(self, document_fields) -> None:
         """Validate local snapshots for non-collection-group queries.
 
         Raises:
@@ -402,7 +419,7 @@ class BaseQuery(object):
         if document_fields.reference._path[:-1] != self._parent._path:
             raise ValueError("Cannot use snapshot from another collection as a cursor.")
 
-    def _cursor_helper(self, document_fields, before, start):
+    def _cursor_helper(self, document_fields, before, start) -> 'BaseQuery':
         """Set values to be used for a ``start_at`` or ``end_at`` cursor.
 
         The values will later be used in a query protobuf.
@@ -454,7 +471,7 @@ class BaseQuery(object):
 
         return self.__class__(self._parent, **query_kwargs)
 
-    def start_at(self, document_fields):
+    def start_at(self, document_fields) -> 'BaseQuery':
         """Start query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -484,7 +501,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields, before=True, start=True)
 
-    def start_after(self, document_fields):
+    def start_after(self, document_fields) -> 'BaseQuery':
         """Start query results after a particular document value.
 
         The result set will **exclude** the document specified by
@@ -513,7 +530,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields, before=False, start=True)
 
-    def end_before(self, document_fields):
+    def end_before(self, document_fields) -> 'BaseQuery':
         """End query results before a particular document value.
 
         The result set will **exclude** the document specified by
@@ -542,7 +559,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields, before=True, start=False)
 
-    def end_at(self, document_fields):
+    def end_at(self, document_fields) -> 'BaseQuery':
         """End query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -571,7 +588,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields, before=False, start=False)
 
-    def _filters_pb(self):
+    def _filters_pb(self) -> Any:
         """Convert all the filters into a single generic Filter protobuf.
 
         This may be a lone field filter or unary filter, may be a composite
@@ -594,7 +611,7 @@ class BaseQuery(object):
             return query.StructuredQuery.Filter(composite_filter=composite_filter)
 
     @staticmethod
-    def _normalize_projection(projection):
+    def _normalize_projection(projection) -> Any:
         """Helper:  convert field paths to message."""
         if projection is not None:
 
@@ -606,7 +623,7 @@ class BaseQuery(object):
 
         return projection
 
-    def _normalize_orders(self):
+    def _normalize_orders(self) -> list:
         """Helper:  adjust orders based on cursors, where clauses."""
         orders = list(self._orders)
         _has_snapshot_cursor = False
@@ -640,7 +657,7 @@ class BaseQuery(object):
 
         return orders
 
-    def _normalize_cursor(self, cursor, orders):
+    def _normalize_cursor(self, cursor, orders) -> Optional[Tuple[Any, Any]]:
         """Helper: convert cursor to a list of values based on orders."""
         if cursor is None:
             return
@@ -692,7 +709,7 @@ class BaseQuery(object):
 
         return document_fields, before
 
-    def _to_protobuf(self):
+    def _to_protobuf(self) -> StructuredQuery:
         """Convert the current query into the equivalent protobuf.
 
         Returns:
@@ -723,16 +740,16 @@ class BaseQuery(object):
 
         return query.StructuredQuery(**query_kwargs)
 
-    def get(self, transaction=None):
+    def get(self, transaction=None) -> NoReturn:
         raise NotImplementedError
 
-    def stream(self, transaction=None):
+    def stream(self, transaction=None) -> NoReturn:
         raise NotImplementedError
 
-    def on_snapshot(self, callback):
+    def on_snapshot(self, callback) -> NoReturn:
         raise NotImplementedError
 
-    def _comparator(self, doc1, doc2):
+    def _comparator(self, doc1, doc2) -> Any:
         _orders = self._orders
 
         # Add implicit sorting by name, using the last specified direction.
@@ -779,7 +796,7 @@ class BaseQuery(object):
         return 0
 
 
-def _enum_from_op_string(op_string):
+def _enum_from_op_string(op_string) -> Any:
     """Convert a string representation of a binary operator to an enum.
 
     These enums come from the protobuf message definition
@@ -804,7 +821,7 @@ def _enum_from_op_string(op_string):
         raise ValueError(msg)
 
 
-def _isnan(value):
+def _isnan(value) -> bool:
     """Check if a value is NaN.
 
     This differs from ``math.isnan`` in that **any** input type is
@@ -822,7 +839,7 @@ def _isnan(value):
         return False
 
 
-def _enum_from_direction(direction):
+def _enum_from_direction(direction) -> Any:
     """Convert a string representation of a direction to an enum.
 
     Args:
@@ -850,7 +867,7 @@ def _enum_from_direction(direction):
         raise ValueError(msg)
 
 
-def _filter_pb(field_or_unary):
+def _filter_pb(field_or_unary) -> Any:
     """Convert a specific protobuf filter to the generic filter type.
 
     Args:
@@ -874,7 +891,7 @@ def _filter_pb(field_or_unary):
         raise ValueError("Unexpected filter type", type(field_or_unary), field_or_unary)
 
 
-def _cursor_pb(cursor_pair):
+def _cursor_pb(cursor_pair) -> Optional[Cursor]:
     """Convert a cursor pair to a protobuf.
 
     If ``cursor_pair`` is :data:`None`, just returns :data:`None`.
@@ -895,7 +912,7 @@ def _cursor_pb(cursor_pair):
         return query.Cursor(values=value_pbs, before=before)
 
 
-def _query_response_to_snapshot(response_pb, collection, expected_prefix):
+def _query_response_to_snapshot(response_pb, collection, expected_prefix) -> Optional[document.DocumentSnapshot]:
     """Parse a query response protobuf to a document snapshot.
 
     Args:
@@ -929,7 +946,7 @@ def _query_response_to_snapshot(response_pb, collection, expected_prefix):
     return snapshot
 
 
-def _collection_group_query_response_to_snapshot(response_pb, collection):
+def _collection_group_query_response_to_snapshot(response_pb, collection) -> Optional[document.DocumentSnapshot]:
     """Parse a query response protobuf to a document snapshot.
 
     Args:

@@ -16,6 +16,7 @@
 
 
 from google.cloud.firestore_v1.base_batch import BaseWriteBatch
+from typing import TypeVar
 
 
 class WriteBatch(BaseWriteBatch):
@@ -30,10 +31,10 @@ class WriteBatch(BaseWriteBatch):
             The client that created this batch.
     """
 
-    def __init__(self, client):
+    def __init__(self, client) -> None:
         super(WriteBatch, self).__init__(client=client)
 
-    def commit(self):
+    def commit(self) -> list:
         """Commit the changes accumulated in this batch.
 
         Returns:

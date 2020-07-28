@@ -35,6 +35,16 @@ from google.cloud.firestore_v1 import __version__
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.field_path import render_field_path
+from typing import Any, List, NoReturn, Optional, Tuple, Union
+
+_ACTIVE_TXN: str
+_BAD_DOC_TEMPLATE: str
+_BAD_OPTION_ERR: str
+_CLIENT_INFO: Any
+_FIRESTORE_EMULATOR_HOST: str
+_INACTIVE_TXN: str
+__version__: str
+_helpers: module
 
 DEFAULT_DATABASE = "(default)"
 """str: The default database used in a :class:`~google.cloud.firestore_v1.client.Client`."""
@@ -95,7 +105,7 @@ class BaseClient(ClientWithProject):
         database=DEFAULT_DATABASE,
         client_info=_CLIENT_INFO,
         client_options=None,
-    ):
+    ) -> None:
         # NOTE: This API has no use for the _http argument, but sending it
         #       will have no impact since the _http() @property only lazily
         #       creates a working HTTP object.
@@ -113,7 +123,7 @@ class BaseClient(ClientWithProject):
         self._database = database
         self._emulator_host = os.getenv(_FIRESTORE_EMULATOR_HOST)
 
-    def _firestore_api_helper(self, transport, client_class, client_module):
+    def _firestore_api_helper(self, transport, client_class, client_module) -> Any:
         """Lazy-loading getter GAPIC Firestore API.
         Returns:
             The GAPIC client with the credentials of the current client.
@@ -142,7 +152,7 @@ class BaseClient(ClientWithProject):
 
         return self._firestore_api_internal
 
-    def _target_helper(self, client_class):
+    def _target_helper(self, client_class) -> Any:
         """Return the target (where the API is).
         Eg. "firestore.googleapis.com"
 
@@ -202,13 +212,13 @@ class BaseClient(ClientWithProject):
 
         return self._rpc_metadata_internal
 
-    def collection(self, *collection_path):
+    def collection(self, *collection_path) -> NoReturn:
         raise NotImplementedError
 
-    def collection_group(self, collection_id):
+    def collection_group(self, collection_id) -> NoReturn:
         raise NotImplementedError
 
-    def _get_collection_reference(self, collection_id):
+    def _get_collection_reference(self, collection_id) -> NoReturn:
         """Checks validity of collection_id and then uses subclasses collection implementation.
 
         Args:
@@ -229,10 +239,10 @@ class BaseClient(ClientWithProject):
 
         return self.collection(collection_id)
 
-    def document(self, *document_path):
+    def document(self, *document_path) -> NoReturn:
         raise NotImplementedError
 
-    def _document_path_helper(self, *document_path):
+    def _document_path_helper(self, *document_path) -> List[str]:
         """Standardize the format of path to tuple of path segments and strip the database string from path if present.
 
         Args:
@@ -249,7 +259,7 @@ class BaseClient(ClientWithProject):
         return joined_path.split(_helpers.DOCUMENT_PATH_DELIMITER)
 
     @staticmethod
-    def field_path(*field_names):
+    def field_path(*field_names) -> Any:
         """Create a **field path** from a list of nested field names.
 
         A **field path** is a ``.``-delimited concatenation of the field
@@ -278,7 +288,7 @@ class BaseClient(ClientWithProject):
         return render_field_path(field_names)
 
     @staticmethod
-    def write_option(**kwargs):
+    def write_option(**kwargs) -> Union[google.cloud.firestore_v1._helpers.ExistsOption, google.cloud.firestore_v1._helpers.LastUpdateOption]:
         """Create a write option for write operations.
 
         Write operations include :meth:`~google.cloud.DocumentReference.set`,
@@ -326,20 +336,20 @@ class BaseClient(ClientWithProject):
             extra = "{!r} was provided".format(name)
             raise TypeError(_BAD_OPTION_ERR, extra)
 
-    def get_all(self, references, field_paths=None, transaction=None):
+    def get_all(self, references, field_paths=None, transaction=None) -> NoReturn:
         raise NotImplementedError
 
-    def collections(self):
+    def collections(self) -> NoReturn:
         raise NotImplementedError
 
-    def batch(self):
+    def batch(self) -> NoReturn:
         raise NotImplementedError
 
-    def transaction(self, **kwargs):
+    def transaction(self, **kwargs) -> NoReturn:
         raise NotImplementedError
 
 
-def _reference_info(references):
+def _reference_info(references) -> Tuple[list, dict]:
     """Get information about document references.
 
     Helper for :meth:`~google.cloud.firestore_v1.client.Client.get_all`.
@@ -366,7 +376,7 @@ def _reference_info(references):
     return document_paths, reference_map
 
 
-def _get_reference(document_path, reference_map):
+def _get_reference(document_path, reference_map) -> Any:
     """Get a document reference from a dictionary.
 
     This just wraps a simple dictionary look-up with a helpful error that is
@@ -392,7 +402,7 @@ def _get_reference(document_path, reference_map):
         raise ValueError(msg)
 
 
-def _parse_batch_get(get_doc_response, reference_map, client):
+def _parse_batch_get(get_doc_response, reference_map, client) -> google.cloud.firestore_v1.base_document.DocumentSnapshot:
     """Parse a `BatchGetDocumentsResponse` protobuf.
 
     Args:
@@ -442,7 +452,7 @@ def _parse_batch_get(get_doc_response, reference_map, client):
     return snapshot
 
 
-def _get_doc_mask(field_paths):
+def _get_doc_mask(field_paths) -> Optional[google.cloud.firestore_v1.types.common.DocumentMask]:
     """Get a document mask if field paths are provided.
 
     Args:
@@ -460,7 +470,7 @@ def _get_doc_mask(field_paths):
         return types.DocumentMask(field_paths=field_paths)
 
 
-def _item_to_collection_ref(iterator, item):
+def _item_to_collection_ref(iterator, item) -> Any:
     """Convert collection ID to collection ref.
 
     Args:
@@ -471,7 +481,7 @@ def _item_to_collection_ref(iterator, item):
     return iterator.client.collection(item)
 
 
-def _path_helper(path):
+def _path_helper(path) -> Any:
     """Standardize path into a tuple of path segments.
 
     Args:
