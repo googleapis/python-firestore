@@ -22,8 +22,8 @@ from google.cloud.firestore_v1 import AsyncClient
 from google.cloud.firestore_v1 import AsyncCollectionReference
 from google.cloud.firestore_v1 import AsyncDocumentReference
 from google.cloud.firestore_v1 import AsyncQuery
-from google.cloud.firestore_v1 import AsyncTransaction
 from google.cloud.firestore_v1 import async_transactional
+from google.cloud.firestore_v1 import AsyncTransaction
 from google.cloud.firestore_v1 import AsyncWriteBatch
 from google.cloud.firestore_v1 import Client
 from google.cloud.firestore_v1 import CollectionReference
@@ -56,8 +56,8 @@ __all__ = [
     "AsyncCollectionReference",
     "AsyncDocumentReference",
     "AsyncQuery",
-    "AsyncTransaction",
     "async_transactional",
+    "AsyncTransaction",
     "AsyncWriteBatch",
     "Client",
     "CollectionReference",
