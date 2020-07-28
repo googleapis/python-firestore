@@ -25,6 +25,7 @@ from google.cloud.firestore_v1 import async_query
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import async_document
 
+from typing import AsyncIterator
 
 class AsyncCollectionReference(BaseCollectionReference):
     """A reference to a collection in a Firestore database.
@@ -129,9 +130,9 @@ class AsyncCollectionReference(BaseCollectionReference):
             stacklevel=2,
         )
         async for d in self.stream(transaction=transaction):
-            yield d
+            yield d # pytype: disable=name-error
 
-    async def stream(self, transaction=None):
+    async def stream(self, transaction=None) -> AsyncIterator[async_document.DocumentSnapshot]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -160,7 +161,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         """
         query = async_query.AsyncQuery(self)
         async for d in query.stream(transaction=transaction):
-            yield d
+            yield d # pytype: disable=name-error
 
     def on_snapshot(self, callback):
         """Monitor the documents in this collection.
