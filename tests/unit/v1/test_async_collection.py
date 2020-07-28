@@ -322,12 +322,6 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         query_instance = query_class.return_value
         query_instance.stream.assert_called_once_with(transaction=transaction)
 
-    @mock.patch("google.cloud.firestore_v1.async_collection.Watch", autospec=True)
-    def test_on_snapshot(self, watch):
-        collection = self._make_one("collection")
-        collection.on_snapshot(None)
-        watch.for_query.assert_called_once()
-
 
 def _make_credentials():
     import google.auth.credentials
