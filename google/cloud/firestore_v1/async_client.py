@@ -99,11 +99,15 @@ class AsyncClient(BaseClient):
             :class:`~google.cloud.gapic.firestore.v1`.async_firestore_client.FirestoreAsyncClient:
             The GAPIC client with the credentials of the current client.
         """
-        return self._firestore_api_helper(
+        firestore_api = self._firestore_api_helper(
             firestore_grpc_transport.FirestoreGrpcAsyncIOTransport,
             firestore_client.FirestoreAsyncClient,
             firestore_client,
         )
+        # Add _transport to FirestoreAsyncClient interface for use in Watch
+        if hasattr(firestore_api, '_client'):
+            firestore_api._transport = firestore_api._client._transport
+        return firestore_api
 
     @property
     def _target(self):
