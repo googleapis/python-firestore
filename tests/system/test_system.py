@@ -15,8 +15,6 @@
 import datetime
 import math
 import operator
-import os
-import re
 
 from google.oauth2 import service_account
 import pytest
@@ -28,16 +26,16 @@ from google.api_core.exceptions import NotFound
 from google.cloud._helpers import _datetime_to_pb_timestamp
 from google.cloud._helpers import UTC
 from google.cloud import firestore_v1 as firestore
-from test_utils.system import unique_resource_id
 
 from time import sleep
 
-FIRESTORE_CREDS = os.environ.get("FIRESTORE_APPLICATION_CREDENTIALS")
-FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
-RANDOM_ID_REGEX = re.compile("^[a-zA-Z0-9]{20}$")
-MISSING_DOCUMENT = "No document to update: "
-DOCUMENT_EXISTS = "Document already exists: "
-UNIQUE_RESOURCE_ID = unique_resource_id("-")
+from tests.system.test__helpers import (
+    FIRESTORE_CREDS,
+    FIRESTORE_PROJECT,
+    RANDOM_ID_REGEX,
+    MISSING_DOCUMENT,
+    UNIQUE_RESOURCE_ID,
+)
 
 
 @pytest.fixture(scope=u"module")
@@ -683,7 +681,7 @@ def test_query_stream_w_offset(query_docs):
 
 def test_query_with_order_dot_key(client, cleanup):
     db = client
-    collection_id = "collek" + unique_resource_id("-")
+    collection_id = "collek" + UNIQUE_RESOURCE_ID
     collection = db.collection(collection_id)
     for index in range(100, -1, -1):
         doc = collection.document("test_{:09d}".format(index))
