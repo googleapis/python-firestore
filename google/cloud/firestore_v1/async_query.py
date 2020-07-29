@@ -29,6 +29,9 @@ from google.cloud.firestore_v1.base_query import (
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import async_document
 from google.cloud.firestore_v1.watch import Watch
+from typing import Any, AsyncGenerator
+
+_helpers: module
 
 
 class AsyncQuery(BaseQuery):
@@ -98,7 +101,7 @@ class AsyncQuery(BaseQuery):
         start_at=None,
         end_at=None,
         all_descendants=False,
-    ):
+    ) -> None:
         super(AsyncQuery, self).__init__(
             parent=parent,
             projection=projection,
@@ -111,7 +114,7 @@ class AsyncQuery(BaseQuery):
             all_descendants=all_descendants,
         )
 
-    async def get(self, transaction=None):
+    async def get(self, transaction=None) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
         """Deprecated alias for :meth:`stream`."""
         warnings.warn(
             "'AsyncQuery.get' is deprecated:  please use 'AsyncQuery.stream' instead.",
@@ -121,7 +124,7 @@ class AsyncQuery(BaseQuery):
         async for d in self.stream(transaction=transaction):
             yield d
 
-    async def stream(self, transaction=None):
+    async def stream(self, transaction=None) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -170,7 +173,7 @@ class AsyncQuery(BaseQuery):
             if snapshot is not None:
                 yield snapshot
 
-    def on_snapshot(self, callback):
+    def on_snapshot(self, callback) -> Watch:
         """Monitor the documents in this collection that match this query.
 
         This starts a watch on this query using a background thread. The

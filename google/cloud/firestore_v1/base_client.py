@@ -36,6 +36,14 @@ from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.field_path import render_field_path
 from typing import Any, List, NoReturn, Optional, Tuple, Union
+_ACTIVE_TXN: str
+_BAD_DOC_TEMPLATE: str
+_BAD_OPTION_ERR: str
+_CLIENT_INFO: Any
+_FIRESTORE_EMULATOR_HOST: str
+_INACTIVE_TXN: str
+__version__: str
+_helpers: module
 
 _ACTIVE_TXN: str
 _BAD_DOC_TEMPLATE: str

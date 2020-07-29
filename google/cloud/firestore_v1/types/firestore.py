@@ -25,6 +25,7 @@ from google.cloud.firestore_v1.types import write
 from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 from google.rpc import status_pb2 as gr_status  # type: ignore
 from typing import Any
+__protobuf__: Any
 
 __protobuf__: Any
 

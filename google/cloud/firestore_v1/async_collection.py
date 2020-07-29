@@ -26,6 +26,7 @@ from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import async_document
 
 from typing import AsyncIterator
+from typing import Any, AsyncGenerator, Coroutine, Generator, Tuple, Union
 
 class AsyncCollectionReference(BaseCollectionReference):
     """A reference to a collection in a Firestore database.
@@ -53,10 +54,10 @@ class AsyncCollectionReference(BaseCollectionReference):
         TypeError: If a keyword other than ``client`` is used.
     """
 
-    def __init__(self, *path, **kwargs):
+    def __init__(self, *path, **kwargs) -> None:
         super(AsyncCollectionReference, self).__init__(*path, **kwargs)
 
-    def _query(self):
+    def _query(self) -> async_query.AsyncQuery:
         """Query factory.
 
         Returns:
@@ -64,7 +65,8 @@ class AsyncCollectionReference(BaseCollectionReference):
         """
         return async_query.AsyncQuery(self)
 
-    async def add(self, document_data, document_id=None):
+    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    async def add(self, document_data, document_id=None) -> Union[Coroutine[Any, Any, Tuple[Any, Any]], Tuple[Any, Any]]:
         """Create a document in the Firestore database with the provided data.
 
         Args:
@@ -95,7 +97,8 @@ class AsyncCollectionReference(BaseCollectionReference):
         write_result = await document_ref.create(document_data)
         return write_result.update_time, document_ref
 
-    async def list_documents(self, page_size=None):
+    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    async def list_documents(self, page_size=None) -> Union[Coroutine[Any, Any, Generator[Any, Any, None]],  Generator[Any, Any, None]]:
         """List all subdocuments of the current collection.
 
         Args:
@@ -122,7 +125,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         )
         return (_item_to_document_ref(self, i) for i in iterator)
 
-    async def get(self, transaction=None):
+    async def get(self, transaction=None) -> AsyncGenerator[async_document.DocumentSnapshot, Any]:
         """Deprecated alias for :meth:`stream`."""
         warnings.warn(
             "'Collection.get' is deprecated:  please use 'Collection.stream' instead.",
@@ -163,7 +166,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         async for d in query.stream(transaction=transaction):
             yield d # pytype: disable=name-error
 
-    def on_snapshot(self, callback):
+    def on_snapshot(self, callback) -> Watch:
         """Monitor the documents in this collection.
 
         This starts a watch on this collection using a background thread. The

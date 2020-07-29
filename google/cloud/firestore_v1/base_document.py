@@ -18,8 +18,7 @@ import copy
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
-from typing import Any, NoReturn, TypeVar
-
+from typing import Any, NoReturn
 
 
 class BaseDocumentReference(object):

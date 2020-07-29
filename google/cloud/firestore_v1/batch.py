@@ -16,7 +16,6 @@
 
 
 from google.cloud.firestore_v1.base_batch import BaseWriteBatch
-from typing import TypeVar
 
 
 class WriteBatch(BaseWriteBatch):

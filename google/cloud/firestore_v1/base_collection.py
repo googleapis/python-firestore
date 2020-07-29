@@ -17,6 +17,7 @@ import random
 
 from google.cloud.firestore_v1 import _helpers
 from typing import Any, NoReturn, Tuple
+_helpers: module
 
 _helpers: module
 

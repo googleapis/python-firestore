@@ -24,6 +24,9 @@ from google.api_core import exceptions
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.watch import Watch
+from typing import Any, Coroutine, Union
+
+_helpers: module
 
 
 class AsyncDocumentReference(BaseDocumentReference):
@@ -51,10 +54,10 @@ class AsyncDocumentReference(BaseDocumentReference):
         TypeError: If a keyword other than ``client`` is used.
     """
 
-    def __init__(self, *path, **kwargs):
+    def __init__(self, *path, **kwargs) -> None:
         super(AsyncDocumentReference, self).__init__(*path, **kwargs)
 
-    async def create(self, document_data):
+    async def create(self, document_data) -> coroutine:
         """Create the current document in the Firestore database.
 
         Args:
@@ -75,7 +78,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         write_results = await batch.commit()
         return _first_write_result(write_results)
 
-    async def set(self, document_data, merge=False):
+    async def set(self, document_data, merge=False) -> coroutine:
         """Replace the current document in the Firestore database.
 
         A write ``option`` can be specified to indicate preconditions of
@@ -106,7 +109,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         write_results = await batch.commit()
         return _first_write_result(write_results)
 
-    async def update(self, field_updates, option=None):
+    async def update(self, field_updates, option=None) -> coroutine:
         """Update an existing document in the Firestore database.
 
         By default, this method verifies that the document exists on the
@@ -254,7 +257,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         write_results = await batch.commit()
         return _first_write_result(write_results)
 
-    async def delete(self, option=None):
+    async def delete(self, option=None) -> coroutine:
         """Delete the current document in the Firestore database.
 
         Args:
@@ -281,7 +284,8 @@ class AsyncDocumentReference(BaseDocumentReference):
 
         return commit_response.commit_time
 
-    async def get(self, field_paths=None, transaction=None):
+    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    async def get(self, field_paths=None, transaction=None) -> Union[Coroutine[Any, Any, DocumentSnapshot], DocumentSnapshot]:
         """Retrieve a snapshot of the current document.
 
         See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for
@@ -346,7 +350,7 @@ class AsyncDocumentReference(BaseDocumentReference):
             update_time=update_time,
         )
 
-    async def collections(self, page_size=None):
+    async def collections(self, page_size=None) -> asyncgenerator:
         """List subcollections of the current document.
 
         Args:
@@ -386,7 +390,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         # iterator.item_to_value = _item_to_collection_ref
         # return iterator
 
-    def on_snapshot(self, callback):
+    def on_snapshot(self, callback) -> Watch:
         """Watch this document.
 
         This starts a watch on this document using a background thread. The

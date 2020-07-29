@@ -32,7 +32,6 @@ from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.types import Cursor
 from google.cloud.firestore_v1.order import Order
 from typing import Any, Dict, NoReturn, Optional, Tuple, TypeVar
-
 _BAD_DIR_STRING: str
 _BAD_OP_NAN_NULL: str
 _BAD_OP_STRING: str
@@ -45,6 +44,7 @@ _MISSING_ORDER_BY: str
 _NO_ORDERS_FOR_CURSOR: str
 _helpers: module
 _operator_enum: Any
+
 
 _EQ_OP = "=="
 _operator_enum = StructuredQuery.FieldFilter.Operator

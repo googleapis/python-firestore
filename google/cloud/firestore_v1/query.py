@@ -30,6 +30,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Generator
+_helpers: module
 
 _helpers: module
 

@@ -45,6 +45,12 @@ from google.cloud.firestore_v1.services.firestore.transports import (
     grpc as firestore_grpc_transport,
 )
 from typing import Any, Generator
+_CLIENT_INFO: Any
+_get_doc_mask: Any
+_helpers: module
+_parse_batch_get: Any
+_path_helper: Any
+_reference_info: Any
 
 _CLIENT_INFO: Any
 _get_doc_mask: Any

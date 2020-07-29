@@ -37,7 +37,6 @@ from google.cloud.firestore_v1 import batch
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
 from typing import Any, Optional, Type
-
 _CANT_BEGIN: str
 _CANT_COMMIT: str
 _CANT_ROLLBACK: str

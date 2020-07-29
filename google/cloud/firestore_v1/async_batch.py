@@ -16,6 +16,7 @@
 
 
 from google.cloud.firestore_v1.base_batch import BaseWriteBatch
+from typing import Any, Coroutine, Union
 
 
 class AsyncWriteBatch(BaseWriteBatch):
@@ -30,10 +31,10 @@ class AsyncWriteBatch(BaseWriteBatch):
             The client that created this batch.
     """
 
-    def __init__(self, client):
+    def __init__(self, client) -> None:
         super(AsyncWriteBatch, self).__init__(client=client)
 
-    async def commit(self):
+    async def commit(self) -> Union[Coroutine[Any, Any, list], list]:
         """Commit the changes accumulated in this batch.
 
         Returns:

@@ -30,12 +30,24 @@ from google.cloud.firestore_v1.base_transaction import (
     _MAX_SLEEP,
     _MULTIPLIER,
     _EXCEED_ATTEMPTS_TEMPLATE,
-)
+)       
 
 from google.api_core import exceptions
 from google.cloud.firestore_v1 import async_batch
+from google.cloud.firestore_v1 import types
+
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
+from typing import Any, Coroutine, Optional, Type, Union
+
+_CANT_BEGIN: str
+_CANT_COMMIT: str
+_CANT_ROLLBACK: str
+_EXCEED_ATTEMPTS_TEMPLATE: str
+_INITIAL_SLEEP: float
+_MAX_SLEEP: float
+_MULTIPLIER: float
+_WRITE_READ_ONLY: str
 
 
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
@@ -52,11 +64,11 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
             :data:`False`.
     """
 
-    def __init__(self, client, max_attempts=MAX_ATTEMPTS, read_only=False):
+    def __init__(self, client, max_attempts=MAX_ATTEMPTS, read_only=False) -> None:
         super(AsyncTransaction, self).__init__(client)
         BaseTransaction.__init__(self, max_attempts, read_only)
 
-    def _add_write_pbs(self, write_pbs):
+    def _add_write_pbs(self, write_pbs) -> None:
         """Add `Write`` protobufs to this transaction.
 
         Args:
@@ -70,8 +82,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
             raise ValueError(_WRITE_READ_ONLY)
 
         super(AsyncTransaction, self)._add_write_pbs(write_pbs)
-
-    async def _begin(self, retry_id=None):
+    
+    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    async def _begin(self, retry_id=None) -> Union[Coroutine[Any, Any, None], None]:
         """Begin the transaction.
 
         Args:
@@ -94,7 +107,8 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         )
         self._id = transaction_response.transaction
 
-    async def _rollback(self):
+    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    async def _rollback(self) -> Union[Coroutine[Any, Any, None], None]:
         """Roll back the transaction.
 
         Raises:
@@ -115,7 +129,8 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         finally:
             self._clean_up()
 
-    async def _commit(self):
+    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    async def _commit(self) -> Union[Coroutine[Any, Any, list], list]:
         """Transactionally commit the changes accumulated.
 
         Returns:
@@ -137,7 +152,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         self._clean_up()
         return list(commit_response.write_results)
 
-    async def get_all(self, references):
+    async def get_all(self, references) -> coroutine:
         """Retrieves multiple documents from Firestore.
 
         Args:
@@ -150,7 +165,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         """
         return await self._client.get_all(references, transaction=self)
 
-    async def get(self, ref_or_query):
+    async def get(self, ref_or_query) -> coroutine:
         """
         Retrieve a document or a query result from the database.
         Args:
@@ -180,10 +195,10 @@ class _AsyncTransactional(_BaseTransactional):
             A callable that should be run (and retried) in a transaction.
     """
 
-    def __init__(self, to_wrap):
+    def __init__(self, to_wrap) -> None:
         super(_AsyncTransactional, self).__init__(to_wrap)
 
-    async def _pre_commit(self, transaction, *args, **kwargs):
+    async def _pre_commit(self, transaction, *args, **kwargs) -> coroutine:
         """Begin transaction and call the wrapped callable.
 
         If the callable raises an exception, the transaction will be rolled
@@ -220,8 +235,9 @@ class _AsyncTransactional(_BaseTransactional):
             #       from the original failure.
             await transaction._rollback()
             raise
-
-    async def _maybe_commit(self, transaction):
+    
+    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    async def _maybe_commit(self, transaction) -> Union[Coroutine[Any, Any, Optional[bool]], bool]:
         """Try to commit the transaction.
 
         If the transaction is read-write and the ``Commit`` fails with the
@@ -287,7 +303,7 @@ class _AsyncTransactional(_BaseTransactional):
         raise ValueError(msg)
 
 
-def transactional(to_wrap):
+def transactional(to_wrap) -> _AsyncTransactional:
     """Decorate a callable so that it runs in a transaction.
 
     Args:
@@ -301,8 +317,8 @@ def transactional(to_wrap):
     """
     return _AsyncTransactional(to_wrap)
 
-
-async def _commit_with_retry(client, write_pbs, transaction_id):
+# TODO(crwilcox): this was 'coroutine' from pytype merge-pyi...
+async def _commit_with_retry(client, write_pbs, transaction_id) -> types.CommitResponse:
     """Call ``Commit`` on the GAPIC client with retry / sleep.
 
     Retries the ``Commit`` RPC on Unavailable. Usually this RPC-level
@@ -344,8 +360,8 @@ async def _commit_with_retry(client, write_pbs, transaction_id):
 
         current_sleep = await _sleep(current_sleep)
 
-
-async def _sleep(current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER):
+# TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+async def _sleep(current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER) -> Union[coroutine, float]:
     """Sleep and produce a new sleep time.
 
     .. _Exponential Backoff And Jitter: https://www.awsarchitectureblog.com/\
