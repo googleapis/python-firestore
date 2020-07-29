@@ -284,7 +284,7 @@ class AsyncDocumentReference(BaseDocumentReference):
 
         return commit_response.commit_time
 
-    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def get(
         self, field_paths=None, transaction=None
     ) -> Union[Coroutine[Any, Any, DocumentSnapshot], DocumentSnapshot]:

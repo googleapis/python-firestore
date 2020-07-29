@@ -66,7 +66,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         """
         return async_query.AsyncQuery(self)
 
-    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def add(
         self, document_data, document_id=None
     ) -> Union[Coroutine[Any, Any, Tuple[Any, Any]], Tuple[Any, Any]]:
@@ -100,7 +100,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         write_result = await document_ref.create(document_data)
         return write_result.update_time, document_ref
 
-    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def list_documents(
         self, page_size=None
     ) -> Union[

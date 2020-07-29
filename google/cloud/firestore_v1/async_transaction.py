@@ -83,7 +83,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
         super(AsyncTransaction, self)._add_write_pbs(write_pbs)
 
-    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def _begin(self, retry_id=None) -> Union[Coroutine[Any, Any, None], None]:
         """Begin the transaction.
 
@@ -107,7 +107,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         )
         self._id = transaction_response.transaction
 
-    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def _rollback(self) -> Union[Coroutine[Any, Any, None], None]:
         """Roll back the transaction.
 
@@ -129,7 +129,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         finally:
             self._clean_up()
 
-    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def _commit(self) -> Union[Coroutine[Any, Any, list], list]:
         """Transactionally commit the changes accumulated.
 
@@ -236,7 +236,7 @@ class _AsyncTransactional(_BaseTransactional):
             await transaction._rollback()
             raise
 
-    # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def _maybe_commit(
         self, transaction
     ) -> Union[Coroutine[Any, Any, Optional[bool]], bool]:
@@ -364,7 +364,7 @@ async def _commit_with_retry(client, write_pbs, transaction_id) -> types.CommitR
         current_sleep = await _sleep(current_sleep)
 
 
-# TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
+# TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
 async def _sleep(
     current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER
 ) -> Union[coroutine, float]:
