@@ -38,7 +38,10 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
-from google.cloud.firestore_v1.async_document import AsyncDocumentReference, DocumentSnapshot
+from google.cloud.firestore_v1.async_document import (
+    AsyncDocumentReference,
+    DocumentSnapshot,
+)
 from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 from google.cloud.firestore_v1.services.firestore import (
     async_client as firestore_client,
@@ -209,7 +212,9 @@ class AsyncClient(BaseClient):
             *self._document_path_helper(*document_path), client=self
         )
 
-    async def get_all(self, references, field_paths=None, transaction=None) -> AsyncGenerator[DocumentSnapshot, Any]:
+    async def get_all(
+        self, references, field_paths=None, transaction=None
+    ) -> AsyncGenerator[DocumentSnapshot, Any]:
         """Retrieve a batch of documents.
 
         .. note::

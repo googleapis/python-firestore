@@ -36,6 +36,7 @@ from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.field_path import render_field_path
 from typing import Any, List, NoReturn, Optional, Tuple, Union
+
 _ACTIVE_TXN: str
 _BAD_DOC_TEMPLATE: str
 _BAD_OPTION_ERR: str
@@ -296,7 +297,12 @@ class BaseClient(ClientWithProject):
         return render_field_path(field_names)
 
     @staticmethod
-    def write_option(**kwargs) -> Union[google.cloud.firestore_v1._helpers.ExistsOption, google.cloud.firestore_v1._helpers.LastUpdateOption]:
+    def write_option(
+        **kwargs,
+    ) -> Union[
+        google.cloud.firestore_v1._helpers.ExistsOption,
+        google.cloud.firestore_v1._helpers.LastUpdateOption,
+    ]:
         """Create a write option for write operations.
 
         Write operations include :meth:`~google.cloud.DocumentReference.set`,
@@ -410,7 +416,9 @@ def _get_reference(document_path, reference_map) -> Any:
         raise ValueError(msg)
 
 
-def _parse_batch_get(get_doc_response, reference_map, client) -> google.cloud.firestore_v1.base_document.DocumentSnapshot:
+def _parse_batch_get(
+    get_doc_response, reference_map, client
+) -> google.cloud.firestore_v1.base_document.DocumentSnapshot:
     """Parse a `BatchGetDocumentsResponse` protobuf.
 
     Args:
@@ -460,7 +468,9 @@ def _parse_batch_get(get_doc_response, reference_map, client) -> google.cloud.fi
     return snapshot
 
 
-def _get_doc_mask(field_paths) -> Optional[google.cloud.firestore_v1.types.common.DocumentMask]:
+def _get_doc_mask(
+    field_paths,
+) -> Optional[google.cloud.firestore_v1.types.common.DocumentMask]:
     """Get a document mask if field paths are provided.
 
     Args:

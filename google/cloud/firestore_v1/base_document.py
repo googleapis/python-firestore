@@ -228,7 +228,9 @@ class DocumentSnapshot(object):
             The time that this document was last updated.
     """
 
-    def __init__(self, reference, data, exists, read_time, create_time, update_time) -> None:
+    def __init__(
+        self, reference, data, exists, read_time, create_time, update_time
+    ) -> None:
         self._reference = reference
         # We want immutable data, so callers can't modify this value
         # out from under us.

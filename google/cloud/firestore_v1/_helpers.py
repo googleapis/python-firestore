@@ -20,7 +20,7 @@ from google.protobuf import struct_pb2
 from google.type import latlng_pb2
 import grpc
 
-from google.cloud import exceptions # type: ignore
+from google.cloud import exceptions  # type: ignore
 from google.cloud._helpers import _datetime_to_pb_timestamp
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds
 from google.cloud.firestore_v1.types.write import DocumentTransform
@@ -347,7 +347,9 @@ def get_doc_id(document_pb, expected_prefix) -> Any:
 _EmptyDict = transforms.Sentinel("Marker for an empty dict value")
 
 
-def extract_fields(document_data, prefix_path: FieldPath, expand_dots=False) -> Generator[Tuple[Any, Any], Any, None]:
+def extract_fields(
+    document_data, prefix_path: FieldPath, expand_dots=False
+) -> Generator[Tuple[Any, Any], Any, None]:
     """Do depth-first walk of tree, yielding field_path, value"""
     if not document_data:
         yield prefix_path, _EmptyDict
@@ -445,7 +447,9 @@ class DocumentExtractor(object):
                 self.field_paths.append(field_path)
                 set_field_value(self.set_fields, field_path, value)
 
-    def _get_document_iterator(self, prefix_path: FieldPath) -> Generator[Tuple[Any, Any], Any, None]:
+    def _get_document_iterator(
+        self, prefix_path: FieldPath
+    ) -> Generator[Tuple[Any, Any], Any, None]:
         return extract_fields(self.document_data, prefix_path)
 
     @property
@@ -473,7 +477,9 @@ class DocumentExtractor(object):
     def _get_update_mask(self, allow_empty_mask=False) -> None:
         return None
 
-    def get_update_pb(self, document_path, exists=None, allow_empty_mask=False) -> types.write.Write:
+    def get_update_pb(
+        self, document_path, exists=None, allow_empty_mask=False
+    ) -> types.write.Write:
 
         if exists is not None:
             current_document = common.Precondition(exists=exists)
@@ -760,7 +766,9 @@ class DocumentExtractorForMerge(DocumentExtractor):
         else:
             self._apply_merge_paths(merge)
 
-    def _get_update_mask(self, allow_empty_mask=False) -> Optional[types.common.DocumentMask]:
+    def _get_update_mask(
+        self, allow_empty_mask=False
+    ) -> Optional[types.common.DocumentMask]:
         # Mask uses dotted / quoted paths.
         mask_paths = [
             field_path.to_api_repr()
@@ -772,7 +780,9 @@ class DocumentExtractorForMerge(DocumentExtractor):
             return common.DocumentMask(field_paths=mask_paths)
 
 
-def pbs_for_set_with_merge(document_path, document_data, merge) -> List[types.write.Write]:
+def pbs_for_set_with_merge(
+    document_path, document_data, merge
+) -> List[types.write.Write]:
     """Make ``Write`` protobufs for ``set()`` methods.
 
     Args:
@@ -830,7 +840,9 @@ class DocumentExtractorForUpdate(DocumentExtractor):
                     "Cannot update with nest delete: {}".format(field_path)
                 )
 
-    def _get_document_iterator(self, prefix_path: FieldPath) -> Generator[Tuple[Any, Any], Any, None]:
+    def _get_document_iterator(
+        self, prefix_path: FieldPath
+    ) -> Generator[Tuple[Any, Any], Any, None]:
         return extract_fields(self.document_data, prefix_path, expand_dots=True)
 
     def _get_update_mask(self, allow_empty_mask=False) -> types.common.DocumentMask:

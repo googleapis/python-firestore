@@ -130,7 +130,9 @@ class CollectionReference(BaseCollectionReference):
         )
         return self.stream(transaction=transaction)
 
-    def stream(self, transaction=None) -> Generator[document.DocumentSnapshot, Any, None]:
+    def stream(
+        self, transaction=None
+    ) -> Generator[document.DocumentSnapshot, Any, None]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which

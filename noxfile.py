@@ -66,11 +66,7 @@ def pytype(session):
     """Run pytype
     """
     session.install(PYTYPE_VERSION)
-    session.run(
-        "pytype",
-    )
-
-
+    session.run("pytype",)
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)

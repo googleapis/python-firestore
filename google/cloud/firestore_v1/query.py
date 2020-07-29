@@ -30,6 +30,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Generator
+
 _helpers: module
 
 _helpers: module
@@ -124,7 +125,9 @@ class Query(BaseQuery):
         )
         return self.stream(transaction=transaction)
 
-    def stream(self, transaction=None) -> Generator[document.DocumentSnapshot, Any, None]:
+    def stream(
+        self, transaction=None
+    ) -> Generator[document.DocumentSnapshot, Any, None]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which

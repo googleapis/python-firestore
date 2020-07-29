@@ -17,6 +17,7 @@
 
 from google.cloud.firestore_v1 import types
 from typing import NoReturn, Optional
+
 _CANT_BEGIN: str
 _CANT_COMMIT: str
 _CANT_RETRY_READ_ONLY: str

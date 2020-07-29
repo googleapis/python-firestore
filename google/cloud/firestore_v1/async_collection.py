@@ -28,6 +28,7 @@ from google.cloud.firestore_v1 import async_document
 from typing import AsyncIterator
 from typing import Any, AsyncGenerator, Coroutine, Generator, Tuple, Union
 
+
 class AsyncCollectionReference(BaseCollectionReference):
     """A reference to a collection in a Firestore database.
 
@@ -66,7 +67,9 @@ class AsyncCollectionReference(BaseCollectionReference):
         return async_query.AsyncQuery(self)
 
     # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
-    async def add(self, document_data, document_id=None) -> Union[Coroutine[Any, Any, Tuple[Any, Any]], Tuple[Any, Any]]:
+    async def add(
+        self, document_data, document_id=None
+    ) -> Union[Coroutine[Any, Any, Tuple[Any, Any]], Tuple[Any, Any]]:
         """Create a document in the Firestore database with the provided data.
 
         Args:
@@ -98,7 +101,11 @@ class AsyncCollectionReference(BaseCollectionReference):
         return write_result.update_time, document_ref
 
     # TODO(crwilcox): added a union with Coroutine here. Though this shouldn't be...
-    async def list_documents(self, page_size=None) -> Union[Coroutine[Any, Any, Generator[Any, Any, None]],  Generator[Any, Any, None]]:
+    async def list_documents(
+        self, page_size=None
+    ) -> Union[
+        Coroutine[Any, Any, Generator[Any, Any, None]], Generator[Any, Any, None]
+    ]:
         """List all subdocuments of the current collection.
 
         Args:
@@ -125,7 +132,9 @@ class AsyncCollectionReference(BaseCollectionReference):
         )
         return (_item_to_document_ref(self, i) for i in iterator)
 
-    async def get(self, transaction=None) -> AsyncGenerator[async_document.DocumentSnapshot, Any]:
+    async def get(
+        self, transaction=None
+    ) -> AsyncGenerator[async_document.DocumentSnapshot, Any]:
         """Deprecated alias for :meth:`stream`."""
         warnings.warn(
             "'Collection.get' is deprecated:  please use 'Collection.stream' instead.",
@@ -133,9 +142,11 @@ class AsyncCollectionReference(BaseCollectionReference):
             stacklevel=2,
         )
         async for d in self.stream(transaction=transaction):
-            yield d # pytype: disable=name-error
+            yield d  # pytype: disable=name-error
 
-    async def stream(self, transaction=None) -> AsyncIterator[async_document.DocumentSnapshot]:
+    async def stream(
+        self, transaction=None
+    ) -> AsyncIterator[async_document.DocumentSnapshot]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -164,7 +175,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         """
         query = async_query.AsyncQuery(self)
         async for d in query.stream(transaction=transaction):
-            yield d # pytype: disable=name-error
+            yield d  # pytype: disable=name-error
 
     def on_snapshot(self, callback) -> Watch:
         """Monitor the documents in this collection.

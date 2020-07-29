@@ -45,6 +45,7 @@ from google.cloud.firestore_v1.services.firestore.transports import (
     grpc as firestore_grpc_transport,
 )
 from typing import Any, Generator
+
 _CLIENT_INFO: Any
 _get_doc_mask: Any
 _helpers: module
@@ -217,7 +218,9 @@ class Client(BaseClient):
             *self._document_path_helper(*document_path), client=self
         )
 
-    def get_all(self, references, field_paths=None, transaction=None) -> Generator[Any, Any, None]:
+    def get_all(
+        self, references, field_paths=None, transaction=None
+    ) -> Generator[Any, Any, None]:
         """Retrieve a batch of documents.
 
         .. note::

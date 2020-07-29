@@ -32,6 +32,7 @@ from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.types import Cursor
 from google.cloud.firestore_v1.order import Order
 from typing import Any, Dict, NoReturn, Optional, Tuple, TypeVar
+
 _BAD_DIR_STRING: str
 _BAD_OP_NAN_NULL: str
 _BAD_OP_STRING: str
@@ -139,8 +140,6 @@ class BaseQuery(object):
     DESCENDING = "DESCENDING"
     """str: Sort query results in descending order on a field."""
 
-
-
     def __init__(
         self,
         parent,
@@ -188,7 +187,7 @@ class BaseQuery(object):
         """
         return self._parent._client
 
-    def select(self, field_paths) -> 'BaseQuery':
+    def select(self, field_paths) -> "BaseQuery":
         """Project documents matching query to a limited set of fields.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -232,7 +231,7 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    def where(self, field_path, op_string, value) -> 'BaseQuery':
+    def where(self, field_path, op_string, value) -> "BaseQuery":
         """Filter the query on a field.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -309,7 +308,7 @@ class BaseQuery(object):
             direction=_enum_from_direction(direction),
         )
 
-    def order_by(self, field_path, direction=ASCENDING) -> 'BaseQuery':
+    def order_by(self, field_path, direction=ASCENDING) -> "BaseQuery":
         """Modify the query to add an order clause on a specific field.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -353,7 +352,7 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    def limit(self, count) -> 'BaseQuery':
+    def limit(self, count) -> "BaseQuery":
         """Limit a query to return a fixed number of results.
 
         If the current query already has a limit set, this will overwrite it.
@@ -379,7 +378,7 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    def offset(self, num_to_skip) -> 'BaseQuery':
+    def offset(self, num_to_skip) -> "BaseQuery":
         """Skip to an offset in a query.
 
         If the current query already has specified an offset, this will
@@ -419,7 +418,7 @@ class BaseQuery(object):
         if document_fields.reference._path[:-1] != self._parent._path:
             raise ValueError("Cannot use snapshot from another collection as a cursor.")
 
-    def _cursor_helper(self, document_fields, before, start) -> 'BaseQuery':
+    def _cursor_helper(self, document_fields, before, start) -> "BaseQuery":
         """Set values to be used for a ``start_at`` or ``end_at`` cursor.
 
         The values will later be used in a query protobuf.
@@ -471,7 +470,7 @@ class BaseQuery(object):
 
         return self.__class__(self._parent, **query_kwargs)
 
-    def start_at(self, document_fields) -> 'BaseQuery':
+    def start_at(self, document_fields) -> "BaseQuery":
         """Start query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -501,7 +500,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields, before=True, start=True)
 
-    def start_after(self, document_fields) -> 'BaseQuery':
+    def start_after(self, document_fields) -> "BaseQuery":
         """Start query results after a particular document value.
 
         The result set will **exclude** the document specified by
@@ -530,7 +529,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields, before=False, start=True)
 
-    def end_before(self, document_fields) -> 'BaseQuery':
+    def end_before(self, document_fields) -> "BaseQuery":
         """End query results before a particular document value.
 
         The result set will **exclude** the document specified by
@@ -559,7 +558,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields, before=True, start=False)
 
-    def end_at(self, document_fields) -> 'BaseQuery':
+    def end_at(self, document_fields) -> "BaseQuery":
         """End query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -912,7 +911,9 @@ def _cursor_pb(cursor_pair) -> Optional[Cursor]:
         return query.Cursor(values=value_pbs, before=before)
 
 
-def _query_response_to_snapshot(response_pb, collection, expected_prefix) -> Optional[document.DocumentSnapshot]:
+def _query_response_to_snapshot(
+    response_pb, collection, expected_prefix
+) -> Optional[document.DocumentSnapshot]:
     """Parse a query response protobuf to a document snapshot.
 
     Args:
@@ -946,7 +947,9 @@ def _query_response_to_snapshot(response_pb, collection, expected_prefix) -> Opt
     return snapshot
 
 
-def _collection_group_query_response_to_snapshot(response_pb, collection) -> Optional[document.DocumentSnapshot]:
+def _collection_group_query_response_to_snapshot(
+    response_pb, collection
+) -> Optional[document.DocumentSnapshot]:
     """Parse a query response protobuf to a document snapshot.
 
     Args:

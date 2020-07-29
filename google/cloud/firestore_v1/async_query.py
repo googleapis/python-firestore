@@ -114,7 +114,9 @@ class AsyncQuery(BaseQuery):
             all_descendants=all_descendants,
         )
 
-    async def get(self, transaction=None) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
+    async def get(
+        self, transaction=None
+    ) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
         """Deprecated alias for :meth:`stream`."""
         warnings.warn(
             "'AsyncQuery.get' is deprecated:  please use 'AsyncQuery.stream' instead.",
@@ -124,7 +126,9 @@ class AsyncQuery(BaseQuery):
         async for d in self.stream(transaction=transaction):
             yield d
 
-    async def stream(self, transaction=None) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
+    async def stream(
+        self, transaction=None
+    ) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which

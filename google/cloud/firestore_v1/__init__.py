@@ -91,6 +91,7 @@ from google.cloud.firestore_v1.watch import Watch
 # from .types.write import DocumentRemove
 from .types.write import DocumentTransform
 from typing import List
+
 __all__: List[str]
 __version__: str
 
