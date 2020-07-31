@@ -290,8 +290,7 @@ class BaseClient(ClientWithProject):
     def write_option(
         **kwargs,
     ) -> Union[
-        _helpers.ExistsOption,
-        _helpers.LastUpdateOption,
+        _helpers.ExistsOption, _helpers.LastUpdateOption,
     ]:
         """Create a write option for write operations.
 
@@ -406,9 +405,7 @@ def _get_reference(document_path, reference_map) -> Any:
         raise ValueError(msg)
 
 
-def _parse_batch_get(
-    get_doc_response, reference_map, client
-) -> DocumentSnapshot:
+def _parse_batch_get(get_doc_response, reference_map, client) -> DocumentSnapshot:
     """Parse a `BatchGetDocumentsResponse` protobuf.
 
     Args:
@@ -458,9 +455,7 @@ def _parse_batch_get(
     return snapshot
 
 
-def _get_doc_mask(
-    field_paths,
-) -> Optional[types.common.DocumentMask]:
+def _get_doc_mask(field_paths,) -> Optional[types.common.DocumentMask]:
     """Get a document mask if field paths are provided.
 
     Args:

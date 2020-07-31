@@ -32,7 +32,6 @@ from google.cloud.firestore_v1.watch import Watch
 from typing import Any, AsyncGenerator
 
 
-
 class AsyncQuery(BaseQuery):
     """Represents a query to the Firestore API.
 

@@ -27,7 +27,6 @@ from google.cloud.firestore_v1.watch import Watch
 from typing import Any, AsyncGenerator, Coroutine, Union
 
 
-
 class AsyncDocumentReference(BaseDocumentReference):
     """A reference to a document in a Firestore database.
 
