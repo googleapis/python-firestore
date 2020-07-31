@@ -285,10 +285,9 @@ class AsyncDocumentReference(BaseDocumentReference):
 
         return commit_response.commit_time
 
-    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def get(
         self, field_paths=None, transaction=None
-    ) -> Union[Coroutine[Any, Any, DocumentSnapshot], DocumentSnapshot]:
+    ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
         See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for

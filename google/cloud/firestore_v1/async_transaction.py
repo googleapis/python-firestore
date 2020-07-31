@@ -83,8 +83,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
         super(AsyncTransaction, self)._add_write_pbs(write_pbs)
 
-    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
-    async def _begin(self, retry_id=None) -> Union[Coroutine[Any, Any, None], None]:
+    async def _begin(self, retry_id=None) -> None:
         """Begin the transaction.
 
         Args:
@@ -107,8 +106,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         )
         self._id = transaction_response.transaction
 
-    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
-    async def _rollback(self) -> Union[Coroutine[Any, Any, None], None]:
+    async def _rollback(self) -> None:
         """Roll back the transaction.
 
         Raises:
@@ -129,8 +127,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         finally:
             self._clean_up()
 
-    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
-    async def _commit(self) -> Union[Coroutine[Any, Any, list], list]:
+    async def _commit(self) -> list:
         """Transactionally commit the changes accumulated.
 
         Returns:
@@ -236,10 +233,9 @@ class _AsyncTransactional(_BaseTransactional):
             await transaction._rollback()
             raise
 
-    # TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
     async def _maybe_commit(
         self, transaction
-    ) -> Union[Coroutine[Any, Any, Optional[bool]], bool]:
+    ) -> bool:
         """Try to commit the transaction.
 
         If the transaction is read-write and the ``Commit`` fails with the
@@ -364,10 +360,9 @@ async def _commit_with_retry(client, write_pbs, transaction_id) -> types.CommitR
         current_sleep = await _sleep(current_sleep)
 
 
-# TODO(https://github.com/google/pytype/issues/631): added a union with Coroutine here. Though this shouldn't be...
 async def _sleep(
     current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER
-) -> Union[coroutine, float]:
+) -> float:
     """Sleep and produce a new sleep time.
 
     .. _Exponential Backoff And Jitter: https://www.awsarchitectureblog.com/\
