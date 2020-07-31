@@ -22,8 +22,6 @@ from google.cloud.firestore_v1.base_collection import (
     _item_to_document_ref,
 )
 from google.cloud.firestore_v1 import async_query
-from google.cloud.firestore_v1.watch import Watch
-from google.cloud.firestore_v1 import async_document
 
 from typing import AsyncIterator
 from typing import Any, AsyncGenerator, Coroutine, Generator, Tuple, Union
@@ -130,7 +128,8 @@ class AsyncCollectionReference(BaseCollectionReference):
             },
             metadata=self._client._rpc_metadata,
         )
-        return (_item_to_document_ref(self, i) for i in iterator)
+        async for i in iterator:
+            yield _item_to_document_ref(self, i)
 
     async def get(
         self, transaction=None

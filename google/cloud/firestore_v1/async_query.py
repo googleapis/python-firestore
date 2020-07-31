@@ -34,6 +34,7 @@ from typing import Any, AsyncGenerator
 _helpers: module
 
 
+
 class AsyncQuery(BaseQuery):
     """Represents a query to the Firestore API.
 
@@ -156,7 +157,7 @@ class AsyncQuery(BaseQuery):
             The next document that fulfills the query.
         """
         parent_path, expected_prefix = self._parent._parent_info()
-        response_iterator = self._client._firestore_api.run_query(
+        response_iterator = await self._client._firestore_api.run_query(
             request={
                 "parent": parent_path,
                 "structured_query": self._to_protobuf(),
@@ -177,6 +178,7 @@ class AsyncQuery(BaseQuery):
             if snapshot is not None:
                 yield snapshot
 
+                
     def on_snapshot(self, callback) -> Watch:
         """Monitor the documents in this collection that match this query.
 
@@ -212,3 +214,4 @@ class AsyncQuery(BaseQuery):
             async_document.DocumentSnapshot,
             async_document.AsyncDocumentReference,
         )
+
