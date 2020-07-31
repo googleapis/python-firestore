@@ -18,9 +18,6 @@ import random
 from google.cloud.firestore_v1 import _helpers
 from typing import Any, NoReturn, Tuple
 
-_helpers: module
-
-_helpers: module
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 

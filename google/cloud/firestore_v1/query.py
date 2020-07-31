@@ -31,10 +31,6 @@ from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Generator
 
-_helpers: module
-
-_helpers: module
-
 
 class Query(BaseQuery):
     """Represents a query to the Firestore API.

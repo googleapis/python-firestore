@@ -24,9 +24,7 @@ from google.api_core import exceptions
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.watch import Watch
-from typing import Any, Coroutine, Union
-
-_helpers: module
+from typing import Any, AsyncGenerator, Coroutine, Union
 
 
 
@@ -58,7 +56,7 @@ class AsyncDocumentReference(BaseDocumentReference):
     def __init__(self, *path, **kwargs) -> None:
         super(AsyncDocumentReference, self).__init__(*path, **kwargs)
 
-    async def create(self, document_data) -> coroutine:
+    async def create(self, document_data) -> Coroutine:
         """Create the current document in the Firestore database.
 
         Args:
@@ -79,7 +77,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         write_results = await batch.commit()
         return _first_write_result(write_results)
 
-    async def set(self, document_data, merge=False) -> coroutine:
+    async def set(self, document_data, merge=False) -> Coroutine:
         """Replace the current document in the Firestore database.
 
         A write ``option`` can be specified to indicate preconditions of
@@ -110,7 +108,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         write_results = await batch.commit()
         return _first_write_result(write_results)
 
-    async def update(self, field_updates, option=None) -> coroutine:
+    async def update(self, field_updates, option=None) -> Coroutine:
         """Update an existing document in the Firestore database.
 
         By default, this method verifies that the document exists on the
@@ -258,7 +256,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         write_results = await batch.commit()
         return _first_write_result(write_results)
 
-    async def delete(self, option=None) -> coroutine:
+    async def delete(self, option=None) -> Coroutine:
         """Delete the current document in the Firestore database.
 
         Args:
@@ -285,9 +283,7 @@ class AsyncDocumentReference(BaseDocumentReference):
 
         return commit_response.commit_time
 
-    async def get(
-        self, field_paths=None, transaction=None
-    ) -> DocumentSnapshot:
+    async def get(self, field_paths=None, transaction=None) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
         See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for
@@ -352,7 +348,7 @@ class AsyncDocumentReference(BaseDocumentReference):
             update_time=update_time,
         )
 
-    async def collections(self, page_size=None) -> asyncgenerator:
+    async def collections(self, page_size=None) -> AsyncGenerator:
         """List subcollections of the current document.
 
         Args:
@@ -391,40 +387,3 @@ class AsyncDocumentReference(BaseDocumentReference):
         # iterator.document = self
         # iterator.item_to_value = _item_to_collection_ref
         # return iterator
-
-    def on_snapshot(self, callback) -> Watch:
-        """Watch this document.
-
-        This starts a watch on this document using a background thread. The
-        provided callback is run on the snapshot.
-
-        Args:
-            callback(Callable[[:class:`~google.cloud.firestore.document.DocumentSnapshot`], NoneType]):
-                a callback to run when a change occurs
-
-        Example:
-
-        .. code-block:: python
-
-            from google.cloud import firestore_v1
-
-            db = firestore_v1.Client()
-            collection_ref = db.collection(u'users')
-
-            def on_snapshot(document_snapshot, changes, read_time):
-                doc = document_snapshot
-                print(u'{} => {}'.format(doc.id, doc.to_dict()))
-
-            doc_ref = db.collection(u'users').document(
-                u'alovelace' + unique_resource_id())
-
-            # Watch this document
-            doc_watch = doc_ref.on_snapshot(on_snapshot)
-
-            # Terminate this watch
-            doc_watch.unsubscribe()
-        """
-        return Watch.for_document(
-            self, callback, DocumentSnapshot, AsyncDocumentReference
-        )
-

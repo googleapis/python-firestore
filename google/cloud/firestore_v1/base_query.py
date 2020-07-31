@@ -43,7 +43,6 @@ _INVALID_WHERE_TRANSFORM: str
 _MISMATCH_CURSOR_W_ORDER_BY: str
 _MISSING_ORDER_BY: str
 _NO_ORDERS_FOR_CURSOR: str
-_helpers: module
 _operator_enum: Any
 
 

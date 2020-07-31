@@ -21,7 +21,7 @@ from google.cloud.firestore_v1.base_collection import (
     _auto_id,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1 import async_query
+from google.cloud.firestore_v1 import async_query, async_document
 
 from typing import AsyncIterator
 from typing import Any, AsyncGenerator, Coroutine, Generator, Tuple, Union
@@ -64,9 +64,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         """
         return async_query.AsyncQuery(self)
 
-    async def add(
-        self, document_data, document_id=None
-    ) -> Tuple[Any, Any]:
+    async def add(self, document_data, document_id=None) -> Tuple[Any, Any]:
         """Create a document in the Firestore database with the provided data.
 
         Args:
@@ -97,9 +95,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         write_result = await document_ref.create(document_data)
         return write_result.update_time, document_ref
 
-    async def list_documents(
-        self, page_size=None
-    ) -> Generator[Any, Any, None]:
+    async def list_documents(self, page_size=None) -> Generator[Any, Any, None]:
         """List all subdocuments of the current collection.
 
         Args:
@@ -171,36 +167,3 @@ class AsyncCollectionReference(BaseCollectionReference):
         query = async_query.AsyncQuery(self)
         async for d in query.stream(transaction=transaction):
             yield d  # pytype: disable=name-error
-
-    def on_snapshot(self, callback) -> Watch:
-        """Monitor the documents in this collection.
-
-        This starts a watch on this collection using a background thread. The
-        provided callback is run on the snapshot of the documents.
-
-        Args:
-            callback (Callable[[:class:`~google.cloud.firestore.collection.CollectionSnapshot`], NoneType]):
-                a callback to run when a change occurs.
-
-        Example:
-            from google.cloud import firestore_v1
-
-            db = firestore_v1.Client()
-            collection_ref = db.collection(u'users')
-
-            def on_snapshot(collection_snapshot, changes, read_time):
-                for doc in collection_snapshot.documents:
-                    print(u'{} => {}'.format(doc.id, doc.to_dict()))
-
-            # Watch this collection
-            collection_watch = collection_ref.on_snapshot(on_snapshot)
-
-            # Terminate this watch
-            collection_watch.unsubscribe()
-        """
-        return Watch.for_query(
-            self._query(),
-            callback,
-            async_document.DocumentSnapshot,
-            async_document.AsyncDocumentReference,
-        )

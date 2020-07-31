@@ -44,16 +44,6 @@ _CLIENT_INFO: Any
 _FIRESTORE_EMULATOR_HOST: str
 _INACTIVE_TXN: str
 __version__: str
-_helpers: module
-
-_ACTIVE_TXN: str
-_BAD_DOC_TEMPLATE: str
-_BAD_OPTION_ERR: str
-_CLIENT_INFO: Any
-_FIRESTORE_EMULATOR_HOST: str
-_INACTIVE_TXN: str
-__version__: str
-_helpers: module
 
 DEFAULT_DATABASE = "(default)"
 """str: The default database used in a :class:`~google.cloud.firestore_v1.client.Client`."""
@@ -300,8 +290,8 @@ class BaseClient(ClientWithProject):
     def write_option(
         **kwargs,
     ) -> Union[
-        google.cloud.firestore_v1._helpers.ExistsOption,
-        google.cloud.firestore_v1._helpers.LastUpdateOption,
+        _helpers.ExistsOption,
+        _helpers.LastUpdateOption,
     ]:
         """Create a write option for write operations.
 
@@ -418,7 +408,7 @@ def _get_reference(document_path, reference_map) -> Any:
 
 def _parse_batch_get(
     get_doc_response, reference_map, client
-) -> google.cloud.firestore_v1.base_document.DocumentSnapshot:
+) -> DocumentSnapshot:
     """Parse a `BatchGetDocumentsResponse` protobuf.
 
     Args:
@@ -470,7 +460,7 @@ def _parse_batch_get(
 
 def _get_doc_mask(
     field_paths,
-) -> Optional[google.cloud.firestore_v1.types.common.DocumentMask]:
+) -> Optional[types.common.DocumentMask]:
     """Get a document mask if field paths are provided.
 
     Args:
@@ -479,7 +469,7 @@ def _get_doc_mask(
             projection of document fields in the returned results.
 
     Returns:
-        Optional[google.cloud.firestore_v1.types.DocumentMask]: A mask
+        Optional[google.cloud.firestore_v1.types.common.DocumentMask]: A mask
             to project documents to a restricted set of field paths.
     """
     if field_paths is None:

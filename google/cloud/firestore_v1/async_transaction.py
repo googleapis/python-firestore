@@ -149,7 +149,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         self._clean_up()
         return list(commit_response.write_results)
 
-    async def get_all(self, references) -> coroutine:
+    async def get_all(self, references) -> Coroutine:
         """Retrieves multiple documents from Firestore.
 
         Args:
@@ -162,7 +162,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         """
         return await self._client.get_all(references, transaction=self)
 
-    async def get(self, ref_or_query) -> coroutine:
+    async def get(self, ref_or_query) -> Coroutine:
         """
         Retrieve a document or a query result from the database.
         Args:
@@ -195,7 +195,7 @@ class _AsyncTransactional(_BaseTransactional):
     def __init__(self, to_wrap) -> None:
         super(_AsyncTransactional, self).__init__(to_wrap)
 
-    async def _pre_commit(self, transaction, *args, **kwargs) -> coroutine:
+    async def _pre_commit(self, transaction, *args, **kwargs) -> Coroutine:
         """Begin transaction and call the wrapped callable.
 
         If the callable raises an exception, the transaction will be rolled
@@ -233,9 +233,7 @@ class _AsyncTransactional(_BaseTransactional):
             await transaction._rollback()
             raise
 
-    async def _maybe_commit(
-        self, transaction
-    ) -> bool:
+    async def _maybe_commit(self, transaction) -> bool:
         """Try to commit the transaction.
 
         If the transaction is read-write and the ``Commit`` fails with the
@@ -301,7 +299,7 @@ class _AsyncTransactional(_BaseTransactional):
         raise ValueError(msg)
 
 
-def transactional(to_wrap) -> _AsyncTransactional:
+def async_transactional(to_wrap) -> _AsyncTransactional:
     """Decorate a callable so that it runs in a transaction.
 
     Args:
@@ -360,9 +358,7 @@ async def _commit_with_retry(client, write_pbs, transaction_id) -> types.CommitR
         current_sleep = await _sleep(current_sleep)
 
 
-async def _sleep(
-    current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER
-) -> float:
+async def _sleep(current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER) -> float:
     """Sleep and produce a new sleep time.
 
     .. _Exponential Backoff And Jitter: https://www.awsarchitectureblog.com/\

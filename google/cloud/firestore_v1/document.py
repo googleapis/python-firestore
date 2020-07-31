@@ -26,10 +26,6 @@ from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Generator
 
-_helpers: module
-
-_helpers: module
-
 
 class DocumentReference(BaseDocumentReference):
     """A reference to a document in a Firestore database.

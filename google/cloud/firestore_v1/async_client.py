@@ -52,7 +52,6 @@ from google.cloud.firestore_v1.services.firestore.transports import (
 from typing import Any, AsyncGenerator, NoReturn
 
 _CLIENT_INFO: Any
-_helpers: module
 
 
 class AsyncClient(BaseClient):
