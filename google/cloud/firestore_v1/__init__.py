@@ -102,9 +102,6 @@ from typing import List
 __all__: List[str]
 __version__: str
 
-__all__: List[str]
-__version__: str
-
 # from .types.write import ExistenceFilter
 # from .types.write import Write
 # from .types.write import WriteResult

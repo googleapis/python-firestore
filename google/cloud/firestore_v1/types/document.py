@@ -25,8 +25,6 @@ from typing import Any
 
 __protobuf__: Any
 
-__protobuf__: Any
-
 
 __protobuf__ = proto.module(
     package="google.firestore.v1",
