@@ -34,7 +34,7 @@ class AsyncWriteBatch(BaseWriteBatch):
     def __init__(self, client) -> None:
         super(AsyncWriteBatch, self).__init__(client=client)
 
-    async def commit(self) -> Union[Coroutine[Any, Any, list], list]:
+    async def commit(self) -> list:
         """Commit the changes accumulated in this batch.
 
         Returns:
