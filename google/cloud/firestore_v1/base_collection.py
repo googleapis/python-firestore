@@ -15,7 +15,8 @@
 """Classes for representing collections for the Google Cloud Firestore API."""
 import random
 
-from google.cloud.firestore_v1 import _helpers, DocumentReference
+from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1.document import DocumentReference
 from typing import Any, NoReturn, Tuple
 
 

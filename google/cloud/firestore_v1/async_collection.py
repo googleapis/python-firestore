@@ -24,8 +24,10 @@ from google.cloud.firestore_v1.base_collection import (
 from google.cloud.firestore_v1 import (
     async_query,
     async_document,
-    AsyncDocumentReference,
 )
+
+from google.cloud.firestore_v1.async_document import AsyncDocumentReference
+
 
 from typing import AsyncIterator
 from typing import Any, AsyncGenerator, Tuple
