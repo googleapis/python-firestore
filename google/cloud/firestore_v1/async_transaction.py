@@ -38,7 +38,7 @@ from google.cloud.firestore_v1 import types
 
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
-from typing import Any, Coroutine, Optional, Type, Union
+from typing import Coroutine
 
 _CANT_BEGIN: str
 _CANT_COMMIT: str

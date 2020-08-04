@@ -31,7 +31,7 @@ from google.cloud.firestore_v1.types import StructuredQuery
 from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.types import Cursor
 from google.cloud.firestore_v1.order import Order
-from typing import Any, Dict, NoReturn, Optional, Tuple, TypeVar
+from typing import Any, Dict, NoReturn, Optional, Tuple
 
 _BAD_DIR_STRING: str
 _BAD_OP_NAN_NULL: str

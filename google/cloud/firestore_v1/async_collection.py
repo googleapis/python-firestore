@@ -21,10 +21,10 @@ from google.cloud.firestore_v1.base_collection import (
     _auto_id,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1 import async_query, async_document
+from google.cloud.firestore_v1 import async_query, async_document, AsyncDocumentReference
 
 from typing import AsyncIterator
-from typing import Any, AsyncGenerator, Coroutine, Generator, Tuple, Union
+from typing import Any, AsyncGenerator, Generator, Tuple
 
 
 class AsyncCollectionReference(BaseCollectionReference):
@@ -95,7 +95,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         write_result = await document_ref.create(document_data)
         return write_result.update_time, document_ref
 
-    async def list_documents(self, page_size=None) -> Generator[Any, Any, None]:
+    async def list_documents(self, page_size=None) -> AsyncGenerator[AsyncDocumentReference, None]:
         """List all subdocuments of the current collection.
 
         Args:

@@ -23,8 +23,7 @@ from google.cloud.firestore_v1.base_document import (
 from google.api_core import exceptions
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import common
-from google.cloud.firestore_v1.watch import Watch
-from typing import Any, AsyncGenerator, Coroutine, Union
+from typing import AsyncGenerator, Coroutine
 
 
 class AsyncDocumentReference(BaseDocumentReference):

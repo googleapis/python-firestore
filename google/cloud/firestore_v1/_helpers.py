@@ -31,7 +31,7 @@ from google.cloud.firestore_v1.field_path import parse_field_path
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import write
-from typing import Any, Generator, List, NoReturn, Optional, Tuple, TypeVar
+from typing import Any, Generator, List, NoReturn, Optional, Tuple
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict

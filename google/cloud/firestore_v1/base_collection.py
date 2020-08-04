@@ -15,7 +15,7 @@
 """Classes for representing collections for the Google Cloud Firestore API."""
 import random
 
-from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1 import _helpers, DocumentReference
 from typing import Any, NoReturn, Tuple
 
 
@@ -341,11 +341,11 @@ def _auto_id() -> str:
     return "".join(random.choice(_AUTO_ID_CHARS) for _ in range(20))
 
 
-def _item_to_document_ref(collection_reference, item) -> Any:
+def _item_to_document_ref(collection_reference, item) -> DocumentReference:
     """Convert Document resource to document ref.
 
     Args:
-        iterator (google.api_core.page_iterator.GRPCIterator):
+        collection_reference (google.api_core.page_iterator.GRPCIterator):
             iterator response
         item (dict): document resource
     """

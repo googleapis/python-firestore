@@ -28,8 +28,7 @@ from google.cloud.firestore_v1.base_query import (
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import async_document
-from google.cloud.firestore_v1.watch import Watch
-from typing import Any, AsyncGenerator
+from typing import AsyncGenerator
 
 
 class AsyncQuery(BaseQuery):
