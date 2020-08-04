@@ -61,7 +61,7 @@ def blacken(session):
     )
 
 
-@nox.session(python="3.6")
+@nox.session(python="3.7")
 def pytype(session):
     """Run pytype
     """
