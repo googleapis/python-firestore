@@ -28,8 +28,8 @@ from google.cloud.firestore_v1.base_client import (
     BaseClient,
     DEFAULT_DATABASE,
     _CLIENT_INFO,
-    _reference_info,
-    _parse_batch_get,
+    _reference_info,  # type: ignore
+    _parse_batch_get,  # type: ignore
     _get_doc_mask,
     _path_helper,
 )
