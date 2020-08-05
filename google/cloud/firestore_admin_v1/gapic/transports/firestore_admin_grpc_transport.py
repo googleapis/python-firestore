@@ -29,17 +29,15 @@ class FirestoreAdminGrpcTransport(object):
     which can be used to take advantage of advanced
     features of gRPC.
     """
-
     # The scopes needed to make gRPC calls to all of the methods defined
     # in this service.
     _OAUTH_SCOPES = (
-        "https://www.googleapis.com/auth/cloud-platform",
-        "https://www.googleapis.com/auth/datastore",
+        'https://www.googleapis.com/auth/cloud-platform',
+        'https://www.googleapis.com/auth/datastore',
     )
 
-    def __init__(
-        self, channel=None, credentials=None, address="firestore.googleapis.com:443"
-    ):
+    def __init__(self, channel=None, credentials=None,
+                 address='firestore.googleapis.com:443'):
         """Instantiate the transport class.
 
         Args:
@@ -57,7 +55,8 @@ class FirestoreAdminGrpcTransport(object):
         # exception (channels come with credentials baked in already).
         if channel is not None and credentials is not None:
             raise ValueError(
-                "The `channel` and `credentials` arguments are mutually " "exclusive.",
+                'The `channel` and `credentials` arguments are mutually '
+                'exclusive.',
             )
 
         # Create the channel.
@@ -66,8 +65,8 @@ class FirestoreAdminGrpcTransport(object):
                 address=address,
                 credentials=credentials,
                 options={
-                    "grpc.max_send_message_length": -1,
-                    "grpc.max_receive_message_length": -1,
+                    'grpc.max_send_message_length': -1,
+                    'grpc.max_receive_message_length': -1,
                 }.items(),
             )
 
@@ -76,22 +75,20 @@ class FirestoreAdminGrpcTransport(object):
         # gRPC uses objects called "stubs" that are bound to the
         # channel and provide a basic method for each RPC.
         self._stubs = {
-            "firestore_admin_stub": firestore_admin_pb2_grpc.FirestoreAdminStub(
-                channel
-            ),
+            'firestore_admin_stub': firestore_admin_pb2_grpc.FirestoreAdminStub(channel),
         }
 
         # Because this API includes a method that returns a
         # long-running operation (proto: google.longrunning.Operation),
         # instantiate an LRO client.
-        self._operations_client = google.api_core.operations_v1.OperationsClient(
-            channel
-        )
+        self._operations_client = google.api_core.operations_v1.OperationsClient(channel)
 
     @classmethod
     def create_channel(
-        cls, address="firestore.googleapis.com:443", credentials=None, **kwargs
-    ):
+                cls,
+                address='firestore.googleapis.com:443',
+                credentials=None,
+                **kwargs):
         """Create and return a gRPC channel object.
 
         Args:
@@ -108,7 +105,10 @@ class FirestoreAdminGrpcTransport(object):
             grpc.Channel: A gRPC channel object.
         """
         return google.api_core.grpc_helpers.create_channel(
-            address, credentials=credentials, scopes=cls._OAUTH_SCOPES, **kwargs
+            address,
+            credentials=credentials,
+            scopes=cls._OAUTH_SCOPES,
+            **kwargs
         )
 
     @property
@@ -131,7 +131,7 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].DeleteIndex
+        return self._stubs['firestore_admin_stub'].DeleteIndex
 
     @property
     def update_field(self):
@@ -156,7 +156,7 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].UpdateField
+        return self._stubs['firestore_admin_stub'].UpdateField
 
     @property
     def create_index(self):
@@ -172,7 +172,7 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].CreateIndex
+        return self._stubs['firestore_admin_stub'].CreateIndex
 
     @property
     def list_indexes(self):
@@ -185,7 +185,7 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].ListIndexes
+        return self._stubs['firestore_admin_stub'].ListIndexes
 
     @property
     def get_index(self):
@@ -198,7 +198,7 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].GetIndex
+        return self._stubs['firestore_admin_stub'].GetIndex
 
     @property
     def get_field(self):
@@ -211,7 +211,7 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].GetField
+        return self._stubs['firestore_admin_stub'].GetField
 
     @property
     def list_fields(self):
@@ -229,7 +229,7 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].ListFields
+        return self._stubs['firestore_admin_stub'].ListFields
 
     @property
     def export_documents(self):
@@ -249,7 +249,7 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].ExportDocuments
+        return self._stubs['firestore_admin_stub'].ExportDocuments
 
     @property
     def import_documents(self):
@@ -266,4 +266,4 @@ class FirestoreAdminGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_admin_stub"].ImportDocuments
+        return self._stubs['firestore_admin_stub'].ImportDocuments

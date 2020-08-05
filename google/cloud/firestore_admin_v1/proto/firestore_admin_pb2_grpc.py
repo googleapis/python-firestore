@@ -2,18 +2,10 @@
 """Client and server classes corresponding to protobuf-defined services."""
 import grpc
 
-from google.cloud.firestore_admin_v1.proto import (
-    field_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2,
-)
-from google.cloud.firestore_admin_v1.proto import (
-    firestore_admin_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2,
-)
-from google.cloud.firestore_admin_v1.proto import (
-    index_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2,
-)
-from google.longrunning import (
-    operations_pb2 as google_dot_longrunning_dot_operations__pb2,
-)
+from google.cloud.firestore_admin_v1.proto import field_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2
+from google.cloud.firestore_admin_v1.proto import firestore_admin_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2
+from google.cloud.firestore_admin_v1.proto import index_pb2 as google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2
+from google.longrunning import operations_pb2 as google_dot_longrunning_dot_operations__pb2
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 
 
@@ -29,50 +21,50 @@ class FirestoreAdminStub(object):
             channel: A grpc.Channel.
         """
         self.CreateIndex = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/CreateIndex",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.SerializeToString,
-            response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/CreateIndex',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.SerializeToString,
+                response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
+                )
         self.ListIndexes = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/ListIndexes",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/ListIndexes',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.SerializeToString,
+                response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.FromString,
+                )
         self.GetIndex = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/GetIndex",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2.Index.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/GetIndex',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.SerializeToString,
+                response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2.Index.FromString,
+                )
         self.DeleteIndex = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.SerializeToString,
-            response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                )
         self.GetField = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/GetField",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2.Field.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/GetField',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.SerializeToString,
+                response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2.Field.FromString,
+                )
         self.UpdateField = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/UpdateField",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.SerializeToString,
-            response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/UpdateField',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.SerializeToString,
+                response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
+                )
         self.ListFields = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/ListFields",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.SerializeToString,
-            response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/ListFields',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.SerializeToString,
+                response_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.FromString,
+                )
         self.ExportDocuments = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.SerializeToString,
-            response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.SerializeToString,
+                response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
+                )
         self.ImportDocuments = channel.unary_unary(
-            "/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments",
-            request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.SerializeToString,
-            response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
-        )
+                '/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments',
+                request_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.SerializeToString,
+                response_deserializer=google_dot_longrunning_dot_operations__pb2.Operation.FromString,
+                )
 
 
 class FirestoreAdminServicer(object):
@@ -86,36 +78,36 @@ class FirestoreAdminServicer(object):
         the operation will be the type [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def ListIndexes(self, request, context):
         """Lists composite indexes.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetIndex(self, request, context):
         """Gets a composite index.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def DeleteIndex(self, request, context):
         """Deletes a composite index.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def GetField(self, request, context):
         """Gets the metadata and configuration for a Field.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def UpdateField(self, request, context):
         """Updates a field configuration. Currently, field updates apply only to
@@ -133,8 +125,8 @@ class FirestoreAdminServicer(object):
         `projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*`.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def ListFields(self, request, context):
         """Lists the field configuration and metadata for this database.
@@ -145,8 +137,8 @@ class FirestoreAdminServicer(object):
         `indexConfig.usesAncestorConfig:false`.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def ExportDocuments(self, request, context):
         """Exports a copy of all or a subset of documents from Google Cloud Firestore
@@ -159,8 +151,8 @@ class FirestoreAdminServicer(object):
         Cloud Storage.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
     def ImportDocuments(self, request, context):
         """Imports documents into Google Cloud Firestore. Existing documents with the
@@ -170,309 +162,209 @@ class FirestoreAdminServicer(object):
         that a subset of the data has already been imported to Cloud Firestore.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
-        context.set_details("Method not implemented!")
-        raise NotImplementedError("Method not implemented!")
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
 
 
 def add_FirestoreAdminServicer_to_server(servicer, server):
     rpc_method_handlers = {
-        "CreateIndex": grpc.unary_unary_rpc_method_handler(
-            servicer.CreateIndex,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.FromString,
-            response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
-        ),
-        "ListIndexes": grpc.unary_unary_rpc_method_handler(
-            servicer.ListIndexes,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.SerializeToString,
-        ),
-        "GetIndex": grpc.unary_unary_rpc_method_handler(
-            servicer.GetIndex,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2.Index.SerializeToString,
-        ),
-        "DeleteIndex": grpc.unary_unary_rpc_method_handler(
-            servicer.DeleteIndex,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.FromString,
-            response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
-        ),
-        "GetField": grpc.unary_unary_rpc_method_handler(
-            servicer.GetField,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2.Field.SerializeToString,
-        ),
-        "UpdateField": grpc.unary_unary_rpc_method_handler(
-            servicer.UpdateField,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.FromString,
-            response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
-        ),
-        "ListFields": grpc.unary_unary_rpc_method_handler(
-            servicer.ListFields,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.FromString,
-            response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.SerializeToString,
-        ),
-        "ExportDocuments": grpc.unary_unary_rpc_method_handler(
-            servicer.ExportDocuments,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.FromString,
-            response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
-        ),
-        "ImportDocuments": grpc.unary_unary_rpc_method_handler(
-            servicer.ImportDocuments,
-            request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.FromString,
-            response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
-        ),
+            'CreateIndex': grpc.unary_unary_rpc_method_handler(
+                    servicer.CreateIndex,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.FromString,
+                    response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
+            ),
+            'ListIndexes': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListIndexes,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.FromString,
+                    response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.SerializeToString,
+            ),
+            'GetIndex': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetIndex,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.FromString,
+                    response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2.Index.SerializeToString,
+            ),
+            'DeleteIndex': grpc.unary_unary_rpc_method_handler(
+                    servicer.DeleteIndex,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
+            ),
+            'GetField': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetField,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.FromString,
+                    response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2.Field.SerializeToString,
+            ),
+            'UpdateField': grpc.unary_unary_rpc_method_handler(
+                    servicer.UpdateField,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.FromString,
+                    response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
+            ),
+            'ListFields': grpc.unary_unary_rpc_method_handler(
+                    servicer.ListFields,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.FromString,
+                    response_serializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.SerializeToString,
+            ),
+            'ExportDocuments': grpc.unary_unary_rpc_method_handler(
+                    servicer.ExportDocuments,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.FromString,
+                    response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
+            ),
+            'ImportDocuments': grpc.unary_unary_rpc_method_handler(
+                    servicer.ImportDocuments,
+                    request_deserializer=google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.FromString,
+                    response_serializer=google_dot_longrunning_dot_operations__pb2.Operation.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-        "google.firestore.admin.v1.FirestoreAdmin", rpc_method_handlers
-    )
+            'google.firestore.admin.v1.FirestoreAdmin', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
 
 
-# This class is part of an EXPERIMENTAL API.
+ # This class is part of an EXPERIMENTAL API.
 class FirestoreAdmin(object):
     """Operations are created by service `FirestoreAdmin`, but are accessed via
     service `google.longrunning.Operations`.
     """
 
     @staticmethod
-    def CreateIndex(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def CreateIndex(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/CreateIndex",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/CreateIndex',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.CreateIndexRequest.SerializeToString,
             google_dot_longrunning_dot_operations__pb2.Operation.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ListIndexes(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def ListIndexes(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/ListIndexes",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/ListIndexes',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesRequest.SerializeToString,
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListIndexesResponse.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def GetIndex(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def GetIndex(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/GetIndex",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/GetIndex',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetIndexRequest.SerializeToString,
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_index__pb2.Index.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def DeleteIndex(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def DeleteIndex(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.DeleteIndexRequest.SerializeToString,
             google_dot_protobuf_dot_empty__pb2.Empty.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def GetField(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def GetField(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/GetField",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/GetField',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.GetFieldRequest.SerializeToString,
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_field__pb2.Field.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def UpdateField(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def UpdateField(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/UpdateField",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/UpdateField',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.UpdateFieldRequest.SerializeToString,
             google_dot_longrunning_dot_operations__pb2.Operation.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ListFields(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def ListFields(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/ListFields",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/ListFields',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsRequest.SerializeToString,
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ListFieldsResponse.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ExportDocuments(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def ExportDocuments(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ExportDocumentsRequest.SerializeToString,
             google_dot_longrunning_dot_operations__pb2.Operation.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)
 
     @staticmethod
-    def ImportDocuments(
-        request,
-        target,
-        options=(),
-        channel_credentials=None,
-        call_credentials=None,
-        compression=None,
-        wait_for_ready=None,
-        timeout=None,
-        metadata=None,
-    ):
-        return grpc.experimental.unary_unary(
-            request,
+    def ImportDocuments(request,
             target,
-            "/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments",
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(request, target, '/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments',
             google_dot_cloud_dot_firestore__admin__v1_dot_proto_dot_firestore__admin__pb2.ImportDocumentsRequest.SerializeToString,
             google_dot_longrunning_dot_operations__pb2.Operation.FromString,
-            options,
-            channel_credentials,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-        )
+            options, channel_credentials,
+            call_credentials, compression, wait_for_ready, timeout, metadata)

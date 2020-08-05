@@ -57,10 +57,10 @@ for module in _shared_modules:  # pragma: NO COVER
         setattr(sys.modules[__name__], name, message)
         names.append(name)
 for module in _local_modules:
-    for name, message in get_messages(module).items():
-        message.__module__ = "google.cloud.firestore_admin_v1.types"
-        setattr(sys.modules[__name__], name, message)
-        names.append(name)
+      for name, message in get_messages(module).items():
+          message.__module__ = 'google.cloud.firestore_admin_v1.types'
+          setattr(sys.modules[__name__], name, message)
+          names.append(name)
 
 
 __all__ = tuple(sorted(names))

@@ -28,17 +28,15 @@ class FirestoreGrpcTransport(object):
     which can be used to take advantage of advanced
     features of gRPC.
     """
-
     # The scopes needed to make gRPC calls to all of the methods defined
     # in this service.
     _OAUTH_SCOPES = (
-        "https://www.googleapis.com/auth/cloud-platform",
-        "https://www.googleapis.com/auth/datastore",
+        'https://www.googleapis.com/auth/cloud-platform',
+        'https://www.googleapis.com/auth/datastore',
     )
 
-    def __init__(
-        self, channel=None, credentials=None, address="firestore.googleapis.com:443"
-    ):
+    def __init__(self, channel=None, credentials=None,
+                 address='firestore.googleapis.com:443'):
         """Instantiate the transport class.
 
         Args:
@@ -56,7 +54,8 @@ class FirestoreGrpcTransport(object):
         # exception (channels come with credentials baked in already).
         if channel is not None and credentials is not None:
             raise ValueError(
-                "The `channel` and `credentials` arguments are mutually " "exclusive.",
+                'The `channel` and `credentials` arguments are mutually '
+                'exclusive.',
             )
 
         # Create the channel.
@@ -65,8 +64,8 @@ class FirestoreGrpcTransport(object):
                 address=address,
                 credentials=credentials,
                 options={
-                    "grpc.max_send_message_length": -1,
-                    "grpc.max_receive_message_length": -1,
+                    'grpc.max_send_message_length': -1,
+                    'grpc.max_receive_message_length': -1,
                 }.items(),
             )
 
@@ -75,13 +74,16 @@ class FirestoreGrpcTransport(object):
         # gRPC uses objects called "stubs" that are bound to the
         # channel and provide a basic method for each RPC.
         self._stubs = {
-            "firestore_stub": firestore_pb2_grpc.FirestoreStub(channel),
+            'firestore_stub': firestore_pb2_grpc.FirestoreStub(channel),
         }
+
 
     @classmethod
     def create_channel(
-        cls, address="firestore.googleapis.com:443", credentials=None, **kwargs
-    ):
+                cls,
+                address='firestore.googleapis.com:443',
+                credentials=None,
+                **kwargs):
         """Create and return a gRPC channel object.
 
         Args:
@@ -98,7 +100,10 @@ class FirestoreGrpcTransport(object):
             grpc.Channel: A gRPC channel object.
         """
         return google.api_core.grpc_helpers.create_channel(
-            address, credentials=credentials, scopes=cls._OAUTH_SCOPES, **kwargs
+            address,
+            credentials=credentials,
+            scopes=cls._OAUTH_SCOPES,
+            **kwargs
         )
 
     @property
@@ -121,7 +126,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].DeleteDocument
+        return self._stubs['firestore_stub'].DeleteDocument
 
     @property
     def batch_get_documents(self):
@@ -137,7 +142,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].BatchGetDocuments
+        return self._stubs['firestore_stub'].BatchGetDocuments
 
     @property
     def begin_transaction(self):
@@ -150,7 +155,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].BeginTransaction
+        return self._stubs['firestore_stub'].BeginTransaction
 
     @property
     def rollback(self):
@@ -163,7 +168,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].Rollback
+        return self._stubs['firestore_stub'].Rollback
 
     @property
     def run_query(self):
@@ -176,7 +181,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].RunQuery
+        return self._stubs['firestore_stub'].RunQuery
 
     @property
     def write(self):
@@ -189,7 +194,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].Write
+        return self._stubs['firestore_stub'].Write
 
     @property
     def listen(self):
@@ -202,7 +207,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].Listen
+        return self._stubs['firestore_stub'].Listen
 
     @property
     def list_collection_ids(self):
@@ -215,7 +220,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].ListCollectionIds
+        return self._stubs['firestore_stub'].ListCollectionIds
 
     @property
     def get_document(self):
@@ -228,7 +233,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].GetDocument
+        return self._stubs['firestore_stub'].GetDocument
 
     @property
     def list_documents(self):
@@ -241,7 +246,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].ListDocuments
+        return self._stubs['firestore_stub'].ListDocuments
 
     @property
     def create_document(self):
@@ -254,7 +259,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].CreateDocument
+        return self._stubs['firestore_stub'].CreateDocument
 
     @property
     def update_document(self):
@@ -267,7 +272,7 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].UpdateDocument
+        return self._stubs['firestore_stub'].UpdateDocument
 
     @property
     def commit(self):
@@ -280,4 +285,4 @@ class FirestoreGrpcTransport(object):
                 deserialized request object and returns a
                 deserialized response object.
         """
-        return self._stubs["firestore_stub"].Commit
+        return self._stubs['firestore_stub'].Commit

@@ -35,7 +35,6 @@ class OperationState(enum.IntEnum):
       CANCELLED (int): Request has finished being cancelled after user called
       google.longrunning.Operations.CancelOperation.
     """
-
     OPERATION_STATE_UNSPECIFIED = 0
     INITIALIZING = 1
     PROCESSING = 2
@@ -57,7 +56,6 @@ class FieldOperationMetadata(object):
               ADD (int): The single field index is being added.
               REMOVE (int): The single field index is being removed.
             """
-
             CHANGE_TYPE_UNSPECIFIED = 0
             ADD = 1
             REMOVE = 2
@@ -78,10 +76,10 @@ class Index(object):
           against all collections that has the collection id specified by the
           index.
         """
-
         QUERY_SCOPE_UNSPECIFIED = 0
         COLLECTION = 1
         COLLECTION_GROUP = 2
+
 
     class State(enum.IntEnum):
         """
@@ -108,11 +106,11 @@ class Index(object):
           that last attempted to create this index failed, then re-create the
           index.
         """
-
         STATE_UNSPECIFIED = 0
         CREATING = 1
         READY = 2
         NEEDS_REPAIR = 3
+
 
     class IndexField(object):
         class ArrayConfig(enum.IntEnum):
@@ -123,9 +121,9 @@ class Index(object):
               ARRAY_CONFIG_UNSPECIFIED (int): The index does not support additional array queries.
               CONTAINS (int): The index supports array containment queries.
             """
-
             ARRAY_CONFIG_UNSPECIFIED = 0
             CONTAINS = 1
+
 
         class Order(enum.IntEnum):
             """
@@ -136,7 +134,7 @@ class Index(object):
               ASCENDING (int): The field is ordered by ascending field value.
               DESCENDING (int): The field is ordered by descending field value.
             """
-
             ORDER_UNSPECIFIED = 0
             ASCENDING = 1
             DESCENDING = 2
+        

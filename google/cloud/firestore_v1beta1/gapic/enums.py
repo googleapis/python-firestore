@@ -29,7 +29,6 @@ class NullValue(enum.IntEnum):
     Attributes:
       NULL_VALUE (int): Null value.
     """
-
     NULL_VALUE = 0
 
 
@@ -44,7 +43,6 @@ class DocumentTransform(object):
               REQUEST_TIME (int): The time at which the server processed the request, with millisecond
               precision.
             """
-
             SERVER_VALUE_UNSPECIFIED = 0
             REQUEST_TIME = 1
 
@@ -59,10 +57,10 @@ class StructuredQuery(object):
           ASCENDING (int): Ascending.
           DESCENDING (int): Descending.
         """
-
         DIRECTION_UNSPECIFIED = 0
         ASCENDING = 1
         DESCENDING = 2
+
 
     class CompositeFilter(object):
         class Operator(enum.IntEnum):
@@ -73,9 +71,9 @@ class StructuredQuery(object):
               OPERATOR_UNSPECIFIED (int): Unspecified. This value must not be used.
               AND (int): The results are required to satisfy each of the combined filters.
             """
-
             OPERATOR_UNSPECIFIED = 0
             AND = 1
+
 
     class FieldFilter(object):
         class Operator(enum.IntEnum):
@@ -97,7 +95,6 @@ class StructuredQuery(object):
               ARRAY_CONTAINS_ANY (int): Contains any. Requires that the field is an array and ``value`` is a
               non-empty ArrayValue with at most 10 values.
             """
-
             OPERATOR_UNSPECIFIED = 0
             LESS_THAN = 1
             LESS_THAN_OR_EQUAL = 2
@@ -107,6 +104,7 @@ class StructuredQuery(object):
             ARRAY_CONTAINS = 7
             IN = 8
             ARRAY_CONTAINS_ANY = 9
+
 
     class UnaryFilter(object):
         class Operator(enum.IntEnum):
@@ -118,7 +116,6 @@ class StructuredQuery(object):
               IS_NAN (int): Test if a field is equal to NaN.
               IS_NULL (int): Test if an expression evaluates to Null.
             """
-
             OPERATOR_UNSPECIFIED = 0
             IS_NAN = 2
             IS_NULL = 3
@@ -148,9 +145,9 @@ class TargetChange(object):
           After the initial state is complete, ``CURRENT`` will be returned even
           if the target was previously indicated to be ``CURRENT``.
         """
-
         NO_CHANGE = 0
         ADD = 1
         REMOVE = 2
         CURRENT = 3
         RESET = 4
+    

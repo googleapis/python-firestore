@@ -44,8 +44,9 @@ from google.protobuf import empty_pb2
 from google.protobuf import timestamp_pb2
 
 
+
 _GAPIC_LIBRARY_VERSION = pkg_resources.get_distribution(
-    "google-cloud-firestore",
+    'google-cloud-firestore',
 ).version
 
 
@@ -70,12 +71,13 @@ class FirestoreClient(object):
        guaranteed to see the effects of the transaction.
     """
 
-    SERVICE_ADDRESS = "firestore.googleapis.com:443"
+    SERVICE_ADDRESS = 'firestore.googleapis.com:443'
     """The default address of the service."""
 
     # The name of the interface for this client. This is the key used to
     # find the method configuration in the client_config dictionary.
-    _INTERFACE_NAME = "google.firestore.v1beta1.Firestore"
+    _INTERFACE_NAME = 'google.firestore.v1beta1.Firestore'
+
 
     @classmethod
     def from_service_account_file(cls, filename, *args, **kwargs):
@@ -91,12 +93,12 @@ class FirestoreClient(object):
         Returns:
             FirestoreClient: The constructed client.
         """
-        credentials = service_account.Credentials.from_service_account_file(filename)
-        kwargs["credentials"] = credentials
+        credentials = service_account.Credentials.from_service_account_file(
+            filename)
+        kwargs['credentials'] = credentials
         return cls(*args, **kwargs)
 
-    from_service_account_json = from_service_account_file
-
+    from_service_account_json = from_service_account_file 
     @classmethod
     def any_path_path(cls, project, database, document, any_path):
         """Return a fully-qualified any_path string."""
@@ -135,16 +137,9 @@ class FirestoreClient(object):
             project=project,
             database=database,
         )
-
-    def __init__(
-        self,
-        transport=None,
-        channel=None,
-        credentials=None,
-        client_config=None,
-        client_info=None,
-        client_options=None,
-    ):
+    
+    def __init__(self, transport=None, channel=None, credentials=None,
+            client_config=None, client_info=None, client_options=None):
         """Constructor.
 
         Args:
@@ -180,27 +175,20 @@ class FirestoreClient(object):
         """
         # Raise deprecation warnings for things we want to go away.
         if client_config is not None:
-            warnings.warn(
-                "The `client_config` argument is deprecated.",
-                PendingDeprecationWarning,
-                stacklevel=2,
-            )
+            warnings.warn('The `client_config` argument is deprecated.',
+                          PendingDeprecationWarning, stacklevel=2)
         else:
             client_config = firestore_client_config.config
 
         if channel:
-            warnings.warn(
-                "The `channel` argument is deprecated; use " "`transport` instead.",
-                PendingDeprecationWarning,
-                stacklevel=2,
-            )
+            warnings.warn('The `channel` argument is deprecated; use '
+                          '`transport` instead.',
+                          PendingDeprecationWarning, stacklevel=2)
 
         api_endpoint = self.SERVICE_ADDRESS
         if client_options:
             if type(client_options) == dict:
-                client_options = google.api_core.client_options.from_dict(
-                    client_options
-                )
+                client_options = google.api_core.client_options.from_dict(client_options)
             if client_options.api_endpoint:
                 api_endpoint = client_options.api_endpoint
 
@@ -217,13 +205,15 @@ class FirestoreClient(object):
             else:
                 if credentials:
                     raise ValueError(
-                        "Received both a transport instance and "
-                        "credentials; these are mutually exclusive."
+                        'Received both a transport instance and '
+                        'credentials; these are mutually exclusive.'
                     )
                 self.transport = transport
         else:
             self.transport = firestore_grpc_transport.FirestoreGrpcTransport(
-                address=api_endpoint, channel=channel, credentials=credentials,
+                address=api_endpoint,
+                channel=channel,
+                credentials=credentials,
             )
 
         if client_info is None:
@@ -239,7 +229,7 @@ class FirestoreClient(object):
         # (Ordinarily, these are the defaults specified in the `*_config.py`
         # file next to this one.)
         self._method_configs = google.api_core.gapic_v1.config.parse_method_configs(
-            client_config["interfaces"][self._INTERFACE_NAME],
+            client_config['interfaces'][self._INTERFACE_NAME],
         )
 
         # Save a dictionary of cached API call functions.
@@ -250,13 +240,12 @@ class FirestoreClient(object):
 
     # Service calls
     def delete_document(
-        self,
-        name,
-        current_document=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            name,
+            current_document=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Deletes a document.
 
@@ -296,48 +285,42 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "delete_document" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "delete_document"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'delete_document' not in self._inner_api_calls:
+            self._inner_api_calls['delete_document'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.delete_document,
-                default_retry=self._method_configs["DeleteDocument"].retry,
-                default_timeout=self._method_configs["DeleteDocument"].timeout,
+                default_retry=self._method_configs['DeleteDocument'].retry,
+                default_timeout=self._method_configs['DeleteDocument'].timeout,
                 client_info=self._client_info,
             )
 
         request = firestore_pb2.DeleteDocumentRequest(
-            name=name, current_document=current_document,
+            name=name,
+            current_document=current_document,
         )
         if metadata is None:
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("name", name)]
+            routing_header = [('name', name)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
-        self._inner_api_calls["delete_document"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        self._inner_api_calls['delete_document'](request, retry=retry, timeout=timeout, metadata=metadata)
 
     def batch_get_documents(
-        self,
-        database,
-        documents=None,
-        mask=None,
-        transaction=None,
-        new_transaction=None,
-        read_time=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            database,
+            documents=None,
+            mask=None,
+            transaction=None,
+            new_transaction=None,
+            read_time=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Gets multiple documents.
 
@@ -403,13 +386,11 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "batch_get_documents" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "batch_get_documents"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'batch_get_documents' not in self._inner_api_calls:
+            self._inner_api_calls['batch_get_documents'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.batch_get_documents,
-                default_retry=self._method_configs["BatchGetDocuments"].retry,
-                default_timeout=self._method_configs["BatchGetDocuments"].timeout,
+                default_retry=self._method_configs['BatchGetDocuments'].retry,
+                default_timeout=self._method_configs['BatchGetDocuments'].timeout,
                 client_info=self._client_info,
             )
 
@@ -433,27 +414,22 @@ class FirestoreClient(object):
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("database", database)]
+            routing_header = [('database', database)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
-        return self._inner_api_calls["batch_get_documents"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['batch_get_documents'](request, retry=retry, timeout=timeout, metadata=metadata)
 
     def begin_transaction(
-        self,
-        database,
-        options_=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            database,
+            options_=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Starts a new transaction.
 
@@ -495,44 +471,38 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "begin_transaction" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "begin_transaction"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'begin_transaction' not in self._inner_api_calls:
+            self._inner_api_calls['begin_transaction'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.begin_transaction,
-                default_retry=self._method_configs["BeginTransaction"].retry,
-                default_timeout=self._method_configs["BeginTransaction"].timeout,
+                default_retry=self._method_configs['BeginTransaction'].retry,
+                default_timeout=self._method_configs['BeginTransaction'].timeout,
                 client_info=self._client_info,
             )
 
         request = firestore_pb2.BeginTransactionRequest(
-            database=database, options=options_,
+            database=database,
+            options=options_,
         )
         if metadata is None:
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("database", database)]
+            routing_header = [('database', database)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
-        return self._inner_api_calls["begin_transaction"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['begin_transaction'](request, retry=retry, timeout=timeout, metadata=metadata)
 
     def rollback(
-        self,
-        database,
-        transaction,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            database,
+            transaction,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Rolls back a transaction.
 
@@ -570,47 +540,41 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "rollback" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "rollback"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'rollback' not in self._inner_api_calls:
+            self._inner_api_calls['rollback'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.rollback,
-                default_retry=self._method_configs["Rollback"].retry,
-                default_timeout=self._method_configs["Rollback"].timeout,
+                default_retry=self._method_configs['Rollback'].retry,
+                default_timeout=self._method_configs['Rollback'].timeout,
                 client_info=self._client_info,
             )
 
         request = firestore_pb2.RollbackRequest(
-            database=database, transaction=transaction,
+            database=database,
+            transaction=transaction,
         )
         if metadata is None:
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("database", database)]
+            routing_header = [('database', database)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
-        self._inner_api_calls["rollback"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        self._inner_api_calls['rollback'](request, retry=retry, timeout=timeout, metadata=metadata)
 
     def run_query(
-        self,
-        parent,
-        structured_query=None,
-        transaction=None,
-        new_transaction=None,
-        read_time=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            parent,
+            structured_query=None,
+            transaction=None,
+            new_transaction=None,
+            read_time=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Runs a query.
 
@@ -669,19 +633,19 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "run_query" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "run_query"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'run_query' not in self._inner_api_calls:
+            self._inner_api_calls['run_query'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.run_query,
-                default_retry=self._method_configs["RunQuery"].retry,
-                default_timeout=self._method_configs["RunQuery"].timeout,
+                default_retry=self._method_configs['RunQuery'].retry,
+                default_timeout=self._method_configs['RunQuery'].timeout,
                 client_info=self._client_info,
             )
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
-        google.api_core.protobuf_helpers.check_oneof(structured_query=structured_query,)
+        google.api_core.protobuf_helpers.check_oneof(
+            structured_query=structured_query,
+        )
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
@@ -702,26 +666,21 @@ class FirestoreClient(object):
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("parent", parent)]
+            routing_header = [('parent', parent)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
-        return self._inner_api_calls["run_query"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['run_query'](request, retry=retry, timeout=timeout, metadata=metadata)
 
     def write(
-        self,
-        requests,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            requests,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Streams batches of document updates and deletes, in order.
 
@@ -762,27 +721,22 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "write" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "write"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'write' not in self._inner_api_calls:
+            self._inner_api_calls['write'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.write,
-                default_retry=self._method_configs["Write"].retry,
-                default_timeout=self._method_configs["Write"].timeout,
+                default_retry=self._method_configs['Write'].retry,
+                default_timeout=self._method_configs['Write'].timeout,
                 client_info=self._client_info,
             )
 
-        return self._inner_api_calls["write"](
-            requests, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['write'](requests, retry=retry, timeout=timeout, metadata=metadata)
 
     def listen(
-        self,
-        requests,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            requests,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Listens to changes.
 
@@ -823,28 +777,23 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "listen" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "listen"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'listen' not in self._inner_api_calls:
+            self._inner_api_calls['listen'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.listen,
-                default_retry=self._method_configs["Listen"].retry,
-                default_timeout=self._method_configs["Listen"].timeout,
+                default_retry=self._method_configs['Listen'].retry,
+                default_timeout=self._method_configs['Listen'].timeout,
                 client_info=self._client_info,
             )
 
-        return self._inner_api_calls["listen"](
-            requests, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['listen'](requests, retry=retry, timeout=timeout, metadata=metadata)
 
     def list_collection_ids(
-        self,
-        parent,
-        page_size=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            parent,
+            page_size=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Lists all the collection IDs underneath a document.
 
@@ -903,57 +852,48 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "list_collection_ids" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "list_collection_ids"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'list_collection_ids' not in self._inner_api_calls:
+            self._inner_api_calls['list_collection_ids'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.list_collection_ids,
-                default_retry=self._method_configs["ListCollectionIds"].retry,
-                default_timeout=self._method_configs["ListCollectionIds"].timeout,
+                default_retry=self._method_configs['ListCollectionIds'].retry,
+                default_timeout=self._method_configs['ListCollectionIds'].timeout,
                 client_info=self._client_info,
             )
 
         request = firestore_pb2.ListCollectionIdsRequest(
-            parent=parent, page_size=page_size,
+            parent=parent,
+            page_size=page_size,
         )
         if metadata is None:
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("parent", parent)]
+            routing_header = [('parent', parent)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
         iterator = google.api_core.page_iterator.GRPCIterator(
             client=None,
-            method=functools.partial(
-                self._inner_api_calls["list_collection_ids"],
-                retry=retry,
-                timeout=timeout,
-                metadata=metadata,
-            ),
+            method=functools.partial(self._inner_api_calls['list_collection_ids'], retry=retry, timeout=timeout, metadata=metadata),
             request=request,
-            items_field="collection_ids",
-            request_token_field="page_token",
-            response_token_field="next_page_token",
+            items_field='collection_ids',
+            request_token_field='page_token',
+            response_token_field='next_page_token',
         )
         return iterator
 
     def get_document(
-        self,
-        name,
-        mask=None,
-        transaction=None,
-        read_time=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            name,
+            mask=None,
+            transaction=None,
+            read_time=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Gets a single document.
 
@@ -1003,56 +943,53 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "get_document" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "get_document"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'get_document' not in self._inner_api_calls:
+            self._inner_api_calls['get_document'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.get_document,
-                default_retry=self._method_configs["GetDocument"].retry,
-                default_timeout=self._method_configs["GetDocument"].timeout,
+                default_retry=self._method_configs['GetDocument'].retry,
+                default_timeout=self._method_configs['GetDocument'].timeout,
                 client_info=self._client_info,
             )
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
         google.api_core.protobuf_helpers.check_oneof(
-            transaction=transaction, read_time=read_time,
+            transaction=transaction,
+            read_time=read_time,
         )
 
         request = firestore_pb2.GetDocumentRequest(
-            name=name, mask=mask, transaction=transaction, read_time=read_time,
+            name=name,
+            mask=mask,
+            transaction=transaction,
+            read_time=read_time,
         )
         if metadata is None:
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("name", name)]
+            routing_header = [('name', name)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
-        return self._inner_api_calls["get_document"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['get_document'](request, retry=retry, timeout=timeout, metadata=metadata)
 
     def list_documents(
-        self,
-        parent,
-        collection_id,
-        page_size=None,
-        order_by=None,
-        mask=None,
-        transaction=None,
-        read_time=None,
-        show_missing=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            parent,
+            collection_id,
+            page_size=None,
+            order_by=None,
+            mask=None,
+            transaction=None,
+            read_time=None,
+            show_missing=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Lists documents.
 
@@ -1138,20 +1075,19 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "list_documents" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "list_documents"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'list_documents' not in self._inner_api_calls:
+            self._inner_api_calls['list_documents'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.list_documents,
-                default_retry=self._method_configs["ListDocuments"].retry,
-                default_timeout=self._method_configs["ListDocuments"].timeout,
+                default_retry=self._method_configs['ListDocuments'].retry,
+                default_timeout=self._method_configs['ListDocuments'].timeout,
                 client_info=self._client_info,
             )
 
         # Sanity check: We have some fields which are mutually exclusive;
         # raise ValueError if more than one is sent.
         google.api_core.protobuf_helpers.check_oneof(
-            transaction=transaction, read_time=read_time,
+            transaction=transaction,
+            read_time=read_time,
         )
 
         request = firestore_pb2.ListDocumentsRequest(
@@ -1166,16 +1102,11 @@ class FirestoreClient(object):
         )
         iterator = google.api_core.page_iterator.GRPCIterator(
             client=None,
-            method=functools.partial(
-                self._inner_api_calls["list_documents"],
-                retry=retry,
-                timeout=timeout,
-                metadata=metadata,
-            ),
+            method=functools.partial(self._inner_api_calls['list_documents'], retry=retry, timeout=timeout, metadata=metadata),
             request=request,
-            items_field="documents",
-            request_token_field="page_token",
-            response_token_field="next_page_token",
+            items_field='documents',
+            request_token_field='page_token',
+            response_token_field='next_page_token',
         )
         return iterator
 
@@ -1188,8 +1119,7 @@ class FirestoreClient(object):
         mask=None,
         retry=google.api_core.gapic_v1.method.DEFAULT,
         timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+        metadata=None):
         """
         Creates a new document.
 
@@ -1249,13 +1179,11 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "create_document" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "create_document"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'create_document' not in self._inner_api_calls:
+            self._inner_api_calls['create_document'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.create_document,
-                default_retry=self._method_configs["CreateDocument"].retry,
-                default_timeout=self._method_configs["CreateDocument"].timeout,
+                default_retry=self._method_configs['CreateDocument'].retry,
+                default_timeout=self._method_configs['CreateDocument'].timeout,
                 client_info=self._client_info,
             )
 
@@ -1266,20 +1194,17 @@ class FirestoreClient(object):
             document_id=document_id,
             mask=mask,
         )
-        return self._inner_api_calls["create_document"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['create_document'](request, retry=retry, timeout=timeout, metadata=metadata)
 
     def update_document(
-        self,
-        document,
-        update_mask=None,
-        mask=None,
-        current_document=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            document,
+            update_mask=None,
+            mask=None,
+            current_document=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Updates or inserts a document.
 
@@ -1341,13 +1266,11 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "update_document" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "update_document"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'update_document' not in self._inner_api_calls:
+            self._inner_api_calls['update_document'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.update_document,
-                default_retry=self._method_configs["UpdateDocument"].retry,
-                default_timeout=self._method_configs["UpdateDocument"].timeout,
+                default_retry=self._method_configs['UpdateDocument'].retry,
+                default_timeout=self._method_configs['UpdateDocument'].timeout,
                 client_info=self._client_info,
             )
 
@@ -1361,28 +1284,23 @@ class FirestoreClient(object):
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("document.name", document.name)]
+            routing_header = [('document.name', document.name)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
-        return self._inner_api_calls["update_document"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['update_document'](request, retry=retry, timeout=timeout, metadata=metadata)
 
     def commit(
-        self,
-        database,
-        writes=None,
-        transaction=None,
-        retry=google.api_core.gapic_v1.method.DEFAULT,
-        timeout=google.api_core.gapic_v1.method.DEFAULT,
-        metadata=None,
-    ):
+            self,
+            database,
+            writes=None,
+            transaction=None,
+            retry=google.api_core.gapic_v1.method.DEFAULT,
+            timeout=google.api_core.gapic_v1.method.DEFAULT,
+            metadata=None):
         """
         Commits a transaction, while optionally updating documents.
 
@@ -1426,32 +1344,28 @@ class FirestoreClient(object):
             ValueError: If the parameters are invalid.
         """
         # Wrap the transport method to add retry and timeout logic.
-        if "commit" not in self._inner_api_calls:
-            self._inner_api_calls[
-                "commit"
-            ] = google.api_core.gapic_v1.method.wrap_method(
+        if 'commit' not in self._inner_api_calls:
+            self._inner_api_calls['commit'] = google.api_core.gapic_v1.method.wrap_method(
                 self.transport.commit,
-                default_retry=self._method_configs["Commit"].retry,
-                default_timeout=self._method_configs["Commit"].timeout,
+                default_retry=self._method_configs['Commit'].retry,
+                default_timeout=self._method_configs['Commit'].timeout,
                 client_info=self._client_info,
             )
 
         request = firestore_pb2.CommitRequest(
-            database=database, writes=writes, transaction=transaction,
+            database=database,
+            writes=writes,
+            transaction=transaction,
         )
         if metadata is None:
             metadata = []
         metadata = list(metadata)
         try:
-            routing_header = [("database", database)]
+            routing_header = [('database', database)]
         except AttributeError:
             pass
         else:
-            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(
-                routing_header
-            )
+            routing_metadata = google.api_core.gapic_v1.routing_header.to_grpc_metadata(routing_header)
             metadata.append(routing_metadata)
 
-        return self._inner_api_calls["commit"](
-            request, retry=retry, timeout=timeout, metadata=metadata
-        )
+        return self._inner_api_calls['commit'](request, retry=retry, timeout=timeout, metadata=metadata)
