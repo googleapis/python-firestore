@@ -20,7 +20,7 @@ from google.cloud.firestore_v1.base_document import (
     _first_write_result,
 )
 
-from google.api_core import exceptions
+from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import common
 from typing import AsyncGenerator, Coroutine
