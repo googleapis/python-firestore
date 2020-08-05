@@ -6,6 +6,7 @@ from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
 from google.protobuf import reflection as _reflection
 from google.protobuf import symbol_database as _symbol_database
+
 # @@protoc_insertion_point(imports)
 
 _sym_db = _symbol_database.Default()
@@ -14,1620 +15,2962 @@ _sym_db = _symbol_database.Default()
 from google.api import annotations_pb2 as google_dot_api_dot_annotations__pb2
 from google.api import client_pb2 as google_dot_api_dot_client__pb2
 from google.api import field_behavior_pb2 as google_dot_api_dot_field__behavior__pb2
-from google.cloud.firestore_v1beta1.proto import common_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2
-from google.cloud.firestore_v1beta1.proto import document_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2
-from google.cloud.firestore_v1beta1.proto import query_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2
-from google.cloud.firestore_v1beta1.proto import write_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2
+from google.cloud.firestore_v1beta1.proto import (
+    common_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2,
+)
+from google.cloud.firestore_v1beta1.proto import (
+    document_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2,
+)
+from google.cloud.firestore_v1beta1.proto import (
+    query_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2,
+)
+from google.cloud.firestore_v1beta1.proto import (
+    write_pb2 as google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2,
+)
 from google.protobuf import empty_pb2 as google_dot_protobuf_dot_empty__pb2
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 from google.rpc import status_pb2 as google_dot_rpc_dot_status__pb2
 
 
 DESCRIPTOR = _descriptor.FileDescriptor(
-  name='google/cloud/firestore_v1beta1/proto/firestore.proto',
-  package='google.firestore.v1beta1',
-  syntax='proto3',
-  serialized_options=b'\n\034com.google.firestore.v1beta1B\016FirestoreProtoP\001ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\242\002\004GCFS\252\002\036Google.Cloud.Firestore.V1Beta1\312\002\036Google\\Cloud\\Firestore\\V1beta1\352\002!Google::Cloud::Firestore::V1beta1',
-  create_key=_descriptor._internal_create_key,
-  serialized_pb=b'\n4google/cloud/firestore_v1beta1/proto/firestore.proto\x12\x18google.firestore.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x31google/cloud/firestore_v1beta1/proto/common.proto\x1a\x33google/cloud/firestore_v1beta1/proto/document.proto\x1a\x30google/cloud/firestore_v1beta1/proto/query.proto\x1a\x30google/cloud/firestore_v1beta1/proto/write.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto\"\xbd\x01\n\x12GetDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x34\n\x04mask\x18\x02 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12\x15\n\x0btransaction\x18\x03 \x01(\x0cH\x00\x12/\n\tread_time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector\"\xac\x02\n\x14ListDocumentsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t\x12\x10\n\x08order_by\x18\x06 \x01(\t\x12\x34\n\x04mask\x18\x07 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12\x15\n\x0btransaction\x18\x08 \x01(\x0cH\x00\x12/\n\tread_time\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x14\n\x0cshow_missing\x18\x0c \x01(\x08\x42\x16\n\x14\x63onsistency_selector\"g\n\x15ListDocumentsResponse\x12\x35\n\tdocuments\x18\x01 \x03(\x0b\x32\".google.firestore.v1beta1.Document\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t\"\xce\x01\n\x15\x43reateDocumentRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12\x39\n\x08\x64ocument\x18\x04 \x01(\x0b\x32\".google.firestore.v1beta1.DocumentB\x03\xe0\x41\x02\x12\x34\n\x04mask\x18\x05 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\"\x87\x02\n\x15UpdateDocumentRequest\x12\x39\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\".google.firestore.v1beta1.DocumentB\x03\xe0\x41\x02\x12;\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12\x34\n\x04mask\x18\x03 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12@\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32&.google.firestore.v1beta1.Precondition\"l\n\x15\x44\x65leteDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12@\n\x10\x63urrent_document\x18\x02 \x01(\x0b\x32&.google.firestore.v1beta1.Precondition\"\xa3\x02\n\x18\x42\x61tchGetDocumentsRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tdocuments\x18\x02 \x03(\t\x12\x34\n\x04mask\x18\x03 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12\x15\n\x0btransaction\x18\x04 \x01(\x0cH\x00\x12G\n\x0fnew_transaction\x18\x05 \x01(\x0b\x32,.google.firestore.v1beta1.TransactionOptionsH\x00\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector\"\xb1\x01\n\x19\x42\x61tchGetDocumentsResponse\x12\x33\n\x05\x66ound\x18\x01 \x01(\x0b\x32\".google.firestore.v1beta1.DocumentH\x00\x12\x11\n\x07missing\x18\x02 \x01(\tH\x00\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\n\x06result\"o\n\x17\x42\x65ginTransactionRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12=\n\x07options\x18\x02 \x01(\x0b\x32,.google.firestore.v1beta1.TransactionOptions\"/\n\x18\x42\x65ginTransactionResponse\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c\"l\n\rCommitRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12/\n\x06writes\x18\x02 \x03(\x0b\x32\x1f.google.firestore.v1beta1.Write\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c\"\x7f\n\x0e\x43ommitResponse\x12<\n\rwrite_results\x18\x01 \x03(\x0b\x32%.google.firestore.v1beta1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"B\n\x0fRollbackRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x18\n\x0btransaction\x18\x02 \x01(\x0c\x42\x03\xe0\x41\x02\"\xa4\x02\n\x0fRunQueryRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x45\n\x10structured_query\x18\x02 \x01(\x0b\x32).google.firestore.v1beta1.StructuredQueryH\x00\x12\x15\n\x0btransaction\x18\x05 \x01(\x0cH\x01\x12G\n\x0fnew_transaction\x18\x06 \x01(\x0b\x32,.google.firestore.v1beta1.TransactionOptionsH\x01\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x42\x0c\n\nquery_typeB\x16\n\x14\x63onsistency_selector\"\xa5\x01\n\x10RunQueryResponse\x12\x13\n\x0btransaction\x18\x02 \x01(\x0c\x12\x34\n\x08\x64ocument\x18\x01 \x01(\x0b\x32\".google.firestore.v1beta1.Document\x12-\n\tread_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0fskipped_results\x18\x04 \x01(\x05\"\xf2\x01\n\x0cWriteRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tstream_id\x18\x02 \x01(\t\x12/\n\x06writes\x18\x03 \x03(\x0b\x32\x1f.google.firestore.v1beta1.Write\x12\x14\n\x0cstream_token\x18\x04 \x01(\x0c\x12\x42\n\x06labels\x18\x05 \x03(\x0b\x32\x32.google.firestore.v1beta1.WriteRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\"\xa7\x01\n\rWriteResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x14\n\x0cstream_token\x18\x02 \x01(\x0c\x12<\n\rwrite_results\x18\x03 \x03(\x0b\x32%.google.firestore.v1beta1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"\xfc\x01\n\rListenRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x36\n\nadd_target\x18\x02 \x01(\x0b\x32 .google.firestore.v1beta1.TargetH\x00\x12\x17\n\rremove_target\x18\x03 \x01(\x05H\x00\x12\x43\n\x06labels\x18\x04 \x03(\x0b\x32\x33.google.firestore.v1beta1.ListenRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0f\n\rtarget_change\"\xee\x02\n\x0eListenResponse\x12?\n\rtarget_change\x18\x02 \x01(\x0b\x32&.google.firestore.v1beta1.TargetChangeH\x00\x12\x43\n\x0f\x64ocument_change\x18\x03 \x01(\x0b\x32(.google.firestore.v1beta1.DocumentChangeH\x00\x12\x43\n\x0f\x64ocument_delete\x18\x04 \x01(\x0b\x32(.google.firestore.v1beta1.DocumentDeleteH\x00\x12\x43\n\x0f\x64ocument_remove\x18\x06 \x01(\x0b\x32(.google.firestore.v1beta1.DocumentRemoveH\x00\x12;\n\x06\x66ilter\x18\x05 \x01(\x0b\x32).google.firestore.v1beta1.ExistenceFilterH\x00\x42\x0f\n\rresponse_type\"\xb0\x03\n\x06Target\x12=\n\x05query\x18\x02 \x01(\x0b\x32,.google.firestore.v1beta1.Target.QueryTargetH\x00\x12\x45\n\tdocuments\x18\x03 \x01(\x0b\x32\x30.google.firestore.v1beta1.Target.DocumentsTargetH\x00\x12\x16\n\x0cresume_token\x18\x04 \x01(\x0cH\x01\x12/\n\tread_time\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x12\x11\n\ttarget_id\x18\x05 \x01(\x05\x12\x0c\n\x04once\x18\x06 \x01(\x08\x1a$\n\x0f\x44ocumentsTarget\x12\x11\n\tdocuments\x18\x02 \x03(\t\x1ar\n\x0bQueryTarget\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12\x45\n\x10structured_query\x18\x02 \x01(\x0b\x32).google.firestore.v1beta1.StructuredQueryH\x00\x42\x0c\n\nquery_typeB\r\n\x0btarget_typeB\r\n\x0bresume_type\"\xaf\x02\n\x0cTargetChange\x12S\n\x12target_change_type\x18\x01 \x01(\x0e\x32\x37.google.firestore.v1beta1.TargetChange.TargetChangeType\x12\x12\n\ntarget_ids\x18\x02 \x03(\x05\x12!\n\x05\x63\x61use\x18\x03 \x01(\x0b\x32\x12.google.rpc.Status\x12\x14\n\x0cresume_token\x18\x04 \x01(\x0c\x12-\n\tread_time\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"N\n\x10TargetChangeType\x12\r\n\tNO_CHANGE\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02\x12\x0b\n\x07\x43URRENT\x10\x03\x12\t\n\x05RESET\x10\x04\"V\n\x18ListCollectionIdsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x02 \x01(\x05\x12\x12\n\npage_token\x18\x03 \x01(\t\"L\n\x19ListCollectionIdsResponse\x12\x16\n\x0e\x63ollection_ids\x18\x01 \x03(\t\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t2\x9b\x15\n\tFirestore\x12\x9e\x01\n\x0bGetDocument\x12,.google.firestore.v1beta1.GetDocumentRequest\x1a\".google.firestore.v1beta1.Document\"=\x82\xd3\xe4\x93\x02\x37\x12\x35/v1beta1/{name=projects/*/databases/*/documents/*/**}\x12\xc1\x01\n\rListDocuments\x12..google.firestore.v1beta1.ListDocumentsRequest\x1a/.google.firestore.v1beta1.ListDocumentsResponse\"O\x82\xd3\xe4\x93\x02I\x12G/v1beta1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}\x12\xbe\x01\n\x0e\x43reateDocument\x12/.google.firestore.v1beta1.CreateDocumentRequest\x1a\".google.firestore.v1beta1.Document\"W\x82\xd3\xe4\x93\x02Q\"E/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\x08\x64ocument\x12\xce\x01\n\x0eUpdateDocument\x12/.google.firestore.v1beta1.UpdateDocumentRequest\x1a\".google.firestore.v1beta1.Document\"g\x82\xd3\xe4\x93\x02J2>/v1beta1/{document.name=projects/*/databases/*/documents/*/**}:\x08\x64ocument\xda\x41\x14\x64ocument,update_mask\x12\x9f\x01\n\x0e\x44\x65leteDocument\x12/.google.firestore.v1beta1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty\"D\x82\xd3\xe4\x93\x02\x37*5/v1beta1/{name=projects/*/databases/*/documents/*/**}\xda\x41\x04name\x12\xc8\x01\n\x11\x42\x61tchGetDocuments\x12\x32.google.firestore.v1beta1.BatchGetDocumentsRequest\x1a\x33.google.firestore.v1beta1.BatchGetDocumentsResponse\"H\x82\xd3\xe4\x93\x02\x42\"=/v1beta1/{database=projects/*/databases/*}/documents:batchGet:\x01*0\x01\x12\xd6\x01\n\x10\x42\x65ginTransaction\x12\x31.google.firestore.v1beta1.BeginTransactionRequest\x1a\x32.google.firestore.v1beta1.BeginTransactionResponse\"[\x82\xd3\xe4\x93\x02J\"E/v1beta1/{database=projects/*/databases/*}/documents:beginTransaction:\x01*\xda\x41\x08\x64\x61tabase\x12\xb5\x01\n\x06\x43ommit\x12\'.google.firestore.v1beta1.CommitRequest\x1a(.google.firestore.v1beta1.CommitResponse\"X\x82\xd3\xe4\x93\x02@\";/v1beta1/{database=projects/*/databases/*}/documents:commit:\x01*\xda\x41\x0f\x64\x61tabase,writes\x12\xae\x01\n\x08Rollback\x12).google.firestore.v1beta1.RollbackRequest\x1a\x16.google.protobuf.Empty\"_\x82\xd3\xe4\x93\x02\x42\"=/v1beta1/{database=projects/*/databases/*}/documents:rollback:\x01*\xda\x41\x14\x64\x61tabase,transaction\x12\xf4\x01\n\x08RunQuery\x12).google.firestore.v1beta1.RunQueryRequest\x1a*.google.firestore.v1beta1.RunQueryResponse\"\x8e\x01\x82\xd3\xe4\x93\x02\x87\x01\";/v1beta1/{parent=projects/*/databases/*/documents}:runQuery:\x01*ZE\"@/v1beta1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\x01*0\x01\x12\xa3\x01\n\x05Write\x12&.google.firestore.v1beta1.WriteRequest\x1a\'.google.firestore.v1beta1.WriteResponse\"E\x82\xd3\xe4\x93\x02?\":/v1beta1/{database=projects/*/databases/*}/documents:write:\x01*(\x01\x30\x01\x12\xa7\x01\n\x06Listen\x12\'.google.firestore.v1beta1.ListenRequest\x1a(.google.firestore.v1beta1.ListenResponse\"F\x82\xd3\xe4\x93\x02@\";/v1beta1/{database=projects/*/databases/*}/documents:listen:\x01*(\x01\x30\x01\x12\xa8\x02\n\x11ListCollectionIds\x12\x32.google.firestore.v1beta1.ListCollectionIdsRequest\x1a\x33.google.firestore.v1beta1.ListCollectionIdsResponse\"\xa9\x01\x82\xd3\xe4\x93\x02\x99\x01\"D/v1beta1/{parent=projects/*/databases/*/documents}:listCollectionIds:\x01*ZN\"I/v1beta1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\x01*\xda\x41\x06parent\x1av\xca\x41\x18\x66irestore.googleapis.com\xd2\x41Xhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastoreB\xe0\x01\n\x1c\x63om.google.firestore.v1beta1B\x0e\x46irestoreProtoP\x01ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\xa2\x02\x04GCFS\xaa\x02\x1eGoogle.Cloud.Firestore.V1Beta1\xca\x02\x1eGoogle\\Cloud\\Firestore\\V1beta1\xea\x02!Google::Cloud::Firestore::V1beta1b\x06proto3'
-  ,
-  dependencies=[google_dot_api_dot_annotations__pb2.DESCRIPTOR,google_dot_api_dot_client__pb2.DESCRIPTOR,google_dot_api_dot_field__behavior__pb2.DESCRIPTOR,google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2.DESCRIPTOR,google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2.DESCRIPTOR,google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2.DESCRIPTOR,google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2.DESCRIPTOR,google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,google_dot_rpc_dot_status__pb2.DESCRIPTOR,])
-
+    name="google/cloud/firestore_v1beta1/proto/firestore.proto",
+    package="google.firestore.v1beta1",
+    syntax="proto3",
+    serialized_options=b"\n\034com.google.firestore.v1beta1B\016FirestoreProtoP\001ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\242\002\004GCFS\252\002\036Google.Cloud.Firestore.V1Beta1\312\002\036Google\\Cloud\\Firestore\\V1beta1\352\002!Google::Cloud::Firestore::V1beta1",
+    create_key=_descriptor._internal_create_key,
+    serialized_pb=b'\n4google/cloud/firestore_v1beta1/proto/firestore.proto\x12\x18google.firestore.v1beta1\x1a\x1cgoogle/api/annotations.proto\x1a\x17google/api/client.proto\x1a\x1fgoogle/api/field_behavior.proto\x1a\x31google/cloud/firestore_v1beta1/proto/common.proto\x1a\x33google/cloud/firestore_v1beta1/proto/document.proto\x1a\x30google/cloud/firestore_v1beta1/proto/query.proto\x1a\x30google/cloud/firestore_v1beta1/proto/write.proto\x1a\x1bgoogle/protobuf/empty.proto\x1a\x1fgoogle/protobuf/timestamp.proto\x1a\x17google/rpc/status.proto"\xbd\x01\n\x12GetDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x34\n\x04mask\x18\x02 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12\x15\n\x0btransaction\x18\x03 \x01(\x0cH\x00\x12/\n\tread_time\x18\x05 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xac\x02\n\x14ListDocumentsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x03 \x01(\x05\x12\x12\n\npage_token\x18\x04 \x01(\t\x12\x10\n\x08order_by\x18\x06 \x01(\t\x12\x34\n\x04mask\x18\x07 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12\x15\n\x0btransaction\x18\x08 \x01(\x0cH\x00\x12/\n\tread_time\x18\n \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x12\x14\n\x0cshow_missing\x18\x0c \x01(\x08\x42\x16\n\x14\x63onsistency_selector"g\n\x15ListDocumentsResponse\x12\x35\n\tdocuments\x18\x01 \x03(\x0b\x32".google.firestore.v1beta1.Document\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t"\xce\x01\n\x15\x43reateDocumentRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x1a\n\rcollection_id\x18\x02 \x01(\tB\x03\xe0\x41\x02\x12\x13\n\x0b\x64ocument_id\x18\x03 \x01(\t\x12\x39\n\x08\x64ocument\x18\x04 \x01(\x0b\x32".google.firestore.v1beta1.DocumentB\x03\xe0\x41\x02\x12\x34\n\x04mask\x18\x05 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask"\x87\x02\n\x15UpdateDocumentRequest\x12\x39\n\x08\x64ocument\x18\x01 \x01(\x0b\x32".google.firestore.v1beta1.DocumentB\x03\xe0\x41\x02\x12;\n\x0bupdate_mask\x18\x02 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12\x34\n\x04mask\x18\x03 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12@\n\x10\x63urrent_document\x18\x04 \x01(\x0b\x32&.google.firestore.v1beta1.Precondition"l\n\x15\x44\x65leteDocumentRequest\x12\x11\n\x04name\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12@\n\x10\x63urrent_document\x18\x02 \x01(\x0b\x32&.google.firestore.v1beta1.Precondition"\xa3\x02\n\x18\x42\x61tchGetDocumentsRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tdocuments\x18\x02 \x03(\t\x12\x34\n\x04mask\x18\x03 \x01(\x0b\x32&.google.firestore.v1beta1.DocumentMask\x12\x15\n\x0btransaction\x18\x04 \x01(\x0cH\x00\x12G\n\x0fnew_transaction\x18\x05 \x01(\x0b\x32,.google.firestore.v1beta1.TransactionOptionsH\x00\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x00\x42\x16\n\x14\x63onsistency_selector"\xb1\x01\n\x19\x42\x61tchGetDocumentsResponse\x12\x33\n\x05\x66ound\x18\x01 \x01(\x0b\x32".google.firestore.v1beta1.DocumentH\x00\x12\x11\n\x07missing\x18\x02 \x01(\tH\x00\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c\x12-\n\tread_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.TimestampB\x08\n\x06result"o\n\x17\x42\x65ginTransactionRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12=\n\x07options\x18\x02 \x01(\x0b\x32,.google.firestore.v1beta1.TransactionOptions"/\n\x18\x42\x65ginTransactionResponse\x12\x13\n\x0btransaction\x18\x01 \x01(\x0c"l\n\rCommitRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12/\n\x06writes\x18\x02 \x03(\x0b\x32\x1f.google.firestore.v1beta1.Write\x12\x13\n\x0btransaction\x18\x03 \x01(\x0c"\x7f\n\x0e\x43ommitResponse\x12<\n\rwrite_results\x18\x01 \x03(\x0b\x32%.google.firestore.v1beta1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"B\n\x0fRollbackRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x18\n\x0btransaction\x18\x02 \x01(\x0c\x42\x03\xe0\x41\x02"\xa4\x02\n\x0fRunQueryRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x45\n\x10structured_query\x18\x02 \x01(\x0b\x32).google.firestore.v1beta1.StructuredQueryH\x00\x12\x15\n\x0btransaction\x18\x05 \x01(\x0cH\x01\x12G\n\x0fnew_transaction\x18\x06 \x01(\x0b\x32,.google.firestore.v1beta1.TransactionOptionsH\x01\x12/\n\tread_time\x18\x07 \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x42\x0c\n\nquery_typeB\x16\n\x14\x63onsistency_selector"\xa5\x01\n\x10RunQueryResponse\x12\x13\n\x0btransaction\x18\x02 \x01(\x0c\x12\x34\n\x08\x64ocument\x18\x01 \x01(\x0b\x32".google.firestore.v1beta1.Document\x12-\n\tread_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x17\n\x0fskipped_results\x18\x04 \x01(\x05"\xf2\x01\n\x0cWriteRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tstream_id\x18\x02 \x01(\t\x12/\n\x06writes\x18\x03 \x03(\x0b\x32\x1f.google.firestore.v1beta1.Write\x12\x14\n\x0cstream_token\x18\x04 \x01(\x0c\x12\x42\n\x06labels\x18\x05 \x03(\x0b\x32\x32.google.firestore.v1beta1.WriteRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01"\xa7\x01\n\rWriteResponse\x12\x11\n\tstream_id\x18\x01 \x01(\t\x12\x14\n\x0cstream_token\x18\x02 \x01(\x0c\x12<\n\rwrite_results\x18\x03 \x03(\x0b\x32%.google.firestore.v1beta1.WriteResult\x12/\n\x0b\x63ommit_time\x18\x04 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"\xfc\x01\n\rListenRequest\x12\x15\n\x08\x64\x61tabase\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x36\n\nadd_target\x18\x02 \x01(\x0b\x32 .google.firestore.v1beta1.TargetH\x00\x12\x17\n\rremove_target\x18\x03 \x01(\x05H\x00\x12\x43\n\x06labels\x18\x04 \x03(\x0b\x32\x33.google.firestore.v1beta1.ListenRequest.LabelsEntry\x1a-\n\x0bLabelsEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\r\n\x05value\x18\x02 \x01(\t:\x02\x38\x01\x42\x0f\n\rtarget_change"\xee\x02\n\x0eListenResponse\x12?\n\rtarget_change\x18\x02 \x01(\x0b\x32&.google.firestore.v1beta1.TargetChangeH\x00\x12\x43\n\x0f\x64ocument_change\x18\x03 \x01(\x0b\x32(.google.firestore.v1beta1.DocumentChangeH\x00\x12\x43\n\x0f\x64ocument_delete\x18\x04 \x01(\x0b\x32(.google.firestore.v1beta1.DocumentDeleteH\x00\x12\x43\n\x0f\x64ocument_remove\x18\x06 \x01(\x0b\x32(.google.firestore.v1beta1.DocumentRemoveH\x00\x12;\n\x06\x66ilter\x18\x05 \x01(\x0b\x32).google.firestore.v1beta1.ExistenceFilterH\x00\x42\x0f\n\rresponse_type"\xb0\x03\n\x06Target\x12=\n\x05query\x18\x02 \x01(\x0b\x32,.google.firestore.v1beta1.Target.QueryTargetH\x00\x12\x45\n\tdocuments\x18\x03 \x01(\x0b\x32\x30.google.firestore.v1beta1.Target.DocumentsTargetH\x00\x12\x16\n\x0cresume_token\x18\x04 \x01(\x0cH\x01\x12/\n\tread_time\x18\x0b \x01(\x0b\x32\x1a.google.protobuf.TimestampH\x01\x12\x11\n\ttarget_id\x18\x05 \x01(\x05\x12\x0c\n\x04once\x18\x06 \x01(\x08\x1a$\n\x0f\x44ocumentsTarget\x12\x11\n\tdocuments\x18\x02 \x03(\t\x1ar\n\x0bQueryTarget\x12\x0e\n\x06parent\x18\x01 \x01(\t\x12\x45\n\x10structured_query\x18\x02 \x01(\x0b\x32).google.firestore.v1beta1.StructuredQueryH\x00\x42\x0c\n\nquery_typeB\r\n\x0btarget_typeB\r\n\x0bresume_type"\xaf\x02\n\x0cTargetChange\x12S\n\x12target_change_type\x18\x01 \x01(\x0e\x32\x37.google.firestore.v1beta1.TargetChange.TargetChangeType\x12\x12\n\ntarget_ids\x18\x02 \x03(\x05\x12!\n\x05\x63\x61use\x18\x03 \x01(\x0b\x32\x12.google.rpc.Status\x12\x14\n\x0cresume_token\x18\x04 \x01(\x0c\x12-\n\tread_time\x18\x06 \x01(\x0b\x32\x1a.google.protobuf.Timestamp"N\n\x10TargetChangeType\x12\r\n\tNO_CHANGE\x10\x00\x12\x07\n\x03\x41\x44\x44\x10\x01\x12\n\n\x06REMOVE\x10\x02\x12\x0b\n\x07\x43URRENT\x10\x03\x12\t\n\x05RESET\x10\x04"V\n\x18ListCollectionIdsRequest\x12\x13\n\x06parent\x18\x01 \x01(\tB\x03\xe0\x41\x02\x12\x11\n\tpage_size\x18\x02 \x01(\x05\x12\x12\n\npage_token\x18\x03 \x01(\t"L\n\x19ListCollectionIdsResponse\x12\x16\n\x0e\x63ollection_ids\x18\x01 \x03(\t\x12\x17\n\x0fnext_page_token\x18\x02 \x01(\t2\x9b\x15\n\tFirestore\x12\x9e\x01\n\x0bGetDocument\x12,.google.firestore.v1beta1.GetDocumentRequest\x1a".google.firestore.v1beta1.Document"=\x82\xd3\xe4\x93\x02\x37\x12\x35/v1beta1/{name=projects/*/databases/*/documents/*/**}\x12\xc1\x01\n\rListDocuments\x12..google.firestore.v1beta1.ListDocumentsRequest\x1a/.google.firestore.v1beta1.ListDocumentsResponse"O\x82\xd3\xe4\x93\x02I\x12G/v1beta1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}\x12\xbe\x01\n\x0e\x43reateDocument\x12/.google.firestore.v1beta1.CreateDocumentRequest\x1a".google.firestore.v1beta1.Document"W\x82\xd3\xe4\x93\x02Q"E/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\x08\x64ocument\x12\xce\x01\n\x0eUpdateDocument\x12/.google.firestore.v1beta1.UpdateDocumentRequest\x1a".google.firestore.v1beta1.Document"g\x82\xd3\xe4\x93\x02J2>/v1beta1/{document.name=projects/*/databases/*/documents/*/**}:\x08\x64ocument\xda\x41\x14\x64ocument,update_mask\x12\x9f\x01\n\x0e\x44\x65leteDocument\x12/.google.firestore.v1beta1.DeleteDocumentRequest\x1a\x16.google.protobuf.Empty"D\x82\xd3\xe4\x93\x02\x37*5/v1beta1/{name=projects/*/databases/*/documents/*/**}\xda\x41\x04name\x12\xc8\x01\n\x11\x42\x61tchGetDocuments\x12\x32.google.firestore.v1beta1.BatchGetDocumentsRequest\x1a\x33.google.firestore.v1beta1.BatchGetDocumentsResponse"H\x82\xd3\xe4\x93\x02\x42"=/v1beta1/{database=projects/*/databases/*}/documents:batchGet:\x01*0\x01\x12\xd6\x01\n\x10\x42\x65ginTransaction\x12\x31.google.firestore.v1beta1.BeginTransactionRequest\x1a\x32.google.firestore.v1beta1.BeginTransactionResponse"[\x82\xd3\xe4\x93\x02J"E/v1beta1/{database=projects/*/databases/*}/documents:beginTransaction:\x01*\xda\x41\x08\x64\x61tabase\x12\xb5\x01\n\x06\x43ommit\x12\'.google.firestore.v1beta1.CommitRequest\x1a(.google.firestore.v1beta1.CommitResponse"X\x82\xd3\xe4\x93\x02@";/v1beta1/{database=projects/*/databases/*}/documents:commit:\x01*\xda\x41\x0f\x64\x61tabase,writes\x12\xae\x01\n\x08Rollback\x12).google.firestore.v1beta1.RollbackRequest\x1a\x16.google.protobuf.Empty"_\x82\xd3\xe4\x93\x02\x42"=/v1beta1/{database=projects/*/databases/*}/documents:rollback:\x01*\xda\x41\x14\x64\x61tabase,transaction\x12\xf4\x01\n\x08RunQuery\x12).google.firestore.v1beta1.RunQueryRequest\x1a*.google.firestore.v1beta1.RunQueryResponse"\x8e\x01\x82\xd3\xe4\x93\x02\x87\x01";/v1beta1/{parent=projects/*/databases/*/documents}:runQuery:\x01*ZE"@/v1beta1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\x01*0\x01\x12\xa3\x01\n\x05Write\x12&.google.firestore.v1beta1.WriteRequest\x1a\'.google.firestore.v1beta1.WriteResponse"E\x82\xd3\xe4\x93\x02?":/v1beta1/{database=projects/*/databases/*}/documents:write:\x01*(\x01\x30\x01\x12\xa7\x01\n\x06Listen\x12\'.google.firestore.v1beta1.ListenRequest\x1a(.google.firestore.v1beta1.ListenResponse"F\x82\xd3\xe4\x93\x02@";/v1beta1/{database=projects/*/databases/*}/documents:listen:\x01*(\x01\x30\x01\x12\xa8\x02\n\x11ListCollectionIds\x12\x32.google.firestore.v1beta1.ListCollectionIdsRequest\x1a\x33.google.firestore.v1beta1.ListCollectionIdsResponse"\xa9\x01\x82\xd3\xe4\x93\x02\x99\x01"D/v1beta1/{parent=projects/*/databases/*/documents}:listCollectionIds:\x01*ZN"I/v1beta1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\x01*\xda\x41\x06parent\x1av\xca\x41\x18\x66irestore.googleapis.com\xd2\x41Xhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastoreB\xe0\x01\n\x1c\x63om.google.firestore.v1beta1B\x0e\x46irestoreProtoP\x01ZAgoogle.golang.org/genproto/googleapis/firestore/v1beta1;firestore\xa2\x02\x04GCFS\xaa\x02\x1eGoogle.Cloud.Firestore.V1Beta1\xca\x02\x1eGoogle\\Cloud\\Firestore\\V1beta1\xea\x02!Google::Cloud::Firestore::V1beta1b\x06proto3',
+    dependencies=[
+        google_dot_api_dot_annotations__pb2.DESCRIPTOR,
+        google_dot_api_dot_client__pb2.DESCRIPTOR,
+        google_dot_api_dot_field__behavior__pb2.DESCRIPTOR,
+        google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2.DESCRIPTOR,
+        google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2.DESCRIPTOR,
+        google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2.DESCRIPTOR,
+        google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2.DESCRIPTOR,
+        google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,
+        google_dot_protobuf_dot_timestamp__pb2.DESCRIPTOR,
+        google_dot_rpc_dot_status__pb2.DESCRIPTOR,
+    ],
+)
 
 
 _TARGETCHANGE_TARGETCHANGETYPE = _descriptor.EnumDescriptor(
-  name='TargetChangeType',
-  full_name='google.firestore.v1beta1.TargetChange.TargetChangeType',
-  filename=None,
-  file=DESCRIPTOR,
-  create_key=_descriptor._internal_create_key,
-  values=[
-    _descriptor.EnumValueDescriptor(
-      name='NO_CHANGE', index=0, number=0,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='ADD', index=1, number=1,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='REMOVE', index=2, number=2,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='CURRENT', index=3, number=3,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-    _descriptor.EnumValueDescriptor(
-      name='RESET', index=4, number=4,
-      serialized_options=None,
-      type=None,
-      create_key=_descriptor._internal_create_key),
-  ],
-  containing_type=None,
-  serialized_options=None,
-  serialized_start=4752,
-  serialized_end=4830,
+    name="TargetChangeType",
+    full_name="google.firestore.v1beta1.TargetChange.TargetChangeType",
+    filename=None,
+    file=DESCRIPTOR,
+    create_key=_descriptor._internal_create_key,
+    values=[
+        _descriptor.EnumValueDescriptor(
+            name="NO_CHANGE",
+            index=0,
+            number=0,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="ADD",
+            index=1,
+            number=1,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="REMOVE",
+            index=2,
+            number=2,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="CURRENT",
+            index=3,
+            number=3,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.EnumValueDescriptor(
+            name="RESET",
+            index=4,
+            number=4,
+            serialized_options=None,
+            type=None,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    containing_type=None,
+    serialized_options=None,
+    serialized_start=4752,
+    serialized_end=4830,
 )
 _sym_db.RegisterEnumDescriptor(_TARGETCHANGE_TARGETCHANGETYPE)
 
 
 _GETDOCUMENTREQUEST = _descriptor.Descriptor(
-  name='GetDocumentRequest',
-  full_name='google.firestore.v1beta1.GetDocumentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='name', full_name='google.firestore.v1beta1.GetDocumentRequest.name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='mask', full_name='google.firestore.v1beta1.GetDocumentRequest.mask', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.GetDocumentRequest.transaction', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='read_time', full_name='google.firestore.v1beta1.GetDocumentRequest.read_time', index=3,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='consistency_selector', full_name='google.firestore.v1beta1.GetDocumentRequest.consistency_selector',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=462,
-  serialized_end=651,
+    name="GetDocumentRequest",
+    full_name="google.firestore.v1beta1.GetDocumentRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="google.firestore.v1beta1.GetDocumentRequest.name",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="mask",
+            full_name="google.firestore.v1beta1.GetDocumentRequest.mask",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.GetDocumentRequest.transaction",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="read_time",
+            full_name="google.firestore.v1beta1.GetDocumentRequest.read_time",
+            index=3,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="consistency_selector",
+            full_name="google.firestore.v1beta1.GetDocumentRequest.consistency_selector",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=462,
+    serialized_end=651,
 )
 
 
 _LISTDOCUMENTSREQUEST = _descriptor.Descriptor(
-  name='ListDocumentsRequest',
-  full_name='google.firestore.v1beta1.ListDocumentsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parent', full_name='google.firestore.v1beta1.ListDocumentsRequest.parent', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='collection_id', full_name='google.firestore.v1beta1.ListDocumentsRequest.collection_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='page_size', full_name='google.firestore.v1beta1.ListDocumentsRequest.page_size', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='page_token', full_name='google.firestore.v1beta1.ListDocumentsRequest.page_token', index=3,
-      number=4, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='order_by', full_name='google.firestore.v1beta1.ListDocumentsRequest.order_by', index=4,
-      number=6, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='mask', full_name='google.firestore.v1beta1.ListDocumentsRequest.mask', index=5,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.ListDocumentsRequest.transaction', index=6,
-      number=8, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='read_time', full_name='google.firestore.v1beta1.ListDocumentsRequest.read_time', index=7,
-      number=10, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='show_missing', full_name='google.firestore.v1beta1.ListDocumentsRequest.show_missing', index=8,
-      number=12, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='consistency_selector', full_name='google.firestore.v1beta1.ListDocumentsRequest.consistency_selector',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=654,
-  serialized_end=954,
+    name="ListDocumentsRequest",
+    full_name="google.firestore.v1beta1.ListDocumentsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="parent",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.parent",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="collection_id",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.collection_id",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="page_size",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.page_size",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="page_token",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.page_token",
+            index=3,
+            number=4,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="order_by",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.order_by",
+            index=4,
+            number=6,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="mask",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.mask",
+            index=5,
+            number=7,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.transaction",
+            index=6,
+            number=8,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="read_time",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.read_time",
+            index=7,
+            number=10,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="show_missing",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.show_missing",
+            index=8,
+            number=12,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="consistency_selector",
+            full_name="google.firestore.v1beta1.ListDocumentsRequest.consistency_selector",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=654,
+    serialized_end=954,
 )
 
 
 _LISTDOCUMENTSRESPONSE = _descriptor.Descriptor(
-  name='ListDocumentsResponse',
-  full_name='google.firestore.v1beta1.ListDocumentsResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='documents', full_name='google.firestore.v1beta1.ListDocumentsResponse.documents', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='next_page_token', full_name='google.firestore.v1beta1.ListDocumentsResponse.next_page_token', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=956,
-  serialized_end=1059,
+    name="ListDocumentsResponse",
+    full_name="google.firestore.v1beta1.ListDocumentsResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="documents",
+            full_name="google.firestore.v1beta1.ListDocumentsResponse.documents",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="next_page_token",
+            full_name="google.firestore.v1beta1.ListDocumentsResponse.next_page_token",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=956,
+    serialized_end=1059,
 )
 
 
 _CREATEDOCUMENTREQUEST = _descriptor.Descriptor(
-  name='CreateDocumentRequest',
-  full_name='google.firestore.v1beta1.CreateDocumentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parent', full_name='google.firestore.v1beta1.CreateDocumentRequest.parent', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='collection_id', full_name='google.firestore.v1beta1.CreateDocumentRequest.collection_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='document_id', full_name='google.firestore.v1beta1.CreateDocumentRequest.document_id', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='document', full_name='google.firestore.v1beta1.CreateDocumentRequest.document', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='mask', full_name='google.firestore.v1beta1.CreateDocumentRequest.mask', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1062,
-  serialized_end=1268,
+    name="CreateDocumentRequest",
+    full_name="google.firestore.v1beta1.CreateDocumentRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="parent",
+            full_name="google.firestore.v1beta1.CreateDocumentRequest.parent",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="collection_id",
+            full_name="google.firestore.v1beta1.CreateDocumentRequest.collection_id",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="document_id",
+            full_name="google.firestore.v1beta1.CreateDocumentRequest.document_id",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="document",
+            full_name="google.firestore.v1beta1.CreateDocumentRequest.document",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="mask",
+            full_name="google.firestore.v1beta1.CreateDocumentRequest.mask",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1062,
+    serialized_end=1268,
 )
 
 
 _UPDATEDOCUMENTREQUEST = _descriptor.Descriptor(
-  name='UpdateDocumentRequest',
-  full_name='google.firestore.v1beta1.UpdateDocumentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='document', full_name='google.firestore.v1beta1.UpdateDocumentRequest.document', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='update_mask', full_name='google.firestore.v1beta1.UpdateDocumentRequest.update_mask', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='mask', full_name='google.firestore.v1beta1.UpdateDocumentRequest.mask', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='current_document', full_name='google.firestore.v1beta1.UpdateDocumentRequest.current_document', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1271,
-  serialized_end=1534,
+    name="UpdateDocumentRequest",
+    full_name="google.firestore.v1beta1.UpdateDocumentRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="document",
+            full_name="google.firestore.v1beta1.UpdateDocumentRequest.document",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="update_mask",
+            full_name="google.firestore.v1beta1.UpdateDocumentRequest.update_mask",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="mask",
+            full_name="google.firestore.v1beta1.UpdateDocumentRequest.mask",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="current_document",
+            full_name="google.firestore.v1beta1.UpdateDocumentRequest.current_document",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1271,
+    serialized_end=1534,
 )
 
 
 _DELETEDOCUMENTREQUEST = _descriptor.Descriptor(
-  name='DeleteDocumentRequest',
-  full_name='google.firestore.v1beta1.DeleteDocumentRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='name', full_name='google.firestore.v1beta1.DeleteDocumentRequest.name', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='current_document', full_name='google.firestore.v1beta1.DeleteDocumentRequest.current_document', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=1536,
-  serialized_end=1644,
+    name="DeleteDocumentRequest",
+    full_name="google.firestore.v1beta1.DeleteDocumentRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="name",
+            full_name="google.firestore.v1beta1.DeleteDocumentRequest.name",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="current_document",
+            full_name="google.firestore.v1beta1.DeleteDocumentRequest.current_document",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=1536,
+    serialized_end=1644,
 )
 
 
 _BATCHGETDOCUMENTSREQUEST = _descriptor.Descriptor(
-  name='BatchGetDocumentsRequest',
-  full_name='google.firestore.v1beta1.BatchGetDocumentsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='database', full_name='google.firestore.v1beta1.BatchGetDocumentsRequest.database', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='documents', full_name='google.firestore.v1beta1.BatchGetDocumentsRequest.documents', index=1,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='mask', full_name='google.firestore.v1beta1.BatchGetDocumentsRequest.mask', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.BatchGetDocumentsRequest.transaction', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='new_transaction', full_name='google.firestore.v1beta1.BatchGetDocumentsRequest.new_transaction', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='read_time', full_name='google.firestore.v1beta1.BatchGetDocumentsRequest.read_time', index=5,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='consistency_selector', full_name='google.firestore.v1beta1.BatchGetDocumentsRequest.consistency_selector',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=1647,
-  serialized_end=1938,
+    name="BatchGetDocumentsRequest",
+    full_name="google.firestore.v1beta1.BatchGetDocumentsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="database",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsRequest.database",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="documents",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsRequest.documents",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="mask",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsRequest.mask",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsRequest.transaction",
+            index=3,
+            number=4,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="new_transaction",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsRequest.new_transaction",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="read_time",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsRequest.read_time",
+            index=5,
+            number=7,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="consistency_selector",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsRequest.consistency_selector",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=1647,
+    serialized_end=1938,
 )
 
 
 _BATCHGETDOCUMENTSRESPONSE = _descriptor.Descriptor(
-  name='BatchGetDocumentsResponse',
-  full_name='google.firestore.v1beta1.BatchGetDocumentsResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='found', full_name='google.firestore.v1beta1.BatchGetDocumentsResponse.found', index=0,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='missing', full_name='google.firestore.v1beta1.BatchGetDocumentsResponse.missing', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.BatchGetDocumentsResponse.transaction', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='read_time', full_name='google.firestore.v1beta1.BatchGetDocumentsResponse.read_time', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='result', full_name='google.firestore.v1beta1.BatchGetDocumentsResponse.result',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=1941,
-  serialized_end=2118,
+    name="BatchGetDocumentsResponse",
+    full_name="google.firestore.v1beta1.BatchGetDocumentsResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="found",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsResponse.found",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="missing",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsResponse.missing",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsResponse.transaction",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="read_time",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsResponse.read_time",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="result",
+            full_name="google.firestore.v1beta1.BatchGetDocumentsResponse.result",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=1941,
+    serialized_end=2118,
 )
 
 
 _BEGINTRANSACTIONREQUEST = _descriptor.Descriptor(
-  name='BeginTransactionRequest',
-  full_name='google.firestore.v1beta1.BeginTransactionRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='database', full_name='google.firestore.v1beta1.BeginTransactionRequest.database', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='options', full_name='google.firestore.v1beta1.BeginTransactionRequest.options', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2120,
-  serialized_end=2231,
+    name="BeginTransactionRequest",
+    full_name="google.firestore.v1beta1.BeginTransactionRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="database",
+            full_name="google.firestore.v1beta1.BeginTransactionRequest.database",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="options",
+            full_name="google.firestore.v1beta1.BeginTransactionRequest.options",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2120,
+    serialized_end=2231,
 )
 
 
 _BEGINTRANSACTIONRESPONSE = _descriptor.Descriptor(
-  name='BeginTransactionResponse',
-  full_name='google.firestore.v1beta1.BeginTransactionResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.BeginTransactionResponse.transaction', index=0,
-      number=1, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2233,
-  serialized_end=2280,
+    name="BeginTransactionResponse",
+    full_name="google.firestore.v1beta1.BeginTransactionResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.BeginTransactionResponse.transaction",
+            index=0,
+            number=1,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2233,
+    serialized_end=2280,
 )
 
 
 _COMMITREQUEST = _descriptor.Descriptor(
-  name='CommitRequest',
-  full_name='google.firestore.v1beta1.CommitRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='database', full_name='google.firestore.v1beta1.CommitRequest.database', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='writes', full_name='google.firestore.v1beta1.CommitRequest.writes', index=1,
-      number=2, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.CommitRequest.transaction', index=2,
-      number=3, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2282,
-  serialized_end=2390,
+    name="CommitRequest",
+    full_name="google.firestore.v1beta1.CommitRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="database",
+            full_name="google.firestore.v1beta1.CommitRequest.database",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="writes",
+            full_name="google.firestore.v1beta1.CommitRequest.writes",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.CommitRequest.transaction",
+            index=2,
+            number=3,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2282,
+    serialized_end=2390,
 )
 
 
 _COMMITRESPONSE = _descriptor.Descriptor(
-  name='CommitResponse',
-  full_name='google.firestore.v1beta1.CommitResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='write_results', full_name='google.firestore.v1beta1.CommitResponse.write_results', index=0,
-      number=1, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='commit_time', full_name='google.firestore.v1beta1.CommitResponse.commit_time', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2392,
-  serialized_end=2519,
+    name="CommitResponse",
+    full_name="google.firestore.v1beta1.CommitResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="write_results",
+            full_name="google.firestore.v1beta1.CommitResponse.write_results",
+            index=0,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="commit_time",
+            full_name="google.firestore.v1beta1.CommitResponse.commit_time",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2392,
+    serialized_end=2519,
 )
 
 
 _ROLLBACKREQUEST = _descriptor.Descriptor(
-  name='RollbackRequest',
-  full_name='google.firestore.v1beta1.RollbackRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='database', full_name='google.firestore.v1beta1.RollbackRequest.database', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.RollbackRequest.transaction', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2521,
-  serialized_end=2587,
+    name="RollbackRequest",
+    full_name="google.firestore.v1beta1.RollbackRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="database",
+            full_name="google.firestore.v1beta1.RollbackRequest.database",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.RollbackRequest.transaction",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2521,
+    serialized_end=2587,
 )
 
 
 _RUNQUERYREQUEST = _descriptor.Descriptor(
-  name='RunQueryRequest',
-  full_name='google.firestore.v1beta1.RunQueryRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parent', full_name='google.firestore.v1beta1.RunQueryRequest.parent', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='structured_query', full_name='google.firestore.v1beta1.RunQueryRequest.structured_query', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.RunQueryRequest.transaction', index=2,
-      number=5, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='new_transaction', full_name='google.firestore.v1beta1.RunQueryRequest.new_transaction', index=3,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='read_time', full_name='google.firestore.v1beta1.RunQueryRequest.read_time', index=4,
-      number=7, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='query_type', full_name='google.firestore.v1beta1.RunQueryRequest.query_type',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-    _descriptor.OneofDescriptor(
-      name='consistency_selector', full_name='google.firestore.v1beta1.RunQueryRequest.consistency_selector',
-      index=1, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=2590,
-  serialized_end=2882,
+    name="RunQueryRequest",
+    full_name="google.firestore.v1beta1.RunQueryRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="parent",
+            full_name="google.firestore.v1beta1.RunQueryRequest.parent",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="structured_query",
+            full_name="google.firestore.v1beta1.RunQueryRequest.structured_query",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.RunQueryRequest.transaction",
+            index=2,
+            number=5,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="new_transaction",
+            full_name="google.firestore.v1beta1.RunQueryRequest.new_transaction",
+            index=3,
+            number=6,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="read_time",
+            full_name="google.firestore.v1beta1.RunQueryRequest.read_time",
+            index=4,
+            number=7,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="query_type",
+            full_name="google.firestore.v1beta1.RunQueryRequest.query_type",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+        _descriptor.OneofDescriptor(
+            name="consistency_selector",
+            full_name="google.firestore.v1beta1.RunQueryRequest.consistency_selector",
+            index=1,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=2590,
+    serialized_end=2882,
 )
 
 
 _RUNQUERYRESPONSE = _descriptor.Descriptor(
-  name='RunQueryResponse',
-  full_name='google.firestore.v1beta1.RunQueryResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='transaction', full_name='google.firestore.v1beta1.RunQueryResponse.transaction', index=0,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='document', full_name='google.firestore.v1beta1.RunQueryResponse.document', index=1,
-      number=1, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='read_time', full_name='google.firestore.v1beta1.RunQueryResponse.read_time', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='skipped_results', full_name='google.firestore.v1beta1.RunQueryResponse.skipped_results', index=3,
-      number=4, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=2885,
-  serialized_end=3050,
+    name="RunQueryResponse",
+    full_name="google.firestore.v1beta1.RunQueryResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="transaction",
+            full_name="google.firestore.v1beta1.RunQueryResponse.transaction",
+            index=0,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="document",
+            full_name="google.firestore.v1beta1.RunQueryResponse.document",
+            index=1,
+            number=1,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="read_time",
+            full_name="google.firestore.v1beta1.RunQueryResponse.read_time",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="skipped_results",
+            full_name="google.firestore.v1beta1.RunQueryResponse.skipped_results",
+            index=3,
+            number=4,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=2885,
+    serialized_end=3050,
 )
 
 
 _WRITEREQUEST_LABELSENTRY = _descriptor.Descriptor(
-  name='LabelsEntry',
-  full_name='google.firestore.v1beta1.WriteRequest.LabelsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='google.firestore.v1beta1.WriteRequest.LabelsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='google.firestore.v1beta1.WriteRequest.LabelsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3250,
-  serialized_end=3295,
+    name="LabelsEntry",
+    full_name="google.firestore.v1beta1.WriteRequest.LabelsEntry",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="key",
+            full_name="google.firestore.v1beta1.WriteRequest.LabelsEntry.key",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="value",
+            full_name="google.firestore.v1beta1.WriteRequest.LabelsEntry.value",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=b"8\001",
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3250,
+    serialized_end=3295,
 )
 
 _WRITEREQUEST = _descriptor.Descriptor(
-  name='WriteRequest',
-  full_name='google.firestore.v1beta1.WriteRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='database', full_name='google.firestore.v1beta1.WriteRequest.database', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='stream_id', full_name='google.firestore.v1beta1.WriteRequest.stream_id', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='writes', full_name='google.firestore.v1beta1.WriteRequest.writes', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='stream_token', full_name='google.firestore.v1beta1.WriteRequest.stream_token', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='labels', full_name='google.firestore.v1beta1.WriteRequest.labels', index=4,
-      number=5, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_WRITEREQUEST_LABELSENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3053,
-  serialized_end=3295,
+    name="WriteRequest",
+    full_name="google.firestore.v1beta1.WriteRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="database",
+            full_name="google.firestore.v1beta1.WriteRequest.database",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="stream_id",
+            full_name="google.firestore.v1beta1.WriteRequest.stream_id",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="writes",
+            full_name="google.firestore.v1beta1.WriteRequest.writes",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="stream_token",
+            full_name="google.firestore.v1beta1.WriteRequest.stream_token",
+            index=3,
+            number=4,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="labels",
+            full_name="google.firestore.v1beta1.WriteRequest.labels",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_WRITEREQUEST_LABELSENTRY,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3053,
+    serialized_end=3295,
 )
 
 
 _WRITERESPONSE = _descriptor.Descriptor(
-  name='WriteResponse',
-  full_name='google.firestore.v1beta1.WriteResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='stream_id', full_name='google.firestore.v1beta1.WriteResponse.stream_id', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='stream_token', full_name='google.firestore.v1beta1.WriteResponse.stream_token', index=1,
-      number=2, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='write_results', full_name='google.firestore.v1beta1.WriteResponse.write_results', index=2,
-      number=3, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='commit_time', full_name='google.firestore.v1beta1.WriteResponse.commit_time', index=3,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3298,
-  serialized_end=3465,
+    name="WriteResponse",
+    full_name="google.firestore.v1beta1.WriteResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="stream_id",
+            full_name="google.firestore.v1beta1.WriteResponse.stream_id",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="stream_token",
+            full_name="google.firestore.v1beta1.WriteResponse.stream_token",
+            index=1,
+            number=2,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="write_results",
+            full_name="google.firestore.v1beta1.WriteResponse.write_results",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="commit_time",
+            full_name="google.firestore.v1beta1.WriteResponse.commit_time",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3298,
+    serialized_end=3465,
 )
 
 
 _LISTENREQUEST_LABELSENTRY = _descriptor.Descriptor(
-  name='LabelsEntry',
-  full_name='google.firestore.v1beta1.ListenRequest.LabelsEntry',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='key', full_name='google.firestore.v1beta1.ListenRequest.LabelsEntry.key', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='value', full_name='google.firestore.v1beta1.ListenRequest.LabelsEntry.value', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=b'8\001',
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=3250,
-  serialized_end=3295,
+    name="LabelsEntry",
+    full_name="google.firestore.v1beta1.ListenRequest.LabelsEntry",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="key",
+            full_name="google.firestore.v1beta1.ListenRequest.LabelsEntry.key",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="value",
+            full_name="google.firestore.v1beta1.ListenRequest.LabelsEntry.value",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=b"8\001",
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=3250,
+    serialized_end=3295,
 )
 
 _LISTENREQUEST = _descriptor.Descriptor(
-  name='ListenRequest',
-  full_name='google.firestore.v1beta1.ListenRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='database', full_name='google.firestore.v1beta1.ListenRequest.database', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='add_target', full_name='google.firestore.v1beta1.ListenRequest.add_target', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='remove_target', full_name='google.firestore.v1beta1.ListenRequest.remove_target', index=2,
-      number=3, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='labels', full_name='google.firestore.v1beta1.ListenRequest.labels', index=3,
-      number=4, type=11, cpp_type=10, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_LISTENREQUEST_LABELSENTRY, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='target_change', full_name='google.firestore.v1beta1.ListenRequest.target_change',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=3468,
-  serialized_end=3720,
+    name="ListenRequest",
+    full_name="google.firestore.v1beta1.ListenRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="database",
+            full_name="google.firestore.v1beta1.ListenRequest.database",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="add_target",
+            full_name="google.firestore.v1beta1.ListenRequest.add_target",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="remove_target",
+            full_name="google.firestore.v1beta1.ListenRequest.remove_target",
+            index=2,
+            number=3,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="labels",
+            full_name="google.firestore.v1beta1.ListenRequest.labels",
+            index=3,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_LISTENREQUEST_LABELSENTRY,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="target_change",
+            full_name="google.firestore.v1beta1.ListenRequest.target_change",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=3468,
+    serialized_end=3720,
 )
 
 
 _LISTENRESPONSE = _descriptor.Descriptor(
-  name='ListenResponse',
-  full_name='google.firestore.v1beta1.ListenResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='target_change', full_name='google.firestore.v1beta1.ListenResponse.target_change', index=0,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='document_change', full_name='google.firestore.v1beta1.ListenResponse.document_change', index=1,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='document_delete', full_name='google.firestore.v1beta1.ListenResponse.document_delete', index=2,
-      number=4, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='document_remove', full_name='google.firestore.v1beta1.ListenResponse.document_remove', index=3,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='filter', full_name='google.firestore.v1beta1.ListenResponse.filter', index=4,
-      number=5, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='response_type', full_name='google.firestore.v1beta1.ListenResponse.response_type',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=3723,
-  serialized_end=4089,
+    name="ListenResponse",
+    full_name="google.firestore.v1beta1.ListenResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="target_change",
+            full_name="google.firestore.v1beta1.ListenResponse.target_change",
+            index=0,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="document_change",
+            full_name="google.firestore.v1beta1.ListenResponse.document_change",
+            index=1,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="document_delete",
+            full_name="google.firestore.v1beta1.ListenResponse.document_delete",
+            index=2,
+            number=4,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="document_remove",
+            full_name="google.firestore.v1beta1.ListenResponse.document_remove",
+            index=3,
+            number=6,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="filter",
+            full_name="google.firestore.v1beta1.ListenResponse.filter",
+            index=4,
+            number=5,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="response_type",
+            full_name="google.firestore.v1beta1.ListenResponse.response_type",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=3723,
+    serialized_end=4089,
 )
 
 
 _TARGET_DOCUMENTSTARGET = _descriptor.Descriptor(
-  name='DocumentsTarget',
-  full_name='google.firestore.v1beta1.Target.DocumentsTarget',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='documents', full_name='google.firestore.v1beta1.Target.DocumentsTarget.documents', index=0,
-      number=2, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4342,
-  serialized_end=4378,
+    name="DocumentsTarget",
+    full_name="google.firestore.v1beta1.Target.DocumentsTarget",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="documents",
+            full_name="google.firestore.v1beta1.Target.DocumentsTarget.documents",
+            index=0,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4342,
+    serialized_end=4378,
 )
 
 _TARGET_QUERYTARGET = _descriptor.Descriptor(
-  name='QueryTarget',
-  full_name='google.firestore.v1beta1.Target.QueryTarget',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parent', full_name='google.firestore.v1beta1.Target.QueryTarget.parent', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='structured_query', full_name='google.firestore.v1beta1.Target.QueryTarget.structured_query', index=1,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='query_type', full_name='google.firestore.v1beta1.Target.QueryTarget.query_type',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=4380,
-  serialized_end=4494,
+    name="QueryTarget",
+    full_name="google.firestore.v1beta1.Target.QueryTarget",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="parent",
+            full_name="google.firestore.v1beta1.Target.QueryTarget.parent",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="structured_query",
+            full_name="google.firestore.v1beta1.Target.QueryTarget.structured_query",
+            index=1,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="query_type",
+            full_name="google.firestore.v1beta1.Target.QueryTarget.query_type",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=4380,
+    serialized_end=4494,
 )
 
 _TARGET = _descriptor.Descriptor(
-  name='Target',
-  full_name='google.firestore.v1beta1.Target',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='query', full_name='google.firestore.v1beta1.Target.query', index=0,
-      number=2, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='documents', full_name='google.firestore.v1beta1.Target.documents', index=1,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='resume_token', full_name='google.firestore.v1beta1.Target.resume_token', index=2,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='read_time', full_name='google.firestore.v1beta1.Target.read_time', index=3,
-      number=11, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='target_id', full_name='google.firestore.v1beta1.Target.target_id', index=4,
-      number=5, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='once', full_name='google.firestore.v1beta1.Target.once', index=5,
-      number=6, type=8, cpp_type=7, label=1,
-      has_default_value=False, default_value=False,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[_TARGET_DOCUMENTSTARGET, _TARGET_QUERYTARGET, ],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-    _descriptor.OneofDescriptor(
-      name='target_type', full_name='google.firestore.v1beta1.Target.target_type',
-      index=0, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-    _descriptor.OneofDescriptor(
-      name='resume_type', full_name='google.firestore.v1beta1.Target.resume_type',
-      index=1, containing_type=None,
-      create_key=_descriptor._internal_create_key,
-    fields=[]),
-  ],
-  serialized_start=4092,
-  serialized_end=4524,
+    name="Target",
+    full_name="google.firestore.v1beta1.Target",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="query",
+            full_name="google.firestore.v1beta1.Target.query",
+            index=0,
+            number=2,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="documents",
+            full_name="google.firestore.v1beta1.Target.documents",
+            index=1,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resume_token",
+            full_name="google.firestore.v1beta1.Target.resume_token",
+            index=2,
+            number=4,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="read_time",
+            full_name="google.firestore.v1beta1.Target.read_time",
+            index=3,
+            number=11,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="target_id",
+            full_name="google.firestore.v1beta1.Target.target_id",
+            index=4,
+            number=5,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="once",
+            full_name="google.firestore.v1beta1.Target.once",
+            index=5,
+            number=6,
+            type=8,
+            cpp_type=7,
+            label=1,
+            has_default_value=False,
+            default_value=False,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[_TARGET_DOCUMENTSTARGET, _TARGET_QUERYTARGET,],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[
+        _descriptor.OneofDescriptor(
+            name="target_type",
+            full_name="google.firestore.v1beta1.Target.target_type",
+            index=0,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+        _descriptor.OneofDescriptor(
+            name="resume_type",
+            full_name="google.firestore.v1beta1.Target.resume_type",
+            index=1,
+            containing_type=None,
+            create_key=_descriptor._internal_create_key,
+            fields=[],
+        ),
+    ],
+    serialized_start=4092,
+    serialized_end=4524,
 )
 
 
 _TARGETCHANGE = _descriptor.Descriptor(
-  name='TargetChange',
-  full_name='google.firestore.v1beta1.TargetChange',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='target_change_type', full_name='google.firestore.v1beta1.TargetChange.target_change_type', index=0,
-      number=1, type=14, cpp_type=8, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='target_ids', full_name='google.firestore.v1beta1.TargetChange.target_ids', index=1,
-      number=2, type=5, cpp_type=1, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='cause', full_name='google.firestore.v1beta1.TargetChange.cause', index=2,
-      number=3, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='resume_token', full_name='google.firestore.v1beta1.TargetChange.resume_token', index=3,
-      number=4, type=12, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"",
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='read_time', full_name='google.firestore.v1beta1.TargetChange.read_time', index=4,
-      number=6, type=11, cpp_type=10, label=1,
-      has_default_value=False, default_value=None,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-    _TARGETCHANGE_TARGETCHANGETYPE,
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4527,
-  serialized_end=4830,
+    name="TargetChange",
+    full_name="google.firestore.v1beta1.TargetChange",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="target_change_type",
+            full_name="google.firestore.v1beta1.TargetChange.target_change_type",
+            index=0,
+            number=1,
+            type=14,
+            cpp_type=8,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="target_ids",
+            full_name="google.firestore.v1beta1.TargetChange.target_ids",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="cause",
+            full_name="google.firestore.v1beta1.TargetChange.cause",
+            index=2,
+            number=3,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="resume_token",
+            full_name="google.firestore.v1beta1.TargetChange.resume_token",
+            index=3,
+            number=4,
+            type=12,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"",
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="read_time",
+            full_name="google.firestore.v1beta1.TargetChange.read_time",
+            index=4,
+            number=6,
+            type=11,
+            cpp_type=10,
+            label=1,
+            has_default_value=False,
+            default_value=None,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[_TARGETCHANGE_TARGETCHANGETYPE,],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4527,
+    serialized_end=4830,
 )
 
 
 _LISTCOLLECTIONIDSREQUEST = _descriptor.Descriptor(
-  name='ListCollectionIdsRequest',
-  full_name='google.firestore.v1beta1.ListCollectionIdsRequest',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='parent', full_name='google.firestore.v1beta1.ListCollectionIdsRequest.parent', index=0,
-      number=1, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=b'\340A\002', file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='page_size', full_name='google.firestore.v1beta1.ListCollectionIdsRequest.page_size', index=1,
-      number=2, type=5, cpp_type=1, label=1,
-      has_default_value=False, default_value=0,
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='page_token', full_name='google.firestore.v1beta1.ListCollectionIdsRequest.page_token', index=2,
-      number=3, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4832,
-  serialized_end=4918,
+    name="ListCollectionIdsRequest",
+    full_name="google.firestore.v1beta1.ListCollectionIdsRequest",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="parent",
+            full_name="google.firestore.v1beta1.ListCollectionIdsRequest.parent",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=b"\340A\002",
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="page_size",
+            full_name="google.firestore.v1beta1.ListCollectionIdsRequest.page_size",
+            index=1,
+            number=2,
+            type=5,
+            cpp_type=1,
+            label=1,
+            has_default_value=False,
+            default_value=0,
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="page_token",
+            full_name="google.firestore.v1beta1.ListCollectionIdsRequest.page_token",
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4832,
+    serialized_end=4918,
 )
 
 
 _LISTCOLLECTIONIDSRESPONSE = _descriptor.Descriptor(
-  name='ListCollectionIdsResponse',
-  full_name='google.firestore.v1beta1.ListCollectionIdsResponse',
-  filename=None,
-  file=DESCRIPTOR,
-  containing_type=None,
-  create_key=_descriptor._internal_create_key,
-  fields=[
-    _descriptor.FieldDescriptor(
-      name='collection_ids', full_name='google.firestore.v1beta1.ListCollectionIdsResponse.collection_ids', index=0,
-      number=1, type=9, cpp_type=9, label=3,
-      has_default_value=False, default_value=[],
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-    _descriptor.FieldDescriptor(
-      name='next_page_token', full_name='google.firestore.v1beta1.ListCollectionIdsResponse.next_page_token', index=1,
-      number=2, type=9, cpp_type=9, label=1,
-      has_default_value=False, default_value=b"".decode('utf-8'),
-      message_type=None, enum_type=None, containing_type=None,
-      is_extension=False, extension_scope=None,
-      serialized_options=None, file=DESCRIPTOR,  create_key=_descriptor._internal_create_key),
-  ],
-  extensions=[
-  ],
-  nested_types=[],
-  enum_types=[
-  ],
-  serialized_options=None,
-  is_extendable=False,
-  syntax='proto3',
-  extension_ranges=[],
-  oneofs=[
-  ],
-  serialized_start=4920,
-  serialized_end=4996,
+    name="ListCollectionIdsResponse",
+    full_name="google.firestore.v1beta1.ListCollectionIdsResponse",
+    filename=None,
+    file=DESCRIPTOR,
+    containing_type=None,
+    create_key=_descriptor._internal_create_key,
+    fields=[
+        _descriptor.FieldDescriptor(
+            name="collection_ids",
+            full_name="google.firestore.v1beta1.ListCollectionIdsResponse.collection_ids",
+            index=0,
+            number=1,
+            type=9,
+            cpp_type=9,
+            label=3,
+            has_default_value=False,
+            default_value=[],
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.FieldDescriptor(
+            name="next_page_token",
+            full_name="google.firestore.v1beta1.ListCollectionIdsResponse.next_page_token",
+            index=1,
+            number=2,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode("utf-8"),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+    extensions=[],
+    nested_types=[],
+    enum_types=[],
+    serialized_options=None,
+    is_extendable=False,
+    syntax="proto3",
+    extension_ranges=[],
+    oneofs=[],
+    serialized_start=4920,
+    serialized_end=4996,
 )
 
-_GETDOCUMENTREQUEST.fields_by_name['mask'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
-_GETDOCUMENTREQUEST.fields_by_name['read_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_GETDOCUMENTREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _GETDOCUMENTREQUEST.fields_by_name['transaction'])
-_GETDOCUMENTREQUEST.fields_by_name['transaction'].containing_oneof = _GETDOCUMENTREQUEST.oneofs_by_name['consistency_selector']
-_GETDOCUMENTREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _GETDOCUMENTREQUEST.fields_by_name['read_time'])
-_GETDOCUMENTREQUEST.fields_by_name['read_time'].containing_oneof = _GETDOCUMENTREQUEST.oneofs_by_name['consistency_selector']
-_LISTDOCUMENTSREQUEST.fields_by_name['mask'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
-_LISTDOCUMENTSREQUEST.fields_by_name['read_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_LISTDOCUMENTSREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _LISTDOCUMENTSREQUEST.fields_by_name['transaction'])
-_LISTDOCUMENTSREQUEST.fields_by_name['transaction'].containing_oneof = _LISTDOCUMENTSREQUEST.oneofs_by_name['consistency_selector']
-_LISTDOCUMENTSREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _LISTDOCUMENTSREQUEST.fields_by_name['read_time'])
-_LISTDOCUMENTSREQUEST.fields_by_name['read_time'].containing_oneof = _LISTDOCUMENTSREQUEST.oneofs_by_name['consistency_selector']
-_LISTDOCUMENTSRESPONSE.fields_by_name['documents'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
-_CREATEDOCUMENTREQUEST.fields_by_name['document'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
-_CREATEDOCUMENTREQUEST.fields_by_name['mask'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
-_UPDATEDOCUMENTREQUEST.fields_by_name['document'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
-_UPDATEDOCUMENTREQUEST.fields_by_name['update_mask'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
-_UPDATEDOCUMENTREQUEST.fields_by_name['mask'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
-_UPDATEDOCUMENTREQUEST.fields_by_name['current_document'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._PRECONDITION
-_DELETEDOCUMENTREQUEST.fields_by_name['current_document'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._PRECONDITION
-_BATCHGETDOCUMENTSREQUEST.fields_by_name['mask'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
-_BATCHGETDOCUMENTSREQUEST.fields_by_name['new_transaction'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._TRANSACTIONOPTIONS
-_BATCHGETDOCUMENTSREQUEST.fields_by_name['read_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_BATCHGETDOCUMENTSREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _BATCHGETDOCUMENTSREQUEST.fields_by_name['transaction'])
-_BATCHGETDOCUMENTSREQUEST.fields_by_name['transaction'].containing_oneof = _BATCHGETDOCUMENTSREQUEST.oneofs_by_name['consistency_selector']
-_BATCHGETDOCUMENTSREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _BATCHGETDOCUMENTSREQUEST.fields_by_name['new_transaction'])
-_BATCHGETDOCUMENTSREQUEST.fields_by_name['new_transaction'].containing_oneof = _BATCHGETDOCUMENTSREQUEST.oneofs_by_name['consistency_selector']
-_BATCHGETDOCUMENTSREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _BATCHGETDOCUMENTSREQUEST.fields_by_name['read_time'])
-_BATCHGETDOCUMENTSREQUEST.fields_by_name['read_time'].containing_oneof = _BATCHGETDOCUMENTSREQUEST.oneofs_by_name['consistency_selector']
-_BATCHGETDOCUMENTSRESPONSE.fields_by_name['found'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
-_BATCHGETDOCUMENTSRESPONSE.fields_by_name['read_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_BATCHGETDOCUMENTSRESPONSE.oneofs_by_name['result'].fields.append(
-  _BATCHGETDOCUMENTSRESPONSE.fields_by_name['found'])
-_BATCHGETDOCUMENTSRESPONSE.fields_by_name['found'].containing_oneof = _BATCHGETDOCUMENTSRESPONSE.oneofs_by_name['result']
-_BATCHGETDOCUMENTSRESPONSE.oneofs_by_name['result'].fields.append(
-  _BATCHGETDOCUMENTSRESPONSE.fields_by_name['missing'])
-_BATCHGETDOCUMENTSRESPONSE.fields_by_name['missing'].containing_oneof = _BATCHGETDOCUMENTSRESPONSE.oneofs_by_name['result']
-_BEGINTRANSACTIONREQUEST.fields_by_name['options'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._TRANSACTIONOPTIONS
-_COMMITREQUEST.fields_by_name['writes'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._WRITE
-_COMMITRESPONSE.fields_by_name['write_results'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._WRITERESULT
-_COMMITRESPONSE.fields_by_name['commit_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_RUNQUERYREQUEST.fields_by_name['structured_query'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2._STRUCTUREDQUERY
-_RUNQUERYREQUEST.fields_by_name['new_transaction'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._TRANSACTIONOPTIONS
-_RUNQUERYREQUEST.fields_by_name['read_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_RUNQUERYREQUEST.oneofs_by_name['query_type'].fields.append(
-  _RUNQUERYREQUEST.fields_by_name['structured_query'])
-_RUNQUERYREQUEST.fields_by_name['structured_query'].containing_oneof = _RUNQUERYREQUEST.oneofs_by_name['query_type']
-_RUNQUERYREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _RUNQUERYREQUEST.fields_by_name['transaction'])
-_RUNQUERYREQUEST.fields_by_name['transaction'].containing_oneof = _RUNQUERYREQUEST.oneofs_by_name['consistency_selector']
-_RUNQUERYREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _RUNQUERYREQUEST.fields_by_name['new_transaction'])
-_RUNQUERYREQUEST.fields_by_name['new_transaction'].containing_oneof = _RUNQUERYREQUEST.oneofs_by_name['consistency_selector']
-_RUNQUERYREQUEST.oneofs_by_name['consistency_selector'].fields.append(
-  _RUNQUERYREQUEST.fields_by_name['read_time'])
-_RUNQUERYREQUEST.fields_by_name['read_time'].containing_oneof = _RUNQUERYREQUEST.oneofs_by_name['consistency_selector']
-_RUNQUERYRESPONSE.fields_by_name['document'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
-_RUNQUERYRESPONSE.fields_by_name['read_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_GETDOCUMENTREQUEST.fields_by_name[
+    "mask"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
+)
+_GETDOCUMENTREQUEST.fields_by_name[
+    "read_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_GETDOCUMENTREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _GETDOCUMENTREQUEST.fields_by_name["transaction"]
+)
+_GETDOCUMENTREQUEST.fields_by_name[
+    "transaction"
+].containing_oneof = _GETDOCUMENTREQUEST.oneofs_by_name["consistency_selector"]
+_GETDOCUMENTREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _GETDOCUMENTREQUEST.fields_by_name["read_time"]
+)
+_GETDOCUMENTREQUEST.fields_by_name[
+    "read_time"
+].containing_oneof = _GETDOCUMENTREQUEST.oneofs_by_name["consistency_selector"]
+_LISTDOCUMENTSREQUEST.fields_by_name[
+    "mask"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
+)
+_LISTDOCUMENTSREQUEST.fields_by_name[
+    "read_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_LISTDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _LISTDOCUMENTSREQUEST.fields_by_name["transaction"]
+)
+_LISTDOCUMENTSREQUEST.fields_by_name[
+    "transaction"
+].containing_oneof = _LISTDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"]
+_LISTDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _LISTDOCUMENTSREQUEST.fields_by_name["read_time"]
+)
+_LISTDOCUMENTSREQUEST.fields_by_name[
+    "read_time"
+].containing_oneof = _LISTDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"]
+_LISTDOCUMENTSRESPONSE.fields_by_name[
+    "documents"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
+)
+_CREATEDOCUMENTREQUEST.fields_by_name[
+    "document"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
+)
+_CREATEDOCUMENTREQUEST.fields_by_name[
+    "mask"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
+)
+_UPDATEDOCUMENTREQUEST.fields_by_name[
+    "document"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
+)
+_UPDATEDOCUMENTREQUEST.fields_by_name[
+    "update_mask"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
+)
+_UPDATEDOCUMENTREQUEST.fields_by_name[
+    "mask"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
+)
+_UPDATEDOCUMENTREQUEST.fields_by_name[
+    "current_document"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._PRECONDITION
+)
+_DELETEDOCUMENTREQUEST.fields_by_name[
+    "current_document"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._PRECONDITION
+)
+_BATCHGETDOCUMENTSREQUEST.fields_by_name[
+    "mask"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._DOCUMENTMASK
+)
+_BATCHGETDOCUMENTSREQUEST.fields_by_name[
+    "new_transaction"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._TRANSACTIONOPTIONS
+)
+_BATCHGETDOCUMENTSREQUEST.fields_by_name[
+    "read_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_BATCHGETDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _BATCHGETDOCUMENTSREQUEST.fields_by_name["transaction"]
+)
+_BATCHGETDOCUMENTSREQUEST.fields_by_name[
+    "transaction"
+].containing_oneof = _BATCHGETDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"]
+_BATCHGETDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _BATCHGETDOCUMENTSREQUEST.fields_by_name["new_transaction"]
+)
+_BATCHGETDOCUMENTSREQUEST.fields_by_name[
+    "new_transaction"
+].containing_oneof = _BATCHGETDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"]
+_BATCHGETDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _BATCHGETDOCUMENTSREQUEST.fields_by_name["read_time"]
+)
+_BATCHGETDOCUMENTSREQUEST.fields_by_name[
+    "read_time"
+].containing_oneof = _BATCHGETDOCUMENTSREQUEST.oneofs_by_name["consistency_selector"]
+_BATCHGETDOCUMENTSRESPONSE.fields_by_name[
+    "found"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
+)
+_BATCHGETDOCUMENTSRESPONSE.fields_by_name[
+    "read_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_BATCHGETDOCUMENTSRESPONSE.oneofs_by_name["result"].fields.append(
+    _BATCHGETDOCUMENTSRESPONSE.fields_by_name["found"]
+)
+_BATCHGETDOCUMENTSRESPONSE.fields_by_name[
+    "found"
+].containing_oneof = _BATCHGETDOCUMENTSRESPONSE.oneofs_by_name["result"]
+_BATCHGETDOCUMENTSRESPONSE.oneofs_by_name["result"].fields.append(
+    _BATCHGETDOCUMENTSRESPONSE.fields_by_name["missing"]
+)
+_BATCHGETDOCUMENTSRESPONSE.fields_by_name[
+    "missing"
+].containing_oneof = _BATCHGETDOCUMENTSRESPONSE.oneofs_by_name["result"]
+_BEGINTRANSACTIONREQUEST.fields_by_name[
+    "options"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._TRANSACTIONOPTIONS
+)
+_COMMITREQUEST.fields_by_name[
+    "writes"
+].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._WRITE
+_COMMITRESPONSE.fields_by_name[
+    "write_results"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._WRITERESULT
+)
+_COMMITRESPONSE.fields_by_name[
+    "commit_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_RUNQUERYREQUEST.fields_by_name[
+    "structured_query"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2._STRUCTUREDQUERY
+)
+_RUNQUERYREQUEST.fields_by_name[
+    "new_transaction"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_common__pb2._TRANSACTIONOPTIONS
+)
+_RUNQUERYREQUEST.fields_by_name[
+    "read_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_RUNQUERYREQUEST.oneofs_by_name["query_type"].fields.append(
+    _RUNQUERYREQUEST.fields_by_name["structured_query"]
+)
+_RUNQUERYREQUEST.fields_by_name[
+    "structured_query"
+].containing_oneof = _RUNQUERYREQUEST.oneofs_by_name["query_type"]
+_RUNQUERYREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _RUNQUERYREQUEST.fields_by_name["transaction"]
+)
+_RUNQUERYREQUEST.fields_by_name[
+    "transaction"
+].containing_oneof = _RUNQUERYREQUEST.oneofs_by_name["consistency_selector"]
+_RUNQUERYREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _RUNQUERYREQUEST.fields_by_name["new_transaction"]
+)
+_RUNQUERYREQUEST.fields_by_name[
+    "new_transaction"
+].containing_oneof = _RUNQUERYREQUEST.oneofs_by_name["consistency_selector"]
+_RUNQUERYREQUEST.oneofs_by_name["consistency_selector"].fields.append(
+    _RUNQUERYREQUEST.fields_by_name["read_time"]
+)
+_RUNQUERYREQUEST.fields_by_name[
+    "read_time"
+].containing_oneof = _RUNQUERYREQUEST.oneofs_by_name["consistency_selector"]
+_RUNQUERYRESPONSE.fields_by_name[
+    "document"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT
+)
+_RUNQUERYRESPONSE.fields_by_name[
+    "read_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _WRITEREQUEST_LABELSENTRY.containing_type = _WRITEREQUEST
-_WRITEREQUEST.fields_by_name['writes'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._WRITE
-_WRITEREQUEST.fields_by_name['labels'].message_type = _WRITEREQUEST_LABELSENTRY
-_WRITERESPONSE.fields_by_name['write_results'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._WRITERESULT
-_WRITERESPONSE.fields_by_name['commit_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_WRITEREQUEST.fields_by_name[
+    "writes"
+].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._WRITE
+_WRITEREQUEST.fields_by_name["labels"].message_type = _WRITEREQUEST_LABELSENTRY
+_WRITERESPONSE.fields_by_name[
+    "write_results"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._WRITERESULT
+)
+_WRITERESPONSE.fields_by_name[
+    "commit_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _LISTENREQUEST_LABELSENTRY.containing_type = _LISTENREQUEST
-_LISTENREQUEST.fields_by_name['add_target'].message_type = _TARGET
-_LISTENREQUEST.fields_by_name['labels'].message_type = _LISTENREQUEST_LABELSENTRY
-_LISTENREQUEST.oneofs_by_name['target_change'].fields.append(
-  _LISTENREQUEST.fields_by_name['add_target'])
-_LISTENREQUEST.fields_by_name['add_target'].containing_oneof = _LISTENREQUEST.oneofs_by_name['target_change']
-_LISTENREQUEST.oneofs_by_name['target_change'].fields.append(
-  _LISTENREQUEST.fields_by_name['remove_target'])
-_LISTENREQUEST.fields_by_name['remove_target'].containing_oneof = _LISTENREQUEST.oneofs_by_name['target_change']
-_LISTENRESPONSE.fields_by_name['target_change'].message_type = _TARGETCHANGE
-_LISTENRESPONSE.fields_by_name['document_change'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._DOCUMENTCHANGE
-_LISTENRESPONSE.fields_by_name['document_delete'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._DOCUMENTDELETE
-_LISTENRESPONSE.fields_by_name['document_remove'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._DOCUMENTREMOVE
-_LISTENRESPONSE.fields_by_name['filter'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._EXISTENCEFILTER
-_LISTENRESPONSE.oneofs_by_name['response_type'].fields.append(
-  _LISTENRESPONSE.fields_by_name['target_change'])
-_LISTENRESPONSE.fields_by_name['target_change'].containing_oneof = _LISTENRESPONSE.oneofs_by_name['response_type']
-_LISTENRESPONSE.oneofs_by_name['response_type'].fields.append(
-  _LISTENRESPONSE.fields_by_name['document_change'])
-_LISTENRESPONSE.fields_by_name['document_change'].containing_oneof = _LISTENRESPONSE.oneofs_by_name['response_type']
-_LISTENRESPONSE.oneofs_by_name['response_type'].fields.append(
-  _LISTENRESPONSE.fields_by_name['document_delete'])
-_LISTENRESPONSE.fields_by_name['document_delete'].containing_oneof = _LISTENRESPONSE.oneofs_by_name['response_type']
-_LISTENRESPONSE.oneofs_by_name['response_type'].fields.append(
-  _LISTENRESPONSE.fields_by_name['document_remove'])
-_LISTENRESPONSE.fields_by_name['document_remove'].containing_oneof = _LISTENRESPONSE.oneofs_by_name['response_type']
-_LISTENRESPONSE.oneofs_by_name['response_type'].fields.append(
-  _LISTENRESPONSE.fields_by_name['filter'])
-_LISTENRESPONSE.fields_by_name['filter'].containing_oneof = _LISTENRESPONSE.oneofs_by_name['response_type']
+_LISTENREQUEST.fields_by_name["add_target"].message_type = _TARGET
+_LISTENREQUEST.fields_by_name["labels"].message_type = _LISTENREQUEST_LABELSENTRY
+_LISTENREQUEST.oneofs_by_name["target_change"].fields.append(
+    _LISTENREQUEST.fields_by_name["add_target"]
+)
+_LISTENREQUEST.fields_by_name[
+    "add_target"
+].containing_oneof = _LISTENREQUEST.oneofs_by_name["target_change"]
+_LISTENREQUEST.oneofs_by_name["target_change"].fields.append(
+    _LISTENREQUEST.fields_by_name["remove_target"]
+)
+_LISTENREQUEST.fields_by_name[
+    "remove_target"
+].containing_oneof = _LISTENREQUEST.oneofs_by_name["target_change"]
+_LISTENRESPONSE.fields_by_name["target_change"].message_type = _TARGETCHANGE
+_LISTENRESPONSE.fields_by_name[
+    "document_change"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._DOCUMENTCHANGE
+)
+_LISTENRESPONSE.fields_by_name[
+    "document_delete"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._DOCUMENTDELETE
+)
+_LISTENRESPONSE.fields_by_name[
+    "document_remove"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._DOCUMENTREMOVE
+)
+_LISTENRESPONSE.fields_by_name[
+    "filter"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_write__pb2._EXISTENCEFILTER
+)
+_LISTENRESPONSE.oneofs_by_name["response_type"].fields.append(
+    _LISTENRESPONSE.fields_by_name["target_change"]
+)
+_LISTENRESPONSE.fields_by_name[
+    "target_change"
+].containing_oneof = _LISTENRESPONSE.oneofs_by_name["response_type"]
+_LISTENRESPONSE.oneofs_by_name["response_type"].fields.append(
+    _LISTENRESPONSE.fields_by_name["document_change"]
+)
+_LISTENRESPONSE.fields_by_name[
+    "document_change"
+].containing_oneof = _LISTENRESPONSE.oneofs_by_name["response_type"]
+_LISTENRESPONSE.oneofs_by_name["response_type"].fields.append(
+    _LISTENRESPONSE.fields_by_name["document_delete"]
+)
+_LISTENRESPONSE.fields_by_name[
+    "document_delete"
+].containing_oneof = _LISTENRESPONSE.oneofs_by_name["response_type"]
+_LISTENRESPONSE.oneofs_by_name["response_type"].fields.append(
+    _LISTENRESPONSE.fields_by_name["document_remove"]
+)
+_LISTENRESPONSE.fields_by_name[
+    "document_remove"
+].containing_oneof = _LISTENRESPONSE.oneofs_by_name["response_type"]
+_LISTENRESPONSE.oneofs_by_name["response_type"].fields.append(
+    _LISTENRESPONSE.fields_by_name["filter"]
+)
+_LISTENRESPONSE.fields_by_name[
+    "filter"
+].containing_oneof = _LISTENRESPONSE.oneofs_by_name["response_type"]
 _TARGET_DOCUMENTSTARGET.containing_type = _TARGET
-_TARGET_QUERYTARGET.fields_by_name['structured_query'].message_type = google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2._STRUCTUREDQUERY
+_TARGET_QUERYTARGET.fields_by_name[
+    "structured_query"
+].message_type = (
+    google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_query__pb2._STRUCTUREDQUERY
+)
 _TARGET_QUERYTARGET.containing_type = _TARGET
-_TARGET_QUERYTARGET.oneofs_by_name['query_type'].fields.append(
-  _TARGET_QUERYTARGET.fields_by_name['structured_query'])
-_TARGET_QUERYTARGET.fields_by_name['structured_query'].containing_oneof = _TARGET_QUERYTARGET.oneofs_by_name['query_type']
-_TARGET.fields_by_name['query'].message_type = _TARGET_QUERYTARGET
-_TARGET.fields_by_name['documents'].message_type = _TARGET_DOCUMENTSTARGET
-_TARGET.fields_by_name['read_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
-_TARGET.oneofs_by_name['target_type'].fields.append(
-  _TARGET.fields_by_name['query'])
-_TARGET.fields_by_name['query'].containing_oneof = _TARGET.oneofs_by_name['target_type']
-_TARGET.oneofs_by_name['target_type'].fields.append(
-  _TARGET.fields_by_name['documents'])
-_TARGET.fields_by_name['documents'].containing_oneof = _TARGET.oneofs_by_name['target_type']
-_TARGET.oneofs_by_name['resume_type'].fields.append(
-  _TARGET.fields_by_name['resume_token'])
-_TARGET.fields_by_name['resume_token'].containing_oneof = _TARGET.oneofs_by_name['resume_type']
-_TARGET.oneofs_by_name['resume_type'].fields.append(
-  _TARGET.fields_by_name['read_time'])
-_TARGET.fields_by_name['read_time'].containing_oneof = _TARGET.oneofs_by_name['resume_type']
-_TARGETCHANGE.fields_by_name['target_change_type'].enum_type = _TARGETCHANGE_TARGETCHANGETYPE
-_TARGETCHANGE.fields_by_name['cause'].message_type = google_dot_rpc_dot_status__pb2._STATUS
-_TARGETCHANGE.fields_by_name['read_time'].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_TARGET_QUERYTARGET.oneofs_by_name["query_type"].fields.append(
+    _TARGET_QUERYTARGET.fields_by_name["structured_query"]
+)
+_TARGET_QUERYTARGET.fields_by_name[
+    "structured_query"
+].containing_oneof = _TARGET_QUERYTARGET.oneofs_by_name["query_type"]
+_TARGET.fields_by_name["query"].message_type = _TARGET_QUERYTARGET
+_TARGET.fields_by_name["documents"].message_type = _TARGET_DOCUMENTSTARGET
+_TARGET.fields_by_name[
+    "read_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
+_TARGET.oneofs_by_name["target_type"].fields.append(_TARGET.fields_by_name["query"])
+_TARGET.fields_by_name["query"].containing_oneof = _TARGET.oneofs_by_name["target_type"]
+_TARGET.oneofs_by_name["target_type"].fields.append(_TARGET.fields_by_name["documents"])
+_TARGET.fields_by_name["documents"].containing_oneof = _TARGET.oneofs_by_name[
+    "target_type"
+]
+_TARGET.oneofs_by_name["resume_type"].fields.append(
+    _TARGET.fields_by_name["resume_token"]
+)
+_TARGET.fields_by_name["resume_token"].containing_oneof = _TARGET.oneofs_by_name[
+    "resume_type"
+]
+_TARGET.oneofs_by_name["resume_type"].fields.append(_TARGET.fields_by_name["read_time"])
+_TARGET.fields_by_name["read_time"].containing_oneof = _TARGET.oneofs_by_name[
+    "resume_type"
+]
+_TARGETCHANGE.fields_by_name[
+    "target_change_type"
+].enum_type = _TARGETCHANGE_TARGETCHANGETYPE
+_TARGETCHANGE.fields_by_name[
+    "cause"
+].message_type = google_dot_rpc_dot_status__pb2._STATUS
+_TARGETCHANGE.fields_by_name[
+    "read_time"
+].message_type = google_dot_protobuf_dot_timestamp__pb2._TIMESTAMP
 _TARGETCHANGE_TARGETCHANGETYPE.containing_type = _TARGETCHANGE
-DESCRIPTOR.message_types_by_name['GetDocumentRequest'] = _GETDOCUMENTREQUEST
-DESCRIPTOR.message_types_by_name['ListDocumentsRequest'] = _LISTDOCUMENTSREQUEST
-DESCRIPTOR.message_types_by_name['ListDocumentsResponse'] = _LISTDOCUMENTSRESPONSE
-DESCRIPTOR.message_types_by_name['CreateDocumentRequest'] = _CREATEDOCUMENTREQUEST
-DESCRIPTOR.message_types_by_name['UpdateDocumentRequest'] = _UPDATEDOCUMENTREQUEST
-DESCRIPTOR.message_types_by_name['DeleteDocumentRequest'] = _DELETEDOCUMENTREQUEST
-DESCRIPTOR.message_types_by_name['BatchGetDocumentsRequest'] = _BATCHGETDOCUMENTSREQUEST
-DESCRIPTOR.message_types_by_name['BatchGetDocumentsResponse'] = _BATCHGETDOCUMENTSRESPONSE
-DESCRIPTOR.message_types_by_name['BeginTransactionRequest'] = _BEGINTRANSACTIONREQUEST
-DESCRIPTOR.message_types_by_name['BeginTransactionResponse'] = _BEGINTRANSACTIONRESPONSE
-DESCRIPTOR.message_types_by_name['CommitRequest'] = _COMMITREQUEST
-DESCRIPTOR.message_types_by_name['CommitResponse'] = _COMMITRESPONSE
-DESCRIPTOR.message_types_by_name['RollbackRequest'] = _ROLLBACKREQUEST
-DESCRIPTOR.message_types_by_name['RunQueryRequest'] = _RUNQUERYREQUEST
-DESCRIPTOR.message_types_by_name['RunQueryResponse'] = _RUNQUERYRESPONSE
-DESCRIPTOR.message_types_by_name['WriteRequest'] = _WRITEREQUEST
-DESCRIPTOR.message_types_by_name['WriteResponse'] = _WRITERESPONSE
-DESCRIPTOR.message_types_by_name['ListenRequest'] = _LISTENREQUEST
-DESCRIPTOR.message_types_by_name['ListenResponse'] = _LISTENRESPONSE
-DESCRIPTOR.message_types_by_name['Target'] = _TARGET
-DESCRIPTOR.message_types_by_name['TargetChange'] = _TARGETCHANGE
-DESCRIPTOR.message_types_by_name['ListCollectionIdsRequest'] = _LISTCOLLECTIONIDSREQUEST
-DESCRIPTOR.message_types_by_name['ListCollectionIdsResponse'] = _LISTCOLLECTIONIDSRESPONSE
+DESCRIPTOR.message_types_by_name["GetDocumentRequest"] = _GETDOCUMENTREQUEST
+DESCRIPTOR.message_types_by_name["ListDocumentsRequest"] = _LISTDOCUMENTSREQUEST
+DESCRIPTOR.message_types_by_name["ListDocumentsResponse"] = _LISTDOCUMENTSRESPONSE
+DESCRIPTOR.message_types_by_name["CreateDocumentRequest"] = _CREATEDOCUMENTREQUEST
+DESCRIPTOR.message_types_by_name["UpdateDocumentRequest"] = _UPDATEDOCUMENTREQUEST
+DESCRIPTOR.message_types_by_name["DeleteDocumentRequest"] = _DELETEDOCUMENTREQUEST
+DESCRIPTOR.message_types_by_name["BatchGetDocumentsRequest"] = _BATCHGETDOCUMENTSREQUEST
+DESCRIPTOR.message_types_by_name[
+    "BatchGetDocumentsResponse"
+] = _BATCHGETDOCUMENTSRESPONSE
+DESCRIPTOR.message_types_by_name["BeginTransactionRequest"] = _BEGINTRANSACTIONREQUEST
+DESCRIPTOR.message_types_by_name["BeginTransactionResponse"] = _BEGINTRANSACTIONRESPONSE
+DESCRIPTOR.message_types_by_name["CommitRequest"] = _COMMITREQUEST
+DESCRIPTOR.message_types_by_name["CommitResponse"] = _COMMITRESPONSE
+DESCRIPTOR.message_types_by_name["RollbackRequest"] = _ROLLBACKREQUEST
+DESCRIPTOR.message_types_by_name["RunQueryRequest"] = _RUNQUERYREQUEST
+DESCRIPTOR.message_types_by_name["RunQueryResponse"] = _RUNQUERYRESPONSE
+DESCRIPTOR.message_types_by_name["WriteRequest"] = _WRITEREQUEST
+DESCRIPTOR.message_types_by_name["WriteResponse"] = _WRITERESPONSE
+DESCRIPTOR.message_types_by_name["ListenRequest"] = _LISTENREQUEST
+DESCRIPTOR.message_types_by_name["ListenResponse"] = _LISTENRESPONSE
+DESCRIPTOR.message_types_by_name["Target"] = _TARGET
+DESCRIPTOR.message_types_by_name["TargetChange"] = _TARGETCHANGE
+DESCRIPTOR.message_types_by_name["ListCollectionIdsRequest"] = _LISTCOLLECTIONIDSREQUEST
+DESCRIPTOR.message_types_by_name[
+    "ListCollectionIdsResponse"
+] = _LISTCOLLECTIONIDSRESPONSE
 _sym_db.RegisterFileDescriptor(DESCRIPTOR)
 
-GetDocumentRequest = _reflection.GeneratedProtocolMessageType('GetDocumentRequest', (_message.Message,), {
-  'DESCRIPTOR' : _GETDOCUMENTREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for [Firestore.GetDocument][google.firestore.v1beta1.Fires
+GetDocumentRequest = _reflection.GeneratedProtocolMessageType(
+    "GetDocumentRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _GETDOCUMENTREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.GetDocument][google.firestore.v1beta1.Fires
   tore.GetDocument].
   
   Attributes:
@@ -1648,15 +2991,18 @@ GetDocumentRequest = _reflection.GeneratedProtocolMessageType('GetDocumentReques
           Reads the version of the document at the given time. This may
           not be older than 60 seconds.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.GetDocumentRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.GetDocumentRequest)
+    },
+)
 _sym_db.RegisterMessage(GetDocumentRequest)
 
-ListDocumentsRequest = _reflection.GeneratedProtocolMessageType('ListDocumentsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _LISTDOCUMENTSREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for [Firestore.ListDocuments][google.firestore.v1beta1.Fir
+ListDocumentsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListDocumentsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTDOCUMENTSREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.ListDocuments][google.firestore.v1beta1.Fir
   estore.ListDocuments].
   
   Attributes:
@@ -1700,15 +3046,18 @@ ListDocumentsRequest = _reflection.GeneratedProtocolMessageType('ListDocumentsRe
           beta1.Document.update_time] set.  Requests with
           ``show_missing`` may not specify ``where`` or ``order_by``.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListDocumentsRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListDocumentsRequest)
+    },
+)
 _sym_db.RegisterMessage(ListDocumentsRequest)
 
-ListDocumentsResponse = _reflection.GeneratedProtocolMessageType('ListDocumentsResponse', (_message.Message,), {
-  'DESCRIPTOR' : _LISTDOCUMENTSRESPONSE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The response for [Firestore.ListDocuments][google.firestore.v1beta1.Fi
+ListDocumentsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListDocumentsResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTDOCUMENTSRESPONSE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The response for [Firestore.ListDocuments][google.firestore.v1beta1.Fi
   restore.ListDocuments].
   
   Attributes:
@@ -1717,15 +3066,18 @@ ListDocumentsResponse = _reflection.GeneratedProtocolMessageType('ListDocumentsR
       next_page_token:
           The next page token.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListDocumentsResponse)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListDocumentsResponse)
+    },
+)
 _sym_db.RegisterMessage(ListDocumentsResponse)
 
-CreateDocumentRequest = _reflection.GeneratedProtocolMessageType('CreateDocumentRequest', (_message.Message,), {
-  'DESCRIPTOR' : _CREATEDOCUMENTREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for [Firestore.CreateDocument][google.firestore.v1beta1.Fi
+CreateDocumentRequest = _reflection.GeneratedProtocolMessageType(
+    "CreateDocumentRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _CREATEDOCUMENTREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.CreateDocument][google.firestore.v1beta1.Fi
   restore.CreateDocument].
   
   Attributes:
@@ -1748,15 +3100,18 @@ CreateDocumentRequest = _reflection.GeneratedProtocolMessageType('CreateDocument
           document has a field that is not present in this mask, that
           field will not be returned in the response.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.CreateDocumentRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.CreateDocumentRequest)
+    },
+)
 _sym_db.RegisterMessage(CreateDocumentRequest)
 
-UpdateDocumentRequest = _reflection.GeneratedProtocolMessageType('UpdateDocumentRequest', (_message.Message,), {
-  'DESCRIPTOR' : _UPDATEDOCUMENTREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for [Firestore.UpdateDocument][google.firestore.v1beta1.Fi
+UpdateDocumentRequest = _reflection.GeneratedProtocolMessageType(
+    "UpdateDocumentRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _UPDATEDOCUMENTREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.UpdateDocument][google.firestore.v1beta1.Fi
   restore.UpdateDocument].
   
   Attributes:
@@ -1778,15 +3133,18 @@ UpdateDocumentRequest = _reflection.GeneratedProtocolMessageType('UpdateDocument
           An optional precondition on the document. The request will
           fail if this is set and not met by the target document.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.UpdateDocumentRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.UpdateDocumentRequest)
+    },
+)
 _sym_db.RegisterMessage(UpdateDocumentRequest)
 
-DeleteDocumentRequest = _reflection.GeneratedProtocolMessageType('DeleteDocumentRequest', (_message.Message,), {
-  'DESCRIPTOR' : _DELETEDOCUMENTREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for [Firestore.DeleteDocument][google.firestore.v1beta1.Fi
+DeleteDocumentRequest = _reflection.GeneratedProtocolMessageType(
+    "DeleteDocumentRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _DELETEDOCUMENTREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.DeleteDocument][google.firestore.v1beta1.Fi
   restore.DeleteDocument].
   
   Attributes:
@@ -1798,15 +3156,18 @@ DeleteDocumentRequest = _reflection.GeneratedProtocolMessageType('DeleteDocument
           An optional precondition on the document. The request will
           fail if this is set and not met by the target document.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.DeleteDocumentRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.DeleteDocumentRequest)
+    },
+)
 _sym_db.RegisterMessage(DeleteDocumentRequest)
 
-BatchGetDocumentsRequest = _reflection.GeneratedProtocolMessageType('BatchGetDocumentsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _BATCHGETDOCUMENTSREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for [Firestore.BatchGetDocuments][google.firestore.v1beta1
+BatchGetDocumentsRequest = _reflection.GeneratedProtocolMessageType(
+    "BatchGetDocumentsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BATCHGETDOCUMENTSREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.BatchGetDocuments][google.firestore.v1beta1
   .Firestore.BatchGetDocuments].
   
   Attributes:
@@ -1836,15 +3197,18 @@ BatchGetDocumentsRequest = _reflection.GeneratedProtocolMessageType('BatchGetDoc
           Reads documents as they were at the given time. This may not
           be older than 60 seconds.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.BatchGetDocumentsRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.BatchGetDocumentsRequest)
+    },
+)
 _sym_db.RegisterMessage(BatchGetDocumentsRequest)
 
-BatchGetDocumentsResponse = _reflection.GeneratedProtocolMessageType('BatchGetDocumentsResponse', (_message.Message,), {
-  'DESCRIPTOR' : _BATCHGETDOCUMENTSRESPONSE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The streamed response for [Firestore.BatchGetDocuments][google.firesto
+BatchGetDocumentsResponse = _reflection.GeneratedProtocolMessageType(
+    "BatchGetDocumentsResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BATCHGETDOCUMENTSRESPONSE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The streamed response for [Firestore.BatchGetDocuments][google.firesto
   re.v1beta1.Firestore.BatchGetDocuments].
   
   Attributes:
@@ -1868,15 +3232,18 @@ BatchGetDocumentsResponse = _reflection.GeneratedProtocolMessageType('BatchGetDo
           the result stream are guaranteed not to have changed between
           their read_time and this one.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.BatchGetDocumentsResponse)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.BatchGetDocumentsResponse)
+    },
+)
 _sym_db.RegisterMessage(BatchGetDocumentsResponse)
 
-BeginTransactionRequest = _reflection.GeneratedProtocolMessageType('BeginTransactionRequest', (_message.Message,), {
-  'DESCRIPTOR' : _BEGINTRANSACTIONREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for [Firestore.BeginTransaction][google.firestore.v1beta1.
+BeginTransactionRequest = _reflection.GeneratedProtocolMessageType(
+    "BeginTransactionRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BEGINTRANSACTIONREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.BeginTransaction][google.firestore.v1beta1.
   Firestore.BeginTransaction].
   
   Attributes:
@@ -1887,30 +3254,36 @@ BeginTransactionRequest = _reflection.GeneratedProtocolMessageType('BeginTransac
           The options for the transaction. Defaults to a read-write
           transaction.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.BeginTransactionRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.BeginTransactionRequest)
+    },
+)
 _sym_db.RegisterMessage(BeginTransactionRequest)
 
-BeginTransactionResponse = _reflection.GeneratedProtocolMessageType('BeginTransactionResponse', (_message.Message,), {
-  'DESCRIPTOR' : _BEGINTRANSACTIONRESPONSE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The response for [Firestore.BeginTransaction][google.firestore.v1beta1
+BeginTransactionResponse = _reflection.GeneratedProtocolMessageType(
+    "BeginTransactionResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _BEGINTRANSACTIONRESPONSE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The response for [Firestore.BeginTransaction][google.firestore.v1beta1
   .Firestore.BeginTransaction].
   
   Attributes:
       transaction:
           The transaction that was started.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.BeginTransactionResponse)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.BeginTransactionResponse)
+    },
+)
 _sym_db.RegisterMessage(BeginTransactionResponse)
 
-CommitRequest = _reflection.GeneratedProtocolMessageType('CommitRequest', (_message.Message,), {
-  'DESCRIPTOR' : _COMMITREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for
+CommitRequest = _reflection.GeneratedProtocolMessageType(
+    "CommitRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COMMITREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for
   [Firestore.Commit][google.firestore.v1beta1.Firestore.Commit].
   
   Attributes:
@@ -1923,15 +3296,18 @@ CommitRequest = _reflection.GeneratedProtocolMessageType('CommitRequest', (_mess
           If set, applies all writes in this transaction, and commits
           it.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.CommitRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.CommitRequest)
+    },
+)
 _sym_db.RegisterMessage(CommitRequest)
 
-CommitResponse = _reflection.GeneratedProtocolMessageType('CommitResponse', (_message.Message,), {
-  'DESCRIPTOR' : _COMMITRESPONSE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The response for
+CommitResponse = _reflection.GeneratedProtocolMessageType(
+    "CommitResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _COMMITRESPONSE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The response for
   [Firestore.Commit][google.firestore.v1beta1.Firestore.Commit].
   
   Attributes:
@@ -1941,15 +3317,18 @@ CommitResponse = _reflection.GeneratedProtocolMessageType('CommitResponse', (_me
       commit_time:
           The time at which the commit occurred.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.CommitResponse)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.CommitResponse)
+    },
+)
 _sym_db.RegisterMessage(CommitResponse)
 
-RollbackRequest = _reflection.GeneratedProtocolMessageType('RollbackRequest', (_message.Message,), {
-  'DESCRIPTOR' : _ROLLBACKREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for
+RollbackRequest = _reflection.GeneratedProtocolMessageType(
+    "RollbackRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _ROLLBACKREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for
   [Firestore.Rollback][google.firestore.v1beta1.Firestore.Rollback].
   
   Attributes:
@@ -1959,15 +3338,18 @@ RollbackRequest = _reflection.GeneratedProtocolMessageType('RollbackRequest', (_
       transaction:
           Required. The transaction to roll back.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.RollbackRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.RollbackRequest)
+    },
+)
 _sym_db.RegisterMessage(RollbackRequest)
 
-RunQueryRequest = _reflection.GeneratedProtocolMessageType('RunQueryRequest', (_message.Message,), {
-  'DESCRIPTOR' : _RUNQUERYREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for
+RunQueryRequest = _reflection.GeneratedProtocolMessageType(
+    "RunQueryRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RUNQUERYREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for
   [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
   
   Attributes:
@@ -1996,15 +3378,18 @@ RunQueryRequest = _reflection.GeneratedProtocolMessageType('RunQueryRequest', (_
           Reads documents as they were at the given time. This may not
           be older than 60 seconds.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.RunQueryRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.RunQueryRequest)
+    },
+)
 _sym_db.RegisterMessage(RunQueryRequest)
 
-RunQueryResponse = _reflection.GeneratedProtocolMessageType('RunQueryResponse', (_message.Message,), {
-  'DESCRIPTOR' : _RUNQUERYRESPONSE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The response for
+RunQueryResponse = _reflection.GeneratedProtocolMessageType(
+    "RunQueryResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _RUNQUERYRESPONSE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The response for
   [Firestore.RunQuery][google.firestore.v1beta1.Firestore.RunQuery].
   
   Attributes:
@@ -2028,22 +3413,27 @@ RunQueryResponse = _reflection.GeneratedProtocolMessageType('RunQueryResponse', 
           The number of results that have been skipped due to an offset
           between the last response and the current response.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.RunQueryResponse)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.RunQueryResponse)
+    },
+)
 _sym_db.RegisterMessage(RunQueryResponse)
 
-WriteRequest = _reflection.GeneratedProtocolMessageType('WriteRequest', (_message.Message,), {
-
-  'LabelsEntry' : _reflection.GeneratedProtocolMessageType('LabelsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _WRITEREQUEST_LABELSENTRY,
-    '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-    # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.WriteRequest.LabelsEntry)
-    })
-  ,
-  'DESCRIPTOR' : _WRITEREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for
+WriteRequest = _reflection.GeneratedProtocolMessageType(
+    "WriteRequest",
+    (_message.Message,),
+    {
+        "LabelsEntry": _reflection.GeneratedProtocolMessageType(
+            "LabelsEntry",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _WRITEREQUEST_LABELSENTRY,
+                "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2"
+                # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.WriteRequest.LabelsEntry)
+            },
+        ),
+        "DESCRIPTOR": _WRITEREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for
   [Firestore.Write][google.firestore.v1beta1.Firestore.Write].  The
   first request creates a stream, or resumes an existing one from a
   token.  When creating a new stream, the server replies with a response
@@ -2081,16 +3471,19 @@ WriteRequest = _reflection.GeneratedProtocolMessageType('WriteRequest', (_messag
       labels:
           Labels associated with this write request.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.WriteRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.WriteRequest)
+    },
+)
 _sym_db.RegisterMessage(WriteRequest)
 _sym_db.RegisterMessage(WriteRequest.LabelsEntry)
 
-WriteResponse = _reflection.GeneratedProtocolMessageType('WriteResponse', (_message.Message,), {
-  'DESCRIPTOR' : _WRITERESPONSE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The response for
+WriteResponse = _reflection.GeneratedProtocolMessageType(
+    "WriteResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _WRITERESPONSE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The response for
   [Firestore.Write][google.firestore.v1beta1.Firestore.Write].
   
   Attributes:
@@ -2107,22 +3500,27 @@ WriteResponse = _reflection.GeneratedProtocolMessageType('WriteResponse', (_mess
       commit_time:
           The time at which the commit occurred.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.WriteResponse)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.WriteResponse)
+    },
+)
 _sym_db.RegisterMessage(WriteResponse)
 
-ListenRequest = _reflection.GeneratedProtocolMessageType('ListenRequest', (_message.Message,), {
-
-  'LabelsEntry' : _reflection.GeneratedProtocolMessageType('LabelsEntry', (_message.Message,), {
-    'DESCRIPTOR' : _LISTENREQUEST_LABELSENTRY,
-    '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-    # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListenRequest.LabelsEntry)
-    })
-  ,
-  'DESCRIPTOR' : _LISTENREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """A request for
+ListenRequest = _reflection.GeneratedProtocolMessageType(
+    "ListenRequest",
+    (_message.Message,),
+    {
+        "LabelsEntry": _reflection.GeneratedProtocolMessageType(
+            "LabelsEntry",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _LISTENREQUEST_LABELSENTRY,
+                "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2"
+                # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListenRequest.LabelsEntry)
+            },
+        ),
+        "DESCRIPTOR": _LISTENREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """A request for
   [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen]
   
   Attributes:
@@ -2138,16 +3536,19 @@ ListenRequest = _reflection.GeneratedProtocolMessageType('ListenRequest', (_mess
       labels:
           Labels associated with this target change.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListenRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListenRequest)
+    },
+)
 _sym_db.RegisterMessage(ListenRequest)
 _sym_db.RegisterMessage(ListenRequest.LabelsEntry)
 
-ListenResponse = _reflection.GeneratedProtocolMessageType('ListenResponse', (_message.Message,), {
-  'DESCRIPTOR' : _LISTENRESPONSE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The response for
+ListenResponse = _reflection.GeneratedProtocolMessageType(
+    "ListenResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTENRESPONSE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The response for
   [Firestore.Listen][google.firestore.v1beta1.Firestore.Listen].
   
   Attributes:
@@ -2170,17 +3571,22 @@ ListenResponse = _reflection.GeneratedProtocolMessageType('ListenResponse', (_me
           removed from the given target, but the exact documents are
           unknown.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListenResponse)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListenResponse)
+    },
+)
 _sym_db.RegisterMessage(ListenResponse)
 
-Target = _reflection.GeneratedProtocolMessageType('Target', (_message.Message,), {
-
-  'DocumentsTarget' : _reflection.GeneratedProtocolMessageType('DocumentsTarget', (_message.Message,), {
-    'DESCRIPTOR' : _TARGET_DOCUMENTSTARGET,
-    '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-    ,
-    '__doc__': """A target specified by a set of documents names.
+Target = _reflection.GeneratedProtocolMessageType(
+    "Target",
+    (_message.Message,),
+    {
+        "DocumentsTarget": _reflection.GeneratedProtocolMessageType(
+            "DocumentsTarget",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _TARGET_DOCUMENTSTARGET,
+                "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+                "__doc__": """A target specified by a set of documents names.
     
     Attributes:
         documents:
@@ -2190,15 +3596,16 @@ Target = _reflection.GeneratedProtocolMessageType('Target', (_message.Message,),
             child resource of the given ``database``. Duplicate names will
             be elided.
     """,
-    # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Target.DocumentsTarget)
-    })
-  ,
-
-  'QueryTarget' : _reflection.GeneratedProtocolMessageType('QueryTarget', (_message.Message,), {
-    'DESCRIPTOR' : _TARGET_QUERYTARGET,
-    '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-    ,
-    '__doc__': """A target specified by a query.
+                # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Target.DocumentsTarget)
+            },
+        ),
+        "QueryTarget": _reflection.GeneratedProtocolMessageType(
+            "QueryTarget",
+            (_message.Message,),
+            {
+                "DESCRIPTOR": _TARGET_QUERYTARGET,
+                "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+                "__doc__": """A target specified by a query.
     
     Attributes:
         parent:
@@ -2214,13 +3621,12 @@ Target = _reflection.GeneratedProtocolMessageType('Target', (_message.Message,),
         structured_query:
             A structured query.
     """,
-    # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Target.QueryTarget)
-    })
-  ,
-  'DESCRIPTOR' : _TARGET,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """A specification of a set of documents to listen to.
+                # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Target.QueryTarget)
+            },
+        ),
+        "DESCRIPTOR": _TARGET,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """A specification of a set of documents to listen to.
   
   Attributes:
       target_type:
@@ -2247,17 +3653,20 @@ Target = _reflection.GeneratedProtocolMessageType('Target', (_message.Message,),
           If the target should be removed once it is current and
           consistent.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Target)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.Target)
+    },
+)
 _sym_db.RegisterMessage(Target)
 _sym_db.RegisterMessage(Target.DocumentsTarget)
 _sym_db.RegisterMessage(Target.QueryTarget)
 
-TargetChange = _reflection.GeneratedProtocolMessageType('TargetChange', (_message.Message,), {
-  'DESCRIPTOR' : _TARGETCHANGE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """Targets being watched have changed.
+TargetChange = _reflection.GeneratedProtocolMessageType(
+    "TargetChange",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _TARGETCHANGE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """Targets being watched have changed.
   
   Attributes:
       target_change_type:
@@ -2283,15 +3692,18 @@ TargetChange = _reflection.GeneratedProtocolMessageType('TargetChange', (_messag
           stream, ``read_time`` is guaranteed to be monotonically
           increasing.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.TargetChange)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.TargetChange)
+    },
+)
 _sym_db.RegisterMessage(TargetChange)
 
-ListCollectionIdsRequest = _reflection.GeneratedProtocolMessageType('ListCollectionIdsRequest', (_message.Message,), {
-  'DESCRIPTOR' : _LISTCOLLECTIONIDSREQUEST,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The request for [Firestore.ListCollectionIds][google.firestore.v1beta1
+ListCollectionIdsRequest = _reflection.GeneratedProtocolMessageType(
+    "ListCollectionIdsRequest",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTCOLLECTIONIDSREQUEST,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The request for [Firestore.ListCollectionIds][google.firestore.v1beta1
   .Firestore.ListCollectionIds].
   
   Attributes:
@@ -2306,15 +3718,18 @@ ListCollectionIdsRequest = _reflection.GeneratedProtocolMessageType('ListCollect
           A page token. Must be a value from [ListCollectionIdsResponse]
           [google.firestore.v1beta1.ListCollectionIdsResponse].
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListCollectionIdsRequest)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListCollectionIdsRequest)
+    },
+)
 _sym_db.RegisterMessage(ListCollectionIdsRequest)
 
-ListCollectionIdsResponse = _reflection.GeneratedProtocolMessageType('ListCollectionIdsResponse', (_message.Message,), {
-  'DESCRIPTOR' : _LISTCOLLECTIONIDSRESPONSE,
-  '__module__' : 'google.cloud.firestore_v1beta1.proto.firestore_pb2'
-  ,
-  '__doc__': """The response from [Firestore.ListCollectionIds][google.firestore.v1bet
+ListCollectionIdsResponse = _reflection.GeneratedProtocolMessageType(
+    "ListCollectionIdsResponse",
+    (_message.Message,),
+    {
+        "DESCRIPTOR": _LISTCOLLECTIONIDSRESPONSE,
+        "__module__": "google.cloud.firestore_v1beta1.proto.firestore_pb2",
+        "__doc__": """The response from [Firestore.ListCollectionIds][google.firestore.v1bet
   a1.Firestore.ListCollectionIds].
   
   Attributes:
@@ -2323,175 +3738,177 @@ ListCollectionIdsResponse = _reflection.GeneratedProtocolMessageType('ListCollec
       next_page_token:
           A page token that may be used to continue the list.
   """,
-  # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListCollectionIdsResponse)
-  })
+        # @@protoc_insertion_point(class_scope:google.firestore.v1beta1.ListCollectionIdsResponse)
+    },
+)
 _sym_db.RegisterMessage(ListCollectionIdsResponse)
 
 
 DESCRIPTOR._options = None
-_GETDOCUMENTREQUEST.fields_by_name['name']._options = None
-_LISTDOCUMENTSREQUEST.fields_by_name['parent']._options = None
-_LISTDOCUMENTSREQUEST.fields_by_name['collection_id']._options = None
-_CREATEDOCUMENTREQUEST.fields_by_name['parent']._options = None
-_CREATEDOCUMENTREQUEST.fields_by_name['collection_id']._options = None
-_CREATEDOCUMENTREQUEST.fields_by_name['document']._options = None
-_UPDATEDOCUMENTREQUEST.fields_by_name['document']._options = None
-_DELETEDOCUMENTREQUEST.fields_by_name['name']._options = None
-_BATCHGETDOCUMENTSREQUEST.fields_by_name['database']._options = None
-_BEGINTRANSACTIONREQUEST.fields_by_name['database']._options = None
-_COMMITREQUEST.fields_by_name['database']._options = None
-_ROLLBACKREQUEST.fields_by_name['database']._options = None
-_ROLLBACKREQUEST.fields_by_name['transaction']._options = None
-_RUNQUERYREQUEST.fields_by_name['parent']._options = None
+_GETDOCUMENTREQUEST.fields_by_name["name"]._options = None
+_LISTDOCUMENTSREQUEST.fields_by_name["parent"]._options = None
+_LISTDOCUMENTSREQUEST.fields_by_name["collection_id"]._options = None
+_CREATEDOCUMENTREQUEST.fields_by_name["parent"]._options = None
+_CREATEDOCUMENTREQUEST.fields_by_name["collection_id"]._options = None
+_CREATEDOCUMENTREQUEST.fields_by_name["document"]._options = None
+_UPDATEDOCUMENTREQUEST.fields_by_name["document"]._options = None
+_DELETEDOCUMENTREQUEST.fields_by_name["name"]._options = None
+_BATCHGETDOCUMENTSREQUEST.fields_by_name["database"]._options = None
+_BEGINTRANSACTIONREQUEST.fields_by_name["database"]._options = None
+_COMMITREQUEST.fields_by_name["database"]._options = None
+_ROLLBACKREQUEST.fields_by_name["database"]._options = None
+_ROLLBACKREQUEST.fields_by_name["transaction"]._options = None
+_RUNQUERYREQUEST.fields_by_name["parent"]._options = None
 _WRITEREQUEST_LABELSENTRY._options = None
-_WRITEREQUEST.fields_by_name['database']._options = None
+_WRITEREQUEST.fields_by_name["database"]._options = None
 _LISTENREQUEST_LABELSENTRY._options = None
-_LISTENREQUEST.fields_by_name['database']._options = None
-_LISTCOLLECTIONIDSREQUEST.fields_by_name['parent']._options = None
+_LISTENREQUEST.fields_by_name["database"]._options = None
+_LISTCOLLECTIONIDSREQUEST.fields_by_name["parent"]._options = None
 
 _FIRESTORE = _descriptor.ServiceDescriptor(
-  name='Firestore',
-  full_name='google.firestore.v1beta1.Firestore',
-  file=DESCRIPTOR,
-  index=0,
-  serialized_options=b'\312A\030firestore.googleapis.com\322AXhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore',
-  create_key=_descriptor._internal_create_key,
-  serialized_start=4999,
-  serialized_end=7714,
-  methods=[
-  _descriptor.MethodDescriptor(
-    name='GetDocument',
-    full_name='google.firestore.v1beta1.Firestore.GetDocument',
+    name="Firestore",
+    full_name="google.firestore.v1beta1.Firestore",
+    file=DESCRIPTOR,
     index=0,
-    containing_service=None,
-    input_type=_GETDOCUMENTREQUEST,
-    output_type=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT,
-    serialized_options=b'\202\323\344\223\0027\0225/v1beta1/{name=projects/*/databases/*/documents/*/**}',
+    serialized_options=b"\312A\030firestore.googleapis.com\322AXhttps://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/datastore",
     create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ListDocuments',
-    full_name='google.firestore.v1beta1.Firestore.ListDocuments',
-    index=1,
-    containing_service=None,
-    input_type=_LISTDOCUMENTSREQUEST,
-    output_type=_LISTDOCUMENTSRESPONSE,
-    serialized_options=b'\202\323\344\223\002I\022G/v1beta1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='CreateDocument',
-    full_name='google.firestore.v1beta1.Firestore.CreateDocument',
-    index=2,
-    containing_service=None,
-    input_type=_CREATEDOCUMENTREQUEST,
-    output_type=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT,
-    serialized_options=b'\202\323\344\223\002Q\"E/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\010document',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='UpdateDocument',
-    full_name='google.firestore.v1beta1.Firestore.UpdateDocument',
-    index=3,
-    containing_service=None,
-    input_type=_UPDATEDOCUMENTREQUEST,
-    output_type=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT,
-    serialized_options=b'\202\323\344\223\002J2>/v1beta1/{document.name=projects/*/databases/*/documents/*/**}:\010document\332A\024document,update_mask',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='DeleteDocument',
-    full_name='google.firestore.v1beta1.Firestore.DeleteDocument',
-    index=4,
-    containing_service=None,
-    input_type=_DELETEDOCUMENTREQUEST,
-    output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    serialized_options=b'\202\323\344\223\0027*5/v1beta1/{name=projects/*/databases/*/documents/*/**}\332A\004name',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='BatchGetDocuments',
-    full_name='google.firestore.v1beta1.Firestore.BatchGetDocuments',
-    index=5,
-    containing_service=None,
-    input_type=_BATCHGETDOCUMENTSREQUEST,
-    output_type=_BATCHGETDOCUMENTSRESPONSE,
-    serialized_options=b'\202\323\344\223\002B\"=/v1beta1/{database=projects/*/databases/*}/documents:batchGet:\001*',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='BeginTransaction',
-    full_name='google.firestore.v1beta1.Firestore.BeginTransaction',
-    index=6,
-    containing_service=None,
-    input_type=_BEGINTRANSACTIONREQUEST,
-    output_type=_BEGINTRANSACTIONRESPONSE,
-    serialized_options=b'\202\323\344\223\002J\"E/v1beta1/{database=projects/*/databases/*}/documents:beginTransaction:\001*\332A\010database',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='Commit',
-    full_name='google.firestore.v1beta1.Firestore.Commit',
-    index=7,
-    containing_service=None,
-    input_type=_COMMITREQUEST,
-    output_type=_COMMITRESPONSE,
-    serialized_options=b'\202\323\344\223\002@\";/v1beta1/{database=projects/*/databases/*}/documents:commit:\001*\332A\017database,writes',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='Rollback',
-    full_name='google.firestore.v1beta1.Firestore.Rollback',
-    index=8,
-    containing_service=None,
-    input_type=_ROLLBACKREQUEST,
-    output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
-    serialized_options=b'\202\323\344\223\002B\"=/v1beta1/{database=projects/*/databases/*}/documents:rollback:\001*\332A\024database,transaction',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='RunQuery',
-    full_name='google.firestore.v1beta1.Firestore.RunQuery',
-    index=9,
-    containing_service=None,
-    input_type=_RUNQUERYREQUEST,
-    output_type=_RUNQUERYRESPONSE,
-    serialized_options=b'\202\323\344\223\002\207\001\";/v1beta1/{parent=projects/*/databases/*/documents}:runQuery:\001*ZE\"@/v1beta1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\001*',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='Write',
-    full_name='google.firestore.v1beta1.Firestore.Write',
-    index=10,
-    containing_service=None,
-    input_type=_WRITEREQUEST,
-    output_type=_WRITERESPONSE,
-    serialized_options=b'\202\323\344\223\002?\":/v1beta1/{database=projects/*/databases/*}/documents:write:\001*',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='Listen',
-    full_name='google.firestore.v1beta1.Firestore.Listen',
-    index=11,
-    containing_service=None,
-    input_type=_LISTENREQUEST,
-    output_type=_LISTENRESPONSE,
-    serialized_options=b'\202\323\344\223\002@\";/v1beta1/{database=projects/*/databases/*}/documents:listen:\001*',
-    create_key=_descriptor._internal_create_key,
-  ),
-  _descriptor.MethodDescriptor(
-    name='ListCollectionIds',
-    full_name='google.firestore.v1beta1.Firestore.ListCollectionIds',
-    index=12,
-    containing_service=None,
-    input_type=_LISTCOLLECTIONIDSREQUEST,
-    output_type=_LISTCOLLECTIONIDSRESPONSE,
-    serialized_options=b'\202\323\344\223\002\231\001\"D/v1beta1/{parent=projects/*/databases/*/documents}:listCollectionIds:\001*ZN\"I/v1beta1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\001*\332A\006parent',
-    create_key=_descriptor._internal_create_key,
-  ),
-])
+    serialized_start=4999,
+    serialized_end=7714,
+    methods=[
+        _descriptor.MethodDescriptor(
+            name="GetDocument",
+            full_name="google.firestore.v1beta1.Firestore.GetDocument",
+            index=0,
+            containing_service=None,
+            input_type=_GETDOCUMENTREQUEST,
+            output_type=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT,
+            serialized_options=b"\202\323\344\223\0027\0225/v1beta1/{name=projects/*/databases/*/documents/*/**}",
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="ListDocuments",
+            full_name="google.firestore.v1beta1.Firestore.ListDocuments",
+            index=1,
+            containing_service=None,
+            input_type=_LISTDOCUMENTSREQUEST,
+            output_type=_LISTDOCUMENTSRESPONSE,
+            serialized_options=b"\202\323\344\223\002I\022G/v1beta1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}",
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="CreateDocument",
+            full_name="google.firestore.v1beta1.Firestore.CreateDocument",
+            index=2,
+            containing_service=None,
+            input_type=_CREATEDOCUMENTREQUEST,
+            output_type=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT,
+            serialized_options=b'\202\323\344\223\002Q"E/v1beta1/{parent=projects/*/databases/*/documents/**}/{collection_id}:\010document',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="UpdateDocument",
+            full_name="google.firestore.v1beta1.Firestore.UpdateDocument",
+            index=3,
+            containing_service=None,
+            input_type=_UPDATEDOCUMENTREQUEST,
+            output_type=google_dot_cloud_dot_firestore__v1beta1_dot_proto_dot_document__pb2._DOCUMENT,
+            serialized_options=b"\202\323\344\223\002J2>/v1beta1/{document.name=projects/*/databases/*/documents/*/**}:\010document\332A\024document,update_mask",
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="DeleteDocument",
+            full_name="google.firestore.v1beta1.Firestore.DeleteDocument",
+            index=4,
+            containing_service=None,
+            input_type=_DELETEDOCUMENTREQUEST,
+            output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
+            serialized_options=b"\202\323\344\223\0027*5/v1beta1/{name=projects/*/databases/*/documents/*/**}\332A\004name",
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="BatchGetDocuments",
+            full_name="google.firestore.v1beta1.Firestore.BatchGetDocuments",
+            index=5,
+            containing_service=None,
+            input_type=_BATCHGETDOCUMENTSREQUEST,
+            output_type=_BATCHGETDOCUMENTSRESPONSE,
+            serialized_options=b'\202\323\344\223\002B"=/v1beta1/{database=projects/*/databases/*}/documents:batchGet:\001*',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="BeginTransaction",
+            full_name="google.firestore.v1beta1.Firestore.BeginTransaction",
+            index=6,
+            containing_service=None,
+            input_type=_BEGINTRANSACTIONREQUEST,
+            output_type=_BEGINTRANSACTIONRESPONSE,
+            serialized_options=b'\202\323\344\223\002J"E/v1beta1/{database=projects/*/databases/*}/documents:beginTransaction:\001*\332A\010database',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="Commit",
+            full_name="google.firestore.v1beta1.Firestore.Commit",
+            index=7,
+            containing_service=None,
+            input_type=_COMMITREQUEST,
+            output_type=_COMMITRESPONSE,
+            serialized_options=b'\202\323\344\223\002@";/v1beta1/{database=projects/*/databases/*}/documents:commit:\001*\332A\017database,writes',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="Rollback",
+            full_name="google.firestore.v1beta1.Firestore.Rollback",
+            index=8,
+            containing_service=None,
+            input_type=_ROLLBACKREQUEST,
+            output_type=google_dot_protobuf_dot_empty__pb2._EMPTY,
+            serialized_options=b'\202\323\344\223\002B"=/v1beta1/{database=projects/*/databases/*}/documents:rollback:\001*\332A\024database,transaction',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="RunQuery",
+            full_name="google.firestore.v1beta1.Firestore.RunQuery",
+            index=9,
+            containing_service=None,
+            input_type=_RUNQUERYREQUEST,
+            output_type=_RUNQUERYRESPONSE,
+            serialized_options=b'\202\323\344\223\002\207\001";/v1beta1/{parent=projects/*/databases/*/documents}:runQuery:\001*ZE"@/v1beta1/{parent=projects/*/databases/*/documents/*/**}:runQuery:\001*',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="Write",
+            full_name="google.firestore.v1beta1.Firestore.Write",
+            index=10,
+            containing_service=None,
+            input_type=_WRITEREQUEST,
+            output_type=_WRITERESPONSE,
+            serialized_options=b'\202\323\344\223\002?":/v1beta1/{database=projects/*/databases/*}/documents:write:\001*',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="Listen",
+            full_name="google.firestore.v1beta1.Firestore.Listen",
+            index=11,
+            containing_service=None,
+            input_type=_LISTENREQUEST,
+            output_type=_LISTENRESPONSE,
+            serialized_options=b'\202\323\344\223\002@";/v1beta1/{database=projects/*/databases/*}/documents:listen:\001*',
+            create_key=_descriptor._internal_create_key,
+        ),
+        _descriptor.MethodDescriptor(
+            name="ListCollectionIds",
+            full_name="google.firestore.v1beta1.Firestore.ListCollectionIds",
+            index=12,
+            containing_service=None,
+            input_type=_LISTCOLLECTIONIDSREQUEST,
+            output_type=_LISTCOLLECTIONIDSRESPONSE,
+            serialized_options=b'\202\323\344\223\002\231\001"D/v1beta1/{parent=projects/*/databases/*/documents}:listCollectionIds:\001*ZN"I/v1beta1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds:\001*\332A\006parent',
+            create_key=_descriptor._internal_create_key,
+        ),
+    ],
+)
 _sym_db.RegisterServiceDescriptor(_FIRESTORE)
 
-DESCRIPTOR.services_by_name['Firestore'] = _FIRESTORE
+DESCRIPTOR.services_by_name["Firestore"] = _FIRESTORE
 
 # @@protoc_insertion_point(module_scope)
