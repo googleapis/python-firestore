@@ -32,7 +32,7 @@ from google.cloud.firestore_v1.base_transaction import (
     _EXCEED_ATTEMPTS_TEMPLATE,
 )
 
-from google.api_core import exceptions
+from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import batch
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
