@@ -20,7 +20,7 @@
 
 from pkg_resources import get_distribution
 
-__version__ = get_distribution("google-cloud-firestore").version
+__version__ : str = get_distribution("google-cloud-firestore").version
 
 
 from google.cloud.firestore_v1 import types
@@ -99,15 +99,13 @@ from google.cloud.firestore_v1.watch import Watch
 from .types.write import DocumentTransform
 from typing import List
 
-__all__: List[str]
-__version__: str
+
 
 # from .types.write import ExistenceFilter
 # from .types.write import Write
 # from .types.write import WriteResult
 
-
-__all__ = [
+__all__ : List[str] = [
     "__version__",
     "ArrayRemove",
     "ArrayUnion",

@@ -17,6 +17,7 @@ import random
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1.query import Query
 from typing import Any, NoReturn, Tuple
 
 
@@ -87,7 +88,7 @@ class BaseCollectionReference(object):
             parent_path = self._path[:-1]
         return self._client.document(*parent_path)
 
-    def _query(self) -> NoReturn:
+    def _query(self) -> Query:
         raise NotImplementedError
 
     def document(self, document_id=None) -> Any:
@@ -137,7 +138,7 @@ class BaseCollectionReference(object):
     def list_documents(self, page_size=None) -> NoReturn:
         raise NotImplementedError
 
-    def select(self, field_paths) -> NoReturn:
+    def select(self, field_paths) -> Query:
         """Create a "select" query with this collection as parent.
 
         See
@@ -156,7 +157,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.select(field_paths)
 
-    def where(self, field_path, op_string, value) -> NoReturn:
+    def where(self, field_path, op_string, value) -> Query:
         """Create a "where" query with this collection as parent.
 
         See
@@ -180,7 +181,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.where(field_path, op_string, value)
 
-    def order_by(self, field_path, **kwargs) -> NoReturn:
+    def order_by(self, field_path, **kwargs) -> Query:
         """Create an "order by" query with this collection as parent.
 
         See
@@ -202,7 +203,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.order_by(field_path, **kwargs)
 
-    def limit(self, count) -> NoReturn:
+    def limit(self, count) -> Query:
         """Create a limited query with this collection as parent.
 
         See
@@ -220,7 +221,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.limit(count)
 
-    def offset(self, num_to_skip) -> NoReturn:
+    def offset(self, num_to_skip) -> Query:
         """Skip to an offset in a query with this collection as parent.
 
         See
@@ -238,7 +239,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.offset(num_to_skip)
 
-    def start_at(self, document_fields) -> NoReturn:
+    def start_at(self, document_fields) -> Query:
         """Start query at a cursor with this collection as parent.
 
         See
@@ -259,7 +260,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.start_at(document_fields)
 
-    def start_after(self, document_fields) -> NoReturn:
+    def start_after(self, document_fields) -> Query:
         """Start query after a cursor with this collection as parent.
 
         See
@@ -280,7 +281,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.start_after(document_fields)
 
-    def end_before(self, document_fields) -> NoReturn:
+    def end_before(self, document_fields) -> Query:
         """End query before a cursor with this collection as parent.
 
         See
@@ -301,7 +302,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.end_before(document_fields)
 
-    def end_at(self, document_fields) -> NoReturn:
+    def end_at(self, document_fields) -> Query:
         """End query at a cursor with this collection as parent.
 
         See
