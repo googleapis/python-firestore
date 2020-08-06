@@ -40,15 +40,6 @@ from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from typing import Coroutine
 
-_CANT_BEGIN: str
-_CANT_COMMIT: str
-_CANT_ROLLBACK: str
-_EXCEED_ATTEMPTS_TEMPLATE: str
-_INITIAL_SLEEP: float
-_MAX_SLEEP: float
-_MULTIPLIER: float
-_WRITE_READ_ONLY: str
-
 
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
     """Accumulate read-and-write operations to be sent in a transaction.

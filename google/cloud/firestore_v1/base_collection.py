@@ -17,9 +17,11 @@ import random
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.document import DocumentReference
-from google.cloud.firestore_v1.query import Query
-from typing import Any, NoReturn, Tuple
+from typing import Any, Generator, Iterator, NoReturn, Tuple
 
+# Types needed only for Type Hints
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.base_query import BaseQuery
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -88,7 +90,7 @@ class BaseCollectionReference(object):
             parent_path = self._path[:-1]
         return self._client.document(*parent_path)
 
-    def _query(self) -> Query:
+    def _query(self) -> BaseQuery:
         raise NotImplementedError
 
     def document(self, document_id=None) -> Any:
@@ -132,13 +134,13 @@ class BaseCollectionReference(object):
         expected_prefix = _helpers.DOCUMENT_PATH_DELIMITER.join((parent_path, self.id))
         return parent_path, expected_prefix
 
-    def add(self, document_data, document_id=None) -> NoReturn:
+    def add(self, document_data, document_id=None) -> Tuple[Any, Any]:
         raise NotImplementedError
 
-    def list_documents(self, page_size=None) -> NoReturn:
+    def list_documents(self, page_size=None) -> Generator[DocumentReference, Any, Any]:
         raise NotImplementedError
 
-    def select(self, field_paths) -> Query:
+    def select(self, field_paths) -> BaseQuery:
         """Create a "select" query with this collection as parent.
 
         See
@@ -157,7 +159,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.select(field_paths)
 
-    def where(self, field_path, op_string, value) -> Query:
+    def where(self, field_path, op_string, value) -> BaseQuery:
         """Create a "where" query with this collection as parent.
 
         See
@@ -181,7 +183,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.where(field_path, op_string, value)
 
-    def order_by(self, field_path, **kwargs) -> Query:
+    def order_by(self, field_path, **kwargs) -> BaseQuery:
         """Create an "order by" query with this collection as parent.
 
         See
@@ -203,7 +205,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.order_by(field_path, **kwargs)
 
-    def limit(self, count) -> Query:
+    def limit(self, count) -> BaseQuery:
         """Create a limited query with this collection as parent.
 
         See
@@ -221,7 +223,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.limit(count)
 
-    def offset(self, num_to_skip) -> Query:
+    def offset(self, num_to_skip) -> BaseQuery:
         """Skip to an offset in a query with this collection as parent.
 
         See
@@ -239,7 +241,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.offset(num_to_skip)
 
-    def start_at(self, document_fields) -> Query:
+    def start_at(self, document_fields) -> BaseQuery:
         """Start query at a cursor with this collection as parent.
 
         See
@@ -260,7 +262,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.start_at(document_fields)
 
-    def start_after(self, document_fields) -> Query:
+    def start_after(self, document_fields) -> BaseQuery:
         """Start query after a cursor with this collection as parent.
 
         See
@@ -281,7 +283,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.start_after(document_fields)
 
-    def end_before(self, document_fields) -> Query:
+    def end_before(self, document_fields) -> BaseQuery:
         """End query before a cursor with this collection as parent.
 
         See
@@ -302,7 +304,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.end_before(document_fields)
 
-    def end_at(self, document_fields) -> Query:
+    def end_at(self, document_fields) -> BaseQuery:
         """End query at a cursor with this collection as parent.
 
         See
@@ -323,10 +325,10 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.end_at(document_fields)
 
-    def get(self, transaction=None) -> NoReturn:
+    def get(self, transaction=None) -> Generator[DocumentSnapshot, Any, Any]:
         raise NotImplementedError
 
-    def stream(self, transaction=None) -> NoReturn:
+    def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
         raise NotImplementedError
 
     def on_snapshot(self, callback) -> NoReturn:
