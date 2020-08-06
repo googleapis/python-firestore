@@ -281,7 +281,9 @@ class AsyncDocumentReference(BaseDocumentReference):
 
         return commit_response.commit_time
 
-    async def get(self, field_paths=None, transaction=None) -> Union[DocumentSnapshot, Coroutine[Any, Any, DocumentSnapshot]]:
+    async def get(
+        self, field_paths=None, transaction=None
+    ) -> Union[DocumentSnapshot, Coroutine[Any, Any, DocumentSnapshot]]:
         """Retrieve a snapshot of the current document.
 
         See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for

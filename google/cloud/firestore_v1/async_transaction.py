@@ -42,7 +42,6 @@ from google.cloud.firestore_v1.async_query import AsyncQuery
 from typing import Any, AsyncGenerator, Coroutine
 
 
-
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
     """Accumulate read-and-write operations to be sent in a transaction.
 

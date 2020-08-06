@@ -20,7 +20,7 @@
 
 from pkg_resources import get_distribution
 
-__version__ : str = get_distribution("google-cloud-firestore").version
+__version__: str = get_distribution("google-cloud-firestore").version
 
 
 from google.cloud.firestore_v1 import types
@@ -104,7 +104,7 @@ from typing import List
 # from .types.write import Write
 # from .types.write import WriteResult
 
-__all__ : List[str] = [
+__all__: List[str] = [
     "__version__",
     "ArrayRemove",
     "ArrayUnion",

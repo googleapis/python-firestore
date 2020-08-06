@@ -37,7 +37,17 @@ from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 from google.cloud.firestore_v1.field_path import render_field_path
-from typing import Any, AsyncGenerator, Generator, List, NoReturn, Optional, Tuple, TYPE_CHECKING, Union
+from typing import (
+    Any,
+    AsyncGenerator,
+    Generator,
+    List,
+    NoReturn,
+    Optional,
+    Tuple,
+    TYPE_CHECKING,
+    Union,
+)
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_collection import BaseCollectionReference
@@ -52,12 +62,12 @@ DEFAULT_DATABASE = "(default)"
 _BAD_OPTION_ERR = (
     "Exactly one of ``last_update_time`` or ``exists`` " "must be provided."
 )
-_BAD_DOC_TEMPLATE: str= (
+_BAD_DOC_TEMPLATE: str = (
     "Document {!r} appeared in response but was not present among references"
 )
 _ACTIVE_TXN: str = "There is already an active transaction."
 _INACTIVE_TXN: str = "There is no active transaction."
-_CLIENT_INFO: Any= client_info.ClientInfo(client_library_version=__version__)
+_CLIENT_INFO: Any = client_info.ClientInfo(client_library_version=__version__)
 _FIRESTORE_EMULATOR_HOST: str = "FIRESTORE_EMULATOR_HOST"
 
 
@@ -341,14 +351,19 @@ class BaseClient(ClientWithProject):
             extra = "{!r} was provided".format(name)
             raise TypeError(_BAD_OPTION_ERR, extra)
 
-    def get_all(self, references, field_paths=None, transaction=None) -> Union[
-            AsyncGenerator[DocumentSnapshot, Any],
-            Generator[DocumentSnapshot, Any, Any]]:
+    def get_all(
+        self, references, field_paths=None, transaction=None
+    ) -> Union[
+        AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
+    ]:
         raise NotImplementedError
 
-    def collections(self) -> Union[
-            AsyncGenerator[BaseCollectionReference, Any],
-            Generator[BaseCollectionReference, Any, Any]]:
+    def collections(
+        self,
+    ) -> Union[
+        AsyncGenerator[BaseCollectionReference, Any],
+        Generator[BaseCollectionReference, Any, Any],
+    ]:
         raise NotImplementedError
 
     def batch(self) -> BaseWriteBatch:

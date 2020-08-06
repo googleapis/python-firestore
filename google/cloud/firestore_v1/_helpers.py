@@ -1060,4 +1060,3 @@ class ExistsOption(WriteOption):
         """
         current_doc = types.Precondition(exists=self._exists)
         write._pb.current_document.CopyFrom(current_doc._pb)
-

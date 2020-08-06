@@ -43,10 +43,10 @@ _INITIAL_SLEEP: float = 1.0
 """float: Initial "max" for sleep interval. To be used in :func:`_sleep`."""
 _MAX_SLEEP: float = 30.0
 """float: Eventual "max" sleep time. To be used in :func:`_sleep`."""
-_MULTIPLIER: float= 2.0
+_MULTIPLIER: float = 2.0
 """float: Multiplier for exponential backoff. To be used in :func:`_sleep`."""
 _EXCEED_ATTEMPTS_TEMPLATE: str = "Failed to commit transaction in {:d} attempts."
-_CANT_RETRY_READ_ONLY: str= "Only read-write transactions can be retried."
+_CANT_RETRY_READ_ONLY: str = "Only read-write transactions can be retried."
 
 
 class BaseTransaction(object):
