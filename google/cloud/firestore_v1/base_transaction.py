@@ -29,17 +29,6 @@ _MISSING_ID_TEMPLATE: str
 _MULTIPLIER: float
 _WRITE_READ_ONLY: str
 
-_CANT_BEGIN: str
-_CANT_COMMIT: str
-_CANT_RETRY_READ_ONLY: str
-_CANT_ROLLBACK: str
-_EXCEED_ATTEMPTS_TEMPLATE: str
-_INITIAL_SLEEP: float
-_MAX_SLEEP: float
-_MISSING_ID_TEMPLATE: str
-_MULTIPLIER: float
-_WRITE_READ_ONLY: str
-
 MAX_ATTEMPTS = 5
 """int: Default number of transaction attempts (with retries)."""
 _CANT_BEGIN = "The transaction has already begun. Current transaction ID: {!r}."
