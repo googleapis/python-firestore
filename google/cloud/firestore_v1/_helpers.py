@@ -35,7 +35,6 @@ from typing import Any, Generator, List, NoReturn, Optional, Tuple
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
-_datetime_to_pb_timestamp: Any
 
 
 BAD_PATH_TEMPLATE = "A path element must be a string. Received {}, which is a {}."
@@ -1061,3 +1060,4 @@ class ExistsOption(WriteOption):
         """
         current_doc = types.Precondition(exists=self._exists)
         write._pb.current_document.CopyFrom(current_doc._pb)
+

@@ -16,15 +16,15 @@
 import random
 
 from google.cloud.firestore_v1 import _helpers
+
 from google.cloud.firestore_v1.document import DocumentReference
-from typing import Any, Generator, Iterator, NoReturn, Tuple
+from typing import Any, AsyncGenerator, Coroutine, Generator, AsyncIterator, Iterator, NoReturn, Tuple, Union
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_query import BaseQuery
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-
 
 class BaseCollectionReference(object):
     """A reference to a collection in a Firestore database.
@@ -134,10 +134,10 @@ class BaseCollectionReference(object):
         expected_prefix = _helpers.DOCUMENT_PATH_DELIMITER.join((parent_path, self.id))
         return parent_path, expected_prefix
 
-    def add(self, document_data, document_id=None) -> Tuple[Any, Any]:
+    def add(self, document_data, document_id=None) -> Union[Tuple[Any, Any], Coroutine[Any, Any, Tuple[Any, Any]]]:
         raise NotImplementedError
 
-    def list_documents(self, page_size=None) -> Generator[DocumentReference, Any, Any]:
+    def list_documents(self, page_size=None) -> Union[Generator[DocumentReference, Any, Any],  AsyncGenerator[DocumentReference, Any]]:
         raise NotImplementedError
 
     def select(self, field_paths) -> BaseQuery:
@@ -325,10 +325,10 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.end_at(document_fields)
 
-    def get(self, transaction=None) -> Generator[DocumentSnapshot, Any, Any]:
+    def get(self, transaction=None) -> Union[Generator[DocumentSnapshot, Any, Any], AsyncGenerator[DocumentSnapshot, Any]]:
         raise NotImplementedError
 
-    def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
+    def stream(self, transaction=None) -> Union[Iterator[DocumentSnapshot], AsyncIterator[DocumentSnapshot]]:
         raise NotImplementedError
 
     def on_snapshot(self, callback) -> NoReturn:

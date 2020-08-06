@@ -16,34 +16,25 @@
 
 
 from google.cloud.firestore_v1 import types
-from typing import NoReturn, Optional
 
-_CANT_BEGIN: str
-_CANT_COMMIT: str
-_CANT_RETRY_READ_ONLY: str
-_CANT_ROLLBACK: str
-_EXCEED_ATTEMPTS_TEMPLATE: str
-_INITIAL_SLEEP: float
-_MAX_SLEEP: float
-_MISSING_ID_TEMPLATE: str
-_MULTIPLIER: float
-_WRITE_READ_ONLY: str
+from typing import Any, Coroutine, NoReturn, Optional, Union
+
 
 MAX_ATTEMPTS = 5
 """int: Default number of transaction attempts (with retries)."""
-_CANT_BEGIN = "The transaction has already begun. Current transaction ID: {!r}."
-_MISSING_ID_TEMPLATE = "The transaction has no transaction ID, so it cannot be {}."
-_CANT_ROLLBACK = _MISSING_ID_TEMPLATE.format("rolled back")
-_CANT_COMMIT = _MISSING_ID_TEMPLATE.format("committed")
-_WRITE_READ_ONLY = "Cannot perform write operation in read-only transaction."
-_INITIAL_SLEEP = 1.0
+_CANT_BEGIN: str = "The transaction has already begun. Current transaction ID: {!r}."
+_MISSING_ID_TEMPLATE: str = "The transaction has no transaction ID, so it cannot be {}."
+_CANT_ROLLBACK: str = _MISSING_ID_TEMPLATE.format("rolled back")
+_CANT_COMMIT: str = _MISSING_ID_TEMPLATE.format("committed")
+_WRITE_READ_ONLY: str = "Cannot perform write operation in read-only transaction."
+_INITIAL_SLEEP: float = 1.0
 """float: Initial "max" for sleep interval. To be used in :func:`_sleep`."""
-_MAX_SLEEP = 30.0
+_MAX_SLEEP: float = 30.0
 """float: Eventual "max" sleep time. To be used in :func:`_sleep`."""
-_MULTIPLIER = 2.0
+_MULTIPLIER: float= 2.0
 """float: Multiplier for exponential backoff. To be used in :func:`_sleep`."""
-_EXCEED_ATTEMPTS_TEMPLATE = "Failed to commit transaction in {:d} attempts."
-_CANT_RETRY_READ_ONLY = "Only read-write transactions can be retried."
+_EXCEED_ATTEMPTS_TEMPLATE: str = "Failed to commit transaction in {:d} attempts."
+_CANT_RETRY_READ_ONLY: str= "Only read-write transactions can be retried."
 
 
 class BaseTransaction(object):
@@ -135,7 +126,7 @@ class BaseTransaction(object):
     def _rollback(self) -> NoReturn:
         raise NotImplementedError
 
-    def _commit(self) -> NoReturn:
+    def _commit(self) -> Union[list, Coroutine[Any, Any, list]]:
         raise NotImplementedError
 
     def get_all(self, references) -> NoReturn:
