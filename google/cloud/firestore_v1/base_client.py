@@ -27,8 +27,8 @@ import os
 
 import google.api_core.client_options
 import google.api_core.path_template
-from google.api_core.gapic_v1 import client_info
-from google.cloud.client import ClientWithProject
+from google.api_core.gapic_v1 import client_info  # type: ignore
+from google.cloud.client import ClientWithProject  # type: ignore
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import __version__
@@ -114,7 +114,7 @@ class BaseClient(ClientWithProject):
         self._client_info = client_info
         if client_options:
             if type(client_options) == dict:
-                client_options = google.api_core.client_options.from_dict(
+                client_options = google.api_core.client_options.from_dict(  # type: ignore
                     client_options
                 )
         self._client_options = client_options
@@ -182,7 +182,7 @@ class BaseClient(ClientWithProject):
             project. (The default database is also in this string.)
         """
         if self._database_string_internal is None:
-            db_str = google.api_core.path_template.expand(
+            db_str = google.api_core.path_template.expand(  # type: ignore
                 "projects/{project}/databases/{database}",
                 project=self.project,
                 database=self._database,
