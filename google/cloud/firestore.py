@@ -49,8 +49,6 @@ from google.cloud.firestore_v1 import WriteOption
 from typing import List
 
 
-
-
 __all__ : List[str] = [
     "__version__",
     "ArrayRemove",

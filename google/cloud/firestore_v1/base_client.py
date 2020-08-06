@@ -184,7 +184,7 @@ class BaseClient(ClientWithProject):
             project. (The default database is also in this string.)
         """
         if self._database_string_internal is None:
-            db_str = google.api_core.path_template.expand(
+            db_str = google.api_core.path_template.expand(  # type: ignore
                 "projects/{project}/databases/{database}",
                 project=self.project,
                 database=self._database,

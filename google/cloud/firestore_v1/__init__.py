@@ -100,7 +100,6 @@ from .types.write import DocumentTransform
 from typing import List
 
 
-
 # from .types.write import ExistenceFilter
 # from .types.write import Write
 # from .types.write import WriteResult
