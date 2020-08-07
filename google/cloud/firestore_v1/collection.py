@@ -121,15 +121,19 @@ class CollectionReference(BaseCollectionReference):
 
     def get(self, transaction=None) -> list:
         """Read the documents in this collection.
+
         This sends a ``RunQuery`` RPC and returns a list of documents
         returned in the stream of ``RunQueryResponse`` messages.
+
         Args:
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
+
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
         allowed).
+
         Returns:
             list: The documents in this collection that match the query.
         """
