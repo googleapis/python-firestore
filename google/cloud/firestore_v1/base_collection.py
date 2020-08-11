@@ -17,10 +17,6 @@ import random
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.document import DocumentReference
-from typing import Any, NoReturn, Tuple
-
-
-from google.cloud.firestore_v1.document import DocumentReference
 from typing import (
     Any,
     AsyncGenerator,
