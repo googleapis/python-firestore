@@ -16,7 +16,7 @@
 
 
 from google.cloud.firestore_v1 import types
-from typing import NoReturn, Optional
+from typing import Any, Coroutine, NoReturn, Optional, Union
 
 _CANT_BEGIN: str
 _CANT_COMMIT: str
@@ -29,7 +29,6 @@ _MISSING_ID_TEMPLATE: str
 _MULTIPLIER: float
 _WRITE_READ_ONLY: str
 
-from typing import Any, Coroutine, NoReturn, Optional, Union
 
 
 MAX_ATTEMPTS = 5

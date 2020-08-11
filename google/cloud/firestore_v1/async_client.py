@@ -49,7 +49,7 @@ from google.cloud.firestore_v1.services.firestore import (
 from google.cloud.firestore_v1.services.firestore.transports import (
     grpc_asyncio as firestore_grpc_transport,
 )
-from typing import Any, AsyncGenerator, NoReturn
+from typing import Any, AsyncGenerator
 
 
 class AsyncClient(BaseClient):

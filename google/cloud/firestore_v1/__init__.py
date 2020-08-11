@@ -20,9 +20,6 @@
 
 from pkg_resources import get_distribution
 
-__version__: str = get_distribution("google-cloud-firestore").version
-
-
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1._helpers import GeoPoint
 from google.cloud.firestore_v1._helpers import ExistsOption
@@ -137,3 +134,7 @@ __all__: List[str] = [
     "WriteBatch",
     "WriteOption",
 ]
+
+
+__version__: str = get_distribution("google-cloud-firestore").version
+
