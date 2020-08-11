@@ -28,6 +28,7 @@ import os
 
 import google.api_core.client_options  # type: ignore
 import google.api_core.path_template
+import google.api_core.path_template  # type: ignore
 from google.api_core.gapic_v1 import client_info  # type: ignore
 from google.cloud.client import ClientWithProject  # type: ignore
 
