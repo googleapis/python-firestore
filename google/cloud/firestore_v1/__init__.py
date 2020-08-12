@@ -19,6 +19,7 @@
 """Python idiomatic client for Google Cloud Firestore."""
 
 from pkg_resources import get_distribution
+
 __version__: str = get_distribution("google-cloud-firestore").version
 
 from google.cloud.firestore_v1 import types
@@ -135,6 +136,3 @@ __all__: List[str] = [
     "WriteBatch",
     "WriteOption",
 ]
-
-
-

@@ -30,7 +30,6 @@ _MULTIPLIER: float
 _WRITE_READ_ONLY: str
 
 
-
 MAX_ATTEMPTS = 5
 """int: Default number of transaction attempts (with retries)."""
 _CANT_BEGIN: str = "The transaction has already begun. Current transaction ID: {!r}."
