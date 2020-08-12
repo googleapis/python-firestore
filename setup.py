@@ -26,7 +26,7 @@ version = "1.8.1"
 release_status = "Development Status :: 5 - Production/Stable"
 dependencies = [
     "google-api-core[grpc] >= 1.14.0, < 2.0.0dev",
-    "google-cloud-core >= 1.4.0, < 2.0dev",
+    "google-cloud-core >= 1.4.1, < 2.0dev",
     "pytz",
 ]
 extras = {}
