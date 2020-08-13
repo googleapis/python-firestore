@@ -5,6 +5,13 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [1.9.0](https://www.github.com/googleapis/python-firestore/compare/v1.8.1...v1.9.0) (2020-08-13)
+
+
+### Features
+
+* **firestore:** add client_options to base class ([#148](https://www.github.com/googleapis/python-firestore/issues/148)) ([91d6580](https://www.github.com/googleapis/python-firestore/commit/91d6580e2903ab55798d66bc53541faa86ca76fe))
+
 ### [1.8.1](https://www.github.com/googleapis/python-firestore/compare/v1.8.0...v1.8.1) (2020-07-07)
 
 
