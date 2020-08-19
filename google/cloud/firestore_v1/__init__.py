@@ -20,7 +20,7 @@
 
 from pkg_resources import get_distribution
 
-__version__: str = get_distribution("google-cloud-firestore").version
+__version__ = get_distribution("google-cloud-firestore").version
 
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1._helpers import GeoPoint
