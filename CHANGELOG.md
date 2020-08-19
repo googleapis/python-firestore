@@ -5,6 +5,13 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+### [1.9.1](https://www.github.com/googleapis/python-firestore/compare/v1.9.0...v1.9.1) (2020-08-19)
+
+
+### Documentation
+
+* update docs build (via synth) ([#155](https://www.github.com/googleapis/python-firestore/issues/155)) ([6d08f80](https://www.github.com/googleapis/python-firestore/commit/6d08f80a30eb866e4b3a90e8d27b7082b0fa39aa)), closes [#154](https://www.github.com/googleapis/python-firestore/issues/154) [#141](https://www.github.com/googleapis/python-firestore/issues/141) [#142](https://www.github.com/googleapis/python-firestore/issues/142) [#143](https://www.github.com/googleapis/python-firestore/issues/143)
+
 ## [1.9.0](https://www.github.com/googleapis/python-firestore/compare/v1.8.1...v1.9.0) (2020-08-13)
 
 
