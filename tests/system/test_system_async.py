@@ -76,7 +76,7 @@ async def test_collections_w_import():
     from google.cloud import firestore
 
     credentials, project = _get_credentials_and_project()
-    client = firestore.AsyncClient(credentials, project)
+    client = firestore.AsyncClient(project=project, credentials=credentials)
     collections = [x async for x in client.collections()]
 
     assert isinstance(collections, list)
