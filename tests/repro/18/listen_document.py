@@ -16,20 +16,23 @@ def main(parsed):
     db = firestore_v1.Client()
     doc_ref = db.collection(parsed.collection).document(parsed.document)
 
-    notified = 0
+    modified = 0
 
     def callback(doc_snapshot, changes, read_time):
-        nonlocal notified
+        nonlocal modified
 
         logger.info(f"Notified: {read_time.isoformat()}")
 
         if len(changes) > 0:
-            notified += 1
             for change in changes:
-                logger.info(f"Change: {change.type:20} [{notified:6}]")
-                if change.type == watch.ChangeType.REMOVED:
+                if change.type == watch.ChangeType.MODIFIED:
+                    modified += 1
+                    logger.info(f"Change: {change.type:20} [{modified:6}]")
+                elif change.type == watch.ChangeType.REMOVED:
                     logger.info("Deleted")
                     callback_done.set()
+                else:
+                    logger.info(f"Change: {change.type:20}")
 
     logger.info(f"Watching: {doc_ref.path}")
     doc_ref.on_snapshot(callback)
