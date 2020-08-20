@@ -46,8 +46,8 @@ UNIQUE_RESOURCE_ID = unique_resource_id("-")
 FIRESTORE_EMULATOR = os.getenv(_FIRESTORE_EMULATOR_HOST) is not None
 
 
-@pytest.fixture(scope=u"module")
-def client():
+
+def _get_credentials_and_project():
     if FIRESTORE_EMULATOR:
         credentials = EmulatorCreds()
         project = FIRESTORE_PROJECT
@@ -56,6 +56,12 @@ def client():
             FIRESTORE_CREDS
         )
         project = FIRESTORE_PROJECT or credentials.project_id
+
+    return credentials, project
+
+@pytest.fixture(scope=u"module")
+def client():
+    credentials, project = _get_credentials_and_project()
     yield firestore.Client(project=project, credentials=credentials)
 
 
@@ -76,7 +82,8 @@ def test_collections(client):
 def test_collections_w_import():
     from google.cloud import firestore
 
-    client = firestore.Client()
+    credentials, project = _get_credentials_and_project()
+    client = firestore.Client(project=project, credentials=credentials)
     collections = list(client.collections())
 
     assert isinstance(collections, list)
