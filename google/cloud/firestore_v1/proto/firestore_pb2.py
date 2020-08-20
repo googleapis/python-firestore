@@ -3855,16 +3855,18 @@ PartitionQueryRequest = _reflection.GeneratedProtocolMessageType(
       query_type:
           The query to partition.
       structured_query:
-          A structured query. Filters, order bys, limits, offsets, and
-          start/end cursors are not supported.
+          A structured query. Query must specify collection with all
+          descendants and be ordered by name ascending. Other filters,
+          order bys, limits, offsets, and start/end cursors are not
+          supported.
       partition_count:
           The desired maximum number of partition points. The partitions
           may be returned across multiple pages of results. The number
-          must be strictly positive. The actual number of partitions
-          returned may be fewer.  For example, this may be set to one
-          fewer than the number of parallel queries to be run, or in
-          running a data pipeline job, one fewer than the number of
-          workers or compute instances available.
+          must be positive. The actual number of partitions returned may
+          be fewer.  For example, this may be set to one fewer than the
+          number of parallel queries to be run, or in running a data
+          pipeline job, one fewer than the number of workers or compute
+          instances available.
       page_token:
           The ``next_page_token`` value returned from a previous call to
           PartitionQuery that may be used to get an additional set of
@@ -3911,7 +3913,9 @@ PartitionQueryResponse = _reflection.GeneratedProtocolMessageType(
           if a PartitionQuery request returns partition cursors A and B,
           running the following three queries will return the entire
           result set of the original query:  -  query, end_at A -
-          query, start_at A, end_at B -  query, start_at B
+          query, start_at A, end_at B -  query, start_at B  An empty
+          result may indicate that the query has too few results to be
+          partitioned.
       next_page_token:
           A page token that may be used to request an additional set of
           results, up to the number specified by ``partition_count`` in

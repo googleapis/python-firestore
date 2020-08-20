@@ -105,6 +105,13 @@ class StructuredQuery(object):
 
               -  That ``field`` come first in ``order_by``.
               EQUAL (int): The given ``field`` is equal to the given ``value``.
+              NOT_EQUAL (int): The given ``field`` is not equal to the given ``value``.
+
+              Requires:
+
+              -  No other ``NOT_EQUAL``, ``NOT_IN``, ``IS_NOT_NULL``, or
+                 ``IS_NOT_NAN``.
+              -  That ``field`` comes first in the ``order_by``.
               ARRAY_CONTAINS (int): The given ``field`` is an array that contains the given ``value``.
               IN (int): The given ``field`` is equal to at least one value in the given
               array.
@@ -112,14 +119,22 @@ class StructuredQuery(object):
               Requires:
 
               -  That ``value`` is a non-empty ``ArrayValue`` with at most 10 values.
-              -  No other ``IN``, ``ARRAY_CONTAINS_ANY``, or ``NOT_IN``.
+              -  No other ``IN`` or ``ARRAY_CONTAINS_ANY`` or ``NOT_IN``.
               ARRAY_CONTAINS_ANY (int): The given ``field`` is an array that contains any of the values in
               the given array.
 
               Requires:
 
               -  That ``value`` is a non-empty ``ArrayValue`` with at most 10 values.
-              -  No other ``IN``, ``ARRAY_CONTAINS_ANY``, or ``NOT_IN``.
+              -  No other ``IN`` or ``ARRAY_CONTAINS_ANY`` or ``NOT_IN``.
+              NOT_IN (int): The value of the ``field`` is not in the given array.
+
+              Requires:
+
+              -  That ``value`` is a non-empty ``ArrayValue`` with at most 10 values.
+              -  No other ``IN``, ``ARRAY_CONTAINS_ANY``, ``NOT_IN``, ``NOT_EQUAL``,
+                 ``IS_NOT_NULL``, or ``IS_NOT_NAN``.
+              -  That ``field`` comes first in the ``order_by``.
             """
 
             OPERATOR_UNSPECIFIED = 0
@@ -128,9 +143,11 @@ class StructuredQuery(object):
             GREATER_THAN = 3
             GREATER_THAN_OR_EQUAL = 4
             EQUAL = 5
+            NOT_EQUAL = 6
             ARRAY_CONTAINS = 7
             IN = 8
             ARRAY_CONTAINS_ANY = 9
+            NOT_IN = 10
 
     class UnaryFilter(object):
         class Operator(enum.IntEnum):
@@ -141,11 +158,27 @@ class StructuredQuery(object):
               OPERATOR_UNSPECIFIED (int): Unspecified. This value must not be used.
               IS_NAN (int): The given ``field`` is equal to ``NaN``.
               IS_NULL (int): The given ``field`` is equal to ``NULL``.
+              IS_NOT_NAN (int): The given ``field`` is not equal to ``NaN``.
+
+              Requires:
+
+              -  No other ``NOT_EQUAL``, ``NOT_IN``, ``IS_NOT_NULL``, or
+                 ``IS_NOT_NAN``.
+              -  That ``field`` comes first in the ``order_by``.
+              IS_NOT_NULL (int): The given ``field`` is not equal to ``NULL``.
+
+              Requires:
+
+              -  A single ``NOT_EQUAL``, ``NOT_IN``, ``IS_NOT_NULL``, or
+                 ``IS_NOT_NAN``.
+              -  That ``field`` comes first in the ``order_by``.
             """
 
             OPERATOR_UNSPECIFIED = 0
             IS_NAN = 2
             IS_NULL = 3
+            IS_NOT_NAN = 4
+            IS_NOT_NULL = 5
 
 
 class TargetChange(object):
