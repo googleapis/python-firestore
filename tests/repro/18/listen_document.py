@@ -30,7 +30,7 @@ def main(parsed):
                 if change.type == watch.ChangeType.REMOVED:
                     logger.info(f"Deleted")
                     callback_done.set()
-    
+
     logger.info(f"Watching: {doc_ref.path}")
     doc_ref.on_snapshot(callback)
 

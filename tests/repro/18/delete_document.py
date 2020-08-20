@@ -11,7 +11,7 @@ logger = logging.getLogger("delete_document")
 def main(parsed):
     db = firestore.Client()
     doc_ref = db.collection(parsed.collection).document(parsed.document)
-    
+
     logger.info(f"Deleting: {doc_ref.path}")
 
     doc_ref.delete()
