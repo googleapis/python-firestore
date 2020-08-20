@@ -28,7 +28,7 @@ def main(parsed):
             for change in changes:
                 logger.info(f"Change: {change.type:20} [{notified:6}]")
                 if change.type == watch.ChangeType.REMOVED:
-                    logger.info(f"Deleted")
+                    logger.info("Deleted")
                     callback_done.set()
 
     logger.info(f"Watching: {doc_ref.path}")

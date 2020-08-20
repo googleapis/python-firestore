@@ -28,5 +28,6 @@ exclude =
   # Standard linting exemptions.
   __pycache__,
   .git,
+  venv,
   *.pyc,
   conf.py
