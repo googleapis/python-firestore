@@ -46,7 +46,6 @@ UNIQUE_RESOURCE_ID = unique_resource_id("-")
 FIRESTORE_EMULATOR = os.getenv(_FIRESTORE_EMULATOR_HOST) is not None
 
 
-
 def _get_credentials_and_project():
     if FIRESTORE_EMULATOR:
         credentials = EmulatorCreds()
@@ -58,6 +57,7 @@ def _get_credentials_and_project():
         project = FIRESTORE_PROJECT or credentials.project_id
 
     return credentials, project
+
 
 @pytest.fixture(scope=u"module")
 def client():
