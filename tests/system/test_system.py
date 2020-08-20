@@ -43,6 +43,7 @@ def _get_credentials_and_project():
     project = FIRESTORE_PROJECT or credentials.project_id
     return credentials, project
 
+
 @pytest.fixture(scope=u"module")
 def client():
     credentials, project = _get_credentials_and_project()
