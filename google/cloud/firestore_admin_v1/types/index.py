@@ -18,12 +18,7 @@
 import proto  # type: ignore
 
 
-__protobuf__ = proto.module(
-    package='google.firestore.admin.v1',
-    manifest={
-        'Index',
-    },
-)
+__protobuf__ = proto.module(package="google.firestore.admin.v1", manifest={"Index",},)
 
 
 class Index(proto.Message):
@@ -65,6 +60,7 @@ class Index(proto.Message):
         state (~.index.Index.State):
             Output only. The serving state of the index.
     """
+
     class QueryScope(proto.Enum):
         r"""Query Scope defines the scope at which a query is run. This is
         specified on a StructuredQuery's ``from`` field.
@@ -101,6 +97,7 @@ class Index(proto.Message):
                 Indicates that this field supports operations on
                 ``array_value``\ s.
         """
+
         class Order(proto.Enum):
             r"""The supported orderings."""
             ORDER_UNSPECIFIED = 0
@@ -114,27 +111,24 @@ class Index(proto.Message):
 
         field_path = proto.Field(proto.STRING, number=1)
 
-        order = proto.Field(proto.ENUM, number=2, oneof='value_mode',
-            enum='Index.IndexField.Order',
+        order = proto.Field(
+            proto.ENUM, number=2, oneof="value_mode", enum="Index.IndexField.Order",
         )
 
-        array_config = proto.Field(proto.ENUM, number=3, oneof='value_mode',
-            enum='Index.IndexField.ArrayConfig',
+        array_config = proto.Field(
+            proto.ENUM,
+            number=3,
+            oneof="value_mode",
+            enum="Index.IndexField.ArrayConfig",
         )
 
     name = proto.Field(proto.STRING, number=1)
 
-    query_scope = proto.Field(proto.ENUM, number=2,
-        enum=QueryScope,
-    )
+    query_scope = proto.Field(proto.ENUM, number=2, enum=QueryScope,)
 
-    fields = proto.RepeatedField(proto.MESSAGE, number=3,
-        message=IndexField,
-    )
+    fields = proto.RepeatedField(proto.MESSAGE, number=3, message=IndexField,)
 
-    state = proto.Field(proto.ENUM, number=4,
-        enum=State,
-    )
+    state = proto.Field(proto.ENUM, number=4, enum=State,)
 
 
 __all__ = tuple(sorted(__protobuf__.manifest))

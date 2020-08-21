@@ -3,8 +3,8 @@
     {
       "git": {
         "name": ".",
-        "remote": "git@github.com:crwilcox/python-firestore.git",
-        "sha": "cc25d5ebfb8cc39b63bff2383e81d16793d42b20"
+        "remote": "https://github.com/googleapis/python-firestore.git",
+        "sha": "a22ecddfa31865fcb02ffa0eed44a776d228b8a4"
       }
     },
     {
@@ -19,7 +19,7 @@
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "3a89215abd0e66dfc4f21d07d552d0b543abf082"
+        "sha": "ee7506d15daa3873accfff9430eff7e3953f0248"
       }
     }
   ],

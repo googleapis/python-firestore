@@ -39,12 +39,15 @@ class ListIndexesPager:
     attributes are available on the pager. If multiple requests are made, only
     the most recent response is retained, and thus used for attribute lookup.
     """
-    def __init__(self,
-            method: Callable[..., firestore_admin.ListIndexesResponse],
-            request: firestore_admin.ListIndexesRequest,
-            response: firestore_admin.ListIndexesResponse,
-            *,
-            metadata: Sequence[Tuple[str, str]] = ()):
+
+    def __init__(
+        self,
+        method: Callable[..., firestore_admin.ListIndexesResponse],
+        request: firestore_admin.ListIndexesRequest,
+        response: firestore_admin.ListIndexesResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
+    ):
         """Instantiate the pager.
 
         Args:
@@ -78,7 +81,7 @@ class ListIndexesPager:
             yield from page.indexes
 
     def __repr__(self) -> str:
-        return '{0}<{1!r}>'.format(self.__class__.__name__, self._response)
+        return "{0}<{1!r}>".format(self.__class__.__name__, self._response)
 
 
 class ListIndexesAsyncPager:
@@ -98,12 +101,15 @@ class ListIndexesAsyncPager:
     attributes are available on the pager. If multiple requests are made, only
     the most recent response is retained, and thus used for attribute lookup.
     """
-    def __init__(self,
-            method: Callable[..., Awaitable[firestore_admin.ListIndexesResponse]],
-            request: firestore_admin.ListIndexesRequest,
-            response: firestore_admin.ListIndexesResponse,
-            *,
-            metadata: Sequence[Tuple[str, str]] = ()):
+
+    def __init__(
+        self,
+        method: Callable[..., Awaitable[firestore_admin.ListIndexesResponse]],
+        request: firestore_admin.ListIndexesRequest,
+        response: firestore_admin.ListIndexesResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
+    ):
         """Instantiate the pager.
 
         Args:
@@ -141,7 +147,7 @@ class ListIndexesAsyncPager:
         return async_generator()
 
     def __repr__(self) -> str:
-        return '{0}<{1!r}>'.format(self.__class__.__name__, self._response)
+        return "{0}<{1!r}>".format(self.__class__.__name__, self._response)
 
 
 class ListFieldsPager:
@@ -161,12 +167,15 @@ class ListFieldsPager:
     attributes are available on the pager. If multiple requests are made, only
     the most recent response is retained, and thus used for attribute lookup.
     """
-    def __init__(self,
-            method: Callable[..., firestore_admin.ListFieldsResponse],
-            request: firestore_admin.ListFieldsRequest,
-            response: firestore_admin.ListFieldsResponse,
-            *,
-            metadata: Sequence[Tuple[str, str]] = ()):
+
+    def __init__(
+        self,
+        method: Callable[..., firestore_admin.ListFieldsResponse],
+        request: firestore_admin.ListFieldsRequest,
+        response: firestore_admin.ListFieldsResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
+    ):
         """Instantiate the pager.
 
         Args:
@@ -200,7 +209,7 @@ class ListFieldsPager:
             yield from page.fields
 
     def __repr__(self) -> str:
-        return '{0}<{1!r}>'.format(self.__class__.__name__, self._response)
+        return "{0}<{1!r}>".format(self.__class__.__name__, self._response)
 
 
 class ListFieldsAsyncPager:
@@ -220,12 +229,15 @@ class ListFieldsAsyncPager:
     attributes are available on the pager. If multiple requests are made, only
     the most recent response is retained, and thus used for attribute lookup.
     """
-    def __init__(self,
-            method: Callable[..., Awaitable[firestore_admin.ListFieldsResponse]],
-            request: firestore_admin.ListFieldsRequest,
-            response: firestore_admin.ListFieldsResponse,
-            *,
-            metadata: Sequence[Tuple[str, str]] = ()):
+
+    def __init__(
+        self,
+        method: Callable[..., Awaitable[firestore_admin.ListFieldsResponse]],
+        request: firestore_admin.ListFieldsRequest,
+        response: firestore_admin.ListFieldsResponse,
+        *,
+        metadata: Sequence[Tuple[str, str]] = ()
+    ):
         """Instantiate the pager.
 
         Args:
@@ -263,4 +275,4 @@ class ListFieldsAsyncPager:
         return async_generator()
 
     def __repr__(self) -> str:
-        return '{0}<{1!r}>'.format(self.__class__.__name__, self._response)
+        return "{0}<{1!r}>".format(self.__class__.__name__, self._response)
