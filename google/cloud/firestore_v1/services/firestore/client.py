@@ -21,14 +21,14 @@ import re
 from typing import Callable, Dict, Iterable, Iterator, Sequence, Tuple, Type, Union
 import pkg_resources
 
-import google.api_core.client_options as ClientOptions  # type: ignore
-from google.api_core import exceptions  # type: ignore
-from google.api_core import gapic_v1  # type: ignore
-from google.api_core import retry as retries  # type: ignore
-from google.auth import credentials  # type: ignore
-from google.auth.transport import mtls  # type: ignore
+import google.api_core.client_options as ClientOptions # type: ignore
+from google.api_core import exceptions                 # type: ignore
+from google.api_core import gapic_v1                   # type: ignore
+from google.api_core import retry as retries           # type: ignore
+from google.auth import credentials                    # type: ignore
+from google.auth.transport import mtls                 # type: ignore
 from google.auth.exceptions import MutualTLSChannelError  # type: ignore
-from google.oauth2 import service_account  # type: ignore
+from google.oauth2 import service_account              # type: ignore
 
 from google.cloud.firestore_v1.services.firestore import pagers
 from google.cloud.firestore_v1.types import common
@@ -52,12 +52,13 @@ class FirestoreClientMeta(type):
     support objects (e.g. transport) without polluting the client instance
     objects.
     """
-
     _transport_registry = OrderedDict()  # type: Dict[str, Type[FirestoreTransport]]
-    _transport_registry["grpc"] = FirestoreGrpcTransport
-    _transport_registry["grpc_asyncio"] = FirestoreGrpcAsyncIOTransport
+    _transport_registry['grpc'] = FirestoreGrpcTransport
+    _transport_registry['grpc_asyncio'] = FirestoreGrpcAsyncIOTransport
 
-    def get_transport_class(cls, label: str = None,) -> Type[FirestoreTransport]:
+    def get_transport_class(cls,
+            label: str = None,
+        ) -> Type[FirestoreTransport]:
         """Return an appropriate transport class.
 
         Args:
@@ -116,7 +117,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         return api_endpoint.replace(".googleapis.com", ".mtls.googleapis.com")
 
-    DEFAULT_ENDPOINT = "firestore.googleapis.com"
+    DEFAULT_ENDPOINT = 'firestore.googleapis.com'
     DEFAULT_MTLS_ENDPOINT = _get_default_mtls_endpoint.__func__(  # type: ignore
         DEFAULT_ENDPOINT
     )
@@ -135,19 +136,18 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         Returns:
             {@api.name}: The constructed client.
         """
-        credentials = service_account.Credentials.from_service_account_file(filename)
-        kwargs["credentials"] = credentials
+        credentials = service_account.Credentials.from_service_account_file(
+            filename)
+        kwargs['credentials'] = credentials
         return cls(*args, **kwargs)
 
     from_service_account_json = from_service_account_file
 
-    def __init__(
-        self,
-        *,
-        credentials: credentials.Credentials = None,
-        transport: Union[str, FirestoreTransport] = None,
-        client_options: ClientOptions = None,
-    ) -> None:
+    def __init__(self, *,
+            credentials: credentials.Credentials = None,
+            transport: Union[str, FirestoreTransport] = None,
+            client_options: ClientOptions = None,
+            ) -> None:
         """Instantiate the firestore client.
 
         Args:
@@ -194,9 +194,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                     or mtls.has_default_client_cert_source()
                 )
                 client_options.api_endpoint = (
-                    self.DEFAULT_MTLS_ENDPOINT
-                    if has_client_cert_source
-                    else self.DEFAULT_ENDPOINT
+                    self.DEFAULT_MTLS_ENDPOINT if has_client_cert_source else self.DEFAULT_ENDPOINT
                 )
             else:
                 raise MutualTLSChannelError(
@@ -209,10 +207,8 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         if isinstance(transport, FirestoreTransport):
             # transport is a FirestoreTransport instance.
             if credentials or client_options.credentials_file:
-                raise ValueError(
-                    "When providing a transport instance, "
-                    "provide its credentials directly."
-                )
+                raise ValueError('When providing a transport instance, '
+                                 'provide its credentials directly.')
             if client_options.scopes:
                 raise ValueError(
                     "When providing a transport instance, "
@@ -230,14 +226,13 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 client_cert_source=client_options.client_cert_source,
             )
 
-    def get_document(
-        self,
-        request: firestore.GetDocumentRequest = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> document.Document:
+    def get_document(self,
+            request: firestore.GetDocumentRequest = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> document.Document:
         r"""Gets a single document.
 
         Args:
@@ -272,23 +267,29 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('name', request.name),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def list_documents(
-        self,
-        request: firestore.ListDocumentsRequest = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> pagers.ListDocumentsPager:
+    def list_documents(self,
+            request: firestore.ListDocumentsRequest = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> pagers.ListDocumentsPager:
         r"""Lists documents.
 
         Args:
@@ -326,31 +327,40 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('parent', request.parent),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # This method is paged; wrap the response in a pager, which provides
         # an `__iter__` convenience method.
         response = pagers.ListDocumentsPager(
-            method=rpc, request=request, response=response, metadata=metadata,
+            method=rpc,
+            request=request,
+            response=response,
+            metadata=metadata,
         )
 
         # Done; return the response.
         return response
 
-    def update_document(
-        self,
-        request: firestore.UpdateDocumentRequest = None,
-        *,
-        document: gf_document.Document = None,
-        update_mask: common.DocumentMask = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> gf_document.Document:
+    def update_document(self,
+            request: firestore.UpdateDocumentRequest = None,
+            *,
+            document: gf_document.Document = None,
+            update_mask: common.DocumentMask = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> gf_document.Document:
         r"""Updates or inserts a document.
 
         Args:
@@ -394,10 +404,8 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
         if request is not None and any([document, update_mask]):
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         request = firestore.UpdateDocumentRequest(request)
 
@@ -420,26 +428,30 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata(
-                (("document.name", request.document.name),)
-            ),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('document.name', request.document.name),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def delete_document(
-        self,
-        request: firestore.DeleteDocumentRequest = None,
-        *,
-        name: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> None:
+    def delete_document(self,
+            request: firestore.DeleteDocumentRequest = None,
+            *,
+            name: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> None:
         r"""Deletes a document.
 
         Args:
@@ -464,10 +476,8 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
         if request is not None and any([name]):
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         request = firestore.DeleteDocumentRequest(request)
 
@@ -488,22 +498,26 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('name', request.name),
+            )),
         )
 
         # Send the request.
         rpc(
-            request, retry=retry, timeout=timeout, metadata=metadata,
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
         )
 
-    def batch_get_documents(
-        self,
-        request: firestore.BatchGetDocumentsRequest = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> Iterable[firestore.BatchGetDocumentsResponse]:
+    def batch_get_documents(self,
+            request: firestore.BatchGetDocumentsRequest = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> Iterable[firestore.BatchGetDocumentsResponse]:
         r"""Gets multiple documents.
         Documents returned by this method are not guaranteed to
         be returned in the same order that they were requested.
@@ -540,24 +554,30 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("database", request.database),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('database', request.database),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def begin_transaction(
-        self,
-        request: firestore.BeginTransactionRequest = None,
-        *,
-        database: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> firestore.BeginTransactionResponse:
+    def begin_transaction(self,
+            request: firestore.BeginTransactionRequest = None,
+            *,
+            database: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> firestore.BeginTransactionResponse:
         r"""Starts a new transaction.
 
         Args:
@@ -587,10 +607,8 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
         if request is not None and any([database]):
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         request = firestore.BeginTransactionRequest(request)
 
@@ -611,25 +629,31 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("database", request.database),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('database', request.database),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def commit(
-        self,
-        request: firestore.CommitRequest = None,
-        *,
-        database: str = None,
-        writes: Sequence[gf_write.Write] = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> firestore.CommitResponse:
+    def commit(self,
+            request: firestore.CommitRequest = None,
+            *,
+            database: str = None,
+            writes: Sequence[gf_write.Write] = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> firestore.CommitResponse:
         r"""Commits a transaction, while optionally updating
         documents.
 
@@ -666,10 +690,8 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
         if request is not None and any([database, writes]):
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         request = firestore.CommitRequest(request)
 
@@ -684,31 +706,39 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.commit, default_timeout=None, client_info=_client_info,
+            self._transport.commit,
+            default_timeout=None,
+            client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("database", request.database),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('database', request.database),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def rollback(
-        self,
-        request: firestore.RollbackRequest = None,
-        *,
-        database: str = None,
-        transaction: bytes = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> None:
+    def rollback(self,
+            request: firestore.RollbackRequest = None,
+            *,
+            database: str = None,
+            transaction: bytes = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> None:
         r"""Rolls back a transaction.
 
         Args:
@@ -738,10 +768,8 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
         if request is not None and any([database, transaction]):
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         request = firestore.RollbackRequest(request)
 
@@ -756,28 +784,34 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.rollback, default_timeout=None, client_info=_client_info,
+            self._transport.rollback,
+            default_timeout=None,
+            client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("database", request.database),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('database', request.database),
+            )),
         )
 
         # Send the request.
         rpc(
-            request, retry=retry, timeout=timeout, metadata=metadata,
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
         )
 
-    def run_query(
-        self,
-        request: firestore.RunQueryRequest = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> Iterable[firestore.RunQueryResponse]:
+    def run_query(self,
+            request: firestore.RunQueryRequest = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> Iterable[firestore.RunQueryResponse]:
         r"""Runs a query.
 
         Args:
@@ -804,29 +838,37 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.run_query, default_timeout=None, client_info=_client_info,
+            self._transport.run_query,
+            default_timeout=None,
+            client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('parent', request.parent),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def partition_query(
-        self,
-        request: firestore.PartitionQueryRequest = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> pagers.PartitionQueryPager:
+    def partition_query(self,
+            request: firestore.PartitionQueryRequest = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> pagers.PartitionQueryPager:
         r"""Partitions a query by returning partition cursors
         that can be used to run the query in parallel. The
         returned partition cursors are split points that can be
@@ -868,29 +910,38 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('parent', request.parent),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # This method is paged; wrap the response in a pager, which provides
         # an `__iter__` convenience method.
         response = pagers.PartitionQueryPager(
-            method=rpc, request=request, response=response, metadata=metadata,
+            method=rpc,
+            request=request,
+            response=response,
+            metadata=metadata,
         )
 
         # Done; return the response.
         return response
 
-    def write(
-        self,
-        requests: Iterator[firestore.WriteRequest] = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> Iterable[firestore.WriteResponse]:
+    def write(self,
+            requests: Iterator[firestore.WriteRequest] = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> Iterable[firestore.WriteResponse]:
         r"""Streams batches of document updates and deletes, in
         order.
 
@@ -924,27 +975,36 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.write, default_timeout=None, client_info=_client_info,
+            self._transport.write,
+            default_timeout=None,
+            client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
         # add these here.
-        metadata = tuple(metadata) + (gapic_v1.routing_header.to_grpc_metadata(()),)
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((
+            )),
+        )
 
         # Send the request.
-        response = rpc(requests, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            requests,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def listen(
-        self,
-        requests: Iterator[firestore.ListenRequest] = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> Iterable[firestore.ListenResponse]:
+    def listen(self,
+            requests: Iterator[firestore.ListenRequest] = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> Iterable[firestore.ListenResponse]:
         r"""Listens to changes.
 
         Args:
@@ -967,28 +1027,37 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.listen, default_timeout=None, client_info=_client_info,
+            self._transport.listen,
+            default_timeout=None,
+            client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
         # add these here.
-        metadata = tuple(metadata) + (gapic_v1.routing_header.to_grpc_metadata(()),)
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((
+            )),
+        )
 
         # Send the request.
-        response = rpc(requests, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            requests,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def list_collection_ids(
-        self,
-        request: firestore.ListCollectionIdsRequest = None,
-        *,
-        parent: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> firestore.ListCollectionIdsResponse:
+    def list_collection_ids(self,
+            request: firestore.ListCollectionIdsRequest = None,
+            *,
+            parent: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> firestore.ListCollectionIdsResponse:
         r"""Lists all the collection IDs underneath a document.
 
         Args:
@@ -1020,10 +1089,8 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
         if request is not None and any([parent]):
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         request = firestore.ListCollectionIdsRequest(request)
 
@@ -1044,23 +1111,29 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('parent', request.parent),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def batch_write(
-        self,
-        request: firestore.BatchWriteRequest = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> firestore.BatchWriteResponse:
+    def batch_write(self,
+            request: firestore.BatchWriteRequest = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> firestore.BatchWriteResponse:
         r"""Applies a batch of write operations.
 
         The BatchWrite method does not apply the write operations
@@ -1097,29 +1170,37 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
         rpc = gapic_v1.method.wrap_method(
-            self._transport.batch_write, default_timeout=None, client_info=_client_info,
+            self._transport.batch_write,
+            default_timeout=None,
+            client_info=_client_info,
         )
 
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("database", request.database),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('database', request.database),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def create_document(
-        self,
-        request: firestore.CreateDocumentRequest = None,
-        *,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> document.Document:
+    def create_document(self,
+            request: firestore.CreateDocumentRequest = None,
+            *,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> document.Document:
         r"""Creates a new document.
 
         Args:
@@ -1154,22 +1235,36 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('parent', request.parent),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
 
+
+
+
 try:
     _client_info = gapic_v1.client_info.ClientInfo(
-        gapic_version=pkg_resources.get_distribution("google-cloud-firestore",).version,
+        gapic_version=pkg_resources.get_distribution(
+            'google-cloud-firestore',
+        ).version,
     )
 except pkg_resources.DistributionNotFound:
     _client_info = gapic_v1.client_info.ClientInfo()
 
 
-__all__ = ("FirestoreClient",)
+__all__ = (
+    'FirestoreClient',
+)

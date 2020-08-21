@@ -24,19 +24,19 @@ from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.firestore.admin.v1",
+    package='google.firestore.admin.v1',
     manifest={
-        "CreateIndexRequest",
-        "ListIndexesRequest",
-        "ListIndexesResponse",
-        "GetIndexRequest",
-        "DeleteIndexRequest",
-        "UpdateFieldRequest",
-        "GetFieldRequest",
-        "ListFieldsRequest",
-        "ListFieldsResponse",
-        "ExportDocumentsRequest",
-        "ImportDocumentsRequest",
+        'CreateIndexRequest',
+        'ListIndexesRequest',
+        'ListIndexesResponse',
+        'GetIndexRequest',
+        'DeleteIndexRequest',
+        'UpdateFieldRequest',
+        'GetFieldRequest',
+        'ListFieldsRequest',
+        'ListFieldsResponse',
+        'ExportDocumentsRequest',
+        'ImportDocumentsRequest',
     },
 )
 
@@ -55,7 +55,9 @@ class CreateIndexRequest(proto.Message):
 
     parent = proto.Field(proto.STRING, number=1)
 
-    index = proto.Field(proto.MESSAGE, number=2, message=gfa_index.Index,)
+    index = proto.Field(proto.MESSAGE, number=2,
+        message=gfa_index.Index,
+    )
 
 
 class ListIndexesRequest(proto.Message):
@@ -102,7 +104,9 @@ class ListIndexesResponse(proto.Message):
     def raw_page(self):
         return self
 
-    indexes = proto.RepeatedField(proto.MESSAGE, number=1, message=gfa_index.Index,)
+    indexes = proto.RepeatedField(proto.MESSAGE, number=1,
+        message=gfa_index.Index,
+    )
 
     next_page_token = proto.Field(proto.STRING, number=2)
 
@@ -146,9 +150,13 @@ class UpdateFieldRequest(proto.Message):
             in the field.
     """
 
-    field = proto.Field(proto.MESSAGE, number=1, message=gfa_field.Field,)
+    field = proto.Field(proto.MESSAGE, number=1,
+        message=gfa_field.Field,
+    )
 
-    update_mask = proto.Field(proto.MESSAGE, number=2, message=field_mask.FieldMask,)
+    update_mask = proto.Field(proto.MESSAGE, number=2,
+        message=field_mask.FieldMask,
+    )
 
 
 class GetFieldRequest(proto.Message):
@@ -214,7 +222,9 @@ class ListFieldsResponse(proto.Message):
     def raw_page(self):
         return self
 
-    fields = proto.RepeatedField(proto.MESSAGE, number=1, message=gfa_field.Field,)
+    fields = proto.RepeatedField(proto.MESSAGE, number=1,
+        message=gfa_field.Field,
+    )
 
     next_page_token = proto.Field(proto.STRING, number=2)
 

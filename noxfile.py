@@ -22,7 +22,7 @@ import shutil
 
 import nox
 
-
+PYTYPE_VERSION = "pytype==2020.7.24"
 BLACK_VERSION = "black==19.10b0"
 BLACK_PATHS = ["docs", "google", "tests", "noxfile.py", "setup.py"]
 
@@ -61,6 +61,14 @@ def blacken(session):
     )
 
 
+@nox.session(python="3.7")
+def pytype(session):
+    """Run pytype
+    """
+    session.install(PYTYPE_VERSION)
+    session.run("pytype",)
+
+
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def lint_setup_py(session):
     """Verify that setup.py is valid (including RST check)."""
@@ -68,16 +76,15 @@ def lint_setup_py(session):
     session.run("python", "setup.py", "check", "--restructuredtext", "--strict")
 
 
-def default(session):
+def default(session, test_dir, ignore_dir=None):
     # Install all test dependencies, then install this package in-place.
-    session.install("asyncmock", "pytest-asyncio")
+    session.install("pytest-asyncio", "aiounittest")
 
     session.install("mock", "pytest", "pytest-cov")
     session.install("-e", ".")
 
     # Run py.test against the unit tests.
-    session.run(
-        "py.test",
+    args = [
         "--quiet",
         "--cov=google.cloud.firestore",
         "--cov=google.cloud",
@@ -86,15 +93,22 @@ def default(session):
         "--cov-config=.coveragerc",
         "--cov-report=",
         "--cov-fail-under=0",
-        os.path.join("tests", "unit"),
+        test_dir,
         *session.posargs,
-    )
+    ]
+
+    if ignore_dir:
+        args.insert(0, f"--ignore={ignore_dir}")
+
+    session.run("py.test", *args)
 
 
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
-    """Run the unit test suite."""
-    default(session)
+    """Run the unit test suite for sync tests."""
+    default(
+        session, os.path.join("tests", "unit"),
+    )
 
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
@@ -118,7 +132,7 @@ def system(session):
     # Install all test dependencies, then install this package into the
     # virtualenv's dist-packages.
     session.install(
-        "mock", "pytest", "google-cloud-testutils",
+        "mock", "pytest", "pytest-asyncio", "google-cloud-testutils",
     )
     session.install("-e", ".")
 
@@ -137,7 +151,7 @@ def cover(session):
     test runs (not system test runs), and then erases coverage data.
     """
     session.install("coverage", "pytest-cov")
-    session.run("coverage", "report", "--show-missing", "--fail-under=100")
+    session.run("coverage", "report", "--show-missing")
 
     session.run("coverage", "erase")
 

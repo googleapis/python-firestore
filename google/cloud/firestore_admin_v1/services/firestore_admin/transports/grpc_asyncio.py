@@ -17,13 +17,13 @@
 
 from typing import Awaitable, Callable, Dict, Optional, Sequence, Tuple
 
-from google.api_core import gapic_v1  # type: ignore
-from google.api_core import grpc_helpers_async  # type: ignore
-from google.api_core import operations_v1  # type: ignore
-from google.auth import credentials  # type: ignore
+from google.api_core import gapic_v1                   # type: ignore
+from google.api_core import grpc_helpers_async         # type: ignore
+from google.api_core import operations_v1              # type: ignore
+from google.auth import credentials                    # type: ignore
 from google.auth.transport.grpc import SslCredentials  # type: ignore
 
-import grpc  # type: ignore
+import grpc                        # type: ignore
 from grpc.experimental import aio  # type: ignore
 
 from google.cloud.firestore_admin_v1.types import field
@@ -54,15 +54,13 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
     _stubs: Dict[str, Callable] = {}
 
     @classmethod
-    def create_channel(
-        cls,
-        host: str = "firestore.googleapis.com",
-        credentials: credentials.Credentials = None,
-        credentials_file: Optional[str] = None,
-        scopes: Optional[Sequence[str]] = None,
-        quota_project_id: Optional[str] = None,
-        **kwargs,
-    ) -> aio.Channel:
+    def create_channel(cls,
+                       host: str = 'firestore.googleapis.com',
+                       credentials: credentials.Credentials = None,
+                       credentials_file: Optional[str] = None,
+                       scopes: Optional[Sequence[str]] = None,
+                       quota_project_id: Optional[str] = None,
+                       **kwargs) -> aio.Channel:
         """Create and return a gRPC AsyncIO channel object.
         Args:
             address (Optional[str]): The host for the channel to use.
@@ -91,22 +89,20 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
             credentials_file=credentials_file,
             scopes=scopes,
             quota_project_id=quota_project_id,
-            **kwargs,
+            **kwargs
         )
 
-    def __init__(
-        self,
-        *,
-        host: str = "firestore.googleapis.com",
-        credentials: credentials.Credentials = None,
-        credentials_file: Optional[str] = None,
-        scopes: Optional[Sequence[str]] = None,
-        channel: aio.Channel = None,
-        api_mtls_endpoint: str = None,
-        client_cert_source: Callable[[], Tuple[bytes, bytes]] = None,
-        quota_project_id=None,
-        client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
-    ) -> None:
+    def __init__(self, *,
+            host: str = 'firestore.googleapis.com',
+            credentials: credentials.Credentials = None,
+            credentials_file: Optional[str] = None,
+            scopes: Optional[Sequence[str]] = None,
+            channel: aio.Channel = None,
+            api_mtls_endpoint: str = None,
+            client_cert_source: Callable[[], Tuple[bytes, bytes]] = None,
+            quota_project_id=None,
+            client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
+            ) -> None:
         """Instantiate the transport.
 
         Args:
@@ -155,11 +151,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
             # If a channel was explicitly provided, set it.
             self._grpc_channel = channel
         elif api_mtls_endpoint:
-            host = (
-                api_mtls_endpoint
-                if ":" in api_mtls_endpoint
-                else api_mtls_endpoint + ":443"
-            )
+            host = api_mtls_endpoint if ":" in api_mtls_endpoint else api_mtls_endpoint + ":443"
 
             # Create SSL credentials with client_cert_source or application
             # default SSL credentials.
@@ -202,9 +194,10 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         """
         # Sanity check: Only create a new channel if we do not already
         # have one.
-        if not hasattr(self, "_grpc_channel"):
+        if not hasattr(self, '_grpc_channel'):
             self._grpc_channel = self.create_channel(
-                self._host, credentials=self._credentials,
+                self._host,
+                credentials=self._credentials,
             )
 
         # Return the channel from cache.
@@ -218,20 +211,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         client.
         """
         # Sanity check: Only create a new client if we do not already have one.
-        if "operations_client" not in self.__dict__:
-            self.__dict__["operations_client"] = operations_v1.OperationsAsyncClient(
+        if 'operations_client' not in self.__dict__:
+            self.__dict__['operations_client'] = operations_v1.OperationsAsyncClient(
                 self.grpc_channel
             )
 
         # Return the client from cache.
-        return self.__dict__["operations_client"]
+        return self.__dict__['operations_client']
 
     @property
-    def create_index(
-        self,
-    ) -> Callable[
-        [firestore_admin.CreateIndexRequest], Awaitable[operations.Operation]
-    ]:
+    def create_index(self) -> Callable[
+            [firestore_admin.CreateIndexRequest],
+            Awaitable[operations.Operation]]:
         r"""Return a callable for the create index method over gRPC.
 
         Creates a composite index. This returns a
@@ -250,21 +241,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "create_index" not in self._stubs:
-            self._stubs["create_index"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/CreateIndex",
+        if 'create_index' not in self._stubs:
+            self._stubs['create_index'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/CreateIndex',
                 request_serializer=firestore_admin.CreateIndexRequest.serialize,
                 response_deserializer=operations.Operation.FromString,
             )
-        return self._stubs["create_index"]
+        return self._stubs['create_index']
 
     @property
-    def list_indexes(
-        self,
-    ) -> Callable[
-        [firestore_admin.ListIndexesRequest],
-        Awaitable[firestore_admin.ListIndexesResponse],
-    ]:
+    def list_indexes(self) -> Callable[
+            [firestore_admin.ListIndexesRequest],
+            Awaitable[firestore_admin.ListIndexesResponse]]:
         r"""Return a callable for the list indexes method over gRPC.
 
         Lists composite indexes.
@@ -279,18 +267,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "list_indexes" not in self._stubs:
-            self._stubs["list_indexes"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/ListIndexes",
+        if 'list_indexes' not in self._stubs:
+            self._stubs['list_indexes'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/ListIndexes',
                 request_serializer=firestore_admin.ListIndexesRequest.serialize,
                 response_deserializer=firestore_admin.ListIndexesResponse.deserialize,
             )
-        return self._stubs["list_indexes"]
+        return self._stubs['list_indexes']
 
     @property
-    def get_index(
-        self,
-    ) -> Callable[[firestore_admin.GetIndexRequest], Awaitable[index.Index]]:
+    def get_index(self) -> Callable[
+            [firestore_admin.GetIndexRequest],
+            Awaitable[index.Index]]:
         r"""Return a callable for the get index method over gRPC.
 
         Gets a composite index.
@@ -305,18 +293,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "get_index" not in self._stubs:
-            self._stubs["get_index"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/GetIndex",
+        if 'get_index' not in self._stubs:
+            self._stubs['get_index'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/GetIndex',
                 request_serializer=firestore_admin.GetIndexRequest.serialize,
                 response_deserializer=index.Index.deserialize,
             )
-        return self._stubs["get_index"]
+        return self._stubs['get_index']
 
     @property
-    def delete_index(
-        self,
-    ) -> Callable[[firestore_admin.DeleteIndexRequest], Awaitable[empty.Empty]]:
+    def delete_index(self) -> Callable[
+            [firestore_admin.DeleteIndexRequest],
+            Awaitable[empty.Empty]]:
         r"""Return a callable for the delete index method over gRPC.
 
         Deletes a composite index.
@@ -331,18 +319,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "delete_index" not in self._stubs:
-            self._stubs["delete_index"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex",
+        if 'delete_index' not in self._stubs:
+            self._stubs['delete_index'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/DeleteIndex',
                 request_serializer=firestore_admin.DeleteIndexRequest.serialize,
                 response_deserializer=empty.Empty.FromString,
             )
-        return self._stubs["delete_index"]
+        return self._stubs['delete_index']
 
     @property
-    def get_field(
-        self,
-    ) -> Callable[[firestore_admin.GetFieldRequest], Awaitable[field.Field]]:
+    def get_field(self) -> Callable[
+            [firestore_admin.GetFieldRequest],
+            Awaitable[field.Field]]:
         r"""Return a callable for the get field method over gRPC.
 
         Gets the metadata and configuration for a Field.
@@ -357,20 +345,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "get_field" not in self._stubs:
-            self._stubs["get_field"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/GetField",
+        if 'get_field' not in self._stubs:
+            self._stubs['get_field'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/GetField',
                 request_serializer=firestore_admin.GetFieldRequest.serialize,
                 response_deserializer=field.Field.deserialize,
             )
-        return self._stubs["get_field"]
+        return self._stubs['get_field']
 
     @property
-    def update_field(
-        self,
-    ) -> Callable[
-        [firestore_admin.UpdateFieldRequest], Awaitable[operations.Operation]
-    ]:
+    def update_field(self) -> Callable[
+            [firestore_admin.UpdateFieldRequest],
+            Awaitable[operations.Operation]]:
         r"""Return a callable for the update field method over gRPC.
 
         Updates a field configuration. Currently, field updates apply
@@ -400,21 +386,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "update_field" not in self._stubs:
-            self._stubs["update_field"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/UpdateField",
+        if 'update_field' not in self._stubs:
+            self._stubs['update_field'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/UpdateField',
                 request_serializer=firestore_admin.UpdateFieldRequest.serialize,
                 response_deserializer=operations.Operation.FromString,
             )
-        return self._stubs["update_field"]
+        return self._stubs['update_field']
 
     @property
-    def list_fields(
-        self,
-    ) -> Callable[
-        [firestore_admin.ListFieldsRequest],
-        Awaitable[firestore_admin.ListFieldsResponse],
-    ]:
+    def list_fields(self) -> Callable[
+            [firestore_admin.ListFieldsRequest],
+            Awaitable[firestore_admin.ListFieldsResponse]]:
         r"""Return a callable for the list fields method over gRPC.
 
         Lists the field configuration and metadata for this database.
@@ -436,20 +419,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "list_fields" not in self._stubs:
-            self._stubs["list_fields"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/ListFields",
+        if 'list_fields' not in self._stubs:
+            self._stubs['list_fields'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/ListFields',
                 request_serializer=firestore_admin.ListFieldsRequest.serialize,
                 response_deserializer=firestore_admin.ListFieldsResponse.deserialize,
             )
-        return self._stubs["list_fields"]
+        return self._stubs['list_fields']
 
     @property
-    def export_documents(
-        self,
-    ) -> Callable[
-        [firestore_admin.ExportDocumentsRequest], Awaitable[operations.Operation]
-    ]:
+    def export_documents(self) -> Callable[
+            [firestore_admin.ExportDocumentsRequest],
+            Awaitable[operations.Operation]]:
         r"""Return a callable for the export documents method over gRPC.
 
         Exports a copy of all or a subset of documents from
@@ -473,20 +454,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "export_documents" not in self._stubs:
-            self._stubs["export_documents"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments",
+        if 'export_documents' not in self._stubs:
+            self._stubs['export_documents'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/ExportDocuments',
                 request_serializer=firestore_admin.ExportDocumentsRequest.serialize,
                 response_deserializer=operations.Operation.FromString,
             )
-        return self._stubs["export_documents"]
+        return self._stubs['export_documents']
 
     @property
-    def import_documents(
-        self,
-    ) -> Callable[
-        [firestore_admin.ImportDocumentsRequest], Awaitable[operations.Operation]
-    ]:
+    def import_documents(self) -> Callable[
+            [firestore_admin.ImportDocumentsRequest],
+            Awaitable[operations.Operation]]:
         r"""Return a callable for the import documents method over gRPC.
 
         Imports documents into Google Cloud Firestore.
@@ -507,13 +486,15 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         # the request.
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
-        if "import_documents" not in self._stubs:
-            self._stubs["import_documents"] = self.grpc_channel.unary_unary(
-                "/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments",
+        if 'import_documents' not in self._stubs:
+            self._stubs['import_documents'] = self.grpc_channel.unary_unary(
+                '/google.firestore.admin.v1.FirestoreAdmin/ImportDocuments',
                 request_serializer=firestore_admin.ImportDocumentsRequest.serialize,
                 response_deserializer=operations.Operation.FromString,
             )
-        return self._stubs["import_documents"]
+        return self._stubs['import_documents']
 
 
-__all__ = ("FirestoreAdminGrpcAsyncIOTransport",)
+__all__ = (
+    'FirestoreAdminGrpcAsyncIOTransport',
+)

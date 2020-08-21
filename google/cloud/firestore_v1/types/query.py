@@ -23,7 +23,11 @@ from google.protobuf import wrappers_pb2 as wrappers  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.firestore.v1", manifest={"StructuredQuery", "Cursor",},
+    package='google.firestore.v1',
+    manifest={
+        'StructuredQuery',
+        'Cursor',
+    },
 )
 
 
@@ -72,7 +76,6 @@ class StructuredQuery(proto.Message):
             Applies after all other constraints.
             Must be >= 0 if specified.
     """
-
     class Direction(proto.Enum):
         r"""A sort direction."""
         DIRECTION_UNSPECIFIED = 0
@@ -93,9 +96,11 @@ class StructuredQuery(proto.Message):
                 collections.
         """
 
-        collection_id = proto.Field(proto.STRING, number=2)
+        collection_id = proto.Field(proto.STRING, number=2
+        )
 
-        all_descendants = proto.Field(proto.BOOL, number=3)
+        all_descendants = proto.Field(proto.BOOL, number=3
+        )
 
     class Filter(proto.Message):
         r"""A filter.
@@ -109,25 +114,19 @@ class StructuredQuery(proto.Message):
                 A filter that takes exactly one argument.
         """
 
-        composite_filter = proto.Field(
-            proto.MESSAGE,
-            number=1,
-            oneof="filter_type",
-            message="StructuredQuery.CompositeFilter",
+        composite_filter = proto.Field(proto.MESSAGE, number=1
+        , oneof='filter_type',
+            message='StructuredQuery.CompositeFilter',
         )
 
-        field_filter = proto.Field(
-            proto.MESSAGE,
-            number=2,
-            oneof="filter_type",
-            message="StructuredQuery.FieldFilter",
+        field_filter = proto.Field(proto.MESSAGE, number=2
+        , oneof='filter_type',
+            message='StructuredQuery.FieldFilter',
         )
 
-        unary_filter = proto.Field(
-            proto.MESSAGE,
-            number=3,
-            oneof="filter_type",
-            message="StructuredQuery.UnaryFilter",
+        unary_filter = proto.Field(proto.MESSAGE, number=3
+        , oneof='filter_type',
+            message='StructuredQuery.UnaryFilter',
         )
 
     class CompositeFilter(proto.Message):
@@ -141,18 +140,19 @@ class StructuredQuery(proto.Message):
                 The list of filters to combine.
                 Must contain at least one filter.
         """
-
         class Operator(proto.Enum):
             r"""A composite filter operator."""
             OPERATOR_UNSPECIFIED = 0
             AND = 1
 
-        op = proto.Field(
-            proto.ENUM, number=1, enum="StructuredQuery.CompositeFilter.Operator",
+        op = proto.Field(proto.ENUM, number=1
+        ,
+            enum='StructuredQuery.CompositeFilter.Operator',
         )
 
-        filters = proto.RepeatedField(
-            proto.MESSAGE, number=2, message="StructuredQuery.Filter",
+        filters = proto.RepeatedField(proto.MESSAGE, number=2
+        ,
+            message='StructuredQuery.Filter',
         )
 
     class FieldFilter(proto.Message):
@@ -166,7 +166,6 @@ class StructuredQuery(proto.Message):
             value (~.document.Value):
                 The value to compare to.
         """
-
         class Operator(proto.Enum):
             r"""A field filter operator."""
             OPERATOR_UNSPECIFIED = 0
@@ -179,15 +178,20 @@ class StructuredQuery(proto.Message):
             IN = 8
             ARRAY_CONTAINS_ANY = 9
 
-        field = proto.Field(
-            proto.MESSAGE, number=1, message="StructuredQuery.FieldReference",
+        field = proto.Field(proto.MESSAGE, number=1
+        ,
+            message='StructuredQuery.FieldReference',
         )
 
-        op = proto.Field(
-            proto.ENUM, number=2, enum="StructuredQuery.FieldFilter.Operator",
+        op = proto.Field(proto.ENUM, number=2
+        ,
+            enum='StructuredQuery.FieldFilter.Operator',
         )
 
-        value = proto.Field(proto.MESSAGE, number=3, message=document.Value,)
+        value = proto.Field(proto.MESSAGE, number=3
+        ,
+            message=document.Value,
+        )
 
     class UnaryFilter(proto.Message):
         r"""A filter with a single operand.
@@ -198,22 +202,20 @@ class StructuredQuery(proto.Message):
             field (~.query.StructuredQuery.FieldReference):
                 The field to which to apply the operator.
         """
-
         class Operator(proto.Enum):
             r"""A unary operator."""
             OPERATOR_UNSPECIFIED = 0
             IS_NAN = 2
             IS_NULL = 3
 
-        op = proto.Field(
-            proto.ENUM, number=1, enum="StructuredQuery.UnaryFilter.Operator",
+        op = proto.Field(proto.ENUM, number=1
+        ,
+            enum='StructuredQuery.UnaryFilter.Operator',
         )
 
-        field = proto.Field(
-            proto.MESSAGE,
-            number=2,
-            oneof="operand_type",
-            message="StructuredQuery.FieldReference",
+        field = proto.Field(proto.MESSAGE, number=2
+        , oneof='operand_type',
+            message='StructuredQuery.FieldReference',
         )
 
     class FieldReference(proto.Message):
@@ -224,7 +226,8 @@ class StructuredQuery(proto.Message):
 
         """
 
-        field_path = proto.Field(proto.STRING, number=2)
+        field_path = proto.Field(proto.STRING, number=2
+        )
 
     class Projection(proto.Message):
         r"""The projection of document's fields to return.
@@ -237,8 +240,9 @@ class StructuredQuery(proto.Message):
                 of the document, use ``['__name__']``.
         """
 
-        fields = proto.RepeatedField(
-            proto.MESSAGE, number=2, message="StructuredQuery.FieldReference",
+        fields = proto.RepeatedField(proto.MESSAGE, number=2
+        ,
+            message='StructuredQuery.FieldReference',
         )
 
     class Order(proto.Message):
@@ -251,27 +255,53 @@ class StructuredQuery(proto.Message):
                 The direction to order by. Defaults to ``ASCENDING``.
         """
 
-        field = proto.Field(
-            proto.MESSAGE, number=1, message="StructuredQuery.FieldReference",
+        field = proto.Field(proto.MESSAGE, number=1
+        ,
+            message='StructuredQuery.FieldReference',
         )
 
-        direction = proto.Field(proto.ENUM, number=2, enum="StructuredQuery.Direction",)
+        direction = proto.Field(proto.ENUM, number=2
+        ,
+            enum='StructuredQuery.Direction',
+        )
 
-    select = proto.Field(proto.MESSAGE, number=1, message=Projection,)
+    select = proto.Field(proto.MESSAGE, number=1
+    ,
+        message=Projection,
+    )
 
-    from_ = proto.RepeatedField(proto.MESSAGE, number=2, message=CollectionSelector,)
+    from_ = proto.RepeatedField(proto.MESSAGE, number=2
+    ,
+        message=CollectionSelector,
+    )
 
-    where = proto.Field(proto.MESSAGE, number=3, message=Filter,)
+    where = proto.Field(proto.MESSAGE, number=3
+    ,
+        message=Filter,
+    )
 
-    order_by = proto.RepeatedField(proto.MESSAGE, number=4, message=Order,)
+    order_by = proto.RepeatedField(proto.MESSAGE, number=4
+    ,
+        message=Order,
+    )
 
-    start_at = proto.Field(proto.MESSAGE, number=7, message="Cursor",)
+    start_at = proto.Field(proto.MESSAGE, number=7
+    ,
+        message='Cursor',
+    )
 
-    end_at = proto.Field(proto.MESSAGE, number=8, message="Cursor",)
+    end_at = proto.Field(proto.MESSAGE, number=8
+    ,
+        message='Cursor',
+    )
 
-    offset = proto.Field(proto.INT32, number=6)
+    offset = proto.Field(proto.INT32, number=6
+    )
 
-    limit = proto.Field(proto.MESSAGE, number=5, message=wrappers.Int32Value,)
+    limit = proto.Field(proto.MESSAGE, number=5
+    ,
+        message=wrappers.Int32Value,
+    )
 
 
 class Cursor(proto.Message):
@@ -290,9 +320,13 @@ class Cursor(proto.Message):
             defined by the query.
     """
 
-    values = proto.RepeatedField(proto.MESSAGE, number=1, message=document.Value,)
+    values = proto.RepeatedField(proto.MESSAGE, number=1
+    ,
+        message=document.Value,
+    )
 
-    before = proto.Field(proto.BOOL, number=2)
+    before = proto.Field(proto.BOOL, number=2
+    )
 
 
 __all__ = tuple(sorted(__protobuf__.manifest))

@@ -21,14 +21,14 @@ import re
 from typing import Callable, Dict, Sequence, Tuple, Type, Union
 import pkg_resources
 
-import google.api_core.client_options as ClientOptions  # type: ignore
-from google.api_core import exceptions  # type: ignore
-from google.api_core import gapic_v1  # type: ignore
-from google.api_core import retry as retries  # type: ignore
-from google.auth import credentials  # type: ignore
-from google.auth.transport import mtls  # type: ignore
+import google.api_core.client_options as ClientOptions # type: ignore
+from google.api_core import exceptions                 # type: ignore
+from google.api_core import gapic_v1                   # type: ignore
+from google.api_core import retry as retries           # type: ignore
+from google.auth import credentials                    # type: ignore
+from google.auth.transport import mtls                 # type: ignore
 from google.auth.exceptions import MutualTLSChannelError  # type: ignore
-from google.oauth2 import service_account  # type: ignore
+from google.oauth2 import service_account              # type: ignore
 
 from google.api_core import operation as ga_operation
 from google.api_core import operation
@@ -54,14 +54,13 @@ class FirestoreAdminClientMeta(type):
     support objects (e.g. transport) without polluting the client instance
     objects.
     """
+    _transport_registry = OrderedDict()  # type: Dict[str, Type[FirestoreAdminTransport]]
+    _transport_registry['grpc'] = FirestoreAdminGrpcTransport
+    _transport_registry['grpc_asyncio'] = FirestoreAdminGrpcAsyncIOTransport
 
-    _transport_registry = (
-        OrderedDict()
-    )  # type: Dict[str, Type[FirestoreAdminTransport]]
-    _transport_registry["grpc"] = FirestoreAdminGrpcTransport
-    _transport_registry["grpc_asyncio"] = FirestoreAdminGrpcAsyncIOTransport
-
-    def get_transport_class(cls, label: str = None,) -> Type[FirestoreAdminTransport]:
+    def get_transport_class(cls,
+            label: str = None,
+        ) -> Type[FirestoreAdminTransport]:
         """Return an appropriate transport class.
 
         Args:
@@ -114,7 +113,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         return api_endpoint.replace(".googleapis.com", ".mtls.googleapis.com")
 
-    DEFAULT_ENDPOINT = "firestore.googleapis.com"
+    DEFAULT_ENDPOINT = 'firestore.googleapis.com'
     DEFAULT_MTLS_ENDPOINT = _get_default_mtls_endpoint.__func__(  # type: ignore
         DEFAULT_ENDPOINT
     )
@@ -133,52 +132,40 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Returns:
             {@api.name}: The constructed client.
         """
-        credentials = service_account.Credentials.from_service_account_file(filename)
-        kwargs["credentials"] = credentials
+        credentials = service_account.Credentials.from_service_account_file(
+            filename)
+        kwargs['credentials'] = credentials
         return cls(*args, **kwargs)
 
     from_service_account_json = from_service_account_file
 
     @staticmethod
-    def field_path(project: str, database: str, collection: str, field: str,) -> str:
+    def field_path(project: str,database: str,collection: str,field: str,) -> str:
         """Return a fully-qualified field string."""
-        return "projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}".format(
-            project=project, database=database, collection=collection, field=field,
-        )
+        return "projects/{project}/databases/{database}/collectionGroups/{collection}/fields/{field}".format(project=project, database=database, collection=collection, field=field, )
 
     @staticmethod
-    def parse_field_path(path: str) -> Dict[str, str]:
+    def parse_field_path(path: str) -> Dict[str,str]:
         """Parse a field path into its component segments."""
-        m = re.match(
-            r"^projects/(?P<project>.+?)/databases/(?P<database>.+?)/collectionGroups/(?P<collection>.+?)/fields/(?P<field>.+?)$",
-            path,
-        )
+        m = re.match(r"^projects/(?P<project>.+?)/databases/(?P<database>.+?)/collectionGroups/(?P<collection>.+?)/fields/(?P<field>.+?)$", path)
         return m.groupdict() if m else {}
-
     @staticmethod
-    def index_path(project: str, database: str, collection: str, index: str,) -> str:
+    def index_path(project: str,database: str,collection: str,index: str,) -> str:
         """Return a fully-qualified index string."""
-        return "projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}".format(
-            project=project, database=database, collection=collection, index=index,
-        )
+        return "projects/{project}/databases/{database}/collectionGroups/{collection}/indexes/{index}".format(project=project, database=database, collection=collection, index=index, )
 
     @staticmethod
-    def parse_index_path(path: str) -> Dict[str, str]:
+    def parse_index_path(path: str) -> Dict[str,str]:
         """Parse a index path into its component segments."""
-        m = re.match(
-            r"^projects/(?P<project>.+?)/databases/(?P<database>.+?)/collectionGroups/(?P<collection>.+?)/indexes/(?P<index>.+?)$",
-            path,
-        )
+        m = re.match(r"^projects/(?P<project>.+?)/databases/(?P<database>.+?)/collectionGroups/(?P<collection>.+?)/indexes/(?P<index>.+?)$", path)
         return m.groupdict() if m else {}
 
-    def __init__(
-        self,
-        *,
-        credentials: credentials.Credentials = None,
-        transport: Union[str, FirestoreAdminTransport] = None,
-        client_options: ClientOptions = None,
-        client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
-    ) -> None:
+    def __init__(self, *,
+            credentials: credentials.Credentials = None,
+            transport: Union[str, FirestoreAdminTransport] = None,
+            client_options: ClientOptions = None,
+            client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
+            ) -> None:
         """Instantiate the firestore admin client.
 
         Args:
@@ -230,9 +217,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                     or mtls.has_default_client_cert_source()
                 )
                 client_options.api_endpoint = (
-                    self.DEFAULT_MTLS_ENDPOINT
-                    if has_client_cert_source
-                    else self.DEFAULT_ENDPOINT
+                    self.DEFAULT_MTLS_ENDPOINT if has_client_cert_source else self.DEFAULT_ENDPOINT
                 )
             else:
                 raise MutualTLSChannelError(
@@ -245,10 +230,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         if isinstance(transport, FirestoreAdminTransport):
             # transport is a FirestoreAdminTransport instance.
             if credentials or client_options.credentials_file:
-                raise ValueError(
-                    "When providing a transport instance, "
-                    "provide its credentials directly."
-                )
+                raise ValueError('When providing a transport instance, '
+                                 'provide its credentials directly.')
             if client_options.scopes:
                 raise ValueError(
                     "When providing a transport instance, "
@@ -268,16 +251,15 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 client_info=client_info,
             )
 
-    def create_index(
-        self,
-        request: firestore_admin.CreateIndexRequest = None,
-        *,
-        parent: str = None,
-        index: gfa_index.Index = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> ga_operation.Operation:
+    def create_index(self,
+            request: firestore_admin.CreateIndexRequest = None,
+            *,
+            parent: str = None,
+            index: gfa_index.Index = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> ga_operation.Operation:
         r"""Creates a composite index. This returns a
         [google.longrunning.Operation][google.longrunning.Operation]
         which may be used to track the status of the creation. The
@@ -322,10 +304,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent, index])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.CreateIndexRequest.
@@ -349,11 +329,18 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('parent', request.parent),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Wrap the response in an operation future.
         response = operation.from_gapic(
@@ -366,15 +353,14 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Done; return the response.
         return response
 
-    def list_indexes(
-        self,
-        request: firestore_admin.ListIndexesRequest = None,
-        *,
-        parent: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> pagers.ListIndexesPager:
+    def list_indexes(self,
+            request: firestore_admin.ListIndexesRequest = None,
+            *,
+            parent: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> pagers.ListIndexesPager:
         r"""Lists composite indexes.
 
         Args:
@@ -408,10 +394,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.ListIndexesRequest.
@@ -433,30 +417,39 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('parent', request.parent),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # This method is paged; wrap the response in a pager, which provides
         # an `__iter__` convenience method.
         response = pagers.ListIndexesPager(
-            method=rpc, request=request, response=response, metadata=metadata,
+            method=rpc,
+            request=request,
+            response=response,
+            metadata=metadata,
         )
 
         # Done; return the response.
         return response
 
-    def get_index(
-        self,
-        request: firestore_admin.GetIndexRequest = None,
-        *,
-        name: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> index.Index:
+    def get_index(self,
+            request: firestore_admin.GetIndexRequest = None,
+            *,
+            name: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> index.Index:
         r"""Gets a composite index.
 
         Args:
@@ -488,10 +481,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.GetIndexRequest.
@@ -513,24 +504,30 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('name', request.name),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def delete_index(
-        self,
-        request: firestore_admin.DeleteIndexRequest = None,
-        *,
-        name: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> None:
+    def delete_index(self,
+            request: firestore_admin.DeleteIndexRequest = None,
+            *,
+            name: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> None:
         r"""Deletes a composite index.
 
         Args:
@@ -555,10 +552,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.DeleteIndexRequest.
@@ -580,23 +575,27 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('name', request.name),
+            )),
         )
 
         # Send the request.
         rpc(
-            request, retry=retry, timeout=timeout, metadata=metadata,
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
         )
 
-    def get_field(
-        self,
-        request: firestore_admin.GetFieldRequest = None,
-        *,
-        name: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> field.Field:
+    def get_field(self,
+            request: firestore_admin.GetFieldRequest = None,
+            *,
+            name: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> field.Field:
         r"""Gets the metadata and configuration for a Field.
 
         Args:
@@ -630,10 +629,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.GetFieldRequest.
@@ -655,24 +652,30 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('name', request.name),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Done; return the response.
         return response
 
-    def update_field(
-        self,
-        request: firestore_admin.UpdateFieldRequest = None,
-        *,
-        field: gfa_field.Field = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> ga_operation.Operation:
+    def update_field(self,
+            request: firestore_admin.UpdateFieldRequest = None,
+            *,
+            field: gfa_field.Field = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> ga_operation.Operation:
         r"""Updates a field configuration. Currently, field updates apply
         only to single field index configuration. However, calls to
         [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField]
@@ -724,10 +727,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([field])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.UpdateFieldRequest.
@@ -749,13 +750,18 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata(
-                (("field.name", request.field.name),)
-            ),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('field.name', request.field.name),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Wrap the response in an operation future.
         response = operation.from_gapic(
@@ -768,15 +774,14 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Done; return the response.
         return response
 
-    def list_fields(
-        self,
-        request: firestore_admin.ListFieldsRequest = None,
-        *,
-        parent: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> pagers.ListFieldsPager:
+    def list_fields(self,
+            request: firestore_admin.ListFieldsRequest = None,
+            *,
+            parent: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> pagers.ListFieldsPager:
         r"""Lists the field configuration and metadata for this database.
 
         Currently,
@@ -817,10 +822,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.ListFieldsRequest.
@@ -842,30 +845,39 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('parent', request.parent),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # This method is paged; wrap the response in a pager, which provides
         # an `__iter__` convenience method.
         response = pagers.ListFieldsPager(
-            method=rpc, request=request, response=response, metadata=metadata,
+            method=rpc,
+            request=request,
+            response=response,
+            metadata=metadata,
         )
 
         # Done; return the response.
         return response
 
-    def export_documents(
-        self,
-        request: firestore_admin.ExportDocumentsRequest = None,
-        *,
-        name: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> ga_operation.Operation:
+    def export_documents(self,
+            request: firestore_admin.ExportDocumentsRequest = None,
+            *,
+            name: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> ga_operation.Operation:
         r"""Exports a copy of all or a subset of documents from
         Google Cloud Firestore to another storage system, such
         as Google Cloud Storage. Recent updates to documents may
@@ -910,10 +922,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.ExportDocumentsRequest.
@@ -935,11 +945,18 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('name', request.name),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Wrap the response in an operation future.
         response = operation.from_gapic(
@@ -952,15 +969,14 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Done; return the response.
         return response
 
-    def import_documents(
-        self,
-        request: firestore_admin.ImportDocumentsRequest = None,
-        *,
-        name: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-        metadata: Sequence[Tuple[str, str]] = (),
-    ) -> ga_operation.Operation:
+    def import_documents(self,
+            request: firestore_admin.ImportDocumentsRequest = None,
+            *,
+            name: str = None,
+            retry: retries.Retry = gapic_v1.method.DEFAULT,
+            timeout: float = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+            ) -> ga_operation.Operation:
         r"""Imports documents into Google Cloud Firestore.
         Existing documents with the same name are overwritten.
         The import occurs in the background and its progress can
@@ -1012,10 +1028,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
-            raise ValueError(
-                "If the `request` argument is set, then none of "
-                "the individual field arguments should be set."
-            )
+            raise ValueError('If the `request` argument is set, then none of '
+                             'the individual field arguments should be set.')
 
         # Minor optimization to avoid making a copy if the user passes
         # in a firestore_admin.ImportDocumentsRequest.
@@ -1037,11 +1051,18 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Certain fields should be provided within the metadata header;
         # add these here.
         metadata = tuple(metadata) + (
-            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+            gapic_v1.routing_header.to_grpc_metadata((
+                ('name', request.name),
+            )),
         )
 
         # Send the request.
-        response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
         # Wrap the response in an operation future.
         response = operation.from_gapic(
@@ -1055,12 +1076,21 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         return response
 
 
+
+
+
+
+
 try:
     DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo(
-        gapic_version=pkg_resources.get_distribution("google-cloud-firestore",).version,
+        gapic_version=pkg_resources.get_distribution(
+            'google-cloud-firestore',
+        ).version,
     )
 except pkg_resources.DistributionNotFound:
     DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo()
 
 
-__all__ = ("FirestoreAdminClient",)
+__all__ = (
+    'FirestoreAdminClient',
+)

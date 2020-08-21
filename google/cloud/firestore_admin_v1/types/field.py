@@ -21,7 +21,12 @@ import proto  # type: ignore
 from google.cloud.firestore_admin_v1.types import index
 
 
-__protobuf__ = proto.module(package="google.firestore.admin.v1", manifest={"Field",},)
+__protobuf__ = proto.module(
+    package='google.firestore.admin.v1',
+    manifest={
+        'Field',
+    },
+)
 
 
 class Field(proto.Message):
@@ -62,7 +67,6 @@ class Field(proto.Message):
             this field, specify an index config with an empty list of
             indexes.
     """
-
     class IndexConfig(proto.Message):
         r"""The index configuration for this field.
 
@@ -89,7 +93,9 @@ class Field(proto.Message):
                 will be ``false``.
         """
 
-        indexes = proto.RepeatedField(proto.MESSAGE, number=1, message=index.Index,)
+        indexes = proto.RepeatedField(proto.MESSAGE, number=1,
+            message=index.Index,
+        )
 
         uses_ancestor_config = proto.Field(proto.BOOL, number=2)
 
@@ -99,7 +105,9 @@ class Field(proto.Message):
 
     name = proto.Field(proto.STRING, number=1)
 
-    index_config = proto.Field(proto.MESSAGE, number=2, message=IndexConfig,)
+    index_config = proto.Field(proto.MESSAGE, number=2,
+        message=IndexConfig,
+    )
 
 
 __all__ = tuple(sorted(__protobuf__.manifest))
