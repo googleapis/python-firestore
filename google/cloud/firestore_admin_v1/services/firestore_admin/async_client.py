@@ -28,8 +28,8 @@ from google.api_core import retry as retries  # type: ignore
 from google.auth import credentials  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 
-from google.api_core import operation as ga_operation  # type: ignore
-from google.api_core import operation_async  # type: ignore
+from google.api_core import operation as ga_operation
+from google.api_core import operation_async
 from google.cloud.firestore_admin_v1.services.firestore_admin import pagers
 from google.cloud.firestore_admin_v1.types import field
 from google.cloud.firestore_admin_v1.types import field as gfa_field
@@ -39,7 +39,7 @@ from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.cloud.firestore_admin_v1.types import operation as gfa_operation
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
-from .transports.base import FirestoreAdminTransport
+from .transports.base import FirestoreAdminTransport, DEFAULT_CLIENT_INFO
 from .transports.grpc_asyncio import FirestoreAdminGrpcAsyncIOTransport
 from .client import FirestoreAdminClient
 
@@ -54,9 +54,9 @@ class FirestoreAdminAsyncClient:
     DEFAULT_ENDPOINT = FirestoreAdminClient.DEFAULT_ENDPOINT
     DEFAULT_MTLS_ENDPOINT = FirestoreAdminClient.DEFAULT_MTLS_ENDPOINT
 
-    field_path = staticmethod(FirestoreAdminClient.field_path)
-
     index_path = staticmethod(FirestoreAdminClient.index_path)
+
+    field_path = staticmethod(FirestoreAdminClient.field_path)
 
     from_service_account_file = FirestoreAdminClient.from_service_account_file
     from_service_account_json = from_service_account_file
@@ -71,6 +71,7 @@ class FirestoreAdminAsyncClient:
         credentials: credentials.Credentials = None,
         transport: Union[str, FirestoreAdminTransport] = "grpc_asyncio",
         client_options: ClientOptions = None,
+        client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
     ) -> None:
         """Instantiate the firestore admin client.
 
@@ -103,7 +104,10 @@ class FirestoreAdminAsyncClient:
         """
 
         self._client = FirestoreAdminClient(
-            credentials=credentials, transport=transport, client_options=client_options,
+            credentials=credentials,
+            transport=transport,
+            client_options=client_options,
+            client_info=client_info,
         )
 
     async def create_index(
@@ -179,7 +183,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.create_index,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -261,7 +265,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.list_indexes,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -339,7 +343,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.get_index,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -404,7 +408,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.delete_index,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -477,7 +481,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.get_field,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -569,7 +573,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.update_field,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -660,7 +664,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.list_fields,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -751,7 +755,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.export_documents,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -851,7 +855,7 @@ class FirestoreAdminAsyncClient:
         rpc = gapic_v1.method_async.wrap_method(
             self._client._transport.import_documents,
             default_timeout=None,
-            client_info=_client_info,
+            client_info=DEFAULT_CLIENT_INFO,
         )
 
         # Certain fields should be provided within the metadata header;
@@ -876,11 +880,11 @@ class FirestoreAdminAsyncClient:
 
 
 try:
-    _client_info = gapic_v1.client_info.ClientInfo(
+    DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo(
         gapic_version=pkg_resources.get_distribution("google-cloud-firestore",).version,
     )
 except pkg_resources.DistributionNotFound:
-    _client_info = gapic_v1.client_info.ClientInfo()
+    DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo()
 
 
 __all__ = ("FirestoreAdminAsyncClient",)
