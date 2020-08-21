@@ -34,6 +34,8 @@ from tests.system.test__helpers import (
     RANDOM_ID_REGEX,
     MISSING_DOCUMENT,
     UNIQUE_RESOURCE_ID,
+    EMULATOR_CREDS,
+    FIRESTORE_EMULATOR,
 )
 
 _test_event_loop = asyncio.new_event_loop()
@@ -42,8 +44,14 @@ pytestmark = pytest.mark.asyncio
 
 @pytest.fixture(scope=u"module")
 def client():
-    credentials = service_account.Credentials.from_service_account_file(FIRESTORE_CREDS)
-    project = FIRESTORE_PROJECT or credentials.project_id
+    if FIRESTORE_EMULATOR:
+        credentials = EMULATOR_CREDS
+        project = FIRESTORE_PROJECT
+    else:
+        credentials = service_account.Credentials.from_service_account_file(
+            FIRESTORE_CREDS
+        )
+        project = FIRESTORE_PROJECT or credentials.project_id
     yield firestore.AsyncClient(project=project, credentials=credentials)
 
 
@@ -142,6 +150,7 @@ async def test_create_document_w_subcollection(client, cleanup):
     assert sorted([child.id async for child in children]) == sorted(child_ids)
 
 
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Internal Issue b/137866686")
 async def test_cannot_use_foreign_key(client, cleanup):
     document_id = "cannot" + UNIQUE_RESOURCE_ID
     document = client.document("foreign-key", document_id)
@@ -294,6 +303,7 @@ async def test_document_update_w_int_field(client, cleanup):
     assert snapshot1.to_dict() == expected
 
 
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Internal Issue b/137867104")
 async def test_update_document(client, cleanup):
     document_id = "for-update" + UNIQUE_RESOURCE_ID
     document = client.document("made", document_id)
@@ -899,6 +909,7 @@ async def test_collection_group_queries_filters(client, cleanup):
     assert found == set(["cg-doc2"])
 
 
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Internal Issue b/137865992")
 async def test_get_all(client, cleanup):
     collection_name = "get-all" + UNIQUE_RESOURCE_ID
 
