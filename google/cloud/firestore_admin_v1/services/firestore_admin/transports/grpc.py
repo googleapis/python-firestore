@@ -19,6 +19,7 @@ from typing import Callable, Dict, Optional, Sequence, Tuple
 
 from google.api_core import grpc_helpers  # type: ignore
 from google.api_core import operations_v1  # type: ignore
+from google.api_core import gapic_v1  # type: ignore
 from google import auth  # type: ignore
 from google.auth import credentials  # type: ignore
 from google.auth.transport.grpc import SslCredentials  # type: ignore
@@ -32,7 +33,7 @@ from google.cloud.firestore_admin_v1.types import index
 from google.longrunning import operations_pb2 as operations  # type: ignore
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
-from .base import FirestoreAdminTransport
+from .base import FirestoreAdminTransport, DEFAULT_CLIENT_INFO
 
 
 class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
@@ -60,7 +61,9 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         scopes: Sequence[str] = None,
         channel: grpc.Channel = None,
         api_mtls_endpoint: str = None,
-        client_cert_source: Callable[[], Tuple[bytes, bytes]] = None
+        client_cert_source: Callable[[], Tuple[bytes, bytes]] = None,
+        quota_project_id: Optional[str] = None,
+        client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
     ) -> None:
         """Instantiate the transport.
 
@@ -87,6 +90,13 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
                 callback to provide client SSL certificate bytes and private key
                 bytes, both in PEM format. It is ignored if ``api_mtls_endpoint``
                 is None.
+            quota_project_id (Optional[str]): An optional project to use for billing
+                and quota.
+            client_info (google.api_core.gapic_v1.client_info.ClientInfo):	
+                The client info used to send a user-agent string along with	
+                API requests. If ``None``, then default info will be used.	
+                Generally, you only need to set this if you're developing	
+                your own client library.
 
         Raises:
           google.auth.exceptions.MutualTLSChannelError: If mutual TLS transport
@@ -109,7 +119,9 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
             )
 
             if credentials is None:
-                credentials, _ = auth.default(scopes=self.AUTH_SCOPES)
+                credentials, _ = auth.default(
+                    scopes=self.AUTH_SCOPES, quota_project_id=quota_project_id
+                )
 
             # Create SSL credentials with client_cert_source or application
             # default SSL credentials.
@@ -128,7 +140,10 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
                 credentials_file=credentials_file,
                 ssl_credentials=ssl_credentials,
                 scopes=scopes or self.AUTH_SCOPES,
+                quota_project_id=quota_project_id,
             )
+
+        self._stubs = {}  # type: Dict[str, Callable]
 
         # Run the base constructor.
         super().__init__(
@@ -136,9 +151,9 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
             credentials=credentials,
             credentials_file=credentials_file,
             scopes=scopes or self.AUTH_SCOPES,
+            quota_project_id=quota_project_id,
+            client_info=client_info,
         )
-
-        self._stubs = {}  # type: Dict[str, Callable]
 
     @classmethod
     def create_channel(
@@ -147,7 +162,8 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         credentials: credentials.Credentials = None,
         credentials_file: str = None,
         scopes: Optional[Sequence[str]] = None,
-        **kwargs
+        quota_project_id: Optional[str] = None,
+        **kwargs,
     ) -> grpc.Channel:
         """Create and return a gRPC channel object.
         Args:
@@ -163,6 +179,8 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
             scopes (Optional[Sequence[str]]): A optional list of scopes needed for this
                 service. These are only used when credentials are not specified and
                 are passed to :func:`google.auth.default`.
+            quota_project_id (Optional[str]): An optional project to use for billing
+                and quota.
             kwargs (Optional[dict]): Keyword arguments, which are passed to the
                 channel creation.
         Returns:
@@ -178,7 +196,8 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
             credentials=credentials,
             credentials_file=credentials_file,
             scopes=scopes,
-            **kwargs
+            quota_project_id=quota_project_id,
+            **kwargs,
         )
 
     @property

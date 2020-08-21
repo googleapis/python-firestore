@@ -30,9 +30,9 @@ from google.auth.transport import mtls  # type: ignore
 from google.auth.exceptions import MutualTLSChannelError  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 
-from google.api_core import operation as ga_operation  # type: ignore
-from google.api_core import operation  # type: ignore
-from google.api_core import operation_async  # type: ignore
+from google.api_core import operation as ga_operation
+from google.api_core import operation
+from google.api_core import operation_async
 from google.cloud.firestore_admin_v1.services.firestore_admin import pagers
 from google.cloud.firestore_admin_v1.types import field
 from google.cloud.firestore_admin_v1.types import field as gfa_field
@@ -42,7 +42,7 @@ from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.cloud.firestore_admin_v1.types import operation as gfa_operation
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
-from .transports.base import FirestoreAdminTransport
+from .transports.base import FirestoreAdminTransport, DEFAULT_CLIENT_INFO
 from .transports.grpc import FirestoreAdminGrpcTransport
 from .transports.grpc_asyncio import FirestoreAdminGrpcAsyncIOTransport
 
@@ -177,6 +177,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         credentials: credentials.Credentials = None,
         transport: Union[str, FirestoreAdminTransport] = None,
         client_options: ClientOptions = None,
+        client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
     ) -> None:
         """Instantiate the firestore admin client.
 
@@ -202,6 +203,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 (2) The ``client_cert_source`` property is used to provide client
                 SSL credentials for mutual TLS transport. If not provided, the
                 default SSL credentials will be used if present.
+            client_info (google.api_core.gapic_v1.client_info.ClientInfo):	
+                The client info used to send a user-agent string along with	
+                API requests. If ``None``, then default info will be used.	
+                Generally, you only need to set this if you're developing	
+                your own client library.
 
         Raises:
             google.auth.exceptions.MutualTLSChannelError: If mutual TLS transport
@@ -258,6 +264,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 scopes=client_options.scopes,
                 api_mtls_endpoint=client_options.api_endpoint,
                 client_cert_source=client_options.client_cert_source,
+                quota_project_id=client_options.quota_project_id,
+                client_info=client_info,
             )
 
     def create_index(
@@ -312,29 +320,31 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([parent, index]):
+        has_flattened_params = any([parent, index])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.CreateIndexRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.CreateIndexRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.CreateIndexRequest):
+            request = firestore_admin.CreateIndexRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if parent is not None:
-            request.parent = parent
-        if index is not None:
-            request.index = index
+            if parent is not None:
+                request.parent = parent
+            if index is not None:
+                request.index = index
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.create_index,
-            default_timeout=None,
-            client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.create_index]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -396,27 +406,29 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([parent]):
+        has_flattened_params = any([parent])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ListIndexesRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.ListIndexesRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.ListIndexesRequest):
+            request = firestore_admin.ListIndexesRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if parent is not None:
-            request.parent = parent
+            if parent is not None:
+                request.parent = parent
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.list_indexes,
-            default_timeout=None,
-            client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.list_indexes]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -474,25 +486,29 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([name]):
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.GetIndexRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.GetIndexRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.GetIndexRequest):
+            request = firestore_admin.GetIndexRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if name is not None:
-            request.name = name
+            if name is not None:
+                request.name = name
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.get_index, default_timeout=None, client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.get_index]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -537,27 +553,29 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([name]):
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.DeleteIndexRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.DeleteIndexRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.DeleteIndexRequest):
+            request = firestore_admin.DeleteIndexRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if name is not None:
-            request.name = name
+            if name is not None:
+                request.name = name
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.delete_index,
-            default_timeout=None,
-            client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.delete_index]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -610,25 +628,29 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([name]):
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.GetFieldRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.GetFieldRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.GetFieldRequest):
+            request = firestore_admin.GetFieldRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if name is not None:
-            request.name = name
+            if name is not None:
+                request.name = name
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.get_field, default_timeout=None, client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.get_field]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -700,27 +722,29 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([field]):
+        has_flattened_params = any([field])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.UpdateFieldRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.UpdateFieldRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.UpdateFieldRequest):
+            request = firestore_admin.UpdateFieldRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if field is not None:
-            request.field = field
+            if field is not None:
+                request.field = field
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.update_field,
-            default_timeout=None,
-            client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.update_field]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -791,25 +815,29 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([parent]):
+        has_flattened_params = any([parent])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ListFieldsRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.ListFieldsRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.ListFieldsRequest):
+            request = firestore_admin.ListFieldsRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if parent is not None:
-            request.parent = parent
+            if parent is not None:
+                request.parent = parent
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.list_fields, default_timeout=None, client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.list_fields]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -880,27 +908,29 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([name]):
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ExportDocumentsRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.ExportDocumentsRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.ExportDocumentsRequest):
+            request = firestore_admin.ExportDocumentsRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if name is not None:
-            request.name = name
+            if name is not None:
+                request.name = name
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.export_documents,
-            default_timeout=None,
-            client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.export_documents]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -980,27 +1010,29 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Create or coerce a protobuf request object.
         # Sanity check: If we got a request object, we should *not* have
         # gotten any keyword arguments that map to the request.
-        if request is not None and any([name]):
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
             raise ValueError(
                 "If the `request` argument is set, then none of "
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ImportDocumentsRequest(request)
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.ImportDocumentsRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.ImportDocumentsRequest):
+            request = firestore_admin.ImportDocumentsRequest(request)
 
-        # If we have keyword arguments corresponding to fields on the
-        # request, apply these.
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
 
-        if name is not None:
-            request.name = name
+            if name is not None:
+                request.name = name
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method.wrap_method(
-            self._transport.import_documents,
-            default_timeout=None,
-            client_info=_client_info,
-        )
+        rpc = self._transport._wrapped_methods[self._transport.import_documents]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1024,11 +1056,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
 
 try:
-    _client_info = gapic_v1.client_info.ClientInfo(
+    DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo(
         gapic_version=pkg_resources.get_distribution("google-cloud-firestore",).version,
     )
 except pkg_resources.DistributionNotFound:
-    _client_info = gapic_v1.client_info.ClientInfo()
+    DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo()
 
 
 __all__ = ("FirestoreAdminClient",)
