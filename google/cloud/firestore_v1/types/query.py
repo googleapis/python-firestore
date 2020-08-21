@@ -175,9 +175,11 @@ class StructuredQuery(proto.Message):
             GREATER_THAN = 3
             GREATER_THAN_OR_EQUAL = 4
             EQUAL = 5
+            NOT_EQUAL = 6
             ARRAY_CONTAINS = 7
             IN = 8
             ARRAY_CONTAINS_ANY = 9
+            NOT_IN = 10
 
         field = proto.Field(
             proto.MESSAGE, number=1, message="StructuredQuery.FieldReference",
@@ -204,6 +206,8 @@ class StructuredQuery(proto.Message):
             OPERATOR_UNSPECIFIED = 0
             IS_NAN = 2
             IS_NULL = 3
+            IS_NOT_NAN = 4
+            IS_NOT_NULL = 5
 
         op = proto.Field(
             proto.ENUM, number=1, enum="StructuredQuery.UnaryFilter.Operator",
@@ -215,6 +219,22 @@ class StructuredQuery(proto.Message):
             oneof="operand_type",
             message="StructuredQuery.FieldReference",
         )
+
+    class Order(proto.Message):
+        r"""An order on a field.
+
+        Attributes:
+            field (~.query.StructuredQuery.FieldReference):
+                The field to order by.
+            direction (~.query.StructuredQuery.Direction):
+                The direction to order by. Defaults to ``ASCENDING``.
+        """
+
+        field = proto.Field(
+            proto.MESSAGE, number=1, message="StructuredQuery.FieldReference",
+        )
+
+        direction = proto.Field(proto.ENUM, number=2, enum="StructuredQuery.Direction",)
 
     class FieldReference(proto.Message):
         r"""A reference to a field, such as ``max(messages.time) as max_time``.
@@ -240,22 +260,6 @@ class StructuredQuery(proto.Message):
         fields = proto.RepeatedField(
             proto.MESSAGE, number=2, message="StructuredQuery.FieldReference",
         )
-
-    class Order(proto.Message):
-        r"""An order on a field.
-
-        Attributes:
-            field (~.query.StructuredQuery.FieldReference):
-                The field to order by.
-            direction (~.query.StructuredQuery.Direction):
-                The direction to order by. Defaults to ``ASCENDING``.
-        """
-
-        field = proto.Field(
-            proto.MESSAGE, number=1, message="StructuredQuery.FieldReference",
-        )
-
-        direction = proto.Field(proto.ENUM, number=2, enum="StructuredQuery.Direction",)
 
     select = proto.Field(proto.MESSAGE, number=1, message=Projection,)
 
