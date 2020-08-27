@@ -103,7 +103,7 @@ class BaseCollectionReference(object):
     def _query(self) -> BaseQuery:
         raise NotImplementedError
 
-    def document(self, document_id=None) -> Any:
+    def document(self, document_id=None) -> DocumentReference:
         """Create a sub-document underneath the current collection.
 
         Args:

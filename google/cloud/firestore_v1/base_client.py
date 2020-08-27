@@ -164,7 +164,7 @@ class BaseClient(ClientWithProject):
 
         return self._firestore_api_internal
 
-    def _target_helper(self, client_class) -> Any:
+    def _target_helper(self, client_class) -> str:
         """Return the target (where the API is).
         Eg. "firestore.googleapis.com"
 
@@ -271,7 +271,7 @@ class BaseClient(ClientWithProject):
         return joined_path.split(_helpers.DOCUMENT_PATH_DELIMITER)
 
     @staticmethod
-    def field_path(*field_names) -> Any:
+    def field_path(*field_names) -> str:
         """Create a **field path** from a list of nested field names.
 
         A **field path** is a ``.``-delimited concatenation of the field
@@ -401,7 +401,7 @@ def _reference_info(references) -> Tuple[list, dict]:
     return document_paths, reference_map
 
 
-def _get_reference(document_path, reference_map) -> Any:
+def _get_reference(document_path, reference_map) -> BaseDocumentReference:
     """Get a document reference from a dictionary.
 
     This just wraps a simple dictionary look-up with a helpful error that is
@@ -495,7 +495,7 @@ def _get_doc_mask(field_paths,) -> Optional[types.common.DocumentMask]:
         return types.DocumentMask(field_paths=field_paths)
 
 
-def _item_to_collection_ref(iterator, item) -> Any:
+def _item_to_collection_ref(iterator, item) -> BaseCollectionReference:
     """Convert collection ID to collection ref.
 
     Args:
@@ -506,7 +506,7 @@ def _item_to_collection_ref(iterator, item) -> Any:
     return iterator.client.collection(item)
 
 
-def _path_helper(path) -> Any:
+def _path_helper(path) -> List[str]:
     """Standardize path into a tuple of path segments.
 
     Args:

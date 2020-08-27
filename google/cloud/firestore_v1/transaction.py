@@ -36,7 +36,11 @@ from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import batch
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
-from typing import Any, Optional
+from typing import Any, Coroutine, Optional
+
+# Types needed only for Type Hints
+from google.cloud.firestore_v1.types import CommitResponse
+from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
 
 class Transaction(batch.WriteBatch, BaseTransaction):
@@ -136,7 +140,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         self._clean_up()
         return list(commit_response.write_results)
 
-    def get_all(self, references) -> Any:
+    def get_all(self, references) -> Coroutine:
         """Retrieves multiple documents from Firestore.
 
         Args:
@@ -149,7 +153,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         """
         return self._client.get_all(references, transaction=self)
 
-    def get(self, ref_or_query) -> Any:
+    def get(self, ref_or_query) -> [DocumentSnapshot, Any]:
         """
         Retrieve a document or a query result from the database.
         Args:
@@ -182,7 +186,7 @@ class _Transactional(_BaseTransactional):
     def __init__(self, to_wrap) -> None:
         super(_Transactional, self).__init__(to_wrap)
 
-    def _pre_commit(self, transaction, *args, **kwargs) -> Any:
+    def _pre_commit(self, transaction, *args, **kwargs) -> Coroutine:
         """Begin transaction and call the wrapped callable.
 
         If the callable raises an exception, the transaction will be rolled
@@ -301,7 +305,7 @@ def transactional(to_wrap) -> _Transactional:
     return _Transactional(to_wrap)
 
 
-def _commit_with_retry(client, write_pbs, transaction_id) -> Any:
+def _commit_with_retry(client, write_pbs, transaction_id) -> CommitResponse:
     """Call ``Commit`` on the GAPIC client with retry / sleep.
 
     Retries the ``Commit`` RPC on Unavailable. Usually this RPC-level
@@ -344,7 +348,7 @@ def _commit_with_retry(client, write_pbs, transaction_id) -> Any:
         current_sleep = _sleep(current_sleep)
 
 
-def _sleep(current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER) -> Any:
+def _sleep(current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER) -> float:
     """Sleep and produce a new sleep time.
 
     .. _Exponential Backoff And Jitter: https://www.awsarchitectureblog.com/\

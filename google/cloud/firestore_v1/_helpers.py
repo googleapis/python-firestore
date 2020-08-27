@@ -31,7 +31,10 @@ from google.cloud.firestore_v1.field_path import parse_field_path
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import write
-from typing import Any, Generator, List, NoReturn, Optional, Tuple
+from typing import Any, Generator, List, NoReturn, Optional, Tuple, Union
+
+# Types needed only for Type Hints
+from google.cloud.firestore_v1.document import DocumentReference
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
@@ -68,7 +71,7 @@ class GeoPoint(object):
         self.latitude = latitude
         self.longitude = longitude
 
-    def to_protobuf(self) -> Any:
+    def to_protobuf(self) -> latlng_pb2.LatLng:
         """Convert the current object to protobuf.
 
         Returns:
@@ -218,7 +221,7 @@ def encode_dict(values_dict) -> dict:
     return {key: encode_value(value) for key, value in values_dict.items()}
 
 
-def reference_value_to_document(reference_value, client) -> Any:
+def reference_value_to_document(reference_value, client) -> DocumentReference:
     """Convert a reference value string to a document.
 
     Args:
@@ -252,7 +255,9 @@ def reference_value_to_document(reference_value, client) -> Any:
     return document
 
 
-def decode_value(value, client) -> Any:
+def decode_value(
+    value, client
+) -> Union[None, bool, int, float, datetime.datetime, str, bytes, dict, GeoPoint]:
     """Converts a Firestore protobuf ``Value`` to a native Python value.
 
     Args:
@@ -315,7 +320,7 @@ def decode_dict(value_fields, client) -> dict:
     return {key: decode_value(value, client) for key, value in value_fields.items()}
 
 
-def get_doc_id(document_pb, expected_prefix) -> Any:
+def get_doc_id(document_pb, expected_prefix) -> str:
     """Parse a document ID from a document protobuf.
 
     Args:
@@ -921,7 +926,7 @@ class ReadAfterWriteError(Exception):
     """
 
 
-def get_transaction_id(transaction, read_operation=True) -> Any:
+def get_transaction_id(transaction, read_operation=True) -> Optional[bytes]:
     """Get the transaction ID from a ``Transaction`` object.
 
     Args:

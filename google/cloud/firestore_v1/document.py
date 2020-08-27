@@ -24,7 +24,7 @@ from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.watch import Watch
-from typing import Any, Generator
+from typing import Any, Coroutine, Generator
 
 
 class DocumentReference(BaseDocumentReference):
@@ -55,7 +55,7 @@ class DocumentReference(BaseDocumentReference):
     def __init__(self, *path, **kwargs) -> None:
         super(DocumentReference, self).__init__(*path, **kwargs)
 
-    def create(self, document_data) -> Any:
+    def create(self, document_data) -> Coroutine:
         """Create the current document in the Firestore database.
 
         Args:
@@ -76,7 +76,7 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit()
         return _first_write_result(write_results)
 
-    def set(self, document_data, merge=False) -> Any:
+    def set(self, document_data, merge=False) -> Coroutine:
         """Replace the current document in the Firestore database.
 
         A write ``option`` can be specified to indicate preconditions of
@@ -107,7 +107,7 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit()
         return _first_write_result(write_results)
 
-    def update(self, field_updates, option=None) -> Any:
+    def update(self, field_updates, option=None) -> Coroutine:
         """Update an existing document in the Firestore database.
 
         By default, this method verifies that the document exists on the
@@ -255,7 +255,7 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit()
         return _first_write_result(write_results)
 
-    def delete(self, option=None) -> Any:
+    def delete(self, option=None) -> Coroutine:
         """Delete the current document in the Firestore database.
 
         Args:
