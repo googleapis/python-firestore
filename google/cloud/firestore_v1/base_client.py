@@ -506,7 +506,7 @@ def _item_to_collection_ref(iterator, item) -> BaseCollectionReference:
     return iterator.client.collection(item)
 
 
-def _path_helper(path) -> List[str]:
+def _path_helper(path) -> Tuple[str]:
     """Standardize path into a tuple of path segments.
 
     Args:

@@ -36,7 +36,7 @@ from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import batch
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
-from typing import Any, Coroutine, Optional
+from typing import Any, Coroutine, Generator, Optional
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.types import CommitResponse
@@ -153,7 +153,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         """
         return self._client.get_all(references, transaction=self)
 
-    def get(self, ref_or_query) -> [DocumentSnapshot, Any]:
+    def get(self, ref_or_query) -> Generator[DocumentSnapshot, Any, None]:
         """
         Retrieve a document or a query result from the database.
         Args:
