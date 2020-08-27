@@ -43,8 +43,14 @@ def main(parsed):
 
 if __name__ == "__main__":
 
-    logging.basicConfig(level=logging.INFO, stream=sys.stderr)
     parser = argparse.ArgumentParser(description="Listen to changes to a collection")
     parser.add_argument("--collection", default="repro_gcf_18", help="ID of collection")
+    parser.add_argument("--debug", action="store_true", help="Debug log")
     parsed = parser.parse_args()
+
+    if parsed.debug:
+        logging.basicConfig(level=logging.DEBUG, stream=sys.stderr)
+    else:
+        logging.basicConfig(level=logging.INFO, stream=sys.stderr)
+
     main(parsed)
