@@ -55,7 +55,7 @@ class DocumentReference(BaseDocumentReference):
     def __init__(self, *path, **kwargs) -> None:
         super(DocumentReference, self).__init__(*path, **kwargs)
 
-    def create(self, document_data) -> Coroutine:
+    def create(self, document_data) -> Any:
         """Create the current document in the Firestore database.
 
         Args:
