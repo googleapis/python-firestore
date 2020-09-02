@@ -20,6 +20,7 @@ except ImportError:  # Python 2.7
     import collections as collections_abc
 
 import re
+from typing import Iterable
 
 
 _FIELD_PATH_MISSING_TOP = "{!r} is not contained in the data"
@@ -45,7 +46,7 @@ TOKENS_PATTERN = "|".join("(?P<{}>{})".format(*pair) for pair in PATH_ELEMENT_TO
 TOKENS_REGEX = re.compile(TOKENS_PATTERN)
 
 
-def _tokenize_field_path(path):
+def _tokenize_field_path(path: str):
     """Lex a field path into tokens (including dots).
 
     Args:
@@ -66,7 +67,7 @@ def _tokenize_field_path(path):
         raise ValueError("Path {} not consumed, residue: {}".format(path, path[pos:]))
 
 
-def split_field_path(path):
+def split_field_path(path: str):
     """Split a field path into valid elements (without dots).
 
     Args:
@@ -101,7 +102,7 @@ def split_field_path(path):
     return elements
 
 
-def parse_field_path(api_repr):
+def parse_field_path(api_repr: str):
     """Parse a **field path** from into a list of nested field names.
 
     See :func:`field_path` for more on **field paths**.
@@ -130,7 +131,7 @@ def parse_field_path(api_repr):
     return field_names
 
 
-def render_field_path(field_names):
+def render_field_path(field_names: Iterable[str]):
     """Create a **field path** from a list of nested field names.
 
     A **field path** is a ``.``-delimited concatenation of the field
@@ -174,7 +175,7 @@ def render_field_path(field_names):
 get_field_path = render_field_path  # backward-compatibility
 
 
-def get_nested_value(field_path, data):
+def get_nested_value(field_path: str, data: dict):
     """Get a (potentially nested) value from a dictionary.
 
     If the data is nested, for example:
@@ -275,7 +276,7 @@ class FieldPath(object):
         self.parts = tuple(parts)
 
     @classmethod
-    def from_api_repr(cls, api_repr):
+    def from_api_repr(cls, api_repr: str):
         """Factory: create a FieldPath from the string formatted per the API.
 
         Args:
@@ -292,7 +293,7 @@ class FieldPath(object):
         return cls(*parse_field_path(api_repr))
 
     @classmethod
-    def from_string(cls, path_string):
+    def from_string(cls, path_string: str):
         """Factory: create a FieldPath from a unicode string representation.
 
         This method splits on the character `.` and disallows the

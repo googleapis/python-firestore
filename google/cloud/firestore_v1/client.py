@@ -44,7 +44,7 @@ from google.cloud.firestore_v1.services.firestore import client as firestore_cli
 from google.cloud.firestore_v1.services.firestore.transports import (
     grpc as firestore_grpc_transport,
 )
-from typing import Any, Generator
+from typing import Any, Generator, Iterable, Tuple
 
 
 class Client(BaseClient):
@@ -114,7 +114,7 @@ class Client(BaseClient):
         """
         return self._target_helper(firestore_client.FirestoreClient)
 
-    def collection(self, *collection_path) -> CollectionReference:
+    def collection(self, *collection_path: Tuple[str]) -> CollectionReference:
         """Get a reference to a collection.
 
         For a top-level collection:
@@ -145,7 +145,7 @@ class Client(BaseClient):
         """
         return CollectionReference(*_path_helper(collection_path), client=self)
 
-    def collection_group(self, collection_id) -> Query:
+    def collection_group(self, collection_id: str) -> Query:
         """
         Creates and returns a new Query that includes all documents in the
         database that are contained in a collection or subcollection with the
@@ -169,7 +169,7 @@ class Client(BaseClient):
             self._get_collection_reference(collection_id), all_descendants=True
         )
 
-    def document(self, *document_path) -> DocumentReference:
+    def document(self, *document_path: Tuple[str]) -> DocumentReference:
         """Get a reference to a document in a collection.
 
         For a top-level document:
@@ -205,7 +205,10 @@ class Client(BaseClient):
         )
 
     def get_all(
-        self, references, field_paths=None, transaction=None
+        self,
+        references: list,
+        field_paths: Iterable[str] = None,
+        transaction: Transaction = None,
     ) -> Generator[Any, Any, None]:
         """Retrieve a batch of documents.
 
