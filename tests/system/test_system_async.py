@@ -43,18 +43,20 @@ pytestmark = pytest.mark.asyncio
 
 
 def _get_credentials_and_project():
-    credentials = service_account.Credentials.from_service_account_file(FIRESTORE_CREDS)
-    project = FIRESTORE_PROJECT or credentials.project_id
+    if FIRESTORE_EMULATOR:
+        credentials = EMULATOR_CREDS
+        project = FIRESTORE_PROJECT
+    else:
+        credentials = service_account.Credentials.from_service_account_file(
+            FIRESTORE_CREDS
+        )
+        project = FIRESTORE_PROJECT or credentials.project_id
     return credentials, project
 
 
 @pytest.fixture(scope=u"module")
 def client():
-    if FIRESTORE_EMULATOR:
-        credentials = EMULATOR_CREDS
-        project = FIRESTORE_PROJECT
-    else:
-        credentials, project = _get_credentials_and_project()
+    credentials, project = _get_credentials_and_project()
     yield firestore.AsyncClient(project=project, credentials=credentials)
 
 
