@@ -14,10 +14,7 @@
 
 """Utilities for managing / converting field paths to / from strings."""
 
-try:
-    from collections import abc as collections_abc
-except ImportError:  # Python 2.7
-    import collections as collections_abc
+from collections import abc as collections_abc
 
 import re
 
