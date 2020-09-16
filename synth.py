@@ -38,16 +38,14 @@ for version in versions:
     s.move(
         library / f"google/cloud/firestore_{version}",
         f"google/cloud/firestore_{version}",
-        excludes=[
-            library / f"google/firestore_{version}/__init__.py"
-        ]
+        excludes=[library / f"google/firestore_{version}/__init__.py"],
     )
 
     s.move(
         library / f"tests/",
         f"tests",
     )
-    
+
 
 # ----------------------------------------------------------------------------
 # Generate firestore admin GAPIC layer
@@ -63,11 +61,10 @@ for version in admin_versions:
     s.move(
         library / f"google/cloud/admin_{version}",
         f"google/cloud/firestore_admin_{version}",
-         excludes=[
-            library / f"/google/cloud/admin_{version}/__init__.py"
-        ])
+        excludes=[library / f"/google/cloud/admin_{version}/__init__.py"],
+    )
     s.move(library / f"tests", f"tests")
-    
+
     s.replace(
         f"google/cloud/firestore_admin_v1/services/firestore_admin/client.py",
         f"from google.api_core import operation as ga_operation",
@@ -87,7 +84,7 @@ templated_files = common.py_library(
 
 s.move(
     templated_files,
-    excludes=[".coveragerc"] # microgenerator has a good .coveragerc file
+    excludes=[".coveragerc"],  # microgenerator has a good .coveragerc file
 )
 
 s.replace(
@@ -146,10 +143,10 @@ BLACK_VERSION = "black==19.10b0"
 
 s.replace(
     "noxfile.py",
-    '''\
+    """\
 @nox.session\(python=DEFAULT_PYTHON_VERSION\)
 def lint_setup_py\(session\):
-''',
+""",
     '''\
 @nox.session(python="3.7")
 def pytype(session):
@@ -166,20 +163,20 @@ def lint_setup_py(session):
 
 s.replace(
     "noxfile.py",
-    '''\
+    """\
     session.install\("asyncmock", "pytest-asyncio"\)
-''',
-    '''\
+""",
+    """\
     session.install("pytest-asyncio", "aiounittest")
-''',
+""",
 )
 
 # Fix up system test dependencies
 
 s.replace(
     "noxfile.py",
-    '''"mock", "pytest", "google-cloud-testutils",''',
-    '''"mock", "pytest", "pytest-asyncio", "google-cloud-testutils",''',
+    """"mock", "pytest", "google-cloud-testutils",""",
+    """"mock", "pytest", "pytest-asyncio", "google-cloud-testutils",""",
 )
 
 s.shell.run(["nox", "-s", "blacken"], hide_output=False)
@@ -191,5 +188,5 @@ s.replace(
 # Setup firestore account credentials
 export FIRESTORE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/firebase-credentials.json
 
-# Setup service account credentials."""
+# Setup service account credentials.""",
 )
