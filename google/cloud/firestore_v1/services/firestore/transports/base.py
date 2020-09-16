@@ -28,8 +28,6 @@ from google.auth import credentials  # type: ignore
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import document as gf_document
 from google.cloud.firestore_v1.types import firestore
-from google.iam.v1 import iam_policy_pb2 as iam_policy  # type: ignore
-from google.iam.v1 import policy_pb2 as policy  # type: ignore
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
 
@@ -458,36 +456,6 @@ class FirestoreTransport(abc.ABC):
     ) -> typing.Callable[
         [firestore.CreateDocumentRequest],
         typing.Union[document.Document, typing.Awaitable[document.Document]],
-    ]:
-        raise NotImplementedError()
-
-    @property
-    def set_iam_policy(
-        self,
-    ) -> typing.Callable[
-        [iam_policy.SetIamPolicyRequest],
-        typing.Union[policy.Policy, typing.Awaitable[policy.Policy]],
-    ]:
-        raise NotImplementedError()
-
-    @property
-    def get_iam_policy(
-        self,
-    ) -> typing.Callable[
-        [iam_policy.GetIamPolicyRequest],
-        typing.Union[policy.Policy, typing.Awaitable[policy.Policy]],
-    ]:
-        raise NotImplementedError()
-
-    @property
-    def test_iam_permissions(
-        self,
-    ) -> typing.Callable[
-        [iam_policy.TestIamPermissionsRequest],
-        typing.Union[
-            iam_policy.TestIamPermissionsResponse,
-            typing.Awaitable[iam_policy.TestIamPermissionsResponse],
-        ],
     ]:
         raise NotImplementedError()
 

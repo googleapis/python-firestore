@@ -31,8 +31,6 @@ from grpc.experimental import aio  # type: ignore
 from google.cloud.admin_v1.types import field
 from google.cloud.admin_v1.types import firestore_admin
 from google.cloud.admin_v1.types import index
-from google.iam.v1 import iam_policy_pb2 as iam_policy  # type: ignore
-from google.iam.v1 import policy_pb2 as policy  # type: ignore
 from google.longrunning import operations_pb2 as operations  # type: ignore
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
@@ -541,86 +539,6 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 response_deserializer=operations.Operation.FromString,
             )
         return self._stubs["import_documents"]
-
-    @property
-    def set_iam_policy(
-        self,
-    ) -> Callable[[iam_policy.SetIamPolicyRequest], Awaitable[policy.Policy]]:
-        r"""Return a callable for the set iam policy method over gRPC.
-        Sets the IAM access control policy on the specified
-        function. Replaces any existing policy.
-        Returns:
-            Callable[[~.SetIamPolicyRequest],
-                    Awaitable[~.Policy]]:
-                A function that, when called, will call the underlying RPC
-                on the server.
-        """
-        # Generate a "stub function" on-the-fly which will actually make
-        # the request.
-        # gRPC handles serialization and deserialization, so we just need
-        # to pass in the functions for each.
-        if "set_iam_policy" not in self._stubs:
-            self._stubs["set_iam_policy"] = self.grpc_channel.unary_unary(
-                "/google.iam.v1.IAMPolicy/SetIamPolicy",
-                request_serializer=iam_policy.SetIamPolicyRequest.SerializeToString,
-                response_deserializer=policy.Policy.FromString,
-            )
-        return self._stubs["set_iam_policy"]
-
-    @property
-    def get_iam_policy(
-        self,
-    ) -> Callable[[iam_policy.GetIamPolicyRequest], Awaitable[policy.Policy]]:
-        r"""Return a callable for the get iam policy method over gRPC.
-        Gets the IAM access control policy for a function.
-        Returns an empty policy if the function exists and does
-        not have a policy set.
-        Returns:
-            Callable[[~.GetIamPolicyRequest],
-                    Awaitable[~.Policy]]:
-                A function that, when called, will call the underlying RPC
-                on the server.
-        """
-        # Generate a "stub function" on-the-fly which will actually make
-        # the request.
-        # gRPC handles serialization and deserialization, so we just need
-        # to pass in the functions for each.
-        if "get_iam_policy" not in self._stubs:
-            self._stubs["get_iam_policy"] = self.grpc_channel.unary_unary(
-                "/google.iam.v1.IAMPolicy/GetIamPolicy",
-                request_serializer=iam_policy.GetIamPolicyRequest.SerializeToString,
-                response_deserializer=policy.Policy.FromString,
-            )
-        return self._stubs["get_iam_policy"]
-
-    @property
-    def test_iam_permissions(
-        self,
-    ) -> Callable[
-        [iam_policy.TestIamPermissionsRequest],
-        Awaitable[iam_policy.TestIamPermissionsResponse],
-    ]:
-        r"""Return a callable for the test iam permissions method over gRPC.
-        Tests the specified permissions against the IAM access control
-        policy for a function. If the function does not exist, this will
-        return an empty set of permissions, not a NOT_FOUND error.
-        Returns:
-            Callable[[~.TestIamPermissionsRequest],
-                    Awaitable[~.TestIamPermissionsResponse]]:
-                A function that, when called, will call the underlying RPC
-                on the server.
-        """
-        # Generate a "stub function" on-the-fly which will actually make
-        # the request.
-        # gRPC handles serialization and deserialization, so we just need
-        # to pass in the functions for each.
-        if "test_iam_permissions" not in self._stubs:
-            self._stubs["test_iam_permissions"] = self.grpc_channel.unary_unary(
-                "/google.iam.v1.IAMPolicy/TestIamPermissions",
-                request_serializer=iam_policy.TestIamPermissionsRequest.SerializeToString,
-                response_deserializer=iam_policy.TestIamPermissionsResponse.FromString,
-            )
-        return self._stubs["test_iam_permissions"]
 
 
 __all__ = ("FirestoreAdminGrpcAsyncIOTransport",)

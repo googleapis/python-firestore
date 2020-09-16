@@ -29,8 +29,6 @@ from google.auth import credentials  # type: ignore
 from google.cloud.admin_v1.types import field
 from google.cloud.admin_v1.types import firestore_admin
 from google.cloud.admin_v1.types import index
-from google.iam.v1 import iam_policy_pb2 as iam_policy  # type: ignore
-from google.iam.v1 import policy_pb2 as policy  # type: ignore
 from google.longrunning import operations_pb2 as operations  # type: ignore
 from google.protobuf import empty_pb2 as empty  # type: ignore
 
@@ -292,36 +290,6 @@ class FirestoreAdminTransport(abc.ABC):
     ) -> typing.Callable[
         [firestore_admin.ImportDocumentsRequest],
         typing.Union[operations.Operation, typing.Awaitable[operations.Operation]],
-    ]:
-        raise NotImplementedError()
-
-    @property
-    def set_iam_policy(
-        self,
-    ) -> typing.Callable[
-        [iam_policy.SetIamPolicyRequest],
-        typing.Union[policy.Policy, typing.Awaitable[policy.Policy]],
-    ]:
-        raise NotImplementedError()
-
-    @property
-    def get_iam_policy(
-        self,
-    ) -> typing.Callable[
-        [iam_policy.GetIamPolicyRequest],
-        typing.Union[policy.Policy, typing.Awaitable[policy.Policy]],
-    ]:
-        raise NotImplementedError()
-
-    @property
-    def test_iam_permissions(
-        self,
-    ) -> typing.Callable[
-        [iam_policy.TestIamPermissionsRequest],
-        typing.Union[
-            iam_policy.TestIamPermissionsResponse,
-            typing.Awaitable[iam_policy.TestIamPermissionsResponse],
-        ],
     ]:
         raise NotImplementedError()
 
