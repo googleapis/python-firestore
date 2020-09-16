@@ -45,6 +45,7 @@ for version in versions:
         library / f"tests/",
         f"tests",
     )
+    s.move(library / "scripts")
 
 
 # ----------------------------------------------------------------------------
@@ -55,8 +56,6 @@ for version in admin_versions:
         service="firestore_admin",
         version=version,
         bazel_target=f"//google/firestore/admin/{version}:firestore-admin-{version}-py",
-        # include_protos=True,
-        # proto_path=f"google/firestore/admin/{version}",
     )
     s.move(
         library / f"google/cloud/firestore_admin_{version}",
@@ -64,6 +63,7 @@ for version in admin_versions:
         excludes=[library / f"google/cloud/admin_{version}/__init__.py"],
     )
     s.move(library / f"tests", f"tests")
+    s.move(library / "scripts")
 
     s.replace(
         f"google/cloud/firestore_admin_v1/services/firestore_admin/client.py",
