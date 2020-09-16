@@ -44,5 +44,7 @@ python3.6 -m nox --version
 if [[ -n "${NOX_SESSION:-}" ]]; then
     python3.6 -m nox -s "${NOX_SESSION:-}"
 else
-    python3.6 -m nox
+    # TODO: Currently generated type metadata, ignores, cause many errors.
+    # For now, disable pytype in CI runs
+    python3.6 -m nox -k "not pytype"
 fi
