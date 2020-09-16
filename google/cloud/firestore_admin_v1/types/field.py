@@ -18,7 +18,7 @@
 import proto  # type: ignore
 
 
-from google.cloud.admin_v1.types import index
+from google.cloud.firestore_admin_v1.types import index
 
 
 __protobuf__ = proto.module(package="google.firestore.admin.v1", manifest={"Field",},)

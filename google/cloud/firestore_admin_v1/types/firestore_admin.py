@@ -18,8 +18,8 @@
 import proto  # type: ignore
 
 
-from google.cloud.admin_v1.types import field as gfa_field
-from google.cloud.admin_v1.types import index as gfa_index
+from google.cloud.firestore_admin_v1.types import field as gfa_field
+from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
 
 

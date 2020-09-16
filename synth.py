@@ -66,6 +66,16 @@ for version in admin_versions:
     s.move(library / f"tests", f"tests")
 
     s.replace(
+        f"google/cloud/**/*.py",
+        f"google.cloud.admin_v1",
+        f"google.cloud.firestore_admin_v1",
+    )
+    s.replace(
+        f"tests/unit/gapic/**/*.py",
+        f"google.cloud.admin_v1",
+        f"google.cloud.firestore_admin_v1",
+    )
+    s.replace(
         f"google/cloud/firestore_admin_v1/services/firestore_admin/client.py",
         f"from google.api_core import operation as ga_operation",
         f"from google.api_core import operation as ga_operation\nfrom google.api_core import operation",
