@@ -35,7 +35,9 @@ from google.protobuf import empty_pb2 as empty  # type: ignore
 
 try:
     DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo(
-        gapic_version=pkg_resources.get_distribution("google-cloud-admin",).version,
+        gapic_version=pkg_resources.get_distribution(
+            "google-cloud-firestore-admin",
+        ).version,
     )
 except pkg_resources.DistributionNotFound:
     DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo()
@@ -122,9 +124,9 @@ class FirestoreAdminTransport(abc.ABC):
                     maximum=60.0,
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
+                        exceptions.DeadlineExceeded,
                         exceptions.InternalServerError,
                         exceptions.ServiceUnavailable,
-                        exceptions.DeadlineExceeded,
                     ),
                 ),
                 default_timeout=60.0,
@@ -137,9 +139,9 @@ class FirestoreAdminTransport(abc.ABC):
                     maximum=60.0,
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
+                        exceptions.DeadlineExceeded,
                         exceptions.InternalServerError,
                         exceptions.ServiceUnavailable,
-                        exceptions.DeadlineExceeded,
                     ),
                 ),
                 default_timeout=60.0,
@@ -152,9 +154,9 @@ class FirestoreAdminTransport(abc.ABC):
                     maximum=60.0,
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
+                        exceptions.DeadlineExceeded,
                         exceptions.InternalServerError,
                         exceptions.ServiceUnavailable,
-                        exceptions.DeadlineExceeded,
                     ),
                 ),
                 default_timeout=60.0,
@@ -167,9 +169,9 @@ class FirestoreAdminTransport(abc.ABC):
                     maximum=60.0,
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
+                        exceptions.DeadlineExceeded,
                         exceptions.InternalServerError,
                         exceptions.ServiceUnavailable,
-                        exceptions.DeadlineExceeded,
                     ),
                 ),
                 default_timeout=60.0,
@@ -185,9 +187,9 @@ class FirestoreAdminTransport(abc.ABC):
                     maximum=60.0,
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
+                        exceptions.DeadlineExceeded,
                         exceptions.InternalServerError,
                         exceptions.ServiceUnavailable,
-                        exceptions.DeadlineExceeded,
                     ),
                 ),
                 default_timeout=60.0,

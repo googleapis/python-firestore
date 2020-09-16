@@ -35,22 +35,20 @@ from google.api_core import operation_async
 from google.api_core import operations_v1
 from google.auth import credentials
 from google.auth.exceptions import MutualTLSChannelError
-from google.cloud.firestore.firestore_admin_v1.services.firestore_admin import (
+from google.cloud.firestore_admin_v1.services.firestore_admin import (
     FirestoreAdminAsyncClient,
 )
-from google.cloud.firestore.firestore_admin_v1.services.firestore_admin import (
+from google.cloud.firestore_admin_v1.services.firestore_admin import (
     FirestoreAdminClient,
 )
-from google.cloud.firestore.firestore_admin_v1.services.firestore_admin import pagers
-from google.cloud.firestore.firestore_admin_v1.services.firestore_admin import (
-    transports,
-)
-from google.cloud.firestore.firestore_admin_v1.types import field
-from google.cloud.firestore.firestore_admin_v1.types import field as gfa_field
-from google.cloud.firestore.firestore_admin_v1.types import firestore_admin
-from google.cloud.firestore.firestore_admin_v1.types import index
-from google.cloud.firestore.firestore_admin_v1.types import index as gfa_index
-from google.cloud.firestore.firestore_admin_v1.types import operation as gfa_operation
+from google.cloud.firestore_admin_v1.services.firestore_admin import pagers
+from google.cloud.firestore_admin_v1.services.firestore_admin import transports
+from google.cloud.firestore_admin_v1.types import field
+from google.cloud.firestore_admin_v1.types import field as gfa_field
+from google.cloud.firestore_admin_v1.types import firestore_admin
+from google.cloud.firestore_admin_v1.types import index
+from google.cloud.firestore_admin_v1.types import index as gfa_index
+from google.cloud.firestore_admin_v1.types import operation as gfa_operation
 from google.longrunning import operations_pb2
 from google.oauth2 import service_account
 from google.protobuf import field_mask_pb2 as field_mask  # type: ignore
@@ -436,7 +434,7 @@ def test_firestore_admin_client_client_options_credentials_file(
 
 def test_firestore_admin_client_client_options_from_dict():
     with mock.patch(
-        "google.cloud.firestore.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminGrpcTransport.__init__"
+        "google.cloud.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminGrpcTransport.__init__"
     ) as grpc_transport:
         grpc_transport.return_value = None
         client = FirestoreAdminClient(
@@ -2499,7 +2497,7 @@ def test_firestore_admin_base_transport_error():
 def test_firestore_admin_base_transport():
     # Instantiate the base transport.
     with mock.patch(
-        "google.cloud.firestore.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminTransport.__init__"
+        "google.cloud.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminTransport.__init__"
     ) as Transport:
         Transport.return_value = None
         transport = transports.FirestoreAdminTransport(
@@ -2534,7 +2532,7 @@ def test_firestore_admin_base_transport_with_credentials_file():
     with mock.patch.object(
         auth, "load_credentials_from_file"
     ) as load_creds, mock.patch(
-        "google.cloud.firestore.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminTransport._prep_wrapped_messages"
+        "google.cloud.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminTransport._prep_wrapped_messages"
     ) as Transport:
         Transport.return_value = None
         load_creds.return_value = (credentials.AnonymousCredentials(), None)
@@ -2554,7 +2552,7 @@ def test_firestore_admin_base_transport_with_credentials_file():
 def test_firestore_admin_base_transport_with_adc():
     # Test the default credentials are used if credentials and credentials_file are None.
     with mock.patch.object(auth, "default") as adc, mock.patch(
-        "google.cloud.firestore.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminTransport._prep_wrapped_messages"
+        "google.cloud.firestore_admin_v1.services.firestore_admin.transports.FirestoreAdminTransport._prep_wrapped_messages"
     ) as Transport:
         Transport.return_value = None
         adc.return_value = (credentials.AnonymousCredentials(), None)
