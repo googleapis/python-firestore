@@ -80,6 +80,7 @@ templated_files = common.py_library(
     unit_test_python_versions=["3.6", "3.7", "3.8"],
     system_test_python_versions=["3.7"],
     microgenerator=True,
+    cov_level=97,  # https://github.com/googleapis/python-firestore/issues/190
 )
 
 s.move(
@@ -177,17 +178,6 @@ s.replace(
     "noxfile.py",
     """"mock", "pytest", "google-cloud-testutils",""",
     """"mock", "pytest", "pytest-asyncio", "google-cloud-testutils",""",
-)
-
-# Work around https://github.com/googleapis/python-firestore/issues/190
-
-s.replace(
-    "noxfile.py",
-    """\
-    session.run\("coverage", "report", "--show-missing", "--fail-under=100"\)""",
-    """\
-    # Work around https://github.com/googleapis/python-firestore/issues/190
-    session.run("coverage", "report", "--show-missing", "--fail-under=97")""",
 )
 
 # Turn of `pytype` on CI for now.
