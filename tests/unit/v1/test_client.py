@@ -212,15 +212,16 @@ class TestClient(unittest.TestCase):
                 self.collection_ids = pages[0]
 
             def _next_page(self):
-                if self._pages:
-                    page, self._pages = self._pages[0], self._pages[1:]
-                    return Page(self, page, self.item_to_value)
+                page, self._pages = self._pages[0], self._pages[1:]
+                return Page(self, page, self.item_to_value)
 
         iterator = _Iterator(pages=[collection_ids])
         firestore_api.list_collection_ids.return_value = iterator
 
-        collections = list(client.collections())
+        collections = [c for c in client.collections()]
 
+        page = iterator._next_page()
+        self.assertEqual(page.num_items, len(collection_ids))
         self.assertEqual(len(collections), len(collection_ids))
         for collection, collection_id in zip(collections, collection_ids):
             self.assertIsInstance(collection, CollectionReference)
@@ -231,6 +232,50 @@ class TestClient(unittest.TestCase):
         firestore_api.list_collection_ids.assert_called_once_with(
             request={"parent": base_path}, metadata=client._rpc_metadata
         )
+
+    def test_collections_w_next_page_token(self):
+        from google.api_core.page_iterator import Iterator
+        from google.api_core.page_iterator import Page
+
+        collection_ids = ["users", "projects"]
+        client = self._make_default_one()
+        firestore_api = mock.Mock(spec=["list_collection_ids"])
+        client._firestore_api_internal = firestore_api
+
+        # TODO(microgen): list_collection_ids isn't a pager.
+        # https://github.com/googleapis/gapic-generator-python/issues/516
+        class _Iterator(Iterator):
+            def __init__(self, pages):
+                super(_Iterator, self).__init__(client=None)
+                self._pages = pages
+                self.collection_ids = pages[0]
+                self.next_page_token = "next_page_token"
+
+            def _next_page(self):
+                page, self._pages = self._pages[0], self._pages[1:]
+                return Page(self, page, self.item_to_value)
+
+        class _Iterator1(Iterator):
+            def __init__(self, pages):
+                super(_Iterator1, self).__init__(client=None)
+                self._pages = pages
+                self.collection_ids = pages[0]
+
+            def _next_page(self):
+                page, self._pages = self._pages[0], self._pages[1:]
+                return Page(self, page, self.item_to_value)
+
+        iterator = _Iterator(pages=[collection_ids])
+        iterator1 = _Iterator1(pages=[collection_ids])
+        firestore_api.list_collection_ids.side_effect = [iterator, iterator1]
+        collections = [c for c in client.collections()]
+
+        page = iterator._next_page()
+        self.assertEqual(page.num_items, len(collection_ids))
+        page1 = iterator1._next_page()
+        self.assertEqual(page1.num_items, len(collection_ids))
+        self.assertEqual(len(collections), 4)
+        firestore_api.list_collection_ids.call_count = 2
 
     def _get_all_helper(self, client, references, document_pbs, **kwargs):
         # Create a minimal fake GAPIC with a dummy response.

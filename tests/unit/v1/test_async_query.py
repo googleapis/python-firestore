@@ -21,16 +21,6 @@ from tests.unit.v1.test__helpers import AsyncMock, AsyncIter
 from tests.unit.v1.test_base_query import _make_credentials, _make_query_response
 
 
-class MockAsyncIter:
-    def __init__(self, count=3):
-        # count is arbitrary value
-        self.count = count
-
-    async def __aiter__(self, **_):
-        for i in range(self.count):
-            yield i
-
-
 class TestAsyncQuery(aiounittest.AsyncTestCase):
     @staticmethod
     def _get_target_class():

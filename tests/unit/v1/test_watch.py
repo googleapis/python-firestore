@@ -374,6 +374,18 @@ class TestWatch(unittest.TestCase):
             inst.on_snapshot(proto)
         self.assertEqual(str(exc.exception), "Unexpected target ID 1 sent by server")
 
+    def test_on_snapshot_target_add_successfully(self):
+        from google.cloud.firestore_v1.watch import WATCH_TARGET_ID
+
+        inst = self._makeOne()
+        proto = DummyProto()
+        proto.target_change.target_change_type = (
+            firestore.TargetChange.TargetChangeType.ADD
+        )
+        proto.target_change.target_ids = [20601]  # not "Py"
+        inst.on_snapshot(proto)
+        self.assertEqual(proto.target_change.target_ids[0], WATCH_TARGET_ID)
+
     def test_on_snapshot_target_remove(self):
         inst = self._makeOne()
         proto = DummyProto()
@@ -564,6 +576,23 @@ class TestWatch(unittest.TestCase):
             str(exc.exception).startswith("Unknown listen response type"),
             str(exc.exception),
         )
+
+    def test_on_snapshot_document_delete(self):
+        from google.cloud.firestore_v1.watch import ChangeType
+
+        inst = self._makeOne()
+        proto = DummyProto()
+        proto.target_change = ""
+        proto.document_change = ""
+
+        class DummyDelete(object):
+            document = "fred"
+
+        delete = DummyDelete()
+        proto.document_remove = ""
+        proto.document_delete = delete
+        inst.on_snapshot(proto)
+        self.assertTrue(inst.change_map["fred"] is ChangeType.REMOVED)
 
     def test_push_callback_called_no_changes(self):
         import pytz

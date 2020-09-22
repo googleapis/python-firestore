@@ -424,7 +424,7 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         await self._get_helper(use_transaction=True)
 
     @pytest.mark.asyncio
-    async def _collections_helper(self, page_size=None):
+    async def _collections_helper(self, page_size=None, page_token=None):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
@@ -437,37 +437,58 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
                 self.collection_ids = pages[0]
 
             def _next_page(self):
-                if self._pages:
-                    page, self._pages = self._pages[0], self._pages[1:]
-                    return Page(self, page, self.item_to_value)
+                page, self._pages = self._pages[0], self._pages[1:]
+                return Page(self, page, self.item_to_value)
+
+        class _Iterator1(Iterator):
+            def __init__(self, pages):
+                super(_Iterator1, self).__init__(client=None)
+                self._pages = pages
+                self.collection_ids = pages[0]
+                self.next_page_token = page_token
+
+            def _next_page(self):
+                page, self._pages = self._pages[0], self._pages[1:]
+                return Page(self, page, self.item_to_value)
 
         collection_ids = ["coll-1", "coll-2"]
         iterator = _Iterator(pages=[collection_ids])
         firestore_api = AsyncMock()
         firestore_api.mock_add_spec(spec=["list_collection_ids"])
-        firestore_api.list_collection_ids.return_value = iterator
+        page = iterator._next_page()
+        self.assertEqual(page.num_items, len(collection_ids))
+
+        if page_token:
+            iterator1 = _Iterator1(pages=[collection_ids])
+            firestore_api.list_collection_ids.side_effect = [iterator1, iterator]
+            page1 = iterator1._next_page()
+            self.assertEqual(page1.num_items, len(collection_ids))
+        else:
+            firestore_api.list_collection_ids.return_value = iterator
 
         client = _make_client()
         client._firestore_api_internal = firestore_api
 
         # Actually make a document and call delete().
         document = self._make_one("where", "we-are", client=client)
-        if page_size is not None:
-            collections = [c async for c in document.collections(page_size=page_size)]
+
+        collections = [c async for c in document.collections(page_size=page_size)]
+
+        if page_token:
+            self.assertEqual(len(collections), 4)
+            firestore_api.list_collection_ids.call_count = 2
         else:
-            collections = [c async for c in document.collections()]
+            # Verify the response and the mocks.
+            self.assertEqual(len(collections), len(collection_ids))
+            for collection, collection_id in zip(collections, collection_ids):
+                self.assertIsInstance(collection, AsyncCollectionReference)
+                self.assertEqual(collection.parent, document)
+                self.assertEqual(collection.id, collection_id)
 
-        # Verify the response and the mocks.
-        self.assertEqual(len(collections), len(collection_ids))
-        for collection, collection_id in zip(collections, collection_ids):
-            self.assertIsInstance(collection, AsyncCollectionReference)
-            self.assertEqual(collection.parent, document)
-            self.assertEqual(collection.id, collection_id)
-
-        firestore_api.list_collection_ids.assert_called_once_with(
-            request={"parent": document._document_path, "page_size": page_size},
-            metadata=client._rpc_metadata,
-        )
+            firestore_api.list_collection_ids.assert_called_once_with(
+                request={"parent": document._document_path, "page_size": page_size},
+                metadata=client._rpc_metadata,
+            )
 
     @pytest.mark.asyncio
     async def test_collections_wo_page_size(self):
@@ -476,6 +497,10 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
     @pytest.mark.asyncio
     async def test_collections_w_page_size(self):
         await self._collections_helper(page_size=10)
+
+    @pytest.mark.asyncio
+    async def test_collections_w_next_page(self):
+        await self._collections_helper(page_token="next_page_token")
 
 
 def _make_credentials():
