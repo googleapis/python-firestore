@@ -65,10 +65,11 @@ for version in admin_versions:
     s.move(library / f"tests", f"tests")
     s.move(library / "scripts")
 
+    # TODO: remove when Bazel pulls in gapic-generator-python 0.33.6
     s.replace(
         f"google/cloud/firestore_admin_v1/services/firestore_admin/client.py",
         f"from google.api_core import operation as ga_operation",
-        f"from google.api_core import operation as ga_operation\nfrom google.api_core import operation",
+        f"from google.api_core import operation as ga_operation  # type: ignore\nfrom google.api_core import operation",
     )
 
 
