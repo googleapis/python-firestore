@@ -3,23 +3,23 @@
     {
       "git": {
         "name": ".",
-        "remote": "git@github.com:crwilcox/python-firestore.git",
-        "sha": "cc25d5ebfb8cc39b63bff2383e81d16793d42b20"
+        "remote": "git@github.com:googleapis/python-firestore",
+        "sha": "bae2f9299d7a2e97e5487898974f90c3f4fd6960"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "5099a037c974066832474771c5dfab504b8daaf6",
-        "internalRef": "321186647"
+        "sha": "8d73f9486fc193a150f6c907dfb9f49431aff3ff",
+        "internalRef": "332497859"
       }
     },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "3a89215abd0e66dfc4f21d07d552d0b543abf082"
+        "sha": "27f4406999b1eee29e04b09b2423a8e4646c7e24"
       }
     }
   ],
@@ -30,7 +30,7 @@
         "apiName": "firestore",
         "apiVersion": "v1",
         "language": "python",
-        "generator": "gapic-generator-python"
+        "generator": "bazel"
       }
     },
     {
@@ -39,7 +39,7 @@
         "apiName": "firestore_admin",
         "apiVersion": "v1",
         "language": "python",
-        "generator": "gapic-generator-python"
+        "generator": "bazel"
       }
     }
   ]
