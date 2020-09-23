@@ -4,15 +4,15 @@
       "git": {
         "name": ".",
         "remote": "git@github.com:googleapis/python-firestore",
-        "sha": "1f44a45419a85d8646ded5f22d6cbab697761651"
+        "sha": "d3631171e9ce26ddddbb3e496c6ae893c362700f"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "3dbeac0d54125b123c8dfd39c774b37473c36944",
-        "internalRef": "333159182"
+        "sha": "acd4aabf1c1e3e5bf7db0e81f323003fb317fdaa",
+        "internalRef": "333302099"
       }
     },
     {
