@@ -18,7 +18,7 @@ import copy
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
-from typing import Any, Coroutine, Dict, NoReturn, Union
+from typing import Any, Dict, NoReturn, Union
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.types import firestore
