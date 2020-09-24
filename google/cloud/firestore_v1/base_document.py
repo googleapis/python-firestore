@@ -18,7 +18,7 @@ import copy
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
-from typing import Any, Coroutine, Dict, NoReturn, Optional
+from typing import Any, Coroutine, Dict, NoReturn, Union
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.types import firestore
@@ -358,7 +358,7 @@ class DocumentSnapshot(object):
         nested_data = field_path_module.get_nested_value(field_path, self._data)
         return copy.deepcopy(nested_data)
 
-    def to_dict(self) -> Optional[Dict[str, Any]]:
+    def to_dict(self) -> Union[Dict[str, Any], None]:
         """Retrieve the data contained in this snapshot.
 
         A copy is returned since the data may contain mutable values,

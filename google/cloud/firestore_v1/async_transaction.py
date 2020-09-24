@@ -141,7 +141,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         self._clean_up()
         return list(commit_response.write_results)
 
-    async def get_all(self, references) -> Coroutine:
+    async def get_all(self, references) -> AsyncGenerator[DocumentSnapshot, Any]:
         """Retrieves multiple documents from Firestore.
 
         Args:

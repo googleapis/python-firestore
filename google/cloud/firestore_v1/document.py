@@ -24,6 +24,7 @@ from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.watch import Watch
+from google.protobuf import timestamp_pb2
 from typing import Any, Coroutine, Generator
 
 
@@ -255,7 +256,7 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit()
         return _first_write_result(write_results)
 
-    def delete(self, option=None) -> Coroutine:
+    def delete(self, option=None) -> timestamp_pb2.Timestamp:
         """Delete the current document in the Firestore database.
 
         Args:

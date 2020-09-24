@@ -926,7 +926,7 @@ class ReadAfterWriteError(Exception):
     """
 
 
-def get_transaction_id(transaction, read_operation=True) -> Optional[bytes]:
+def get_transaction_id(transaction, read_operation=True) -> Union[bytes, None]:
     """Get the transaction ID from a ``Transaction`` object.
 
     Args:

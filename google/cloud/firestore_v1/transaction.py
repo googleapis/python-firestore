@@ -36,11 +36,11 @@ from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import batch
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
-from typing import Any, Coroutine, Generator, Optional
+from typing import Any, Generator, Optional
 
 # Types needed only for Type Hints
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.types import CommitResponse
-from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
 
 class Transaction(batch.WriteBatch, BaseTransaction):
@@ -140,7 +140,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         self._clean_up()
         return list(commit_response.write_results)
 
-    def get_all(self, references) -> Coroutine:
+    def get_all(self, references) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieves multiple documents from Firestore.
 
         Args:
@@ -186,7 +186,7 @@ class _Transactional(_BaseTransactional):
     def __init__(self, to_wrap) -> None:
         super(_Transactional, self).__init__(to_wrap)
 
-    def _pre_commit(self, transaction, *args, **kwargs) -> Coroutine:
+    def _pre_commit(self, transaction, *args, **kwargs) -> Any:
         """Begin transaction and call the wrapped callable.
 
         If the callable raises an exception, the transaction will be rolled
