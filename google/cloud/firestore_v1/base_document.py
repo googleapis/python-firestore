@@ -22,6 +22,7 @@ from typing import Any, Coroutine, Dict, NoReturn, Union
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.types import firestore
+from google.cloud.firestore_v1.types import write
 
 
 class BaseDocumentReference(object):
@@ -426,7 +427,7 @@ def _consume_single_get(response_iterator) -> firestore.BatchGetDocumentsRespons
     return all_responses[0]
 
 
-def _first_write_result(write_results) -> Coroutine:
+def _first_write_result(write_results) -> write.WriteResult:
     """Get first write result from list.
 
     For cases where ``len(write_results) > 1``, this assumes the writes

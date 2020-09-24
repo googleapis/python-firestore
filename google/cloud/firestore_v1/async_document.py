@@ -23,6 +23,7 @@ from google.cloud.firestore_v1.base_document import (
 from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import common
+from google.cloud.firestore_v1.types import write
 from google.protobuf import timestamp_pb2
 from typing import Any, AsyncGenerator, Coroutine, Union
 
@@ -55,7 +56,7 @@ class AsyncDocumentReference(BaseDocumentReference):
     def __init__(self, *path, **kwargs) -> None:
         super(AsyncDocumentReference, self).__init__(*path, **kwargs)
 
-    async def create(self, document_data) -> Coroutine:
+    async def create(self, document_data) -> write.WriteResult:
         """Create the current document in the Firestore database.
 
         Args:
@@ -76,7 +77,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         write_results = await batch.commit()
         return _first_write_result(write_results)
 
-    async def set(self, document_data, merge=False) -> Coroutine:
+    async def set(self, document_data, merge=False) -> write.WriteResult:
         """Replace the current document in the Firestore database.
 
         A write ``option`` can be specified to indicate preconditions of
@@ -107,7 +108,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         write_results = await batch.commit()
         return _first_write_result(write_results)
 
-    async def update(self, field_updates, option=None) -> Coroutine:
+    async def update(self, field_updates, option=None) -> write.WriteResult:
         """Update an existing document in the Firestore database.
 
         By default, this method verifies that the document exists on the
