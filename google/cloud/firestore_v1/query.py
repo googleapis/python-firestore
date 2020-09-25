@@ -255,6 +255,7 @@ class CollectionGroup(Query):
         parent (:class:`~google.cloud.firestore_v1.collection.CollectionReference`):
             The collection that this query applies to.
     """
+
     def __init__(
         self,
         parent,
@@ -334,4 +335,4 @@ class CollectionGroup(Query):
 
     def _decode_cursor(self, cursor_pb):
         """TODO"""
-        return self._client.document(cursor_pb.values[0].reference_value).get()
+        return [self._client.document(cursor_pb.values[0].reference_value)]
