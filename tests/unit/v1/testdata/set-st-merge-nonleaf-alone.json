@@ -26,13 +26,18 @@
                 "fieldPaths": [
                   "h"
                 ]
-              },
-              "updateTransforms": [
-                {
-                  "fieldPath": "h.g",
-                  "setToServerValue": "REQUEST_TIME"
-                }
-              ]
+              }
+            },
+            {
+              "transform": {
+                "document": "projects/projectID/databases/(default)/documents/C/d",
+                "fieldTransforms": [
+                  {
+                    "fieldPath": "h.g",
+                    "setToServerValue": "REQUEST_TIME"
+                  }
+                ]
+              }
             }
           ]
         }

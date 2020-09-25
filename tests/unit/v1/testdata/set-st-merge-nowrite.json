@@ -19,19 +19,15 @@
           "database": "projects/projectID/databases/(default)",
           "writes": [
             {
-              "update": {
-                "fields": {},
-                "name": "projects/projectID/databases/(default)/documents/C/d"
-              },
-              "updateMask": {
-                "fieldPaths": []
-              },
-              "updateTransforms": [
-                {
-                  "fieldPath": "b",
-                  "setToServerValue": "REQUEST_TIME"
-                }
-              ]
+              "transform": {
+                "document": "projects/projectID/databases/(default)/documents/C/d",
+                "fieldTransforms": [
+                  {
+                    "fieldPath": "b",
+                    "setToServerValue": "REQUEST_TIME"
+                  }
+                ]
+              }
             }
           ]
         }
