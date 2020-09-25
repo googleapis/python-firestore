@@ -22,7 +22,6 @@ import os
 import mock
 import pytest
 
-from google.protobuf import json_format
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import firestore
 from google.cloud.firestore_v1.types import tests
@@ -107,11 +106,17 @@ def _run_testcase(testcase, call, firestore_api, client):
             call()
     else:
         call()
+
+        wrapped_writes = [write.Write(write_pb) for write_pb in testcase.request.writes]
+
+        expected_request = {
+            "database": client._database_string,
+            "writes": wrapped_writes,
+            "transaction": None,
+        }
+
         firestore_api.commit.assert_called_once_with(
-            client._database_string,
-            list(testcase.request.writes),
-            transaction=None,
-            metadata=client._rpc_metadata,
+            request=expected_request, metadata=client._rpc_metadata,
         )
 
 
@@ -135,18 +140,24 @@ def test_get_testprotos(test_proto):
 
     doc.get()  # No '.textprotos' for errors, field_paths.
 
+    expected_request = {
+        "name": doc._document_path,
+        "mask": None,
+        "transaction": None,
+    }
+
     firestore_api.get_document.assert_called_once_with(
-        doc._document_path, mask=None, transaction=None, metadata=client._rpc_metadata,
+        request=expected_request, metadata=client._rpc_metadata,
     )
 
 
 @pytest.mark.parametrize("test_proto", _SET_TESTPROTOS)
 def test_set_testprotos(test_proto):
-    testcase = test_proto.set
+    testcase = test_proto.set_
     firestore_api = _mock_firestore_api()
     client, doc = _make_client_document(firestore_api, testcase)
     data = convert_data(json.loads(testcase.json_data))
-    if testcase.HasField("option"):
+    if "option" in testcase:
         merge = convert_set_option(testcase.option)
     else:
         merge = False
@@ -160,7 +171,7 @@ def test_update_testprotos(test_proto):
     firestore_api = _mock_firestore_api()
     client, doc = _make_client_document(firestore_api, testcase)
     data = convert_data(json.loads(testcase.json_data))
-    if testcase.HasField("precondition"):
+    if "precondition" in testcase:
         option = convert_precondition(testcase.precondition)
     else:
         option = None
@@ -179,7 +190,7 @@ def test_delete_testprotos(test_proto):
     testcase = test_proto.delete
     firestore_api = _mock_firestore_api()
     client, doc = _make_client_document(firestore_api, testcase)
-    if testcase.HasField("precondition"):
+    if "precondition" in testcase:
         option = convert_precondition(testcase.precondition)
     else:
         option = None
@@ -227,9 +238,12 @@ def test_listen_testprotos(test_proto):  # pragma: NO COVER
                 db_str = "projects/projectID/databases/(default)"
                 watch._firestore._database_string_internal = db_str
 
+                wrapped_responses = [
+                    firestore.ListenResponse(proto) for proto in testcase.responses
+                ]
                 if testcase.is_error:
                     try:
-                        for proto in testcase.responses:
+                        for proto in wrapped_responses:
                             watch.on_snapshot(proto)
                     except RuntimeError:
                         # listen-target-add-wrong-id.textpro
@@ -237,7 +251,7 @@ def test_listen_testprotos(test_proto):  # pragma: NO COVER
                         pass
 
                 else:
-                    for proto in testcase.responses:
+                    for proto in wrapped_responses:
                         watch.on_snapshot(proto)
 
                     assert len(snapshots) == len(testcase.snapshots)
@@ -310,7 +324,7 @@ def convert_set_option(option):
             _helpers.FieldPath(*field.field).to_api_repr() for field in option.fields
         ]
 
-    assert option.all
+    assert option.all_
     return True
 
 
@@ -482,7 +496,7 @@ def parse_cursor(cursor, client):
     from google.cloud.firestore_v1 import DocumentReference
     from google.cloud.firestore_v1 import DocumentSnapshot
 
-    if cursor.HasField("doc_snapshot"):
+    if "doc_snapshot" in cursor:
         path = parse_path(cursor.doc_snapshot.path)
         doc_ref = DocumentReference(*path, client=client)
 
