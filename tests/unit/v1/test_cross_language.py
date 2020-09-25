@@ -50,51 +50,31 @@ for filename in sorted(_globs):
     ALL_TESTPROTOS.extend(_load_test_json(filename))
 
 _CREATE_TESTPROTOS = [
-    test_proto
-    for test_proto in ALL_TESTPROTOS
-    if "create" in test_proto
+    test_proto for test_proto in ALL_TESTPROTOS if "create" in test_proto
 ]
 
-_GET_TESTPROTOS = [
-    test_proto
-    for test_proto in ALL_TESTPROTOS
-    if "get" in test_proto
-]
+_GET_TESTPROTOS = [test_proto for test_proto in ALL_TESTPROTOS if "get" in test_proto]
 
-_SET_TESTPROTOS = [
-    test_proto
-    for test_proto in ALL_TESTPROTOS
-    if "set_" in test_proto
-]
+_SET_TESTPROTOS = [test_proto for test_proto in ALL_TESTPROTOS if "set_" in test_proto]
 
 _UPDATE_TESTPROTOS = [
-    test_proto
-    for test_proto in ALL_TESTPROTOS
-    if "update" in test_proto
+    test_proto for test_proto in ALL_TESTPROTOS if "update" in test_proto
 ]
 
 _UPDATE_PATHS_TESTPROTOS = [
-    test_proto
-    for test_proto in ALL_TESTPROTOS
-    if "update_paths" in test_proto
+    test_proto for test_proto in ALL_TESTPROTOS if "update_paths" in test_proto
 ]
 
 _DELETE_TESTPROTOS = [
-    test_proto
-    for test_proto in ALL_TESTPROTOS
-    if "delete" in test_proto
+    test_proto for test_proto in ALL_TESTPROTOS if "delete" in test_proto
 ]
 
 _LISTEN_TESTPROTOS = [
-    test_proto
-    for test_proto in ALL_TESTPROTOS
-    if "listen" in test_proto
+    test_proto for test_proto in ALL_TESTPROTOS if "listen" in test_proto
 ]
 
 _QUERY_TESTPROTOS = [
-    test_proto
-    for test_proto in ALL_TESTPROTOS
-    if "query" in test_proto
+    test_proto for test_proto in ALL_TESTPROTOS if "query" in test_proto
 ]
 
 

@@ -26,28 +26,28 @@ from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.cloud.firestore_v1',
+    package="google.cloud.firestore_v1",
     manifest={
-        'TestFile',
-        'Test',
-        'GetTest',
-        'CreateTest',
-        'SetTest',
-        'UpdateTest',
-        'UpdatePathsTest',
-        'DeleteTest',
-        'SetOption',
-        'QueryTest',
-        'Clause',
-        'Select',
-        'Where',
-        'OrderBy',
-        'Cursor_',
-        'DocSnapshot',
-        'FieldPath',
-        'ListenTest',
-        'Snapshot',
-        'DocChange',
+        "TestFile",
+        "Test",
+        "GetTest",
+        "CreateTest",
+        "SetTest",
+        "UpdateTest",
+        "UpdatePathsTest",
+        "DeleteTest",
+        "SetOption",
+        "QueryTest",
+        "Clause",
+        "Select",
+        "Where",
+        "OrderBy",
+        "Cursor_",
+        "DocSnapshot",
+        "FieldPath",
+        "ListenTest",
+        "Snapshot",
+        "DocChange",
     },
 )
 
@@ -60,9 +60,7 @@ class TestFile(proto.Message):
 
     """
 
-    tests = proto.RepeatedField(proto.MESSAGE, number=1,
-        message='Test',
-    )
+    tests = proto.RepeatedField(proto.MESSAGE, number=1, message="Test",)
 
 
 class Test(proto.Message):
@@ -97,37 +95,23 @@ class Test(proto.Message):
 
     comment = proto.Field(proto.STRING, number=10)
 
-    get = proto.Field(proto.MESSAGE, number=2, oneof='test',
-        message='GetTest',
+    get = proto.Field(proto.MESSAGE, number=2, oneof="test", message="GetTest",)
+
+    create = proto.Field(proto.MESSAGE, number=3, oneof="test", message="CreateTest",)
+
+    set_ = proto.Field(proto.MESSAGE, number=4, oneof="test", message="SetTest",)
+
+    update = proto.Field(proto.MESSAGE, number=5, oneof="test", message="UpdateTest",)
+
+    update_paths = proto.Field(
+        proto.MESSAGE, number=6, oneof="test", message="UpdatePathsTest",
     )
 
-    create = proto.Field(proto.MESSAGE, number=3, oneof='test',
-        message='CreateTest',
-    )
+    delete = proto.Field(proto.MESSAGE, number=7, oneof="test", message="DeleteTest",)
 
-    set_ = proto.Field(proto.MESSAGE, number=4, oneof='test',
-        message='SetTest',
-    )
+    query = proto.Field(proto.MESSAGE, number=8, oneof="test", message="QueryTest",)
 
-    update = proto.Field(proto.MESSAGE, number=5, oneof='test',
-        message='UpdateTest',
-    )
-
-    update_paths = proto.Field(proto.MESSAGE, number=6, oneof='test',
-        message='UpdatePathsTest',
-    )
-
-    delete = proto.Field(proto.MESSAGE, number=7, oneof='test',
-        message='DeleteTest',
-    )
-
-    query = proto.Field(proto.MESSAGE, number=8, oneof='test',
-        message='QueryTest',
-    )
-
-    listen = proto.Field(proto.MESSAGE, number=9, oneof='test',
-        message='ListenTest',
-    )
+    listen = proto.Field(proto.MESSAGE, number=9, oneof="test", message="ListenTest",)
 
 
 class GetTest(proto.Message):
@@ -144,8 +128,8 @@ class GetTest(proto.Message):
 
     doc_ref_path = proto.Field(proto.STRING, number=1)
 
-    request = proto.Field(proto.MESSAGE, number=2,
-        message=firestore.GetDocumentRequest,
+    request = proto.Field(
+        proto.MESSAGE, number=2, message=firestore.GetDocumentRequest,
     )
 
 
@@ -174,9 +158,7 @@ class CreateTest(proto.Message):
 
     json_data = proto.Field(proto.STRING, number=2)
 
-    request = proto.Field(proto.MESSAGE, number=3,
-        message=firestore.CommitRequest,
-    )
+    request = proto.Field(proto.MESSAGE, number=3, message=firestore.CommitRequest,)
 
     is_error = proto.Field(proto.BOOL, number=4)
 
@@ -199,15 +181,11 @@ class SetTest(proto.Message):
 
     doc_ref_path = proto.Field(proto.STRING, number=1)
 
-    option = proto.Field(proto.MESSAGE, number=2,
-        message='SetOption',
-    )
+    option = proto.Field(proto.MESSAGE, number=2, message="SetOption",)
 
     json_data = proto.Field(proto.STRING, number=3)
 
-    request = proto.Field(proto.MESSAGE, number=4,
-        message=firestore.CommitRequest,
-    )
+    request = proto.Field(proto.MESSAGE, number=4, message=firestore.CommitRequest,)
 
     is_error = proto.Field(proto.BOOL, number=5)
 
@@ -231,15 +209,11 @@ class UpdateTest(proto.Message):
 
     doc_ref_path = proto.Field(proto.STRING, number=1)
 
-    precondition = proto.Field(proto.MESSAGE, number=2,
-        message=common.Precondition,
-    )
+    precondition = proto.Field(proto.MESSAGE, number=2, message=common.Precondition,)
 
     json_data = proto.Field(proto.STRING, number=3)
 
-    request = proto.Field(proto.MESSAGE, number=4,
-        message=firestore.CommitRequest,
-    )
+    request = proto.Field(proto.MESSAGE, number=4, message=firestore.CommitRequest,)
 
     is_error = proto.Field(proto.BOOL, number=5)
 
@@ -266,19 +240,13 @@ class UpdatePathsTest(proto.Message):
 
     doc_ref_path = proto.Field(proto.STRING, number=1)
 
-    precondition = proto.Field(proto.MESSAGE, number=2,
-        message=common.Precondition,
-    )
+    precondition = proto.Field(proto.MESSAGE, number=2, message=common.Precondition,)
 
-    field_paths = proto.RepeatedField(proto.MESSAGE, number=3,
-        message='FieldPath',
-    )
+    field_paths = proto.RepeatedField(proto.MESSAGE, number=3, message="FieldPath",)
 
     json_values = proto.RepeatedField(proto.STRING, number=4)
 
-    request = proto.Field(proto.MESSAGE, number=5,
-        message=firestore.CommitRequest,
-    )
+    request = proto.Field(proto.MESSAGE, number=5, message=firestore.CommitRequest,)
 
     is_error = proto.Field(proto.BOOL, number=6)
 
@@ -299,13 +267,9 @@ class DeleteTest(proto.Message):
 
     doc_ref_path = proto.Field(proto.STRING, number=1)
 
-    precondition = proto.Field(proto.MESSAGE, number=2,
-        message=common.Precondition,
-    )
+    precondition = proto.Field(proto.MESSAGE, number=2, message=common.Precondition,)
 
-    request = proto.Field(proto.MESSAGE, number=3,
-        message=firestore.CommitRequest,
-    )
+    request = proto.Field(proto.MESSAGE, number=3, message=firestore.CommitRequest,)
 
     is_error = proto.Field(proto.BOOL, number=4)
 
@@ -323,9 +287,7 @@ class SetOption(proto.Message):
 
     all_ = proto.Field(proto.BOOL, number=1)
 
-    fields = proto.RepeatedField(proto.MESSAGE, number=2,
-        message='FieldPath',
-    )
+    fields = proto.RepeatedField(proto.MESSAGE, number=2, message="FieldPath",)
 
 
 class QueryTest(proto.Message):
@@ -345,13 +307,9 @@ class QueryTest(proto.Message):
 
     coll_path = proto.Field(proto.STRING, number=1)
 
-    clauses = proto.RepeatedField(proto.MESSAGE, number=2,
-        message='Clause',
-    )
+    clauses = proto.RepeatedField(proto.MESSAGE, number=2, message="Clause",)
 
-    query = proto.Field(proto.MESSAGE, number=3,
-        message=gcf_query.StructuredQuery,
-    )
+    query = proto.Field(proto.MESSAGE, number=3, message=gcf_query.StructuredQuery,)
 
     is_error = proto.Field(proto.BOOL, number=4)
 
@@ -380,36 +338,26 @@ class Clause(proto.Message):
 
     """
 
-    select = proto.Field(proto.MESSAGE, number=1, oneof='clause',
-        message='Select',
+    select = proto.Field(proto.MESSAGE, number=1, oneof="clause", message="Select",)
+
+    where = proto.Field(proto.MESSAGE, number=2, oneof="clause", message="Where",)
+
+    order_by = proto.Field(proto.MESSAGE, number=3, oneof="clause", message="OrderBy",)
+
+    offset = proto.Field(proto.INT32, number=4, oneof="clause")
+
+    limit = proto.Field(proto.INT32, number=5, oneof="clause")
+
+    start_at = proto.Field(proto.MESSAGE, number=6, oneof="clause", message="Cursor_",)
+
+    start_after = proto.Field(
+        proto.MESSAGE, number=7, oneof="clause", message="Cursor_",
     )
 
-    where = proto.Field(proto.MESSAGE, number=2, oneof='clause',
-        message='Where',
-    )
+    end_at = proto.Field(proto.MESSAGE, number=8, oneof="clause", message="Cursor_",)
 
-    order_by = proto.Field(proto.MESSAGE, number=3, oneof='clause',
-        message='OrderBy',
-    )
-
-    offset = proto.Field(proto.INT32, number=4, oneof='clause')
-
-    limit = proto.Field(proto.INT32, number=5, oneof='clause')
-
-    start_at = proto.Field(proto.MESSAGE, number=6, oneof='clause',
-        message='Cursor_',
-    )
-
-    start_after = proto.Field(proto.MESSAGE, number=7, oneof='clause',
-        message='Cursor_',
-    )
-
-    end_at = proto.Field(proto.MESSAGE, number=8, oneof='clause',
-        message='Cursor_',
-    )
-
-    end_before = proto.Field(proto.MESSAGE, number=9, oneof='clause',
-        message='Cursor_',
+    end_before = proto.Field(
+        proto.MESSAGE, number=9, oneof="clause", message="Cursor_",
     )
 
 
@@ -421,9 +369,7 @@ class Select(proto.Message):
 
     """
 
-    fields = proto.RepeatedField(proto.MESSAGE, number=1,
-        message='FieldPath',
-    )
+    fields = proto.RepeatedField(proto.MESSAGE, number=1, message="FieldPath",)
 
 
 class Where(proto.Message):
@@ -438,9 +384,7 @@ class Where(proto.Message):
 
     """
 
-    path = proto.Field(proto.MESSAGE, number=1,
-        message='FieldPath',
-    )
+    path = proto.Field(proto.MESSAGE, number=1, message="FieldPath",)
 
     op = proto.Field(proto.STRING, number=2)
 
@@ -457,9 +401,7 @@ class OrderBy(proto.Message):
             "asc" or "desc".
     """
 
-    path = proto.Field(proto.MESSAGE, number=1,
-        message='FieldPath',
-    )
+    path = proto.Field(proto.MESSAGE, number=1, message="FieldPath",)
 
     direction = proto.Field(proto.STRING, number=2)
 
@@ -474,9 +416,7 @@ class Cursor_(proto.Message):
 
     """
 
-    doc_snapshot = proto.Field(proto.MESSAGE, number=1,
-        message='DocSnapshot',
-    )
+    doc_snapshot = proto.Field(proto.MESSAGE, number=1, message="DocSnapshot",)
 
     json_values = proto.RepeatedField(proto.STRING, number=2)
 
@@ -530,13 +470,11 @@ class ListenTest(proto.Message):
 
     """
 
-    responses = proto.RepeatedField(proto.MESSAGE, number=1,
-        message=firestore.ListenResponse,
+    responses = proto.RepeatedField(
+        proto.MESSAGE, number=1, message=firestore.ListenResponse,
     )
 
-    snapshots = proto.RepeatedField(proto.MESSAGE, number=2,
-        message='Snapshot',
-    )
+    snapshots = proto.RepeatedField(proto.MESSAGE, number=2, message="Snapshot",)
 
     is_error = proto.Field(proto.BOOL, number=3)
 
@@ -553,17 +491,11 @@ class Snapshot(proto.Message):
 
     """
 
-    docs = proto.RepeatedField(proto.MESSAGE, number=1,
-        message=document.Document,
-    )
+    docs = proto.RepeatedField(proto.MESSAGE, number=1, message=document.Document,)
 
-    changes = proto.RepeatedField(proto.MESSAGE, number=2,
-        message='DocChange',
-    )
+    changes = proto.RepeatedField(proto.MESSAGE, number=2, message="DocChange",)
 
-    read_time = proto.Field(proto.MESSAGE, number=3,
-        message=timestamp.Timestamp,
-    )
+    read_time = proto.Field(proto.MESSAGE, number=3, message=timestamp.Timestamp,)
 
 
 class DocChange(proto.Message):
@@ -579,6 +511,7 @@ class DocChange(proto.Message):
         new_index (int):
 
     """
+
     class Kind(proto.Enum):
         r""""""
         KIND_UNSPECIFIED = 0
@@ -586,13 +519,9 @@ class DocChange(proto.Message):
         REMOVED = 2
         MODIFIED = 3
 
-    kind = proto.Field(proto.ENUM, number=1,
-        enum=Kind,
-    )
+    kind = proto.Field(proto.ENUM, number=1, enum=Kind,)
 
-    doc = proto.Field(proto.MESSAGE, number=2,
-        message=document.Document,
-    )
+    doc = proto.Field(proto.MESSAGE, number=2, message=document.Document,)
 
     old_index = proto.Field(proto.INT32, number=3)
 
