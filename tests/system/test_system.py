@@ -904,10 +904,12 @@ def test_partition_query_no_partitions(client, cleanup):
     ]
 
     batch = client.batch()
+    cleanup_batch = client.batch()
+    cleanup(cleanup_batch.commit)
     for doc_path in doc_paths:
         doc_ref = client.document(doc_path)
         batch.set(doc_ref, {"x": 1})
-        cleanup(doc_ref.delete)
+        cleanup_batch.delete(doc_ref)
 
     batch.commit()
 
@@ -925,13 +927,13 @@ def test_partition_query(client, cleanup):
     parents = itertools.cycle(("", "abc/123/", "def/456/", "ghi/789/"))
     batch = client.batch()
     cleanup_batch = client.batch()
+    cleanup(cleanup_batch.commit)
     for i, parent in zip(range(n_docs), parents):
         doc_path = parent + collection_group + f"/cg-doc{i:03d}"
         doc_ref = client.document(doc_path)
         batch.set(doc_ref, {"x": i})
         cleanup_batch.delete(doc_ref)
 
-    cleanup(cleanup_batch.commit)
     batch.commit()
 
     query = client.collection_group(collection_group)
