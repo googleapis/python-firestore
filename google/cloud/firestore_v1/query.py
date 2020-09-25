@@ -311,7 +311,7 @@ class CollectionGroup(Query):
 
         start_at = None
         for cursor_pb in pager:
-            cursor = self._decode_cursor(cursor_pb)
+            cursor = cursor_pb.values[0].reference_value
             yield self._partition(start_at, cursor)
             start_at = cursor
 
@@ -320,10 +320,10 @@ class CollectionGroup(Query):
     def _partition(self, start_at, end_before):
         """TODO"""
         if start_at:
-            start_at = start_at, True
+            start_at = [start_at], True
 
         if end_before:
-            end_before = end_before, True
+            end_before = [end_before], True
 
         return Query(
             self._parent,
@@ -332,7 +332,3 @@ class CollectionGroup(Query):
             start_at=start_at,
             end_at=end_before,
         )
-
-    def _decode_cursor(self, cursor_pb):
-        """TODO"""
-        return [self._client.document(cursor_pb.values[0].reference_value)]
