@@ -25,16 +25,18 @@ import pytest
 from google.protobuf import json_format
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import firestore
-from google.cloud.firestore_v1.proto import tests_pb2
+from google.cloud.firestore_v1.types import tests
 from google.cloud.firestore_v1.types import write
 
 
 def _load_test_json(filename):
-    with open(filename, "r") as tp_file:
-        tp_json = json.load(tp_file)
-    test_file = tests_pb2.TestFile()
-    json_format.ParseDict(tp_json, test_file)
     shortname = os.path.split(filename)[-1]
+
+    with open(filename, "r") as tp_file:
+        tp_json = tp_file.read()
+
+    test_file = tests.TestFile.from_json(tp_json)
+
     for test_proto in test_file.tests:
         test_proto.description = test_proto.description + " (%s)" % shortname
         yield test_proto
@@ -50,49 +52,49 @@ for filename in sorted(_globs):
 _CREATE_TESTPROTOS = [
     test_proto
     for test_proto in ALL_TESTPROTOS
-    if test_proto.WhichOneof("test") == "create"
+    if "create" in test_proto
 ]
 
 _GET_TESTPROTOS = [
     test_proto
     for test_proto in ALL_TESTPROTOS
-    if test_proto.WhichOneof("test") == "get"
+    if "get" in test_proto
 ]
 
 _SET_TESTPROTOS = [
     test_proto
     for test_proto in ALL_TESTPROTOS
-    if test_proto.WhichOneof("test") == "set"
+    if "set_" in test_proto
 ]
 
 _UPDATE_TESTPROTOS = [
     test_proto
     for test_proto in ALL_TESTPROTOS
-    if test_proto.WhichOneof("test") == "update"
+    if "update" in test_proto
 ]
 
 _UPDATE_PATHS_TESTPROTOS = [
     test_proto
     for test_proto in ALL_TESTPROTOS
-    if test_proto.WhichOneof("test") == "update_paths"
+    if "update_paths" in test_proto
 ]
 
 _DELETE_TESTPROTOS = [
     test_proto
     for test_proto in ALL_TESTPROTOS
-    if test_proto.WhichOneof("test") == "delete"
+    if "delete" in test_proto
 ]
 
 _LISTEN_TESTPROTOS = [
     test_proto
     for test_proto in ALL_TESTPROTOS
-    if test_proto.WhichOneof("test") == "listen"
+    if "listen" in test_proto
 ]
 
 _QUERY_TESTPROTOS = [
     test_proto
     for test_proto in ALL_TESTPROTOS
-    if test_proto.WhichOneof("test") == "query"
+    if "query" in test_proto
 ]
 
 
@@ -454,40 +456,39 @@ def parse_query(testcase):
     query = collection
 
     for clause in testcase.clauses:
-        kind = clause.WhichOneof("clause")
 
-        if kind == "select":
+        if "select" in clause:
             field_paths = [
                 ".".join(field_path.field) for field_path in clause.select.fields
             ]
             query = query.select(field_paths)
-        elif kind == "where":
+        elif "where" in clause:
             path = ".".join(clause.where.path.field)
             value = convert_data(json.loads(clause.where.json_value))
             query = query.where(path, clause.where.op, value)
-        elif kind == "order_by":
+        elif "order_by" in clause:
             path = ".".join(clause.order_by.path.field)
             direction = clause.order_by.direction
             direction = _directions.get(direction, direction)
             query = query.order_by(path, direction=direction)
-        elif kind == "offset":
+        elif "offset" in clause:
             query = query.offset(clause.offset)
-        elif kind == "limit":
+        elif "limit" in clause:
             query = query.limit(clause.limit)
-        elif kind == "start_at":
+        elif "start_at" in clause:
             cursor = parse_cursor(clause.start_at, client)
             query = query.start_at(cursor)
-        elif kind == "start_after":
+        elif "start_after" in clause:
             cursor = parse_cursor(clause.start_after, client)
             query = query.start_after(cursor)
-        elif kind == "end_at":
+        elif "end_at" in clause:
             cursor = parse_cursor(clause.end_at, client)
             query = query.end_at(cursor)
-        elif kind == "end_before":
+        elif "end_before" in clause:
             cursor = parse_cursor(clause.end_before, client)
             query = query.end_before(cursor)
         else:  # pragma: NO COVER
-            raise ValueError("Unknown query clause: {}".format(kind))
+            raise ValueError("Unknown query clause: {}".format(clause))
 
     return query
 
