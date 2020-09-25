@@ -27,8 +27,11 @@ from google.cloud.firestore_v1.base_query import (
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import document
+from google.cloud.firestore_v1 import field_path
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Generator
+
+DOCUMENT_ID = field_path.FieldPath.document_id()
 
 
 class Query(BaseQuery):
@@ -239,3 +242,96 @@ class Query(BaseQuery):
         return Watch.for_query(
             self, callback, document.DocumentSnapshot, document.DocumentReference
         )
+
+
+class CollectionGroup(Query):
+    """Represents a Collection Group in the Firestore API.
+
+    This is a specialization of :class:`.Query` that includes all documents in the
+    database that are contained in a collection or subcollection of the given
+    parent.
+
+    Args:
+        parent (:class:`~google.cloud.firestore_v1.collection.CollectionReference`):
+            The collection that this query applies to.
+    """
+    def __init__(
+        self,
+        parent,
+        projection=None,
+        field_filters=(),
+        orders=(),
+        limit=None,
+        limit_to_last=False,
+        offset=None,
+        start_at=None,
+        end_at=None,
+        all_descendants=True,
+    ) -> None:
+        # TODO: Validate all_descendants?
+        super(Query, self).__init__(
+            parent=parent,
+            projection=projection,
+            field_filters=field_filters,
+            orders=orders,
+            limit=limit,
+            limit_to_last=limit_to_last,
+            offset=offset,
+            start_at=start_at,
+            end_at=end_at,
+            all_descendants=all_descendants,
+        )
+
+    def get_partitions(self, partition_count) -> Generator[Query, None, None]:
+        """TODO"""
+        # Validate query?
+        query = Query(
+            self._parent,
+            projection=self._projection,
+            field_filters=self._field_filters,
+            orders=(Query._make_order(DOCUMENT_ID, Query.ASCENDING),),
+            limit=self._limit,
+            limit_to_last=self._limit_to_last,
+            offset=self._offset,
+            start_at=self._start_at,
+            end_at=self._end_at,
+            all_descendants=self._all_descendants,
+        )
+
+        parent_path, expected_prefix = self._parent._parent_info()
+        pager = self._client._firestore_api.partition_query(
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "partition_count": partition_count,
+            },
+            metadata=self._client._rpc_metadata,
+        )
+
+        start_at = None
+        for cursor_pb in pager:
+            cursor = self._decode_cursor(cursor_pb)
+            yield self._partition(start_at, cursor)
+            start_at = cursor
+
+        yield self._partition(start_at, None)
+
+    def _partition(self, start_at, end_before):
+        """TODO"""
+        if start_at:
+            start_at = start_at, True
+
+        if end_before:
+            end_before = end_before, True
+
+        return Query(
+            self._parent,
+            orders=(Query._make_order(DOCUMENT_ID, Query.ASCENDING),),
+            all_descendants=True,
+            start_at=start_at,
+            end_at=end_before,
+        )
+
+    def _decode_cursor(self, cursor_pb):
+        """TODO"""
+        return self._client.document(cursor_pb.values[0].reference_value).get()
