@@ -4,8 +4,7 @@
       "git": {
         "name": ".",
         "remote": "https://github.com/googleapis/python-firestore.git",
-        "sha": "2021f38bb6f016c13bc43d59730c77b57ae5c352"
-
+        "sha": "1fb39140c26e06a3bc28e8304c56270b58a15b0b"
       }
     },
     {
@@ -45,6 +44,7 @@
     }
   ],
   "generatedFiles": [
+    ".coveragerc",
     ".flake8",
     ".github/CONTRIBUTING.md",
     ".github/ISSUE_TEMPLATE/bug_report.md",
