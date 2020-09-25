@@ -928,20 +928,21 @@ def test_partition_query(client, cleanup):
     batch = client.batch()
     cleanup_batch = client.batch()
     cleanup(cleanup_batch.commit)
+    expected = []
     for i, parent in zip(range(n_docs), parents):
         doc_path = parent + collection_group + f"/cg-doc{i:03d}"
         doc_ref = client.document(doc_path)
         batch.set(doc_ref, {"x": i})
         cleanup_batch.delete(doc_ref)
+        expected.append(doc_path)
 
     batch.commit()
 
     query = client.collection_group(collection_group)
     streams = [partition.stream() for partition in query.get_partitions(3)]
     snapshots = itertools.chain(*streams)
-    found = [snapshot.id for snapshot in snapshots]
-    found.sort()
-    expected = [f"cg-doc{i:03d}" for i in range(n_docs)]
+    found = [snapshot.reference.path for snapshot in snapshots]
+    expected.sort()
     assert found == expected
 
 
