@@ -11,7 +11,7 @@ GOOGLEAPIS_REPO = $(REPO_DIR)/googleapis
 TESTS_REPO = $(REPO_DIR)/conformance-tests
 TEST_PROTO_DIR = $(TESTS_REPO)/firestore/v1
 TEST_PROTO_SRC = $(TEST_PROTO_DIR)/proto/google/cloud/conformance/firestore/v1/tests.proto
-TESTDATA_DIR = tests/unit/vi/testdata
+TESTDATA_DIR = `pwd`/tests/unit/v1/testdata/
 
 TMPDIR = /tmp/python-fs-proto
 TMPDIR_FS = $(TMPDIR)/google/cloud/firestore_v1/types
@@ -51,3 +51,7 @@ sync-protos:
 
 docker-pull:
 	docker pull gcr.io/gapic-images/gapic-generator-python:latest
+
+copy-testdata:
+	rm $(TESTDATA_DIR)/*.json
+	cp $(TEST_PROTO_DIR)/*.json $(TESTDATA_DIR)/
