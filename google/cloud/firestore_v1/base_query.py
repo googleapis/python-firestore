@@ -1091,13 +1091,13 @@ class QueryPartition:
     constraints of the query that produced this partition.
 
     Args:
-        query (BaseQuery): The original query that is a partition of.
+        query (BaseQuery): The original query that this is a partition of.
         start_at (Optional[~google.cloud.firestore_v1.document.DocumentSnapshot]):
             Cursor for first query result to include. If `None`, the partition starts at
             the beginning of the result set.
         end_at (Optional[~google.cloud.firestore_v1.document.DocumentSnapshot]):
             Cursor for first query result after the last result included in the
-            partition. If `None`, the partitions runs to the end of the result set.
+            partition. If `None`, the partition runs to the end of the result set.
 
         """
 
