@@ -107,7 +107,9 @@ def _run_testcase(testcase, call, firestore_api, client):
     else:
         call()
 
-        wrapped_writes = [write.Write(write_pb) for write_pb in testcase.request.writes]
+        wrapped_writes = [
+            write.Write.wrap(write_pb) for write_pb in testcase.request.writes
+        ]
 
         expected_request = {
             "database": client._database_string,
@@ -239,7 +241,7 @@ def test_listen_testprotos(test_proto):  # pragma: NO COVER
                 watch._firestore._database_string_internal = db_str
 
                 wrapped_responses = [
-                    firestore.ListenResponse(proto) for proto in testcase.responses
+                    firestore.ListenResponse.wrap(proto) for proto in testcase.responses
                 ]
                 if testcase.is_error:
                     try:
