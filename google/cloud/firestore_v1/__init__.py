@@ -20,6 +20,7 @@
 
 
 import pkg_resources
+
 try:
     __version__ = pkg_resources.get_distribution("google-cloud-firestore").version
 except pkg_resources.DistributionNotFound:
