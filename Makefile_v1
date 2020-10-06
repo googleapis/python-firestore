@@ -16,6 +16,7 @@ TESTDATA_DIR = `pwd`/tests/unit/v1/testdata/
 TMPDIR = /tmp/python-fs-proto
 TMPDIR_FS = $(TMPDIR)/google/cloud/firestore_v1/types
 TEST_PROTO_COPY = $(TMPDIR_FS)/tests.proto
+TEST_GEN_OUT = tests/unit/v1/conformance_tests.py
 OUTDIR = /tmp/python-fs-gen
 
 .PHONY: sync-protos gen-protos docker-pull
@@ -31,7 +32,10 @@ gen-protos-raw:
 		--user `id -u`:`id -g` \
 	gcr.io/gapic-images/gapic-generator-python
 	cp $(OUTDIR)/google/cloud/firestore_v1/types/tests.py \
-		google/cloud/firestore_v1/types/
+		$(TEST_GEN_OUT)
+	sed -i -e \
+		"s@package='google.cloud.firestore_v1'@package='tests.unit.v1'@" \
+		$(TEST_GEN_OUT)
 
 tweak-protos:
 	mkdir -p $(TMPDIR_FS)

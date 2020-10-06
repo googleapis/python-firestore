@@ -26,7 +26,7 @@ from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package="google.cloud.firestore_v1",
+    package="tests.unit.v1",
     manifest={
         "TestFile",
         "Test",

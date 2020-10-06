@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# TODO(microgen): currently cross language tests don't run as part of test pass
-# This should be updated (and its makefile) to generate like other proto classes
 import functools
 import glob
 import json
@@ -24,8 +22,9 @@ import pytest
 
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import firestore
-from google.cloud.firestore_v1.types import tests
 from google.cloud.firestore_v1.types import write
+
+from tests.unit.v1 import conformance_tests
 
 
 def _load_test_json(filename):
@@ -34,7 +33,7 @@ def _load_test_json(filename):
     with open(filename, "r") as tp_file:
         tp_json = tp_file.read()
 
-    test_file = tests.TestFile.from_json(tp_json)
+    test_file = conformance_tests.TestFile.from_json(tp_json)
 
     for test_proto in test_file.tests:
         test_proto.description = test_proto.description + " (%s)" % shortname
