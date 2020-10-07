@@ -18,9 +18,13 @@
 
 """Python idiomatic client for Google Cloud Firestore."""
 
-from pkg_resources import get_distribution
 
-__version__ = get_distribution("google-cloud-firestore").version
+import pkg_resources
+
+try:
+    __version__ = pkg_resources.get_distribution("google-cloud-firestore").version
+except pkg_resources.DistributionNotFound:
+    __version__ = None
 
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1._helpers import GeoPoint
@@ -40,6 +44,7 @@ from google.cloud.firestore_v1.batch import WriteBatch
 from google.cloud.firestore_v1.client import Client
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1.query import CollectionGroup
 from google.cloud.firestore_v1.query import Query
 from google.cloud.firestore_v1.transaction import Transaction
 from google.cloud.firestore_v1.transaction import transactional
@@ -115,6 +120,7 @@ __all__: List[str] = [
     "AsyncTransaction",
     "AsyncWriteBatch",
     "Client",
+    "CollectionGroup",
     "CollectionReference",
     "DELETE_FIELD",
     "DocumentReference",
