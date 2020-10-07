@@ -1270,6 +1270,42 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(update_pb.update.fields, encode_dict(document_data))
         self.assertFalse(update_pb._pb.HasField("current_document"))
 
+    def test_get_field_transform_pbs_miss(self):
+        from google.cloud.firestore_v1.types import write
+        from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
+        from google.cloud.firestore_v1._helpers import REQUEST_TIME_ENUM
+
+        document_data = {"a": 1}
+        inst = self._make_one(document_data)
+        document_path = (
+            "projects/project-id/databases/(default)/" "documents/document-id"
+        )
+
+        field_transform_pbs = inst.get_field_transform_pbs(document_path)
+
+        self.assertEqual(field_transform_pbs, [])
+
+    def test_get_field_transform_pbs_w_server_timestamp(self):
+        from google.cloud.firestore_v1.types import write
+        from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
+        from google.cloud.firestore_v1._helpers import REQUEST_TIME_ENUM
+
+        document_data = {"a": SERVER_TIMESTAMP}
+        inst = self._make_one(document_data)
+        document_path = (
+            "projects/project-id/databases/(default)/" "documents/document-id"
+        )
+
+        field_transform_pbs = inst.get_field_transform_pbs(document_path)
+
+        self.assertEqual(len(field_transform_pbs), 1)
+        field_transform_pb = field_transform_pbs[0]
+        self.assertIsInstance(
+            field_transform_pb, write.DocumentTransform.FieldTransform
+        )
+        self.assertEqual(field_transform_pb.field_path, "a")
+        self.assertEqual(field_transform_pb.set_to_server_value, REQUEST_TIME_ENUM)
+
     def test_get_transform_pb_w_server_timestamp_w_exists_precondition(self):
         from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
@@ -1526,23 +1562,17 @@ class Test_pbs_for_create(unittest.TestCase):
         )
 
     @staticmethod
-    def _make_write_w_transform(document_path, fields):
+    def _add_field_transforms(update_pb, fields):
         from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
-        transforms = [
-            write.DocumentTransform.FieldTransform(
-                field_path=field, set_to_server_value=server_val.REQUEST_TIME
+        for field in fields:
+            update_pb.update_transforms.append(
+                DocumentTransform.FieldTransform(
+                    field_path=field, set_to_server_value=server_val.REQUEST_TIME
+                )
             )
-            for field in fields
-        ]
-
-        return write.Write(
-            transform=write.DocumentTransform(
-                document=document_path, field_transforms=transforms
-            )
-        )
 
     def _helper(self, do_transform=False, empty_val=False):
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
@@ -1569,9 +1599,7 @@ class Test_pbs_for_create(unittest.TestCase):
         expected_pbs = [update_pb]
 
         if do_transform:
-            expected_pbs.append(
-                self._make_write_w_transform(document_path, fields=["butter"])
-            )
+            self._add_field_transforms(update_pb, fields=["butter"])
 
         self.assertEqual(write_pbs, expected_pbs)
 
