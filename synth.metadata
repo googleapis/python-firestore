@@ -4,16 +4,15 @@
       "git": {
         "name": ".",
         "remote": "https://github.com/googleapis/python-firestore.git",
-        "sha": "2021f38bb6f016c13bc43d59730c77b57ae5c352"
-
+        "sha": "8e53a2c3aef160c4090241f5260686aee03323d2"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "470d84e263c833af5280753b8e4188432b8d5b06",
-        "internalRef": "333132625"
+        "sha": "d3697d47929f34c43bcc4de16c7c761a80e97cf1",
+        "internalRef": "333502684"
       }
     },
     {
@@ -45,6 +44,7 @@
     }
   ],
   "generatedFiles": [
+    ".coveragerc",
     ".flake8",
     ".github/CONTRIBUTING.md",
     ".github/ISSUE_TEMPLATE/bug_report.md",
