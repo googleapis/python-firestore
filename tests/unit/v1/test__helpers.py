@@ -2159,23 +2159,19 @@ class Test_pbs_for_update(unittest.TestCase):
         if isinstance(option, _helpers.ExistsOption):
             precondition = common.Precondition(exists=False)
             expected_update_pb._pb.current_document.CopyFrom(precondition._pb)
-        expected_pbs = [expected_update_pb]
+
         if do_transform:
             transform_paths = FieldPath.from_string(field_path2)
             server_val = DocumentTransform.FieldTransform.ServerValue
-            expected_transform_pb = write.Write(
-                transform=write.DocumentTransform(
-                    document=document_path,
-                    field_transforms=[
-                        write.DocumentTransform.FieldTransform(
-                            field_path=transform_paths.to_api_repr(),
-                            set_to_server_value=server_val.REQUEST_TIME,
-                        )
-                    ],
+            field_transform_pbs = [
+                write.DocumentTransform.FieldTransform(
+                    field_path=transform_paths.to_api_repr(),
+                    set_to_server_value=server_val.REQUEST_TIME,
                 )
-            )
-            expected_pbs.append(expected_transform_pb)
-        self.assertEqual(write_pbs, expected_pbs)
+            ]
+            expected_update_pb.update_transforms.extend(field_transform_pbs)
+
+        self.assertEqual(write_pbs, [expected_update_pb])
 
     def test_without_option(self):
         from google.cloud.firestore_v1.types import common

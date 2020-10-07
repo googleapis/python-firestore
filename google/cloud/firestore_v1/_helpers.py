@@ -866,22 +866,14 @@ def pbs_for_update(document_path, field_updates, option) -> List[types.write.Wri
     if option is None:  # Default is to use ``exists=True``.
         option = ExistsOption(exists=True)
 
-    write_pbs = []
-
-    if extractor.field_paths or extractor.deleted_fields:
-        update_pb = extractor.get_update_pb(document_path)
-        option.modify_write(update_pb)
-        write_pbs.append(update_pb)
+    update_pb = extractor.get_update_pb(document_path)
+    option.modify_write(update_pb)
 
     if extractor.has_transforms:
-        transform_pb = extractor.get_transform_pb(document_path)
-        if not write_pbs:
-            # NOTE: set the write option on the ``transform_pb`` only if there
-            #       is no ``update_pb``
-            option.modify_write(transform_pb)
-        write_pbs.append(transform_pb)
+        field_transform_pbs = extractor.get_field_transform_pbs(document_path)
+        update_pb.update_transforms.extend(field_transform_pbs)
 
-    return write_pbs
+    return [update_pb]
 
 
 def pb_for_delete(document_path, option) -> types.write.Write:
