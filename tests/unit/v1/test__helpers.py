@@ -1924,23 +1924,17 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
         )
 
     @staticmethod
-    def _make_write_w_transform(document_path, fields):
+    def _add_field_transforms(update_pb, fields):
         from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
-        transforms = [
-            write.DocumentTransform.FieldTransform(
-                field_path=field, set_to_server_value=server_val.REQUEST_TIME
+        for field in fields:
+            update_pb.update_transforms.append(
+                DocumentTransform.FieldTransform(
+                    field_path=field, set_to_server_value=server_val.REQUEST_TIME
+                )
             )
-            for field in fields
-        ]
-
-        return write.Write(
-            transform=write.DocumentTransform(
-                document=document_path, field_transforms=transforms
-            )
-        )
 
     @staticmethod
     def _update_document_mask(update_pb, field_paths):
@@ -1974,6 +1968,20 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
         expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
+    def test_with_merge_true_w_only_transform(self):
+        from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
+
+        document_path = _make_ref_string(u"little", u"town", u"of", u"ham")
+        document_data = {"butter": SERVER_TIMESTAMP}
+
+        write_pbs = self._call_fut(document_path, document_data, merge=True)
+
+        update_pb = self._make_write_w_document(document_path)
+        self._update_document_mask(update_pb, field_paths=())
+        self._add_field_transforms(update_pb, fields=["butter"])
+        expected_pbs = [update_pb]
+        self.assertEqual(write_pbs, expected_pbs)
+
     def test_with_merge_true_w_transform(self):
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
 
@@ -1986,8 +1994,8 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
 
         update_pb = self._make_write_w_document(document_path, **update_data)
         self._update_document_mask(update_pb, field_paths=sorted(update_data))
-        transform_pb = self._make_write_w_transform(document_path, fields=["butter"])
-        expected_pbs = [update_pb, transform_pb]
+        self._add_field_transforms(update_pb, fields=["butter"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
     def test_with_merge_field_w_transform(self):
@@ -2006,8 +2014,8 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
             document_path, cheese=document_data["cheese"]
         )
         self._update_document_mask(update_pb, ["cheese"])
-        transform_pb = self._make_write_w_transform(document_path, fields=["butter"])
-        expected_pbs = [update_pb, transform_pb]
+        self._add_field_transforms(update_pb, fields=["butter"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
     def test_with_merge_field_w_transform_masking_simple(self):
@@ -2021,10 +2029,9 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
         write_pbs = self._call_fut(document_path, document_data, merge=["butter.pecan"])
 
         update_pb = self._make_write_w_document(document_path)
-        transform_pb = self._make_write_w_transform(
-            document_path, fields=["butter.pecan"]
-        )
-        expected_pbs = [update_pb, transform_pb]
+        self._update_document_mask(update_pb, field_paths=())
+        self._add_field_transforms(update_pb, fields=["butter.pecan"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
     def test_with_merge_field_w_transform_parent(self):
@@ -2043,10 +2050,8 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
             document_path, cheese=update_data["cheese"], butter={"popcorn": "yum"}
         )
         self._update_document_mask(update_pb, ["cheese", "butter"])
-        transform_pb = self._make_write_w_transform(
-            document_path, fields=["butter.pecan"]
-        )
-        expected_pbs = [update_pb, transform_pb]
+        self._add_field_transforms(update_pb, fields=["butter.pecan"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
 

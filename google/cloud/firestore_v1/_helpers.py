@@ -794,19 +794,14 @@ def pbs_for_set_with_merge(
     extractor.apply_merge(merge)
 
     merge_empty = not document_data
+    allow_empty_mask = merge_empty or extractor.transform_paths
 
-    write_pbs = []
-
-    if extractor.has_updates or merge_empty:
-        write_pbs.append(
-            extractor.get_update_pb(document_path, allow_empty_mask=merge_empty)
-        )
-
+    set_pb = extractor.get_update_pb(document_path, allow_empty_mask=allow_empty_mask)
     if extractor.transform_paths:
-        transform_pb = extractor.get_transform_pb(document_path)
-        write_pbs.append(transform_pb)
+        field_transform_pbs = extractor.get_field_transform_pbs(document_path)
+        set_pb.update_transforms.extend(field_transform_pbs)
 
-    return write_pbs
+    return [set_pb]
 
 
 class DocumentExtractorForUpdate(DocumentExtractor):
