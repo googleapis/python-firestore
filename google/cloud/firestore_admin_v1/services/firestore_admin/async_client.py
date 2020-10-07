@@ -28,8 +28,8 @@ from google.api_core import retry as retries  # type: ignore
 from google.auth import credentials  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 
-from google.api_core import operation as ga_operation  # type: ignore
-from google.api_core import operation_async  # type: ignore
+from google.api_core import operation as ga_operation
+from google.api_core import operation_async
 from google.cloud.firestore_admin_v1.services.firestore_admin import pagers
 from google.cloud.firestore_admin_v1.types import field
 from google.cloud.firestore_admin_v1.types import field as gfa_field
@@ -274,8 +274,8 @@ class FirestoreAdminAsyncClient:
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
-                    exceptions.InternalServerError,
                     exceptions.ServiceUnavailable,
+                    exceptions.InternalServerError,
                 ),
             ),
             default_timeout=60.0,
@@ -362,8 +362,8 @@ class FirestoreAdminAsyncClient:
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
-                    exceptions.InternalServerError,
                     exceptions.ServiceUnavailable,
+                    exceptions.InternalServerError,
                 ),
             ),
             default_timeout=60.0,
@@ -437,8 +437,8 @@ class FirestoreAdminAsyncClient:
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
-                    exceptions.InternalServerError,
                     exceptions.ServiceUnavailable,
+                    exceptions.InternalServerError,
                 ),
             ),
             default_timeout=60.0,
@@ -520,8 +520,8 @@ class FirestoreAdminAsyncClient:
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
-                    exceptions.InternalServerError,
                     exceptions.ServiceUnavailable,
+                    exceptions.InternalServerError,
                 ),
             ),
             default_timeout=60.0,
@@ -713,8 +713,8 @@ class FirestoreAdminAsyncClient:
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
-                    exceptions.InternalServerError,
                     exceptions.ServiceUnavailable,
+                    exceptions.InternalServerError,
                 ),
             ),
             default_timeout=60.0,
