@@ -1631,23 +1631,17 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
         )
 
     @staticmethod
-    def _make_write_w_transform(document_path, fields):
+    def _add_field_transforms(update_pb, fields):
         from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
-        transforms = [
-            write.DocumentTransform.FieldTransform(
-                field_path=field, set_to_server_value=server_val.REQUEST_TIME
+        for field in fields:
+            update_pb.update_transforms.append(
+                DocumentTransform.FieldTransform(
+                    field_path=field, set_to_server_value=server_val.REQUEST_TIME
+                )
             )
-            for field in fields
-        ]
-
-        return write.Write(
-            transform=write.DocumentTransform(
-                document=document_path, field_transforms=transforms
-            )
-        )
 
     def test_w_empty_document(self):
         document_path = _make_ref_string(u"little", u"town", u"of", u"ham")
@@ -1668,8 +1662,8 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
         write_pbs = self._call_fut(document_path, document_data)
 
         update_pb = self._make_write_w_document(document_path)
-        transform_pb = self._make_write_w_transform(document_path, ["butter"])
-        expected_pbs = [update_pb, transform_pb]
+        self._add_field_transforms(update_pb, fields=["butter"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
     def _helper(self, do_transform=False, empty_val=False):
@@ -1697,9 +1691,7 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
         expected_pbs = [update_pb]
 
         if do_transform:
-            expected_pbs.append(
-                self._make_write_w_transform(document_path, fields=["butter"])
-            )
+            self._add_field_transforms(update_pb, fields=["butter"])
 
         self.assertEqual(write_pbs, expected_pbs)
 

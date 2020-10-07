@@ -624,15 +624,13 @@ def pbs_for_set_no_merge(document_path, document_data) -> List[types.write.Write
             "specifying 'merge=True' or 'merge=[field_paths]'."
         )
 
-    # Conformance tests require send the 'update_pb' even if the document
-    # contains only transforms.
-    write_pbs = [extractor.get_update_pb(document_path)]
+    set_pb = extractor.get_update_pb(document_path)
 
     if extractor.has_transforms:
-        transform_pb = extractor.get_transform_pb(document_path)
-        write_pbs.append(transform_pb)
+        field_transform_pbs = extractor.get_field_transform_pbs(document_path)
+        set_pb.update_transforms.extend(field_transform_pbs)
 
-    return write_pbs
+    return [set_pb]
 
 
 class DocumentExtractorForMerge(DocumentExtractor):
