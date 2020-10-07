@@ -1271,10 +1271,6 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertFalse(update_pb._pb.HasField("current_document"))
 
     def test_get_field_transform_pbs_miss(self):
-        from google.cloud.firestore_v1.types import write
-        from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
-        from google.cloud.firestore_v1._helpers import REQUEST_TIME_ENUM
-
         document_data = {"a": 1}
         inst = self._make_one(document_data)
         document_path = (
@@ -1563,7 +1559,6 @@ class Test_pbs_for_create(unittest.TestCase):
 
     @staticmethod
     def _add_field_transforms(update_pb, fields):
-        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
@@ -1632,7 +1627,6 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
 
     @staticmethod
     def _add_field_transforms(update_pb, fields):
-        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
@@ -1925,7 +1919,6 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
 
     @staticmethod
     def _add_field_transforms(update_pb, fields):
-        from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
