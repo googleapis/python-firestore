@@ -1,0 +1,42 @@
+{
+  "tests": [
+    {
+      "description": "query: NOT_EQUAL operator in Where clause",
+      "comment": "A Where clause that tests NOT_EQUAL operator in field filter.",
+      "query": {
+        "collPath": "projects/projectID/databases/(default)/documents/C",
+        "clauses": [
+          {
+            "where": {
+              "path": {
+                "field": [
+                  "a"
+                ]
+              },
+              "op": "!=",
+              "jsonValue": "4"
+            }
+          }
+        ],
+        "query": {
+          "from": [
+            {
+              "collectionId": "C"
+            }
+          ],
+          "where": {
+            "fieldFilter": {
+              "field": {
+                "fieldPath": "a"
+              },
+              "op": "NOT_EQUAL",
+              "value": {
+                "integerValue": "4"
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
