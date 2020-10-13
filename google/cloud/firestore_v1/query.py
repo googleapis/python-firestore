@@ -118,7 +118,9 @@ class Query(BaseQuery):
             all_descendants=all_descendants,
         )
 
-    def get(self, transaction=None) -> list:
+    def get(
+        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
+    ) -> list:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -128,9 +130,12 @@ class Query(BaseQuery):
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
-        If a ``transaction`` is used and it already has write operations
-        added, this method cannot be used (i.e. read-after-write is not
-        allowed).
+                If a ``transaction`` is used and it already has write operations
+                added, this method cannot be used (i.e. read-after-write is not
+                allowed).
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             list: The documents in the collection that match this query.
@@ -149,7 +154,7 @@ class Query(BaseQuery):
                 )
             self._limit_to_last = False
 
-        result = self.stream(transaction=transaction)
+        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
         if is_limited_to_last:
             result = reversed(list(result))
 

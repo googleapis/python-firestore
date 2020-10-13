@@ -46,7 +46,7 @@ class TestQuery(unittest.TestCase):
         self.assertIsNone(query._end_at)
         self.assertFalse(query._all_descendants)
 
-    def test_get(self):
+    def _get_helper(self, retry=None, timeout=None):
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
 
@@ -68,7 +68,16 @@ class TestQuery(unittest.TestCase):
 
         # Execute the query and check the response.
         query = self._make_one(parent)
-        returned = query.get()
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        returned = query.get(**kwargs)
 
         self.assertIsInstance(returned, list)
         self.assertEqual(len(returned), 1)
@@ -76,6 +85,28 @@ class TestQuery(unittest.TestCase):
         snapshot = returned[0]
         self.assertEqual(snapshot.reference._path, ("dee", "sleep"))
         self.assertEqual(snapshot.to_dict(), data)
+
+        # Verify the mock call.
+        parent_path, _ = parent._parent_info()
+        firestore_api.run_query.assert_called_once_with(
+            request={
+                "parent": parent_path,
+                "structured_query": query._to_protobuf(),
+                "transaction": None,
+            },
+            metadata=client._rpc_metadata,
+            **kwargs,
+        )
+
+    def test_get(self):
+        self._get_helper()
+
+    def test_get_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._get_helper(retry=retry, timeout=timeout)
 
     def test_get_limit_to_last(self):
         from google.cloud import firestore
