@@ -302,7 +302,9 @@ class CollectionGroup(Query, BaseCollectionGroup):
             all_descendants=all_descendants,
         )
 
-    def get_partitions(self, partition_count) -> Generator[QueryPartition, None, None]:
+    def get_partitions(
+        self, partition_count, retry: retries.Retry = None, timeout: float = None
+    ) -> Generator[QueryPartition, None, None]:
         """Partition a query for parallelization.
 
         Partitions a query by returning partition cursors that can be used to run the
@@ -313,6 +315,9 @@ class CollectionGroup(Query, BaseCollectionGroup):
             partition_count (int): The desired maximum number of partition points. The
                 number must be strictly positive. The actual number of partitions
                 returned may be fewer.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
         """
         self._validate_partition_query()
         query = Query(
@@ -324,6 +329,15 @@ class CollectionGroup(Query, BaseCollectionGroup):
         )
 
         parent_path, expected_prefix = self._parent._parent_info()
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         pager = self._client._firestore_api.partition_query(
             request={
                 "parent": parent_path,
@@ -331,6 +345,7 @@ class CollectionGroup(Query, BaseCollectionGroup):
                 "partition_count": partition_count,
             },
             metadata=self._client._rpc_metadata,
+            **kwargs,
         )
 
         start_at = None

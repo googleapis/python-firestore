@@ -500,7 +500,7 @@ class TestCollectionGroup(unittest.TestCase):
         with pytest.raises(ValueError):
             self._make_one(mock.sentinel.parent, all_descendants=False)
 
-    def test_get_partitions(self):
+    def _get_partitions_helper(self, retry=None, timeout=None):
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["partition_query"])
 
@@ -522,7 +522,16 @@ class TestCollectionGroup(unittest.TestCase):
 
         # Execute the query and check the response.
         query = self._make_one(parent)
-        get_response = query.get_partitions(2)
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        get_response = query.get_partitions(2, **kwargs)
         self.assertIsInstance(get_response, types.GeneratorType)
         returned = list(get_response)
         self.assertEqual(len(returned), 3)
@@ -539,7 +548,18 @@ class TestCollectionGroup(unittest.TestCase):
                 "partition_count": 2,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
+
+    def test_get_partitions(self):
+        self._get_partitions_helper()
+
+    def test_get_partitions_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._get_partitions_helper(retry=retry, timeout=timeout)
 
     def test_get_partitions_w_filter(self):
         # Make a **real** collection reference as parent.
