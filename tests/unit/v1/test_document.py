@@ -313,7 +313,14 @@ class TestDocumentReference(unittest.TestCase):
         timestamp_pb = timestamp_pb2.Timestamp(seconds=1058655101, nanos=100022244)
         self._delete_helper(last_update_time=timestamp_pb)
 
-    def _get_helper(self, field_paths=None, use_transaction=False, not_found=False):
+    def _get_helper(
+        self,
+        field_paths=None,
+        use_transaction=False,
+        not_found=False,
+        retry=None,
+        timeout=None,
+    ):
         from google.api_core.exceptions import NotFound
         from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1.types import document
@@ -344,7 +351,17 @@ class TestDocumentReference(unittest.TestCase):
         else:
             transaction = None
 
-        snapshot = document.get(field_paths=field_paths, transaction=transaction)
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        snapshot = document.get(
+            field_paths=field_paths, transaction=transaction, **kwargs
+        )
 
         self.assertIs(snapshot.reference, document)
         if not_found:
@@ -378,6 +395,7 @@ class TestDocumentReference(unittest.TestCase):
                 "transaction": expected_transaction_id,
             },
             metadata=client._rpc_metadata,
+            **kwargs
         )
 
     def test_get_not_found(self):
@@ -385,6 +403,13 @@ class TestDocumentReference(unittest.TestCase):
 
     def test_get_default(self):
         self._get_helper()
+
+    def test_get_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._get_helper(retry=retry, timeout=timeout)
 
     def test_get_w_string_field_path(self):
         with self.assertRaises(ValueError):
