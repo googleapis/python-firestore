@@ -185,7 +185,10 @@ class CollectionReference(BaseCollectionReference):
         return query.get(transaction=transaction, **kwargs)
 
     def stream(
-        self, transaction: Transaction = None
+        self,
+        transaction: Transaction = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> Generator[document.DocumentSnapshot, Any, None]:
         """Read the documents in this collection.
 
@@ -208,13 +211,17 @@ class CollectionReference(BaseCollectionReference):
             transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.\
                 Transaction`]):
                 An existing transaction that the query will run in.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Yields:
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
             The next document that fulfills the query.
         """
         query = query_mod.Query(self)
-        return query.stream(transaction=transaction)
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        return query.stream(transaction=transaction, **kwargs)
 
     def on_snapshot(self, callback: Callable) -> Watch:
         """Monitor the documents in this collection.

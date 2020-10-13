@@ -327,6 +327,22 @@ class TestCollectionReference(unittest.TestCase):
         query_instance.stream.assert_called_once_with(transaction=None)
 
     @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
+    def test_stream_w_retry_timeout(self, query_class):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        collection = self._make_one("collection")
+        stream_response = collection.stream(retry=retry, timeout=timeout)
+
+        query_class.assert_called_once_with(collection)
+        query_instance = query_class.return_value
+        self.assertIs(stream_response, query_instance.stream.return_value)
+        query_instance.stream.assert_called_once_with(
+            transaction=None, retry=retry, timeout=timeout,
+        )
+
+    @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
     def test_stream_with_transaction(self, query_class):
         collection = self._make_one("collection")
         transaction = mock.sentinel.txn
