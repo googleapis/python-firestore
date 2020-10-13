@@ -303,6 +303,55 @@ class TestClient(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
+    def test_get_all_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+        from google.cloud.firestore_v1.types import common
+        from google.cloud.firestore_v1.document import DocumentSnapshot
+
+        data1 = {"a": u"cheese"}
+        data2 = {"b": True, "c": 18}
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        info = self._info_for_get_all(data1, data2)
+        client, document1, document2, response1, response2 = info
+
+        # Exercise the mocked ``batch_get_documents``.
+        field_paths = ["a", "b"]
+        snapshots = self._get_all_helper(
+            client,
+            [document1, document2],
+            [response1, response2],
+            field_paths=field_paths,
+            retry=retry,
+            timeout=timeout,
+        )
+        self.assertEqual(len(snapshots), 2)
+
+        snapshot1 = snapshots[0]
+        self.assertIsInstance(snapshot1, DocumentSnapshot)
+        self.assertIs(snapshot1._reference, document1)
+        self.assertEqual(snapshot1._data, data1)
+
+        snapshot2 = snapshots[1]
+        self.assertIsInstance(snapshot2, DocumentSnapshot)
+        self.assertIs(snapshot2._reference, document2)
+        self.assertEqual(snapshot2._data, data2)
+
+        # Verify the call to the mock.
+        doc_paths = [document1._document_path, document2._document_path]
+        mask = common.DocumentMask(field_paths=field_paths)
+        client._firestore_api.batch_get_documents.assert_called_once_with(
+            request={
+                "database": client._database_string,
+                "documents": doc_paths,
+                "mask": mask,
+                "transaction": None,
+            },
+            retry=retry,
+            timeout=timeout,
+            metadata=client._rpc_metadata,
+        )
+
     def test_get_all_with_transaction(self):
         from google.cloud.firestore_v1.document import DocumentSnapshot
 

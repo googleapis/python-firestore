@@ -24,6 +24,8 @@ In the hierarchy of API concepts
   :class:`~google.cloud.firestore_v1.document.DocumentReference`
 """
 
+from google.api_core import retry as retries  # type: ignore
+
 from google.cloud.firestore_v1.base_client import (
     BaseClient,
     DEFAULT_DATABASE,
@@ -202,11 +204,25 @@ class Client(BaseClient):
             *self._document_path_helper(*document_path), client=self
         )
 
+    @staticmethod
+    def _make_retry_timeout_kwargs(retry, timeout):
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        return kwargs
+
     def get_all(
         self,
         references: list,
         field_paths: Iterable[str] = None,
         transaction: Transaction = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> Generator[Any, Any, None]:
         """Retrieve a batch of documents.
 
@@ -237,6 +253,9 @@ class Client(BaseClient):
             transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that these ``references`` will be
                 retrieved in.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
@@ -244,6 +263,8 @@ class Client(BaseClient):
         """
         document_paths, reference_map = _reference_info(references)
         mask = _get_doc_mask(field_paths)
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+
         response_iterator = self._firestore_api.batch_get_documents(
             request={
                 "database": self._database_string,
@@ -252,6 +273,7 @@ class Client(BaseClient):
                 "transaction": _helpers.get_transaction_id(transaction),
             },
             metadata=self._rpc_metadata,
+            **kwargs,
         )
 
         for get_doc_response in response_iterator:
