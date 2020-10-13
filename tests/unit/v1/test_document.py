@@ -233,7 +233,7 @@ class TestDocumentReference(unittest.TestCase):
             current_document=common.Precondition(exists=True),
         )
 
-    def _update_helper(self, **option_kwargs):
+    def _update_helper(self, retry=None, timeout=None, **option_kwargs):
         from google.cloud.firestore_v1.transforms import DELETE_FIELD
 
         # Create a minimal fake GAPIC with a dummy response.
@@ -250,12 +250,21 @@ class TestDocumentReference(unittest.TestCase):
         field_updates = collections.OrderedDict(
             (("hello", 1), ("then.do", False), ("goodbye", DELETE_FIELD))
         )
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         if option_kwargs:
             option = client.write_option(**option_kwargs)
-            write_result = document.update(field_updates, option=option)
+            write_result = document.update(field_updates, option=option, **kwargs)
         else:
             option = None
-            write_result = document.update(field_updates)
+            write_result = document.update(field_updates, **kwargs)
 
         # Verify the response and the mocks.
         self.assertIs(write_result, mock.sentinel.write_result)
@@ -276,6 +285,7 @@ class TestDocumentReference(unittest.TestCase):
                 "transaction": None,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
 
     def test_update_with_exists(self):
@@ -284,6 +294,13 @@ class TestDocumentReference(unittest.TestCase):
 
     def test_update(self):
         self._update_helper()
+
+    def test_update_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._update_helper(retry=retry, timeout=timeout)
 
     def test_update_with_precondition(self):
         from google.protobuf import timestamp_pb2

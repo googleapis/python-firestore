@@ -137,7 +137,13 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
-    def update(self, field_updates: dict, option: _helpers.WriteOption = None) -> Any:
+    def update(
+        self,
+        field_updates: dict,
+        option: _helpers.WriteOption = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> Any:
         """Update an existing document in the Firestore database.
 
         By default, this method verifies that the document exists on the
@@ -271,6 +277,9 @@ class DocumentReference(BaseDocumentReference):
             option (Optional[:class:`~google.cloud.firestore_v1.client.WriteOption`]):
                 A write option to make assertions / preconditions on the server
                 state of the document before applying changes.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             :class:`~google.cloud.firestore_v1.types.WriteResult`:
@@ -282,7 +291,8 @@ class DocumentReference(BaseDocumentReference):
         """
         batch = self._client.batch()
         batch.update(self, field_updates, option=option)
-        write_results = batch.commit()
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
     def delete(
