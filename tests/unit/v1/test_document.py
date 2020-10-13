@@ -69,7 +69,7 @@ class TestDocumentReference(unittest.TestCase):
             current_document=common.Precondition(exists=False),
         )
 
-    def test_create(self):
+    def _create_helper(self, retry=None, timeout=None):
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock()
         firestore_api.commit.mock_add_spec(spec=["commit"])
@@ -82,7 +82,16 @@ class TestDocumentReference(unittest.TestCase):
         # Actually make a document and call create().
         document = self._make_one("foo", "twelve", client=client)
         document_data = {"hello": "goodbye", "count": 99}
-        write_result = document.create(document_data)
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        write_result = document.create(document_data, **kwargs)
 
         # Verify the response and the mocks.
         self.assertIs(write_result, mock.sentinel.write_result)
@@ -94,7 +103,18 @@ class TestDocumentReference(unittest.TestCase):
                 "transaction": None,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
+
+    def test_create(self):
+        self._create_helper()
+
+    def test_create_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._create_helper(retry=retry, timeout=timeout)
 
     def test_create_empty(self):
         # Create a minimal fake GAPIC with a dummy response.

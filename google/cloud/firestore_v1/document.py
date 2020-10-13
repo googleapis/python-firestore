@@ -69,12 +69,17 @@ class DocumentReference(BaseDocumentReference):
 
         return kwargs
 
-    def create(self, document_data) -> Any:
+    def create(
+        self, document_data, retry: retries.Retry = None, timeout: float = None,
+    ) -> Any:
         """Create the current document in the Firestore database.
 
         Args:
             document_data (dict): Property names and values to use for
                 creating a document.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             :class:`~google.cloud.firestore_v1.types.WriteResult`:
@@ -87,7 +92,8 @@ class DocumentReference(BaseDocumentReference):
         """
         batch = self._client.batch()
         batch.create(self, document_data)
-        write_results = batch.commit()
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
     def set(self, document_data: dict, merge: bool = False) -> Any:
