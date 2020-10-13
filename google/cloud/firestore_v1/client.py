@@ -279,16 +279,26 @@ class Client(BaseClient):
         for get_doc_response in response_iterator:
             yield _parse_batch_get(get_doc_response, reference_map, self)
 
-    def collections(self) -> Generator[Any, Any, None]:
+    def collections(
+        self, retry: retries.Retry = None, timeout: float = None,
+    ) -> Generator[Any, Any, None]:
         """List top-level collections of the client's database.
+
+        Args:
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.collection.CollectionReference`]:
                 iterator of subcollections of the current document.
         """
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+
         iterator = self._firestore_api.list_collection_ids(
             request={"parent": "{}/documents".format(self._database_string)},
             metadata=self._rpc_metadata,
+            **kwargs,
         )
 
         while True:
