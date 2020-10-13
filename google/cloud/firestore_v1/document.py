@@ -372,13 +372,18 @@ class DocumentReference(BaseDocumentReference):
             update_time=update_time,
         )
 
-    def collections(self, page_size: int = None) -> Generator[Any, Any, None]:
+    def collections(
+        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
+    ) -> Generator[Any, Any, None]:
         """List subcollections of the current document.
 
         Args:
             page_size (Optional[int]]): The maximum number of collections
-            in each page of results from this request. Non-positive values
-            are ignored. Defaults to a sensible value set by the API.
+                in each page of results from this request. Non-positive values
+                are ignored. Defaults to a sensible value set by the API.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.collection.CollectionReference`]:
@@ -386,9 +391,12 @@ class DocumentReference(BaseDocumentReference):
                 document does not exist at the time of `snapshot`, the
                 iterator will be empty
         """
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+
         iterator = self._client._firestore_api.list_collection_ids(
             request={"parent": self._document_path, "page_size": page_size},
             metadata=self._client._rpc_metadata,
+            **kwargs,
         )
 
         while True:

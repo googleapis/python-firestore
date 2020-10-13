@@ -395,7 +395,7 @@ class TestDocumentReference(unittest.TestCase):
                 "transaction": expected_transaction_id,
             },
             metadata=client._rpc_metadata,
-            **kwargs
+            **kwargs,
         )
 
     def test_get_not_found(self):
@@ -424,7 +424,7 @@ class TestDocumentReference(unittest.TestCase):
     def test_get_with_transaction(self):
         self._get_helper(use_transaction=True)
 
-    def _collections_helper(self, page_size=None):
+    def _collections_helper(self, page_size=None, retry=None, timeout=None):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.collection import CollectionReference
@@ -450,12 +450,20 @@ class TestDocumentReference(unittest.TestCase):
         client = _make_client()
         client._firestore_api_internal = api_client
 
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         # Actually make a document and call delete().
         document = self._make_one("where", "we-are", client=client)
         if page_size is not None:
-            collections = list(document.collections(page_size=page_size))
+            collections = list(document.collections(page_size=page_size, **kwargs))
         else:
-            collections = list(document.collections())
+            collections = list(document.collections(**kwargs))
 
         # Verify the response and the mocks.
         self.assertEqual(len(collections), len(collection_ids))
@@ -467,6 +475,7 @@ class TestDocumentReference(unittest.TestCase):
         api_client.list_collection_ids.assert_called_once_with(
             request={"parent": document._document_path, "page_size": page_size},
             metadata=client._rpc_metadata,
+            **kwargs,
         )
 
     def test_collections_wo_page_size(self):
@@ -474,6 +483,13 @@ class TestDocumentReference(unittest.TestCase):
 
     def test_collections_w_page_size(self):
         self._collections_helper(page_size=10)
+
+    def test_collections_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._collections_helper(retry=retry, timeout=timeout)
 
     @mock.patch("google.cloud.firestore_v1.document.Watch", autospec=True)
     def test_on_snapshot(self, watch):
