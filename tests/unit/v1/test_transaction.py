@@ -291,13 +291,34 @@ class TestTransaction(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_get_all(self):
+    def _get_all_helper(self, retry=None, timeout=None):
         client = mock.Mock(spec=["get_all"])
         transaction = self._make_one(client)
         ref1, ref2 = mock.Mock(), mock.Mock()
-        result = transaction.get_all([ref1, ref2])
-        client.get_all.assert_called_once_with([ref1, ref2], transaction=transaction)
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        result = transaction.get_all([ref1, ref2], **kwargs)
+        client.get_all.assert_called_once_with(
+            [ref1, ref2], transaction=transaction, **kwargs,
+        )
         self.assertIs(result, client.get_all.return_value)
+
+    def test_get_all(self):
+        self._get_all_helper()
+
+    def test_get_all_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._get_all_helper(retry=retry, timeout=timeout)
 
     def test_get_document_ref(self):
         from google.cloud.firestore_v1.document import DocumentReference

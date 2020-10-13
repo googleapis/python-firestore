@@ -18,6 +18,8 @@
 import random
 import time
 
+from google.api_core import retry as retries  # type: ignore
+
 from google.cloud.firestore_v1.base_transaction import (
     _BaseTransactional,
     BaseTransaction,
@@ -136,18 +138,36 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         self._clean_up()
         return list(commit_response.write_results)
 
-    def get_all(self, references: list) -> Any:
+    @staticmethod
+    def _make_retry_timeout_kwargs(retry, timeout):
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        return kwargs
+
+    def get_all(
+        self, references: list, retry: retries.Retry = None, timeout: float = None
+    ) -> Any:
         """Retrieves multiple documents from Firestore.
 
         Args:
             references (List[.DocumentReference, ...]): Iterable of document
                 references to be retrieved.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
             query, or :data:`None` if the document does not exist.
         """
-        return self._client.get_all(references, transaction=self)
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        return self._client.get_all(references, transaction=self, **kwargs)
 
     def get(self, ref_or_query) -> Any:
         """
