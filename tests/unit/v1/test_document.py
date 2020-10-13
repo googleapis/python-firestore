@@ -168,7 +168,7 @@ class TestDocumentReference(unittest.TestCase):
             write_pbs._pb.update_mask.CopyFrom(mask._pb)
         return write_pbs
 
-    def _set_helper(self, merge=False, **option_kwargs):
+    def _set_helper(self, merge=False, retry=None, timeout=None, **option_kwargs):
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock(spec=["commit"])
         firestore_api.commit.return_value = self._make_commit_repsonse()
@@ -180,7 +180,16 @@ class TestDocumentReference(unittest.TestCase):
         # Actually make a document and call create().
         document = self._make_one("User", "Interface", client=client)
         document_data = {"And": 500, "Now": b"\xba\xaa\xaa \xba\xaa\xaa"}
-        write_result = document.set(document_data, merge)
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        write_result = document.set(document_data, merge, **kwargs)
 
         # Verify the response and the mocks.
         self.assertIs(write_result, mock.sentinel.write_result)
@@ -193,10 +202,18 @@ class TestDocumentReference(unittest.TestCase):
                 "transaction": None,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
 
     def test_set(self):
         self._set_helper()
+
+    def test_set_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._set_helper(retry=retry, timeout=timeout)
 
     def test_set_merge(self):
         self._set_helper(merge=True)

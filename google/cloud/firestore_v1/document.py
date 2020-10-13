@@ -96,7 +96,13 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
-    def set(self, document_data: dict, merge: bool = False) -> Any:
+    def set(
+        self,
+        document_data: dict,
+        merge: bool = False,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> Any:
         """Replace the current document in the Firestore database.
 
         A write ``option`` can be specified to indicate preconditions of
@@ -116,6 +122,9 @@ class DocumentReference(BaseDocumentReference):
             merge (Optional[bool] or Optional[List<apispec>]):
                 If True, apply merging instead of overwriting the state
                 of the document.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             :class:`~google.cloud.firestore_v1.types.WriteResult`:
@@ -124,7 +133,8 @@ class DocumentReference(BaseDocumentReference):
         """
         batch = self._client.batch()
         batch.set(self, document_data, merge=merge)
-        write_results = batch.commit()
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
     def update(self, field_updates: dict, option: _helpers.WriteOption = None) -> Any:
