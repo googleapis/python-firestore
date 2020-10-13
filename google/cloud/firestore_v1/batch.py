@@ -14,6 +14,7 @@
 
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
+from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_batch import BaseWriteBatch
 
@@ -33,8 +34,13 @@ class WriteBatch(BaseWriteBatch):
     def __init__(self, client) -> None:
         super(WriteBatch, self).__init__(client=client)
 
-    def commit(self) -> list:
+    def commit(self, retry: retries.Retry = None, timeout: float = None) -> list:
         """Commit the changes accumulated in this batch.
+
+        Args
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             List[:class:`google.cloud.proto.firestore.v1.write.WriteResult`, ...]:
@@ -42,6 +48,14 @@ class WriteBatch(BaseWriteBatch):
             in the same order as the changes were applied to this batch. A
             write result contains an ``update_time`` field.
         """
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         commit_response = self._client._firestore_api.commit(
             request={
                 "database": self._client._database_string,
@@ -49,6 +63,7 @@ class WriteBatch(BaseWriteBatch):
                 "transaction": None,
             },
             metadata=self._client._rpc_metadata,
+            **kwargs,
         )
 
         self._write_pbs = []
