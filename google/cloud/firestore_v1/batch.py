@@ -37,7 +37,7 @@ class WriteBatch(BaseWriteBatch):
     def commit(self, retry: retries.Retry = None, timeout: float = None) -> list:
         """Commit the changes accumulated in this batch.
 
-        Args
+        Args:
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.

@@ -172,13 +172,14 @@ class Transaction(batch.WriteBatch, BaseTransaction):
     def get(
         self, ref_or_query, retry: retries.Retry = None, timeout: float = None
     ) -> Any:
-        """
-        Retrieve a document or a query result from the database.
+        """Retrieve a document or a query result from the database.
+
         Args:
             ref_or_query: The document references or query object to return.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
+
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
             query, or :data:`None` if the document does not exist.
