@@ -105,7 +105,7 @@ class TestQuery(unittest.TestCase):
         # Execute the query and check the response.
         query = self._make_one(parent)
         query = query.order_by(
-            u"snooze", direction=firestore.Query.DESCENDING
+            "snooze", direction=firestore.Query.DESCENDING
         ).limit_to_last(2)
         returned = query.get()
 
@@ -134,7 +134,7 @@ class TestQuery(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
-    def test_stream_simple(self):
+    def _stream_helper(self, retry=None, timeout=None):
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
 
@@ -154,7 +154,17 @@ class TestQuery(unittest.TestCase):
 
         # Execute the query and check the response.
         query = self._make_one(parent)
-        get_response = query.stream()
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        get_response = query.stream(**kwargs)
+
         self.assertIsInstance(get_response, types.GeneratorType)
         returned = list(get_response)
         self.assertEqual(len(returned), 1)
@@ -171,7 +181,18 @@ class TestQuery(unittest.TestCase):
                 "transaction": None,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
+
+    def test_stream_simple(self):
+        self._stream_helper()
+
+    def test_stream_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._stream_helper(retry=retry, timeout=timeout)
 
     def test_stream_with_limit_to_last(self):
         # Attach the fake GAPIC to a real client.

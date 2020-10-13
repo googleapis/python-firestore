@@ -18,6 +18,9 @@ A :class:`~google.cloud.firestore_v1.query.Query` can be created directly from
 a :class:`~google.cloud.firestore_v1.collection.Collection` and that can be
 a more common way to create a query than direct usage of the constructor.
 """
+
+from google.api_core import retry as retries  # type: ignore
+
 from google.cloud.firestore_v1.base_query import (
     BaseCollectionGroup,
     BaseQuery,
@@ -153,7 +156,7 @@ class Query(BaseQuery):
         return list(result)
 
     def stream(
-        self, transaction=None
+        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
     ) -> Generator[document.DocumentSnapshot, Any, None]:
         """Read the documents in the collection that match this query.
 
@@ -176,6 +179,9 @@ class Query(BaseQuery):
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Yields:
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
@@ -188,6 +194,15 @@ class Query(BaseQuery):
             )
 
         parent_path, expected_prefix = self._parent._parent_info()
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         response_iterator = self._client._firestore_api.run_query(
             request={
                 "parent": parent_path,
@@ -195,6 +210,7 @@ class Query(BaseQuery):
                 "transaction": _helpers.get_transaction_id(transaction),
             },
             metadata=self._client._rpc_metadata,
+            **kwargs,
         )
 
         for response in response_iterator:
