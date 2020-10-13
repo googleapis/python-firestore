@@ -28,6 +28,7 @@ import os
 
 import google.api_core.client_options  # type: ignore
 import google.api_core.path_template  # type: ignore
+from google.api_core import retry as retries  # type: ignore
 from google.api_core.gapic_v1 import client_info  # type: ignore
 from google.cloud.client import ClientWithProject  # type: ignore
 
@@ -358,13 +359,15 @@ class BaseClient(ClientWithProject):
         references: list,
         field_paths: Iterable[str] = None,
         transaction: BaseTransaction = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> Union[
         AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
     ]:
         raise NotImplementedError
 
     def collections(
-        self,
+        self, retry: retries.Retry = None, timeout: float = None,
     ) -> Union[
         AsyncGenerator[BaseCollectionReference, Any],
         Generator[BaseCollectionReference, Any, Any],

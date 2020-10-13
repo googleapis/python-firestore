@@ -16,6 +16,8 @@
 
 import copy
 
+from google.api_core import retry as retries  # type: ignore
+
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
 from typing import Any, Iterable, NoReturn, Tuple
@@ -178,26 +180,49 @@ class BaseDocumentReference(object):
         child_path = self._path + (collection_id,)
         return self._client.collection(*child_path)
 
-    def create(self, document_data: dict) -> NoReturn:
-        raise NotImplementedError
-
-    def set(self, document_data: dict, merge: bool = False) -> NoReturn:
-        raise NotImplementedError
-
-    def update(
-        self, field_updates: dict, option: _helpers.WriteOption = None
+    def create(
+        self, document_data: dict, retry: retries.Retry = None, timeout: float = None,
     ) -> NoReturn:
         raise NotImplementedError
 
-    def delete(self, option: _helpers.WriteOption = None) -> NoReturn:
+    def set(
+        self,
+        document_data: dict,
+        merge: bool = False,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> NoReturn:
+        raise NotImplementedError
+
+    def update(
+        self,
+        field_updates: dict,
+        option: _helpers.WriteOption = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> NoReturn:
+        raise NotImplementedError
+
+    def delete(
+        self,
+        option: _helpers.WriteOption = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> NoReturn:
         raise NotImplementedError
 
     def get(
-        self, field_paths: Iterable[str] = None, transaction=None
+        self,
+        field_paths: Iterable[str] = None,
+        transaction=None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> "DocumentSnapshot":
         raise NotImplementedError
 
-    def collections(self, page_size: int = None) -> NoReturn:
+    def collections(
+        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
+    ) -> NoReturn:
         raise NotImplementedError
 
     def on_snapshot(self, callback) -> NoReturn:

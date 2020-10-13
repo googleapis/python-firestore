@@ -21,6 +21,7 @@ a more common way to create a query than direct usage of the constructor.
 import copy
 import math
 
+from google.api_core import retry as retries  # type: ignore
 from google.protobuf import wrappers_pb2
 
 from google.cloud.firestore_v1 import _helpers
@@ -800,10 +801,14 @@ class BaseQuery(object):
 
         return query.StructuredQuery(**query_kwargs)
 
-    def get(self, transaction=None) -> NoReturn:
+    def get(
+        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
+    ) -> NoReturn:
         raise NotImplementedError
 
-    def stream(self, transaction=None) -> NoReturn:
+    def stream(
+        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
+    ) -> NoReturn:
         raise NotImplementedError
 
     def on_snapshot(self, callback) -> NoReturn:
@@ -1098,6 +1103,11 @@ class BaseCollectionGroup(BaseQuery):
 
         if self._offset:
             raise ValueError("Can't partition query with offset.")
+
+    def get_partitions(
+        self, partition_count, retry: retries.Retry = None, timeout: float = None,
+    ) -> NoReturn:
+        raise NotImplementedError
 
 
 class QueryPartition:

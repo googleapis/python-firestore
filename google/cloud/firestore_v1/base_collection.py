@@ -15,6 +15,8 @@
 """Classes for representing collections for the Google Cloud Firestore API."""
 import random
 
+from google.api_core import retry as retries  # type: ignore
+
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.document import DocumentReference
 from typing import (
@@ -147,12 +149,16 @@ class BaseCollectionReference(object):
         return parent_path, expected_prefix
 
     def add(
-        self, document_data: dict, document_id: str = None
+        self,
+        document_data: dict,
+        document_id: str = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> Union[Tuple[Any, Any], Coroutine[Any, Any, Tuple[Any, Any]]]:
         raise NotImplementedError
 
     def list_documents(
-        self, page_size: int = None
+        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
     ) -> Union[
         Generator[DocumentReference, Any, Any], AsyncGenerator[DocumentReference, Any]
     ]:
@@ -374,14 +380,20 @@ class BaseCollectionReference(object):
         return query.end_at(document_fields)
 
     def get(
-        self, transaction: Transaction = None
+        self,
+        transaction: Transaction = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> Union[
         Generator[DocumentSnapshot, Any, Any], AsyncGenerator[DocumentSnapshot, Any]
     ]:
         raise NotImplementedError
 
     def stream(
-        self, transaction: Transaction = None
+        self,
+        transaction: Transaction = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> Union[Iterator[DocumentSnapshot], AsyncIterator[DocumentSnapshot]]:
         raise NotImplementedError
 
