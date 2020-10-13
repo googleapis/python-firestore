@@ -201,7 +201,7 @@ class TestCollectionReference(unittest.TestCase):
         timeout = 123.0
         self._add_helper(retry=retry, timeout=timeout)
 
-    def _list_documents_helper(self, page_size=None):
+    def _list_documents_helper(self, page_size=None, retry=None, timeout=None):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.document import DocumentReference
@@ -230,10 +230,18 @@ class TestCollectionReference(unittest.TestCase):
         client._firestore_api_internal = api_client
         collection = self._make_one("collection", client=client)
 
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         if page_size is not None:
-            documents = list(collection.list_documents(page_size=page_size))
+            documents = list(collection.list_documents(page_size=page_size, **kwargs))
         else:
-            documents = list(collection.list_documents())
+            documents = list(collection.list_documents(**kwargs))
 
         # Verify the response and the mocks.
         self.assertEqual(len(documents), len(document_ids))
@@ -251,10 +259,18 @@ class TestCollectionReference(unittest.TestCase):
                 "show_missing": True,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
 
     def test_list_documents_wo_page_size(self):
         self._list_documents_helper()
+
+    def test_list_documents_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._list_documents_helper(retry=retry, timeout=timeout)
 
     def test_list_documents_w_page_size(self):
         self._list_documents_helper(page_size=25)

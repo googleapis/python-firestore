@@ -120,13 +120,18 @@ class CollectionReference(BaseCollectionReference):
         write_result = document_ref.create(document_data, **kwargs)
         return write_result.update_time, document_ref
 
-    def list_documents(self, page_size: int = None) -> Generator[Any, Any, None]:
+    def list_documents(
+        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
+    ) -> Generator[Any, Any, None]:
         """List all subdocuments of the current collection.
 
         Args:
             page_size (Optional[int]]): The maximum number of documents
-            in each page of results from this request. Non-positive values
-            are ignored. Defaults to a sensible value set by the API.
+                in each page of results from this request. Non-positive values
+                are ignored. Defaults to a sensible value set by the API.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.collection.DocumentReference`]:
@@ -135,6 +140,7 @@ class CollectionReference(BaseCollectionReference):
                 iterator will be empty
         """
         parent, _ = self._parent_info()
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
 
         iterator = self._client._firestore_api.list_documents(
             request={
@@ -144,6 +150,7 @@ class CollectionReference(BaseCollectionReference):
                 "show_missing": True,
             },
             metadata=self._client._rpc_metadata,
+            **kwargs,
         )
         return (_item_to_document_ref(self, i) for i in iterator)
 
