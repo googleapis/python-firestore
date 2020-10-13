@@ -26,7 +26,7 @@ from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import write
 from google.cloud.firestore_v1.watch import Watch
 from google.protobuf import timestamp_pb2
-from typing import Any, Generator
+from typing import Any, Callable, Generator, Iterable
 
 
 class DocumentReference(BaseDocumentReference):
@@ -78,7 +78,7 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit()
         return _first_write_result(write_results)
 
-    def set(self, document_data, merge=False) -> write.WriteResult:
+    def set(self, document_data: dict, merge: bool = False) -> write.WriteResult:
         """Replace the current document in the Firestore database.
 
         A write ``option`` can be specified to indicate preconditions of
@@ -109,7 +109,7 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit()
         return _first_write_result(write_results)
 
-    def update(self, field_updates, option=None) -> write.WriteResult:
+    def update(self, field_updates: dict, option=None) -> write.WriteResult:
         """Update an existing document in the Firestore database.
 
         By default, this method verifies that the document exists on the
@@ -284,7 +284,9 @@ class DocumentReference(BaseDocumentReference):
 
         return commit_response.commit_time
 
-    def get(self, field_paths=None, transaction=None) -> DocumentSnapshot:
+    def get(
+        self, field_paths: Iterable[str] = None, transaction=None
+    ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
         See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for
@@ -349,7 +351,7 @@ class DocumentReference(BaseDocumentReference):
             update_time=update_time,
         )
 
-    def collections(self, page_size=None) -> Generator[Any, Any, None]:
+    def collections(self, page_size: int = None) -> Generator[Any, Any, None]:
         """List subcollections of the current document.
 
         Args:
@@ -389,7 +391,7 @@ class DocumentReference(BaseDocumentReference):
         # iterator.item_to_value = _item_to_collection_ref
         # return iterator
 
-    def on_snapshot(self, callback) -> Watch:
+    def on_snapshot(self, callback: Callable) -> Watch:
         """Watch this document.
 
         This starts a watch on this document using a background thread. The
