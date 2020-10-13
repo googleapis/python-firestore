@@ -169,19 +169,25 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         kwargs = self._make_retry_timeout_kwargs(retry, timeout)
         return self._client.get_all(references, transaction=self, **kwargs)
 
-    def get(self, ref_or_query) -> Any:
+    def get(
+        self, ref_or_query, retry: retries.Retry = None, timeout: float = None
+    ) -> Any:
         """
         Retrieve a document or a query result from the database.
         Args:
-            ref_or_query The document references or query object to return.
+            ref_or_query: The document references or query object to return.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
             query, or :data:`None` if the document does not exist.
         """
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
         if isinstance(ref_or_query, DocumentReference):
-            return self._client.get_all([ref_or_query], transaction=self)
+            return self._client.get_all([ref_or_query], transaction=self, **kwargs)
         elif isinstance(ref_or_query, Query):
-            return ref_or_query.stream(transaction=self)
+            return ref_or_query.stream(transaction=self, **kwargs)
         else:
             raise ValueError(
                 'Value for argument "ref_or_query" must be a DocumentReference or a Query.'
