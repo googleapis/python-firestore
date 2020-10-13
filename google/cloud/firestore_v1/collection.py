@@ -13,6 +13,9 @@
 # limitations under the License.
 
 """Classes for representing collections for the Google Cloud Firestore API."""
+
+from google.api_core import retry as retries  # type: ignore
+
 from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _auto_id,
@@ -64,7 +67,25 @@ class CollectionReference(BaseCollectionReference):
         """
         return query_mod.Query(self)
 
-    def add(self, document_data: dict, document_id: str = None) -> Tuple[Any, Any]:
+    @staticmethod
+    def _make_retry_timeout_kwargs(retry, timeout):
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        return kwargs
+
+    def add(
+        self,
+        document_data: dict,
+        document_id: str = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> Tuple[Any, Any]:
         """Create a document in the Firestore database with the provided data.
 
         Args:
@@ -75,6 +96,9 @@ class CollectionReference(BaseCollectionReference):
                 automatically assigned by the server (the assigned ID will be
                 a random 20 character string composed of digits,
                 uppercase and lowercase letters).
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             Tuple[:class:`google.protobuf.timestamp_pb2.Timestamp`, \
@@ -92,7 +116,8 @@ class CollectionReference(BaseCollectionReference):
             document_id = _auto_id()
 
         document_ref = self.document(document_id)
-        write_result = document_ref.create(document_data)
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        write_result = document_ref.create(document_data, **kwargs)
         return write_result.update_time, document_ref
 
     def list_documents(self, page_size: int = None) -> Generator[Any, Any, None]:

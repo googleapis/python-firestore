@@ -138,7 +138,7 @@ class TestCollectionReference(unittest.TestCase):
             current_document=common.Precondition(exists=False),
         )
 
-    def test_add_explicit_id(self):
+    def _add_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1.document import DocumentReference
 
         # Create a minimal fake GAPIC with a dummy response.
@@ -161,7 +161,18 @@ class TestCollectionReference(unittest.TestCase):
         collection = self._make_one("parent", client=client)
         document_data = {"zorp": 208.75, "i-did-not": b"know that"}
         doc_id = "child"
-        update_time, document_ref = collection.add(document_data, document_id=doc_id)
+
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
+        update_time, document_ref = collection.add(
+            document_data, document_id=doc_id, **kwargs
+        )
 
         # Verify the response and the mocks.
         self.assertIs(update_time, mock.sentinel.update_time)
@@ -177,7 +188,18 @@ class TestCollectionReference(unittest.TestCase):
                 "transaction": None,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
+
+    def test_add_explicit_id(self):
+        self._add_helper()
+
+    def test_add_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._add_helper(retry=retry, timeout=timeout)
 
     def _list_documents_helper(self, page_size=None):
         from google.api_core.page_iterator import Iterator
