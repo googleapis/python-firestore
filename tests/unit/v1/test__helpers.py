@@ -1270,6 +1270,38 @@ class TestDocumentExtractor(unittest.TestCase):
         self.assertEqual(update_pb.update.fields, encode_dict(document_data))
         self.assertFalse(update_pb._pb.HasField("current_document"))
 
+    def test_get_field_transform_pbs_miss(self):
+        document_data = {"a": 1}
+        inst = self._make_one(document_data)
+        document_path = (
+            "projects/project-id/databases/(default)/" "documents/document-id"
+        )
+
+        field_transform_pbs = inst.get_field_transform_pbs(document_path)
+
+        self.assertEqual(field_transform_pbs, [])
+
+    def test_get_field_transform_pbs_w_server_timestamp(self):
+        from google.cloud.firestore_v1.types import write
+        from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
+        from google.cloud.firestore_v1._helpers import REQUEST_TIME_ENUM
+
+        document_data = {"a": SERVER_TIMESTAMP}
+        inst = self._make_one(document_data)
+        document_path = (
+            "projects/project-id/databases/(default)/" "documents/document-id"
+        )
+
+        field_transform_pbs = inst.get_field_transform_pbs(document_path)
+
+        self.assertEqual(len(field_transform_pbs), 1)
+        field_transform_pb = field_transform_pbs[0]
+        self.assertIsInstance(
+            field_transform_pb, write.DocumentTransform.FieldTransform
+        )
+        self.assertEqual(field_transform_pb.field_path, "a")
+        self.assertEqual(field_transform_pb.set_to_server_value, REQUEST_TIME_ENUM)
+
     def test_get_transform_pb_w_server_timestamp_w_exists_precondition(self):
         from google.cloud.firestore_v1.types import write
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
@@ -1526,30 +1558,15 @@ class Test_pbs_for_create(unittest.TestCase):
         )
 
     @staticmethod
-    def _make_write_w_transform(document_path, fields, set_field=True):
-        from google.cloud.firestore_v1.types import write
+    def _add_field_transforms(update_pb, fields):
         from google.cloud.firestore_v1 import DocumentTransform
-        from google.cloud.firestore_v1.types import common
 
         server_val = DocumentTransform.FieldTransform.ServerValue
-        transforms = [
-            write.DocumentTransform.FieldTransform(
-                field_path=field, set_to_server_value=server_val.REQUEST_TIME
-            )
-            for field in fields
-        ]
-        if not set_field:
-            return write.Write(
-                transform=write.DocumentTransform(
-                    document=document_path, field_transforms=transforms
-                ),
-                current_document=common.Precondition(exists=False),
-            )
-        else:
-            return write.Write(
-                transform=write.DocumentTransform(
-                    document=document_path, field_transforms=transforms
-                ),
+        for field in fields:
+            update_pb.update_transforms.append(
+                DocumentTransform.FieldTransform(
+                    field_path=field, set_to_server_value=server_val.REQUEST_TIME
+                )
             )
 
     def _helper(self, do_transform=False, empty_val=False, set_field=True):
@@ -1568,26 +1585,17 @@ class Test_pbs_for_create(unittest.TestCase):
 
         write_pbs = self._call_fut(document_path, document_data)
 
-        expected_pbs = []
         if empty_val:
-            expected_pbs.append(
-                self._make_write_w_document(
-                    document_path, cheese=1.5, crackers=True, mustard={}
-                )
+            update_pb = self._make_write_w_document(
+                document_path, cheese=1.5, crackers=True, mustard={}
             )
-        elif not set_field:
-            pass
         else:
-            expected_pbs.append(
-                self._make_write_w_document(document_path, cheese=1.5, crackers=True)
+            update_pb = self._make_write_w_document(
+                document_path, cheese=1.5, crackers=True
             )
-
+        expected_pbs = [update_pb]
         if do_transform:
-            expected_pbs.append(
-                self._make_write_w_transform(
-                    document_path, fields=["butter"], set_field=set_field
-                )
-            )
+            self._add_field_transforms(update_pb, fields=["butter"])
 
         self.assertEqual(write_pbs, expected_pbs)
 
@@ -1599,9 +1607,6 @@ class Test_pbs_for_create(unittest.TestCase):
 
     def test_w_transform_and_empty_value(self):
         self._helper(do_transform=True, empty_val=True)
-
-    def test_w_transform_and_set_fields(self):
-        self._helper(do_transform=True, set_field=False)
 
     def test_w_deleted_fields(self):
         from google.cloud.firestore_v1.transforms import DELETE_FIELD
@@ -1639,23 +1644,16 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
         )
 
     @staticmethod
-    def _make_write_w_transform(document_path, fields):
-        from google.cloud.firestore_v1.types import write
+    def _add_field_transforms(update_pb, fields):
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
-        transforms = [
-            write.DocumentTransform.FieldTransform(
-                field_path=field, set_to_server_value=server_val.REQUEST_TIME
+        for field in fields:
+            update_pb.update_transforms.append(
+                DocumentTransform.FieldTransform(
+                    field_path=field, set_to_server_value=server_val.REQUEST_TIME
+                )
             )
-            for field in fields
-        ]
-
-        return write.Write(
-            transform=write.DocumentTransform(
-                document=document_path, field_transforms=transforms
-            )
-        )
 
     def test_w_empty_document(self):
         document_path = _make_ref_string(u"little", u"town", u"of", u"ham")
@@ -1676,8 +1674,8 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
         write_pbs = self._call_fut(document_path, document_data)
 
         update_pb = self._make_write_w_document(document_path)
-        transform_pb = self._make_write_w_transform(document_path, ["butter"])
-        expected_pbs = [update_pb, transform_pb]
+        self._add_field_transforms(update_pb, fields=["butter"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
     def _helper(self, do_transform=False, empty_val=False):
@@ -1705,9 +1703,7 @@ class Test_pbs_for_set_no_merge(unittest.TestCase):
         expected_pbs = [update_pb]
 
         if do_transform:
-            expected_pbs.append(
-                self._make_write_w_transform(document_path, fields=["butter"])
-            )
+            self._add_field_transforms(update_pb, fields=["butter"])
 
         self.assertEqual(write_pbs, expected_pbs)
 
@@ -1936,6 +1932,36 @@ class TestDocumentExtractorForMerge(unittest.TestCase):
         self.assertEqual(inst.array_unions, expected_array_unions)
         self.assertTrue(inst.has_updates)
 
+    def test_apply_merge_multiple_transform_paths(self):
+        from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP, ArrayUnion
+
+        values = [1, 3, 5]
+        document_data = {
+            "write_me": "value",
+            "b": {"timestamp": SERVER_TIMESTAMP},
+            "union_me": ArrayUnion(values),
+        }
+        inst = self._make_one(document_data)
+
+        inst.apply_merge(True)
+
+        expected_data_merge = [_make_field_path("write_me")]
+        expected_transform_merge = [
+            _make_field_path("b", "timestamp"),
+            _make_field_path("union_me"),
+        ]
+        expected_merge = [
+            _make_field_path("b", "timestamp"),
+            _make_field_path("union_me"),
+            _make_field_path("write_me"),
+        ]
+        self.assertEqual(inst.data_merge, expected_data_merge)
+        self.assertEqual(inst.transform_merge, expected_transform_merge)
+        self.assertEqual(inst.merge, expected_merge)
+        expected_array_unions = {_make_field_path("union_me"): values}
+        self.assertEqual(inst.array_unions, expected_array_unions)
+        self.assertTrue(inst.has_updates)
+
 
 class Test_pbs_for_set_with_merge(unittest.TestCase):
     @staticmethod
@@ -1957,23 +1983,16 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
         )
 
     @staticmethod
-    def _make_write_w_transform(document_path, fields):
-        from google.cloud.firestore_v1.types import write
+    def _add_field_transforms(update_pb, fields):
         from google.cloud.firestore_v1 import DocumentTransform
 
         server_val = DocumentTransform.FieldTransform.ServerValue
-        transforms = [
-            write.DocumentTransform.FieldTransform(
-                field_path=field, set_to_server_value=server_val.REQUEST_TIME
+        for field in fields:
+            update_pb.update_transforms.append(
+                DocumentTransform.FieldTransform(
+                    field_path=field, set_to_server_value=server_val.REQUEST_TIME
+                )
             )
-            for field in fields
-        ]
-
-        return write.Write(
-            transform=write.DocumentTransform(
-                document=document_path, field_transforms=transforms
-            )
-        )
 
     @staticmethod
     def _update_document_mask(update_pb, field_paths):
@@ -2007,6 +2026,20 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
         expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
+    def test_with_merge_true_w_only_transform(self):
+        from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
+
+        document_path = _make_ref_string(u"little", u"town", u"of", u"ham")
+        document_data = {"butter": SERVER_TIMESTAMP}
+
+        write_pbs = self._call_fut(document_path, document_data, merge=True)
+
+        update_pb = self._make_write_w_document(document_path)
+        self._update_document_mask(update_pb, field_paths=())
+        self._add_field_transforms(update_pb, fields=["butter"])
+        expected_pbs = [update_pb]
+        self.assertEqual(write_pbs, expected_pbs)
+
     def test_with_merge_true_w_transform(self):
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
 
@@ -2019,21 +2052,29 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
 
         update_pb = self._make_write_w_document(document_path, **update_data)
         self._update_document_mask(update_pb, field_paths=sorted(update_data))
-        transform_pb = self._make_write_w_transform(document_path, fields=["butter"])
-        expected_pbs = [update_pb, transform_pb]
+        self._add_field_transforms(update_pb, fields=["butter"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
     def test_with_merge_field_w_transform(self):
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
 
-        document_data = {}
         document_path = _make_ref_string(u"little", u"town", u"of", u"ham")
+        update_data = {"cheese": 1.5, "crackers": True}
+        document_data = update_data.copy()
         document_data["butter"] = SERVER_TIMESTAMP
 
-        write_pbs = self._call_fut(document_path, document_data, merge=["butter"])
+        write_pbs = self._call_fut(
+            document_path, document_data, merge=["cheese", "butter"]
+        )
 
-        transform_pb = self._make_write_w_transform(document_path, fields=["butter"])
-        self.assertEqual(write_pbs, [transform_pb])
+        update_pb = self._make_write_w_document(
+            document_path, cheese=document_data["cheese"]
+        )
+        self._update_document_mask(update_pb, ["cheese"])
+        self._add_field_transforms(update_pb, fields=["butter"])
+        expected_pbs = [update_pb]
+        self.assertEqual(write_pbs, expected_pbs)
 
     def test_with_merge_field_w_transform_masking_simple(self):
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
@@ -2046,10 +2087,9 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
         write_pbs = self._call_fut(document_path, document_data, merge=["butter.pecan"])
 
         update_pb = self._make_write_w_document(document_path)
-        transform_pb = self._make_write_w_transform(
-            document_path, fields=["butter.pecan"]
-        )
-        expected_pbs = [update_pb, transform_pb]
+        self._update_document_mask(update_pb, field_paths=())
+        self._add_field_transforms(update_pb, fields=["butter.pecan"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
     def test_with_merge_field_w_transform_parent(self):
@@ -2068,30 +2108,8 @@ class Test_pbs_for_set_with_merge(unittest.TestCase):
             document_path, cheese=update_data["cheese"], butter={"popcorn": "yum"}
         )
         self._update_document_mask(update_pb, ["cheese", "butter"])
-        transform_pb = self._make_write_w_transform(
-            document_path, fields=["butter.pecan"]
-        )
-        expected_pbs = [update_pb, transform_pb]
-        self.assertEqual(write_pbs, expected_pbs)
-
-    def test_wo_merge_field_w_transform(self):
-        from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
-
-        document_path = _make_ref_string(u"little", u"town", u"of", u"ham")
-        update_data = {"cheese": 1.5, "crackers": True}
-        document_data = update_data.copy()
-        document_data["butter"] = SERVER_TIMESTAMP
-
-        write_pbs = self._call_fut(
-            document_path, document_data, merge=["cheese", "butter"]
-        )
-
-        update_pb = self._make_write_w_document(
-            document_path, cheese=document_data["cheese"]
-        )
-        self._update_document_mask(update_pb, ["cheese"])
-        transform_pb = self._make_write_w_transform(document_path, fields=["butter"])
-        expected_pbs = [update_pb, transform_pb]
+        self._add_field_transforms(update_pb, fields=["butter.pecan"])
+        expected_pbs = [update_pb]
         self.assertEqual(write_pbs, expected_pbs)
 
 
@@ -2183,7 +2201,7 @@ class Test_pbs_for_update(unittest.TestCase):
 
         return pbs_for_update(document_path, field_updates, option)
 
-    def _helper(self, option=None, do_transform=False, update=True, **write_kwargs):
+    def _helper(self, option=None, do_transform=False, **write_kwargs):
         from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.field_path import FieldPath
         from google.cloud.firestore_v1.transforms import SERVER_TIMESTAMP
@@ -2193,66 +2211,43 @@ class Test_pbs_for_update(unittest.TestCase):
         from google.cloud.firestore_v1.types import write
 
         document_path = _make_ref_string(u"toy", u"car", u"onion", u"garlic")
-        field_updates = {}
-        if update:
-            field_path1 = "bitez.yum"
-            value = b"\x00\x01"
-            field_updates[field_path1] = value
+        field_path1 = "bitez.yum"
+        value = b"\x00\x01"
         field_path2 = "blog.internet"
 
+        field_updates = {field_path1: value}
         if do_transform:
             field_updates[field_path2] = SERVER_TIMESTAMP
 
         write_pbs = self._call_fut(document_path, field_updates, option)
 
-        expected_pbs = []
-        if update:
-            map_pb = document.MapValue(fields={"yum": _value_pb(bytes_value=value)})
+        map_pb = document.MapValue(fields={"yum": _value_pb(bytes_value=value)})
 
-            field_paths = [field_path1]
+        field_paths = [field_path1]
 
-            expected_update_pb = write.Write(
-                update=document.Document(
-                    name=document_path, fields={"bitez": _value_pb(map_value=map_pb)}
-                ),
-                update_mask=common.DocumentMask(field_paths=field_paths),
-                **write_kwargs
-            )
-            if isinstance(option, _helpers.ExistsOption):
-                precondition = common.Precondition(exists=False)
-                expected_update_pb._pb.current_document.CopyFrom(precondition._pb)
-            expected_pbs.append(expected_update_pb)
+        expected_update_pb = write.Write(
+            update=document.Document(
+                name=document_path, fields={"bitez": _value_pb(map_value=map_pb)}
+            ),
+            update_mask=common.DocumentMask(field_paths=field_paths),
+            **write_kwargs
+        )
+        if isinstance(option, _helpers.ExistsOption):
+            precondition = common.Precondition(exists=False)
+            expected_update_pb._pb.current_document.CopyFrom(precondition._pb)
 
         if do_transform:
             transform_paths = FieldPath.from_string(field_path2)
             server_val = DocumentTransform.FieldTransform.ServerValue
-            if update:
-                expected_transform_pb = write.Write(
-                    transform=write.DocumentTransform(
-                        document=document_path,
-                        field_transforms=[
-                            write.DocumentTransform.FieldTransform(
-                                field_path=transform_paths.to_api_repr(),
-                                set_to_server_value=server_val.REQUEST_TIME,
-                            )
-                        ],
-                    ),
+            field_transform_pbs = [
+                write.DocumentTransform.FieldTransform(
+                    field_path=transform_paths.to_api_repr(),
+                    set_to_server_value=server_val.REQUEST_TIME,
                 )
-            else:
-                expected_transform_pb = write.Write(
-                    transform=write.DocumentTransform(
-                        document=document_path,
-                        field_transforms=[
-                            write.DocumentTransform.FieldTransform(
-                                field_path=transform_paths.to_api_repr(),
-                                set_to_server_value=server_val.REQUEST_TIME,
-                            )
-                        ],
-                    ),
-                    current_document=common.Precondition(exists=True),
-                )
-            expected_pbs.append(expected_transform_pb)
-        self.assertEqual(write_pbs, expected_pbs)
+            ]
+            expected_update_pb.update_transforms.extend(field_transform_pbs)
+
+        self.assertEqual(write_pbs, [expected_update_pb])
 
     def test_without_option(self):
         from google.cloud.firestore_v1.types import common
@@ -2271,9 +2266,6 @@ class Test_pbs_for_update(unittest.TestCase):
 
         precondition = common.Precondition(exists=True)
         self._helper(current_document=precondition, do_transform=True)
-
-    def test_transform(self):
-        self._helper(do_transform=True, update=False)
 
 
 class Test_pb_for_delete(unittest.TestCase):
