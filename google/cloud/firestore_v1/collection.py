@@ -154,7 +154,12 @@ class CollectionReference(BaseCollectionReference):
         )
         return (_item_to_document_ref(self, i) for i in iterator)
 
-    def get(self, transaction: Transaction = None) -> list:
+    def get(
+        self,
+        transaction: Transaction = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> list:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -164,6 +169,9 @@ class CollectionReference(BaseCollectionReference):
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
@@ -173,7 +181,8 @@ class CollectionReference(BaseCollectionReference):
             list: The documents in this collection that match the query.
         """
         query = query_mod.Query(self)
-        return query.get(transaction=transaction)
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        return query.get(transaction=transaction, **kwargs)
 
     def stream(
         self, transaction: Transaction = None
