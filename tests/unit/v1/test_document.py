@@ -270,7 +270,7 @@ class TestDocumentReference(unittest.TestCase):
         with self.assertRaises(ValueError):
             document.update(field_updates)
 
-    def _delete_helper(self, **option_kwargs):
+    def _delete_helper(self, retry=None, timeout=None, **option_kwargs):
         from google.cloud.firestore_v1.types import write
 
         # Create a minimal fake GAPIC with a dummy response.
@@ -281,14 +281,22 @@ class TestDocumentReference(unittest.TestCase):
         client = _make_client("donut-base")
         client._firestore_api_internal = firestore_api
 
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         # Actually make a document and call delete().
         document = self._make_one("where", "we-are", client=client)
         if option_kwargs:
             option = client.write_option(**option_kwargs)
-            delete_time = document.delete(option=option)
+            delete_time = document.delete(option=option, **kwargs)
         else:
             option = None
-            delete_time = document.delete()
+            delete_time = document.delete(**kwargs)
 
         # Verify the response and the mocks.
         self.assertIs(delete_time, mock.sentinel.commit_time)
@@ -302,6 +310,7 @@ class TestDocumentReference(unittest.TestCase):
                 "transaction": None,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
 
     def test_delete(self):
@@ -312,6 +321,13 @@ class TestDocumentReference(unittest.TestCase):
 
         timestamp_pb = timestamp_pb2.Timestamp(seconds=1058655101, nanos=100022244)
         self._delete_helper(last_update_time=timestamp_pb)
+
+    def test_delete_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._delete_helper(retry=retry, timeout=timeout)
 
     def _get_helper(
         self,

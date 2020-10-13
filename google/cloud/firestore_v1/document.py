@@ -269,13 +269,21 @@ class DocumentReference(BaseDocumentReference):
         write_results = batch.commit()
         return _first_write_result(write_results)
 
-    def delete(self, option: _helpers.WriteOption = None) -> Any:
+    def delete(
+        self,
+        option: _helpers.WriteOption = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> Any:
         """Delete the current document in the Firestore database.
 
         Args:
             option (Optional[:class:`~google.cloud.firestore_v1.client.WriteOption`]):
                 A write option to make assertions / preconditions on the server
                 state of the document before applying changes.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
 
         Returns:
             :class:`google.protobuf.timestamp_pb2.Timestamp`:
@@ -285,6 +293,7 @@ class DocumentReference(BaseDocumentReference):
             still return the time that the request was received by the server.
         """
         write_pb = _helpers.pb_for_delete(self._document_path, option)
+        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
         commit_response = self._client._firestore_api.commit(
             request={
                 "database": self._client._database_string,
@@ -292,6 +301,7 @@ class DocumentReference(BaseDocumentReference):
                 "transaction": None,
             },
             metadata=self._client._rpc_metadata,
+            **kwargs,
         )
 
         return commit_response.commit_time
