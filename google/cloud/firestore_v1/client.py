@@ -30,13 +30,10 @@ from google.cloud.firestore_v1.base_client import (
     BaseClient,
     DEFAULT_DATABASE,
     _CLIENT_INFO,
-    _reference_info,
     _parse_batch_get,
-    _get_doc_mask,
     _path_helper,
 )
 
-from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.query import CollectionGroup
 from google.cloud.firestore_v1.batch import WriteBatch
 from google.cloud.firestore_v1.collection import CollectionReference
@@ -204,18 +201,6 @@ class Client(BaseClient):
             *self._document_path_helper(*document_path), client=self
         )
 
-    @staticmethod
-    def _make_retry_timeout_kwargs(retry, timeout):
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
-
-        return kwargs
-
     def get_all(
         self,
         references: list,
@@ -261,19 +246,12 @@ class Client(BaseClient):
             .DocumentSnapshot: The next document snapshot that fulfills the
             query, or :data:`None` if the document does not exist.
         """
-        document_paths, reference_map = _reference_info(references)
-        mask = _get_doc_mask(field_paths)
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        request, reference_map, kwargs = self._prep_get_all(
+            references, field_paths, transaction, retry, timeout
+        )
 
         response_iterator = self._firestore_api.batch_get_documents(
-            request={
-                "database": self._database_string,
-                "documents": document_paths,
-                "mask": mask,
-                "transaction": _helpers.get_transaction_id(transaction),
-            },
-            metadata=self._rpc_metadata,
-            **kwargs,
+            request=request, metadata=self._rpc_metadata, **kwargs,
         )
 
         for get_doc_response in response_iterator:
@@ -293,24 +271,20 @@ class Client(BaseClient):
             Sequence[:class:`~google.cloud.firestore_v1.collection.CollectionReference`]:
                 iterator of subcollections of the current document.
         """
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        request, kwargs = self._prep_collections(retry, timeout)
 
         iterator = self._firestore_api.list_collection_ids(
-            request={"parent": "{}/documents".format(self._database_string)},
-            metadata=self._rpc_metadata,
-            **kwargs,
+            request=request, metadata=self._rpc_metadata, **kwargs,
         )
 
         while True:
             for i in iterator.collection_ids:
                 yield self.collection(i)
             if iterator.next_page_token:
+                next_request = request.copy()
+                next_request["page_token"] = iterator.next_page_token
                 iterator = self._firestore_api.list_collection_ids(
-                    request={
-                        "parent": "{}/documents".format(self._database_string),
-                        "page_token": iterator.next_page_token,
-                    },
-                    metadata=self._rpc_metadata,
+                    request=next_request, metadata=self._rpc_metadata, **kwargs,
                 )
             else:
                 return
