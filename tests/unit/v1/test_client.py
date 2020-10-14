@@ -273,9 +273,7 @@ class TestClient(unittest.TestCase):
 
         return client, document1, document2, response1, response2
 
-    def _get_all_helper(
-        self, num_snapshots=2, txn_id=None, retry=None, timeout=None
-    ):
+    def _get_all_helper(self, num_snapshots=2, txn_id=None, retry=None, timeout=None):
         from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1.async_document import DocumentSnapshot

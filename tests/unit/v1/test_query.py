@@ -160,6 +160,7 @@ class TestQuery(unittest.TestCase):
 
     def _stream_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1 import _helpers
+
         # Create a minimal fake GAPIC.
         firestore_api = mock.Mock(spec=["run_query"])
 

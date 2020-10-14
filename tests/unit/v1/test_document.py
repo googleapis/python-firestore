@@ -71,6 +71,7 @@ class TestDocumentReference(unittest.TestCase):
 
     def _create_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1 import _helpers
+
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock()
         firestore_api.commit.mock_add_spec(spec=["commit"])
@@ -164,6 +165,7 @@ class TestDocumentReference(unittest.TestCase):
 
     def _set_helper(self, merge=False, retry=None, timeout=None, **option_kwargs):
         from google.cloud.firestore_v1 import _helpers
+
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock(spec=["commit"])
         firestore_api.commit.return_value = self._make_commit_repsonse()
