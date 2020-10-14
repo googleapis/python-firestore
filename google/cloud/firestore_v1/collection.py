@@ -18,13 +18,11 @@ from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
-    _auto_id,
     _item_to_document_ref,
 )
 from google.cloud.firestore_v1 import query as query_mod
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import document
-from google.cloud.firestore_v1 import _helpers
 from typing import Any, Callable, Generator, Tuple
 
 # Types needed only for Type Hints
@@ -101,11 +99,9 @@ class CollectionReference(BaseCollectionReference):
             ~google.cloud.exceptions.Conflict: If ``document_id`` is provided
                 and the document already exists.
         """
-        if document_id is None:
-            document_id = _auto_id()
-
-        document_ref = self.document(document_id)
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        document_ref, kwargs = self._prep_add(
+            document_data, document_id, retry, timeout,
+        )
         write_result = document_ref.create(document_data, **kwargs)
         return write_result.update_time, document_ref
 
@@ -128,18 +124,10 @@ class CollectionReference(BaseCollectionReference):
                 collection does not exist at the time of `snapshot`, the
                 iterator will be empty
         """
-        parent, _ = self._parent_info()
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        request, kwargs = self._prep_list_documents(page_size, retry, timeout)
 
         iterator = self._client._firestore_api.list_documents(
-            request={
-                "parent": parent,
-                "collection_id": self.id,
-                "page_size": page_size,
-                "show_missing": True,
-            },
-            metadata=self._client._rpc_metadata,
-            **kwargs,
+            request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
         return (_item_to_document_ref(self, i) for i in iterator)
 
@@ -169,8 +157,8 @@ class CollectionReference(BaseCollectionReference):
         Returns:
             list: The documents in this collection that match the query.
         """
-        query = query_mod.Query(self)
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        query, kwargs = self._prep_get_or_stream(retry, timeout)
+
         return query.get(transaction=transaction, **kwargs)
 
     def stream(
@@ -208,8 +196,8 @@ class CollectionReference(BaseCollectionReference):
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
             The next document that fulfills the query.
         """
-        query = query_mod.Query(self)
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        query, kwargs = self._prep_get_or_stream(retry, timeout)
+
         return query.stream(transaction=transaction, **kwargs)
 
     def on_snapshot(self, callback: Callable) -> Watch:

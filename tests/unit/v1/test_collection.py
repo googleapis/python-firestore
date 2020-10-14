@@ -99,7 +99,7 @@ class TestCollectionReference(unittest.TestCase):
         # sure transforms during adds work.
         document_data = {"been": "here", "now": SERVER_TIMESTAMP}
 
-        patch = mock.patch("google.cloud.firestore_v1.collection._auto_id")
+        patch = mock.patch("google.cloud.firestore_v1.base_collection._auto_id")
         random_doc_id = "DEADBEEF"
         with patch as patched:
             patched.return_value = random_doc_id
