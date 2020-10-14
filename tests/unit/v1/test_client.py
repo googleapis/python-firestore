@@ -244,7 +244,7 @@ class TestClient(unittest.TestCase):
         timeout = 123.0
         self._collections_helper(retry=retry, timeout=timeout)
 
-    def _get_all_helper(self, client, references, document_pbs, **kwargs):
+    def _invoke_get_all(self, client, references, document_pbs, **kwargs):
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock(spec=["batch_get_documents"])
         response_iterator = iter(document_pbs)
@@ -273,190 +273,110 @@ class TestClient(unittest.TestCase):
 
         return client, document1, document2, response1, response2
 
-    def test_get_all(self):
+    def _get_all_helper(
+        self, num_snapshots=2, txn_id=None, retry=None, timeout=None
+    ):
+        from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.types import common
-        from google.cloud.firestore_v1.document import DocumentSnapshot
+        from google.cloud.firestore_v1.async_document import DocumentSnapshot
+
+        client = self._make_default_one()
 
         data1 = {"a": "cheese"}
+        document1 = client.document("pineapple", "lamp1")
+        document_pb1, read_time = _doc_get_info(document1._document_path, data1)
+        response1 = _make_batch_response(found=document_pb1, read_time=read_time)
+
         data2 = {"b": True, "c": 18}
-        info = self._info_for_get_all(data1, data2)
-        client, document1, document2, response1, response2 = info
+        document2 = client.document("pineapple", "lamp2")
+        document, read_time = _doc_get_info(document2._document_path, data2)
+        response2 = _make_batch_response(found=document, read_time=read_time)
 
-        # Exercise the mocked ``batch_get_documents``.
-        field_paths = ["a", "b"]
-        snapshots = self._get_all_helper(
-            client,
-            [document1, document2],
-            [response1, response2],
-            field_paths=field_paths,
+        document3 = client.document("pineapple", "lamp3")
+        response3 = _make_batch_response(missing=document3._document_path)
+
+        expected_data = [data1, data2, None][:num_snapshots]
+        documents = [document1, document2, document3][:num_snapshots]
+        responses = [response1, response2, response3][:num_snapshots]
+        field_paths = [
+            field_path for field_path in ["a", "b", None][:num_snapshots] if field_path
+        ]
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+
+        if txn_id is not None:
+            transaction = client.transaction()
+            transaction._id = txn_id
+            kwargs["transaction"] = transaction
+
+        snapshots = self._invoke_get_all(
+            client, documents, responses, field_paths=field_paths, **kwargs,
         )
-        self.assertEqual(len(snapshots), 2)
 
-        snapshot1 = snapshots[0]
-        self.assertIsInstance(snapshot1, DocumentSnapshot)
-        self.assertIs(snapshot1._reference, document1)
-        self.assertEqual(snapshot1._data, data1)
+        self.assertEqual(len(snapshots), num_snapshots)
 
-        snapshot2 = snapshots[1]
-        self.assertIsInstance(snapshot2, DocumentSnapshot)
-        self.assertIs(snapshot2._reference, document2)
-        self.assertEqual(snapshot2._data, data2)
+        for data, document, snapshot in zip(expected_data, documents, snapshots):
+            self.assertIsInstance(snapshot, DocumentSnapshot)
+            self.assertIs(snapshot._reference, document)
+            if data is None:
+                self.assertFalse(snapshot.exists)
+            else:
+                self.assertEqual(snapshot._data, data)
 
         # Verify the call to the mock.
-        doc_paths = [document1._document_path, document2._document_path]
+        doc_paths = [document._document_path for document in documents]
         mask = common.DocumentMask(field_paths=field_paths)
+
+        kwargs.pop("transaction", None)
+
         client._firestore_api.batch_get_documents.assert_called_once_with(
             request={
                 "database": client._database_string,
                 "documents": doc_paths,
                 "mask": mask,
-                "transaction": None,
-            },
-            metadata=client._rpc_metadata,
-        )
-
-    def test_get_all_w_retry_timeout(self):
-        from google.api_core.retry import Retry
-        from google.cloud.firestore_v1.types import common
-        from google.cloud.firestore_v1.document import DocumentSnapshot
-
-        data1 = {"a": "cheese"}
-        data2 = {"b": True, "c": 18}
-        retry = Retry(predicate=object())
-        timeout = 123.0
-        info = self._info_for_get_all(data1, data2)
-        client, document1, document2, response1, response2 = info
-
-        # Exercise the mocked ``batch_get_documents``.
-        field_paths = ["a", "b"]
-        snapshots = self._get_all_helper(
-            client,
-            [document1, document2],
-            [response1, response2],
-            field_paths=field_paths,
-            retry=retry,
-            timeout=timeout,
-        )
-        self.assertEqual(len(snapshots), 2)
-
-        snapshot1 = snapshots[0]
-        self.assertIsInstance(snapshot1, DocumentSnapshot)
-        self.assertIs(snapshot1._reference, document1)
-        self.assertEqual(snapshot1._data, data1)
-
-        snapshot2 = snapshots[1]
-        self.assertIsInstance(snapshot2, DocumentSnapshot)
-        self.assertIs(snapshot2._reference, document2)
-        self.assertEqual(snapshot2._data, data2)
-
-        # Verify the call to the mock.
-        doc_paths = [document1._document_path, document2._document_path]
-        mask = common.DocumentMask(field_paths=field_paths)
-        client._firestore_api.batch_get_documents.assert_called_once_with(
-            request={
-                "database": client._database_string,
-                "documents": doc_paths,
-                "mask": mask,
-                "transaction": None,
-            },
-            retry=retry,
-            timeout=timeout,
-            metadata=client._rpc_metadata,
-        )
-
-    def test_get_all_with_transaction(self):
-        from google.cloud.firestore_v1.document import DocumentSnapshot
-
-        data = {"so-much": 484}
-        info = self._info_for_get_all(data, {})
-        client, document, _, response, _ = info
-        transaction = client.transaction()
-        txn_id = b"the-man-is-non-stop"
-        transaction._id = txn_id
-
-        # Exercise the mocked ``batch_get_documents``.
-        snapshots = self._get_all_helper(
-            client, [document], [response], transaction=transaction
-        )
-        self.assertEqual(len(snapshots), 1)
-
-        snapshot = snapshots[0]
-        self.assertIsInstance(snapshot, DocumentSnapshot)
-        self.assertIs(snapshot._reference, document)
-        self.assertEqual(snapshot._data, data)
-
-        # Verify the call to the mock.
-        doc_paths = [document._document_path]
-        client._firestore_api.batch_get_documents.assert_called_once_with(
-            request={
-                "database": client._database_string,
-                "documents": doc_paths,
-                "mask": None,
                 "transaction": txn_id,
             },
             metadata=client._rpc_metadata,
+            **kwargs,
         )
+
+    def test_get_all(self):
+        self._get_all_helper()
+
+    def test_get_all_with_transaction(self):
+        txn_id = b"the-man-is-non-stop"
+        self._get_all_helper(num_snapshots=1, txn_id=txn_id)
+
+    def test_get_all_w_retry_timeout(self):
+        from google.api_core.retry import Retry
+
+        retry = Retry(predicate=object())
+        timeout = 123.0
+        self._get_all_helper(retry=retry, timeout=timeout)
+
+    def test_get_all_wrong_order(self):
+        self._get_all_helper(num_snapshots=3)
 
     def test_get_all_unknown_result(self):
         from google.cloud.firestore_v1.base_client import _BAD_DOC_TEMPLATE
 
-        info = self._info_for_get_all({"z": 28.5}, {})
-        client, document, _, _, response = info
+        client = self._make_default_one()
+
+        expected_document = client.document("pineapple", "lamp1")
+
+        data = {"z": 28.5}
+        wrong_document = client.document("pineapple", "lamp2")
+        document_pb, read_time = _doc_get_info(wrong_document._document_path, data)
+        response = _make_batch_response(found=document_pb, read_time=read_time)
 
         # Exercise the mocked ``batch_get_documents``.
         with self.assertRaises(ValueError) as exc_info:
-            self._get_all_helper(client, [document], [response])
+            self._invoke_get_all(client, [expected_document], [response])
 
         err_msg = _BAD_DOC_TEMPLATE.format(response.found.name)
         self.assertEqual(exc_info.exception.args, (err_msg,))
 
         # Verify the call to the mock.
-        doc_paths = [document._document_path]
-        client._firestore_api.batch_get_documents.assert_called_once_with(
-            request={
-                "database": client._database_string,
-                "documents": doc_paths,
-                "mask": None,
-                "transaction": None,
-            },
-            metadata=client._rpc_metadata,
-        )
-
-    def test_get_all_wrong_order(self):
-        from google.cloud.firestore_v1.document import DocumentSnapshot
-
-        data1 = {"up": 10}
-        data2 = {"down": -10}
-        info = self._info_for_get_all(data1, data2)
-        client, document1, document2, response1, response2 = info
-        document3 = client.document("pineapple", "lamp3")
-        response3 = _make_batch_response(missing=document3._document_path)
-
-        # Exercise the mocked ``batch_get_documents``.
-        snapshots = self._get_all_helper(
-            client, [document1, document2, document3], [response2, response1, response3]
-        )
-
-        self.assertEqual(len(snapshots), 3)
-
-        snapshot1 = snapshots[0]
-        self.assertIsInstance(snapshot1, DocumentSnapshot)
-        self.assertIs(snapshot1._reference, document2)
-        self.assertEqual(snapshot1._data, data2)
-
-        snapshot2 = snapshots[1]
-        self.assertIsInstance(snapshot2, DocumentSnapshot)
-        self.assertIs(snapshot2._reference, document1)
-        self.assertEqual(snapshot2._data, data1)
-
-        self.assertFalse(snapshots[2].exists)
-
-        # Verify the call to the mock.
-        doc_paths = [
-            document1._document_path,
-            document2._document_path,
-            document3._document_path,
-        ]
+        doc_paths = [expected_document._document_path]
         client._firestore_api.batch_get_documents.assert_called_once_with(
             request={
                 "database": client._database_string,

@@ -264,20 +264,6 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
 
         return [s async for s in snapshots]
 
-    def _info_for_get_all(self, data1, data2):
-        client = self._make_default_one()
-        document1 = client.document("pineapple", "lamp1")
-        document2 = client.document("pineapple", "lamp2")
-
-        # Make response protobufs.
-        document_pb1, read_time = _doc_get_info(document1._document_path, data1)
-        response1 = _make_batch_response(found=document_pb1, read_time=read_time)
-
-        document, read_time = _doc_get_info(document2._document_path, data2)
-        response2 = _make_batch_response(found=document, read_time=read_time)
-
-        return client, document1, document2, response1, response2
-
     async def _get_all_helper(
         self, num_snapshots=2, txn_id=None, retry=None, timeout=None
     ):
@@ -371,7 +357,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
 
         client = self._make_default_one()
 
-        document1 = client.document("pineapple", "lamp1")
+        expected_document = client.document("pineapple", "lamp1")
 
         data = {"z": 28.5}
         wrong_document = client.document("pineapple", "lamp2")
@@ -380,13 +366,13 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
 
         # Exercise the mocked ``batch_get_documents``.
         with self.assertRaises(ValueError) as exc_info:
-            await self._invoke_get_all(client, [document1], [response])
+            await self._invoke_get_all(client, [expected_document], [response])
 
         err_msg = _BAD_DOC_TEMPLATE.format(response.found.name)
         self.assertEqual(exc_info.exception.args, (err_msg,))
 
         # Verify the call to the mock.
-        doc_paths = [document1._document_path]
+        doc_paths = [expected_document._document_path]
         client._firestore_api.batch_get_documents.assert_called_once_with(
             request={
                 "database": client._database_string,
