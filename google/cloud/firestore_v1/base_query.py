@@ -1124,6 +1124,9 @@ class BaseCollectionGroup(BaseQuery):
         if self._offset:
             raise ValueError("Can't partition query with offset.")
 
+    def _get_query_class(self):
+        raise NotImplementedError
+
     def _prep_get_partitions(
         self, partition_count, retry: retries.Retry = None, timeout: float = None,
     ) -> Tuple[dict, dict]:
