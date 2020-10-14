@@ -1042,3 +1042,16 @@ class ExistsOption(WriteOption):
         """
         current_doc = types.Precondition(exists=self._exists)
         write._pb.current_document.CopyFrom(current_doc._pb)
+
+
+def make_retry_timeout_kwargs(retry, timeout) -> dict:
+    """Helper fo API methods which take optional 'retry' / 'timeout' args."""
+    kwargs = {}
+
+    if retry is not None:
+        kwargs["retry"] = retry
+
+    if timeout is not None:
+        kwargs["timeout"] = timeout
+
+    return kwargs
