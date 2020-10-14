@@ -398,7 +398,7 @@ class AsyncDocumentReference(BaseDocumentReference):
             for i in iterator.collection_ids:
                 yield self.collection(i)
             if iterator.next_page_token:
-                next_request = request.cpoy()
+                next_request = request.copy()
                 next_request["page_token"] = iterator.next_page_token
                 iterator = await self._client._firestore_api.list_collection_ids(
                     request=request, metadata=self._client._rpc_metadata, **kwargs
