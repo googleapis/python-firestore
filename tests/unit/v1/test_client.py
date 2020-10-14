@@ -129,11 +129,11 @@ class TestClient(unittest.TestCase):
 
     def test_collection_group(self):
         client = self._make_default_one()
-        query = client.collection_group("collectionId").where("foo", "==", u"bar")
+        query = client.collection_group("collectionId").where("foo", "==", "bar")
 
         self.assertTrue(query._all_descendants)
         self.assertEqual(query._field_filters[0].field.field_path, "foo")
-        self.assertEqual(query._field_filters[0].value.string_value, u"bar")
+        self.assertEqual(query._field_filters[0].value.string_value, "bar")
         self.assertEqual(
             query._field_filters[0].op, query._field_filters[0].Operator.EQUAL
         )
@@ -193,7 +193,7 @@ class TestClient(unittest.TestCase):
         self.assertIs(document2._client, client)
         self.assertIsInstance(document2, DocumentReference)
 
-    def test_collections(self):
+    def _collections_helper(self, retry=None, timeout=None):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.collection import CollectionReference
@@ -216,10 +216,18 @@ class TestClient(unittest.TestCase):
                     page, self._pages = self._pages[0], self._pages[1:]
                     return Page(self, page, self.item_to_value)
 
+        kwargs = {}
+
+        if retry is not None:
+            kwargs["retry"] = retry
+
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         iterator = _Iterator(pages=[collection_ids])
         firestore_api.list_collection_ids.return_value = iterator
 
-        collections = list(client.collections())
+        collections = list(client.collections(**kwargs))
 
         self.assertEqual(len(collections), len(collection_ids))
         for collection, collection_id in zip(collections, collection_ids):
@@ -229,53 +237,18 @@ class TestClient(unittest.TestCase):
 
         base_path = client._database_string + "/documents"
         firestore_api.list_collection_ids.assert_called_once_with(
-            request={"parent": base_path}, metadata=client._rpc_metadata
+            request={"parent": base_path}, metadata=client._rpc_metadata, **kwargs,
         )
+
+    def test_collections(self):
+        self._collections_helper()
 
     def test_collections_w_retry_timeout(self):
-        from google.api_core.page_iterator import Iterator
-        from google.api_core.page_iterator import Page
         from google.api_core.retry import Retry
-        from google.cloud.firestore_v1.collection import CollectionReference
 
-        collection_ids = ["users", "projects"]
         retry = Retry(predicate=object())
         timeout = 123.0
-        client = self._make_default_one()
-        firestore_api = mock.Mock(spec=["list_collection_ids"])
-        client._firestore_api_internal = firestore_api
-
-        # TODO(microgen): list_collection_ids isn't a pager.
-        # https://github.com/googleapis/gapic-generator-python/issues/516
-        class _Iterator(Iterator):
-            def __init__(self, pages):
-                super(_Iterator, self).__init__(client=None)
-                self._pages = pages
-                self.collection_ids = pages[0]
-
-            def _next_page(self):
-                if self._pages:
-                    page, self._pages = self._pages[0], self._pages[1:]
-                    return Page(self, page, self.item_to_value)
-
-        iterator = _Iterator(pages=[collection_ids])
-        firestore_api.list_collection_ids.return_value = iterator
-
-        collections = list(client.collections(retry=retry, timeout=timeout))
-
-        self.assertEqual(len(collections), len(collection_ids))
-        for collection, collection_id in zip(collections, collection_ids):
-            self.assertIsInstance(collection, CollectionReference)
-            self.assertEqual(collection.parent, None)
-            self.assertEqual(collection.id, collection_id)
-
-        base_path = client._database_string + "/documents"
-        firestore_api.list_collection_ids.assert_called_once_with(
-            request={"parent": base_path},
-            retry=retry,
-            timeout=timeout,
-            metadata=client._rpc_metadata,
-        )
+        self._collections_helper(retry=retry, timeout=timeout)
 
     def _get_all_helper(self, client, references, document_pbs, **kwargs):
         # Create a minimal fake GAPIC with a dummy response.
@@ -310,7 +283,7 @@ class TestClient(unittest.TestCase):
         from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1.document import DocumentSnapshot
 
-        data1 = {"a": u"cheese"}
+        data1 = {"a": "cheese"}
         data2 = {"b": True, "c": 18}
         info = self._info_for_get_all(data1, data2)
         client, document1, document2, response1, response2 = info
@@ -353,7 +326,7 @@ class TestClient(unittest.TestCase):
         from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1.document import DocumentSnapshot
 
-        data1 = {"a": u"cheese"}
+        data1 = {"a": "cheese"}
         data2 = {"b": True, "c": 18}
         retry = Retry(predicate=object())
         timeout = 123.0
