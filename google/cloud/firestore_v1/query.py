@@ -30,10 +30,11 @@ from google.cloud.firestore_v1.base_query import (
     _enum_from_direction,
 )
 
-from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.watch import Watch
-from typing import Any, Callable, Generator
+from typing import Any
+from typing import Callable
+from typing import Generator
 
 
 class Query(BaseQuery):
@@ -192,24 +193,12 @@ class Query(BaseQuery):
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
             The next document that fulfills the query.
         """
-        if self._limit_to_last:
-            raise ValueError(
-                "Query results for queries that include limit_to_last() "
-                "constraints cannot be streamed. Use Query.get() instead."
-            )
-
-        parent_path, expected_prefix = self._parent._parent_info()
-
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        request, expected_prefix, kwargs = self._prep_stream(
+            transaction, retry, timeout,
+        )
 
         response_iterator = self._client._firestore_api.run_query(
-            request={
-                "parent": parent_path,
-                "structured_query": self._to_protobuf(),
-                "transaction": _helpers.get_transaction_id(transaction),
-            },
-            metadata=self._client._rpc_metadata,
-            **kwargs,
+            request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
 
         for response in response_iterator:
@@ -296,6 +285,10 @@ class CollectionGroup(Query, BaseCollectionGroup):
             all_descendants=all_descendants,
         )
 
+    @staticmethod
+    def _get_query_class():
+        return Query
+
     def get_partitions(
         self, partition_count, retry: retries.Retry = None, timeout: float = None
     ) -> Generator[QueryPartition, None, None]:
@@ -313,27 +306,10 @@ class CollectionGroup(Query, BaseCollectionGroup):
                 should be retried.
             timeout (float): The timeout for this request.
         """
-        self._validate_partition_query()
-        query = Query(
-            self._parent,
-            orders=self._PARTITION_QUERY_ORDER,
-            start_at=self._start_at,
-            end_at=self._end_at,
-            all_descendants=self._all_descendants,
-        )
-
-        parent_path, expected_prefix = self._parent._parent_info()
-
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        request, kwargs = self._prep_get_partitions(partition_count, retry, timeout)
 
         pager = self._client._firestore_api.partition_query(
-            request={
-                "parent": parent_path,
-                "structured_query": query._to_protobuf(),
-                "partition_count": partition_count,
-            },
-            metadata=self._client._rpc_metadata,
-            **kwargs,
+            request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
 
         start_at = None
