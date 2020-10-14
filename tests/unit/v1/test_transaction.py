@@ -316,7 +316,7 @@ class TestTransaction(unittest.TestCase):
         timeout = 123.0
         self._get_all_helper(retry=retry, timeout=timeout)
 
-    def _get_document_ref_helper(self, retry=None, timeout=None):
+    def _get_w_document_ref_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1.document import DocumentReference
         from google.cloud.firestore_v1 import _helpers
 
@@ -330,15 +330,15 @@ class TestTransaction(unittest.TestCase):
         self.assertIs(result, client.get_all.return_value)
         client.get_all.assert_called_once_with([ref], transaction=transaction, **kwargs)
 
-    def test_get_document_ref(self):
-        self._get_document_ref_helper()
+    def test_get_w_document_ref(self):
+        self._get_w_document_ref_helper()
 
-    def test_get_document_ref_w_retry_timeout(self):
+    def test_get_w_document_ref_w_retry_timeout(self):
         from google.api_core.retry import Retry
 
         retry = Retry(predicate=object())
         timeout = 123.0
-        self._get_document_ref_helper(retry=retry, timeout=timeout)
+        self._get_w_document_ref_helper(retry=retry, timeout=timeout)
 
     def _get_w_query_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1 import _helpers
