@@ -330,7 +330,7 @@ class TestAsyncTransaction(aiounittest.AsyncTestCase):
 
         retry = Retry(predicate=object())
         timeout = 123.0
-        await self._get_w_document_ref_helper()
+        await self._get_w_document_ref_helper(retry=retry, timeout=timeout)
 
     async def _get_w_query_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1.async_query import AsyncQuery
