@@ -37,6 +37,7 @@ class TestWriteBatch(unittest.TestCase):
 
     def _commit_helper(self, retry=None, timeout=None):
         from google.protobuf import timestamp_pb2
+        from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.types import firestore
         from google.cloud.firestore_v1.types import write
 
@@ -48,14 +49,7 @@ class TestWriteBatch(unittest.TestCase):
             commit_time=timestamp,
         )
         firestore_api.commit.return_value = commit_response
-
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         # Attach the fake GAPIC to a real client.
         client = _make_client("grand")

@@ -57,18 +57,6 @@ class DocumentReference(BaseDocumentReference):
     def __init__(self, *path, **kwargs) -> None:
         super(DocumentReference, self).__init__(*path, **kwargs)
 
-    @staticmethod
-    def _make_retry_timeout_kwargs(retry, timeout):
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
-
-        return kwargs
-
     def create(
         self, document_data, retry: retries.Retry = None, timeout: float = None,
     ) -> Any:
@@ -92,7 +80,7 @@ class DocumentReference(BaseDocumentReference):
         """
         batch = self._client.batch()
         batch.create(self, document_data)
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
@@ -133,7 +121,7 @@ class DocumentReference(BaseDocumentReference):
         """
         batch = self._client.batch()
         batch.set(self, document_data, merge=merge)
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
@@ -291,7 +279,7 @@ class DocumentReference(BaseDocumentReference):
         """
         batch = self._client.batch()
         batch.update(self, field_updates, option=option)
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
@@ -319,7 +307,7 @@ class DocumentReference(BaseDocumentReference):
             still return the time that the request was received by the server.
         """
         write_pb = _helpers.pb_for_delete(self._document_path, option)
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         commit_response = self._client._firestore_api.commit(
             request={
                 "database": self._client._database_string,
@@ -375,7 +363,7 @@ class DocumentReference(BaseDocumentReference):
             mask = common.DocumentMask(field_paths=sorted(field_paths))
         else:
             mask = None
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         firestore_api = self._client._firestore_api
         try:
@@ -427,7 +415,7 @@ class DocumentReference(BaseDocumentReference):
                 document does not exist at the time of `snapshot`, the
                 iterator will be empty
         """
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         iterator = self._client._firestore_api.list_collection_ids(
             request={"parent": self._document_path, "page_size": page_size},

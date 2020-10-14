@@ -37,6 +37,7 @@ from google.cloud.firestore_v1.base_transaction import (
 from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import batch
 from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.query import Query
 from typing import Any, Callable, Optional
 
@@ -138,18 +139,6 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         self._clean_up()
         return list(commit_response.write_results)
 
-    @staticmethod
-    def _make_retry_timeout_kwargs(retry, timeout):
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
-
-        return kwargs
-
     def get_all(
         self, references: list, retry: retries.Retry = None, timeout: float = None
     ) -> Any:
@@ -166,7 +155,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
             .DocumentSnapshot: The next document snapshot that fulfills the
             query, or :data:`None` if the document does not exist.
         """
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         return self._client.get_all(references, transaction=self, **kwargs)
 
     def get(
@@ -184,7 +173,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
             .DocumentSnapshot: The next document snapshot that fulfills the
             query, or :data:`None` if the document does not exist.
         """
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         if isinstance(ref_or_query, DocumentReference):
             return self._client.get_all([ref_or_query], transaction=self, **kwargs)
         elif isinstance(ref_or_query, Query):

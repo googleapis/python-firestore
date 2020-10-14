@@ -199,6 +199,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
+        from google.cloud.firestore_v1 import _helpers
 
         collection_ids = ["users", "projects"]
         client = self._make_default_one()
@@ -219,14 +220,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
                     page, self._pages = self._pages[0], self._pages[1:]
                     return Page(self, page, self.item_to_value)
 
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
-
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         iterator = _Iterator(pages=[collection_ids])
         firestore_api.list_collection_ids.return_value = iterator
 
@@ -287,6 +281,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
     async def _get_all_helper(
         self, num_snapshots=2, txn_id=None, retry=None, timeout=None
     ):
+        from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1.async_document import DocumentSnapshot
 
@@ -311,14 +306,7 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         field_paths = [
             field_path for field_path in ["a", "b", None][:num_snapshots] if field_path
         ]
-
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         if txn_id is not None:
             transaction = client.transaction()

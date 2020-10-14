@@ -17,6 +17,7 @@
 from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_batch import BaseWriteBatch
+from google.cloud.firestore_v1 import _helpers
 
 
 class WriteBatch(BaseWriteBatch):
@@ -48,13 +49,7 @@ class WriteBatch(BaseWriteBatch):
             in the same order as the changes were applied to this batch. A
             write result contains an ``update_time`` field.
         """
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         commit_response = self._client._firestore_api.commit(
             request={

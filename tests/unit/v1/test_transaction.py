@@ -292,19 +292,15 @@ class TestTransaction(unittest.TestCase):
         )
 
     def _get_all_helper(self, retry=None, timeout=None):
+        from google.cloud.firestore_v1 import _helpers
+
         client = mock.Mock(spec=["get_all"])
         transaction = self._make_one(client)
         ref1, ref2 = mock.Mock(), mock.Mock()
-
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         result = transaction.get_all([ref1, ref2], **kwargs)
+
         client.get_all.assert_called_once_with(
             [ref1, ref2], transaction=transaction, **kwargs,
         )
@@ -322,18 +318,12 @@ class TestTransaction(unittest.TestCase):
 
     def _get_document_ref_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1.document import DocumentReference
+        from google.cloud.firestore_v1 import _helpers
 
         client = mock.Mock(spec=["get_all"])
         transaction = self._make_one(client)
         ref = DocumentReference("documents", "doc-id")
-
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         result = transaction.get(ref, **kwargs)
 
@@ -351,20 +341,14 @@ class TestTransaction(unittest.TestCase):
         self._get_document_ref_helper(retry=retry, timeout=timeout)
 
     def _get_w_query_helper(self, retry=None, timeout=None):
+        from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.query import Query
 
         client = mock.Mock(spec=[])
         transaction = self._make_one(client)
         query = Query(parent=mock.Mock(spec=[]))
         query.stream = mock.MagicMock()
-
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         result = transaction.get(query, **kwargs)
 

@@ -140,6 +140,7 @@ class TestCollectionReference(unittest.TestCase):
 
     def _add_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1.document import DocumentReference
+        from google.cloud.firestore_v1 import _helpers
 
         # Create a minimal fake GAPIC with a dummy response.
         firestore_api = mock.Mock(spec=["commit"])
@@ -162,14 +163,7 @@ class TestCollectionReference(unittest.TestCase):
         document_data = {"zorp": 208.75, "i-did-not": b"know that"}
         doc_id = "child"
 
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
-
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         update_time, document_ref = collection.add(
             document_data, document_id=doc_id, **kwargs
         )
@@ -202,6 +196,7 @@ class TestCollectionReference(unittest.TestCase):
         self._add_helper(retry=retry, timeout=timeout)
 
     def _list_documents_helper(self, page_size=None, retry=None, timeout=None):
+        from google.cloud.firestore_v1 import _helpers
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.document import DocumentReference
@@ -229,14 +224,7 @@ class TestCollectionReference(unittest.TestCase):
         api_client.list_documents.return_value = iterator
         client._firestore_api_internal = api_client
         collection = self._make_one("collection", client=client)
-
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         if page_size is not None:
             documents = list(collection.list_documents(page_size=page_size, **kwargs))

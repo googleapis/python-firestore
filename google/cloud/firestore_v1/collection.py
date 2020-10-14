@@ -24,6 +24,7 @@ from google.cloud.firestore_v1.base_collection import (
 from google.cloud.firestore_v1 import query as query_mod
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import document
+from google.cloud.firestore_v1 import _helpers
 from typing import Any, Callable, Generator, Tuple
 
 # Types needed only for Type Hints
@@ -67,18 +68,6 @@ class CollectionReference(BaseCollectionReference):
         """
         return query_mod.Query(self)
 
-    @staticmethod
-    def _make_retry_timeout_kwargs(retry, timeout):
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
-
-        return kwargs
-
     def add(
         self,
         document_data: dict,
@@ -116,7 +105,7 @@ class CollectionReference(BaseCollectionReference):
             document_id = _auto_id()
 
         document_ref = self.document(document_id)
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         write_result = document_ref.create(document_data, **kwargs)
         return write_result.update_time, document_ref
 
@@ -140,7 +129,7 @@ class CollectionReference(BaseCollectionReference):
                 iterator will be empty
         """
         parent, _ = self._parent_info()
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         iterator = self._client._firestore_api.list_documents(
             request={
@@ -181,7 +170,7 @@ class CollectionReference(BaseCollectionReference):
             list: The documents in this collection that match the query.
         """
         query = query_mod.Query(self)
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         return query.get(transaction=transaction, **kwargs)
 
     def stream(
@@ -220,7 +209,7 @@ class CollectionReference(BaseCollectionReference):
             The next document that fulfills the query.
         """
         query = query_mod.Query(self)
-        kwargs = self._make_retry_timeout_kwargs(retry, timeout)
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         return query.stream(transaction=transaction, **kwargs)
 
     def on_snapshot(self, callback: Callable) -> Watch:

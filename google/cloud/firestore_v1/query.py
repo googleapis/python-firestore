@@ -200,13 +200,7 @@ class Query(BaseQuery):
 
         parent_path, expected_prefix = self._parent._parent_info()
 
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         response_iterator = self._client._firestore_api.run_query(
             request={
@@ -330,13 +324,7 @@ class CollectionGroup(Query, BaseCollectionGroup):
 
         parent_path, expected_prefix = self._parent._parent_info()
 
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         pager = self._client._firestore_api.partition_query(
             request={

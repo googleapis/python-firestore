@@ -194,6 +194,7 @@ class TestClient(unittest.TestCase):
         self.assertIsInstance(document2, DocumentReference)
 
     def _collections_helper(self, retry=None, timeout=None):
+        from google.cloud.firestore_v1 import _helpers
         from google.api_core.page_iterator import Iterator
         from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.collection import CollectionReference
@@ -216,14 +217,7 @@ class TestClient(unittest.TestCase):
                     page, self._pages = self._pages[0], self._pages[1:]
                     return Page(self, page, self.item_to_value)
 
-        kwargs = {}
-
-        if retry is not None:
-            kwargs["retry"] = retry
-
-        if timeout is not None:
-            kwargs["timeout"] = timeout
-
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         iterator = _Iterator(pages=[collection_ids])
         firestore_api.list_collection_ids.return_value = iterator
 
