@@ -24,7 +24,6 @@ from google.cloud.firestore_v1.base_document import (
 
 from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Callable, Generator, Iterable
 
@@ -58,7 +57,7 @@ class DocumentReference(BaseDocumentReference):
         super(DocumentReference, self).__init__(*path, **kwargs)
 
     def create(
-        self, document_data, retry: retries.Retry = None, timeout: float = None,
+        self, document_data: dict, retry: retries.Retry = None, timeout: float = None,
     ) -> Any:
         """Create the current document in the Firestore database.
 
@@ -78,9 +77,7 @@ class DocumentReference(BaseDocumentReference):
             :class:`~google.cloud.exceptions.Conflict`:
                 If the document already exists.
         """
-        batch = self._client.batch()
-        batch.create(self, document_data)
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        batch, kwargs = self._prep_create(document_data, retry, timeout)
         write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
@@ -119,9 +116,7 @@ class DocumentReference(BaseDocumentReference):
             The write result corresponding to the committed document. A write
             result contains an ``update_time`` field.
         """
-        batch = self._client.batch()
-        batch.set(self, document_data, merge=merge)
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        batch, kwargs = self._prep_set(document_data, merge, retry, timeout)
         write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
@@ -277,9 +272,7 @@ class DocumentReference(BaseDocumentReference):
         Raises:
             ~google.cloud.exceptions.NotFound: If the document does not exist.
         """
-        batch = self._client.batch()
-        batch.update(self, field_updates, option=option)
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        batch, kwargs = self._prep_update(field_updates, option, retry, timeout)
         write_results = batch.commit(**kwargs)
         return _first_write_result(write_results)
 
@@ -306,16 +299,10 @@ class DocumentReference(BaseDocumentReference):
             nothing was deleted), this method will still succeed and will
             still return the time that the request was received by the server.
         """
-        write_pb = _helpers.pb_for_delete(self._document_path, option)
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        request, kwargs = self._prep_delete(option, retry, timeout)
+
         commit_response = self._client._firestore_api.commit(
-            request={
-                "database": self._client._database_string,
-                "writes": [write_pb],
-                "transaction": None,
-            },
-            metadata=self._client._rpc_metadata,
-            **kwargs,
+            request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
 
         return commit_response.commit_time
@@ -356,25 +343,12 @@ class DocumentReference(BaseDocumentReference):
                 :attr:`create_time` attributes will all be ``None`` and
                 its :attr:`exists` attribute will be ``False``.
         """
-        if isinstance(field_paths, str):
-            raise ValueError("'field_paths' must be a sequence of paths, not a string.")
-
-        if field_paths is not None:
-            mask = common.DocumentMask(field_paths=sorted(field_paths))
-        else:
-            mask = None
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        request, kwargs = self._prep_get(field_paths, transaction, retry, timeout)
 
         firestore_api = self._client._firestore_api
         try:
             document_pb = firestore_api.get_document(
-                request={
-                    "name": self._document_path,
-                    "mask": mask,
-                    "transaction": _helpers.get_transaction_id(transaction),
-                },
-                metadata=self._client._rpc_metadata,
-                **kwargs,
+                request=request, metadata=self._client._rpc_metadata, **kwargs,
             )
         except exceptions.NotFound:
             data = None
@@ -415,25 +389,20 @@ class DocumentReference(BaseDocumentReference):
                 document does not exist at the time of `snapshot`, the
                 iterator will be empty
         """
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        request, kwargs = self._prep_collections(page_size, retry, timeout)
 
         iterator = self._client._firestore_api.list_collection_ids(
-            request={"parent": self._document_path, "page_size": page_size},
-            metadata=self._client._rpc_metadata,
-            **kwargs,
+            request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
 
         while True:
             for i in iterator.collection_ids:
                 yield self.collection(i)
             if iterator.next_page_token:
+                next_request = request.cpoy()
+                next_request["page_token"] = iterator.next_page_token
                 iterator = self._client._firestore_api.list_collection_ids(
-                    request={
-                        "parent": self._document_path,
-                        "page_size": page_size,
-                        "page_token": iterator.next_page_token,
-                    },
-                    metadata=self._client._rpc_metadata,
+                    request=request, metadata=self._client._rpc_metadata, **kwargs
                 )
             else:
                 return
