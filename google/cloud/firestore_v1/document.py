@@ -65,8 +65,9 @@ class DocumentReference(BaseDocumentReference):
             document_data (dict): Property names and values to use for
                 creating a document.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             :class:`~google.cloud.firestore_v1.types.WriteResult`:
@@ -108,8 +109,9 @@ class DocumentReference(BaseDocumentReference):
                 If True, apply merging instead of overwriting the state
                 of the document.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             :class:`~google.cloud.firestore_v1.types.WriteResult`:
@@ -261,8 +263,9 @@ class DocumentReference(BaseDocumentReference):
                 A write option to make assertions / preconditions on the server
                 state of the document before applying changes.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             :class:`~google.cloud.firestore_v1.types.WriteResult`:
@@ -289,8 +292,9 @@ class DocumentReference(BaseDocumentReference):
                 A write option to make assertions / preconditions on the server
                 state of the document before applying changes.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             :class:`google.protobuf.timestamp_pb2.Timestamp`:
@@ -332,8 +336,9 @@ class DocumentReference(BaseDocumentReference):
                 An existing transaction that this reference
                 will be retrieved in.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             :class:`~google.cloud.firestore_v1.base_document.DocumentSnapshot`:
@@ -380,8 +385,9 @@ class DocumentReference(BaseDocumentReference):
                 in each page of results from this request. Non-positive values
                 are ignored. Defaults to a sensible value set by the API.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.collection.CollectionReference`]:

@@ -135,8 +135,9 @@ class AsyncQuery(BaseQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
@@ -191,8 +192,9 @@ class AsyncQuery(BaseQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Yields:
             :class:`~google.cloud.firestore_v1.async_document.DocumentSnapshot`:
@@ -275,8 +277,9 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
                 number must be strictly positive. The actual number of partitions
                 returned may be fewer.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
         """
         request, kwargs = self._prep_get_partitions(partition_count, retry, timeout)
         pager = await self._client._firestore_api.partition_query(

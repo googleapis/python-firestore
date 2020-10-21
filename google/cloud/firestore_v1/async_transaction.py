@@ -156,8 +156,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
             references (List[.AsyncDocumentReference, ...]): Iterable of document
                 references to be retrieved.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
@@ -175,8 +176,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         Args:
             ref_or_query The document references or query object to return.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the

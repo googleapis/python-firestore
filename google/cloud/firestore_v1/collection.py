@@ -84,8 +84,9 @@ class CollectionReference(BaseCollectionReference):
                 a random 20 character string composed of digits,
                 uppercase and lowercase letters).
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             Tuple[:class:`google.protobuf.timestamp_pb2.Timestamp`, \
@@ -115,8 +116,9 @@ class CollectionReference(BaseCollectionReference):
                 in each page of results from this request. Non-positive values
                 are ignored. Defaults to a sensible value set by the API.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.collection.DocumentReference`]:
@@ -147,8 +149,9 @@ class CollectionReference(BaseCollectionReference):
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
@@ -189,8 +192,9 @@ class CollectionReference(BaseCollectionReference):
                 Transaction`]):
                 An existing transaction that the query will run in.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Yields:
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:

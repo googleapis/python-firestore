@@ -40,8 +40,9 @@ class AsyncWriteBatch(BaseWriteBatch):
 
         Args:
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             List[:class:`google.cloud.proto.firestore.v1.write.WriteResult`, ...]:

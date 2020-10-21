@@ -244,8 +244,9 @@ class AsyncClient(BaseClient):
                 An existing transaction that these ``references`` will be
                 retrieved in.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
@@ -269,8 +270,9 @@ class AsyncClient(BaseClient):
 
         Args:
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.
-            timeout (float): The timeout for this request.
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.async_collection.AsyncCollectionReference`]:
