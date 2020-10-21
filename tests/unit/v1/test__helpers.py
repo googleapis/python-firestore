@@ -2402,8 +2402,6 @@ class Test_make_retry_timeout_kwargs(unittest.TestCase):
         self.assertEqual(kwargs, expected)
 
     def test_retry_None(self):
-        from google.api_core.retry import Retry
-
         kwargs = self._call_fut(None, None)
         expected = {"retry": None}
         self.assertEqual(kwargs, expected)
