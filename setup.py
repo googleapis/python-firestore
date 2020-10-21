@@ -28,7 +28,6 @@ dependencies = [
     "google-api-core[grpc] >= 1.22.1, < 2.0.0dev",
     "google-cloud-core >= 1.4.1, < 2.0dev",
     "pytz",
-    "libcst >= 0.2.5",
     "proto-plus >= 1.3.0",
 ]
 extras = {}
@@ -80,10 +79,6 @@ setuptools.setup(
     install_requires=dependencies,
     extras_require=extras,
     python_requires=">=3.6",
-    scripts=[
-        "scripts/fixup_firestore_v1_keywords.py",
-        "scripts/fixup_admin_v1_keywords.py",
-    ],
     include_package_data=True,
     zip_safe=False,
 )

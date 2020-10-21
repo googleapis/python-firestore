@@ -38,7 +38,11 @@ for version in versions:
     s.move(
         library / f"google/cloud/firestore_{version}",
         f"google/cloud/firestore_{version}",
-        excludes=[library / f"google/cloud/firestore_{version}/__init__.py"],
+        excludes=[
+            library / f"google/cloud/firestore_{version}/__init__.py",
+            "scripts/fixup_firestore_v1_keywords.py"
+        clear
+        ],
     )
 
     s.move(
@@ -60,7 +64,10 @@ for version in admin_versions:
     s.move(
         library / f"google/cloud/firestore_admin_{version}",
         f"google/cloud/firestore_admin_{version}",
-        excludes=[library / f"google/cloud/admin_{version}/__init__.py"],
+        excludes=[
+            library / f"google/cloud/admin_{version}/__init__.py",
+            "scripts/fixup_admin_v1_keywords.py"
+        ],
     )
     s.move(library / f"tests", f"tests")
     s.move(library / "scripts")

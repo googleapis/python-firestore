@@ -17,7 +17,12 @@
 
 import argparse
 import os
-import libcst as cst
+
+try:
+    import libcst as cst
+except ImportError as exception:
+    raise ImportError(exception.__class__.__name__ + ": " + exception.msg)
+
 import pathlib
 import sys
 from typing import (Any, Callable, Dict, List, Sequence, Tuple)
