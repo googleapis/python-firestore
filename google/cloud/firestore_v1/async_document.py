@@ -14,6 +14,7 @@
 
 """Classes for representing documents for the Google Cloud Firestore API."""
 
+from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_document import (
@@ -56,7 +57,10 @@ class AsyncDocumentReference(BaseDocumentReference):
         super(AsyncDocumentReference, self).__init__(*path, **kwargs)
 
     async def create(
-        self, document_data: dict, retry: retries.Retry = None, timeout: float = None,
+        self,
+        document_data: dict,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> Coroutine:
         """Create the current document in the Firestore database.
 
@@ -85,7 +89,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         self,
         document_data: dict,
         merge: bool = False,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Coroutine:
         """Replace the current document in the Firestore database.
@@ -125,7 +129,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         self,
         field_updates: dict,
         option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Coroutine:
         """Update an existing document in the Firestore database.
@@ -281,7 +285,7 @@ class AsyncDocumentReference(BaseDocumentReference):
     async def delete(
         self,
         option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Coroutine:
         """Delete the current document in the Firestore database.
@@ -314,7 +318,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         self,
         field_paths: Iterable[str] = None,
         transaction=None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Union[DocumentSnapshot, Coroutine[Any, Any, DocumentSnapshot]]:
         """Retrieve a snapshot of the current document.
@@ -375,7 +379,10 @@ class AsyncDocumentReference(BaseDocumentReference):
         )
 
     async def collections(
-        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
+        self,
+        page_size: int = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> AsyncGenerator:
         """List subcollections of the current document.
 

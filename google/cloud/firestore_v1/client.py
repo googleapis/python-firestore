@@ -24,6 +24,7 @@ In the hierarchy of API concepts
   :class:`~google.cloud.firestore_v1.document.DocumentReference`
 """
 
+from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_client import (
@@ -206,7 +207,7 @@ class Client(BaseClient):
         references: list,
         field_paths: Iterable[str] = None,
         transaction: Transaction = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Generator[Any, Any, None]:
         """Retrieve a batch of documents.
@@ -259,7 +260,7 @@ class Client(BaseClient):
             yield _parse_batch_get(get_doc_response, reference_map, self)
 
     def collections(
-        self, retry: retries.Retry = None, timeout: float = None,
+        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None,
     ) -> Generator[Any, Any, None]:
         """List top-level collections of the client's database.
 

@@ -19,6 +19,7 @@ a :class:`~google.cloud.firestore_v1.collection.Collection` and that can be
 a more common way to create a query than direct usage of the constructor.
 """
 
+from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_query import (
@@ -122,7 +123,7 @@ class AsyncQuery(BaseQuery):
     async def get(
         self,
         transaction: Transaction = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> list:
         """Read the documents in the collection that match this query.
@@ -168,7 +169,10 @@ class AsyncQuery(BaseQuery):
         return result
 
     async def stream(
-        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
+        self,
+        transaction=None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
         """Read the documents in the collection that match this query.
 
@@ -264,7 +268,10 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
         return AsyncQuery
 
     async def get_partitions(
-        self, partition_count, retry: retries.Retry = None, timeout: float = None
+        self,
+        partition_count,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> AsyncGenerator[QueryPartition, None]:
         """Partition a query for parallelization.
 

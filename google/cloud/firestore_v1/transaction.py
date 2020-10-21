@@ -18,6 +18,7 @@
 import random
 import time
 
+from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_transaction import (
@@ -140,7 +141,10 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         return list(commit_response.write_results)
 
     def get_all(
-        self, references: list, retry: retries.Retry = None, timeout: float = None
+        self,
+        references: list,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> Any:
         """Retrieves multiple documents from Firestore.
 
@@ -160,7 +164,10 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         return self._client.get_all(references, transaction=self, **kwargs)
 
     def get(
-        self, ref_or_query, retry: retries.Retry = None, timeout: float = None
+        self,
+        ref_or_query,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> Any:
         """Retrieve a document or a query result from the database.
 

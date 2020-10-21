@@ -14,6 +14,7 @@
 
 """Classes for representing collections for the Google Cloud Firestore API."""
 
+from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_collection import (
@@ -70,7 +71,7 @@ class CollectionReference(BaseCollectionReference):
         self,
         document_data: dict,
         document_id: str = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Tuple[Any, Any]:
         """Create a document in the Firestore database with the provided data.
@@ -107,7 +108,10 @@ class CollectionReference(BaseCollectionReference):
         return write_result.update_time, document_ref
 
     def list_documents(
-        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
+        self,
+        page_size: int = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> Generator[Any, Any, None]:
         """List all subdocuments of the current collection.
 
@@ -136,7 +140,7 @@ class CollectionReference(BaseCollectionReference):
     def get(
         self,
         transaction: Transaction = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> list:
         """Read the documents in this collection.
@@ -167,7 +171,7 @@ class CollectionReference(BaseCollectionReference):
     def stream(
         self,
         transaction: Transaction = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Generator[document.DocumentSnapshot, Any, None]:
         """Read the documents in this collection.

@@ -14,6 +14,7 @@
 
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
+from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_batch import BaseWriteBatch
@@ -34,7 +35,9 @@ class WriteBatch(BaseWriteBatch):
     def __init__(self, client) -> None:
         super(WriteBatch, self).__init__(client=client)
 
-    def commit(self, retry: retries.Retry = None, timeout: float = None) -> list:
+    def commit(
+        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None
+    ) -> list:
         """Commit the changes accumulated in this batch.
 
         Args:

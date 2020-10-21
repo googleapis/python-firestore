@@ -2395,8 +2395,17 @@ class Test_make_retry_timeout_kwargs(unittest.TestCase):
         return make_retry_timeout_kwargs(retry, timeout)
 
     def test_default(self):
-        kwargs = self._call_fut(None, None)
+        from google.api_core.gapic_v1.method import DEFAULT
+
+        kwargs = self._call_fut(DEFAULT, None)
         expected = {}
+        self.assertEqual(kwargs, expected)
+
+    def test_retry_None(self):
+        from google.api_core.retry import Retry
+
+        kwargs = self._call_fut(None, None)
+        expected = {"retry": None}
         self.assertEqual(kwargs, expected)
 
     def test_retry_only(self):
@@ -2408,8 +2417,10 @@ class Test_make_retry_timeout_kwargs(unittest.TestCase):
         self.assertEqual(kwargs, expected)
 
     def test_timeout_only(self):
+        from google.api_core.gapic_v1.method import DEFAULT
+
         timeout = 123.0
-        kwargs = self._call_fut(None, timeout)
+        kwargs = self._call_fut(DEFAULT, timeout)
         expected = {"timeout": timeout}
         self.assertEqual(kwargs, expected)
 

@@ -14,6 +14,7 @@
 
 """Classes for representing documents for the Google Cloud Firestore API."""
 
+from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
 from google.cloud.firestore_v1.base_document import (
@@ -57,7 +58,10 @@ class DocumentReference(BaseDocumentReference):
         super(DocumentReference, self).__init__(*path, **kwargs)
 
     def create(
-        self, document_data: dict, retry: retries.Retry = None, timeout: float = None,
+        self,
+        document_data: dict,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> Any:
         """Create the current document in the Firestore database.
 
@@ -86,7 +90,7 @@ class DocumentReference(BaseDocumentReference):
         self,
         document_data: dict,
         merge: bool = False,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Any:
         """Replace the current document in the Firestore database.
@@ -126,7 +130,7 @@ class DocumentReference(BaseDocumentReference):
         self,
         field_updates: dict,
         option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Any:
         """Update an existing document in the Firestore database.
@@ -282,7 +286,7 @@ class DocumentReference(BaseDocumentReference):
     def delete(
         self,
         option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Any:
         """Delete the current document in the Firestore database.
@@ -315,7 +319,7 @@ class DocumentReference(BaseDocumentReference):
         self,
         field_paths: Iterable[str] = None,
         transaction=None,
-        retry: retries.Retry = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
@@ -376,7 +380,10 @@ class DocumentReference(BaseDocumentReference):
         )
 
     def collections(
-        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
+        self,
+        page_size: int = None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
     ) -> Generator[Any, Any, None]:
         """List subcollections of the current document.
 
