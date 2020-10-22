@@ -7,7 +7,7 @@
 # You may obtain a copy of the License at
 #
 #     http://www.apache.org/licenses/LICENSE-2.0
-#nox
+#
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -21,7 +21,7 @@ import os
 try:
     import libcst as cst
 except ImportError as exception:
-    raise ImportError(exception.__class__.__name__ + ": " + exception.msg)
+    raise ImportError('Run python -m pip install "libcst >= 0.2.5" command to install libcst.')
 
 import pathlib
 import sys
