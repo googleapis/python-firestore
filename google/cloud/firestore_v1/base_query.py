@@ -21,6 +21,7 @@ a more common way to create a query than direct usage of the constructor.
 import copy
 import math
 
+from google.api_core import retry as retries  # type: ignore
 from google.protobuf import wrappers_pb2
 
 from google.cloud.firestore_v1 import _helpers
@@ -56,10 +57,12 @@ _COMPARISON_OPERATORS = {
     "<": _operator_enum.LESS_THAN,
     "<=": _operator_enum.LESS_THAN_OR_EQUAL,
     _EQ_OP: _operator_enum.EQUAL,
+    "!=": _operator_enum.NOT_EQUAL,
     ">=": _operator_enum.GREATER_THAN_OR_EQUAL,
     ">": _operator_enum.GREATER_THAN,
     "array_contains": _operator_enum.ARRAY_CONTAINS,
     "in": _operator_enum.IN,
+    "not-in": _operator_enum.NOT_IN,
     "array_contains_any": _operator_enum.ARRAY_CONTAINS_ANY,
 }
 _BAD_OP_STRING = "Operator string {!r} is invalid. Valid choices are: {}."
@@ -255,8 +258,8 @@ class BaseQuery(object):
             field_path (str): A field path (``.``-delimited list of
                 field names) for the field to filter on.
             op_string (str): A comparison operation in the form of a string.
-                Acceptable values are ``<``, ``<=``, ``==``, ``>=``, ``>``,
-                ``in``, ``array_contains`` and ``array_contains_any``.
+                Acceptable values are ``<``, ``<=``, ``==``, ``!=``, ``>=``, ``>``,
+                ``in``, ``not-in``, ``array_contains`` and ``array_contains_any``.
             value (Any): The value to compare the field against in the filter.
                 If ``value`` is :data:`None` or a NaN, then ``==`` is the only
                 allowed operation.
@@ -800,10 +803,34 @@ class BaseQuery(object):
 
         return query.StructuredQuery(**query_kwargs)
 
-    def get(self, transaction=None) -> NoReturn:
+    def get(
+        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
+    ) -> NoReturn:
         raise NotImplementedError
 
-    def stream(self, transaction=None) -> NoReturn:
+    def _prep_stream(
+        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
+    ) -> Tuple[dict, str, dict]:
+        """Shared setup for async / sync :meth:`stream`"""
+        if self._limit_to_last:
+            raise ValueError(
+                "Query results for queries that include limit_to_last() "
+                "constraints cannot be streamed. Use Query.get() instead."
+            )
+
+        parent_path, expected_prefix = self._parent._parent_info()
+        request = {
+            "parent": parent_path,
+            "structured_query": self._to_protobuf(),
+            "transaction": _helpers.get_transaction_id(transaction),
+        }
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+
+        return request, expected_prefix, kwargs
+
+    def stream(
+        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
+    ) -> NoReturn:
         raise NotImplementedError
 
     def on_snapshot(self, callback) -> NoReturn:
@@ -864,7 +891,7 @@ def _enum_from_op_string(op_string: str) -> Any:
 
     Args:
         op_string (str): A comparison operation in the form of a string.
-            Acceptable values are ``<``, ``<=``, ``==``, ``>=``
+            Acceptable values are ``<``, ``<=``, ``==``, ``!=``, ``>=``
             and ``>``.
 
     Returns:
@@ -1098,6 +1125,36 @@ class BaseCollectionGroup(BaseQuery):
 
         if self._offset:
             raise ValueError("Can't partition query with offset.")
+
+    def _get_query_class(self):
+        raise NotImplementedError
+
+    def _prep_get_partitions(
+        self, partition_count, retry: retries.Retry = None, timeout: float = None,
+    ) -> Tuple[dict, dict]:
+        self._validate_partition_query()
+        parent_path, expected_prefix = self._parent._parent_info()
+        klass = self._get_query_class()
+        query = klass(
+            self._parent,
+            orders=self._PARTITION_QUERY_ORDER,
+            start_at=self._start_at,
+            end_at=self._end_at,
+            all_descendants=self._all_descendants,
+        )
+        request = {
+            "parent": parent_path,
+            "structured_query": query._to_protobuf(),
+            "partition_count": partition_count,
+        }
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+
+        return request, kwargs
+
+    def get_partitions(
+        self, partition_count, retry: retries.Retry = None, timeout: float = None,
+    ) -> NoReturn:
+        raise NotImplementedError
 
 
 class QueryPartition:
