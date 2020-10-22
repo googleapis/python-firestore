@@ -644,20 +644,6 @@ class DocumentExtractorForMerge(DocumentExtractor):
         self.transform_merge = []
         self.merge = []
 
-    @property
-    def has_updates(self):
-        # for whatever reason, the conformance tests want to see the parent
-        # of nested transform paths in the update mask
-        # (see set-st-merge-nonleaf-alone.textproto)
-        update_paths = set(self.data_merge)
-
-        for transform_path in self.transform_paths:
-            if len(transform_path.parts) > 1:
-                parent_fp = FieldPath(*transform_path.parts[:-1])
-                update_paths.add(parent_fp)
-
-        return bool(update_paths)
-
     def _apply_merge_all(self) -> None:
         self.data_merge = sorted(self.field_paths + self.deleted_fields)
         # TODO: other transforms
