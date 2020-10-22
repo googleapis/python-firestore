@@ -757,8 +757,7 @@ class DocumentExtractorForMerge(DocumentExtractor):
             if field_path not in self.transform_merge
         ]
 
-        if mask_paths or allow_empty_mask:
-            return common.DocumentMask(field_paths=mask_paths)
+        return common.DocumentMask(field_paths=mask_paths)
 
 
 def pbs_for_set_with_merge(
@@ -780,10 +779,8 @@ def pbs_for_set_with_merge(
     extractor = DocumentExtractorForMerge(document_data)
     extractor.apply_merge(merge)
 
-    merge_empty = not document_data
-    allow_empty_mask = merge_empty or extractor.transform_paths
+    set_pb = extractor.get_update_pb(document_path)
 
-    set_pb = extractor.get_update_pb(document_path, allow_empty_mask=allow_empty_mask)
     if extractor.transform_paths:
         field_transform_pbs = extractor.get_field_transform_pbs(document_path)
         set_pb.update_transforms.extend(field_transform_pbs)
