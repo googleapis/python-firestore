@@ -195,31 +195,20 @@ class TestClient(unittest.TestCase):
 
     def _collections_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1 import _helpers
-        from google.api_core.page_iterator import Iterator
-        from google.api_core.page_iterator import Page
         from google.cloud.firestore_v1.collection import CollectionReference
 
         collection_ids = ["users", "projects"]
-        client = self._make_default_one()
+
+        class Pager(object):
+            def __iter__(self):
+                yield from collection_ids
+
         firestore_api = mock.Mock(spec=["list_collection_ids"])
+        firestore_api.list_collection_ids.return_value = Pager()
+
+        client = self._make_default_one()
         client._firestore_api_internal = firestore_api
-
-        # TODO(microgen): list_collection_ids isn't a pager.
-        # https://github.com/googleapis/gapic-generator-python/issues/516
-        class _Iterator(Iterator):
-            def __init__(self, pages):
-                super(_Iterator, self).__init__(client=None)
-                self._pages = pages
-                self.collection_ids = pages[0]
-
-            def _next_page(self):
-                if self._pages:
-                    page, self._pages = self._pages[0], self._pages[1:]
-                    return Page(self, page, self.item_to_value)
-
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
-        iterator = _Iterator(pages=[collection_ids])
-        firestore_api.list_collection_ids.return_value = iterator
 
         collections = list(client.collections(**kwargs))
 
