@@ -259,20 +259,6 @@ class TestClient(unittest.TestCase):
 
         return list(snapshots)
 
-    def _info_for_get_all(self, data1, data2):
-        client = self._make_default_one()
-        document1 = client.document("pineapple", "lamp1")
-        document2 = client.document("pineapple", "lamp2")
-
-        # Make response protobufs.
-        document_pb1, read_time = _doc_get_info(document1._document_path, data1)
-        response1 = _make_batch_response(found=document_pb1, read_time=read_time)
-
-        document, read_time = _doc_get_info(document2._document_path, data2)
-        response2 = _make_batch_response(found=document, read_time=read_time)
-
-        return client, document1, document2, response1, response2
-
     def _get_all_helper(self, num_snapshots=2, txn_id=None, retry=None, timeout=None):
         from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.types import common
