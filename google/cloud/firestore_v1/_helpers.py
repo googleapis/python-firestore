@@ -34,9 +34,6 @@ from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import write
 from typing import Any, Generator, List, NoReturn, Optional, Tuple, Union
 
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.document import DocumentReference
-
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
 
@@ -222,7 +219,7 @@ def encode_dict(values_dict) -> dict:
     return {key: encode_value(value) for key, value in values_dict.items()}
 
 
-def reference_value_to_document(reference_value, client) -> DocumentReference:
+def reference_value_to_document(reference_value, client) -> Any:
     """Convert a reference value string to a document.
 
     Args:

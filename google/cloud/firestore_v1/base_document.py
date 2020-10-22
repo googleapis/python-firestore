@@ -224,7 +224,7 @@ class BaseDocumentReference(object):
     def _prep_update(
         self,
         field_updates: dict,
-        option=None,
+        option: _helpers.WriteOption = None,
         retry: retries.Retry = None,
         timeout: float = None,
     ) -> Tuple[Any, dict]:
@@ -237,14 +237,17 @@ class BaseDocumentReference(object):
     def update(
         self,
         field_updates: dict,
-        option=None,
+        option: _helpers.WriteOption = None,
         retry: retries.Retry = None,
         timeout: float = None,
     ) -> NoReturn:
         raise NotImplementedError
 
     def _prep_delete(
-        self, option=None, retry: retries.Retry = None, timeout: float = None,
+        self,
+        option: _helpers.WriteOption = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`delete`."""
         write_pb = _helpers.pb_for_delete(self._document_path, option)
@@ -258,7 +261,10 @@ class BaseDocumentReference(object):
         return request, kwargs
 
     def delete(
-        self, option=None, retry: retries.Retry = None, timeout: float = None,
+        self,
+        option: _helpers.WriteOption = None,
+        retry: retries.Retry = None,
+        timeout: float = None,
     ) -> NoReturn:
         raise NotImplementedError
 

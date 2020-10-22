@@ -131,7 +131,7 @@ class DocumentReference(BaseDocumentReference):
     def update(
         self,
         field_updates: dict,
-        option=None,
+        option: _helpers.WriteOption = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> write.WriteResult:
@@ -287,7 +287,7 @@ class DocumentReference(BaseDocumentReference):
 
     def delete(
         self,
-        option=None,
+        option: _helpers.WriteOption = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> timestamp_pb2.Timestamp:
@@ -341,7 +341,7 @@ class DocumentReference(BaseDocumentReference):
             transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this reference
                 will be retrieved in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+            retry (google.api_core.retry.Retry): Designation of what errors, if an                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      y,
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
