@@ -407,5 +407,5 @@ class AsyncDocumentReference(BaseDocumentReference):
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
 
-        for collection_id in iterator:
+        async for collection_id in iterator:
             yield self.collection(collection_id)

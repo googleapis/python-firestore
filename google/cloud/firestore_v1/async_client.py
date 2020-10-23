@@ -284,7 +284,7 @@ class AsyncClient(BaseClient):
             request=request, metadata=self._rpc_metadata, **kwargs,
         )
 
-        for collection_id in iterator:
+        async for collection_id in iterator:
             yield self.collection(collection_id)
 
     def batch(self) -> AsyncWriteBatch:

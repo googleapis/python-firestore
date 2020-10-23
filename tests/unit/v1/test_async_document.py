@@ -502,8 +502,9 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         collection_ids = ["coll-1", "coll-2"]
 
         class Pager(object):
-            def __iter__(self):
-                yield from collection_ids
+            async def __aiter__(self, **_):
+                for collection_id in collection_ids:
+                    yield collection_id
 
         firestore_api = AsyncMock()
         firestore_api.mock_add_spec(spec=["list_collection_ids"])
