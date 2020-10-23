@@ -21,7 +21,7 @@ import os
 try:
     import libcst as cst
 except ImportError as exception:
-    raise ImportError('Run python -m pip install "libcst >= 0.2.5" command to install libcst.')
+    raise ImportError('Run `python -m pip install "libcst >= 0.2.5"` to install libcst.')
 
 import pathlib
 import sys
