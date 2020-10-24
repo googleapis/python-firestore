@@ -17,12 +17,7 @@
 
 import argparse
 import os
-
-try:
-    import libcst as cst
-except ImportError as exception:
-    raise ImportError('Run `python -m pip install "libcst >= 0.2.5"` to install libcst.')
-
+import libcst as cst
 import pathlib
 import sys
 from typing import (Any, Callable, Dict, List, Sequence, Tuple)
