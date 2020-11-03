@@ -29,9 +29,9 @@ BLACK_PATHS = ["docs", "google", "tests", "noxfile.py", "setup.py"]
 
 DEFAULT_PYTHON_VERSION = "3.9"
 SYSTEM_TEST_PYTHON_VERSIONS = ["3.9"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9"]
-UNIT_TEST_PRERELEASE_PYTHON_VERSIONS = ["3.10"]
-
+# Run unit tests on all supported versions. Also include a scenario to
+# test the next version.
+UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9", "3.10"]
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def lint(session):
@@ -99,11 +99,6 @@ def default(session):
         os.path.join("tests", "unit"),
         *session.posargs,
     )
-
-@nox.session(python=UNIT_TEST_PRERELEASE_PYTHON_VERSIONS)
-def prerelease_unit(session):
-    """Run the unit test suite."""
-    default(session)
 
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):
