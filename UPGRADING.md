@@ -17,7 +17,7 @@ The 2.0.0 release requires Python 3.6+.
 
 If you previously were using modules or functions under the namespace
 `google.cloud.firestore_v1.gapic` there is a high likelihood you have incompatible code.
-To assist with this, we have includes some helpful scripts to make some of the code
+To assist with this, we have included some helpful scripts to make some of the code
 modifications required to use 2.0.0.
 
 * Install the library
