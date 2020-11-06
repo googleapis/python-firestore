@@ -116,7 +116,7 @@ response = client.a_method(
 
 > **WARNING**: Breaking change
 
-The submodules `enums` and `types` have been removed.
+The `enums` submodule has been removed.
 
 **Before:**
 ```py
