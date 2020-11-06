@@ -82,7 +82,7 @@
 
 * add python 2 sunset banner to documentation ([#9036](https://www.github.com/googleapis/python-firestore/issues/9036)) ([819d154](https://www.github.com/googleapis/python-firestore/commit/819d1541bae21e4054124dd32ff38906d82caca9))
 * add upgrading section to index of documentation ([#248](https://www.github.com/googleapis/python-firestore/issues/248)) ([55d1356](https://www.github.com/googleapis/python-firestore/commit/55d1356081c2d2226d7190dac2abdffbf8a0fb2f))
-* adds UPGRADING.md, not to readme, to help inform users about migration to v2 ([#245](https://www.github.com/googleapis/python-firestore/issues/245)) ([6a8cbdd](https://www.github.com/googleapis/python-firestore/commit/6a8cbddd01771190c04a5fc065863e8def3eb44f))
+* adds UPGRADING.md, note to readme, to help inform users about migration to v2 ([#245](https://www.github.com/googleapis/python-firestore/issues/245)) ([6a8cbdd](https://www.github.com/googleapis/python-firestore/commit/6a8cbddd01771190c04a5fc065863e8def3eb44f))
 * document admin client ([#174](https://www.github.com/googleapis/python-firestore/issues/174)) ([f099736](https://www.github.com/googleapis/python-firestore/commit/f09973638e627f741ea7d1f38294c4f8e9677e53)), closes [#30](https://www.github.com/googleapis/python-firestore/issues/30)
 * fix intersphinx reference to requests ([#9294](https://www.github.com/googleapis/python-firestore/issues/9294)) ([e859f3c](https://www.github.com/googleapis/python-firestore/commit/e859f3cb40dae6d9828e01ef28fa2539b978c56f))
 * fix typo in watch documentation ([#115](https://www.github.com/googleapis/python-firestore/issues/115)) ([367ac73](https://www.github.com/googleapis/python-firestore/commit/367ac732048e1e96cacb54238f88603ed47e2833))
