@@ -10,6 +10,7 @@
 
 ### ⚠ BREAKING CHANGES
 
+* remove support for Python 2.7
 * remove v1beta1 surface for v2 (#96)
 * Begin using new microgenerator for v2 firestore (#91)
 * from `firestore-0.30.0`: revert to merge not being an option;
