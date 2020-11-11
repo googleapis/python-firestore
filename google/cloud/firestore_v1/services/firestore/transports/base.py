@@ -118,8 +118,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=60.0,
@@ -133,8 +133,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=60.0,
@@ -159,8 +159,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=60.0,
@@ -174,8 +174,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=300.0,
@@ -189,8 +189,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=60.0,
@@ -215,8 +215,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=60.0,
@@ -230,8 +230,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=300.0,
@@ -245,8 +245,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=300.0,
@@ -263,8 +263,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=86400.0,
@@ -278,8 +278,8 @@ class FirestoreTransport(abc.ABC):
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
                         exceptions.DeadlineExceeded,
-                        exceptions.ServiceUnavailable,
                         exceptions.InternalServerError,
+                        exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=60.0,
@@ -292,7 +292,7 @@ class FirestoreTransport(abc.ABC):
                     maximum=60.0,
                     multiplier=1.3,
                     predicate=retries.if_exception_type(
-                        exceptions.ServiceUnavailable, exceptions.Aborted,
+                        exceptions.Aborted, exceptions.ServiceUnavailable,
                     ),
                 ),
                 default_timeout=60.0,
