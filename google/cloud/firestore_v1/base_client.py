@@ -25,7 +25,7 @@ In the hierarchy of API concepts
 """
 
 import os
-import grpc
+import grpc  # type: ignore
 
 import google.api_core.client_options  # type: ignore
 import google.api_core.path_template  # type: ignore
