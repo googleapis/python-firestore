@@ -31,6 +31,7 @@ DEFAULT_PYTHON_VERSION = "3.8"
 SYSTEM_TEST_PYTHON_VERSIONS = ["3.9"]
 UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9"]
 
+
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def lint(session):
     """Run linters.
@@ -97,6 +98,7 @@ def default(session):
         os.path.join("tests", "unit"),
         *session.posargs,
     )
+
 
 @nox.session(python=UNIT_TEST_PYTHON_VERSIONS)
 def unit(session):

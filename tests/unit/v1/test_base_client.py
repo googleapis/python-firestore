@@ -67,8 +67,7 @@ class TestBaseClient(unittest.TestCase):
         return_value=mock.sentinel.firestore_api,
     )
     @mock.patch(
-        "grpc.insecure_channel",
-        autospec=True,
+        "grpc.insecure_channel", autospec=True,
     )
     def test__firestore_api_property_with_emulator(
         self, mock_insecure_channel, mock_client
