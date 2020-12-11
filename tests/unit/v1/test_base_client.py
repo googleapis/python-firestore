@@ -14,9 +14,9 @@
 
 import datetime
 import unittest
+import grpc
 
 import mock
-
 
 
 class TestBaseClient(unittest.TestCase):
@@ -69,7 +69,7 @@ class TestBaseClient(unittest.TestCase):
     )
     @mock.patch(
         "google.cloud.firestore_v1.base_client.BaseClient._emulator_channel",
-        autospec=True
+        autospec=True,
     )
     def test__firestore_api_property_with_emulator(
         self, mock_emulator_channel, mock_client
@@ -135,6 +135,36 @@ class TestBaseClient(unittest.TestCase):
                 ("google-cloud-resource-prefix", client._database_string),
                 ("authorization", "Bearer owner"),
             ],
+        )
+
+    def test_emulator_channel(self):
+        emulator_host = "localhost:8081"
+        with mock.patch("os.getenv") as getenv:
+            getenv.return_value = emulator_host
+
+            credentials = _make_credentials()
+            database = "quanta"
+            client = self._make_one(
+                project=self.PROJECT, credentials=credentials, database=database
+            )
+
+        # checks that a channel is created
+        channel = client._emulator_channel()
+        self.assertTrue(isinstance(channel, grpc._channel.Channel))
+        # checks that the credentials are composite ones using a local channel from grpc
+        composite_credentials = client._local_composite_credentials()
+        self.assertTrue(isinstance(composite_credentials, grpc.ChannelCredentials))
+        self.assertTrue(
+            isinstance(
+                composite_credentials._credentials._call_credentialses[0],
+                grpc._cython.cygrpc.MetadataPluginCallCredentials,
+            )
+        )
+        self.assertTrue(
+            isinstance(
+                composite_credentials._credentials._channel_credentials,
+                grpc._cython.cygrpc.LocalChannelCredentials,
+            )
         )
 
     def test_field_path(self):

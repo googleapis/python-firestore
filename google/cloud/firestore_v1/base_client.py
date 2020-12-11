@@ -174,8 +174,21 @@ class BaseClient(ClientWithProject):
 
         :return: grcp.Channel
         """
+        return grpc._channel.Channel(
+            self._emulator_host,
+            (),
+            self._local_composite_credentials()._credentials,
+            None,
+        )
 
-        credentials = google.auth.credentials.with_scopes_if_required(self._credentials, None)
+    def _local_composite_credentials(self):
+        """
+        Ceates the credentials for the local emulator channel
+        :return: grpc.ChannelCredentials
+        """
+        credentials = google.auth.credentials.with_scopes_if_required(
+            self._credentials, None
+        )
         request = google.auth.transport.requests.Request()
 
         # Create the metadata plugin for inserting the authorization header.
@@ -190,10 +203,9 @@ class BaseClient(ClientWithProject):
         local_credentials = grpc.local_channel_credentials()
 
         # Combine the local credentials and the authorization credentials.
-        composite_credentials = grpc.composite_channel_credentials(local_credentials, google_auth_credentials)
-
-        return grpc._channel.Channel(self._emulator_host, (), composite_credentials._credentials, None)
-
+        return grpc.composite_channel_credentials(
+            local_credentials, google_auth_credentials
+        )
 
     def _target_helper(self, client_class) -> str:
         """Return the target (where the API is).
