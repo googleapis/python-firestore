@@ -4,22 +4,22 @@
       "git": {
         "name": ".",
         "remote": "git@github.com:googleapis/python-firestore",
-        "sha": "ab19546ee96c69f46519764a3fb0eb4bea4fc6f8"
+        "sha": "dffc580472193c7d3b0eecadc316d77afaa0d0bf"
       }
     },
     {
       "git": {
         "name": "googleapis",
         "remote": "https://github.com/googleapis/googleapis.git",
-        "sha": "0c9e3f8cb3a0c75983fe9a7897f0ef048d81e999",
-        "internalRef": "342123525"
+        "sha": "e689e62a5540d4b98639f0e444a0edf5b2d94043",
+        "internalRef": "347651882"
       }
     },
     {
       "git": {
         "name": "synthtool",
         "remote": "https://github.com/googleapis/synthtool.git",
-        "sha": "e89175cf074dccc4babb4eca66ae913696e47a71"
+        "sha": "996775eca5fd934edac3c2ae34b80ff0395b1717"
       }
     }
   ],
