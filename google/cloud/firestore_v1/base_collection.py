@@ -186,7 +186,7 @@ class BaseCollectionReference(object):
             # list_documents returns an iterator of document references, which do not
             # include any fields. To save on data transfer, we can set a field_path mask
             # to include no fields
-            "mask": {"field_paths": None}
+            "mask": {"field_paths": None},
         }
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
