@@ -115,7 +115,7 @@ class DocumentReference(BaseDocumentReference):
           True
 
         - To "merge" ``document_data`` with an existing document (creating if
-          the document dos not exist), pass ``merge`` as True``:
+          the document does not exist), pass ``merge`` as True``:
 
           >>> document_data = {"a": 1, "b": {"c": "Two"}}
           >>> document.get().to_dict() == {"d": "Three", "b": {}} # exists
