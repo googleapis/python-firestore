@@ -18,6 +18,7 @@ TESTS_REPO = $(REPO_DIR)/../conformance-tests
 TEST_PROTO_DIR = $(TESTS_REPO)/firestore/v1
 TEST_PROTO_SRC = $(TEST_PROTO_DIR)/proto/google/cloud/conformance/firestore/v1/tests.proto
 TESTDATA_DIR = `pwd`/tests/unit/v1/testdata/
+TESTDATA_DIR = $(REPO_DIR)/tests/unit/v1/testdata/
 
 TMPDIR = /tmp/python-fs-proto
 TMPDIR_FS = $(TMPDIR)/google/cloud/firestore_v1/types
@@ -27,7 +28,7 @@ OUTDIR = /tmp/python-fs-gen
 
 .PHONY: sync-protos gen-protos docker-pull
 
-gen-protos: sync-protos tweak-protos docker-pull gen-protos-raw
+gen-protos: sync-protos tweak-protos docker-pull gen-protos-raw format
 
 gen-protos-raw:
 	mkdir -p $(OUTDIR)
@@ -65,3 +66,6 @@ docker-pull:
 copy-testdata:
 	rm $(TESTDATA_DIR)/*.json
 	cp $(TEST_PROTO_DIR)/*.json $(TESTDATA_DIR)/
+
+format:
+	nox -s blacken
