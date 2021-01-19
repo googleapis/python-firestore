@@ -5,15 +5,15 @@
 PROTOC = protoc
 
 # Dependent repos.
-REPO_DIR=$(HOME)/workspace
-
-# This requires a number or repositories.
+REPO_DIR=$(shell pwd)
+# This requires a few other repositories, assumed to be in the same root
+# of this repository.
 # => git clone git@github.com:protocolbuffers/protobuf
-PROTOBUF_REPO = $(REPO_DIR)/protobuf 
+PROTOBUF_REPO = $(REPO_DIR)/../protobuf 
 # => git clone git@github.com:googleapis/googleapis.git
-GOOGLEAPIS_REPO = $(REPO_DIR)/googleapis
+GOOGLEAPIS_REPO = $(REPO_DIR)/../googleapis
 # => git clone git@github.com:googleapis/conformance-tests.git
-TESTS_REPO = $(REPO_DIR)/conformance-tests
+TESTS_REPO = $(REPO_DIR)/../conformance-tests
 
 TEST_PROTO_DIR = $(TESTS_REPO)/firestore/v1
 TEST_PROTO_SRC = $(TEST_PROTO_DIR)/proto/google/cloud/conformance/firestore/v1/tests.proto
