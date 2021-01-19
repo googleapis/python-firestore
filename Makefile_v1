@@ -5,10 +5,16 @@
 PROTOC = protoc
 
 # Dependent repos.
-REPO_DIR=$(HOME)/git-repos
-PROTOBUF_REPO = $(REPO_DIR)/protobuf
+REPO_DIR=$(HOME)/workspace
+
+# This requires a number or repositories.
+# => git clone git@github.com:protocolbuffers/protobuf
+PROTOBUF_REPO = $(REPO_DIR)/protobuf 
+# => git clone git@github.com:googleapis/googleapis.git
 GOOGLEAPIS_REPO = $(REPO_DIR)/googleapis
+# => git clone git@github.com:googleapis/conformance-tests.git
 TESTS_REPO = $(REPO_DIR)/conformance-tests
+
 TEST_PROTO_DIR = $(TESTS_REPO)/firestore/v1
 TEST_PROTO_SRC = $(TEST_PROTO_DIR)/proto/google/cloud/conformance/firestore/v1/tests.proto
 TESTDATA_DIR = `pwd`/tests/unit/v1/testdata/
