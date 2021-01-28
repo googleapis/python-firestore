@@ -5,6 +5,24 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.1.0](https://www.github.com/googleapis/python-firestore/compare/v2.0.2...v2.1.0) (2021-01-28)
+
+
+### Features
+
+* support using client credentials with emulator ([#269](https://www.github.com/googleapis/python-firestore/issues/269)) ([dffc580](https://www.github.com/googleapis/python-firestore/commit/dffc580472193c7d3b0eecadc316d77afaa0d0bf))
+
+
+### Bug Fixes
+
+* limit data transferred as part of list_documents as we don't require field data ([#280](https://www.github.com/googleapis/python-firestore/issues/280)) ([0386bc4](https://www.github.com/googleapis/python-firestore/commit/0386bc4824bd082410112c495963f13fb2489dfa))
+* remove client recv msg limit fix: add enums to `types/__init__.py` ([#274](https://www.github.com/googleapis/python-firestore/issues/274)) ([2b47c00](https://www.github.com/googleapis/python-firestore/commit/2b47c0072769ee47073c68ccab73733416aa0cef))
+
+
+### Documentation
+
+* update intersphinx for grpc and auth ([#261](https://www.github.com/googleapis/python-firestore/issues/261)) ([1bbd3a0](https://www.github.com/googleapis/python-firestore/commit/1bbd3a0dca43714289f741e759d8aaa40e3ef600))
+
 ### [2.0.2](https://www.github.com/googleapis/python-firestore/compare/v2.0.1...v2.0.2) (2020-12-05)
 
 
