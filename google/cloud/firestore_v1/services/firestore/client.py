@@ -134,22 +134,6 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     )
 
     @classmethod
-    def from_service_account_info(cls, info: dict, *args, **kwargs):
-        """Creates an instance of this client using the provided credentials info.
-
-        Args:
-            info (dict): The service account private key info.
-            args: Additional arguments to pass to the constructor.
-            kwargs: Additional arguments to pass to the constructor.
-
-        Returns:
-            FirestoreClient: The constructed client.
-        """
-        credentials = service_account.Credentials.from_service_account_info(info)
-        kwargs["credentials"] = credentials
-        return cls(*args, **kwargs)
-
-    @classmethod
     def from_service_account_file(cls, filename: str, *args, **kwargs):
         """Creates an instance of this client using the provided credentials
         file.
@@ -161,7 +145,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
             kwargs: Additional arguments to pass to the constructor.
 
         Returns:
-            FirestoreClient: The constructed client.
+            {@api.name}: The constructed client.
         """
         credentials = service_account.Credentials.from_service_account_file(filename)
         kwargs["credentials"] = credentials
@@ -253,10 +237,10 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 credentials identify the application to the service; if none
                 are specified, the client will attempt to ascertain the
                 credentials from the environment.
-            transport (Union[str, FirestoreTransport]): The
+            transport (Union[str, ~.FirestoreTransport]): The
                 transport to use. If set to None, a transport is chosen
                 automatically.
-            client_options (google.api_core.client_options.ClientOptions): Custom options for the
+            client_options (client_options_lib.ClientOptions): Custom options for the
                 client. It won't take effect if a ``transport`` instance is provided.
                 (1) The ``api_endpoint`` property can be used to override the
                 default endpoint provided by the client. GOOGLE_API_USE_MTLS_ENDPOINT
@@ -365,7 +349,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Gets a single document.
 
         Args:
-            request (google.cloud.firestore_v1.types.GetDocumentRequest):
+            request (:class:`~.firestore.GetDocumentRequest`):
                 The request object. The request for
                 [Firestore.GetDocument][google.firestore.v1.Firestore.GetDocument].
 
@@ -376,7 +360,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.types.Document:
+            ~.document.Document:
                 A Firestore document.
                 Must not exceed 1 MiB - 4 bytes.
 
@@ -417,7 +401,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Lists documents.
 
         Args:
-            request (google.cloud.firestore_v1.types.ListDocumentsRequest):
+            request (:class:`~.firestore.ListDocumentsRequest`):
                 The request object. The request for
                 [Firestore.ListDocuments][google.firestore.v1.Firestore.ListDocuments].
 
@@ -428,7 +412,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.services.firestore.pagers.ListDocumentsPager:
+            ~.pagers.ListDocumentsPager:
                 The response for
                 [Firestore.ListDocuments][google.firestore.v1.Firestore.ListDocuments].
 
@@ -480,18 +464,17 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Updates or inserts a document.
 
         Args:
-            request (google.cloud.firestore_v1.types.UpdateDocumentRequest):
+            request (:class:`~.firestore.UpdateDocumentRequest`):
                 The request object. The request for
                 [Firestore.UpdateDocument][google.firestore.v1.Firestore.UpdateDocument].
-            document (google.cloud.firestore_v1.types.Document):
+            document (:class:`~.gf_document.Document`):
                 Required. The updated document.
                 Creates the document if it does not
                 already exist.
-
                 This corresponds to the ``document`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-            update_mask (google.cloud.firestore_v1.types.DocumentMask):
+            update_mask (:class:`~.common.DocumentMask`):
                 The fields to update.
                 None of the field paths in the mask may
                 contain a reserved name.
@@ -501,7 +484,6 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 Fields referenced in the mask, but not
                 present in the input document, are
                 deleted from the document on the server.
-
                 This corresponds to the ``update_mask`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -513,7 +495,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.types.Document:
+            ~.gf_document.Document:
                 A Firestore document.
                 Must not exceed 1 MiB - 4 bytes.
 
@@ -573,14 +555,13 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Deletes a document.
 
         Args:
-            request (google.cloud.firestore_v1.types.DeleteDocumentRequest):
+            request (:class:`~.firestore.DeleteDocumentRequest`):
                 The request object. The request for
                 [Firestore.DeleteDocument][google.firestore.v1.Firestore.DeleteDocument].
-            name (str):
+            name (:class:`str`):
                 Required. The resource name of the Document to delete.
                 In the format:
                 ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
-
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -642,7 +623,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         be returned in the same order that they were requested.
 
         Args:
-            request (google.cloud.firestore_v1.types.BatchGetDocumentsRequest):
+            request (:class:`~.firestore.BatchGetDocumentsRequest`):
                 The request object. The request for
                 [Firestore.BatchGetDocuments][google.firestore.v1.Firestore.BatchGetDocuments].
 
@@ -653,7 +634,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            Iterable[google.cloud.firestore_v1.types.BatchGetDocumentsResponse]:
+            Iterable[~.firestore.BatchGetDocumentsResponse]:
                 The streamed response for
                 [Firestore.BatchGetDocuments][google.firestore.v1.Firestore.BatchGetDocuments].
 
@@ -695,13 +676,12 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Starts a new transaction.
 
         Args:
-            request (google.cloud.firestore_v1.types.BeginTransactionRequest):
+            request (:class:`~.firestore.BeginTransactionRequest`):
                 The request object. The request for
                 [Firestore.BeginTransaction][google.firestore.v1.Firestore.BeginTransaction].
-            database (str):
+            database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
-
                 This corresponds to the ``database`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -713,7 +693,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.types.BeginTransactionResponse:
+            ~.firestore.BeginTransactionResponse:
                 The response for
                 [Firestore.BeginTransaction][google.firestore.v1.Firestore.BeginTransaction].
 
@@ -771,20 +751,18 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         documents.
 
         Args:
-            request (google.cloud.firestore_v1.types.CommitRequest):
+            request (:class:`~.firestore.CommitRequest`):
                 The request object. The request for
                 [Firestore.Commit][google.firestore.v1.Firestore.Commit].
-            database (str):
+            database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
-
                 This corresponds to the ``database`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-            writes (Sequence[google.cloud.firestore_v1.types.Write]):
+            writes (:class:`Sequence[~.gf_write.Write]`):
                 The writes to apply.
                 Always executed atomically and in order.
-
                 This corresponds to the ``writes`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -796,7 +774,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.types.CommitResponse:
+            ~.firestore.CommitResponse:
                 The response for
                 [Firestore.Commit][google.firestore.v1.Firestore.Commit].
 
@@ -856,20 +834,18 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Rolls back a transaction.
 
         Args:
-            request (google.cloud.firestore_v1.types.RollbackRequest):
+            request (:class:`~.firestore.RollbackRequest`):
                 The request object. The request for
                 [Firestore.Rollback][google.firestore.v1.Firestore.Rollback].
-            database (str):
+            database (:class:`str`):
                 Required. The database name. In the format:
                 ``projects/{project_id}/databases/{database_id}``.
-
                 This corresponds to the ``database`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-            transaction (bytes):
+            transaction (:class:`bytes`):
                 Required. The transaction to roll
                 back.
-
                 This corresponds to the ``transaction`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -931,7 +907,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Runs a query.
 
         Args:
-            request (google.cloud.firestore_v1.types.RunQueryRequest):
+            request (:class:`~.firestore.RunQueryRequest`):
                 The request object. The request for
                 [Firestore.RunQuery][google.firestore.v1.Firestore.RunQuery].
 
@@ -942,7 +918,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            Iterable[google.cloud.firestore_v1.types.RunQueryResponse]:
+            Iterable[~.firestore.RunQueryResponse]:
                 The response for
                 [Firestore.RunQuery][google.firestore.v1.Firestore.RunQuery].
 
@@ -987,7 +963,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         results.
 
         Args:
-            request (google.cloud.firestore_v1.types.PartitionQueryRequest):
+            request (:class:`~.firestore.PartitionQueryRequest`):
                 The request object. The request for
                 [Firestore.PartitionQuery][google.firestore.v1.Firestore.PartitionQuery].
 
@@ -998,7 +974,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.services.firestore.pagers.PartitionQueryPager:
+            ~.pagers.PartitionQueryPager:
                 The response for
                 [Firestore.PartitionQuery][google.firestore.v1.Firestore.PartitionQuery].
 
@@ -1049,7 +1025,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         order.
 
         Args:
-            requests (Iterator[google.cloud.firestore_v1.types.WriteRequest]):
+            requests (Iterator[`~.firestore.WriteRequest`]):
                 The request object iterator. The request for
                 [Firestore.Write][google.firestore.v1.Firestore.Write].
                 The first request creates a stream, or resumes an
@@ -1069,7 +1045,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            Iterable[google.cloud.firestore_v1.types.WriteResponse]:
+            Iterable[~.firestore.WriteResponse]:
                 The response for
                 [Firestore.Write][google.firestore.v1.Firestore.Write].
 
@@ -1100,7 +1076,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Listens to changes.
 
         Args:
-            requests (Iterator[google.cloud.firestore_v1.types.ListenRequest]):
+            requests (Iterator[`~.firestore.ListenRequest`]):
                 The request object iterator. A request for
                 [Firestore.Listen][google.firestore.v1.Firestore.Listen]
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
@@ -1110,7 +1086,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            Iterable[google.cloud.firestore_v1.types.ListenResponse]:
+            Iterable[~.firestore.ListenResponse]:
                 The response for
                 [Firestore.Listen][google.firestore.v1.Firestore.Listen].
 
@@ -1142,15 +1118,14 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Lists all the collection IDs underneath a document.
 
         Args:
-            request (google.cloud.firestore_v1.types.ListCollectionIdsRequest):
+            request (:class:`~.firestore.ListCollectionIdsRequest`):
                 The request object. The request for
                 [Firestore.ListCollectionIds][google.firestore.v1.Firestore.ListCollectionIds].
-            parent (str):
+            parent (:class:`str`):
                 Required. The parent document. In the format:
                 ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
                 For example:
                 ``projects/my-project/databases/my-database/documents/chatrooms/my-chatroom``
-
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -1162,7 +1137,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.services.firestore.pagers.ListCollectionIdsPager:
+            ~.pagers.ListCollectionIdsPager:
                 The response from
                 [Firestore.ListCollectionIds][google.firestore.v1.Firestore.ListCollectionIds].
 
@@ -1236,7 +1211,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         [Commit][google.firestore.v1.Firestore.Commit] instead.
 
         Args:
-            request (google.cloud.firestore_v1.types.BatchWriteRequest):
+            request (:class:`~.firestore.BatchWriteRequest`):
                 The request object. The request for
                 [Firestore.BatchWrite][google.firestore.v1.Firestore.BatchWrite].
 
@@ -1247,7 +1222,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.types.BatchWriteResponse:
+            ~.firestore.BatchWriteResponse:
                 The response from
                 [Firestore.BatchWrite][google.firestore.v1.Firestore.BatchWrite].
 
@@ -1288,7 +1263,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         r"""Creates a new document.
 
         Args:
-            request (google.cloud.firestore_v1.types.CreateDocumentRequest):
+            request (:class:`~.firestore.CreateDocumentRequest`):
                 The request object. The request for
                 [Firestore.CreateDocument][google.firestore.v1.Firestore.CreateDocument].
 
@@ -1299,7 +1274,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_v1.types.Document:
+            ~.document.Document:
                 A Firestore document.
                 Must not exceed 1 MiB - 4 bytes.
 
