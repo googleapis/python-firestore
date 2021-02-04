@@ -121,22 +121,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     )
 
     @classmethod
-    def from_service_account_info(cls, info: dict, *args, **kwargs):
-        """Creates an instance of this client using the provided credentials info.
-
-        Args:
-            info (dict): The service account private key info.
-            args: Additional arguments to pass to the constructor.
-            kwargs: Additional arguments to pass to the constructor.
-
-        Returns:
-            FirestoreAdminClient: The constructed client.
-        """
-        credentials = service_account.Credentials.from_service_account_info(info)
-        kwargs["credentials"] = credentials
-        return cls(*args, **kwargs)
-
-    @classmethod
     def from_service_account_file(cls, filename: str, *args, **kwargs):
         """Creates an instance of this client using the provided credentials
         file.
@@ -148,7 +132,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             kwargs: Additional arguments to pass to the constructor.
 
         Returns:
-            FirestoreAdminClient: The constructed client.
+            {@api.name}: The constructed client.
         """
         credentials = service_account.Credentials.from_service_account_file(filename)
         kwargs["credentials"] = credentials
@@ -301,10 +285,10 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 credentials identify the application to the service; if none
                 are specified, the client will attempt to ascertain the
                 credentials from the environment.
-            transport (Union[str, FirestoreAdminTransport]): The
+            transport (Union[str, ~.FirestoreAdminTransport]): The
                 transport to use. If set to None, a transport is chosen
                 automatically.
-            client_options (google.api_core.client_options.ClientOptions): Custom options for the
+            client_options (client_options_lib.ClientOptions): Custom options for the
                 client. It won't take effect if a ``transport`` instance is provided.
                 (1) The ``api_endpoint`` property can be used to override the
                 default endpoint provided by the client. GOOGLE_API_USE_MTLS_ENDPOINT
@@ -419,20 +403,18 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.CreateIndexRequest):
+            request (:class:`~.firestore_admin.CreateIndexRequest`):
                 The request object. The request for
                 [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
-            parent (str):
+            parent (:class:`str`):
                 Required. A parent name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}``
-
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-            index (google.cloud.firestore_admin_v1.types.Index):
+            index (:class:`~.gfa_index.Index`):
                 Required. The composite index to
                 create.
-
                 This corresponds to the ``index`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -444,11 +426,13 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.api_core.operation.Operation:
+            ~.ga_operation.Operation:
                 An object representing a long-running operation.
 
-                The result type for the operation will be :class:`google.cloud.firestore_admin_v1.types.Index` Cloud Firestore indexes enable simple and complex queries against
-                   documents in a database.
+                The result type for the operation will be
+                :class:``~.gfa_index.Index``: Cloud Firestore indexes
+                enable simple and complex queries against documents in a
+                database.
 
         """
         # Create or coerce a protobuf request object.
@@ -512,13 +496,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Lists composite indexes.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.ListIndexesRequest):
+            request (:class:`~.firestore_admin.ListIndexesRequest`):
                 The request object. The request for
                 [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
-            parent (str):
+            parent (:class:`str`):
                 Required. A parent name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}``
-
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -530,7 +513,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_admin_v1.services.firestore_admin.pagers.ListIndexesPager:
+            ~.pagers.ListIndexesPager:
                 The response for
                 [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
 
@@ -595,13 +578,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Gets a composite index.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.GetIndexRequest):
+            request (:class:`~.firestore_admin.GetIndexRequest`):
                 The request object. The request for
                 [FirestoreAdmin.GetIndex][google.firestore.admin.v1.FirestoreAdmin.GetIndex].
-            name (str):
+            name (:class:`str`):
                 Required. A name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}``
-
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -613,7 +595,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_admin_v1.types.Index:
+            ~.index.Index:
                 Cloud Firestore indexes enable simple
                 and complex queries against documents in
                 a database.
@@ -670,13 +652,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Deletes a composite index.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.DeleteIndexRequest):
+            request (:class:`~.firestore_admin.DeleteIndexRequest`):
                 The request object. The request for
                 [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
-            name (str):
+            name (:class:`str`):
                 Required. A name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/indexes/{index_id}``
-
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -737,13 +718,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Gets the metadata and configuration for a Field.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.GetFieldRequest):
+            request (:class:`~.firestore_admin.GetFieldRequest`):
                 The request object. The request for
                 [FirestoreAdmin.GetField][google.firestore.admin.v1.FirestoreAdmin.GetField].
-            name (str):
+            name (:class:`str`):
                 Required. A name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}/fields/{field_id}``
-
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -755,7 +735,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_admin_v1.types.Field:
+            ~.field.Field:
                 Represents a single field in the
                 database.
                 Fields are grouped by their "Collection
@@ -829,10 +809,10 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.UpdateFieldRequest):
+            request (:class:`~.firestore_admin.UpdateFieldRequest`):
                 The request object. The request for
                 [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
-            field (google.cloud.firestore_admin_v1.types.Field):
+            field (:class:`~.gfa_field.Field`):
                 Required. The field to be updated.
                 This corresponds to the ``field`` field
                 on the ``request`` instance; if ``request`` is provided, this
@@ -845,16 +825,16 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.api_core.operation.Operation:
+            ~.ga_operation.Operation:
                 An object representing a long-running operation.
 
                 The result type for the operation will be
-                :class:`google.cloud.firestore_admin_v1.types.Field`
-                Represents a single field in the database.
+                :class:``~.gfa_field.Field``: Represents a single field
+                in the database.
 
-                   Fields are grouped by their "Collection Group", which
-                   represent all collections in the database with the
-                   same id.
+                Fields are grouped by their "Collection Group", which
+                represent all collections in the database with the same
+                id.
 
         """
         # Create or coerce a protobuf request object.
@@ -925,13 +905,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         with the filter set to ``indexConfig.usesAncestorConfig:false``.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.ListFieldsRequest):
+            request (:class:`~.firestore_admin.ListFieldsRequest`):
                 The request object. The request for
                 [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
-            parent (str):
+            parent (:class:`str`):
                 Required. A parent name of the form
                 ``projects/{project_id}/databases/{database_id}/collectionGroups/{collection_id}``
-
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -943,7 +922,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.cloud.firestore_admin_v1.services.firestore_admin.pagers.ListFieldsPager:
+            ~.pagers.ListFieldsPager:
                 The response for
                 [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
 
@@ -1017,13 +996,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Google Cloud Storage.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.ExportDocumentsRequest):
+            request (:class:`~.firestore_admin.ExportDocumentsRequest`):
                 The request object. The request for
                 [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
-            name (str):
+            name (:class:`str`):
                 Required. Database to export. Should be of the form:
                 ``projects/{project_id}/databases/{database_id}``.
-
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -1035,11 +1013,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.api_core.operation.Operation:
+            ~.ga_operation.Operation:
                 An object representing a long-running operation.
 
                 The result type for the operation will be
-                :class:`google.cloud.firestore_admin_v1.types.ExportDocumentsResponse`
+                :class:``~.gfa_operation.ExportDocumentsResponse``:
                 Returned in the
                 [google.longrunning.Operation][google.longrunning.Operation]
                 response field.
@@ -1110,13 +1088,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         already been imported to Cloud Firestore.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.ImportDocumentsRequest):
+            request (:class:`~.firestore_admin.ImportDocumentsRequest`):
                 The request object. The request for
                 [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
-            name (str):
+            name (:class:`str`):
                 Required. Database to import into. Should be of the
                 form: ``projects/{project_id}/databases/{database_id}``.
-
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
@@ -1128,22 +1105,24 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
 
         Returns:
-            google.api_core.operation.Operation:
+            ~.ga_operation.Operation:
                 An object representing a long-running operation.
 
-                The result type for the operation will be :class:`google.protobuf.empty_pb2.Empty` A generic empty message that you can re-use to avoid defining duplicated
-                   empty messages in your APIs. A typical example is to
-                   use it as the request or the response type of an API
-                   method. For instance:
+                The result type for the operation will be
+                :class:``~.empty.Empty``: A generic empty message that
+                you can re-use to avoid defining duplicated empty
+                messages in your APIs. A typical example is to use it as
+                the request or the response type of an API method. For
+                instance:
 
-                      service Foo {
-                         rpc Bar(google.protobuf.Empty) returns
-                         (google.protobuf.Empty);
+                ::
 
-                      }
+                    service Foo {
+                      rpc Bar(google.protobuf.Empty) returns (google.protobuf.Empty);
+                    }
 
-                   The JSON representation for Empty is empty JSON
-                   object {}.
+                The JSON representation for ``Empty`` is empty JSON
+                object ``{}``.
 
         """
         # Create or coerce a protobuf request object.
