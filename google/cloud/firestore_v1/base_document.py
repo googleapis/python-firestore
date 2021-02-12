@@ -293,6 +293,32 @@ class BaseDocumentReference(object):
 
         return request, kwargs
 
+    def _prep_batch_get(
+        self,
+        field_paths: Iterable[str] = None,
+        transaction=None,
+        retry: retries.Retry = None,
+        timeout: float = None,
+    ) -> Tuple[dict, dict]:
+        """Shared setup for async/sync :meth:`get`."""
+        if isinstance(field_paths, str):
+            raise ValueError("'field_paths' must be a sequence of paths, not a string.")
+
+        if field_paths is not None:
+            mask = common.DocumentMask(field_paths=sorted(field_paths))
+        else:
+            mask = None
+
+        request = {
+            "database": self._client._database_string,
+            "documents": [self._document_path],
+            "mask": mask,
+            "transaction": _helpers.get_transaction_id(transaction),
+        }
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+
+        return request, kwargs
+
     def get(
         self,
         field_paths: Iterable[str] = None,
