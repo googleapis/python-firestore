@@ -403,15 +403,20 @@ class DocumentReference(BaseDocumentReference):
             create_time = None
             update_time = None
         else:
-            # TODO: Does the `NotFound` exception not having been thrown
-            # above guarantee that this list has at least one element?
             batched_response: BatchGetDocumentsResponse = list(batch_response_pb)[0]
-            document: Document = batched_response.found
-            data = _helpers.decode_dict(document.fields, self._client)
-            exists = True
-            create_time = document.create_time
-            update_time = document.update_time
             read_time = batched_response.read_time
+            document: Document = batched_response.found
+            # TODO: Verify this check is correct.
+            if self.id not in batched_response.missing:
+                data = _helpers.decode_dict(document.fields, self._client)
+                exists = True
+                create_time = document.create_time
+                update_time = document.update_time
+            else:
+                data = None
+                exists = False
+                create_time = None
+                update_time = None
 
         return DocumentSnapshot(
             reference=self,
