@@ -389,17 +389,16 @@ class TestDocumentReference(unittest.TestCase):
         response.found.create_time = create_time
         response.found.update_time = update_time
 
-        if not_found:
-            # firestore_api.get_document.side_effect = NotFound("testing")
-            firestore_api.batch_get_documents.side_effect = NotFound("testing")
-        else:
-            # firestore_api.get_document.return_value = response
-            firestore_api.batch_get_documents.return_value = iter([response])
-
         client = _make_client("donut-base")
         client._firestore_api_internal = firestore_api
-
         document_reference = self._make_one("where", "we-are", client=client)
+
+        if not_found:
+            response.missing = document_reference._document_path
+        else:
+            response.missing = None
+
+        firestore_api.batch_get_documents.return_value = iter([response])
 
         if use_transaction:
             transaction = Transaction(client)
@@ -417,7 +416,7 @@ class TestDocumentReference(unittest.TestCase):
         if not_found:
             self.assertIsNone(snapshot._data)
             self.assertFalse(snapshot.exists)
-            self.assertIsNone(snapshot.read_time)
+            self.assertIsNotNone(snapshot.read_time)
             self.assertIsNone(snapshot.create_time)
             self.assertIsNone(snapshot.update_time)
         else:

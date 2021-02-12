@@ -28,7 +28,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import BatchGetDocumentsResponse, Document, write
 from google.cloud.firestore_v1.watch import Watch
 from google.protobuf.timestamp_pb2 import Timestamp
-from typing import Any, Callable, Generator, Iterable
+from typing import Any, Callable, Generator, Iterable, List
 
 
 class DocumentReference(BaseDocumentReference):
@@ -393,30 +393,24 @@ class DocumentReference(BaseDocumentReference):
 
         firestore_api = self._client._firestore_api
         read_time: Timestamp = None
-        try:
-            batch_response_pb: BatchGetDocumentsResponse = firestore_api.batch_get_documents(
-                request=request, metadata=self._client._rpc_metadata, **kwargs,
-            )
-        except exceptions.NotFound:
-            data = None
-            exists = False
-            create_time = None
-            update_time = None
-        else:
-            batched_response: BatchGetDocumentsResponse = list(batch_response_pb)[0]
-            read_time = batched_response.read_time
-            document: Document = batched_response.found
-            # TODO: Verify this check is correct.
-            if self.id not in batched_response.missing:
+        data = None
+        exists = False
+        create_time = None
+        update_time = None
+
+        response_stream = firestore_api.batch_get_documents(
+            request=request, metadata=self._client._rpc_metadata, **kwargs,
+        )
+        response: List[BatchGetDocumentsResponse] = list(response_stream)
+        if response:
+            batch_pb: BatchGetDocumentsResponse = response[0]
+            read_time = batch_pb.read_time
+            document: Document = batch_pb.found
+            if batch_pb.missing is None or self.id not in batch_pb.missing:
                 data = _helpers.decode_dict(document.fields, self._client)
                 exists = True
                 create_time = document.create_time
                 update_time = document.update_time
-            else:
-                data = None
-                exists = False
-                create_time = None
-                update_time = None
 
         return DocumentSnapshot(
             reference=self,
