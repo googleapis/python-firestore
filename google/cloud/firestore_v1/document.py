@@ -402,15 +402,15 @@ class DocumentReference(BaseDocumentReference):
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
         response: List[BatchGetDocumentsResponse] = list(response_stream)
-        if response:
-            batch_pb: BatchGetDocumentsResponse = response[0]
-            read_time = batch_pb.read_time
-            document: Document = batch_pb.found
-            if batch_pb.missing is None or self.id not in batch_pb.missing:
-                data = _helpers.decode_dict(document.fields, self._client)
-                exists = True
-                create_time = document.create_time
-                update_time = document.update_time
+
+        batch_pb: BatchGetDocumentsResponse = response[0]
+        read_time = batch_pb.read_time
+        document: Document = batch_pb.found
+        if batch_pb.missing is None or self.id not in batch_pb.missing:
+            data = _helpers.decode_dict(document.fields, self._client)
+            exists = True
+            create_time = document.create_time
+            update_time = document.update_time
 
         return DocumentSnapshot(
             reference=self,
@@ -450,7 +450,9 @@ class DocumentReference(BaseDocumentReference):
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
 
+        print("bout to iterate")
         for collection_id in iterator:
+            print(f"collection_id: {collection_id}")
             yield self.collection(collection_id)
 
     def on_snapshot(self, callback: Callable) -> Watch:
