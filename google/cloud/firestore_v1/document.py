@@ -23,7 +23,6 @@ from google.cloud.firestore_v1.base_document import (
     _first_write_result,
 )
 
-from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import BatchGetDocumentsResponse, Document, write
 from google.cloud.firestore_v1.watch import Watch

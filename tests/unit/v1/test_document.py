@@ -369,7 +369,6 @@ class TestDocumentReference(unittest.TestCase):
         retry=None,
         timeout=None,
     ):
-        from google.api_core.exceptions import NotFound
         from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1.types import document
