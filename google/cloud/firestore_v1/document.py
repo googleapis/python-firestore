@@ -399,11 +399,11 @@ class DocumentReference(BaseDocumentReference):
         response_stream = firestore_api.batch_get_documents(
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
-        response: List[BatchGetDocumentsResponse] = list(response_stream)
-        batch_pb: BatchGetDocumentsResponse = response[0]
-        document: Document = batch_pb.found
+        response_list: List[BatchGetDocumentsResponse] = list(response_stream)
+        batch: BatchGetDocumentsResponse = response_list[0]
+        document: Document = batch.found
 
-        if batch_pb.missing is None or self.id not in batch_pb.missing:
+        if batch.missing is None or self.id not in batch.missing:
             data = _helpers.decode_dict(document.fields, self._client)
             exists = True
             create_time = document.create_time
@@ -413,7 +413,7 @@ class DocumentReference(BaseDocumentReference):
             reference=self,
             data=data,
             exists=exists,
-            read_time=batch_pb.read_time,
+            read_time=batch.read_time,
             create_time=create_time,
             update_time=update_time,
         )
