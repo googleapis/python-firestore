@@ -106,6 +106,19 @@ s.replace(
 )
 
 s.replace(
+    ".gitignore",
+    """\
+pylintrc
+pylintrc.test
+""",
+    """\
+pylintrc
+pylintrc.test
+.make/**
+""",
+)
+
+s.replace(
     "setup.cfg",
     """\
 universal = 1
@@ -215,4 +228,23 @@ s.replace(
 export FIRESTORE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/firebase-credentials.json
 
 # Setup service account credentials.""",
+)
+
+
+# Add a section on updating conformance tests to contributing.
+s.replace(
+    "CONTRIBUTING.rst",
+    "\nTest Coverage",
+    """*************
+Updating Conformance Tests
+**************************
+
+The firestore client libraries use a shared set of conformance tests, the source of which can be found at https://github.com/googleapis/conformance-tests.
+
+To update the copy of these conformance tests used by this repository, run the provided Makefile:
+
+   $ make -f Makefile_v1
+
+*************
+Test Coverage"""
 )
