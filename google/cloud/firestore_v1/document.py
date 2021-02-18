@@ -391,7 +391,6 @@ class DocumentReference(BaseDocumentReference):
         request, kwargs = self._prep_batch_get(field_paths, transaction, retry, timeout)
 
         firestore_api = self._client._firestore_api
-        read_time: Timestamp = None
         data = None
         exists = False
         create_time = None
@@ -401,10 +400,9 @@ class DocumentReference(BaseDocumentReference):
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
         response: List[BatchGetDocumentsResponse] = list(response_stream)
-
         batch_pb: BatchGetDocumentsResponse = response[0]
-        read_time = batch_pb.read_time
         document: Document = batch_pb.found
+
         if batch_pb.missing is None or self.id not in batch_pb.missing:
             data = _helpers.decode_dict(document.fields, self._client)
             exists = True
@@ -415,7 +413,7 @@ class DocumentReference(BaseDocumentReference):
             reference=self,
             data=data,
             exists=exists,
-            read_time=read_time,
+            read_time=batch_pb.read_time,
             create_time=create_time,
             update_time=update_time,
         )
@@ -449,9 +447,7 @@ class DocumentReference(BaseDocumentReference):
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
 
-        print("bout to iterate")
         for collection_id in iterator:
-            print(f"collection_id: {collection_id}")
             yield self.collection(collection_id)
 
     def on_snapshot(self, callback: Callable) -> Watch:

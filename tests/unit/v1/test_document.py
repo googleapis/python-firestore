@@ -380,7 +380,6 @@ class TestDocumentReference(unittest.TestCase):
         update_time = 234
         read_time = 345
         firestore_api = mock.Mock(spec=["batch_get_documents"])
-        # response = mock.create_autospec(document.Document)
         response = mock.create_autospec(firestore.BatchGetDocumentsResponse)
         response.read_time = read_time
         response.found = mock.create_autospec(document.Document)
@@ -391,11 +390,11 @@ class TestDocumentReference(unittest.TestCase):
         client = _make_client("donut-base")
         client._firestore_api_internal = firestore_api
         document_reference = self._make_one("where", "we-are", client=client)
-
-        if not_found:
-            response.missing = document_reference._document_path
-        else:
-            response.missing = None
+        response.missing = (
+            document_reference._document_path
+            if not_found else
+            None
+        )
 
         firestore_api.batch_get_documents.return_value = iter([response])
 
@@ -421,7 +420,7 @@ class TestDocumentReference(unittest.TestCase):
         else:
             self.assertEqual(snapshot.to_dict(), {})
             self.assertTrue(snapshot.exists)
-            self.assertIsNotNone(snapshot.read_time)
+            self.assertIs(snapshot.read_time, read_time)
             self.assertIs(snapshot.create_time, create_time)
             self.assertIs(snapshot.update_time, update_time)
 

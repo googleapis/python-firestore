@@ -25,9 +25,9 @@ from google.cloud.firestore_v1.base_document import (
 
 from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.types import write
-from google.protobuf import timestamp_pb2
-from typing import Any, AsyncGenerator, Coroutine, Iterable, Union
+from google.cloud.firestore_v1.types import BatchGetDocumentsResponse, Document, write
+from google.protobuf.timestamp_pb2 import Timestamp
+from typing import Any, AsyncGenerator, Coroutine, Iterable, List, Union
 
 
 class AsyncDocumentReference(BaseDocumentReference):
@@ -289,7 +289,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         option: _helpers.WriteOption = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
-    ) -> timestamp_pb2.Timestamp:
+    ) -> Timestamp:
         """Delete the current document in the Firestore database.
 
         Args:
@@ -353,29 +353,32 @@ class AsyncDocumentReference(BaseDocumentReference):
                 :attr:`create_time` attributes will all be ``None`` and
                 its :attr:`exists` attribute will be ``False``.
         """
-        request, kwargs = self._prep_get(field_paths, transaction, retry, timeout)
+        request, kwargs = self._prep_batch_get(field_paths, transaction, retry, timeout)
 
         firestore_api = self._client._firestore_api
-        try:
-            document_pb = await firestore_api.get_document(
-                request=request, metadata=self._client._rpc_metadata, **kwargs,
-            )
-        except exceptions.NotFound:
-            data = None
-            exists = False
-            create_time = None
-            update_time = None
-        else:
-            data = _helpers.decode_dict(document_pb.fields, self._client)
+        data = None
+        exists = False
+        create_time = None
+        update_time = None
+
+        response_stream = await firestore_api.batch_get_documents(
+            request=request, metadata=self._client._rpc_metadata, **kwargs,
+        )
+        response: List[BatchGetDocumentsResponse] = list(response_stream)
+        batch_pb: BatchGetDocumentsResponse = response[0]
+        document: Document = batch_pb.found
+
+        if batch_pb.missing is None or self.id not in batch_pb.missing:
+            data = _helpers.decode_dict(document.fields, self._client)
             exists = True
-            create_time = document_pb.create_time
-            update_time = document_pb.update_time
+            create_time = document.create_time
+            update_time = document.update_time
 
         return DocumentSnapshot(
             reference=self,
             data=data,
             exists=exists,
-            read_time=None,  # No server read_time available
+            read_time=batch_pb.read_time,
             create_time=create_time,
             update_time=update_time,
         )
