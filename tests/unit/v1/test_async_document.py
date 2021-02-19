@@ -442,7 +442,7 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         if not_found or return_empty:
             self.assertIsNone(snapshot._data)
             self.assertFalse(snapshot.exists)
-            self.assertIs(snapshot.read_time, read_time)
+            self.assertIsNotNone(snapshot.read_time)
             self.assertIsNone(snapshot.create_time)
             self.assertIsNone(snapshot.update_time)
         else:
