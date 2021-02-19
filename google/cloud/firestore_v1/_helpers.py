@@ -1041,3 +1041,12 @@ def make_retry_timeout_kwargs(retry, timeout) -> dict:
         kwargs["timeout"] = timeout
 
     return kwargs
+
+
+class AsyncIter:
+    def __init__(self, items):
+        self.items = items
+
+    async def __aiter__(self):
+        for item in self.items:
+            yield item

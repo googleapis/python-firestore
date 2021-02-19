@@ -529,6 +529,8 @@ def _parse_batch_get(
         ValueError: If the response has a ``result`` field (a oneof) other
             than ``found`` or ``missing``.
     """
+    # print(f"get_doc_response._pb: {get_doc_response._pb}")
+    # import ipdb; ipdb.set_trace()
     result_type = get_doc_response._pb.WhichOneof("result")
     if result_type == "found":
         reference = _get_reference(get_doc_response.found.name, reference_map)

@@ -22,12 +22,10 @@ from google.cloud.firestore_v1.base_document import (
     DocumentSnapshot,
     _first_write_result,
 )
-
-from google.api_core import exceptions  # type: ignore
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.types import BatchGetDocumentsResponse, Document, write
+from google.cloud.firestore_v1.types import write
 from google.protobuf.timestamp_pb2 import Timestamp
-from typing import Any, AsyncGenerator, Coroutine, Iterable, List, Union
+from typing import Any, AsyncGenerator, Coroutine, Iterable, Union
 
 
 class AsyncDocumentReference(BaseDocumentReference):
@@ -353,35 +351,21 @@ class AsyncDocumentReference(BaseDocumentReference):
                 :attr:`create_time` attributes will all be ``None`` and
                 its :attr:`exists` attribute will be ``False``.
         """
+        from google.cloud.firestore_v1.base_client import _parse_batch_get
+
         request, kwargs = self._prep_batch_get(field_paths, transaction, retry, timeout)
 
-        firestore_api = self._client._firestore_api
-        data = None
-        exists = False
-        create_time = None
-        update_time = None
-
-        response_stream = await firestore_api.batch_get_documents(
+        response_iter = await self._client._firestore_api.batch_get_documents(
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
-        response: List[BatchGetDocumentsResponse] = list(response_stream)
-        batch_pb: BatchGetDocumentsResponse = response[0]
-        document: Document = batch_pb.found
 
-        if batch_pb.missing is None or self.id not in batch_pb.missing:
-            data = _helpers.decode_dict(document.fields, self._client)
-            exists = True
-            create_time = document.create_time
-            update_time = document.update_time
-
-        return DocumentSnapshot(
-            reference=self,
-            data=data,
-            exists=exists,
-            read_time=batch_pb.read_time,
-            create_time=create_time,
-            update_time=update_time,
-        )
+        async for resp in response_iter:
+            # Immediate return as the iterator should only ever have one item.
+            return _parse_batch_get(
+                get_doc_response=resp,
+                reference_map={self._document_path: self},
+                client=self._client,
+            )
 
     async def collections(
         self,

@@ -145,6 +145,7 @@ def test_get_testprotos(test_proto):
     firestore_api.batch_get_documents.return_value = iter([response])
     firestore_api._client._database_string = "projects/projectID/databases/(default)"
     client, doc = _make_client_document(firestore_api, testcase)
+    response.found.name = doc._document_path
 
     doc.get()  # No '.textprotos' for errors, field_paths.
 

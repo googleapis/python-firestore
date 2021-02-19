@@ -18,6 +18,7 @@ import aiounittest
 
 import mock
 from tests.unit.v1.test__helpers import AsyncMock
+from google.cloud.firestore_v1._helpers import AsyncIter
 
 
 class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
@@ -389,7 +390,6 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         retry=None,
         timeout=None,
     ):
-        from google.api_core.exceptions import NotFound
         from google.cloud.firestore_v1 import _helpers
         from google.cloud.firestore_v1.types import common
         from google.cloud.firestore_v1.types import document
@@ -411,13 +411,15 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         client = _make_client("donut-base")
         client._firestore_api_internal = firestore_api
         document_reference = self._make_one("where", "we-are", client=client)
-        response.missing = (
-            document_reference._document_path
-            if not_found else
-            None
-        )
+        response.found.name = None if not_found else document_reference._document_path
+        response.missing = document_reference._document_path if not_found else None
 
-        firestore_api.batch_get_documents.return_value = iter([response])
+        def WhichOneof(val):
+            return "missing" if not_found else "found"
+
+        response._pb = response
+        response._pb.WhichOneof = WhichOneof
+        firestore_api.batch_get_documents.return_value = AsyncIter([response])
 
         if use_transaction:
             transaction = Transaction(client)

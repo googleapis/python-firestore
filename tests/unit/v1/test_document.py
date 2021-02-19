@@ -390,12 +390,15 @@ class TestDocumentReference(unittest.TestCase):
         client = _make_client("donut-base")
         client._firestore_api_internal = firestore_api
         document_reference = self._make_one("where", "we-are", client=client)
-        response.missing = (
-            document_reference._document_path
-            if not_found else
-            None
-        )
 
+        response.found.name = None if not_found else document_reference._document_path
+        response.missing = document_reference._document_path if not_found else None
+
+        def WhichOneof(val):
+            return "missing" if not_found else "found"
+
+        response._pb = response
+        response._pb.WhichOneof = WhichOneof
         firestore_api.batch_get_documents.return_value = iter([response])
 
         if use_transaction:

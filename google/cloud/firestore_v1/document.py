@@ -22,12 +22,11 @@ from google.cloud.firestore_v1.base_document import (
     DocumentSnapshot,
     _first_write_result,
 )
-
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.types import BatchGetDocumentsResponse, Document, write
+from google.cloud.firestore_v1.types import write
 from google.cloud.firestore_v1.watch import Watch
 from google.protobuf.timestamp_pb2 import Timestamp
-from typing import Any, Callable, Generator, Iterable, List
+from typing import Any, Callable, Generator, Iterable
 
 
 class DocumentReference(BaseDocumentReference):
@@ -388,35 +387,21 @@ class DocumentReference(BaseDocumentReference):
                 :attr:`create_time` attributes will all be ``None`` and
                 its :attr:`exists` attribute will be ``False``.
         """
+        from google.cloud.firestore_v1.base_client import _parse_batch_get
+
         request, kwargs = self._prep_batch_get(field_paths, transaction, retry, timeout)
 
-        firestore_api = self._client._firestore_api
-        data = None
-        exists = False
-        create_time = None
-        update_time = None
-
-        response_stream = firestore_api.batch_get_documents(
+        response_iter = self._client._firestore_api.batch_get_documents(
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
-        response_list: List[BatchGetDocumentsResponse] = list(response_stream)
-        batch: BatchGetDocumentsResponse = response_list[0]
-        document: Document = batch.found
 
-        if batch.missing is None or self.id not in batch.missing:
-            data = _helpers.decode_dict(document.fields, self._client)
-            exists = True
-            create_time = document.create_time
-            update_time = document.update_time
-
-        return DocumentSnapshot(
-            reference=self,
-            data=data,
-            exists=exists,
-            read_time=batch.read_time,
-            create_time=create_time,
-            update_time=update_time,
-        )
+        for resp in response_iter:
+            # Immediate return as the iterator should only ever have one item.
+            return _parse_batch_get(
+                get_doc_response=resp,
+                reference_map={self._document_path: self},
+                client=self._client,
+            )
 
     def collections(
         self,
