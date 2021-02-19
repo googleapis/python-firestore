@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import aiounittest
 import datetime
 import sys
 import unittest
 
 import mock
+import pytest
 from typing import List
 
 
@@ -2416,7 +2418,9 @@ class Test_make_retry_timeout_kwargs(unittest.TestCase):
         self.assertEqual(kwargs, expected)
 
 
-class TestAsyncGenerator(unittest.TestCase):
+class TestAsyncGenerator(aiounittest.AsyncTestCase):
+
+    @pytest.mark.asyncio
     async def test_async_iter(self):
         from google.cloud.firestore_v1._helpers import AsyncIter
 

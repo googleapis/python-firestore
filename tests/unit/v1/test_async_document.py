@@ -483,6 +483,10 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         await self._get_helper()
 
     @pytest.mark.asyncio
+    async def test_get_return_empty(self):
+        await self._get_helper(return_empty=True)
+
+    @pytest.mark.asyncio
     async def test_get_w_retry_timeout(self):
         from google.api_core.retry import Retry
 
