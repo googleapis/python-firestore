@@ -268,31 +268,6 @@ class BaseDocumentReference(object):
     ) -> NoReturn:
         raise NotImplementedError
 
-    def _prep_get(
-        self,
-        field_paths: Iterable[str] = None,
-        transaction=None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[dict, dict]:
-        """Shared setup for async/sync :meth:`get`."""
-        if isinstance(field_paths, str):
-            raise ValueError("'field_paths' must be a sequence of paths, not a string.")
-
-        if field_paths is not None:
-            mask = common.DocumentMask(field_paths=sorted(field_paths))
-        else:
-            mask = None
-
-        request = {
-            "name": self._document_path,
-            "mask": mask,
-            "transaction": _helpers.get_transaction_id(transaction),
-        }
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
-
-        return request, kwargs
-
     def _prep_batch_get(
         self,
         field_paths: Iterable[str] = None,

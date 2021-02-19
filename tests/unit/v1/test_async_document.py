@@ -387,6 +387,9 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         field_paths=None,
         use_transaction=False,
         not_found=False,
+        # This should be an impossible case, but we test against it for
+        # completeness
+        return_empty=False,
         retry=None,
         timeout=None,
     ):
@@ -419,7 +422,9 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
 
         response._pb = response
         response._pb.WhichOneof = WhichOneof
-        firestore_api.batch_get_documents.return_value = AsyncIter([response])
+        firestore_api.batch_get_documents.return_value = AsyncIter(
+            [response] if not return_empty else []
+        )
 
         if use_transaction:
             transaction = Transaction(client)
@@ -434,7 +439,7 @@ class TestAsyncDocumentReference(aiounittest.AsyncTestCase):
         )
 
         self.assertIs(snapshot.reference, document_reference)
-        if not_found:
+        if not_found or return_empty:
             self.assertIsNone(snapshot._data)
             self.assertFalse(snapshot.exists)
             self.assertIs(snapshot.read_time, read_time)

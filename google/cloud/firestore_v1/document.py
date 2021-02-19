@@ -13,9 +13,12 @@
 # limitations under the License.
 
 """Classes for representing documents for the Google Cloud Firestore API."""
+import datetime
+import logging
 
 from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
+from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
 
 from google.cloud.firestore_v1.base_document import (
     BaseDocumentReference,
@@ -27,6 +30,9 @@ from google.cloud.firestore_v1.types import write
 from google.cloud.firestore_v1.watch import Watch
 from google.protobuf.timestamp_pb2 import Timestamp
 from typing import Any, Callable, Generator, Iterable
+
+
+logger = logging.getLogger(__name__)
 
 
 class DocumentReference(BaseDocumentReference):
@@ -395,13 +401,28 @@ class DocumentReference(BaseDocumentReference):
             request=request, metadata=self._client._rpc_metadata, **kwargs,
         )
 
-        for resp in response_iter:
-            # Immediate return as the iterator should only ever have one item.
+        get_doc_response = next(response_iter, None)
+
+        if get_doc_response is not None:
             return _parse_batch_get(
-                get_doc_response=resp,
+                get_doc_response=get_doc_response,
                 reference_map={self._document_path: self},
                 client=self._client,
             )
+
+        logger.warning(
+            "`batch_get_documents` unexpectedly returned empty "
+            "stream. Expected one object.",
+        )
+
+        return DocumentSnapshot(
+            self,
+            None,
+            exists=False,
+            read_time=_datetime_to_pb_timestamp(datetime.datetime.now()),
+            create_time=None,
+            update_time=None,
+        )
 
     def collections(
         self,

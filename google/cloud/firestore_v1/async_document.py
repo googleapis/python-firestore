@@ -13,9 +13,12 @@
 # limitations under the License.
 
 """Classes for representing documents for the Google Cloud Firestore API."""
+import datetime
+import logging
 
 from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
+from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
 
 from google.cloud.firestore_v1.base_document import (
     BaseDocumentReference,
@@ -26,6 +29,9 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import write
 from google.protobuf.timestamp_pb2 import Timestamp
 from typing import Any, AsyncGenerator, Coroutine, Iterable, Union
+
+
+logger = logging.getLogger(__name__)
 
 
 class AsyncDocumentReference(BaseDocumentReference):
@@ -366,6 +372,20 @@ class AsyncDocumentReference(BaseDocumentReference):
                 reference_map={self._document_path: self},
                 client=self._client,
             )
+
+        logger.warning(
+            "`batch_get_documents` unexpectedly returned empty "
+            "stream. Expected one object.",
+        )
+
+        return DocumentSnapshot(
+            self,
+            None,
+            exists=False,
+            read_time=_datetime_to_pb_timestamp(datetime.datetime.now()),
+            create_time=None,
+            update_time=None,
+        )
 
     async def collections(
         self,

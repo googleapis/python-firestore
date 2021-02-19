@@ -17,7 +17,8 @@ import types
 import aiounittest
 
 import mock
-from tests.unit.v1.test__helpers import AsyncMock, AsyncIter
+from google.cloud.firestore_v1._helpers import AsyncIter
+from tests.unit.v1.test__helpers import AsyncMock
 from tests.unit.v1.test_base_query import (
     _make_credentials,
     _make_query_response,

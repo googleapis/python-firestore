@@ -366,6 +366,9 @@ class TestDocumentReference(unittest.TestCase):
         field_paths=None,
         use_transaction=False,
         not_found=False,
+        # This should be an impossible case, but we test against it for
+        # completeness
+        return_empty=False,
         retry=None,
         timeout=None,
     ):
@@ -399,7 +402,9 @@ class TestDocumentReference(unittest.TestCase):
 
         response._pb = response
         response._pb.WhichOneof = WhichOneof
-        firestore_api.batch_get_documents.return_value = iter([response])
+        firestore_api.batch_get_documents.return_value = iter(
+            [response] if not return_empty else []
+        )
 
         if use_transaction:
             transaction = Transaction(client)
@@ -414,7 +419,7 @@ class TestDocumentReference(unittest.TestCase):
         )
 
         self.assertIs(snapshot.reference, document_reference)
-        if not_found:
+        if not_found or return_empty:
             self.assertIsNone(snapshot._data)
             self.assertFalse(snapshot.exists)
             self.assertIsNotNone(snapshot.read_time)
@@ -454,6 +459,9 @@ class TestDocumentReference(unittest.TestCase):
 
     def test_get_default(self):
         self._get_helper()
+
+    def test_get_return_empty(self):
+        self._get_helper(return_empty=True)
 
     def test_get_w_retry_timeout(self):
         from google.api_core.retry import Retry

@@ -18,20 +18,12 @@ import sys
 import unittest
 
 import mock
+from typing import List
 
 
 class AsyncMock(mock.MagicMock):
     async def __call__(self, *args, **kwargs):
         return super(AsyncMock, self).__call__(*args, **kwargs)
-
-
-class AsyncIter:
-    def __init__(self, items):
-        self.items = items
-
-    async def __aiter__(self, **_):
-        for i in self.items:
-            yield i
 
 
 class TestGeoPoint(unittest.TestCase):
@@ -2422,6 +2414,16 @@ class Test_make_retry_timeout_kwargs(unittest.TestCase):
         kwargs = self._call_fut(retry, timeout)
         expected = {"retry": retry, "timeout": timeout}
         self.assertEqual(kwargs, expected)
+
+
+class TestAsyncGenerator(unittest.TestCase):
+    async def test_async_iter(self):
+        from google.cloud.firestore_v1._helpers import AsyncIter
+
+        consumed: List[int] = []
+        async for el in AsyncIter([1, 2, 3]):
+            consumed.append(el)
+        self.assertEqual(consumed, [1, 2, 3])
 
 
 def _value_pb(**kwargs):
