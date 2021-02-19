@@ -2419,7 +2419,6 @@ class Test_make_retry_timeout_kwargs(unittest.TestCase):
 
 
 class TestAsyncGenerator(aiounittest.AsyncTestCase):
-
     @pytest.mark.asyncio
     async def test_async_iter(self):
         from google.cloud.firestore_v1._helpers import AsyncIter
