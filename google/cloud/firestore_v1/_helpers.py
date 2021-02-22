@@ -1041,16 +1041,3 @@ def make_retry_timeout_kwargs(retry, timeout) -> dict:
         kwargs["timeout"] = timeout
 
     return kwargs
-
-
-class AsyncIter:
-    """Utility to help recreate the effect of an async generator. Useful when
-    you need to mock a system that requires `async for`.
-    """
-
-    def __init__(self, items):
-        self.items = items
-
-    async def __aiter__(self):
-        for item in self.items:
-            yield item

@@ -17,8 +17,7 @@ import types
 import aiounittest
 
 import mock
-from tests.unit.v1.test__helpers import AsyncMock
-from google.cloud.firestore_v1._helpers import AsyncIter
+from tests.unit.v1.test__helpers import AsyncIter, AsyncMock
 
 
 class TestAsyncCollectionReference(aiounittest.AsyncTestCase):

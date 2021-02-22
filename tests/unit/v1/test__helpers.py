@@ -28,6 +28,19 @@ class AsyncMock(mock.MagicMock):
         return super(AsyncMock, self).__call__(*args, **kwargs)
 
 
+class AsyncIter:
+    """Utility to help recreate the effect of an async generator. Useful when
+    you need to mock a system that requires `async for`.
+    """
+
+    def __init__(self, items):
+        self.items = items
+
+    async def __aiter__(self):
+        for i in self.items:
+            yield i
+
+
 class TestGeoPoint(unittest.TestCase):
     @staticmethod
     def _get_target_class():
@@ -2421,8 +2434,6 @@ class Test_make_retry_timeout_kwargs(unittest.TestCase):
 class TestAsyncGenerator(aiounittest.AsyncTestCase):
     @pytest.mark.asyncio
     async def test_async_iter(self):
-        from google.cloud.firestore_v1._helpers import AsyncIter
-
         consumed: List[int] = []
         async for el in AsyncIter([1, 2, 3]):
             consumed.append(el)
