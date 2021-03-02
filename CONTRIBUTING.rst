@@ -70,8 +70,13 @@ We use `nox <https://nox.readthedocs.io/en/latest/>`__ to instrument our tests.
 - To test your changes, run unit tests with ``nox``::
 
     $ nox -s unit-2.7
-    $ nox -s unit-3.7
+    $ nox -s unit-3.8
     $ ...
+
+- Args to pytest can be passed through the nox command separated by a `--`. For
+  example, to run a single test::
+
+    $ nox -s unit-3.8 -- -k <name of test>
 
   .. note::
 
@@ -93,8 +98,12 @@ On Debian/Ubuntu::
 ************
 Coding Style
 ************
+- We use the automatic code formatter ``black``. You can run it using
+  the nox session ``blacken``. This will eliminate many lint errors. Run via::
 
-- PEP8 compliance, with exceptions defined in the linter configuration.
+   $ nox -s blacken
+
+- PEP8 compliance is required, with exceptions defined in the linter configuration.
   If you have ``nox`` installed, you can test that you have not introduced
   any non-compliant code via::
 
@@ -133,13 +142,18 @@ Running System Tests
 
 - To run system tests, you can execute::
 
-   $ nox -s system-3.7
+   # Run all system tests
+   $ nox -s system-3.8
    $ nox -s system-2.7
+
+   # Run a single system test
+   $ nox -s system-3.8 -- -k <name of test>
+
 
   .. note::
 
       System tests are only configured to run under Python 2.7 and
-      Python 3.7. For expediency, we do not run them in older versions
+      Python 3.8. For expediency, we do not run them in older versions
       of Python 3.
 
   This alone will not run the tests. You'll need to change some local
@@ -163,14 +177,14 @@ Running System Tests
 
 
 **************************
-Updating Conformance Tests	
-**************************	
+Updating Conformance Tests
+**************************
 
-The firestore client libraries use a shared set of conformance tests, the source of which can be found at https://github.com/googleapis/conformance-tests.	
+The firestore client libraries use a shared set of conformance tests, the source of which can be found at https://github.com/googleapis/conformance-tests.
 
-To update the copy of these conformance tests used by this repository, run the provided Makefile:	
+To update the copy of these conformance tests used by this repository, run the provided Makefile:
 
-   $ make -f Makefile_v1	
+   $ make -f Makefile_v1
 
 *************
 Test Coverage
