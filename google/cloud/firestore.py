@@ -47,6 +47,7 @@ from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1 import Watch
 from google.cloud.firestore_v1 import WriteBatch
 from google.cloud.firestore_v1 import WriteOption
+from google.cloud.firestore_bundle.bundle import FirestoreBundle
 from typing import List
 
 
@@ -69,6 +70,7 @@ __all__: List[str] = [
     "DocumentSnapshot",
     "DocumentTransform",
     "ExistsOption",
+    "FirestoreBundle",
     "GeoPoint",
     "Increment",
     "LastUpdateOption",
