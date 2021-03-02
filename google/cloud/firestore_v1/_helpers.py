@@ -32,6 +32,7 @@ from google.cloud.firestore_v1.field_path import parse_field_path
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import write
+from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 from typing import Any, Generator, List, NoReturn, Optional, Tuple, Union
 
 _EmptyDict: transforms.Sentinel
@@ -1041,3 +1042,16 @@ def make_retry_timeout_kwargs(retry, timeout) -> dict:
         kwargs["timeout"] = timeout
 
     return kwargs
+
+
+def build_timestamp(dt: Optional[datetime.datetime] = None) -> Timestamp:
+    """Returns the supplied datetime (or "now") as a Timestamp"""
+    return _datetime_to_pb_timestamp(dt or datetime.datetime.utcnow())
+
+
+def compare_timestamps(ts1: Timestamp, ts2: Timestamp) -> int:
+    dt1 = ts1.ToDatetime()
+    dt2 = ts2.ToDatetime()
+    if dt1 == dt2:
+        return 0
+    return 1 if dt1 > dt2 else -1

@@ -33,7 +33,7 @@ from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.types import Cursor
 from google.cloud.firestore_v1.types import RunQueryResponse
 from google.cloud.firestore_v1.order import Order
-from typing import Any, Dict, Iterable, NoReturn, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterable, NoReturn, Optional, Tuple, Union
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -394,6 +394,18 @@ class BaseQuery(object):
             start_at=self._start_at,
             end_at=self._end_at,
             all_descendants=self._all_descendants,
+        )
+
+    @property
+    def limit_type(self) -> int:
+        """BundledQuery.LimitType equivalent of this query.
+        """
+        from google.cloud.firestore_bundle.types import BundledQuery
+
+        return (
+            BundledQuery.LimitType.LAST
+            if self._limit_to_last
+            else BundledQuery.LimitType.FIRST
         )
 
     def limit_to_last(self, count: int) -> "BaseQuery":
@@ -804,12 +816,11 @@ class BaseQuery(object):
             query_kwargs["offset"] = self._offset
         if self._limit is not None:
             query_kwargs["limit"] = wrappers_pb2.Int32Value(value=self._limit)
-
         return query.StructuredQuery(**query_kwargs)
 
     def get(
         self, transaction=None, retry: retries.Retry = None, timeout: float = None,
-    ) -> NoReturn:
+    ) -> Iterable[DocumentSnapshot]:
         raise NotImplementedError
 
     def _prep_stream(
@@ -834,7 +845,7 @@ class BaseQuery(object):
 
     def stream(
         self, transaction=None, retry: retries.Retry = None, timeout: float = None,
-    ) -> NoReturn:
+    ) -> Generator[document.DocumentSnapshot, Any, None]:
         raise NotImplementedError
 
     def on_snapshot(self, callback) -> NoReturn:
