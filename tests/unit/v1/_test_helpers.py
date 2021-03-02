@@ -25,7 +25,7 @@ from google.cloud.firestore_v1.client import Client
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 
 
-def make_test_credentials() -> 'Credentials':  # type: ignore
+def make_test_credentials() -> "Credentials":  # type: ignore
     import google.auth.credentials  # type: ignore
 
     return mock.Mock(spec=google.auth.credentials.Credentials)
@@ -59,10 +59,11 @@ def build_test_timestamp(
         ),
     )
 
+
 def build_document_snapshot(
     *,
-    collection_name: str = 'col',
-    document_id: str = 'doc',
+    collection_name: str = "col",
+    document_id: str = "doc",
     client: typing.Optional[BaseClient] = None,
     data: typing.Optional[typing.Dict] = None,
     exists: bool = True,
@@ -72,7 +73,7 @@ def build_document_snapshot(
 ) -> DocumentSnapshot:
     return DocumentSnapshot(
         DocumentReference(collection_name, document_id, client=client),
-        data or {'hello', 'world'},
+        data or {"hello", "world"},
         exists=exists,
         read_time=read_time or build_timestamp(),
         create_time=create_time or build_timestamp(),

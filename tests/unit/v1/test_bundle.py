@@ -19,7 +19,9 @@ from google.cloud.firestore_bundle.bundle import FirestoreBundle
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.collection import CollectionReference
-from google.cloud.firestore_v1.services.firestore.async_client import FirestoreAsyncClient
+from google.cloud.firestore_v1.services.firestore.async_client import (
+    FirestoreAsyncClient,
+)
 from google.cloud.firestore_v1.services.firestore.client import FirestoreClient
 from google.cloud.firestore_v1.types.document import Document
 from google.cloud.firestore_v1.types.firestore import RunQueryResponse
@@ -31,7 +33,7 @@ class _CollectionQueryMixin:
 
     # Path to each document where we don't specify custom collection names or
     # document Ids
-    doc_key: str = 'projects/project-project/databases/(default)/documents/col/doc'
+    doc_key: str = "projects/project-project/databases/(default)/documents/col/doc"
 
     @staticmethod
     def build_results_iterable(items):
@@ -61,10 +63,11 @@ class _CollectionQueryMixin:
         document_ids = ["doc-1", "doc-2"]
         documents = [
             RunQueryResponse(
-                transaction=b'',
+                transaction=b"",
                 document=Document(name=template.format(document_id)),
                 read_time=_test_helpers.build_timestamp(),
-            ) for document_id in document_ids
+            )
+            for document_id in document_ids
         ]
         iterator = self.build_results_iterable(documents)
         api_client = self.get_internal_client_mock()
@@ -77,7 +80,6 @@ class _CollectionQueryMixin:
 
 
 class TestBundle(_CollectionQueryMixin, unittest.TestCase):
-
     @staticmethod
     def build_results_iterable(items):
         return iter(items)
@@ -95,67 +97,75 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
         return CollectionReference
 
     def test_add_document(self):
-        bundle = FirestoreBundle('test')
+        bundle = FirestoreBundle("test")
         doc = _test_helpers.build_document_snapshot(client=_test_helpers.make_client())
         bundle.add_document(doc)
         self.assertEqual(bundle.documents[self.doc_key].snapshot, doc)
 
     def test_add_document_with_name(self):
-        bundle = FirestoreBundle('test')
+        bundle = FirestoreBundle("test")
         doc = _test_helpers.build_document_snapshot(client=_test_helpers.make_client())
-        bundle.add_document(doc, query_name='awesome name')
+        bundle.add_document(doc, query_name="awesome name")
         bundled_doc = bundle.documents.get(self.doc_key)
         self.assertEqual(bundled_doc.snapshot, doc)
-        self.assertEqual(bundled_doc.metadata.queries, ['awesome name'])
+        self.assertEqual(bundled_doc.metadata.queries, ["awesome name"])
 
         # Now add it again with a second name
-        bundle.add_document(doc, query_name='less good name, but still okay')
+        bundle.add_document(doc, query_name="less good name, but still okay")
         bundled_doc = bundle.documents.get(self.doc_key)
         self.assertEqual(bundled_doc.snapshot, doc)
-        self.assertEqual(bundled_doc.metadata.queries, ['awesome name', 'less good name, but still okay'])
+        self.assertEqual(
+            bundled_doc.metadata.queries,
+            ["awesome name", "less good name, but still okay"],
+        )
 
     def test_add_document_with_different_read_times(self):
-        bundle = FirestoreBundle('test')
+        bundle = FirestoreBundle("test")
         doc = _test_helpers.build_document_snapshot(
             client=_test_helpers.make_client(),
-            data={'version': 1},
-            read_time=_test_helpers.build_test_timestamp(second=1)
+            data={"version": 1},
+            read_time=_test_helpers.build_test_timestamp(second=1),
         )
         # Create another reference to the same document, but with new
         # data and a more recent `read_time`
         doc_refreshed = _test_helpers.build_document_snapshot(
             client=_test_helpers.make_client(),
-            data={'version': 2},
-            read_time=_test_helpers.build_test_timestamp(second=2)
+            data={"version": 2},
+            read_time=_test_helpers.build_test_timestamp(second=2),
         )
 
         bundle.add_document(doc)
         self.assertEqual(
-            bundle.documents[self.doc_key].snapshot._data,
-            {'version': 1},
+            bundle.documents[self.doc_key].snapshot._data, {"version": 1},
         )
         bundle.add_document(doc_refreshed)
         self.assertEqual(
-            bundle.documents[self.doc_key].snapshot._data,
-            {'version': 2},
+            bundle.documents[self.doc_key].snapshot._data, {"version": 2},
         )
 
     def test_add_query(self):
         query = self._bundled_query_helper()
-        bundle = FirestoreBundle('test')
-        bundle.add_named_query('asdf', query)
-        self.assertIsNotNone(bundle.named_queries.get('asdf'))
-        self.assertIsNotNone(bundle.documents['projects/project-project/databases/(default)/documents/col/doc-1'])
-        self.assertIsNotNone(bundle.documents['projects/project-project/databases/(default)/documents/col/doc-2'])
+        bundle = FirestoreBundle("test")
+        bundle.add_named_query("asdf", query)
+        self.assertIsNotNone(bundle.named_queries.get("asdf"))
+        self.assertIsNotNone(
+            bundle.documents[
+                "projects/project-project/databases/(default)/documents/col/doc-1"
+            ]
+        )
+        self.assertIsNotNone(
+            bundle.documents[
+                "projects/project-project/databases/(default)/documents/col/doc-2"
+            ]
+        )
 
     def test_adding_collection_raises_error(self):
         col = self._bundled_collection_helper()
-        bundle = FirestoreBundle('test')
-        self.assertRaises(ValueError, bundle.add_named_query, 'asdf', col)
+        bundle = FirestoreBundle("test")
+        self.assertRaises(ValueError, bundle.add_named_query, "asdf", col)
 
 
 class TestAsyncBundle(_CollectionQueryMixin, unittest.TestCase):
-
     @staticmethod
     def get_client():
         return _test_helpers.make_async_client()
@@ -177,8 +187,16 @@ class TestAsyncBundle(_CollectionQueryMixin, unittest.TestCase):
         # marked as async by pytest because `bundle.add_named_query()`
         # seemlessly handles accepting async iterables.
         async_query = self._bundled_query_helper()
-        bundle = FirestoreBundle('test')
-        bundle.add_named_query('asdf', async_query)
-        self.assertIsNotNone(bundle.named_queries.get('asdf'))
-        self.assertIsNotNone(bundle.documents['projects/project-project/databases/(default)/documents/col/doc-1'])
-        self.assertIsNotNone(bundle.documents['projects/project-project/databases/(default)/documents/col/doc-2'])
+        bundle = FirestoreBundle("test")
+        bundle.add_named_query("asdf", async_query)
+        self.assertIsNotNone(bundle.named_queries.get("asdf"))
+        self.assertIsNotNone(
+            bundle.documents[
+                "projects/project-project/databases/(default)/documents/col/doc-1"
+            ]
+        )
+        self.assertIsNotNone(
+            bundle.documents[
+                "projects/project-project/databases/(default)/documents/col/doc-2"
+            ]
+        )

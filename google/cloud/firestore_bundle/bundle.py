@@ -65,9 +65,7 @@ class FirestoreBundle:
         return self
 
     def add_document(
-        self,
-        snapshot: DocumentSnapshot,
-        query_name: Optional[str] = None,
+        self, snapshot: DocumentSnapshot, query_name: Optional[str] = None,
     ) -> None:
         original_document: Optional[_BundledDocument]
         original_queries: Optional[List[str]] = []
@@ -82,9 +80,9 @@ class FirestoreBundle:
             # equivalent to:
             #   `if snapshot.read_time > original_document.snapshot.read_time`
             or _helpers.compare_timestamps(
-                snapshot.read_time,
-                original_document.snapshot.read_time,
-            ) >= 0
+                snapshot.read_time, original_document.snapshot.read_time,
+            )
+            >= 0
         )
 
         if should_use_snaphot:
@@ -104,11 +102,7 @@ class FirestoreBundle:
 
         self._update_last_read_time(snapshot.read_time)
 
-    def add_named_query(
-        self,
-        name: str,
-        snapshot: BaseQuery,
-    ) -> None:
+    def add_named_query(self, name: str, snapshot: BaseQuery,) -> None:
         if not isinstance(snapshot, BaseQuery):
             raise ValueError(
                 "Attempted to add named query of type: "
@@ -121,6 +115,7 @@ class FirestoreBundle:
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
         if isinstance(snapshot, AsyncQuery):
             import asyncio
+
             loop = asyncio.get_event_loop()
             loop.run_until_complete(self._process_async_query(name, snapshot))
 
@@ -146,10 +141,7 @@ class FirestoreBundle:
         return _read_time
 
     def _build_named_query(
-        self,
-        name: str,
-        snapshot: BaseQuery,
-        read_time: Timestamp,
+        self, name: str, snapshot: BaseQuery, read_time: Timestamp,
     ) -> NamedQuery:
         return NamedQuery(
             name=name,
@@ -162,11 +154,13 @@ class FirestoreBundle:
             read_time=read_time,
         )
 
-    def _update_last_read_time(self, read_time: Union[datetime.datetime, Timestamp]) -> None:
+    def _update_last_read_time(
+        self, read_time: Union[datetime.datetime, Timestamp]
+    ) -> None:
         _ts: Timestamp = (
             read_time
-            if isinstance(read_time, Timestamp) else
-            _datetime_to_pb_timestamp(read_time)
+            if isinstance(read_time, Timestamp)
+            else _datetime_to_pb_timestamp(read_time)
         )
 
         # if `_ts` is greater than `self.latest_read_time`
@@ -174,7 +168,7 @@ class FirestoreBundle:
             self.latest_read_time = _ts
 
     def build(self) -> str:
-        buffer: str = ''
+        buffer: str = ""
         # TODO: build the thing
         return buffer
 
@@ -184,9 +178,7 @@ class _BundledDocument:
     of a document to be bundled."""
 
     def __init__(
-        self,
-        snapshot: DocumentSnapshot,
-        metadata: BundledDocumentMetadata,
+        self, snapshot: DocumentSnapshot, metadata: BundledDocumentMetadata,
     ) -> None:
         self.snapshot = snapshot
         self.metadata = metadata
