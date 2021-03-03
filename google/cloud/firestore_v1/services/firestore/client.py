@@ -819,9 +819,8 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
             if database is not None:
                 request.database = database
-
-            if writes:
-                request.writes.extend(writes)
+            if writes is not None:
+                request.writes = writes
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
