@@ -94,7 +94,7 @@ class FirestoreBundle:
             self.documents[_id] = _BundledDocument(
                 snapshot=snapshot,
                 metadata=BundledDocumentMetadata(
-                    name=snapshot.id,
+                    name=f'{snapshot._client._database_string}/{snapshot.reference.path}',
                     read_time=snapshot.read_time,
                     exists=snapshot.exists,
                     queries=original_queries,
