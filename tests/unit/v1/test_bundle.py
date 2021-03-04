@@ -164,6 +164,11 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
         bundle = FirestoreBundle("test")
         self.assertRaises(ValueError, bundle.add_named_query, "asdf", col)
 
+    def test_building_bundle(self):
+        bundle = FirestoreBundle("test")
+        bundle.add_named_query('best name', self._bundled_query_helper())
+        self.assertIsInstance(bundle.build(), str)
+
 
 class TestAsyncBundle(_CollectionQueryMixin, unittest.TestCase):
     @staticmethod

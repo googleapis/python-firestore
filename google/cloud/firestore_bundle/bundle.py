@@ -19,6 +19,8 @@ from google.cloud.firestore_v1.types.query import StructuredQuery
 from google.cloud.firestore_bundle.types.bundle import (
     BundledDocumentMetadata,
     BundledQuery,
+    BundleElement,
+    BundleMetadata,
     NamedQuery,
 )
 from google.cloud._helpers import _datetime_to_pb_timestamp, UTC  # type: ignore
@@ -40,6 +42,9 @@ from typing import (
 
 
 class FirestoreBundle:
+
+    BUNDLE_SCHEMA_VERSION: int = 1
+
     def __init__(self, name: str) -> None:
         self.name: str = name
         self.documents: Dict[str, "_BundledDocument"] = {}
@@ -168,9 +173,47 @@ class FirestoreBundle:
             self.latest_read_time = _ts
 
     def build(self) -> str:
-        buffer: str = ""
-        # TODO: build the thing
-        return buffer
+        buffer: str = ''
+
+        named_query: NamedQuery
+        for named_query in self.named_queries.values():
+            buffer += self._compile_bundle_element(
+                BundleElement(
+                    named_query=named_query,
+                )
+            )
+
+        bundled_document: '_BundledDocument'  # type: ignore
+        document_count: int = 0
+        for bundled_document in self.documents.values():
+            buffer += self._compile_bundle_element(
+                BundleElement(
+                    document_metadata=bundled_document.metadata,
+                )
+            )
+            if bundled_document.snapshot is not None:
+                document_count += 1
+                buffer += self._compile_bundle_element(
+                    BundleElement(
+                        document=bundled_document.snapshot._to_protobuf()._pb,
+                    )
+                )
+
+        metadata: BundleElement = BundleElement(
+            metadata=BundleMetadata(
+                id=self.name,
+                create_time=_helpers.build_timestamp(),
+                version=FirestoreBundle.BUNDLE_SCHEMA_VERSION,
+                total_documents=document_count,
+                total_bytes=len(buffer.encode('utf-8')),
+            )
+        )
+        return f'{self._compile_bundle_element(metadata)}{buffer}'
+
+    def _compile_bundle_element(self, bundle_element: BundleElement) -> str:
+        serialized_be: str = BundleElement.to_json(bundle_element)
+        # TODO: Does this `len()` call need to be against `encode('utf-8')`?
+        return f'{len(serialized_be)}{serialized_be}'
 
 
 class _BundledDocument:

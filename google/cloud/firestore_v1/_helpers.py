@@ -220,6 +220,21 @@ def encode_dict(values_dict) -> dict:
     return {key: encode_value(value) for key, value in values_dict.items()}
 
 
+def document_snapshot_to_protobuf(snapshot: 'DocumentSnapshot') -> Optional['Document']:  # type: ignore
+    from google.cloud.firestore_v1.types import Document
+
+    if not snapshot.exists:
+        return None
+
+    return Document(
+        name=f'{snapshot._client._database_string}/{snapshot.reference.path}',
+        fields=encode_dict(snapshot._data),
+        create_time=snapshot.create_time,
+        update_time=snapshot.update_time,
+    )
+
+
+
 def reference_value_to_document(reference_value, client) -> Any:
     """Convert a reference value string to a document.
 
@@ -1044,9 +1059,9 @@ def make_retry_timeout_kwargs(retry, timeout) -> dict:
     return kwargs
 
 
-def build_timestamp(dt: Optional[datetime.datetime] = None) -> Timestamp:
+def build_timestamp(dt: Optional[Union[DatetimeWithNanoseconds, datetime.datetime]] = None) -> Timestamp:
     """Returns the supplied datetime (or "now") as a Timestamp"""
-    return _datetime_to_pb_timestamp(dt or datetime.datetime.utcnow())
+    return _datetime_to_pb_timestamp(dt or DatetimeWithNanoseconds.utcnow())
 
 
 def compare_timestamps(ts1: Timestamp, ts2: Timestamp) -> int:
@@ -1055,3 +1070,4 @@ def compare_timestamps(ts1: Timestamp, ts2: Timestamp) -> int:
     if dt1 == dt2:
         return 0
     return 1 if dt1 > dt2 else -1
+
