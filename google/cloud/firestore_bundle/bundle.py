@@ -13,8 +13,8 @@
 # limitations under the License.
 
 """Classes for representing bundles for the Google Cloud Firestore API."""
+
 import datetime
-from google.cloud.firestore_v1.types.query import StructuredQuery
 
 from google.cloud.firestore_bundle.types.bundle import (
     BundledDocumentMetadata,
@@ -42,6 +42,17 @@ from typing import (
 
 
 class FirestoreBundle:
+    """A group of serialized documents and queries, suitable for
+    longterm storage.
+
+    If any queries are added to this bundle, all associated documents will be
+    loaded and stored in memory for serialization. Client libraries handle
+    deserialization and usage of FirestoreBundles - the Python Firestore SDK
+    does not offer that functionality.
+
+    Args:
+        name (str): The Id of the bundle.
+    """
 
     BUNDLE_SCHEMA_VERSION: int = 1
 
@@ -54,14 +65,54 @@ class FirestoreBundle:
     def add(
         self,
         document_or_query_name: Union[DocumentSnapshot, str],
-        query_snapshot: Optional[Query] = None,
-    ):
+        query: Optional[Query] = None,
+    ) -> "FirestoreBundle":
+        """Adds a document or entire query to the bundle.
+
+        This function is offered for convenience / API parity with other SDKs.
+        Most developers will get better outcomes from using the more specific,
+        `add_document` or `add_named_query` methods.
+
+        Args:
+            document_or_query_name (Union[DocumentSnapshot, str]): If supplied
+                as a `DocumentSnapshot`, this parameter routes control flow to
+                `add_document`, and the second parameter must be None. However,
+                if supplied as a `str`, then this parameter routes control flow
+                to `add_named_query`, and the second parameter must be supplied.
+            query_snapshot (Optional[Query]): Query to fully load and save to
+                the bundle. This parameter is required if the first parameter is
+                a string, and is required to be `None` if the first parameter
+                is a `DocumentSnapshot`.
+
+        Example:
+
+            from google.cloud import firestore
+
+            db = firestore.Client()
+            collection_ref = db.collection(u'users')
+
+            bundle = firestore.FirestoreBundle('my bundle')
+
+            # Add an entire query. This will load and save every matching
+            # document.
+            bundle.add(
+                'all the users',
+                collection_ref._query(),
+            )
+
+            # Add a single document.
+            bundle.add(collection_ref.documents('some_id').get())
+
+        Returns:
+            FirestoreBundle: self
+
+        """
         if isinstance(document_or_query_name, DocumentSnapshot):
-            assert query_snapshot is None
+            assert query is None
             self.add_document(document_or_query_name)
         elif isinstance(document_or_query_name, str):
-            assert query_snapshot is not None
-            self.add_named_query(document_or_query_name, query_snapshot)
+            assert query is not None
+            self.add_named_query(document_or_query_name, query)
         else:
             raise ValueError(
                 "Bundle.add accepts either a standalone DocumentSnapshot, or "
@@ -71,7 +122,28 @@ class FirestoreBundle:
 
     def add_document(
         self, snapshot: DocumentSnapshot, query_name: Optional[str] = None,
-    ) -> None:
+    ) -> "FirestoreBundle":
+        """Adds a document to the bundle.
+
+        Args:
+            snapshot (DocumentSnapshot): The fully-loaded Firestore document to
+                be preserved.
+            query_name (Optional[str]): If provided, also establishes a link
+                between the provided document and the referenced query.
+
+        Example:
+
+            from google.cloud import firestore
+
+            db = firestore.Client()
+            collection_ref = db.collection(u'users')
+
+            bundle = firestore.FirestoreBundle('my bundle')
+            bundle.add_document(collection_ref.documents('some_id').get())
+
+        Returns:
+            FirestoreBundle: self
+        """
         original_document: Optional[_BundledDocument]
         original_queries: Optional[List[str]] = []
         _id: str = snapshot.reference._document_path
@@ -106,36 +178,60 @@ class FirestoreBundle:
             bundled_document.metadata.queries.append(query_name)  # type: ignore
 
         self._update_last_read_time(snapshot.read_time)
+        return self
 
-    def add_named_query(self, name: str, snapshot: BaseQuery,) -> None:
-        if not isinstance(snapshot, BaseQuery):
+    def add_named_query(
+        self, name: str, query: BaseQuery,
+    ) -> "FirestoreBundle":
+        """Adds a query to the bundle, referenced by the provided name.
+
+        Args:
+            name (str): The name by which the provided query should be referenced.
+            query (Query): Query of documents to be fully loaded and stored in
+                the bundle for future access.
+
+        Example:
+
+            from google.cloud import firestore
+
+            db = firestore.Client()
+            collection_ref = db.collection(u'users')
+
+            bundle = firestore.FirestoreBundle('my bundle')
+            bundle.add_named_query('all the users', collection_ref._query())
+
+        Returns:
+            FirestoreBundle: self
+        """
+        if not isinstance(query, BaseQuery):
             raise ValueError(
                 "Attempted to add named query of type: "
-                f"{type(snapshot).__name__}. Expected BaseQuery.",
+                f"{type(query).__name__}. Expected BaseQuery.",
             )
 
         if self.named_queries.get(name):
             raise ValueError(f"Query name conflict: {name} has already been added.")
 
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
-        if isinstance(snapshot, AsyncQuery):
+        if isinstance(query, AsyncQuery):
             import asyncio
 
             loop = asyncio.get_event_loop()
-            loop.run_until_complete(self._process_async_query(name, snapshot))
+            loop.run_until_complete(self._process_async_query(name, query))
 
-        elif isinstance(snapshot, BaseQuery):
+        elif isinstance(query, BaseQuery):
             doc: DocumentSnapshot
-            for doc in snapshot.stream():
+            for doc in query.stream():
                 self.add_document(doc, query_name=name)
                 _read_time = doc.read_time
 
         self.named_queries[name] = self._build_named_query(
             name=name,
-            snapshot=snapshot,
+            snapshot=query,
             read_time=_helpers.build_timestamp(_read_time),
         )
         self._update_last_read_time(_read_time)
+        return self
 
     async def _process_async_query(self, name, snapshot) -> datetime.datetime:
         doc: DocumentSnapshot
@@ -173,6 +269,28 @@ class FirestoreBundle:
             self.latest_read_time = _ts
 
     def build(self) -> str:
+        """Iterates over the bundle's stored documents and queries and produces
+        a single length-prefixed json string suitable for long-term storage.
+
+        Example:
+
+            from google.cloud import firestore
+
+            db = firestore.Client()
+            collection_ref = db.collection(u'users')
+
+            bundle = firestore.FirestoreBundle('my bundle')
+            bundle.add('app-users', collection_ref._query())
+
+            serialized_bundle: str = bundle.build()
+
+            # Now upload `serialized_bundle` to Google Cloud Storage, store it
+            # in Memorystore, or any other storage solution.
+
+        Returns:
+            str: The length-prefixed string representation of this bundle'
+                contents.
+        """
         buffer: str = ''
 
         named_query: NamedQuery
