@@ -26,6 +26,7 @@ try:
 except pkg_resources.DistributionNotFound:
     __version__ = None
 
+from google.cloud.firestore_bundle.bundle import FirestoreBundle
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1._helpers import GeoPoint
 from google.cloud.firestore_v1._helpers import ExistsOption
@@ -127,6 +128,7 @@ __all__: List[str] = [
     "DocumentSnapshot",
     "DocumentTransform",
     "ExistsOption",
+    "FirestoreBundle",
     "GeoPoint",
     "Increment",
     "LastUpdateOption",

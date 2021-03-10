@@ -15,6 +15,7 @@
 """Python idiomatic client for Google Cloud Firestore."""
 
 
+from google.cloud.firestore_bundle.bundle import FirestoreBundle
 from google.cloud.firestore_v1 import __version__
 from google.cloud.firestore_v1 import ArrayRemove
 from google.cloud.firestore_v1 import ArrayUnion
@@ -47,7 +48,6 @@ from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1 import Watch
 from google.cloud.firestore_v1 import WriteBatch
 from google.cloud.firestore_v1 import WriteOption
-from google.cloud.firestore_bundle.bundle import FirestoreBundle
 from typing import List
 
 
