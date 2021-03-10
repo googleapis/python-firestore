@@ -20,7 +20,7 @@ import unittest
 
 import mock
 import pytest
-from typing import List
+from typing import Dict, List
 
 
 class AsyncMock(mock.MagicMock):
@@ -386,6 +386,32 @@ class Test_reference_value_to_document(unittest.TestCase):
 
         err_msg = WRONG_APP_REFERENCE.format(reference_value, client2._database_string)
         self.assertEqual(exc_info.exception.args, (err_msg,))
+
+
+class Test_parse_reference_value(unittest.TestCase):
+
+    @staticmethod
+    def _call(ref_value: str):
+        from google.cloud.firestore_v1._helpers import parse_reference_value
+
+        return parse_reference_value(ref_value)
+
+    def test_normal(self):
+        parsed: Dict = self._call('projects/name/databases/(default)/col/doc')
+        self.assertEqual(parsed['collection_name'], 'col')
+        self.assertEqual(parsed['database_name'], '(default)')
+        self.assertEqual(parsed['document_key'], 'doc')
+
+    def test_nested(self):
+        parsed: Dict = self._call('projects/name/databases/(default)/col/doc/nested')
+        self.assertEqual(parsed['collection_name'], 'col')
+        self.assertEqual(parsed['database_name'], '(default)')
+        self.assertEqual(parsed['document_key'], 'doc/nested')
+
+    def test_broken(self):
+        self.assertRaises(
+            ValueError, self._call, 'projects/name/databases/(default)/col',
+        )
 
 
 class Test_decode_value(unittest.TestCase):

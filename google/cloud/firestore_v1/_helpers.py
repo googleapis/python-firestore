@@ -15,6 +15,7 @@
 """Common helpers shared across Google Cloud Firestore modules."""
 
 import datetime
+import json
 
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds  # type: ignore
 from google.api_core import gapic_v1  # type: ignore
@@ -33,7 +34,7 @@ from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import write
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
-from typing import Any, Generator, List, NoReturn, Optional, Tuple, Union
+from typing import Any, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
@@ -234,6 +235,21 @@ def document_snapshot_to_protobuf(snapshot: 'DocumentSnapshot') -> Optional['Doc
     )
 
 
+def parse_reference_value(reference_value: str) -> Dict[str, str]:
+    """Extracts the collection name, document key, and database name from a full
+    document path.
+    """
+    parts = reference_value.split(DOCUMENT_PATH_DELIMITER, 5)
+    if len(parts) < 6:
+        msg = BAD_REFERENCE_ERROR.format(reference_value)
+        raise ValueError(msg)
+
+    return {
+        'collection_name': parts[4],
+        'database_name': parts[3],
+        'document_key': '/'.join(parts[5:]),
+    }
+
 
 def reference_value_to_document(reference_value, client) -> Any:
     """Convert a reference value string to a document.
@@ -290,6 +306,7 @@ def decode_value(
         ValueError: If the ``value_type`` is unknown.
     """
     value_type = value._pb.WhichOneof("value_type")
+    # print(f'value: {type(value)} :: {value_type} :: {value}')
 
     if value_type == "null_value":
         return None
@@ -1064,10 +1081,119 @@ def build_timestamp(dt: Optional[Union[DatetimeWithNanoseconds, datetime.datetim
     return _datetime_to_pb_timestamp(dt or DatetimeWithNanoseconds.utcnow())
 
 
-def compare_timestamps(ts1: Timestamp, ts2: Timestamp) -> int:
-    dt1 = ts1.ToDatetime()
-    dt2 = ts2.ToDatetime()
+def compare_timestamps(
+    ts1: Union[Timestamp, datetime.datetime],
+    ts2: Union[Timestamp, datetime.datetime],
+) -> int:
+    dt1 = ts1.ToDatetime() if not isinstance(ts1, datetime.datetime) else ts1
+    dt2 = ts2.ToDatetime() if not isinstance(ts2, datetime.datetime) else ts2
     if dt1 == dt2:
         return 0
     return 1 if dt1 > dt2 else -1
 
+
+def deserialize_bundle(serialized: Union[str, bytes], client: "BaseClient") -> "FirestoreBundle":  # type: ignore
+    """Inverse operation to a `FirestoreBundle` instance's `build()` method.
+    """
+    from google.cloud.firestore_bundle.bundle import FirestoreBundle
+    from google.cloud.firestore_bundle.types import BundleElement
+
+    # Outlines the legal transitions from one BundleElement to another.
+    bundle_state_machine = {
+        '__initial__': ['metadata'],
+        'metadata': ['named_query', 'document_metadata', '__end__'],
+        'named_query': ['named_query', 'document_metadata', '__end__'],
+        'document_metadata': ['document'],
+        'document': ['document_metadata', '__end__']
+    }
+    allowed_next_element_types: List[str] = bundle_state_machine['__initial__']
+
+    # This must be saved and added last, since we cache it to preserve timestamps,
+    # yet must flush it whenever a new document or query is added to a bundle.
+    # Thus, it must be the final step to deserialization.
+    metadata_bundle_element: Optional[BundleElement] = None
+
+    bundle: Optional[FirestoreBundle] = None
+    data: Dict
+    for data in _parse_bundle_elements_data(serialized):
+
+        # BundleElements are serialized as JSON containing one key outlining
+        # the type, with all further data nested under that key
+        keys: List[str] = list(data.keys())
+
+        if len(keys) != 1:
+            raise ValueError('Expected serialized BundleElement with one top-level key')
+
+        key: str = keys[0]
+
+        if key not in allowed_next_element_types:
+            raise ValueError(
+                f'Encountered BundleElement of type {key}. '
+                f'Expected one of {allowed_next_element_types}'
+            )
+
+        # Create and add our BundleElement
+        bundle_element: BundleElement = BundleElement.from_json(json.dumps(data))  # type: ignore
+
+        if bundle is None:
+            if key != 'metadata':
+                raise ValueError('Expected initial type of "metadata"')
+            bundle = FirestoreBundle(data[key]['id'])
+            metadata_bundle_element = bundle_element
+
+        else:
+            bundle._add_bundle_element(bundle_element, client=client,  type=key)
+
+        # Update the allowed next BundleElement types
+        allowed_next_element_types = bundle_state_machine[key]
+
+    if '__end__' not in allowed_next_element_types:
+        raise ValueError('Unexpected end to serialized FirestoreBundle')
+
+
+    # Now, finally add the metadata element
+    bundle._add_bundle_element(
+        metadata_bundle_element, client=client, type='metadata',  # type: ignore
+    )
+
+    return bundle
+
+
+def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict, None, None]:  # type: ignore
+    """Reads through a serialized FirestoreBundle and yields JSON chunks that
+    were created via `BundleElement.to_json(bundle_element)`.
+
+    Serialized FirestoreBundle instances are length-prefixed JSON objects, and
+    so are of the form "123{...}57{...}"
+    To correctly and safely read a bundle, we must first detect these length
+    prefixes, read that many bytes of data, and attempt to JSON-parse that.
+    """
+    _serialized: Iterator[int] = iter(
+        serialized
+        if isinstance(serialized, bytes) else
+        serialized.encode('utf-8')
+    )
+
+    length_prefix: str = ''
+    while True:
+        byte: Optional[int] = next(_serialized, None)
+
+        if byte is None:
+            return None
+
+        _str: str = chr(byte)
+        if _str.isnumeric():
+            length_prefix += _str
+        else:
+            if length_prefix == '':
+                raise ValueError('Expected length prefix')
+
+            _length_prefix = int(length_prefix)
+            length_prefix = ''
+            _bytes = bytearray([byte])
+            _counter = 1
+            while _counter < _length_prefix:
+                _bytes.append(next(_serialized))
+                _counter += 1
+
+            yield json.loads(_bytes.decode('utf-8'))

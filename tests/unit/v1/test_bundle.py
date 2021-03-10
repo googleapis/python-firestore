@@ -16,15 +16,14 @@ import unittest
 
 import mock
 from google.cloud.firestore_bundle.bundle import FirestoreBundle
+from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.collection import CollectionReference
-from google.cloud.firestore_v1.services.firestore.async_client import (
-    FirestoreAsyncClient,
-)
 from google.cloud.firestore_v1.services.firestore.client import FirestoreClient
 from google.cloud.firestore_v1.types.document import Document
 from google.cloud.firestore_v1.types.firestore import RunQueryResponse
+from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 from tests.unit.v1 import _test_helpers
 from tests.unit.v1 import test__helpers
 
@@ -64,7 +63,12 @@ class _CollectionQueryMixin:
         documents = [
             RunQueryResponse(
                 transaction=b"",
-                document=Document(name=template.format(document_id)),
+                document=Document(
+                    name=template.format(document_id),
+                    fields=_helpers.encode_dict({'hello': 'world'}),
+                    create_time=Timestamp(seconds=1, nanos=1),
+                    update_time=Timestamp(seconds=1, nanos=1),
+                ),
                 read_time=_test_helpers.build_timestamp(),
             )
             for document_id in document_ids
@@ -164,7 +168,7 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
         bundle = FirestoreBundle("test")
         self.assertRaises(ValueError, bundle.add_named_query, "asdf", col)
 
-    def test_building_bundle(self):
+    def test_bundle_round_trip(self):
         bundle = FirestoreBundle("test")
         bundle.add_named_query('best name', self._bundled_query_helper())
         self.assertIsInstance(bundle.build(), str)
@@ -205,3 +209,42 @@ class TestAsyncBundle(_CollectionQueryMixin, unittest.TestCase):
                 "projects/project-project/databases/(default)/documents/col/doc-2"
             ]
         )
+
+
+class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
+
+    @staticmethod
+    def build_results_iterable(items):
+        return iter(items)
+
+    @staticmethod
+    def get_client():
+        return _test_helpers.make_client()
+
+    @staticmethod
+    def get_internal_client_mock():
+        return mock.create_autospec(FirestoreClient)
+
+    @classmethod
+    def get_collection_class(cls):
+        return CollectionReference
+
+    def test_build_round_trip(self):
+        query = self._bundled_query_helper()
+        bundle = FirestoreBundle("test")
+        bundle.add_named_query("asdf", query)
+        serialized = bundle.build()
+        self.assertEqual(
+            serialized,
+            _helpers.deserialize_bundle(serialized, query._client).build(),
+        )
+
+    def test_deserialized_bundle_cached_metadata(self):
+        query = self._bundled_query_helper()
+        bundle = FirestoreBundle("test")
+        bundle.add_named_query("asdf", query)
+        bundle_copy = _helpers.deserialize_bundle(bundle.build(), query._client)
+        self.assertIsInstance(bundle_copy, FirestoreBundle)
+        self.assertIsNotNone(bundle_copy._deserialized_metadata)
+        bundle_copy.add_named_query("second query", query)
+        self.assertIsNone(bundle_copy._deserialized_metadata)

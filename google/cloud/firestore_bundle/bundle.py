@@ -15,6 +15,7 @@
 """Classes for representing bundles for the Google Cloud Firestore API."""
 
 import datetime
+import json
 
 from google.cloud.firestore_bundle.types.bundle import (
     BundledDocumentMetadata,
@@ -30,6 +31,7 @@ from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.base_collection import BaseCollectionReference
 from google.cloud.firestore_v1.collection import CollectionReference
+from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
 from google.cloud.firestore_v1 import _helpers
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
@@ -61,6 +63,7 @@ class FirestoreBundle:
         self.documents: Dict[str, "_BundledDocument"] = {}
         self.named_queries: Dict[str, NamedQuery] = {}
         self.latest_read_time: Timestamp = Timestamp(seconds=0, nanos=0)
+        self._deserialized_metadata: Optional[BundledDocumentMetadata] = None
 
     def add(
         self,
@@ -178,6 +181,8 @@ class FirestoreBundle:
             bundled_document.metadata.queries.append(query_name)  # type: ignore
 
         self._update_last_read_time(snapshot.read_time)
+        # Flush this if it was cached
+        self._deserialized_metadata = None
         return self
 
     def add_named_query(
@@ -212,6 +217,16 @@ class FirestoreBundle:
         if self.named_queries.get(name):
             raise ValueError(f"Query name conflict: {name} has already been added.")
 
+        # Execute the query and save each resulting document
+        _read_time = self._save_documents_from_query(name, query)
+
+        # Actually save the query to our local object cache
+        self._save_named_query(name, query, _read_time)
+        # Flush this if it was cached
+        self._deserialized_metadata = None
+        return self
+
+    def _save_documents_from_query(self, name, query) -> datetime.datetime:
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
         if isinstance(query, AsyncQuery):
             import asyncio
@@ -224,16 +239,21 @@ class FirestoreBundle:
             for doc in query.stream():
                 self.add_document(doc, query_name=name)
                 _read_time = doc.read_time
+        return _read_time
 
+    def _save_named_query(self,
+        name: str, query: BaseQuery, read_time: datetime.datetime,
+    ) -> None:
         self.named_queries[name] = self._build_named_query(
             name=name,
             snapshot=query,
-            read_time=_helpers.build_timestamp(_read_time),
+            read_time=_helpers.build_timestamp(read_time),
         )
-        self._update_last_read_time(_read_time)
-        return self
+        self._update_last_read_time(read_time)
 
-    async def _process_async_query(self, name, snapshot) -> datetime.datetime:
+    async def _process_async_query(
+        self, name: str, snapshot: AsyncQuery,
+    ) -> datetime.datetime:
         doc: DocumentSnapshot
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
         async for doc in snapshot.stream():
@@ -268,6 +288,40 @@ class FirestoreBundle:
         if _helpers.compare_timestamps(_ts, self.latest_read_time) == 1:
             self.latest_read_time = _ts
 
+    def _add_bundle_element(self, bundle_element: BundleElement, *, client: 'BaseClient', type: str):  # type: ignore
+        """Applies BundleElements to this FirestoreBundle instance as a part of
+        deserializing a FirestoreBundle string.
+        """
+        from google.cloud.firestore_v1.types.document import Document
+        if getattr(self, '_doc_metadata_map', None) is None:
+            self._doc_metadata_map = {}
+        if type == 'metadata':
+            self._deserialized_metadata = bundle_element.metadata  # type: ignore
+        elif type == 'named_query':
+            self.named_queries[bundle_element.named_query.name] = bundle_element.named_query  # type: ignore
+        elif type == 'document_metadata':
+            self._doc_metadata_map[bundle_element.document_metadata.name] = bundle_element.document_metadata
+        elif type == 'document':
+            parsed_path = _helpers.parse_reference_value(bundle_element.document.name)
+            snapshot = DocumentSnapshot(
+                data=_helpers.decode_dict(Document(mapping=bundle_element.document).fields, client),
+                exists=True,
+                reference=DocumentReference(
+                    parsed_path['collection_name'],
+                    parsed_path['document_key'],
+                    client=client,
+                ),
+                read_time=self._doc_metadata_map[bundle_element.document.name].read_time,
+                create_time=bundle_element.document.create_time,  # type: ignore
+                update_time=bundle_element.document.update_time,  # type: ignore
+            )
+            self.add_document(snapshot)
+
+            bundled_document = self.documents.get(snapshot.reference._document_path)
+            for query_name in self._doc_metadata_map[bundle_element.document.name].queries:
+                bundled_document.metadata.queries.append(query_name)  # type: ignore
+
+
     def build(self) -> str:
         """Iterates over the bundle's stored documents and queries and produces
         a single length-prefixed json string suitable for long-term storage.
@@ -296,18 +350,14 @@ class FirestoreBundle:
         named_query: NamedQuery
         for named_query in self.named_queries.values():
             buffer += self._compile_bundle_element(
-                BundleElement(
-                    named_query=named_query,
-                )
+                BundleElement(named_query=named_query)
             )
 
         bundled_document: '_BundledDocument'  # type: ignore
         document_count: int = 0
         for bundled_document in self.documents.values():
             buffer += self._compile_bundle_element(
-                BundleElement(
-                    document_metadata=bundled_document.metadata,
-                )
+                BundleElement(document_metadata=bundled_document.metadata)
             )
             if bundled_document.snapshot is not None:
                 document_count += 1
@@ -318,7 +368,7 @@ class FirestoreBundle:
                 )
 
         metadata: BundleElement = BundleElement(
-            metadata=BundleMetadata(
+            metadata=self._deserialized_metadata or BundleMetadata(
                 id=self.name,
                 create_time=_helpers.build_timestamp(),
                 version=FirestoreBundle.BUNDLE_SCHEMA_VERSION,
@@ -329,8 +379,7 @@ class FirestoreBundle:
         return f'{self._compile_bundle_element(metadata)}{buffer}'
 
     def _compile_bundle_element(self, bundle_element: BundleElement) -> str:
-        serialized_be: str = BundleElement.to_json(bundle_element)
-        # TODO: Does this `len()` call need to be against `encode('utf-8')`?
+        serialized_be: str = json.dumps(BundleElement.to_dict(bundle_element))
         return f'{len(serialized_be)}{serialized_be}'
 
 
