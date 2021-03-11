@@ -17,6 +17,7 @@
 import datetime
 import json
 
+import google
 from google.api_core.datetime_helpers import DatetimeWithNanoseconds  # type: ignore
 from google.api_core import gapic_v1  # type: ignore
 from google.protobuf import struct_pb2
@@ -231,7 +232,7 @@ def encode_dict(values_dict) -> dict:
     return {key: encode_value(value) for key, value in values_dict.items()}
 
 
-def document_snapshot_to_protobuf(snapshot: "DocumentSnapshot") -> Optional["Document"]:  # type: ignore
+def document_snapshot_to_protobuf(snapshot: "google.cloud.firestore_v1.base_document.DocumentSnapshot") -> Optional["google.cloud.firestore_v1.types.Document"]:  # type: ignore
     from google.cloud.firestore_v1.types import Document
 
     if not snapshot.exists:
@@ -1104,7 +1105,7 @@ def compare_timestamps(
     return 1 if dt1_nanos > dt2_nanos else -1
 
 
-def deserialize_bundle(serialized: Union[str, bytes], client: "BaseClient") -> "FirestoreBundle":  # type: ignore
+def deserialize_bundle(serialized: Union[str, bytes], client: "google.cloud.firestore_v1.client.BaseClient") -> "google.cloud.firestore_bundle.bundle.FirestoreBundle":  # type: ignore
     """Inverse operation to a `FirestoreBundle` instance's `build()` method.
     """
     from google.cloud.firestore_bundle.bundle import FirestoreBundle
@@ -1148,8 +1149,8 @@ def deserialize_bundle(serialized: Union[str, bytes], client: "BaseClient") -> "
         bundle_element: BundleElement = BundleElement.from_json(json.dumps(data))  # type: ignore
 
         if bundle is None:
+            # pragma: no cover
             if key != "metadata":
-                # pragma: no cover
                 raise ValueError('Expected initial type of "metadata"')
             bundle = FirestoreBundle(data[key]["id"])
             metadata_bundle_element = bundle_element

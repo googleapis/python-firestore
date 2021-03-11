@@ -16,6 +16,7 @@ import datetime
 import mock
 import typing
 
+import google
 from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.document import DocumentReference, DocumentSnapshot
 from google.cloud._helpers import _datetime_to_pb_timestamp, UTC  # type: ignore
@@ -25,7 +26,7 @@ from google.cloud.firestore_v1.client import Client
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 
 
-def make_test_credentials() -> "Credentials":  # type: ignore
+def make_test_credentials() -> google.auth.credentials.Credentials:  # type: ignore
     import google.auth.credentials  # type: ignore
 
     return mock.Mock(spec=google.auth.credentials.Credentials)

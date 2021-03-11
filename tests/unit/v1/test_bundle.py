@@ -16,6 +16,7 @@ import unittest
 
 import mock
 from google.cloud.firestore_bundle.bundle import FirestoreBundle
+from google.cloud.firestore_bundle.types import BundleElement
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.base_query import BaseQuery
@@ -407,4 +408,15 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         client = _test_helpers.make_client()
         self.assertRaises(
             ValueError, _helpers.deserialize_bundle, "{}", client,
+        )
+
+    def test_add_invalid_bundle_element_type(self):
+        client = _test_helpers.make_client()
+        bundle = FirestoreBundle("asdf")
+        self.assertRaises(
+            ValueError,
+            bundle._add_bundle_element,
+            BundleElement(),
+            client=client,
+            type="asdf",
         )

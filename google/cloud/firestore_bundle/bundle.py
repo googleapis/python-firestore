@@ -26,11 +26,9 @@ from google.cloud.firestore_bundle.types.bundle import (
 )
 from google.cloud._helpers import _datetime_to_pb_timestamp, UTC  # type: ignore
 from google.cloud.firestore_v1.async_query import AsyncQuery
-from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
+from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_query import BaseQuery
-from google.cloud.firestore_v1.base_collection import BaseCollectionReference
-from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
 from google.cloud.firestore_v1 import _helpers
@@ -284,7 +282,7 @@ class FirestoreBundle:
         if _helpers.compare_timestamps(_ts, self.latest_read_time) == 1:
             self.latest_read_time = _ts
 
-    def _add_bundle_element(self, bundle_element: BundleElement, *, client: "BaseClient", type: str):  # type: ignore
+    def _add_bundle_element(self, bundle_element: BundleElement, *, client: BaseClient, type: str):  # type: ignore noqa
         """Applies BundleElements to this FirestoreBundle instance as a part of
         deserializing a FirestoreBundle string.
         """
@@ -326,7 +324,6 @@ class FirestoreBundle:
             ].queries:
                 bundled_document.metadata.queries.append(query_name)  # type: ignore
         else:
-            # pragma: no cover
             raise ValueError(f"Unexpected type of BundleElement: {type}")
 
     def build(self) -> str:
