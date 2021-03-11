@@ -103,6 +103,12 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
 
     def test_add_document(self):
         bundle = FirestoreBundle("test")
+        doc = _test_helpers.build_document_snapshot(client=_test_helpers.make_client())
+        bundle.add_document(doc)
+        self.assertEqual(bundle.documents[self.doc_key].snapshot, doc)
+
+    def test_add_newer_document(self):
+        bundle = FirestoreBundle("test")
         old_doc = _test_helpers.build_document_snapshot(
             data={"version": 1},
             client=_test_helpers.make_client(),
@@ -120,11 +126,24 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
         bundle.add_document(new_doc)
         self.assertEqual(bundle.documents[self.doc_key].snapshot._data["version"], 2)
 
-    def test_add_newer_document(self):
+    def test_add_older_document(self):
         bundle = FirestoreBundle("test")
-        doc = _test_helpers.build_document_snapshot(client=_test_helpers.make_client())
-        bundle.add_document(doc)
-        self.assertEqual(bundle.documents[self.doc_key].snapshot, doc)
+        new_doc = _test_helpers.build_document_snapshot(
+            data={"version": 2},
+            client=_test_helpers.make_client(),
+            read_time=Timestamp(seconds=1, nanos=2),
+        )
+        bundle.add_document(new_doc)
+        self.assertEqual(bundle.documents[self.doc_key].snapshot._data["version"], 2)
+
+        # Builds the same ID by default
+        old_doc = _test_helpers.build_document_snapshot(
+            data={"version": 1},
+            client=_test_helpers.make_client(),
+            read_time=Timestamp(seconds=1, nanos=1),
+        )
+        bundle.add_document(old_doc)
+        self.assertEqual(bundle.documents[self.doc_key].snapshot._data["version"], 2)
 
     def test_add_document_via_add(self):
         bundle = FirestoreBundle("test")
@@ -356,6 +375,30 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         client = _test_helpers.make_client()
         # invalid bc `document` must follow `document_metadata`
         fnc.return_value = [{"metadata": {"id": "asdf"}}, {"document": {}}]
+        self.assertRaises(
+            ValueError, _helpers.deserialize_bundle, "does not matter", client,
+        )
+
+    @mock.patch(
+        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+    )
+    @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
+    def test_invalid_bundle_element_type(self, fnc, _):
+        client = _test_helpers.make_client()
+        # invalid bc `wtfisthis?` is obviously invalid
+        fnc.return_value = [{"metadata": {"id": "asdf"}}, {"wtfisthis?": {}}]
+        self.assertRaises(
+            ValueError, _helpers.deserialize_bundle, "does not matter", client,
+        )
+
+    @mock.patch(
+        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+    )
+    @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
+    def test_invalid_bundle_start(self, fnc, _):
+        client = _test_helpers.make_client()
+        # invalid bc first element must be of key `metadata`
+        fnc.return_value = [{"document": {}}]
         self.assertRaises(
             ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )

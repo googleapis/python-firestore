@@ -316,7 +316,6 @@ def decode_value(
         ValueError: If the ``value_type`` is unknown.
     """
     value_type = value._pb.WhichOneof("value_type")
-    # print(f'value: {type(value)} :: {value_type} :: {value}')
 
     if value_type == "null_value":
         return None
@@ -1096,11 +1095,13 @@ def build_timestamp(
 def compare_timestamps(
     ts1: Union[Timestamp, datetime.datetime], ts2: Union[Timestamp, datetime.datetime],
 ) -> int:
-    dt1 = ts1.ToDatetime() if not isinstance(ts1, datetime.datetime) else ts1
-    dt2 = ts2.ToDatetime() if not isinstance(ts2, datetime.datetime) else ts2
-    if dt1 == dt2:
+    dt1 = build_timestamp(ts1) if not isinstance(ts1, Timestamp) else ts1
+    dt2 = build_timestamp(ts2) if not isinstance(ts2, Timestamp) else ts2
+    dt1_nanos = dt1.nanos + dt1.seconds * 1e9
+    dt2_nanos = dt2.nanos + dt2.seconds * 1e9
+    if dt1_nanos == dt2_nanos:
         return 0
-    return 1 if dt1 > dt2 else -1
+    return 1 if dt1_nanos > dt2_nanos else -1
 
 
 def deserialize_bundle(serialized: Union[str, bytes], client: "BaseClient") -> "FirestoreBundle":  # type: ignore
@@ -1148,6 +1149,7 @@ def deserialize_bundle(serialized: Union[str, bytes], client: "BaseClient") -> "
 
         if bundle is None:
             if key != "metadata":
+                # pragma: no cover
                 raise ValueError('Expected initial type of "metadata"')
             bundle = FirestoreBundle(data[key]["id"])
             metadata_bundle_element = bundle_element

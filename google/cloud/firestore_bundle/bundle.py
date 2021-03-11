@@ -224,19 +224,19 @@ class FirestoreBundle:
         self._deserialized_metadata = None
         return self
 
-    def _save_documents_from_query(self, name, query) -> datetime.datetime:
+    def _save_documents_from_query(self, name, query: BaseQuery) -> datetime.datetime:
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
         if isinstance(query, AsyncQuery):
             import asyncio
 
             loop = asyncio.get_event_loop()
-            loop.run_until_complete(self._process_async_query(name, query))
+            return loop.run_until_complete(self._process_async_query(name, query))
 
-        elif isinstance(query, BaseQuery):
-            doc: DocumentSnapshot
-            for doc in query.stream():
-                self.add_document(doc, query_name=name)
-                _read_time = doc.read_time
+        # `query` is now known to be a non-async `BaseQuery`
+        doc: DocumentSnapshot
+        for doc in query.stream():  # type: ignore
+            self.add_document(doc, query_name=name)
+            _read_time = doc.read_time
         return _read_time
 
     def _save_named_query(
@@ -325,6 +325,9 @@ class FirestoreBundle:
                 bundle_element.document.name
             ].queries:
                 bundled_document.metadata.queries.append(query_name)  # type: ignore
+        else:
+            # pragma: no cover
+            raise ValueError(f"Unexpected type of BundleElement: {type}")
 
     def build(self) -> str:
         """Iterates over the bundle's stored documents and queries and produces
@@ -363,13 +366,10 @@ class FirestoreBundle:
             buffer += self._compile_bundle_element(
                 BundleElement(document_metadata=bundled_document.metadata)
             )
-            if bundled_document.snapshot is not None:
-                document_count += 1
-                buffer += self._compile_bundle_element(
-                    BundleElement(
-                        document=bundled_document.snapshot._to_protobuf()._pb,
-                    )
-                )
+            document_count += 1
+            buffer += self._compile_bundle_element(
+                BundleElement(document=bundled_document.snapshot._to_protobuf()._pb,)
+            )
 
         metadata: BundleElement = BundleElement(
             metadata=self._deserialized_metadata
