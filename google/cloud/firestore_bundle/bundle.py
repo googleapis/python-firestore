@@ -169,7 +169,7 @@ class FirestoreBundle:
             self.documents[_id] = _BundledDocument(
                 snapshot=snapshot,
                 metadata=BundledDocumentMetadata(
-                    name=f'{snapshot._client._database_string}/{snapshot.reference.path}',
+                    name=f"{snapshot._client._database_string}/{snapshot.reference.path}",
                     read_time=snapshot.read_time,
                     exists=snapshot.exists,
                     queries=original_queries,
@@ -185,9 +185,7 @@ class FirestoreBundle:
         self._deserialized_metadata = None
         return self
 
-    def add_named_query(
-        self, name: str, query: BaseQuery,
-    ) -> "FirestoreBundle":
+    def add_named_query(self, name: str, query: BaseQuery,) -> "FirestoreBundle":
         """Adds a query to the bundle, referenced by the provided name.
 
         Args:
@@ -241,13 +239,11 @@ class FirestoreBundle:
                 _read_time = doc.read_time
         return _read_time
 
-    def _save_named_query(self,
-        name: str, query: BaseQuery, read_time: datetime.datetime,
+    def _save_named_query(
+        self, name: str, query: BaseQuery, read_time: datetime.datetime,
     ) -> None:
         self.named_queries[name] = self._build_named_query(
-            name=name,
-            snapshot=query,
-            read_time=_helpers.build_timestamp(read_time),
+            name=name, snapshot=query, read_time=_helpers.build_timestamp(read_time),
         )
         self._update_last_read_time(read_time)
 
@@ -288,39 +284,47 @@ class FirestoreBundle:
         if _helpers.compare_timestamps(_ts, self.latest_read_time) == 1:
             self.latest_read_time = _ts
 
-    def _add_bundle_element(self, bundle_element: BundleElement, *, client: 'BaseClient', type: str):  # type: ignore
+    def _add_bundle_element(self, bundle_element: BundleElement, *, client: "BaseClient", type: str):  # type: ignore
         """Applies BundleElements to this FirestoreBundle instance as a part of
         deserializing a FirestoreBundle string.
         """
         from google.cloud.firestore_v1.types.document import Document
-        if getattr(self, '_doc_metadata_map', None) is None:
+
+        if getattr(self, "_doc_metadata_map", None) is None:
             self._doc_metadata_map = {}
-        if type == 'metadata':
+        if type == "metadata":
             self._deserialized_metadata = bundle_element.metadata  # type: ignore
-        elif type == 'named_query':
+        elif type == "named_query":
             self.named_queries[bundle_element.named_query.name] = bundle_element.named_query  # type: ignore
-        elif type == 'document_metadata':
-            self._doc_metadata_map[bundle_element.document_metadata.name] = bundle_element.document_metadata
-        elif type == 'document':
+        elif type == "document_metadata":
+            self._doc_metadata_map[
+                bundle_element.document_metadata.name
+            ] = bundle_element.document_metadata
+        elif type == "document":
             parsed_path = _helpers.parse_reference_value(bundle_element.document.name)
             snapshot = DocumentSnapshot(
-                data=_helpers.decode_dict(Document(mapping=bundle_element.document).fields, client),
+                data=_helpers.decode_dict(
+                    Document(mapping=bundle_element.document).fields, client
+                ),
                 exists=True,
                 reference=DocumentReference(
-                    parsed_path['collection_name'],
-                    parsed_path['document_key'],
+                    parsed_path["collection_name"],
+                    parsed_path["document_key"],
                     client=client,
                 ),
-                read_time=self._doc_metadata_map[bundle_element.document.name].read_time,
+                read_time=self._doc_metadata_map[
+                    bundle_element.document.name
+                ].read_time,
                 create_time=bundle_element.document.create_time,  # type: ignore
                 update_time=bundle_element.document.update_time,  # type: ignore
             )
             self.add_document(snapshot)
 
             bundled_document = self.documents.get(snapshot.reference._document_path)
-            for query_name in self._doc_metadata_map[bundle_element.document.name].queries:
+            for query_name in self._doc_metadata_map[
+                bundle_element.document.name
+            ].queries:
                 bundled_document.metadata.queries.append(query_name)  # type: ignore
-
 
     def build(self) -> str:
         """Iterates over the bundle's stored documents and queries and produces
@@ -345,7 +349,7 @@ class FirestoreBundle:
             str: The length-prefixed string representation of this bundle'
                 contents.
         """
-        buffer: str = ''
+        buffer: str = ""
 
         named_query: NamedQuery
         for named_query in self.named_queries.values():
@@ -353,7 +357,7 @@ class FirestoreBundle:
                 BundleElement(named_query=named_query)
             )
 
-        bundled_document: '_BundledDocument'  # type: ignore
+        bundled_document: "_BundledDocument"  # type: ignore
         document_count: int = 0
         for bundled_document in self.documents.values():
             buffer += self._compile_bundle_element(
@@ -368,19 +372,20 @@ class FirestoreBundle:
                 )
 
         metadata: BundleElement = BundleElement(
-            metadata=self._deserialized_metadata or BundleMetadata(
+            metadata=self._deserialized_metadata
+            or BundleMetadata(
                 id=self.name,
                 create_time=_helpers.build_timestamp(),
                 version=FirestoreBundle.BUNDLE_SCHEMA_VERSION,
                 total_documents=document_count,
-                total_bytes=len(buffer.encode('utf-8')),
+                total_bytes=len(buffer.encode("utf-8")),
             )
         )
-        return f'{self._compile_bundle_element(metadata)}{buffer}'
+        return f"{self._compile_bundle_element(metadata)}{buffer}"
 
     def _compile_bundle_element(self, bundle_element: BundleElement) -> str:
         serialized_be: str = json.dumps(BundleElement.to_dict(bundle_element))
-        return f'{len(serialized_be)}{serialized_be}'
+        return f"{len(serialized_be)}{serialized_be}"
 
 
 class _BundledDocument:

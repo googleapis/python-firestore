@@ -34,7 +34,17 @@ from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import write
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
-from typing import Any, Dict, Generator, Iterator, List, NoReturn, Optional, Tuple, Union
+from typing import (
+    Any,
+    Dict,
+    Generator,
+    Iterator,
+    List,
+    NoReturn,
+    Optional,
+    Tuple,
+    Union,
+)
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
@@ -221,14 +231,14 @@ def encode_dict(values_dict) -> dict:
     return {key: encode_value(value) for key, value in values_dict.items()}
 
 
-def document_snapshot_to_protobuf(snapshot: 'DocumentSnapshot') -> Optional['Document']:  # type: ignore
+def document_snapshot_to_protobuf(snapshot: "DocumentSnapshot") -> Optional["Document"]:  # type: ignore
     from google.cloud.firestore_v1.types import Document
 
     if not snapshot.exists:
         return None
 
     return Document(
-        name=f'{snapshot._client._database_string}/{snapshot.reference.path}',
+        name=f"{snapshot._client._database_string}/{snapshot.reference.path}",
         fields=encode_dict(snapshot._data),
         create_time=snapshot.create_time,
         update_time=snapshot.update_time,
@@ -245,9 +255,9 @@ def parse_reference_value(reference_value: str) -> Dict[str, str]:
         raise ValueError(msg)
 
     return {
-        'collection_name': parts[4],
-        'database_name': parts[3],
-        'document_key': '/'.join(parts[5:]),
+        "collection_name": parts[4],
+        "database_name": parts[3],
+        "document_key": "/".join(parts[5:]),
     }
 
 
@@ -1076,14 +1086,15 @@ def make_retry_timeout_kwargs(retry, timeout) -> dict:
     return kwargs
 
 
-def build_timestamp(dt: Optional[Union[DatetimeWithNanoseconds, datetime.datetime]] = None) -> Timestamp:
+def build_timestamp(
+    dt: Optional[Union[DatetimeWithNanoseconds, datetime.datetime]] = None
+) -> Timestamp:
     """Returns the supplied datetime (or "now") as a Timestamp"""
     return _datetime_to_pb_timestamp(dt or DatetimeWithNanoseconds.utcnow())
 
 
 def compare_timestamps(
-    ts1: Union[Timestamp, datetime.datetime],
-    ts2: Union[Timestamp, datetime.datetime],
+    ts1: Union[Timestamp, datetime.datetime], ts2: Union[Timestamp, datetime.datetime],
 ) -> int:
     dt1 = ts1.ToDatetime() if not isinstance(ts1, datetime.datetime) else ts1
     dt2 = ts2.ToDatetime() if not isinstance(ts2, datetime.datetime) else ts2
@@ -1100,13 +1111,13 @@ def deserialize_bundle(serialized: Union[str, bytes], client: "BaseClient") -> "
 
     # Outlines the legal transitions from one BundleElement to another.
     bundle_state_machine = {
-        '__initial__': ['metadata'],
-        'metadata': ['named_query', 'document_metadata', '__end__'],
-        'named_query': ['named_query', 'document_metadata', '__end__'],
-        'document_metadata': ['document'],
-        'document': ['document_metadata', '__end__']
+        "__initial__": ["metadata"],
+        "metadata": ["named_query", "document_metadata", "__end__"],
+        "named_query": ["named_query", "document_metadata", "__end__"],
+        "document_metadata": ["document"],
+        "document": ["document_metadata", "__end__"],
     }
-    allowed_next_element_types: List[str] = bundle_state_machine['__initial__']
+    allowed_next_element_types: List[str] = bundle_state_machine["__initial__"]
 
     # This must be saved and added last, since we cache it to preserve timestamps,
     # yet must flush it whenever a new document or query is added to a bundle.
@@ -1122,38 +1133,37 @@ def deserialize_bundle(serialized: Union[str, bytes], client: "BaseClient") -> "
         keys: List[str] = list(data.keys())
 
         if len(keys) != 1:
-            raise ValueError('Expected serialized BundleElement with one top-level key')
+            raise ValueError("Expected serialized BundleElement with one top-level key")
 
         key: str = keys[0]
 
         if key not in allowed_next_element_types:
             raise ValueError(
-                f'Encountered BundleElement of type {key}. '
-                f'Expected one of {allowed_next_element_types}'
+                f"Encountered BundleElement of type {key}. "
+                f"Expected one of {allowed_next_element_types}"
             )
 
         # Create and add our BundleElement
         bundle_element: BundleElement = BundleElement.from_json(json.dumps(data))  # type: ignore
 
         if bundle is None:
-            if key != 'metadata':
+            if key != "metadata":
                 raise ValueError('Expected initial type of "metadata"')
-            bundle = FirestoreBundle(data[key]['id'])
+            bundle = FirestoreBundle(data[key]["id"])
             metadata_bundle_element = bundle_element
 
         else:
-            bundle._add_bundle_element(bundle_element, client=client,  type=key)
+            bundle._add_bundle_element(bundle_element, client=client, type=key)
 
         # Update the allowed next BundleElement types
         allowed_next_element_types = bundle_state_machine[key]
 
-    if '__end__' not in allowed_next_element_types:
-        raise ValueError('Unexpected end to serialized FirestoreBundle')
-
+    if "__end__" not in allowed_next_element_types:
+        raise ValueError("Unexpected end to serialized FirestoreBundle")
 
     # Now, finally add the metadata element
     bundle._add_bundle_element(
-        metadata_bundle_element, client=client, type='metadata',  # type: ignore
+        metadata_bundle_element, client=client, type="metadata",  # type: ignore
     )
 
     return bundle
@@ -1169,12 +1179,10 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
     prefixes, read that many bytes of data, and attempt to JSON-parse that.
     """
     _serialized: Iterator[int] = iter(
-        serialized
-        if isinstance(serialized, bytes) else
-        serialized.encode('utf-8')
+        serialized if isinstance(serialized, bytes) else serialized.encode("utf-8")
     )
 
-    length_prefix: str = ''
+    length_prefix: str = ""
     while True:
         byte: Optional[int] = next(_serialized, None)
 
@@ -1185,15 +1193,15 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
         if _str.isnumeric():
             length_prefix += _str
         else:
-            if length_prefix == '':
-                raise ValueError('Expected length prefix')
+            if length_prefix == "":
+                raise ValueError("Expected length prefix")
 
             _length_prefix = int(length_prefix)
-            length_prefix = ''
+            length_prefix = ""
             _bytes = bytearray([byte])
             _counter = 1
             while _counter < _length_prefix:
                 _bytes.append(next(_serialized))
                 _counter += 1
 
-            yield json.loads(_bytes.decode('utf-8'))
+            yield json.loads(_bytes.decode("utf-8"))

@@ -66,7 +66,7 @@ class _CollectionQueryMixin:
                 transaction=b"",
                 document=Document(
                     name=template.format(document_id),
-                    fields=_helpers.encode_dict({'hello': 'world'}),
+                    fields=_helpers.encode_dict({"hello": "world"}),
                     create_time=Timestamp(seconds=1, nanos=1),
                     update_time=Timestamp(seconds=1, nanos=1),
                 ),
@@ -104,21 +104,21 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
     def test_add_document(self):
         bundle = FirestoreBundle("test")
         old_doc = _test_helpers.build_document_snapshot(
-            data={'version': 1},
+            data={"version": 1},
             client=_test_helpers.make_client(),
             read_time=Timestamp(seconds=1, nanos=1),
         )
         bundle.add_document(old_doc)
-        self.assertEqual(bundle.documents[self.doc_key].snapshot._data['version'], 1)
+        self.assertEqual(bundle.documents[self.doc_key].snapshot._data["version"], 1)
 
         # Builds the same ID by default
         new_doc = _test_helpers.build_document_snapshot(
-            data={'version': 2},
+            data={"version": 2},
             client=_test_helpers.make_client(),
             read_time=Timestamp(seconds=1, nanos=2),
         )
         bundle.add_document(new_doc)
-        self.assertEqual(bundle.documents[self.doc_key].snapshot._data['version'], 2)
+        self.assertEqual(bundle.documents[self.doc_key].snapshot._data["version"], 2)
 
     def test_add_newer_document(self):
         bundle = FirestoreBundle("test")
@@ -210,7 +210,7 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
             read_time=_test_helpers.build_test_timestamp(second=1),
         )
         # `add` does not accept adding named documents
-        self.assertRaises(ValueError, bundle.add, (doc, 'asdf',))  # type: ignore
+        self.assertRaises(ValueError, bundle.add, (doc, "asdf",))  # type: ignore
 
     def test_add_query_invalid(self):
         bundle = FirestoreBundle("test")
@@ -220,8 +220,8 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
             read_time=_test_helpers.build_test_timestamp(second=1),
         )
         # if first param is a string, second param must be a query
-        self.assertRaises(ValueError, bundle.add, ('asdf', doc))  # type: ignore
-        self.assertRaises(AssertionError, bundle.add, ('asdf'))
+        self.assertRaises(ValueError, bundle.add, ("asdf", doc))  # type: ignore
+        self.assertRaises(AssertionError, bundle.add, ("asdf"))
 
     def test_adding_collection_raises_error(self):
         col = self._bundled_collection_helper()
@@ -230,7 +230,7 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
 
     def test_bundle_round_trip(self):
         bundle = FirestoreBundle("test")
-        bundle.add_named_query('best name', self._bundled_query_helper())
+        bundle.add_named_query("best name", self._bundled_query_helper())
         self.assertIsInstance(bundle.build(), str)
 
 
@@ -272,7 +272,6 @@ class TestAsyncBundle(_CollectionQueryMixin, unittest.TestCase):
 
 
 class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
-
     @staticmethod
     def build_results_iterable(items):
         return iter(items)
@@ -295,8 +294,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         bundle.add_named_query("asdf", query)
         serialized = bundle.build()
         self.assertEqual(
-            serialized,
-            _helpers.deserialize_bundle(serialized, query._client).build(),
+            serialized, _helpers.deserialize_bundle(serialized, query._client).build(),
         )
 
     def test_deserialized_bundle_cached_metadata(self):
@@ -309,51 +307,61 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         bundle_copy.add_named_query("second query", query)
         self.assertIsNone(bundle_copy._deserialized_metadata)
 
-    @mock.patch('google.cloud.firestore_v1._helpers._parse_bundle_elements_data')
+    @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_invalid_json(self, fnc):
         client = _test_helpers.make_client()
         fnc.return_value = iter([{}])
         self.assertRaises(
-            ValueError, _helpers.deserialize_bundle, 'does not matter', client,
+            ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
 
-    @mock.patch('google.cloud.firestore_v1._helpers._parse_bundle_elements_data')
+    @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_not_metadata_first(self, fnc):
         client = _test_helpers.make_client()
-        fnc.return_value = iter([{'document': {}}])
+        fnc.return_value = iter([{"document": {}}])
         self.assertRaises(
-            ValueError, _helpers.deserialize_bundle, 'does not matter', client,
+            ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
 
-    @mock.patch('google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element')
-    @mock.patch('google.cloud.firestore_v1._helpers._parse_bundle_elements_data')
+    @mock.patch(
+        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+    )
+    @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_unexpected_termination(self, fnc, _):
         client = _test_helpers.make_client()
         # invalid bc `document_metadata` must be followed by a `document`
-        fnc.return_value = [{'metadata':  {'id': 'asdf'}}, {'document_metadata': {}}]
+        fnc.return_value = [{"metadata": {"id": "asdf"}}, {"document_metadata": {}}]
         self.assertRaises(
-            ValueError, _helpers.deserialize_bundle, 'does not matter', client,
+            ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
 
-    @mock.patch('google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element')
-    @mock.patch('google.cloud.firestore_v1._helpers._parse_bundle_elements_data')
+    @mock.patch(
+        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+    )
+    @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_valid_passes(self, fnc, _):
         client = _test_helpers.make_client()
-        fnc.return_value = [{'metadata': {'id': 'asdf'}}, {'document_metadata': {}}, {'document': {}}]
-        _helpers.deserialize_bundle('does not matter', client)
+        fnc.return_value = [
+            {"metadata": {"id": "asdf"}},
+            {"document_metadata": {}},
+            {"document": {}},
+        ]
+        _helpers.deserialize_bundle("does not matter", client)
 
-    @mock.patch('google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element')
-    @mock.patch('google.cloud.firestore_v1._helpers._parse_bundle_elements_data')
+    @mock.patch(
+        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+    )
+    @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_invalid_bundle(self, fnc, _):
         client = _test_helpers.make_client()
         # invalid bc `document` must follow `document_metadata`
-        fnc.return_value = [{'metadata': {'id': 'asdf'}}, {'document': {}}]
+        fnc.return_value = [{"metadata": {"id": "asdf"}}, {"document": {}}]
         self.assertRaises(
-            ValueError, _helpers.deserialize_bundle, 'does not matter', client,
+            ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
 
     def test_not_actually_a_bundle_at_all(self):
         client = _test_helpers.make_client()
         self.assertRaises(
-            ValueError, _helpers.deserialize_bundle, '{}', client,
+            ValueError, _helpers.deserialize_bundle, "{}", client,
         )

@@ -389,7 +389,6 @@ class Test_reference_value_to_document(unittest.TestCase):
 
 
 class Test_parse_reference_value(unittest.TestCase):
-
     @staticmethod
     def _call(ref_value: str):
         from google.cloud.firestore_v1._helpers import parse_reference_value
@@ -397,36 +396,35 @@ class Test_parse_reference_value(unittest.TestCase):
         return parse_reference_value(ref_value)
 
     def test_normal(self):
-        parsed: Dict = self._call('projects/name/databases/(default)/col/doc')
-        self.assertEqual(parsed['collection_name'], 'col')
-        self.assertEqual(parsed['database_name'], '(default)')
-        self.assertEqual(parsed['document_key'], 'doc')
+        parsed: Dict = self._call("projects/name/databases/(default)/col/doc")
+        self.assertEqual(parsed["collection_name"], "col")
+        self.assertEqual(parsed["database_name"], "(default)")
+        self.assertEqual(parsed["document_key"], "doc")
 
     def test_nested(self):
-        parsed: Dict = self._call('projects/name/databases/(default)/col/doc/nested')
-        self.assertEqual(parsed['collection_name'], 'col')
-        self.assertEqual(parsed['database_name'], '(default)')
-        self.assertEqual(parsed['document_key'], 'doc/nested')
+        parsed: Dict = self._call("projects/name/databases/(default)/col/doc/nested")
+        self.assertEqual(parsed["collection_name"], "col")
+        self.assertEqual(parsed["database_name"], "(default)")
+        self.assertEqual(parsed["document_key"], "doc/nested")
 
     def test_broken(self):
         self.assertRaises(
-            ValueError, self._call, 'projects/name/databases/(default)/col',
+            ValueError, self._call, "projects/name/databases/(default)/col",
         )
 
 
-
 class Test_document_snapshot_to_protobuf(unittest.TestCase):
-
     def test_real_snapshot(self):
         from google.cloud.firestore_v1._helpers import document_snapshot_to_protobuf
         from google.cloud.firestore_v1.types import Document
         from google.cloud.firestore_v1.base_document import DocumentSnapshot
         from google.cloud.firestore_v1.document import DocumentReference
         from google.protobuf import timestamp_pb2  # type: ignore
+
         client = _make_client()
         snapshot = DocumentSnapshot(
-            data={'hello': 'world'},
-            reference=DocumentReference('col', 'doc', client=client),
+            data={"hello": "world"},
+            reference=DocumentReference("col", "doc", client=client),
             exists=True,
             read_time=timestamp_pb2.Timestamp(seconds=0, nanos=1),
             update_time=timestamp_pb2.Timestamp(seconds=0, nanos=1),
@@ -438,10 +436,11 @@ class Test_document_snapshot_to_protobuf(unittest.TestCase):
         from google.cloud.firestore_v1._helpers import document_snapshot_to_protobuf
         from google.cloud.firestore_v1.base_document import DocumentSnapshot
         from google.cloud.firestore_v1.document import DocumentReference
+
         client = _make_client()
         snapshot = DocumentSnapshot(
             data=None,
-            reference=DocumentReference('col', 'doc', client=client),
+            reference=DocumentReference("col", "doc", client=client),
             exists=False,
             read_time=None,
             update_time=None,
