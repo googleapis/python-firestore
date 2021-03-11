@@ -414,6 +414,42 @@ class Test_parse_reference_value(unittest.TestCase):
         )
 
 
+
+class Test_document_snapshot_to_protobuf(unittest.TestCase):
+
+    def test_real_snapshot(self):
+        from google.cloud.firestore_v1._helpers import document_snapshot_to_protobuf
+        from google.cloud.firestore_v1.types import Document
+        from google.cloud.firestore_v1.base_document import DocumentSnapshot
+        from google.cloud.firestore_v1.document import DocumentReference
+        from google.protobuf import timestamp_pb2  # type: ignore
+        client = _make_client()
+        snapshot = DocumentSnapshot(
+            data={'hello': 'world'},
+            reference=DocumentReference('col', 'doc', client=client),
+            exists=True,
+            read_time=timestamp_pb2.Timestamp(seconds=0, nanos=1),
+            update_time=timestamp_pb2.Timestamp(seconds=0, nanos=1),
+            create_time=timestamp_pb2.Timestamp(seconds=0, nanos=1),
+        )
+        self.assertIsInstance(document_snapshot_to_protobuf(snapshot), Document)
+
+    def test_non_existant_snapshot(self):
+        from google.cloud.firestore_v1._helpers import document_snapshot_to_protobuf
+        from google.cloud.firestore_v1.base_document import DocumentSnapshot
+        from google.cloud.firestore_v1.document import DocumentReference
+        client = _make_client()
+        snapshot = DocumentSnapshot(
+            data=None,
+            reference=DocumentReference('col', 'doc', client=client),
+            exists=False,
+            read_time=None,
+            update_time=None,
+            create_time=None,
+        )
+        self.assertIsNone(document_snapshot_to_protobuf(snapshot))
+
+
 class Test_decode_value(unittest.TestCase):
     @staticmethod
     def _call_fut(value, client=mock.sentinel.client):
