@@ -1149,9 +1149,8 @@ def deserialize_bundle(serialized: Union[str, bytes], client: "google.cloud.fire
         bundle_element: BundleElement = BundleElement.from_json(json.dumps(data))  # type: ignore
 
         if bundle is None:
-            # pragma: no cover
-            if key != "metadata":
-                raise ValueError('Expected initial type of "metadata"')
+            # This must be the first bundle type encountered
+            assert key == "metadata"
             bundle = FirestoreBundle(data[key]["id"])
             metadata_bundle_element = bundle_element
 
