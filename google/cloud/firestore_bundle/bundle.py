@@ -261,7 +261,6 @@ class FirestoreBundle:
         return NamedQuery(
             name=name,
             bundled_query=BundledQuery(
-                # TODO: is this value for `parent` correct?
                 parent=name,
                 structured_query=snapshot._to_protobuf()._pb,
                 limit_type=snapshot.limit_type,
