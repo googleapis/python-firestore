@@ -409,7 +409,9 @@ class FirestoreBundle:
         serialized_be: str = json.dumps(BundleElement.to_dict(bundle_element))
         return f"{len(serialized_be)}{serialized_be}"
 
-    def get_documents(self, *, query_name: Optional[str] = None) -> Iterable[DocumentSnapshot]:
+    def get_documents(
+        self, *, query_name: Optional[str] = None
+    ) -> Iterable[DocumentSnapshot]:
         bundled_doc: "_BundledDocument"
         for bundled_doc in self.documents.values():
             if query_name and query_name not in bundled_doc.metadata.queries:
@@ -420,6 +422,7 @@ class FirestoreBundle:
         bundled_doc = self.documents.get(document_id)
         if bundled_doc:
             return bundled_doc.snapshot
+
 
 class _BundledDocument:
     """Convenience class to hold both the metadata and the actual content
