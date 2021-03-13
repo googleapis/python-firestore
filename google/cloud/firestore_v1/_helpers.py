@@ -1096,17 +1096,35 @@ def build_timestamp(
 def compare_timestamps(
     ts1: Union[Timestamp, datetime.datetime], ts2: Union[Timestamp, datetime.datetime],
 ) -> int:
-    dt1 = build_timestamp(ts1) if not isinstance(ts1, Timestamp) else ts1
-    dt2 = build_timestamp(ts2) if not isinstance(ts2, Timestamp) else ts2
-    dt1_nanos = dt1.nanos + dt1.seconds * 1e9
-    dt2_nanos = dt2.nanos + dt2.seconds * 1e9
-    if dt1_nanos == dt2_nanos:
+    ts1 = build_timestamp(ts1) if not isinstance(ts1, Timestamp) else ts1
+    ts2 = build_timestamp(ts2) if not isinstance(ts2, Timestamp) else ts2
+    ts1_nanos = ts1.nanos + ts1.seconds * 1e9
+    ts2_nanos = ts2.nanos + ts2.seconds * 1e9
+    if ts1_nanos == ts2_nanos:
         return 0
-    return 1 if dt1_nanos > dt2_nanos else -1
+    return 1 if ts1_nanos > ts2_nanos else -1
 
 
-def deserialize_bundle(serialized: Union[str, bytes], client: "google.cloud.firestore_v1.client.BaseClient") -> "google.cloud.firestore_bundle.bundle.FirestoreBundle":  # type: ignore
+def deserialize_bundle(
+    serialized: Union[str, bytes],
+    client: "google.cloud.firestore_v1.client.BaseClient",  # type: ignore
+) -> "google.cloud.firestore_bundle.bundle.FirestoreBundle":  # type: ignore
     """Inverse operation to a `FirestoreBundle` instance's `build()` method.
+
+    Args:
+        serialized (Union[str, bytes]): The result of `FirestoreBundle.build()`.
+            Should be a list of dictionaries in string format.
+        client (BaseClient): A connected Client instance.
+
+    Returns:
+        FirestoreBundle: A bundle equivalent to that which called `build()` and
+            initially created the `serialized` value.
+
+    Raises:
+        ValueError: If any of the dictionaries in the list contain any more than
+            one top-level key.
+        ValueError: If any unexpected BundleElement types are encountered.
+        ValueError: If the serialized bundle ends before expected.
     """
     from google.cloud.firestore_bundle.bundle import FirestoreBundle
     from google.cloud.firestore_bundle.types import BundleElement
@@ -1123,7 +1141,9 @@ def deserialize_bundle(serialized: Union[str, bytes], client: "google.cloud.fire
 
     # This must be saved and added last, since we cache it to preserve timestamps,
     # yet must flush it whenever a new document or query is added to a bundle.
-    # Thus, it must be the final step to deserialization.
+    # The process of deserializing a bundle uses these methods which flush a
+    # cached metadata element, and thus, it must be the last BundleElement
+    # added during deserialization.
     metadata_bundle_element: Optional[BundleElement] = None
 
     bundle: Optional[FirestoreBundle] = None
@@ -1179,6 +1199,10 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
     so are of the form "123{...}57{...}"
     To correctly and safely read a bundle, we must first detect these length
     prefixes, read that many bytes of data, and attempt to JSON-parse that.
+
+    Raises:
+        ValueError: If a chunk of JSON ever starts without following a length
+            prefix.
     """
     _serialized: Iterator[int] = iter(
         serialized if isinstance(serialized, bytes) else serialized.encode("utf-8")

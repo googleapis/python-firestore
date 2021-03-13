@@ -35,6 +35,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 from typing import (
     Dict,
+    Iterable,
     List,
     Optional,
     Union,
@@ -46,9 +47,31 @@ class FirestoreBundle:
     longterm storage.
 
     If any queries are added to this bundle, all associated documents will be
-    loaded and stored in memory for serialization. Client libraries handle
-    deserialization and usage of FirestoreBundles - the Python Firestore SDK
-    does not offer that functionality.
+    loaded and stored in memory for serialization.
+
+    Usage:
+
+        from google.cloud.firestore import Client
+        from google.cloud.firestore_bundle.bundle import FirestoreBundle
+        from google.cloud.firestore import _helpers
+
+        db = Client()
+        bundle = FirestoreBundle('my-bundle')
+        bundle.add('all-users', db.collection('users')._query())
+        bundle.add(
+            'top-ten-hamburgers',
+            db.collection('hamburgers').limit(limit=10)._query(),
+        )
+        serialized: str = bundle.build()
+
+        # Store somewhere like your GCS or your device's file system
+
+        # Some time later after loading `serialized` again
+        bundle = _helpers.deserialize_bundle(serialized)
+
+        users: Iterable[DocumentSnapshot] = bundle.get_documents(
+            query_name='all-users',
+        )
 
     Args:
         name (str): The Id of the bundle.
@@ -71,7 +94,7 @@ class FirestoreBundle:
         """Adds a document or entire query to the bundle.
 
         This function is offered for convenience / API parity with other SDKs.
-        Most developers will get better outcomes from using the more specific,
+        Most users will get better outcomes from using the more specific,
         `add_document` or `add_named_query` methods.
 
         Args:
@@ -92,14 +115,11 @@ class FirestoreBundle:
             db = firestore.Client()
             collection_ref = db.collection(u'users')
 
-            bundle = firestore.FirestoreBundle('my bundle')
+            bundle = firestore.FirestoreBundle('my-bundle')
 
             # Add an entire query. This will load and save every matching
             # document.
-            bundle.add(
-                'all the users',
-                collection_ref._query(),
-            )
+            bundle.add('all the users', collection_ref._query())
 
             # Add a single document.
             bundle.add(collection_ref.documents('some_id').get())
@@ -116,7 +136,7 @@ class FirestoreBundle:
             self.add_named_query(document_or_query_name, query)
         else:
             raise ValueError(
-                "Bundle.add accepts either a standalone DocumentSnapshot, or "
+                "Bundle.add accepts either a standalone DocumentSnapshot or "
                 "a name (string) and a Query."
             )
         return self
@@ -183,7 +203,7 @@ class FirestoreBundle:
         self._deserialized_metadata = None
         return self
 
-    def add_named_query(self, name: str, query: BaseQuery,) -> "FirestoreBundle":
+    def add_named_query(self, name: str, query: BaseQuery) -> "FirestoreBundle":
         """Adds a query to the bundle, referenced by the provided name.
 
         Args:
@@ -203,6 +223,12 @@ class FirestoreBundle:
 
         Returns:
             FirestoreBundle: self
+
+        Raises:
+            ValueError: If anything other than a BaseQuery (e.g., a Collection)
+                is supplied. If you have a Collection, call its `_query()`
+                method to get what this method expects.
+            ValueError: If the supplied name has already been added.
         """
         if not isinstance(query, BaseQuery):
             raise ValueError(
@@ -281,7 +307,7 @@ class FirestoreBundle:
         if _helpers.compare_timestamps(_ts, self.latest_read_time) == 1:
             self.latest_read_time = _ts
 
-    def _add_bundle_element(self, bundle_element: BundleElement, *, client: BaseClient, type: str):  # type: ignore noqa
+    def _add_bundle_element(self, bundle_element: BundleElement, *, client: BaseClient, type: str):  # type: ignore
         """Applies BundleElements to this FirestoreBundle instance as a part of
         deserializing a FirestoreBundle string.
         """
@@ -383,6 +409,17 @@ class FirestoreBundle:
         serialized_be: str = json.dumps(BundleElement.to_dict(bundle_element))
         return f"{len(serialized_be)}{serialized_be}"
 
+    def get_documents(self, *, query_name: Optional[str] = None) -> Iterable[DocumentSnapshot]:
+        bundled_doc: "_BundledDocument"
+        for bundled_doc in self.documents.values():
+            if query_name and query_name not in bundled_doc.metadata.queries:
+                continue
+            yield bundled_doc.snapshot
+
+    def get_document(self, document_id: str) -> Optional[DocumentSnapshot]:
+        bundled_doc = self.documents.get(document_id)
+        if bundled_doc:
+            return bundled_doc.snapshot
 
 class _BundledDocument:
     """Convenience class to hold both the metadata and the actual content
