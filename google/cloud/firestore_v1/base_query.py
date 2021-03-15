@@ -396,18 +396,6 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    @property
-    def limit_type(self) -> int:
-        """BundledQuery.LimitType equivalent of this query.
-        """
-        from google.cloud.firestore_bundle.types import BundledQuery
-
-        return (
-            BundledQuery.LimitType.LAST
-            if self._limit_to_last
-            else BundledQuery.LimitType.FIRST
-        )
-
     def limit_to_last(self, count: int) -> "BaseQuery":
         """Limit a query to return the last `count` matching results.
         If the current query already has a `limit_to_last`

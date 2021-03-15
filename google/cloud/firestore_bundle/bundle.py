@@ -25,6 +25,7 @@ from google.cloud.firestore_bundle.types.bundle import (
     NamedQuery,
 )
 from google.cloud._helpers import _datetime_to_pb_timestamp, UTC  # type: ignore
+from google.cloud.firestore_bundle._helpers import limit_type_of_query
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -289,7 +290,7 @@ class FirestoreBundle:
             bundled_query=BundledQuery(
                 parent=name,
                 structured_query=snapshot._to_protobuf()._pb,
-                limit_type=snapshot.limit_type,
+                limit_type=limit_type_of_query(snapshot),
             ),
             read_time=read_time,
         )
