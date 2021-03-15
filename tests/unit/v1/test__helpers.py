@@ -20,7 +20,7 @@ import unittest
 
 import mock
 import pytest
-from typing import Dict, List
+from typing import List
 
 
 class AsyncMock(mock.MagicMock):

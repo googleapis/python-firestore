@@ -36,7 +36,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 from typing import (
     Dict,
-    Iterable,
+    Generator,
     List,
     Optional,
     Union,
@@ -414,7 +414,7 @@ class FirestoreBundle:
 
     def get_documents(
         self, *, query_name: Optional[str] = None
-    ) -> Iterable[DocumentSnapshot]:
+    ) -> Generator[DocumentSnapshot, None, None]:
         bundled_doc: "_BundledDocument"
         for bundled_doc in self.documents.values():
             if query_name and query_name not in bundled_doc.metadata.queries:

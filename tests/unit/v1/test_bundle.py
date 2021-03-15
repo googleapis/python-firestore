@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import typing
 import unittest
 
 import mock
@@ -52,7 +53,9 @@ class _CollectionQueryMixin:
     def get_client():
         raise NotImplementedError()
 
-    def _bundled_collection_helper(self) -> CollectionReference:
+    def _bundled_collection_helper(
+        self, document_ids: typing.Optional[typing.List[str]] = None
+    ) -> CollectionReference:
         """Builder of a mocked Query for the sake of testing Bundles.
 
         Bundling queries involves loading the actual documents for cold storage,
@@ -61,7 +64,7 @@ class _CollectionQueryMixin:
         """
         client = self.get_client()
         template = client._database_string + "/documents/col/{}"
-        document_ids = ["doc-1", "doc-2"]
+        document_ids = document_ids or ["doc-1", "doc-2"]
         documents = [
             RunQueryResponse(
                 transaction=b"",
@@ -81,8 +84,10 @@ class _CollectionQueryMixin:
         client._firestore_api_internal = api_client
         return self.get_collection_class()("col", client=client)
 
-    def _bundled_query_helper(self) -> BaseQuery:
-        return self._bundled_collection_helper()._query()
+    def _bundled_query_helper(
+        self, document_ids: typing.Optional[typing.List[str]] = None
+    ) -> BaseQuery:
+        return self._bundled_collection_helper(document_ids=document_ids)._query()
 
 
 class TestBundle(_CollectionQueryMixin, unittest.TestCase):
@@ -248,10 +253,62 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
         bundle = FirestoreBundle("test")
         self.assertRaises(ValueError, bundle.add_named_query, "asdf", col)
 
-    def test_bundle_round_trip(self):
+    def test_bundle_build(self):
         bundle = FirestoreBundle("test")
         bundle.add_named_query("best name", self._bundled_query_helper())
         self.assertIsInstance(bundle.build(), str)
+
+    def test_get_documents(self):
+        bundle = FirestoreBundle("test")
+        query: Query = self._bundled_query_helper()  # type: ignore
+        bundle.add_named_query("sweet query", query)
+        docs_iter = bundle.get_documents(query_name="sweet query")
+        doc = next(docs_iter)
+        self.assertEqual(doc.id, "doc-1")
+        doc = next(docs_iter)
+        self.assertEqual(doc.id, "doc-2")
+
+        # Now an empty one
+        docs_iter = bundle.get_documents(query_name="wrong query")
+        doc = next(docs_iter, None)
+        self.assertIsNone(doc)
+
+    def test_get_documents_two_queries(self):
+        bundle = FirestoreBundle("test")
+        query: Query = self._bundled_query_helper()  # type: ignore
+        bundle.add_named_query("sweet query", query)
+
+        query: Query = self._bundled_query_helper(document_ids=["doc-3", "doc-4"])  # type: ignore
+        bundle.add_named_query("second query", query)
+
+        docs_iter = bundle.get_documents(query_name="sweet query")
+        doc = next(docs_iter)
+        self.assertEqual(doc.id, "doc-1")
+        doc = next(docs_iter)
+        self.assertEqual(doc.id, "doc-2")
+
+        docs_iter = bundle.get_documents(query_name="second query")
+        doc = next(docs_iter)
+        self.assertEqual(doc.id, "doc-3")
+        doc = next(docs_iter)
+        self.assertEqual(doc.id, "doc-4")
+
+    def test_get_document(self):
+        bundle = FirestoreBundle("test")
+        query: Query = self._bundled_query_helper()  # type: ignore
+        bundle.add_named_query("sweet query", query)
+
+        self.assertIsNotNone(
+            bundle.get_document(
+                "projects/project-project/databases/(default)/documents/col/doc-1",
+            ),
+        )
+
+        self.assertIsNone(
+            bundle.get_document(
+                "projects/project-project/databases/(default)/documents/col/doc-0",
+            ),
+        )
 
 
 class TestAsyncBundle(_CollectionQueryMixin, unittest.TestCase):
