@@ -325,15 +325,15 @@ class FirestoreBundle:
                 bundle_element.document_metadata.name
             ] = bundle_element.document_metadata
         elif type == "document":
-            parsed_path = _helpers.parse_reference_value(bundle_element.document.name)
+            parsed_path: _helpers.ParsedReferenceValue = _helpers.parse_reference_value(bundle_element.document.name)
             snapshot = DocumentSnapshot(
                 data=_helpers.decode_dict(
                     Document(mapping=bundle_element.document).fields, client
                 ),
                 exists=True,
                 reference=DocumentReference(
-                    parsed_path["collection_name"],
-                    parsed_path["document_key"],
+                    parsed_path.collection_name,
+                    parsed_path.document_key,
                     client=client,
                 ),
                 read_time=self._doc_metadata_map[

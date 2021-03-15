@@ -396,16 +396,16 @@ class Test_parse_reference_value(unittest.TestCase):
         return parse_reference_value(ref_value)
 
     def test_normal(self):
-        parsed: Dict = self._call("projects/name/databases/(default)/col/doc")
-        self.assertEqual(parsed["collection_name"], "col")
-        self.assertEqual(parsed["database_name"], "(default)")
-        self.assertEqual(parsed["document_key"], "doc")
+        parsed = self._call("projects/name/databases/(default)/col/doc")
+        self.assertEqual(parsed.collection_name, "col")
+        self.assertEqual(parsed.database_name, "(default)")
+        self.assertEqual(parsed.document_key, "doc")
 
     def test_nested(self):
-        parsed: Dict = self._call("projects/name/databases/(default)/col/doc/nested")
-        self.assertEqual(parsed["collection_name"], "col")
-        self.assertEqual(parsed["database_name"], "(default)")
-        self.assertEqual(parsed["document_key"], "doc/nested")
+        parsed = self._call("projects/name/databases/(default)/col/doc/nested")
+        self.assertEqual(parsed.collection_name, "col")
+        self.assertEqual(parsed.database_name, "(default)")
+        self.assertEqual(parsed.document_key, "doc/nested")
 
     def test_broken(self):
         self.assertRaises(

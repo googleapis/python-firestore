@@ -246,7 +246,14 @@ def document_snapshot_to_protobuf(snapshot: "google.cloud.firestore_v1.base_docu
     )
 
 
-def parse_reference_value(reference_value: str) -> Dict[str, str]:
+class ParsedReferenceValue:
+    def __init__(self, *, collection_name: str, document_key: str, database_name: str = '(default)'):
+        self.collection_name = collection_name
+        self.database_name = database_name
+        self.document_key = document_key
+
+
+def parse_reference_value(reference_value: str) -> ParsedReferenceValue:
     """Extracts the collection name, document key, and database name from a full
     document path.
     """
@@ -255,11 +262,11 @@ def parse_reference_value(reference_value: str) -> Dict[str, str]:
         msg = BAD_REFERENCE_ERROR.format(reference_value)
         raise ValueError(msg)
 
-    return {
-        "collection_name": parts[4],
-        "database_name": parts[3],
-        "document_key": "/".join(parts[5:]),
-    }
+    return ParsedReferenceValue(
+        collection_name=parts[4],
+        database_name=parts[3],
+        document_key="/".join(parts[5:]),
+    )
 
 
 def reference_value_to_document(reference_value, client) -> Any:
