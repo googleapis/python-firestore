@@ -396,10 +396,15 @@ class TestDocumentReferenceValue(unittest.TestCase):
         return DocumentReferenceValue(ref_value)
 
     def test_normal(self):
-        parsed = self._call("projects/name/databases/(default)/documents/col/doc")
+        orig = "projects/name/databases/(default)/documents/col/doc"
+        parsed = self._call(orig)
         self.assertEqual(parsed.collection_name, "col")
         self.assertEqual(parsed.database_name, "(default)")
         self.assertEqual(parsed.document_id, "doc")
+
+        self.assertEqual(parsed.full_path, orig)
+        parsed._reference_value = None  # type: ignore
+        self.assertEqual(parsed.full_path, orig)
 
     def test_nested(self):
         parsed = self._call(
