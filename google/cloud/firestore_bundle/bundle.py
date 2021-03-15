@@ -325,7 +325,9 @@ class FirestoreBundle:
                 bundle_element.document_metadata.name
             ] = bundle_element.document_metadata
         elif type == "document":
-            doc_ref_value = _helpers.DocumentReferenceValue(bundle_element.document.name)
+            doc_ref_value = _helpers.DocumentReferenceValue(
+                bundle_element.document.name
+            )
             snapshot = DocumentSnapshot(
                 data=_helpers.decode_dict(
                     Document(mapping=bundle_element.document).fields, client

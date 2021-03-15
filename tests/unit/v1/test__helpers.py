@@ -402,7 +402,9 @@ class TestDocumentReferenceValue(unittest.TestCase):
         self.assertEqual(parsed.document_id, "doc")
 
     def test_nested(self):
-        parsed = self._call("projects/name/databases/(default)/documents/col/doc/nested")
+        parsed = self._call(
+            "projects/name/databases/(default)/documents/col/doc/nested"
+        )
         self.assertEqual(parsed.collection_name, "col")
         self.assertEqual(parsed.database_name, "(default)")
         self.assertEqual(parsed.document_id, "doc/nested")

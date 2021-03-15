@@ -255,12 +255,13 @@ class DocumentReferenceValue:
         )
         assert doc_ref_val.project_name == 'my-proj'
         assert doc_ref_val.collection_name == 'my-col'
-        assert doc_ref_val.document_key == 'my-doc'
+        assert doc_ref_val.document_id == 'my-doc'
         assert doc_ref_val.database_name == '(default)'
 
     Raises:
         ValueError: If the supplied value cannot satisfy a complete path.
     """
+
     def __init__(self, reference_value: str):
         self._reference_value = reference_value
 
@@ -274,20 +275,27 @@ class DocumentReferenceValue:
         self.project_name = parts[1]
         self.collection_name = parts[5]
         self.database_name = parts[3]
-        self.document_id = '/'.join(parts[6:])
+        self.document_id = "/".join(parts[6:])
 
     @property
     def full_key(self) -> str:
         """Computed property for a DocumentReference's collection_name and
         document Id"""
-        return '/'.join([self.collection_name, self.document_id])
+        return "/".join([self.collection_name, self.document_id])
 
     @property
     def full_path(self) -> str:
-        return self._reference_value or '/'.join([
-            'projects', self.project_name, 'databases', self.database_name,
-            'documents', self.collection_name, self.document_id,
-        ])
+        return self._reference_value or "/".join(
+            [
+                "projects",
+                self.project_name,
+                "databases",
+                self.database_name,
+                "documents",
+                self.collection_name,
+                self.document_id,
+            ]
+        )
 
 
 def reference_value_to_document(reference_value, client) -> Any:
@@ -309,6 +317,7 @@ def reference_value_to_document(reference_value, client) -> Any:
             project / database combination as the ``client``.
     """
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
+
     doc_ref_value = DocumentReferenceValue(reference_value)
 
     document: BaseDocumentReference = client.document(doc_ref_value.full_key)
