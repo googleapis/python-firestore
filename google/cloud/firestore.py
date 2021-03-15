@@ -15,7 +15,6 @@
 """Python idiomatic client for Google Cloud Firestore."""
 
 
-from google.cloud.firestore_bundle.bundle import FirestoreBundle
 from google.cloud.firestore_v1 import __version__
 from google.cloud.firestore_v1 import ArrayRemove
 from google.cloud.firestore_v1 import ArrayUnion
@@ -70,7 +69,6 @@ __all__: List[str] = [
     "DocumentSnapshot",
     "DocumentTransform",
     "ExistsOption",
-    "FirestoreBundle",
     "GeoPoint",
     "Increment",
     "LastUpdateOption",
