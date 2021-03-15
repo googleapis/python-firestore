@@ -53,7 +53,7 @@ class FirestoreBundle:
     Usage:
 
         from google.cloud.firestore import Client
-        from google.cloud.firestore_bundle.bundle import FirestoreBundle
+        from google.cloud.firestore_bundle import FirestoreBundle
         from google.cloud.firestore import _helpers
 
         db = Client()
@@ -112,11 +112,12 @@ class FirestoreBundle:
         Example:
 
             from google.cloud import firestore
+            from google.cloud.firestore.firestore_bundle import FirestoreBundle
 
             db = firestore.Client()
             collection_ref = db.collection(u'users')
 
-            bundle = firestore.FirestoreBundle('my-bundle')
+            bundle = FirestoreBundle('my-bundle')
 
             # Add an entire query. This will load and save every matching
             # document.

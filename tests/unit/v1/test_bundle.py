@@ -16,8 +16,7 @@ import typing
 import unittest
 
 import mock
-from google.cloud.firestore_bundle.bundle import FirestoreBundle
-from google.cloud.firestore_bundle.types import BundleElement
+from google.cloud.firestore_bundle import BundleElement, FirestoreBundle
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.base_query import BaseQuery
@@ -401,7 +400,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         )
 
     @mock.patch(
-        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
     )
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_unexpected_termination(self, fnc, _):
@@ -413,7 +412,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         )
 
     @mock.patch(
-        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
     )
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_valid_passes(self, fnc, _):
@@ -426,7 +425,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         _helpers.deserialize_bundle("does not matter", client)
 
     @mock.patch(
-        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
     )
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_invalid_bundle(self, fnc, _):
@@ -438,7 +437,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         )
 
     @mock.patch(
-        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
     )
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_invalid_bundle_element_type(self, fnc, _):
@@ -450,7 +449,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         )
 
     @mock.patch(
-        "google.cloud.firestore_bundle.bundle.FirestoreBundle._add_bundle_element"
+        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
     )
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_invalid_bundle_start(self, fnc, _):

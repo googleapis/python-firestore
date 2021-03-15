@@ -1140,7 +1140,7 @@ def compare_timestamps(
 def deserialize_bundle(
     serialized: Union[str, bytes],
     client: "google.cloud.firestore_v1.client.BaseClient",  # type: ignore
-) -> "google.cloud.firestore_bundle.bundle.FirestoreBundle":  # type: ignore
+) -> "google.cloud.firestore_bundle.FirestoreBundle":  # type: ignore
     """Inverse operation to a `FirestoreBundle` instance's `build()` method.
 
     Args:
@@ -1158,8 +1158,7 @@ def deserialize_bundle(
         ValueError: If any unexpected BundleElement types are encountered.
         ValueError: If the serialized bundle ends before expected.
     """
-    from google.cloud.firestore_bundle.bundle import FirestoreBundle
-    from google.cloud.firestore_bundle.types import BundleElement
+    from google.cloud.firestore_bundle import BundleElement, FirestoreBundle
 
     # Outlines the legal transitions from one BundleElement to another.
     bundle_state_machine = {

@@ -247,16 +247,28 @@ omit =
 """,
 )
 
+# s.replace(
+#     "google/cloud/firestore_bundle/types/bundle.py",
+#     "from google.firestore.v1 import document_pb2 as gfv_document  # type: ignore\n",
+#     "from google.cloud.firestore_v1.types import document as gfv_document\n",
+# )
+
+# s.replace(
+#     "google/cloud/firestore_bundle/types/bundle.py",
+#     "from google.firestore.v1 import query_pb2 as query  # type: ignore\n",
+#     "from google.cloud.firestore_v1.types import query\n",
+# )
+
 s.replace(
-    "google/cloud/firestore_bundle/types/bundle.py",
-    "from google.firestore.v1 import document_pb2 as gfv_document  # type: ignore\n",
-    "from google.cloud.firestore_v1.types import document as gfv_document\n",
+    "google/cloud/firestore_bundle/__init__.py",
+    "from .types.bundle import NamedQuery\n",
+    "from .types.bundle import NamedQuery\n\nfrom .bundle import FirestoreBundle\n",
 )
 
 s.replace(
-    "google/cloud/firestore_bundle/types/bundle.py",
-    "from google.firestore.v1 import query_pb2 as query  # type: ignore\n",
-    "from google.cloud.firestore_v1.types import query\n",
+    "google/cloud/firestore_bundle/__init__.py",
+    "\'BundledQuery\',",
+    "\"BundledQuery\",\n    \"FirestoreBundle\",",
 )
 
 s.shell.run(["nox", "-s", "blacken"], hide_output=False)
