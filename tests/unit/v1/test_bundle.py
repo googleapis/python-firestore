@@ -399,9 +399,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
             ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
 
-    @mock.patch(
-        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
-    )
+    @mock.patch("google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element")
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_unexpected_termination(self, fnc, _):
         client = _test_helpers.make_client()
@@ -411,9 +409,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
             ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
 
-    @mock.patch(
-        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
-    )
+    @mock.patch("google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element")
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_valid_passes(self, fnc, _):
         client = _test_helpers.make_client()
@@ -424,9 +420,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         ]
         _helpers.deserialize_bundle("does not matter", client)
 
-    @mock.patch(
-        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
-    )
+    @mock.patch("google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element")
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_invalid_bundle(self, fnc, _):
         client = _test_helpers.make_client()
@@ -436,9 +430,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
             ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
 
-    @mock.patch(
-        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
-    )
+    @mock.patch("google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element")
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_invalid_bundle_element_type(self, fnc, _):
         client = _test_helpers.make_client()
@@ -448,9 +440,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
             ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
 
-    @mock.patch(
-        "google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element"
-    )
+    @mock.patch("google.cloud.firestore_bundle.FirestoreBundle._add_bundle_element")
     @mock.patch("google.cloud.firestore_v1._helpers._parse_bundle_elements_data")
     def test_invalid_bundle_start(self, fnc, _):
         client = _test_helpers.make_client()
