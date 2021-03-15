@@ -239,34 +239,55 @@ def document_snapshot_to_protobuf(snapshot: "google.cloud.firestore_v1.base_docu
         return None
 
     return Document(
-        name=f"{snapshot._client._database_string}/{snapshot.reference.path}",
+        name=snapshot.reference._document_path,
         fields=encode_dict(snapshot._data),
         create_time=snapshot.create_time,
         update_time=snapshot.update_time,
     )
 
 
-class ParsedReferenceValue:
-    def __init__(self, *, collection_name: str, document_key: str, database_name: str = '(default)'):
-        self.collection_name = collection_name
-        self.database_name = database_name
-        self.document_key = document_key
+class DocumentReferenceValue:
+    """DocumentReference path container with accessors for each relevant chunk.
 
+    Usage:
+        doc_ref_val = DocumentReferenceValue(
+            'projects/my-proj/databases/(default)/documents/my-col/my-doc',
+        )
+        assert doc_ref_val.project_name == 'my-proj'
+        assert doc_ref_val.collection_name == 'my-col'
+        assert doc_ref_val.document_key == 'my-doc'
+        assert doc_ref_val.database_name == '(default)'
 
-def parse_reference_value(reference_value: str) -> ParsedReferenceValue:
-    """Extracts the collection name, document key, and database name from a full
-    document path.
+    Raises:
+        ValueError: If the supplied value cannot satisfy a complete path.
     """
-    parts = reference_value.split(DOCUMENT_PATH_DELIMITER, 5)
-    if len(parts) < 6:
-        msg = BAD_REFERENCE_ERROR.format(reference_value)
-        raise ValueError(msg)
+    def __init__(self, reference_value: str):
+        self._reference_value = reference_value
 
-    return ParsedReferenceValue(
-        collection_name=parts[4],
-        database_name=parts[3],
-        document_key="/".join(parts[5:]),
-    )
+        # The first 5 parts are
+        # projects, {project}, databases, {database}, documents
+        parts = reference_value.split(DOCUMENT_PATH_DELIMITER)
+        if len(parts) < 7:
+            msg = BAD_REFERENCE_ERROR.format(reference_value)
+            raise ValueError(msg)
+
+        self.project_name = parts[1]
+        self.collection_name = parts[5]
+        self.database_name = parts[3]
+        self.document_id = '/'.join(parts[6:])
+
+    @property
+    def full_key(self) -> str:
+        """Computed property for a DocumentReference's collection_name and
+        document Id"""
+        return '/'.join([self.collection_name, self.document_id])
+
+    @property
+    def full_path(self) -> str:
+        return self._reference_value or '/'.join([
+            'projects', self.project_name, 'databases', self.database_name,
+            'documents', self.collection_name, self.document_id,
+        ])
 
 
 def reference_value_to_document(reference_value, client) -> Any:
@@ -287,15 +308,10 @@ def reference_value_to_document(reference_value, client) -> Any:
         ValueError: If the ``reference_value`` does not come from the same
             project / database combination as the ``client``.
     """
-    # The first 5 parts are
-    # projects, {project}, databases, {database}, documents
-    parts = reference_value.split(DOCUMENT_PATH_DELIMITER, 5)
-    if len(parts) != 6:
-        msg = BAD_REFERENCE_ERROR.format(reference_value)
-        raise ValueError(msg)
+    from google.cloud.firestore_v1.base_document import BaseDocumentReference
+    doc_ref_value = DocumentReferenceValue(reference_value)
 
-    # The sixth part is `a/b/c/d` (i.e. the document path)
-    document = client.document(parts[-1])
+    document: BaseDocumentReference = client.document(doc_ref_value.full_key)
     if document._document_path != reference_value:
         msg = WRONG_APP_REFERENCE.format(reference_value, client._database_string)
         raise ValueError(msg)

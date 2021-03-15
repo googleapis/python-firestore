@@ -388,28 +388,28 @@ class Test_reference_value_to_document(unittest.TestCase):
         self.assertEqual(exc_info.exception.args, (err_msg,))
 
 
-class Test_parse_reference_value(unittest.TestCase):
+class TestDocumentReferenceValue(unittest.TestCase):
     @staticmethod
     def _call(ref_value: str):
-        from google.cloud.firestore_v1._helpers import parse_reference_value
+        from google.cloud.firestore_v1._helpers import DocumentReferenceValue
 
-        return parse_reference_value(ref_value)
+        return DocumentReferenceValue(ref_value)
 
     def test_normal(self):
-        parsed = self._call("projects/name/databases/(default)/col/doc")
+        parsed = self._call("projects/name/databases/(default)/documents/col/doc")
         self.assertEqual(parsed.collection_name, "col")
         self.assertEqual(parsed.database_name, "(default)")
-        self.assertEqual(parsed.document_key, "doc")
+        self.assertEqual(parsed.document_id, "doc")
 
     def test_nested(self):
-        parsed = self._call("projects/name/databases/(default)/col/doc/nested")
+        parsed = self._call("projects/name/databases/(default)/documents/col/doc/nested")
         self.assertEqual(parsed.collection_name, "col")
         self.assertEqual(parsed.database_name, "(default)")
-        self.assertEqual(parsed.document_key, "doc/nested")
+        self.assertEqual(parsed.document_id, "doc/nested")
 
     def test_broken(self):
         self.assertRaises(
-            ValueError, self._call, "projects/name/databases/(default)/col",
+            ValueError, self._call, "projects/name/databases/(default)/documents/col",
         )
 
 

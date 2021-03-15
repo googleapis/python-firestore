@@ -168,9 +168,9 @@ class FirestoreBundle:
         """
         original_document: Optional[_BundledDocument]
         original_queries: Optional[List[str]] = []
-        _id: str = snapshot.reference._document_path
+        full_document_path: str = snapshot.reference._document_path
 
-        original_document = self.documents.get(_id)
+        original_document = self.documents.get(full_document_path)
         if original_document:
             original_queries = original_document.metadata.queries  # type: ignore
 
@@ -185,10 +185,10 @@ class FirestoreBundle:
         )
 
         if should_use_snaphot:
-            self.documents[_id] = _BundledDocument(
+            self.documents[full_document_path] = _BundledDocument(
                 snapshot=snapshot,
                 metadata=BundledDocumentMetadata(
-                    name=f"{snapshot._client._database_string}/{snapshot.reference.path}",
+                    name=full_document_path,
                     read_time=snapshot.read_time,
                     exists=snapshot.exists,
                     queries=original_queries,
@@ -196,7 +196,7 @@ class FirestoreBundle:
             )
 
         if query_name:
-            bundled_document = self.documents.get(_id)
+            bundled_document = self.documents.get(full_document_path)
             bundled_document.metadata.queries.append(query_name)  # type: ignore
 
         self._update_last_read_time(snapshot.read_time)
@@ -325,15 +325,15 @@ class FirestoreBundle:
                 bundle_element.document_metadata.name
             ] = bundle_element.document_metadata
         elif type == "document":
-            parsed_path: _helpers.ParsedReferenceValue = _helpers.parse_reference_value(bundle_element.document.name)
+            doc_ref_value = _helpers.DocumentReferenceValue(bundle_element.document.name)
             snapshot = DocumentSnapshot(
                 data=_helpers.decode_dict(
                     Document(mapping=bundle_element.document).fields, client
                 ),
                 exists=True,
                 reference=DocumentReference(
-                    parsed_path.collection_name,
-                    parsed_path.document_key,
+                    doc_ref_value.collection_name,
+                    doc_ref_value.document_id,
                     client=client,
                 ),
                 read_time=self._doc_metadata_map[
