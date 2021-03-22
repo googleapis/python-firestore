@@ -21,7 +21,6 @@ import mock
 from google.cloud.firestore_bundle import BundleElement, FirestoreBundle
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
-from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.query import Query
@@ -80,7 +79,9 @@ class _CollectionQueryMixin:
                 transaction=b"",
                 document=Document(
                     name=template.format(document_id),
-                    fields=_helpers.encode_dict(_index_from_data(index) or {"hello": "world"}),
+                    fields=_helpers.encode_dict(
+                        _index_from_data(index) or {"hello": "world"}
+                    ),
                     create_time=Timestamp(seconds=1, nanos=1),
                     update_time=Timestamp(seconds=1, nanos=1),
                 ),
@@ -100,8 +101,7 @@ class _CollectionQueryMixin:
         data: typing.Optional[typing.List[typing.Dict]] = None,
     ) -> BaseQuery:
         return self._bundled_collection_helper(
-            document_ids=document_ids,
-            data=data,
+            document_ids=document_ids, data=data,
         )._query()
 
 
@@ -226,14 +226,18 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
         bundle = FirestoreBundle("test")
         query: Query = self._bundled_query_helper()  # type: ignore
         bundle.add_named_query("sweet query", query)
-        docs_iter = _helpers._get_documents_from_bundle(bundle, query_name="sweet query")
+        docs_iter = _helpers._get_documents_from_bundle(
+            bundle, query_name="sweet query"
+        )
         doc = next(docs_iter)
         self.assertEqual(doc.id, "doc-1")
         doc = next(docs_iter)
         self.assertEqual(doc.id, "doc-2")
 
         # Now an empty one
-        docs_iter = _helpers._get_documents_from_bundle(bundle, query_name="wrong query")
+        docs_iter = _helpers._get_documents_from_bundle(
+            bundle, query_name="wrong query"
+        )
         doc = next(docs_iter, None)
         self.assertIsNone(doc)
 
@@ -245,13 +249,17 @@ class TestBundle(_CollectionQueryMixin, unittest.TestCase):
         query: Query = self._bundled_query_helper(document_ids=["doc-3", "doc-4"])  # type: ignore
         bundle.add_named_query("second query", query)
 
-        docs_iter = _helpers._get_documents_from_bundle(bundle, query_name="sweet query")
+        docs_iter = _helpers._get_documents_from_bundle(
+            bundle, query_name="sweet query"
+        )
         doc = next(docs_iter)
         self.assertEqual(doc.id, "doc-1")
         doc = next(docs_iter)
         self.assertEqual(doc.id, "doc-2")
 
-        docs_iter = _helpers._get_documents_from_bundle(bundle, query_name="second query")
+        docs_iter = _helpers._get_documents_from_bundle(
+            bundle, query_name="second query"
+        )
         doc = next(docs_iter)
         self.assertEqual(doc.id, "doc-3")
         doc = next(docs_iter)
@@ -341,10 +349,10 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         )
 
     def test_build_round_trip_emojis(self):
-        smile = '😂'
-        mermaid = '🧜🏿‍♀️'
+        smile = "😂"
+        mermaid = "🧜🏿‍♀️"
         query = self._bundled_query_helper(
-            data=[{'smile': smile}, {'compound': mermaid}],
+            data=[{"smile": smile}, {"compound": mermaid}],
         )
         bundle = FirestoreBundle("test")
         bundle.add_named_query("asdf", query)
@@ -352,11 +360,15 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         reserialized_bundle = _helpers.deserialize_bundle(serialized, query._client)
 
         self.assertEqual(
-            bundle.documents["projects/project-project/databases/(default)/documents/col/doc-1"].snapshot._data['smile'],
+            bundle.documents[
+                "projects/project-project/databases/(default)/documents/col/doc-1"
+            ].snapshot._data["smile"],
             smile,
         )
         self.assertEqual(
-            bundle.documents["projects/project-project/databases/(default)/documents/col/doc-2"].snapshot._data['compound'],
+            bundle.documents[
+                "projects/project-project/databases/(default)/documents/col/doc-2"
+            ].snapshot._data["compound"],
             mermaid,
         )
         self.assertEqual(
@@ -364,10 +376,10 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         )
 
     def test_build_round_trip_more_unicode(self):
-        bano = 'baño'
-        chinese_characters = '殷周金文集成引得'
+        bano = "baño"
+        chinese_characters = "殷周金文集成引得"
         query = self._bundled_query_helper(
-            data=[{'bano': bano}, {'international': chinese_characters}],
+            data=[{"bano": bano}, {"international": chinese_characters}],
         )
         bundle = FirestoreBundle("test")
         bundle.add_named_query("asdf", query)
@@ -375,11 +387,15 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         reserialized_bundle = _helpers.deserialize_bundle(serialized, query._client)
 
         self.assertEqual(
-            bundle.documents["projects/project-project/databases/(default)/documents/col/doc-1"].snapshot._data['bano'],
+            bundle.documents[
+                "projects/project-project/databases/(default)/documents/col/doc-1"
+            ].snapshot._data["bano"],
             bano,
         )
         self.assertEqual(
-            bundle.documents["projects/project-project/databases/(default)/documents/col/doc-2"].snapshot._data['international'],
+            bundle.documents[
+                "projects/project-project/databases/(default)/documents/col/doc-2"
+            ].snapshot._data["international"],
             chinese_characters,
         )
         self.assertEqual(
@@ -391,29 +407,28 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         '{"seconds": 123, "nanos": 456}', instead of an ISO-formatted string.
         This tests deserialization from that format."""
 
-        client = _test_helpers.make_client(project_name='fir-bundles-test')
+        client = _test_helpers.make_client(project_name="fir-bundles-test")
 
-        _serialized: str = ('139{"metadata":{"id":"test-bundle","createTime":' +
-        '{"seconds":"1616434660","nanos":913764000},"version":1,"totalDocuments"' +
-        ':1,"totalBytes":"829"}}224{"namedQuery":{"name":"self","bundledQuery":' +
-        '{"parent":"projects/fir-bundles-test/databases/(default)/documents",' +
-        '"structuredQuery":{"from":[{"collectionId":"bundles"}]}},"readTime":' +
-        '{"seconds":"1616434660","nanos":913764000}}}194{"documentMetadata":' +
-        '{"name":"projects/fir-bundles-test/databases/(default)/documents/' +
-        'bundles/test-bundle","readTime":{"seconds":"1616434660","nanos":' +
-        '913764000},"exists":true,"queries":["self"]}}402{"document":{"name":' +
-        '"projects/fir-bundles-test/databases/(default)/documents/bundles/' +
-        'test-bundle","fields":{"clientCache":{"stringValue":"1200"},' +
-        '"serverCache":{"stringValue":"600"},"queries":{"mapValue":{"fields":' +
-        '{"self":{"mapValue":{"fields":{"collection":{"stringValue":"bundles"' +
-        '}}}}}}}},"createTime":{"seconds":"1615488796","nanos":163327000},' +
-        '"updateTime":{"seconds":"1615492486","nanos":34157000}}}')
+        _serialized: str = (
+            '139{"metadata":{"id":"test-bundle","createTime":'
+            + '{"seconds":"1616434660","nanos":913764000},"version":1,"totalDocuments"'
+            + ':1,"totalBytes":"829"}}224{"namedQuery":{"name":"self","bundledQuery":'
+            + '{"parent":"projects/fir-bundles-test/databases/(default)/documents",'
+            + '"structuredQuery":{"from":[{"collectionId":"bundles"}]}},"readTime":'
+            + '{"seconds":"1616434660","nanos":913764000}}}194{"documentMetadata":'
+            + '{"name":"projects/fir-bundles-test/databases/(default)/documents/'
+            + 'bundles/test-bundle","readTime":{"seconds":"1616434660","nanos":'
+            + '913764000},"exists":true,"queries":["self"]}}402{"document":{"name":'
+            + '"projects/fir-bundles-test/databases/(default)/documents/bundles/'
+            + 'test-bundle","fields":{"clientCache":{"stringValue":"1200"},'
+            + '"serverCache":{"stringValue":"600"},"queries":{"mapValue":{"fields":'
+            + '{"self":{"mapValue":{"fields":{"collection":{"stringValue":"bundles"'
+            + '}}}}}}}},"createTime":{"seconds":"1615488796","nanos":163327000},'
+            + '"updateTime":{"seconds":"1615492486","nanos":34157000}}}'
+        )
 
         self.assertRaises(
-            ValueError,
-            _helpers.deserialize_bundle,
-            _serialized,
-            client=client,
+            ValueError, _helpers.deserialize_bundle, _serialized, client=client,
         )
 
         # The following assertions would test deserialization of NodeJS bundles

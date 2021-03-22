@@ -1204,10 +1204,10 @@ def deserialize_bundle(
             # Some bad serialization formats cannot be universally deserialized.
             if e.args[0] == "'dict' object has no attribute 'find'":
                 raise ValueError(
-                    'Invalid serialization of datetimes. '
-                    'Cannot deserialize Bundles created from the NodeJS SDK.'
+                    "Invalid serialization of datetimes. "
+                    "Cannot deserialize Bundles created from the NodeJS SDK."
                 )
-            raise e
+            raise e  # pragma: NO COVER
 
         if bundle is None:
             # This must be the first bundle type encountered
@@ -1276,14 +1276,19 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
 
 def _get_documents_from_bundle(
     bundle, *, query_name: Optional[str] = None
-) -> Generator['DocumentSnapshot', None, None]:  # type: ignore
-    bundled_doc: "_BundledDocument"  # type: ignore
+) -> Generator["google.cloud.firestore.DocumentSnapshot", None, None]:  # type: ignore
+    from google.cloud.firestore_bundle.bundle import _BundledDocument
+
+    bundled_doc: _BundledDocument
     for bundled_doc in bundle.documents.values():
         if query_name and query_name not in bundled_doc.metadata.queries:
             continue
         yield bundled_doc.snapshot
 
-def _get_document_from_bundle(bundle, *, document_id: str) -> Optional['DocumentSnapshot']:  # type: ignore
+
+def _get_document_from_bundle(
+    bundle, *, document_id: str,
+) -> Optional["google.cloud.firestore.DocumentSnapshot"]:  # type: ignore
     bundled_doc = bundle.documents.get(document_id)
     if bundled_doc:
         return bundled_doc.snapshot

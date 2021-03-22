@@ -31,12 +31,10 @@ from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.document import DocumentReference
-from google.cloud.firestore_v1.query import Query
 from google.cloud.firestore_v1 import _helpers
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 from typing import (
     Dict,
-    Generator,
     List,
     Optional,
     Union,
@@ -179,7 +177,9 @@ class FirestoreBundle:
         self._reset_metadata()
         return self
 
-    def _save_documents_from_query(self, query: BaseQuery, query_name: str) -> datetime.datetime:
+    def _save_documents_from_query(
+        self, query: BaseQuery, query_name: str
+    ) -> datetime.datetime:
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
         if isinstance(query, AsyncQuery):
             import asyncio
