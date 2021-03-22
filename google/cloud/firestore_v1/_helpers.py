@@ -1197,7 +1197,17 @@ def deserialize_bundle(
             )
 
         # Create and add our BundleElement
-        bundle_element: BundleElement = BundleElement.from_json(json.dumps(data))  # type: ignore
+        bundle_element: BundleElement
+        try:
+            bundle_element: BundleElement = BundleElement.from_json(json.dumps(data))  # type: ignore
+        except AttributeError as e:
+            # Some bad serialization formats cannot be universally deserialized.
+            if e.args[0] == "'dict' object has no attribute 'find'":
+                raise ValueError(
+                    'Invalid serialization of datetimes. '
+                    'Cannot deserialize Bundles created from the NodeJS SDK.'
+                )
+            raise e
 
         if bundle is None:
             # This must be the first bundle type encountered
@@ -1262,3 +1272,18 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
                 _counter += 1
 
             yield json.loads(_bytes.decode("utf-8"))
+
+
+def _get_documents_from_bundle(
+    bundle, *, query_name: Optional[str] = None
+) -> Generator['DocumentSnapshot', None, None]:  # type: ignore
+    bundled_doc: "_BundledDocument"  # type: ignore
+    for bundled_doc in bundle.documents.values():
+        if query_name and query_name not in bundled_doc.metadata.queries:
+            continue
+        yield bundled_doc.snapshot
+
+def _get_document_from_bundle(bundle, *, document_id: str) -> Optional['DocumentSnapshot']:  # type: ignore
+    bundled_doc = bundle.documents.get(document_id)
+    if bundled_doc:
+        return bundled_doc.snapshot

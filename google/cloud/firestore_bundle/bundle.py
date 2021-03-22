@@ -45,7 +45,7 @@ from typing import (
 
 class FirestoreBundle:
     """A group of serialized documents and queries, suitable for
-    longterm storage.
+    longterm storage or query resumption.
 
     If any queries are added to this bundle, all associated documents will be
     loaded and stored in memory for serialization.
@@ -67,13 +67,6 @@ class FirestoreBundle:
 
         # Store somewhere like your GCS or your device's file system
 
-        # Some time later after loading `serialized` again
-        bundle = _helpers.deserialize_bundle(serialized)
-
-        users: Iterable[DocumentSnapshot] = bundle.get_documents(
-            query_name='all-users',
-        )
-
     Args:
         name (str): The Id of the bundle.
     """
@@ -87,65 +80,7 @@ class FirestoreBundle:
         self.latest_read_time: Timestamp = Timestamp(seconds=0, nanos=0)
         self._deserialized_metadata: Optional[BundledDocumentMetadata] = None
 
-    def add(
-        self,
-        document_or_query_name: Union[DocumentSnapshot, str],
-        query: Optional[Query] = None,
-    ) -> "FirestoreBundle":
-        """Adds a document or entire query to the bundle.
-
-        This function is offered for convenience / API parity with other SDKs.
-        Most users will get better outcomes from using the more specific,
-        `add_document` or `add_named_query` methods.
-
-        Args:
-            document_or_query_name (Union[DocumentSnapshot, str]): If supplied
-                as a `DocumentSnapshot`, this parameter routes control flow to
-                `add_document`, and the second parameter must be None. However,
-                if supplied as a `str`, then this parameter routes control flow
-                to `add_named_query`, and the second parameter must be supplied.
-            query_snapshot (Optional[Query]): Query to fully load and save to
-                the bundle. This parameter is required if the first parameter is
-                a string, and is required to be `None` if the first parameter
-                is a `DocumentSnapshot`.
-
-        Example:
-
-            from google.cloud import firestore
-            from google.cloud.firestore.firestore_bundle import FirestoreBundle
-
-            db = firestore.Client()
-            collection_ref = db.collection(u'users')
-
-            bundle = FirestoreBundle('my-bundle')
-
-            # Add an entire query. This will load and save every matching
-            # document.
-            bundle.add('all the users', collection_ref._query())
-
-            # Add a single document.
-            bundle.add(collection_ref.documents('some_id').get())
-
-        Returns:
-            FirestoreBundle: self
-
-        """
-        if isinstance(document_or_query_name, DocumentSnapshot):
-            assert query is None
-            self.add_document(document_or_query_name)
-        elif isinstance(document_or_query_name, str):
-            assert query is not None
-            self.add_named_query(document_or_query_name, query)
-        else:
-            raise ValueError(
-                "Bundle.add accepts either a standalone DocumentSnapshot or "
-                "a name (string) and a Query."
-            )
-        return self
-
-    def add_document(
-        self, snapshot: DocumentSnapshot, query_name: Optional[str] = None,
-    ) -> "FirestoreBundle":
+    def add_document(self, snapshot: DocumentSnapshot) -> "FirestoreBundle":
         """Adds a document to the bundle.
 
         Args:
@@ -196,13 +131,8 @@ class FirestoreBundle:
                 ),
             )
 
-        if query_name:
-            bundled_document = self.documents.get(full_document_path)
-            bundled_document.metadata.queries.append(query_name)  # type: ignore
-
         self._update_last_read_time(snapshot.read_time)
-        # Flush this if it was cached
-        self._deserialized_metadata = None
+        self._reset_metadata()
         return self
 
     def add_named_query(self, name: str, query: BaseQuery) -> "FirestoreBundle":
@@ -238,30 +168,31 @@ class FirestoreBundle:
                 f"{type(query).__name__}. Expected BaseQuery.",
             )
 
-        if self.named_queries.get(name):
+        if name in self.named_queries:
             raise ValueError(f"Query name conflict: {name} has already been added.")
 
         # Execute the query and save each resulting document
-        _read_time = self._save_documents_from_query(name, query)
+        _read_time = self._save_documents_from_query(query, query_name=name)
 
         # Actually save the query to our local object cache
         self._save_named_query(name, query, _read_time)
-        # Flush this if it was cached
-        self._deserialized_metadata = None
+        self._reset_metadata()
         return self
 
-    def _save_documents_from_query(self, name, query: BaseQuery) -> datetime.datetime:
+    def _save_documents_from_query(self, query: BaseQuery, query_name: str) -> datetime.datetime:
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
         if isinstance(query, AsyncQuery):
             import asyncio
 
             loop = asyncio.get_event_loop()
-            return loop.run_until_complete(self._process_async_query(name, query))
+            return loop.run_until_complete(self._process_async_query(query, query_name))
 
         # `query` is now known to be a non-async `BaseQuery`
         doc: DocumentSnapshot
         for doc in query.stream():  # type: ignore
-            self.add_document(doc, query_name=name)
+            self.add_document(doc)
+            bundled_document = self.documents.get(doc.reference._document_path)
+            bundled_document.metadata.queries.append(query_name)  # type: ignore
             _read_time = doc.read_time
         return _read_time
 
@@ -269,22 +200,24 @@ class FirestoreBundle:
         self, name: str, query: BaseQuery, read_time: datetime.datetime,
     ) -> None:
         self.named_queries[name] = self._build_named_query(
-            name=name, snapshot=query, read_time=_helpers.build_timestamp(read_time),
+            name=name, snapshot=query, read_time=read_time,
         )
         self._update_last_read_time(read_time)
 
     async def _process_async_query(
-        self, name: str, snapshot: AsyncQuery,
+        self, snapshot: AsyncQuery, query_name: str,
     ) -> datetime.datetime:
         doc: DocumentSnapshot
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
         async for doc in snapshot.stream():
-            self.add_document(doc, query_name=name)
+            self.add_document(doc)
+            bundled_document = self.documents.get(doc.reference._document_path)
+            bundled_document.metadata.queries.append(query_name)  # type: ignore
             _read_time = doc.read_time
         return _read_time
 
     def _build_named_query(
-        self, name: str, snapshot: BaseQuery, read_time: Timestamp,
+        self, name: str, snapshot: BaseQuery, read_time: datetime.datetime,
     ) -> NamedQuery:
         return NamedQuery(
             name=name,
@@ -293,7 +226,7 @@ class FirestoreBundle:
                 structured_query=snapshot._to_protobuf()._pb,
                 limit_type=limit_type_of_query(snapshot),
             ),
-            read_time=read_time,
+            read_time=_helpers.build_timestamp(read_time),
         )
 
     def _update_last_read_time(
@@ -413,19 +346,10 @@ class FirestoreBundle:
         serialized_be: str = json.dumps(BundleElement.to_dict(bundle_element))
         return f"{len(serialized_be)}{serialized_be}"
 
-    def get_documents(
-        self, *, query_name: Optional[str] = None
-    ) -> Generator[DocumentSnapshot, None, None]:
-        bundled_doc: "_BundledDocument"
-        for bundled_doc in self.documents.values():
-            if query_name and query_name not in bundled_doc.metadata.queries:
-                continue
-            yield bundled_doc.snapshot
-
-    def get_document(self, document_id: str) -> Optional[DocumentSnapshot]:
-        bundled_doc = self.documents.get(document_id)
-        if bundled_doc:
-            return bundled_doc.snapshot
+    def _reset_metadata(self):
+        """Hydrating bundles stores cached data we must reset anytime new
+        queries or documents are added"""
+        self._deserialized_metadata = None
 
 
 class _BundledDocument:

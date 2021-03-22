@@ -32,8 +32,11 @@ def make_test_credentials() -> google.auth.credentials.Credentials:  # type: ign
     return mock.Mock(spec=google.auth.credentials.Credentials)
 
 
-def make_client() -> Client:
-    return Client(project="project-project", credentials=make_test_credentials())
+def make_client(project_name: typing.Optional[str] = None) -> Client:
+    return Client(
+        project=project_name or "project-project",
+        credentials=make_test_credentials(),
+    )
 
 
 def make_async_client() -> AsyncClient:
