@@ -63,7 +63,7 @@ class FirestoreBundle:
         )
         serialized: str = bundle.build()
 
-        # Store somewhere like your GCS or your device's file system
+        # Store somewhere like your GCS for retrieval by a client SDK.
 
     Args:
         name (str): The Id of the bundle.
@@ -84,8 +84,6 @@ class FirestoreBundle:
         Args:
             snapshot (DocumentSnapshot): The fully-loaded Firestore document to
                 be preserved.
-            query_name (Optional[str]): If provided, also establishes a link
-                between the provided document and the referenced query.
 
         Example:
 
