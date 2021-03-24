@@ -1163,10 +1163,10 @@ def deserialize_bundle(
     # Outlines the legal transitions from one BundleElement to another.
     bundle_state_machine = {
         "__initial__": ["metadata"],
-        "metadata": ["named_query", "document_metadata", "__end__"],
-        "named_query": ["named_query", "document_metadata", "__end__"],
-        "document_metadata": ["document"],
-        "document": ["document_metadata", "__end__"],
+        "metadata": ["namedQuery", "documentMetadata", "__end__"],
+        "namedQuery": ["namedQuery", "documentMetadata", "__end__"],
+        "documentMetadata": ["document"],
+        "document": ["documentMetadata", "__end__"],
     }
     allowed_next_element_types: List[str] = bundle_state_machine["__initial__"]
 

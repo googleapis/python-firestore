@@ -33,6 +33,7 @@ from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1 import _helpers
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
+from google.protobuf import json_format  # type: ignore
 from typing import (
     Dict,
     List,
@@ -250,9 +251,9 @@ class FirestoreBundle:
             self._doc_metadata_map = {}
         if type == "metadata":
             self._deserialized_metadata = bundle_element.metadata  # type: ignore
-        elif type == "named_query":
+        elif type == "namedQuery":
             self.named_queries[bundle_element.named_query.name] = bundle_element.named_query  # type: ignore
-        elif type == "document_metadata":
+        elif type == "documentMetadata":
             self._doc_metadata_map[
                 bundle_element.document_metadata.name
             ] = bundle_element.document_metadata
@@ -341,7 +342,8 @@ class FirestoreBundle:
         return f"{self._compile_bundle_element(metadata)}{buffer}"
 
     def _compile_bundle_element(self, bundle_element: BundleElement) -> str:
-        serialized_be: str = json.dumps(BundleElement.to_dict(bundle_element))
+        # serialized_be: str = json_format.MessageToJson(BundleElement.to_dict(bundle_element))
+        serialized_be = json.dumps(json_format.MessageToDict(bundle_element._pb))
         return f"{len(serialized_be)}{serialized_be}"
 
     def _reset_metadata(self):

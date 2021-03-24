@@ -477,7 +477,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
     def test_unexpected_termination(self, fnc, _):
         client = _test_helpers.make_client()
         # invalid bc `document_metadata` must be followed by a `document`
-        fnc.return_value = [{"metadata": {"id": "asdf"}}, {"document_metadata": {}}]
+        fnc.return_value = [{"metadata": {"id": "asdf"}}, {"documentMetadata": {}}]
         self.assertRaises(
             ValueError, _helpers.deserialize_bundle, "does not matter", client,
         )
@@ -488,7 +488,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         client = _test_helpers.make_client()
         fnc.return_value = [
             {"metadata": {"id": "asdf"}},
-            {"document_metadata": {}},
+            {"documentMetadata": {}},
             {"document": {}},
         ]
         _helpers.deserialize_bundle("does not matter", client)
