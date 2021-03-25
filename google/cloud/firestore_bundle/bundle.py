@@ -57,8 +57,8 @@ class FirestoreBundle:
 
         db = Client()
         bundle = FirestoreBundle('my-bundle')
-        bundle.add('all-users', db.collection('users')._query())
-        bundle.add(
+        bundle.add_named_query('all-users', db.collection('users')._query())
+        bundle.add_named_query(
             'top-ten-hamburgers',
             db.collection('hamburgers').limit(limit=10)._query(),
         )
@@ -299,7 +299,7 @@ class FirestoreBundle:
             collection_ref = db.collection(u'users')
 
             bundle = firestore.FirestoreBundle('my bundle')
-            bundle.add('app-users', collection_ref._query())
+            bundle.add_named_query('app-users', collection_ref._query())
 
             serialized_bundle: str = bundle.build()
 
@@ -342,7 +342,6 @@ class FirestoreBundle:
         return f"{self._compile_bundle_element(metadata)}{buffer}"
 
     def _compile_bundle_element(self, bundle_element: BundleElement) -> str:
-        # serialized_be: str = json_format.MessageToJson(BundleElement.to_dict(bundle_element))
         serialized_be = json.dumps(json_format.MessageToDict(bundle_element._pb))
         return f"{len(serialized_be)}{serialized_be}"
 
