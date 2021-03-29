@@ -404,9 +404,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         )
 
     def test_roundtrip_binary_data(self):
-        query = self._bundled_query_helper(
-            data=[{"binary_data": b"\x0f"}],
-        )
+        query = self._bundled_query_helper(data=[{"binary_data": b"\x0f"}],)
         bundle = FirestoreBundle("test")
         bundle.add_named_query("asdf", query)
         serialized = bundle.build()
@@ -414,8 +412,7 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         gen = _helpers._get_documents_from_bundle(reserialized_bundle)
         snapshot = next(gen)
         self.assertEqual(
-            int.from_bytes(snapshot._data["binary_data"], byteorder=sys.byteorder),
-            15,
+            int.from_bytes(snapshot._data["binary_data"], byteorder=sys.byteorder), 15,
         )
 
     def test_deserialize_from_seconds_nanos(self):
