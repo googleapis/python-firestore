@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
 import typing
 import unittest
 
@@ -400,6 +401,21 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         )
         self.assertEqual(
             serialized, reserialized_bundle.build(),
+        )
+
+    def test_roundtrip_binary_data(self):
+        query = self._bundled_query_helper(
+            data=[{"binary_data": b"\x0f"}],
+        )
+        bundle = FirestoreBundle("test")
+        bundle.add_named_query("asdf", query)
+        serialized = bundle.build()
+        reserialized_bundle = _helpers.deserialize_bundle(serialized, query._client)
+        gen = _helpers._get_documents_from_bundle(reserialized_bundle)
+        snapshot = next(gen)
+        self.assertEqual(
+            int.from_bytes(snapshot._data["binary_data"], byteorder=sys.byteorder),
+            15,
         )
 
     def test_deserialize_from_seconds_nanos(self):
