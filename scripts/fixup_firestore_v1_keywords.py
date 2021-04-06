@@ -49,7 +49,7 @@ class firestoreCallTransformer(cst.CSTTransformer):
     METHOD_TO_PARAMS: Dict[str, Tuple[str]] = {
     'batch_get_documents': ('database', 'documents', 'mask', 'transaction', 'new_transaction', 'read_time', ),
     'batch_write': ('database', 'writes', 'labels', ),
-    'begin_transaction': ('database', 'options_', ),
+    'begin_transaction': ('database', 'options', ),
     'commit': ('database', 'writes', 'transaction', ),
     'create_document': ('parent', 'collection_id', 'document', 'document_id', 'mask', ),
     'delete_document': ('name', 'current_document', ),
