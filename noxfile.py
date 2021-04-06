@@ -102,7 +102,9 @@ def default(session):
     )
     session.install("asyncmock", "pytest-asyncio", "-c", constraints_path)
 
-    session.install("mock", "pytest", "pytest-cov", "-c", constraints_path)
+    session.install(
+        "mock", "pytest", "pytest-cov", "aiounittest", "-c", constraints_path
+    )
 
     session.install("-e", ".", "-c", constraints_path)
 
@@ -161,8 +163,8 @@ def system(session):
     session.install(
         "mock",
         "pytest",
-        "pytest-asyncio",
         "google-cloud-testutils",
+        "pytest-asyncio",
         "-c",
         constraints_path,
     )
