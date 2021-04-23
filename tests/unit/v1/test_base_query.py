@@ -745,11 +745,25 @@ class TestBaseQuery(unittest.TestCase):
             query._normalize_cursor(cursor, query._orders)
 
     def test__normalize_cursor_as_dict_mismatched_order(self):
+        # A cursor item that isn't in order by is perfectly fine? maybe?
         cursor = ({"a": 1}, True)
         query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
 
-        with self.assertRaises(ValueError):
-            query._normalize_cursor(cursor, query._orders)
+        #with self.assertRaises(ValueError):
+        query._normalize_cursor(cursor, query._orders)
+
+    def test__normalize_cursor_as_dict_extra_orders_ok(self):
+        cursor = ({'name': 'Springfield'}, True)
+        query = self._make_one(mock.sentinel.parent).order_by("name").order_by("state")
+
+        query._normalize_cursor(cursor, query._orders)
+
+    def test__normalize_cursor_extra_orders_ok(self):
+        cursor = (['Springfield'], True)
+        query = self._make_one(mock.sentinel.parent).order_by("name").order_by("state")
+
+        query._normalize_cursor(cursor, query._orders)
+
 
     def test__normalize_cursor_w_delete(self):
         from google.cloud.firestore_v1 import DELETE_FIELD
