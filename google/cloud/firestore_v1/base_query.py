@@ -764,7 +764,9 @@ class BaseQuery(object):
                     # java states this is okay.
                     # https://github.com/googleapis/java-firestore/blob/517084e478422067779b21d4c92adb6878735300/proto-google-cloud-firestore-v1/src/main/java/com/google/firestore/v1/Cursor.java#L160
                     # raise ValueError(msg)
-                    pass
+
+                    # Don't raise an error, but add a None to the list
+                    values.append(None)
 
             # Reverse the above. We need to be sure each specified key cursor
             # has a correpsonding order by, not the reverse
