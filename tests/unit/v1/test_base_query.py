@@ -749,22 +749,15 @@ class TestBaseQuery(unittest.TestCase):
         cursor = ({"a": 1}, True)
         query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
 
-        #with self.assertRaises(ValueError):
-        query._normalize_cursor(cursor, query._orders)
+        with self.assertRaises(ValueError):
+            query._normalize_cursor(cursor, query._orders)
 
     def test__normalize_cursor_as_dict_extra_orders_ok(self):
         cursor = ({'name': 'Springfield'}, True)
         query = self._make_one(mock.sentinel.parent).order_by("name").order_by("state")
 
         normalized = query._normalize_cursor(cursor, query._orders)
-        self.assertEqual(normalized, (["Springfield", None], True))
-
-    def test__normalize_cursor_as_dict_extra_orders_not_first_ok(self):
-        cursor = ({'state': 'Missouri'}, True)
-        query = self._make_one(mock.sentinel.parent).order_by("name").order_by("state")
-
-        normalized = query._normalize_cursor(cursor, query._orders)
-        self.assertEqual(normalized, ([None, "Missouri"], True))
+        self.assertEqual(normalized, (["Springfield"], True))
 
     def test__normalize_cursor_extra_orders_ok(self):
         cursor = (['Springfield'], True)

@@ -746,7 +746,10 @@ class BaseQuery(object):
             # Transform to list using orders
             values = []
             data = document_fields
-            for order_key in order_keys:
+
+            # It isn't required that all order by have a cursor.
+            # However, we need to be sure they are specified in order without gaps
+            for order_key in order_keys[:len(data)]:
                 try:
                     if order_key in data:
                         values.append(data[order_key])
@@ -755,51 +758,9 @@ class BaseQuery(object):
                             field_path_module.get_nested_value(order_key, data)
                         )
                 except KeyError:
-                    # If we are missing a field to match an order by it is not *technicaly* a problem.
-                    #
-                    # msg = _MISSING_ORDER_BY.format(order_key, data)
-                    # TODO: not sure this is a value error. It is allowed
-                    # to have order by that aren't in the cursor, however, 
-                    # it may be true that each cursor should be in the order.
-                    # java states this is okay.
-                    # https://github.com/googleapis/java-firestore/blob/517084e478422067779b21d4c92adb6878735300/proto-google-cloud-firestore-v1/src/main/java/com/google/firestore/v1/Cursor.java#L160
-                    # raise ValueError(msg)
-
-                    # Don't raise an error, but add a None to the list
-                    values.append(None)
-
-            # Reverse the above. We need to be sure each specified key cursor
-            # has a correpsonding order by, not the reverse
-            for data_key in data:
-                try:
-                    if data_key in order_keys:
-                        continue
-                    else:
-                        # it is possible this is a nested object. We need to flatten the inner keys and check if they are in the order by.
-                        if type(data[data_key]) is dict:
-                            for key in data[data_key]:
-                                if data_key + "." + key in order_keys:
-                                    # TODO: if we want this approach, this likely needs to support further nesting (a.b.c)
-                                    continue
-                                else:
-                                    msg = _MISMATCH_CURSOR_W_ORDER_BY.format(data_key, order_keys)
-                                    #msg = _MISSING_ORDER_BY.format(order_key, data)
-                                    raise ValueError(msg)
-                        else:                          
-                            # TODO: if it is deemed that cursore {"a":1} with orderby("b") is disallowed we need to raise here (test__normalize_cursor_as_dict_mismatched_order)
-                            # However, that will cause multiple other tests to fail as well.
-                            pass
-                            # msg = _MISMATCH_CURSOR_W_ORDER_BY.format(data_key, order_keys)
-                            # raise ValueError(msg)
-
-                except KeyError:
-                    msg = _MISSING_ORDER_BY.format(data_key, data)
-                    # TODO: not sure this is a value error. It is allowed
-                    # to have order by that aren't in the cursor, however, 
-                    # it may be true that each cursor should be in the order.
-                    # java states this is okay.
-                    # https://github.com/googleapis/java-firestore/blob/517084e478422067779b21d4c92adb6878735300/proto-google-cloud-firestore-v1/src/main/java/com/google/firestore/v1/Cursor.java#L160
+                    msg = _MISSING_ORDER_BY.format(order_key, data)
                     raise ValueError(msg)
+
             document_fields = values
 
         if len(document_fields) > len(orders):
