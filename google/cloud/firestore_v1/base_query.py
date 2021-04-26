@@ -749,7 +749,7 @@ class BaseQuery(object):
 
             # It isn't required that all order by have a cursor.
             # However, we need to be sure they are specified in order without gaps
-            for order_key in order_keys[:len(data)]:
+            for order_key in order_keys[: len(data)]:
                 try:
                     if order_key in data:
                         values.append(data[order_key])
