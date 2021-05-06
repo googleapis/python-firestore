@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 from collections import OrderedDict
 import functools
 import re
@@ -36,6 +38,7 @@ from google.cloud.firestore_admin_v1.types import index
 from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.cloud.firestore_admin_v1.types import operation as gfa_operation
 from google.protobuf import empty_pb2 as empty  # type: ignore
+
 from .transports.base import FirestoreAdminTransport, DEFAULT_CLIENT_INFO
 from .transports.grpc_asyncio import FirestoreAdminGrpcAsyncIOTransport
 from .client import FirestoreAdminClient
@@ -61,26 +64,31 @@ class FirestoreAdminAsyncClient:
     parse_field_path = staticmethod(FirestoreAdminClient.parse_field_path)
     index_path = staticmethod(FirestoreAdminClient.index_path)
     parse_index_path = staticmethod(FirestoreAdminClient.parse_index_path)
+
     common_billing_account_path = staticmethod(
         FirestoreAdminClient.common_billing_account_path
     )
     parse_common_billing_account_path = staticmethod(
         FirestoreAdminClient.parse_common_billing_account_path
     )
+
     common_folder_path = staticmethod(FirestoreAdminClient.common_folder_path)
     parse_common_folder_path = staticmethod(
         FirestoreAdminClient.parse_common_folder_path
     )
+
     common_organization_path = staticmethod(
         FirestoreAdminClient.common_organization_path
     )
     parse_common_organization_path = staticmethod(
         FirestoreAdminClient.parse_common_organization_path
     )
+
     common_project_path = staticmethod(FirestoreAdminClient.common_project_path)
     parse_common_project_path = staticmethod(
         FirestoreAdminClient.parse_common_project_path
     )
+
     common_location_path = staticmethod(FirestoreAdminClient.common_location_path)
     parse_common_location_path = staticmethod(
         FirestoreAdminClient.parse_common_location_path
@@ -171,6 +179,7 @@ class FirestoreAdminAsyncClient:
             google.auth.exceptions.MutualTlsChannelError: If mutual TLS transport
                 creation failed for any reason.
         """
+
         self._client = FirestoreAdminClient(
             credentials=credentials,
             transport=transport,
@@ -196,8 +205,7 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.CreateIndexRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
             parent (:class:`str`):
                 Required. A parent name of the form
@@ -213,6 +221,7 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``index`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -241,6 +250,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if parent is not None:
             request.parent = parent
         if index is not None:
@@ -287,8 +297,7 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.ListIndexesRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
             parent (:class:`str`):
                 Required. A parent name of the form
@@ -297,6 +306,7 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -326,6 +336,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if parent is not None:
             request.parent = parent
 
@@ -379,8 +390,7 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.GetIndexRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.GetIndex][google.firestore.admin.v1.FirestoreAdmin.GetIndex].
             name (:class:`str`):
                 Required. A name of the form
@@ -389,6 +399,7 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -416,6 +427,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if name is not None:
             request.name = name
 
@@ -463,8 +475,7 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.DeleteIndexRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
             name (:class:`str`):
                 Required. A name of the form
@@ -473,6 +484,7 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -493,6 +505,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if name is not None:
             request.name = name
 
@@ -539,8 +552,7 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.GetFieldRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.GetField][google.firestore.admin.v1.FirestoreAdmin.GetField].
             name (:class:`str`):
                 Required. A name of the form
@@ -549,6 +561,7 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -578,6 +591,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if name is not None:
             request.name = name
 
@@ -640,14 +654,14 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.UpdateFieldRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
             field (:class:`google.cloud.firestore_admin_v1.types.Field`):
                 Required. The field to be updated.
                 This corresponds to the ``field`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -681,6 +695,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if field is not None:
             request.field = field
 
@@ -734,8 +749,7 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.ListFieldsRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
             parent (:class:`str`):
                 Required. A parent name of the form
@@ -744,6 +758,7 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -773,6 +788,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if parent is not None:
             request.parent = parent
 
@@ -835,8 +851,7 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.ExportDocumentsRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
             name (:class:`str`):
                 Required. Database to export. Should be of the form:
@@ -845,6 +860,7 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -876,6 +892,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if name is not None:
             request.name = name
 
@@ -926,8 +943,7 @@ class FirestoreAdminAsyncClient:
 
         Args:
             request (:class:`google.cloud.firestore_admin_v1.types.ImportDocumentsRequest`):
-                The request object.
-                The request for
+                The request object. The request for
                 [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
             name (:class:`str`):
                 Required. Database to import into. Should be of the
@@ -936,6 +952,7 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
+
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -975,6 +992,7 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
+
         if name is not None:
             request.name = name
 

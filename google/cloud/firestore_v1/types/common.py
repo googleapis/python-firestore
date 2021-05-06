@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +14,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
 import proto  # type: ignore
+
 
 from google.protobuf import timestamp_pb2 as timestamp  # type: ignore
 
@@ -38,7 +41,7 @@ class DocumentMask(proto.Message):
             field path syntax reference.
     """
 
-    field_paths = proto.RepeatedField(proto.STRING, number=1,)
+    field_paths = proto.RepeatedField(proto.STRING, number=1)
 
 
 class Precondition(proto.Message):
@@ -54,7 +57,8 @@ class Precondition(proto.Message):
             have been last updated at that time.
     """
 
-    exists = proto.Field(proto.BOOL, number=1, oneof="condition_type",)
+    exists = proto.Field(proto.BOOL, number=1, oneof="condition_type")
+
     update_time = proto.Field(
         proto.MESSAGE, number=2, oneof="condition_type", message=timestamp.Timestamp,
     )
@@ -62,6 +66,7 @@ class Precondition(proto.Message):
 
 class TransactionOptions(proto.Message):
     r"""Options for creating a new transaction.
+
     Attributes:
         read_only (google.cloud.firestore_v1.types.TransactionOptions.ReadOnly):
             The transaction can only be used for read
@@ -80,7 +85,7 @@ class TransactionOptions(proto.Message):
                 An optional transaction to retry.
         """
 
-        retry_transaction = proto.Field(proto.BYTES, number=1,)
+        retry_transaction = proto.Field(proto.BYTES, number=1)
 
     class ReadOnly(proto.Message):
         r"""Options for a transaction that can only be used to read
@@ -100,6 +105,7 @@ class TransactionOptions(proto.Message):
         )
 
     read_only = proto.Field(proto.MESSAGE, number=2, oneof="mode", message=ReadOnly,)
+
     read_write = proto.Field(proto.MESSAGE, number=3, oneof="mode", message=ReadWrite,)
 
 

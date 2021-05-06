@@ -162,6 +162,16 @@ Running System Tests
 
 - System tests will be run against an actual project. You should use local credentials from gcloud when possible. See `Best practices for application authentication <https://cloud.google.com/docs/authentication/best-practices-applications#local_development_and_testing_with_the>`__. Some tests require a service account. For those tests see `Authenticating as a service account <https://cloud.google.com/docs/authentication/production>`__.
 
+**************************
+Updating Conformance Tests
+**************************
+
+The firestore client libraries use a shared set of conformance tests, the source of which can be found at https://github.com/googleapis/conformance-tests.
+
+To update the copy of these conformance tests used by this repository, run the provided Makefile:
+
+   $ make -f Makefile_v1
+
 *************
 Test Coverage
 *************
