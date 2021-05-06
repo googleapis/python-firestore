@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from collections import OrderedDict
 from distutils import util
 import os
@@ -23,10 +21,10 @@ from typing import Callable, Dict, Optional, Sequence, Tuple, Type, Union
 import pkg_resources
 
 from google.api_core import client_options as client_options_lib  # type: ignore
-from google.api_core import exceptions  # type: ignore
+from google.api_core import exceptions as core_exceptions  # type: ignore
 from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
-from google.auth import credentials  # type: ignore
+from google.auth import credentials as ga_credentials  # type: ignore
 from google.auth.transport import mtls  # type: ignore
 from google.auth.transport.grpc import SslCredentials  # type: ignore
 from google.auth.exceptions import MutualTLSChannelError  # type: ignore
@@ -41,8 +39,7 @@ from google.cloud.firestore_admin_v1.types import firestore_admin
 from google.cloud.firestore_admin_v1.types import index
 from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.cloud.firestore_admin_v1.types import operation as gfa_operation
-from google.protobuf import empty_pb2 as empty  # type: ignore
-
+from google.protobuf import empty_pb2  # type: ignore
 from .transports.base import FirestoreAdminTransport, DEFAULT_CLIENT_INFO
 from .transports.grpc import FirestoreAdminGrpcTransport
 from .transports.grpc_asyncio import FirestoreAdminGrpcAsyncIOTransport
@@ -288,7 +285,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     def __init__(
         self,
         *,
-        credentials: Optional[credentials.Credentials] = None,
+        credentials: Optional[ga_credentials.Credentials] = None,
         transport: Union[str, FirestoreAdminTransport, None] = None,
         client_options: Optional[client_options_lib.ClientOptions] = None,
         client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
@@ -432,7 +429,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``index`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -463,10 +459,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.CreateIndexRequest):
             request = firestore_admin.CreateIndexRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if parent is not None:
                 request.parent = parent
             if index is not None:
@@ -518,7 +512,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -550,10 +543,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.ListIndexesRequest):
             request = firestore_admin.ListIndexesRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if parent is not None:
                 request.parent = parent
 
@@ -601,7 +592,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -631,10 +621,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.GetIndexRequest):
             request = firestore_admin.GetIndexRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if name is not None:
                 request.name = name
 
@@ -676,7 +664,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -699,10 +686,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.DeleteIndexRequest):
             request = firestore_admin.DeleteIndexRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if name is not None:
                 request.name = name
 
@@ -743,7 +728,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -775,10 +759,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.GetFieldRequest):
             request = firestore_admin.GetFieldRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if name is not None:
                 request.name = name
 
@@ -833,7 +815,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``field`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -869,10 +850,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.UpdateFieldRequest):
             request = firestore_admin.UpdateFieldRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if field is not None:
                 request.field = field
 
@@ -931,7 +910,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -963,10 +941,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.ListFieldsRequest):
             request = firestore_admin.ListFieldsRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if parent is not None:
                 request.parent = parent
 
@@ -1023,7 +999,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -1057,10 +1032,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.ExportDocumentsRequest):
             request = firestore_admin.ExportDocumentsRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if name is not None:
                 request.name = name
 
@@ -1116,7 +1089,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -1158,10 +1130,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # there are no flattened fields.
         if not isinstance(request, firestore_admin.ImportDocumentsRequest):
             request = firestore_admin.ImportDocumentsRequest(request)
-
             # If we have keyword arguments corresponding to fields on the
             # request, apply these.
-
             if name is not None:
                 request.name = name
 
@@ -1182,7 +1152,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = gac_operation.from_gapic(
             response,
             self._transport.operations_client,
-            empty.Empty,
+            empty_pb2.Empty,
             metadata_type=gfa_operation.ImportDocumentsMetadata,
         )
 

@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 from collections import OrderedDict
 import functools
 import re
@@ -22,10 +20,10 @@ from typing import Dict, Sequence, Tuple, Type, Union
 import pkg_resources
 
 import google.api_core.client_options as ClientOptions  # type: ignore
-from google.api_core import exceptions  # type: ignore
+from google.api_core import exceptions as core_exceptions  # type: ignore
 from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
-from google.auth import credentials  # type: ignore
+from google.auth import credentials as ga_credentials  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 
 from google.api_core import operation as gac_operation  # type: ignore
@@ -37,8 +35,7 @@ from google.cloud.firestore_admin_v1.types import firestore_admin
 from google.cloud.firestore_admin_v1.types import index
 from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.cloud.firestore_admin_v1.types import operation as gfa_operation
-from google.protobuf import empty_pb2 as empty  # type: ignore
-
+from google.protobuf import empty_pb2  # type: ignore
 from .transports.base import FirestoreAdminTransport, DEFAULT_CLIENT_INFO
 from .transports.grpc_asyncio import FirestoreAdminGrpcAsyncIOTransport
 from .client import FirestoreAdminClient
@@ -64,31 +61,26 @@ class FirestoreAdminAsyncClient:
     parse_field_path = staticmethod(FirestoreAdminClient.parse_field_path)
     index_path = staticmethod(FirestoreAdminClient.index_path)
     parse_index_path = staticmethod(FirestoreAdminClient.parse_index_path)
-
     common_billing_account_path = staticmethod(
         FirestoreAdminClient.common_billing_account_path
     )
     parse_common_billing_account_path = staticmethod(
         FirestoreAdminClient.parse_common_billing_account_path
     )
-
     common_folder_path = staticmethod(FirestoreAdminClient.common_folder_path)
     parse_common_folder_path = staticmethod(
         FirestoreAdminClient.parse_common_folder_path
     )
-
     common_organization_path = staticmethod(
         FirestoreAdminClient.common_organization_path
     )
     parse_common_organization_path = staticmethod(
         FirestoreAdminClient.parse_common_organization_path
     )
-
     common_project_path = staticmethod(FirestoreAdminClient.common_project_path)
     parse_common_project_path = staticmethod(
         FirestoreAdminClient.parse_common_project_path
     )
-
     common_location_path = staticmethod(FirestoreAdminClient.common_location_path)
     parse_common_location_path = staticmethod(
         FirestoreAdminClient.parse_common_location_path
@@ -142,7 +134,7 @@ class FirestoreAdminAsyncClient:
     def __init__(
         self,
         *,
-        credentials: credentials.Credentials = None,
+        credentials: ga_credentials.Credentials = None,
         transport: Union[str, FirestoreAdminTransport] = "grpc_asyncio",
         client_options: ClientOptions = None,
         client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
@@ -179,7 +171,6 @@ class FirestoreAdminAsyncClient:
             google.auth.exceptions.MutualTlsChannelError: If mutual TLS transport
                 creation failed for any reason.
         """
-
         self._client = FirestoreAdminClient(
             credentials=credentials,
             transport=transport,
@@ -221,7 +212,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``index`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -250,7 +240,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if parent is not None:
             request.parent = parent
         if index is not None:
@@ -306,7 +295,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -336,7 +324,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if parent is not None:
             request.parent = parent
 
@@ -399,7 +386,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -427,7 +413,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if name is not None:
             request.name = name
 
@@ -484,7 +469,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -505,7 +489,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if name is not None:
             request.name = name
 
@@ -561,7 +544,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -591,7 +573,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if name is not None:
             request.name = name
 
@@ -661,7 +642,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``field`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -695,7 +675,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if field is not None:
             request.field = field
 
@@ -758,7 +737,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``parent`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -788,7 +766,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if parent is not None:
             request.parent = parent
 
@@ -860,7 +837,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -892,7 +868,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if name is not None:
             request.name = name
 
@@ -952,7 +927,6 @@ class FirestoreAdminAsyncClient:
                 This corresponds to the ``name`` field
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
-
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.
             timeout (float): The timeout for this request.
@@ -992,7 +966,6 @@ class FirestoreAdminAsyncClient:
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
-
         if name is not None:
             request.name = name
 
@@ -1017,7 +990,7 @@ class FirestoreAdminAsyncClient:
         response = operation_async.from_gapic(
             response,
             self._client._transport.operations_client,
-            empty.Empty,
+            empty_pb2.Empty,
             metadata_type=gfa_operation.ImportDocumentsMetadata,
         )
 
