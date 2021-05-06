@@ -32,7 +32,7 @@ from google.auth.transport.grpc import SslCredentials  # type: ignore
 from google.auth.exceptions import MutualTLSChannelError  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 
-from google.api_core import operation as ga_operation  # type: ignore
+from google.api_core import operation as gac_operation  # type: ignore
 from google.api_core import operation_async  # type: ignore
 from google.cloud.firestore_admin_v1.services.firestore_admin import pagers
 from google.cloud.firestore_admin_v1.types import field
@@ -407,7 +407,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
         metadata: Sequence[Tuple[str, str]] = (),
-    ) -> ga_operation.Operation:
+    ) -> gac_operation.Operation:
         r"""Creates a composite index. This returns a
         [google.longrunning.Operation][google.longrunning.Operation]
         which may be used to track the status of the creation. The
@@ -486,7 +486,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Wrap the response in an operation future.
-        response = ga_operation.from_gapic(
+        response = gac_operation.from_gapic(
             response,
             self._transport.operations_client,
             gfa_index.Index,
@@ -806,7 +806,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
         metadata: Sequence[Tuple[str, str]] = (),
-    ) -> ga_operation.Operation:
+    ) -> gac_operation.Operation:
         r"""Updates a field configuration. Currently, field updates apply
         only to single field index configuration. However, calls to
         [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField]
@@ -892,7 +892,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Wrap the response in an operation future.
-        response = ga_operation.from_gapic(
+        response = gac_operation.from_gapic(
             response,
             self._transport.operations_client,
             gfa_field.Field,
@@ -1000,7 +1000,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
         metadata: Sequence[Tuple[str, str]] = (),
-    ) -> ga_operation.Operation:
+    ) -> gac_operation.Operation:
         r"""Exports a copy of all or a subset of documents from
         Google Cloud Firestore to another storage system, such
         as Google Cloud Storage. Recent updates to documents may
@@ -1078,7 +1078,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Wrap the response in an operation future.
-        response = ga_operation.from_gapic(
+        response = gac_operation.from_gapic(
             response,
             self._transport.operations_client,
             gfa_operation.ExportDocumentsResponse,
@@ -1096,7 +1096,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
         metadata: Sequence[Tuple[str, str]] = (),
-    ) -> ga_operation.Operation:
+    ) -> gac_operation.Operation:
         r"""Imports documents into Google Cloud Firestore.
         Existing documents with the same name are overwritten.
         The import occurs in the background and its progress can
@@ -1179,7 +1179,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         response = rpc(request, retry=retry, timeout=timeout, metadata=metadata,)
 
         # Wrap the response in an operation future.
-        response = ga_operation.from_gapic(
+        response = gac_operation.from_gapic(
             response,
             self._transport.operations_client,
             empty.Empty,
