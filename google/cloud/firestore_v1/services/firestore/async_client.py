@@ -226,6 +226,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=60.0,
@@ -291,6 +292,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=60.0,
@@ -396,7 +398,9 @@ class FirestoreAsyncClient:
                 initial=0.1,
                 maximum=60.0,
                 multiplier=1.3,
-                predicate=retries.if_exception_type(exceptions.ServiceUnavailable,),
+                predicate=retries.if_exception_type(
+                    exceptions.ResourceExhausted, exceptions.ServiceUnavailable,
+                ),
                 deadline=60.0,
             ),
             default_timeout=60.0,
@@ -476,6 +480,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=60.0,
@@ -539,6 +544,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=300.0,
@@ -623,6 +629,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=60.0,
@@ -716,7 +723,9 @@ class FirestoreAsyncClient:
                 initial=0.1,
                 maximum=60.0,
                 multiplier=1.3,
-                predicate=retries.if_exception_type(exceptions.ServiceUnavailable,),
+                predicate=retries.if_exception_type(
+                    exceptions.ResourceExhausted, exceptions.ServiceUnavailable,
+                ),
                 deadline=60.0,
             ),
             default_timeout=60.0,
@@ -803,6 +812,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=60.0,
@@ -864,6 +874,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=300.0,
@@ -933,6 +944,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=300.0,
@@ -1053,6 +1065,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=86400.0,
@@ -1140,6 +1153,7 @@ class FirestoreAsyncClient:
                 predicate=retries.if_exception_type(
                     exceptions.DeadlineExceeded,
                     exceptions.InternalServerError,
+                    exceptions.ResourceExhausted,
                     exceptions.ServiceUnavailable,
                 ),
                 deadline=60.0,
@@ -1216,7 +1230,9 @@ class FirestoreAsyncClient:
                 maximum=60.0,
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
-                    exceptions.Aborted, exceptions.ServiceUnavailable,
+                    exceptions.Aborted,
+                    exceptions.ResourceExhausted,
+                    exceptions.ServiceUnavailable,
                 ),
                 deadline=60.0,
             ),
@@ -1275,7 +1291,9 @@ class FirestoreAsyncClient:
                 initial=0.1,
                 maximum=60.0,
                 multiplier=1.3,
-                predicate=retries.if_exception_type(exceptions.ServiceUnavailable,),
+                predicate=retries.if_exception_type(
+                    exceptions.ResourceExhausted, exceptions.ServiceUnavailable,
+                ),
                 deadline=60.0,
             ),
             default_timeout=60.0,
