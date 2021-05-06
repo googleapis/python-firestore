@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 # Copyright 2020 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,6 +15,7 @@
 #
 
 from .services.firestore_admin import FirestoreAdminClient
+
 from .types.field import Field
 from .types.firestore_admin import CreateIndexRequest
 from .types.firestore_admin import DeleteIndexRequest
@@ -37,7 +37,6 @@ from .types.operation import ImportDocumentsMetadata
 from .types.operation import IndexOperationMetadata
 from .types.operation import OperationState
 from .types.operation import Progress
-
 
 __all__ = (
     "CreateIndexRequest",
