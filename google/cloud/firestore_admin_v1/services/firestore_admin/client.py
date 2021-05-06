@@ -413,7 +413,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.CreateIndexRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
             parent (str):
                 Required. A parent name of the form
@@ -503,7 +504,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.ListIndexesRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
             parent (str):
                 Required. A parent name of the form
@@ -583,7 +585,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.GetIndexRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.GetIndex][google.firestore.admin.v1.FirestoreAdmin.GetIndex].
             name (str):
                 Required. A name of the form
@@ -655,7 +658,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.DeleteIndexRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
             name (str):
                 Required. A name of the form
@@ -719,7 +723,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.GetFieldRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.GetField][google.firestore.admin.v1.FirestoreAdmin.GetField].
             name (str):
                 Required. A name of the form
@@ -808,7 +813,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.UpdateFieldRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
             field (google.cloud.firestore_admin_v1.types.Field):
                 Required. The field to be updated.
@@ -901,7 +907,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.ListFieldsRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
             parent (str):
                 Required. A parent name of the form
@@ -990,7 +997,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.ExportDocumentsRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
             name (str):
                 Required. Database to export. Should be of the form:
@@ -1080,7 +1088,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         Args:
             request (google.cloud.firestore_admin_v1.types.ImportDocumentsRequest):
-                The request object. The request for
+                The request object.
+                The request for
                 [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
             name (str):
                 Required. Database to import into. Should be of the
