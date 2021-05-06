@@ -246,9 +246,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
     def create_index(
         self,
     ) -> Callable[[firestore_admin.CreateIndexRequest], operations.Operation]:
-        r"""Return a callable for the
-        create index
-          method over gRPC.
+        r"""Return a callable for the create index method over gRPC.
 
         Creates a composite index. This returns a
         [google.longrunning.Operation][google.longrunning.Operation]
@@ -280,9 +278,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
     ) -> Callable[
         [firestore_admin.ListIndexesRequest], firestore_admin.ListIndexesResponse
     ]:
-        r"""Return a callable for the
-        list indexes
-          method over gRPC.
+        r"""Return a callable for the list indexes method over gRPC.
 
         Lists composite indexes.
 
@@ -306,9 +302,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
 
     @property
     def get_index(self) -> Callable[[firestore_admin.GetIndexRequest], index.Index]:
-        r"""Return a callable for the
-        get index
-          method over gRPC.
+        r"""Return a callable for the get index method over gRPC.
 
         Gets a composite index.
 
@@ -334,9 +328,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
     def delete_index(
         self,
     ) -> Callable[[firestore_admin.DeleteIndexRequest], empty.Empty]:
-        r"""Return a callable for the
-        delete index
-          method over gRPC.
+        r"""Return a callable for the delete index method over gRPC.
 
         Deletes a composite index.
 
@@ -360,9 +352,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
 
     @property
     def get_field(self) -> Callable[[firestore_admin.GetFieldRequest], field.Field]:
-        r"""Return a callable for the
-        get field
-          method over gRPC.
+        r"""Return a callable for the get field method over gRPC.
 
         Gets the metadata and configuration for a Field.
 
@@ -388,9 +378,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
     def update_field(
         self,
     ) -> Callable[[firestore_admin.UpdateFieldRequest], operations.Operation]:
-        r"""Return a callable for the
-        update field
-          method over gRPC.
+        r"""Return a callable for the update field method over gRPC.
 
         Updates a field configuration. Currently, field updates apply
         only to single field index configuration. However, calls to
@@ -433,9 +421,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
     ) -> Callable[
         [firestore_admin.ListFieldsRequest], firestore_admin.ListFieldsResponse
     ]:
-        r"""Return a callable for the
-        list fields
-          method over gRPC.
+        r"""Return a callable for the list fields method over gRPC.
 
         Lists the field configuration and metadata for this database.
 
@@ -468,9 +454,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
     def export_documents(
         self,
     ) -> Callable[[firestore_admin.ExportDocumentsRequest], operations.Operation]:
-        r"""Return a callable for the
-        export documents
-          method over gRPC.
+        r"""Return a callable for the export documents method over gRPC.
 
         Exports a copy of all or a subset of documents from
         Google Cloud Firestore to another storage system, such
@@ -505,9 +489,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
     def import_documents(
         self,
     ) -> Callable[[firestore_admin.ImportDocumentsRequest], operations.Operation]:
-        r"""Return a callable for the
-        import documents
-          method over gRPC.
+        r"""Return a callable for the import documents method over gRPC.
 
         Imports documents into Google Cloud Firestore.
         Existing documents with the same name are overwritten.

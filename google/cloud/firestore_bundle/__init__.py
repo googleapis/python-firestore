@@ -15,19 +15,19 @@
 #
 
 
-from .types.bundle import BundleElement
-from .types.bundle import BundleMetadata
 from .types.bundle import BundledDocumentMetadata
 from .types.bundle import BundledQuery
+from .types.bundle import BundleElement
+from .types.bundle import BundleMetadata
 from .types.bundle import NamedQuery
 
 from .bundle import FirestoreBundle
 
 __all__ = (
-    "BundleElement",
-    "BundleMetadata",
     "BundledDocumentMetadata",
-    "NamedQuery",
     "BundledQuery",
     "FirestoreBundle",
+    "BundleElement",
+    "BundleMetadata",
+    "NamedQuery",
 )

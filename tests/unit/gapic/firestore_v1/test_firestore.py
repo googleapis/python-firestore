@@ -3416,7 +3416,7 @@ def test_firestore_transport_create_channel(transport_class, grpc_helpers):
         transport_class(quota_project_id="octopus", scopes=["1", "2"])
 
         create_channel.assert_called_with(
-            "firestore.googleapis.com",
+            "firestore.googleapis.com:443",
             credentials=creds,
             credentials_file=None,
             quota_project_id="octopus",

@@ -239,9 +239,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def get_document(
         self,
     ) -> Callable[[firestore.GetDocumentRequest], Awaitable[document.Document]]:
-        r"""Return a callable for the
-        get document
-          method over gRPC.
+        r"""Return a callable for the get document method over gRPC.
 
         Gets a single document.
 
@@ -269,9 +267,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     ) -> Callable[
         [firestore.ListDocumentsRequest], Awaitable[firestore.ListDocumentsResponse]
     ]:
-        r"""Return a callable for the
-        list documents
-          method over gRPC.
+        r"""Return a callable for the list documents method over gRPC.
 
         Lists documents.
 
@@ -297,9 +293,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def update_document(
         self,
     ) -> Callable[[firestore.UpdateDocumentRequest], Awaitable[gf_document.Document]]:
-        r"""Return a callable for the
-        update document
-          method over gRPC.
+        r"""Return a callable for the update document method over gRPC.
 
         Updates or inserts a document.
 
@@ -325,9 +319,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def delete_document(
         self,
     ) -> Callable[[firestore.DeleteDocumentRequest], Awaitable[empty.Empty]]:
-        r"""Return a callable for the
-        delete document
-          method over gRPC.
+        r"""Return a callable for the delete document method over gRPC.
 
         Deletes a document.
 
@@ -356,9 +348,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         [firestore.BatchGetDocumentsRequest],
         Awaitable[firestore.BatchGetDocumentsResponse],
     ]:
-        r"""Return a callable for the
-        batch get documents
-          method over gRPC.
+        r"""Return a callable for the batch get documents method over gRPC.
 
         Gets multiple documents.
         Documents returned by this method are not guaranteed to
@@ -389,9 +379,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         [firestore.BeginTransactionRequest],
         Awaitable[firestore.BeginTransactionResponse],
     ]:
-        r"""Return a callable for the
-        begin transaction
-          method over gRPC.
+        r"""Return a callable for the begin transaction method over gRPC.
 
         Starts a new transaction.
 
@@ -417,9 +405,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def commit(
         self,
     ) -> Callable[[firestore.CommitRequest], Awaitable[firestore.CommitResponse]]:
-        r"""Return a callable for the
-        commit
-          method over gRPC.
+        r"""Return a callable for the commit method over gRPC.
 
         Commits a transaction, while optionally updating
         documents.
@@ -444,9 +430,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
 
     @property
     def rollback(self) -> Callable[[firestore.RollbackRequest], Awaitable[empty.Empty]]:
-        r"""Return a callable for the
-        rollback
-          method over gRPC.
+        r"""Return a callable for the rollback method over gRPC.
 
         Rolls back a transaction.
 
@@ -472,9 +456,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def run_query(
         self,
     ) -> Callable[[firestore.RunQueryRequest], Awaitable[firestore.RunQueryResponse]]:
-        r"""Return a callable for the
-        run query
-          method over gRPC.
+        r"""Return a callable for the run query method over gRPC.
 
         Runs a query.
 
@@ -502,9 +484,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     ) -> Callable[
         [firestore.PartitionQueryRequest], Awaitable[firestore.PartitionQueryResponse]
     ]:
-        r"""Return a callable for the
-        partition query
-          method over gRPC.
+        r"""Return a callable for the partition query method over gRPC.
 
         Partitions a query by returning partition cursors
         that can be used to run the query in parallel. The
@@ -534,9 +514,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def write(
         self,
     ) -> Callable[[firestore.WriteRequest], Awaitable[firestore.WriteResponse]]:
-        r"""Return a callable for the
-        write
-          method over gRPC.
+        r"""Return a callable for the write method over gRPC.
 
         Streams batches of document updates and deletes, in
         order.
@@ -563,9 +541,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def listen(
         self,
     ) -> Callable[[firestore.ListenRequest], Awaitable[firestore.ListenResponse]]:
-        r"""Return a callable for the
-        listen
-          method over gRPC.
+        r"""Return a callable for the listen method over gRPC.
 
         Listens to changes.
 
@@ -594,9 +570,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         [firestore.ListCollectionIdsRequest],
         Awaitable[firestore.ListCollectionIdsResponse],
     ]:
-        r"""Return a callable for the
-        list collection ids
-          method over gRPC.
+        r"""Return a callable for the list collection ids method over gRPC.
 
         Lists all the collection IDs underneath a document.
 
@@ -624,9 +598,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     ) -> Callable[
         [firestore.BatchWriteRequest], Awaitable[firestore.BatchWriteResponse]
     ]:
-        r"""Return a callable for the
-        batch write
-          method over gRPC.
+        r"""Return a callable for the batch write method over gRPC.
 
         Applies a batch of write operations.
 
@@ -662,9 +634,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def create_document(
         self,
     ) -> Callable[[firestore.CreateDocumentRequest], Awaitable[document.Document]]:
-        r"""Return a callable for the
-        create document
-          method over gRPC.
+        r"""Return a callable for the create document method over gRPC.
 
         Creates a new document.
 

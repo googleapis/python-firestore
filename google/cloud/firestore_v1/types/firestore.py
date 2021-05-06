@@ -679,7 +679,7 @@ class WriteRequest(proto.Message):
     stream_id = proto.Field(proto.STRING, number=2,)
     writes = proto.RepeatedField(proto.MESSAGE, number=3, message=write.Write,)
     stream_token = proto.Field(proto.BYTES, number=4,)
-    labels = proto.MapField(proto.STRING, proto.STRING, number=5)
+    labels = proto.MapField(proto.STRING, proto.STRING, number=5,)
 
 
 class WriteResponse(proto.Message):
@@ -736,7 +736,7 @@ class ListenRequest(proto.Message):
         proto.MESSAGE, number=2, oneof="target_change", message="Target",
     )
     remove_target = proto.Field(proto.INT32, number=3, oneof="target_change",)
-    labels = proto.MapField(proto.STRING, proto.STRING, number=4)
+    labels = proto.MapField(proto.STRING, proto.STRING, number=4,)
 
 
 class ListenResponse(proto.Message):
@@ -969,7 +969,7 @@ class BatchWriteRequest(proto.Message):
 
     database = proto.Field(proto.STRING, number=1,)
     writes = proto.RepeatedField(proto.MESSAGE, number=2, message=write.Write,)
-    labels = proto.MapField(proto.STRING, proto.STRING, number=3)
+    labels = proto.MapField(proto.STRING, proto.STRING, number=3,)
 
 
 class BatchWriteResponse(proto.Message):
