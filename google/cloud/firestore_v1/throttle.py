@@ -55,16 +55,17 @@ class Throttle:
         # Tracks how many times the [_maximum_tokens] has increased by 50%.
         self._phase: int = 0
 
-    def take_token(self) -> bool:
+    def take_tokens(self, num: Optional[int] = 1) -> bool:
         """Returns True if an operation is currently permitted or False if not."""
         self._check_phase()
         self._refill()
 
         if self._available_tokens > 0:
-            self._available_tokens -= 1
-            self._operations_this_phase += 1
-            return True
-        return False
+            _num_to_take = min(self._available_tokens, num)
+            self._available_tokens -= _num_to_take
+            self._operations_this_phase += _num_to_take
+            return _num_to_take
+        return 0
 
     def _check_phase(self):
         """Increments or decrements [_phase] depending on traffic.
