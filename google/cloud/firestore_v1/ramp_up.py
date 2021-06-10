@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import datetime
-from typing import Callable, NoReturn, Optional
+from typing import NoReturn, Optional
 
 
 def utcnow():
@@ -25,7 +25,7 @@ default_phase_length: int = 60 * 5  # 5 minutes
 microseconds_per_second: int = 1000000
 
 
-class Throttle:
+class RampUp:
     """Implements 5/5/5 ramp-up via Token Bucket algorithm."""
 
     def __init__(
@@ -33,6 +33,7 @@ class Throttle:
         initial_tokens: Optional[int] = default_initial_tokens,
         phase_length: Optional[int] = default_phase_length,
     ):
+
         # Tracks the volume of operations during a given ramp-up phase.
         self._operations_this_phase: int = 0
 
