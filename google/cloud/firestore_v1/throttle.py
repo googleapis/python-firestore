@@ -15,7 +15,9 @@
 import datetime
 from typing import Callable, NoReturn, Optional
 
-import ipdb
+
+def utcnow():
+    return datetime.datetime.utcnow()
 
 
 default_initial_tokens: int = 500
@@ -30,15 +32,11 @@ class Throttle:
         self,
         initial_tokens: Optional[int] = default_initial_tokens,
         phase_length: Optional[int] = default_phase_length,
-        now_getter: Optional[Callable] = datetime.datetime.utcnow,
     ):
-        # Tracks the volume of operations during the
+        # Tracks the volume of operations during a given ramp-up phase.
         self._operations_this_phase: int = 0
 
-        # Optional override for telling time. Useful for testing.
-        self._now = now_getter
-
-        self._start: datetime.datetime = self._now()
+        self._start: datetime.datetime = utcnow()
         self._last_refill: datetime.datetime = self._start
 
         # Current number of available operations. Decrements with every
@@ -76,7 +74,7 @@ class Throttle:
         This is a no-op unless a new [_phase_length] number of seconds since the
         start was crossed since it was last called.
         """
-        age: datetime.timedelta = self._now() - self._start
+        age: datetime.timedelta = utcnow() - self._start
 
         # Uses integer division to calculate the expected phase. We start in
         # Phase 0, so until [_phase_length] seconds have passed, this will
@@ -103,7 +101,7 @@ class Throttle:
     def _refill(self) -> NoReturn:
         """Replenishes any tokens that should have regenerated since the last
         operation."""
-        now: datetime.datetime = self._now()
+        now: datetime.datetime = utcnow()
         time_since_last_refill: datetime.timedelta = now - self._last_refill
 
         if time_since_last_refill:
