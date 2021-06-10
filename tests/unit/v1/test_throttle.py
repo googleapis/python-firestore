@@ -14,9 +14,10 @@
 
 import datetime
 import unittest
-from typing import Callable, Optional
+from typing import Optional
 
-
+import mock
+import google
 from google.cloud.firestore_v1 import throttle
 
 
@@ -31,63 +32,131 @@ def now() -> datetime.datetime:
 
 def now_plus_n(
     seconds: Optional[int] = 0, microseconds: Optional[int] = 0,
-) -> Callable:
-    def wrapper():
-        return fake_now + datetime.timedelta(
-            seconds=seconds, microseconds=microseconds,
-        )
-
-    return wrapper
+) -> datetime.timedelta:
+    return fake_now + datetime.timedelta(seconds=seconds, microseconds=microseconds,)
 
 
 class TestThrottle(unittest.TestCase):
-    def test_throttle_basic(self):
-        """Verifies that if time stands still, the Throttle allows 500 writes
-        before crashing out.
+    @mock.patch.object(google.cloud.firestore_v1.throttle, "utcnow")
+    def test_throttle_basic(self, mocked_now):
+        """Verifies that if the clock does not advance, the Throttle allows 500
+        writes before crashing out.
         """
+        mocked_now.return_value = fake_now
         # This throttle will never advance. Poor fella.
-        th = throttle.Throttle(now_getter=now)
+        th = throttle.Throttle()
         for _ in range(throttle.default_initial_tokens):
-            self.assertTrue(th.take_token())
-        self.assertFalse(th.take_token())
+            self.assertEqual(th.take_tokens(), 1)
+        self.assertEqual(th.take_tokens(), 0)
 
-    def test_throttle_with_refill(self):
-        """Verifies that if clock advances, the Throttle allows appropriate
+    @mock.patch.object(google.cloud.firestore_v1.throttle, "utcnow")
+    def test_throttle_with_refill(self, mocked_now):
+        """Verifies that if the clock advances, the Throttle allows appropriate
         additional writes.
         """
-        th = throttle.Throttle(now_getter=now)
+        mocked_now.return_value = fake_now
+        th = throttle.Throttle()
         th._available_tokens = 0
-        self.assertFalse(th.take_token())
+        self.assertEqual(th.take_tokens(), 0)
         # Advance the clock 0.1 seconds
-        th._now = now_plus_n(microseconds=100000)
+        mocked_now.return_value = now_plus_n(microseconds=100000)
         for _ in range(round(throttle.default_initial_tokens / 10)):
-            self.assertTrue(th.take_token())
-        self.assertFalse(th.take_token())
+            self.assertEqual(th.take_tokens(), 1)
+        self.assertEqual(th.take_tokens(), 0)
 
-    def test_throttle_phase_length(self):
-        """Verifies that if clock advances, the Throttle allows appropriate
+    @mock.patch.object(google.cloud.firestore_v1.throttle, "utcnow")
+    def test_throttle_phase_length(self, mocked_now):
+        """Verifies that if the clock advances, the Throttle allows appropriate
         additional writes.
         """
-        th = throttle.Throttle(now_getter=now)
-        self.assertTrue(th.take_token())
+        mocked_now.return_value = fake_now
+        th = throttle.Throttle()
+        self.assertEqual(th.take_tokens(), 1)
         th._available_tokens = 0
-        self.assertFalse(th.take_token())
+        self.assertEqual(th.take_tokens(), 0)
         # Advance the clock 1 phase
-        th._now = now_plus_n(seconds=throttle.default_phase_length, microseconds=1)
+        mocked_now.return_value = now_plus_n(
+            seconds=throttle.default_phase_length, microseconds=1,
+        )
         for _ in range(round(throttle.default_initial_tokens * 3 / 2)):
-            self.assertTrue(th.take_token(), msg=f"token {_} should have been allowed")
-        self.assertFalse(th.take_token())
+            self.assertTrue(th.take_tokens(), msg=f"token {_} should have been allowed")
+        self.assertEqual(th.take_tokens(), 0)
 
-    def test_throttle_idle_phase_length(self):
-        """Verifies that if clock advances but nothing happens, the Throttle
+    @mock.patch.object(google.cloud.firestore_v1.throttle, "utcnow")
+    def test_throttle_idle_phase_length(self, mocked_now):
+        """Verifies that if the clock advances but nothing happens, the Throttle
         doesn't ramp up.
         """
-        th = throttle.Throttle(now_getter=now)
+        mocked_now.return_value = fake_now
+        th = throttle.Throttle()
         th._available_tokens = 0
-        self.assertFalse(th.take_token())
+        self.assertEqual(th.take_tokens(), 0)
         # Advance the clock 1 phase
-        th._now = now_plus_n(seconds=throttle.default_phase_length, microseconds=1)
+        mocked_now.return_value = now_plus_n(
+            seconds=throttle.default_phase_length, microseconds=1,
+        )
         for _ in range(round(throttle.default_initial_tokens)):
-            self.assertTrue(th.take_token(), msg=f"token {_} should have been allowed")
+            self.assertEqual(
+                th.take_tokens(), 1, msg=f"token {_} should have been allowed"
+            )
             self.assertEqual(th._maximum_tokens, 500)
-        self.assertFalse(th.take_token())
+        self.assertEqual(th.take_tokens(), 0)
+
+    @mock.patch.object(google.cloud.firestore_v1.throttle, "utcnow")
+    def test_take_batch_size(self, mocked_now):
+        """Verifies that if the clock advances but nothing happens, the Throttle
+        doesn't ramp up.
+        """
+        page_size: int = 20
+        mocked_now.return_value = fake_now
+        th = throttle.Throttle()
+        th._available_tokens = 15
+        self.assertEqual(th.take_tokens(page_size), 15)
+        # Advance the clock 1 phase
+        mocked_now.return_value = now_plus_n(
+            seconds=throttle.default_phase_length, microseconds=1,
+        )
+        th._check_phase()
+        self.assertEqual(th._maximum_tokens, 750)
+
+        for _ in range(740 // page_size):
+            self.assertEqual(
+                th.take_tokens(page_size),
+                page_size,
+                msg=f"page {_} should have been allowed",
+            )
+        self.assertEqual(th.take_tokens(page_size), 10)
+        self.assertEqual(th.take_tokens(page_size), 0)
+
+    @mock.patch.object(google.cloud.firestore_v1.throttle, "utcnow")
+    def test_phase_progress(self, mocked_now):
+        mocked_now.return_value = fake_now
+
+        th = throttle.Throttle()
+        self.assertEqual(th._phase, 0)
+        self.assertEqual(th._maximum_tokens, 500)
+        th.take_tokens()
+
+        # Advance the clock 1 phase
+        mocked_now.return_value = now_plus_n(
+            seconds=throttle.default_phase_length, microseconds=1,
+        )
+        th.take_tokens()
+        self.assertEqual(th._phase, 1)
+        self.assertEqual(th._maximum_tokens, 750)
+
+        # Advance the clock another phase
+        mocked_now.return_value = now_plus_n(
+            seconds=throttle.default_phase_length * 2, microseconds=1,
+        )
+        th.take_tokens()
+        self.assertEqual(th._phase, 2)
+        self.assertEqual(th._maximum_tokens, 1125)
+
+        # Advance the clock another ms and the phase should not advance
+        mocked_now.return_value = now_plus_n(
+            seconds=throttle.default_phase_length * 2, microseconds=2,
+        )
+        th.take_tokens()
+        self.assertEqual(th._phase, 2)
+        self.assertEqual(th._maximum_tokens, 1125)
