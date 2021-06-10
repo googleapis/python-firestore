@@ -79,7 +79,9 @@ class TestRampUp(unittest.TestCase):
             seconds=ramp_up.default_phase_length, microseconds=1,
         )
         for _ in range(round(ramp_up.default_initial_tokens * 3 / 2)):
-            self.assertTrue(ramp.take_tokens(), msg=f"token {_} should have been allowed")
+            self.assertTrue(
+                ramp.take_tokens(), msg=f"token {_} should have been allowed"
+            )
         self.assertEqual(ramp.take_tokens(), 0)
 
     @mock.patch.object(google.cloud.firestore_v1.ramp_up, "utcnow")
