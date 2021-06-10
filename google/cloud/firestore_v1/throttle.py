@@ -93,9 +93,8 @@ class Throttle:
         self._phase = expected_phase
 
         # No-op if we did nothing for an entire phase
-        if not operations_last_phase or self._phase > previous_phase + 1:
-            return
-        self._increase_maximum_tokens()
+        if operations_last_phase and self._phase <= previous_phase + 1:
+            self._increase_maximum_tokens()
 
     def _increase_maximum_tokens(self) -> NoReturn:
         self._maximum_tokens = round(self._maximum_tokens * 1.5)
