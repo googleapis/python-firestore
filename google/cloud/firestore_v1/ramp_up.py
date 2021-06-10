@@ -26,14 +26,43 @@ microseconds_per_second: int = 1000000
 
 
 class RampUp:
-    """Implements 5/5/5 ramp-up via Token Bucket algorithm."""
+    """Implements 5/5/5 ramp-up via Token Bucket algorithm.
+
+    5/5/5 is a ramp up strategy that starts with a budget of 500 operations per
+    second. Additionally, every 5 minutes, the maximum budget can increase by
+    50%. Thus, at 5:01 into a long bulk-writing process, the maximum budget
+    becomes 750 operations per second. At 10:01, the budget becomes 1,125
+    operations per second.
+
+    The Token Bucket algorithm uses the metaphor of a bucket, or pile, or really
+    any container, if we're being honest, of tokens from which a user is able
+    to draw. If there are tokens available, you can do the thing. If there are not,
+    you can not do the thing. Additionally, tokens replenish at a fixed rate.
+
+    Usage:
+
+        ramp_up = RampUp()
+        tokens = ramp_up.take_tokens(20)
+
+        if not tokens:
+            queue_retry()
+        else:
+            for _ in range(tokens):
+                my_operation()
+
+    Args:
+        initial_tokens (Optional[int]): Starting size of the budget. Defaults
+            to 500.
+        phase_length (Optional[int]): Number of seconds, after which, the size
+            of the budget can increase by 50%. Such an increase will happen every
+            [phase_length] seconds if operation requests continue consistently.
+    """
 
     def __init__(
         self,
         initial_tokens: Optional[int] = default_initial_tokens,
         phase_length: Optional[int] = default_phase_length,
     ):
-
         # Tracks the volume of operations during a given ramp-up phase.
         self._operations_this_phase: int = 0
 
@@ -54,15 +83,14 @@ class RampUp:
         # Tracks how many times the [_maximum_tokens] has increased by 50%.
         self._phase: int = 0
 
-    def take_tokens(self, num: Optional[int] = 1) -> bool:
-        """Returns True if an operation is currently permitted or False if not."""
+    def take_tokens(self, num: Optional[int] = 1) -> int:
+        """Returns the number of available tokens, up to the amount requested."""
         self._check_phase()
         self._refill()
 
         if self._available_tokens > 0:
             _num_to_take = min(self._available_tokens, num)
             self._available_tokens -= _num_to_take
-            self._operations_this_phase += _num_to_take
             return _num_to_take
         return 0
 
