@@ -17,7 +17,7 @@ from typing import NoReturn, Optional
 
 
 def utcnow():
-    return datetime.datetime.utcnow()
+    return datetime.datetime.utcnow()  # pragma: NO COVER
 
 
 default_initial_tokens: int = 500
@@ -91,6 +91,7 @@ class RampUp:
         if self._available_tokens > 0:
             _num_to_take = min(self._available_tokens, num)
             self._available_tokens -= _num_to_take
+            self._operations_this_phase += _num_to_take
             return _num_to_take
         return 0
 
@@ -121,7 +122,7 @@ class RampUp:
         self._phase = expected_phase
 
         # No-op if we did nothing for an entire phase
-        if operations_last_phase and self._phase <= previous_phase + 1:
+        if operations_last_phase and self._phase > previous_phase:
             self._increase_maximum_tokens()
 
     def _increase_maximum_tokens(self) -> NoReturn:

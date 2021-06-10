@@ -26,10 +26,6 @@ from google.cloud.firestore_v1 import ramp_up
 fake_now = datetime.datetime.utcnow()
 
 
-def now() -> datetime.datetime:
-    return fake_now
-
-
 def now_plus_n(
     seconds: Optional[int] = 0, microseconds: Optional[int] = 0,
 ) -> datetime.timedelta:
