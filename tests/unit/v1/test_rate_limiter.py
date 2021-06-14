@@ -18,7 +18,7 @@ from typing import Optional
 
 import mock
 import google
-from google.cloud.firestore_v1 import ramp_up
+from google.cloud.firestore_v1 import rate_limiter
 
 
 # Pick a point in time as the center of our universe for this test run.
@@ -32,87 +32,87 @@ def now_plus_n(
     return fake_now + datetime.timedelta(seconds=seconds, microseconds=microseconds,)
 
 
-class TestRampUp(unittest.TestCase):
-    @mock.patch.object(google.cloud.firestore_v1.ramp_up, "utcnow")
-    def test_ramp_up_basic(self, mocked_now):
-        """Verifies that if the clock does not advance, the RampUp allows 500
+class TestRateLimiter(unittest.TestCase):
+    @mock.patch.object(google.cloud.firestore_v1.rate_limiter, "utcnow")
+    def test_rate_limiter_basic(self, mocked_now):
+        """Verifies that if the clock does not advance, the RateLimiter allows 500
         writes before crashing out.
         """
         mocked_now.return_value = fake_now
-        # This RampUp will never advance. Poor fella.
-        ramp = ramp_up.RampUp()
-        for _ in range(ramp_up.default_initial_tokens):
+        # This RateLimiter will never advance. Poor fella.
+        ramp = rate_limiter.RateLimiter()
+        for _ in range(rate_limiter.default_initial_tokens):
             self.assertEqual(ramp.take_tokens(), 1)
         self.assertEqual(ramp.take_tokens(), 0)
 
-    @mock.patch.object(google.cloud.firestore_v1.ramp_up, "utcnow")
-    def test_ramp_up_with_refill(self, mocked_now):
-        """Verifies that if the clock advances, the RampUp allows appropriate
+    @mock.patch.object(google.cloud.firestore_v1.rate_limiter, "utcnow")
+    def test_rate_limiter_with_refill(self, mocked_now):
+        """Verifies that if the clock advances, the RateLimiter allows appropriate
         additional writes.
         """
         mocked_now.return_value = fake_now
-        ramp = ramp_up.RampUp()
+        ramp = rate_limiter.RateLimiter()
         ramp._available_tokens = 0
         self.assertEqual(ramp.take_tokens(), 0)
         # Advance the clock 0.1 seconds
         mocked_now.return_value = now_plus_n(microseconds=100000)
-        for _ in range(round(ramp_up.default_initial_tokens / 10)):
+        for _ in range(round(rate_limiter.default_initial_tokens / 10)):
             self.assertEqual(ramp.take_tokens(), 1)
         self.assertEqual(ramp.take_tokens(), 0)
 
-    @mock.patch.object(google.cloud.firestore_v1.ramp_up, "utcnow")
-    def test_ramp_up_phase_length(self, mocked_now):
-        """Verifies that if the clock advances, the RampUp allows appropriate
+    @mock.patch.object(google.cloud.firestore_v1.rate_limiter, "utcnow")
+    def test_rate_limiter_phase_length(self, mocked_now):
+        """Verifies that if the clock advances, the RateLimiter allows appropriate
         additional writes.
         """
         mocked_now.return_value = fake_now
-        ramp = ramp_up.RampUp()
+        ramp = rate_limiter.RateLimiter()
         self.assertEqual(ramp.take_tokens(), 1)
         ramp._available_tokens = 0
         self.assertEqual(ramp.take_tokens(), 0)
         # Advance the clock 1 phase
         mocked_now.return_value = now_plus_n(
-            seconds=ramp_up.default_phase_length, microseconds=1,
+            seconds=rate_limiter.default_phase_length, microseconds=1,
         )
-        for _ in range(round(ramp_up.default_initial_tokens * 3 / 2)):
+        for _ in range(round(rate_limiter.default_initial_tokens * 3 / 2)):
             self.assertTrue(
                 ramp.take_tokens(), msg=f"token {_} should have been allowed"
             )
         self.assertEqual(ramp.take_tokens(), 0)
 
-    @mock.patch.object(google.cloud.firestore_v1.ramp_up, "utcnow")
-    def test_ramp_up_idle_phase_length(self, mocked_now):
-        """Verifies that if the clock advances but nothing happens, the RampUp
+    @mock.patch.object(google.cloud.firestore_v1.rate_limiter, "utcnow")
+    def test_rate_limiter_idle_phase_length(self, mocked_now):
+        """Verifies that if the clock advances but nothing happens, the RateLimiter
         doesn't ramp up.
         """
         mocked_now.return_value = fake_now
-        ramp = ramp_up.RampUp()
+        ramp = rate_limiter.RateLimiter()
         ramp._available_tokens = 0
         self.assertEqual(ramp.take_tokens(), 0)
         # Advance the clock 1 phase
         mocked_now.return_value = now_plus_n(
-            seconds=ramp_up.default_phase_length, microseconds=1,
+            seconds=rate_limiter.default_phase_length, microseconds=1,
         )
-        for _ in range(round(ramp_up.default_initial_tokens)):
+        for _ in range(round(rate_limiter.default_initial_tokens)):
             self.assertEqual(
                 ramp.take_tokens(), 1, msg=f"token {_} should have been allowed"
             )
             self.assertEqual(ramp._maximum_tokens, 500)
         self.assertEqual(ramp.take_tokens(), 0)
 
-    @mock.patch.object(google.cloud.firestore_v1.ramp_up, "utcnow")
+    @mock.patch.object(google.cloud.firestore_v1.rate_limiter, "utcnow")
     def test_take_batch_size(self, mocked_now):
-        """Verifies that if the clock advances but nothing happens, the RampUp
+        """Verifies that if the clock advances but nothing happens, the RateLimiter
         doesn't ramp up.
         """
         page_size: int = 20
         mocked_now.return_value = fake_now
-        ramp = ramp_up.RampUp()
+        ramp = rate_limiter.RateLimiter()
         ramp._available_tokens = 15
         self.assertEqual(ramp.take_tokens(page_size), 15)
         # Advance the clock 1 phase
         mocked_now.return_value = now_plus_n(
-            seconds=ramp_up.default_phase_length, microseconds=1,
+            seconds=rate_limiter.default_phase_length, microseconds=1,
         )
         ramp._check_phase()
         self.assertEqual(ramp._maximum_tokens, 750)
@@ -126,18 +126,18 @@ class TestRampUp(unittest.TestCase):
         self.assertEqual(ramp.take_tokens(page_size), 10)
         self.assertEqual(ramp.take_tokens(page_size), 0)
 
-    @mock.patch.object(google.cloud.firestore_v1.ramp_up, "utcnow")
+    @mock.patch.object(google.cloud.firestore_v1.rate_limiter, "utcnow")
     def test_phase_progress(self, mocked_now):
         mocked_now.return_value = fake_now
 
-        ramp = ramp_up.RampUp()
+        ramp = rate_limiter.RateLimiter()
         self.assertEqual(ramp._phase, 0)
         self.assertEqual(ramp._maximum_tokens, 500)
         ramp.take_tokens()
 
         # Advance the clock 1 phase
         mocked_now.return_value = now_plus_n(
-            seconds=ramp_up.default_phase_length, microseconds=1,
+            seconds=rate_limiter.default_phase_length, microseconds=1,
         )
         ramp.take_tokens()
         self.assertEqual(ramp._phase, 1)
@@ -145,7 +145,7 @@ class TestRampUp(unittest.TestCase):
 
         # Advance the clock another phase
         mocked_now.return_value = now_plus_n(
-            seconds=ramp_up.default_phase_length * 2, microseconds=1,
+            seconds=rate_limiter.default_phase_length * 2, microseconds=1,
         )
         ramp.take_tokens()
         self.assertEqual(ramp._phase, 2)
@@ -153,8 +153,16 @@ class TestRampUp(unittest.TestCase):
 
         # Advance the clock another ms and the phase should not advance
         mocked_now.return_value = now_plus_n(
-            seconds=ramp_up.default_phase_length * 2, microseconds=2,
+            seconds=rate_limiter.default_phase_length * 2, microseconds=2,
         )
         ramp.take_tokens()
         self.assertEqual(ramp._phase, 2)
         self.assertEqual(ramp._maximum_tokens, 1125)
+
+    def test_utcnow(self):
+        self.assertTrue(
+            isinstance(
+                google.cloud.firestore_v1.rate_limiter.utcnow(),
+                datetime.datetime,
+            )
+        )

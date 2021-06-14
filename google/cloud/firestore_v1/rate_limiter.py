@@ -17,7 +17,7 @@ from typing import NoReturn, Optional
 
 
 def utcnow():
-    return datetime.datetime.utcnow()  # pragma: NO COVER
+    return datetime.datetime.utcnow()
 
 
 default_initial_tokens: int = 500
@@ -25,7 +25,7 @@ default_phase_length: int = 60 * 5  # 5 minutes
 microseconds_per_second: int = 1000000
 
 
-class RampUp:
+class RateLimiter:
     """Implements 5/5/5 ramp-up via Token Bucket algorithm.
 
     5/5/5 is a ramp up strategy that starts with a budget of 500 operations per
@@ -41,8 +41,8 @@ class RampUp:
 
     Usage:
 
-        ramp_up = RampUp()
-        tokens = ramp_up.take_tokens(20)
+        rate_limiter = RateLimiter()
+        tokens = rate_limiter.take_tokens(20)
 
         if not tokens:
             queue_retry()
@@ -66,8 +66,8 @@ class RampUp:
         # Tracks the volume of operations during a given ramp-up phase.
         self._operations_this_phase: int = 0
 
-        self._start: datetime.datetime = utcnow()
-        self._last_refill: datetime.datetime = self._start
+        self._start: Optional[datetime.datetime] = None
+        self._last_refill: Optional[datetime.datetime] = None
 
         # Current number of available operations. Decrements with every
         # permitted request and refills over time.
@@ -83,8 +83,13 @@ class RampUp:
         # Tracks how many times the [_maximum_tokens] has increased by 50%.
         self._phase: int = 0
 
+    def _start_clock(self):
+        self._start = self._start or utcnow()
+        self._last_refill = self._last_refill or utcnow()
+
     def take_tokens(self, num: Optional[int] = 1) -> int:
         """Returns the number of available tokens, up to the amount requested."""
+        self._start_clock()
         self._check_phase()
         self._refill()
 
