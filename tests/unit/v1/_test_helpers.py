@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import concurrent.futures
 import datetime
 import mock
 import typing
@@ -89,7 +90,16 @@ class FakeThreadPoolExecutor:
         self._shutdown = False
 
     def submit(self, callable) -> typing.NoReturn:
-        callable()
+        if self._shutdown:
+            raise RuntimeError(
+                "cannot schedule new futures after shutdown"
+            )  # pragma: NO COVER
+        future = concurrent.futures.Future()
+        future.set_result(callable())
+        return future
 
     def shutdown(self):
         self._shutdown = True
+
+    def __repr__(self):
+        return f"FakeThreadPoolExecutor(shutdown={self._shutdown})"

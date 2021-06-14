@@ -381,7 +381,12 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         client = self._make_default_one()
         bulk_writer = client.bulk_writer()
         self.assertIsInstance(bulk_writer, BulkWriter)
-        self.assertIs(bulk_writer._client, client)
+        self.assertIs(bulk_writer._client, client._sync_copy)
+
+    def test_sync_copy(self):
+        client = self._make_default_one()
+        # Multiple calls to this method should return the same cached instance.
+        self.assertIs(client._to_sync_copy(), client._to_sync_copy())
 
     def test_batch(self):
         from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
