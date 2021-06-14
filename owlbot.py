@@ -107,7 +107,9 @@ for library in get_staging_dirs(sub_directory="firestore_bundle"):
         "from .types.bundle import BundleMetadata\n"
         "from .types.bundle import NamedQuery\n",
         "from .types.bundle import BundleMetadata\n"
-        "from .types.bundle import NamedQuery\n\nfrom .bundle import FirestoreBundle\n",
+        "from .types.bundle import NamedQuery\n"
+        "\n"
+        "from .bundle import FirestoreBundle\n",
     )
 
     s.replace(
