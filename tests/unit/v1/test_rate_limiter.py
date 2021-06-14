@@ -162,7 +162,6 @@ class TestRateLimiter(unittest.TestCase):
     def test_utcnow(self):
         self.assertTrue(
             isinstance(
-                google.cloud.firestore_v1.rate_limiter.utcnow(),
-                datetime.datetime,
+                google.cloud.firestore_v1.rate_limiter.utcnow(), datetime.datetime,
             )
         )
