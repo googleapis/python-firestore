@@ -61,7 +61,7 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         client = _make_client()
         document = client.collection("test").document()
         # name is random, but assert it is not null
-        self.assertTrue(document.id != None)
+        self.assertTrue(document.id is not None)
 
     def test_constructor(self):
         collection_id1 = "rooms"
