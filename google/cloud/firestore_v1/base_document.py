@@ -18,6 +18,7 @@ import copy
 
 from google.api_core import retry as retries  # type: ignore
 
+from google.cloud.firestore_v1.types import Document
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
 from google.cloud.firestore_v1.types import common
@@ -25,7 +26,7 @@ from google.cloud.firestore_v1.types import common
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.types import firestore
 from google.cloud.firestore_v1.types import write
-from typing import Any, Dict, Iterable, NoReturn, Union, Tuple
+from typing import Any, Dict, Iterable, NoReturn, Optional, Union, Tuple
 
 
 class BaseDocumentReference(object):
@@ -268,7 +269,7 @@ class BaseDocumentReference(object):
     ) -> NoReturn:
         raise NotImplementedError
 
-    def _prep_get(
+    def _prep_batch_get(
         self,
         field_paths: Iterable[str] = None,
         transaction=None,
@@ -285,7 +286,8 @@ class BaseDocumentReference(object):
             mask = None
 
         request = {
-            "name": self._document_path,
+            "database": self._client._database_string,
+            "documents": [self._document_path],
             "mask": mask,
             "transaction": _helpers.get_transaction_id(transaction),
         }
@@ -489,6 +491,9 @@ class DocumentSnapshot(object):
         if not self._exists:
             return None
         return copy.deepcopy(self._data)
+
+    def _to_protobuf(self) -> Optional[Document]:
+        return _helpers.document_snapshot_to_protobuf(self)
 
 
 def _get_document_path(client, path: Tuple[str]) -> str:

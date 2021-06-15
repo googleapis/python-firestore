@@ -13,11 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import aiounittest
 import datetime
 import sys
 import unittest
 
 import mock
+import pytest
+from typing import List
 
 
 class AsyncMock(mock.MagicMock):
@@ -26,10 +29,14 @@ class AsyncMock(mock.MagicMock):
 
 
 class AsyncIter:
+    """Utility to help recreate the effect of an async generator. Useful when
+    you need to mock a system that requires `async for`.
+    """
+
     def __init__(self, items):
         self.items = items
 
-    async def __aiter__(self, **_):
+    async def __aiter__(self):
         for i in self.items:
             yield i
 
@@ -379,6 +386,74 @@ class Test_reference_value_to_document(unittest.TestCase):
 
         err_msg = WRONG_APP_REFERENCE.format(reference_value, client2._database_string)
         self.assertEqual(exc_info.exception.args, (err_msg,))
+
+
+class TestDocumentReferenceValue(unittest.TestCase):
+    @staticmethod
+    def _call(ref_value: str):
+        from google.cloud.firestore_v1._helpers import DocumentReferenceValue
+
+        return DocumentReferenceValue(ref_value)
+
+    def test_normal(self):
+        orig = "projects/name/databases/(default)/documents/col/doc"
+        parsed = self._call(orig)
+        self.assertEqual(parsed.collection_name, "col")
+        self.assertEqual(parsed.database_name, "(default)")
+        self.assertEqual(parsed.document_id, "doc")
+
+        self.assertEqual(parsed.full_path, orig)
+        parsed._reference_value = None  # type: ignore
+        self.assertEqual(parsed.full_path, orig)
+
+    def test_nested(self):
+        parsed = self._call(
+            "projects/name/databases/(default)/documents/col/doc/nested"
+        )
+        self.assertEqual(parsed.collection_name, "col")
+        self.assertEqual(parsed.database_name, "(default)")
+        self.assertEqual(parsed.document_id, "doc/nested")
+
+    def test_broken(self):
+        self.assertRaises(
+            ValueError, self._call, "projects/name/databases/(default)/documents/col",
+        )
+
+
+class Test_document_snapshot_to_protobuf(unittest.TestCase):
+    def test_real_snapshot(self):
+        from google.cloud.firestore_v1._helpers import document_snapshot_to_protobuf
+        from google.cloud.firestore_v1.types import Document
+        from google.cloud.firestore_v1.base_document import DocumentSnapshot
+        from google.cloud.firestore_v1.document import DocumentReference
+        from google.protobuf import timestamp_pb2  # type: ignore
+
+        client = _make_client()
+        snapshot = DocumentSnapshot(
+            data={"hello": "world"},
+            reference=DocumentReference("col", "doc", client=client),
+            exists=True,
+            read_time=timestamp_pb2.Timestamp(seconds=0, nanos=1),
+            update_time=timestamp_pb2.Timestamp(seconds=0, nanos=1),
+            create_time=timestamp_pb2.Timestamp(seconds=0, nanos=1),
+        )
+        self.assertIsInstance(document_snapshot_to_protobuf(snapshot), Document)
+
+    def test_non_existant_snapshot(self):
+        from google.cloud.firestore_v1._helpers import document_snapshot_to_protobuf
+        from google.cloud.firestore_v1.base_document import DocumentSnapshot
+        from google.cloud.firestore_v1.document import DocumentReference
+
+        client = _make_client()
+        snapshot = DocumentSnapshot(
+            data=None,
+            reference=DocumentReference("col", "doc", client=client),
+            exists=False,
+            read_time=None,
+            update_time=None,
+            create_time=None,
+        )
+        self.assertIsNone(document_snapshot_to_protobuf(snapshot))
 
 
 class Test_decode_value(unittest.TestCase):
@@ -2422,6 +2497,15 @@ class Test_make_retry_timeout_kwargs(unittest.TestCase):
         kwargs = self._call_fut(retry, timeout)
         expected = {"retry": retry, "timeout": timeout}
         self.assertEqual(kwargs, expected)
+
+
+class TestAsyncGenerator(aiounittest.AsyncTestCase):
+    @pytest.mark.asyncio
+    async def test_async_iter(self):
+        consumed: List[int] = []
+        async for el in AsyncIter([1, 2, 3]):
+            consumed.append(el)
+        self.assertEqual(consumed, [1, 2, 3])
 
 
 def _value_pb(**kwargs):
