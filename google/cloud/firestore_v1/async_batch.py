@@ -33,8 +33,40 @@ class AsyncWriteBatch(BaseWriteBatch):
             The client that created this batch.
     """
 
-    def __init__(self, client) -> None:
-        super(AsyncWriteBatch, self).__init__(client=client)
+    def __init__(self, client, *, write_ctx: bool = False) -> None:
+        super(AsyncWriteBatch, self).__init__(client=client, write_ctx=write_ctx)
+
+    async def write(
+        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None
+    ) -> list:
+        """Writes the changes accumulated in this batch.
+
+        Write operations are not guaranteed to be applied in order and must not
+        contain multiple writes to any given document. Preferred over `commit`
+        for performance reasons if these conditions are acceptable.
+
+        Args:
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
+
+        Returns:
+            List[:class:`google.cloud.proto.firestore.v1.write.BatchWriteResult`, ...]:
+            The write results corresponding to the changes committed, returned
+            in the same order as the changes were applied to this batch. A
+            write result contains an ``update_time`` field.
+        """
+        request, kwargs = self._prep_write(retry, timeout)
+
+        save_response = await self._client._firestore_api.batch_write(
+            request=request, metadata=self._client._rpc_metadata, **kwargs,
+        )
+
+        self._write_pbs = []
+        self.write_results = results = list(save_response.write_results)
+
+        return results
 
     async def commit(
         self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None,
@@ -70,4 +102,4 @@ class AsyncWriteBatch(BaseWriteBatch):
 
     async def __aexit__(self, exc_type, exc_value, traceback):
         if exc_type is None:
-            await self.commit()
+            await (self.write() if self._write_ctx else self.commit())
