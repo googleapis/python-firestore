@@ -33,13 +33,21 @@ class BaseWriteBatch(object):
     Args:
         client (:class:`~google.cloud.firestore_v1.client.Client`):
             The client that created this batch.
+        write_ctx (bool):
+            Controls whether this instance should call `commit` or `write` upon
+            exiting as a context manager. This parameter has no impact if you
+            do not use the instance as a context manager.
     """
 
-    def __init__(self, client) -> None:
+    def __init__(self, client, write_ctx: bool = False) -> None:
         self._client = client
+        self._write_ctx = write_ctx
         self._write_pbs = []
         self.write_results = None
         self.commit_time = None
+
+    def __len__(self):
+        return len(self._write_pbs)
 
     def _add_write_pbs(self, write_pbs: list) -> None:
         """Add `Write`` protobufs to this transaction.
@@ -154,6 +162,16 @@ class BaseWriteBatch(object):
             "database": self._client._database_string,
             "writes": self._write_pbs,
             "transaction": None,
+        }
+        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+        return request, kwargs
+
+    def _prep_write(self, retry, timeout):
+        """Shared setup for async/sync :meth:`write`."""
+        request = {
+            "database": self._client._database_string,
+            "writes": self._write_pbs,
+            "labels": None,
         }
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         return request, kwargs
