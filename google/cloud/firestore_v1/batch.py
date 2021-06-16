@@ -30,6 +30,10 @@ class WriteBatch(BaseWriteBatch):
     Args:
         client (:class:`~google.cloud.firestore_v1.client.Client`):
             The client that created this batch.
+        write_ctx (bool):
+            Controls whether this instance should call `commit` or `write` upon
+            exiting as a context manager. This parameter has no impact if you
+            do not use the instance as a context manager.
     """
 
     def __init__(self, client, *, write_ctx: bool = False) -> None:
