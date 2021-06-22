@@ -163,18 +163,17 @@ class TestAsyncWriteBatch(aiounittest.AsyncTestCase):
         firestore_api.commit.assert_not_called()
 
 
-class TestAsyncWriteBatchWrite(aiounittest.AsyncTestCase):
-    """Tests the AsyncWriteBatch.write method"""
+class TestAsyncBulkWriteBatch(aiounittest.AsyncTestCase):
+    """Tests the AsyncBulkWriteBatch.commit method"""
 
     @staticmethod
     def _get_target_class():
-        from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
+        from google.cloud.firestore_v1.async_batch import AsyncBulkWriteBatch
 
-        return AsyncWriteBatch
+        return AsyncBulkWriteBatch
 
     def _make_one(self, *args, **kwargs):
         klass = self._get_target_class()
-        kwargs.setdefault("write_ctx", True)
         return klass(*args, **kwargs)
 
     def test_constructor(self):
@@ -210,7 +209,7 @@ class TestAsyncWriteBatchWrite(aiounittest.AsyncTestCase):
         self.assertEqual(len(batch), 2)
         write_pbs = batch._write_pbs[::]
 
-        write_results = await batch.write(**kwargs)
+        write_results = await batch.commit(**kwargs)
         self.assertEqual(write_results, list(write_response.write_results))
         self.assertEqual(batch.write_results, write_results)
         # Make sure batch has no more "changes".

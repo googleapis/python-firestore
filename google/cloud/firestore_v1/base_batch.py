@@ -14,8 +14,9 @@
 
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
-
+import abc
 from google.cloud.firestore_v1 import _helpers
+from google.api_core import retry as retries  # type: ignore
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.document import DocumentReference
@@ -23,7 +24,7 @@ from google.cloud.firestore_v1.document import DocumentReference
 from typing import Union
 
 
-class BaseWriteBatch(object):
+class BaseBatch(metaclass=abc.ABCMeta):
     """Accumulate write operations to be sent in a batch.
 
     This has the same set of methods for write operations that
@@ -33,15 +34,10 @@ class BaseWriteBatch(object):
     Args:
         client (:class:`~google.cloud.firestore_v1.client.Client`):
             The client that created this batch.
-        write_ctx (bool):
-            Controls whether this instance should call `commit` or `write` upon
-            exiting as a context manager. This parameter has no impact if you
-            do not use the instance as a context manager.
     """
 
-    def __init__(self, client, write_ctx: bool = False) -> None:
+    def __init__(self, client) -> None:
         self._client = client
-        self._write_ctx = write_ctx
         self._write_pbs = []
         self.write_results = None
         self.commit_time = None
@@ -59,6 +55,12 @@ class BaseWriteBatch(object):
                 write_pb2.Write]): A list of write protobufs to be added.
         """
         self._write_pbs.extend(write_pbs)
+
+    @abc.abstractmethod
+    def commit(self):
+        """Sends all accumulated write operations to the server. The details of this
+        write depend on the implementing class."""
+        raise NotImplementedError()
 
     def create(self, reference: DocumentReference, document_data: dict) -> None:
         """Add a "change" to this batch to create a document.
@@ -156,7 +158,12 @@ class BaseWriteBatch(object):
         write_pb = _helpers.pb_for_delete(reference._document_path, option)
         self._add_write_pbs([write_pb])
 
-    def _prep_commit(self, retry, timeout):
+
+class BaseWriteBatch(BaseBatch):
+    """Base class for a/sync implementations of the `commit` RPC. `commit` is useful
+    for lower volumes or when the order of write operations is important."""
+
+    def _prep_commit(self, retry: retries.Retry, timeout: float):
         """Shared setup for async/sync :meth:`commit`."""
         request = {
             "database": self._client._database_string,
@@ -166,7 +173,19 @@ class BaseWriteBatch(object):
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         return request, kwargs
 
-    def _prep_write(self, retry, timeout):
+
+class BaseBulkWriteBatch(BaseBatch):
+    """Base class for a/sync implementations of the `batch_write` RPC. `batch_write` is useful
+    for higher volumes and when the order of write operations (within a batch) is
+    unimportant.
+    
+    Because the order in which individual write operations land in the database is not guaranteed,
+    `batch_write` RPCs can never contain multiple operations to the same document. If calling code
+    detects a second write operation to a known document reference, it should first cut off the
+    previous batch and send it, then create a new batch starting with the latest write operation.
+    In practice, the [Async]BulkWriter classes handle this."""
+
+    def _prep_commit(self, retry: retries.Retry, timeout: float):
         """Shared setup for async/sync :meth:`write`."""
         request = {
             "database": self._client._database_string,
