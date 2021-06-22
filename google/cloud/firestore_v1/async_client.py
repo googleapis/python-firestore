@@ -35,6 +35,7 @@ from google.cloud.firestore_v1.base_client import (
     _path_helper,
 )
 
+from google.cloud.firestore_v1.async_bulk_writer import AsyncBulkWriter
 from google.cloud.firestore_v1.async_query import AsyncCollectionGroup
 from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
@@ -286,6 +287,16 @@ class AsyncClient(BaseClient):
 
         async for collection_id in iterator:
             yield self.collection(collection_id)
+
+    def bulk_writer(self) -> AsyncBulkWriter:
+        """Get a AsyncBulkWriter instance from this client.
+
+        Returns:
+            :class:`@google.cloud.firestore_v1.async_bulk_writer.AsyncBulkWriter`:
+            A utility to efficiently create and save many `AsyncWriteBatch` instances
+            to the server.
+        """
+        return AsyncBulkWriter(client=self)
 
     def batch(self) -> AsyncWriteBatch:
         """Get a batch instance from this client.

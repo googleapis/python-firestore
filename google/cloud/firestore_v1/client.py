@@ -286,6 +286,17 @@ class Client(BaseClient):
         for collection_id in iterator:
             yield self.collection(collection_id)
 
+    def bulk_writer(self) -> 'BulkWriter':  # type: ignore
+        """Get a BulkWriter instance from this client.
+
+        Returns:
+            :class:`@google.cloud.firestore_v1.bulk_writer.BulkWriter`:
+            A utility to efficiently create and save many `WriteBatch` instances
+            to the server.
+        """
+        from google.cloud.firestore_v1.bulk_writer import BulkWriter
+        return BulkWriter(client=self)
+
     def batch(self) -> WriteBatch:
         """Get a batch instance from this client.
 

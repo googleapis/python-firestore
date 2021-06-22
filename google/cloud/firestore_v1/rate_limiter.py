@@ -87,13 +87,15 @@ class RateLimiter:
         self._start = self._start or utcnow()
         self._last_refill = self._last_refill or utcnow()
 
-    def take_tokens(self, num: Optional[int] = 1) -> int:
+    def take_tokens(self, num: Optional[int] = 1, allow_less: bool = False) -> int:
         """Returns the number of available tokens, up to the amount requested."""
         self._start_clock()
         self._check_phase()
         self._refill()
 
-        if self._available_tokens > 0:
+        minimum_tokens = 1 if allow_less else num
+
+        if self._available_tokens >= minimum_tokens:
             _num_to_take = min(self._available_tokens, num)
             self._available_tokens -= _num_to_take
             self._operations_this_phase += _num_to_take
