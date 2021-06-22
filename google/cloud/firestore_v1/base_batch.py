@@ -33,15 +33,10 @@ class BaseBatch(metaclass=abc.ABCMeta):
     Args:
         client (:class:`~google.cloud.firestore_v1.client.Client`):
             The client that created this batch.
-        write_ctx (bool):
-            Controls whether this instance should call `commit` or `write` upon
-            exiting as a context manager. This parameter has no impact if you
-            do not use the instance as a context manager.
     """
 
-    def __init__(self, client, write_ctx: bool = False) -> None:
+    def __init__(self, client) -> None:
         self._client = client
-        self._write_ctx = write_ctx
         self._write_pbs = []
         self._document_references: Dict[str, BaseDocumentReference] = {}
         self.write_results = None
@@ -185,7 +180,19 @@ class BaseWriteBatch(BaseBatch):
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         return request, kwargs
 
-    def _prep_write(self, retry, timeout):
+
+class BaseBulkWriteBatch(BaseBatch):
+    """Base class for a/sync implementations of the `batch_write` RPC. `batch_write` is useful
+    for higher volumes and when the order of write operations (within a batch) is
+    unimportant.
+    
+    Because the order in which individual write operations land in the database is not guaranteed,
+    `batch_write` RPCs can never contain multiple operations to the same document. If calling code
+    detects a second write operation to a known document reference, it should first cut off the
+    previous batch and send it, then create a new batch starting with the latest write operation.
+    In practice, the [Async]BulkWriter classes handle this."""
+
+    def _prep_commit(self, retry: retries.Retry, timeout: float):
         """Shared setup for async/sync :meth:`write`."""
         request = {
             "database": self._client._database_string,
