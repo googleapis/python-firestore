@@ -185,7 +185,7 @@ class BaseBulkWriteBatch(BaseBatch):
     """Base class for a/sync implementations of the `batch_write` RPC. `batch_write` is useful
     for higher volumes and when the order of write operations (within a batch) is
     unimportant.
-    
+
     Because the order in which individual write operations land in the database is not guaranteed,
     `batch_write` RPCs can never contain multiple operations to the same document. If calling code
     detects a second write operation to a known document reference, it should first cut off the
