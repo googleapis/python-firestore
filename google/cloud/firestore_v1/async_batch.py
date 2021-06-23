@@ -78,6 +78,22 @@ class AsyncWriteBatch(_AsyncContextManagerMixin, BaseWriteBatch):
 
 
 class AsyncBulkWriteBatch(_AsyncContextManagerMixin, BaseBulkWriteBatch):
+    """Accumulate write operations to be sent in a batch. Use this over `AsyncWriteBatch`
+    for higher volumes (e.g., via `BulkWriter`) and when the order of operations
+    within a given batch is unimportant.
+
+    This has the same set of methods for write operations that
+    :class:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference` does,
+    e.g. :meth:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference.create`.
+
+    Args:
+        client (:class:`~google.cloud.firestore_v1.async_client.AsyncClient`):
+            The client that created this batch.
+    """
+
+    def __init__(self, client) -> None:
+        super(AsyncBulkWriteBatch, self).__init__(client=client)
+
     async def commit(
         self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None
     ) -> list:
