@@ -26,6 +26,7 @@ class TestableBaseWriteBatch(BaseWriteBatch):
     evaluating the shared methods."""
 
     def commit(self):
+        # pragma: NO COVER
         pass
 
 
