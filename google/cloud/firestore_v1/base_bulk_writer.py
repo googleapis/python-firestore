@@ -16,21 +16,15 @@
 Firestore API."""
 
 import abc
-import asyncio
-import collections
-import functools
 import logging
-import time
 from typing import Callable, Dict, NoReturn, Optional
 
-from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
-
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.rate_limiter import RateLimiter
-from google.cloud.firestore_v1.base_document import BaseDocumentReference, DocumentSnapshot
+from google.cloud.firestore_v1.base_document import BaseDocumentReference
 from google.cloud.firestore_v1.base_client import BaseClient
-from google.cloud.firestore_v1.base_batch import BaseWriteBatch
-from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1.base_batch import BaseBulkWriteBatch
+from google.cloud.firestore_v1.rate_limiter import RateLimiter
+from google.cloud.firestore_v1.types.firestore import BatchWriteResponse
 
 
 logger = logging.getLogger(__name__)
@@ -53,7 +47,7 @@ class BaseBulkWriterScheduler(metaclass=abc.ABCMeta):
 class BaseBulkWriterSender(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
-    def send(self, batch: BaseWriteBatch):
+    def send(self, batch: BaseBulkWriteBatch) -> BatchWriteResponse:
         raise NotImplementedError()
 
 
@@ -79,8 +73,15 @@ class BaseBulkWriter(metaclass=abc.ABCMeta):
         self._scheduler: BaseBulkWriterScheduler = scheduler or self.build_scheduler()
         self._sender: BaseBulkWriterSender = sender or self.build_sender()
         self._is_open = True
-        self._batch: Optional[BaseWriteBatch] = None
+        self._batch: Optional[BaseBulkWriteBatch] = None
         self._reset_batch()
+
+        self._in_flight_batches = set()
+
+        # BulkWriteBatch objects cannot contain > 1 write operation to the same
+        # document reference (which is distinguishable by the document path),
+        # so here we track seen documents to prevent competing operations.
+        self._document_paths = set()
 
     @abc.abstractmethod
     def build_scheduler(self) -> BaseBulkWriterScheduler:
@@ -90,8 +91,17 @@ class BaseBulkWriter(metaclass=abc.ABCMeta):
     def build_sender(self) -> BaseBulkWriterSender:
         raise NotImplementedError()
 
+    def _register_document_reference(self, reference: BaseDocumentReference):
+        if reference._document_path in self._document_paths:
+            raise ValueError(
+                'Cannot add multiple references to same document within a '
+                'single BulkWriteBatch'
+            )
+        self._document_paths.add(reference._document_path)
+
     def _reset_batch(self):
-        self._batch = self._client.batch()
+        self._batch = self._client.bulk_batch()
+        self._document_paths = set()
 
     def flush(self):
         self._send_ready_batch(force=True)

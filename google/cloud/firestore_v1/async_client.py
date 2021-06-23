@@ -37,7 +37,7 @@ from google.cloud.firestore_v1.base_client import (
 
 from google.cloud.firestore_v1.async_bulk_writer import AsyncBulkWriter
 from google.cloud.firestore_v1.async_query import AsyncCollectionGroup
-from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
+from google.cloud.firestore_v1.async_batch import AsyncBulkWriteBatch, AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_document import (
     AsyncDocumentReference,
@@ -307,6 +307,16 @@ class AsyncClient(BaseClient):
             sending the changes all at once.
         """
         return AsyncWriteBatch(self)
+
+    def bulk_batch(self) -> AsyncBulkWriteBatch:
+        """Get a bulk batch instance from this client.
+
+        Returns:
+            :class:`~google.cloud.firestore_v1.async_batch.AsyncBulkWriteBatch`:
+            A "write" batch to be used for accumulating document changes and
+            sending the changes all at once.
+        """
+        return AsyncBulkWriteBatch(self)
 
     def transaction(self, **kwargs) -> AsyncTransaction:
         """Get a transaction that uses this client.

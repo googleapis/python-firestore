@@ -39,7 +39,7 @@ class BulkWriterScheduler(base_bulk_writer.BaseBulkWriterScheduler):
 
 class BulkWriterSender(base_bulk_writer.BaseBulkWriterSender):
 
-    def send(self, batch: WriteBatch):
+    def send(self, batch: BulkWriteBatch):
         batch.commit()
 
 

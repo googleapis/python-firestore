@@ -36,7 +36,7 @@ from google.cloud.firestore_v1.base_client import (
 )
 
 from google.cloud.firestore_v1.query import CollectionGroup
-from google.cloud.firestore_v1.batch import WriteBatch
+from google.cloud.firestore_v1.batch import BulkWriteBatch, WriteBatch
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.transaction import Transaction
@@ -306,6 +306,16 @@ class Client(BaseClient):
             sending the changes all at once.
         """
         return WriteBatch(self)
+
+    def bulk_batch(self) -> WriteBatch:
+        """Get a bulk batch instance from this client.
+
+        Returns:
+            :class:`~google.cloud.firestore_v1.batch.BulkWriteBatch`:
+            A "write" batch to be used for accumulating document changes and
+            sending the changes all at once.
+        """
+        return BulkWriteBatch(self)
 
     def transaction(self, **kwargs) -> Transaction:
         """Get a transaction that uses this client.
