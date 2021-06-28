@@ -294,8 +294,8 @@ class Client(BaseClient):
             A utility to efficiently create and save many `WriteBatch` instances
             to the server.
         """
-        from google.cloud.firestore_v1.bulk_writer import BulkWriter
-        return BulkWriter(client=self)
+        from google.cloud.firestore_v1.base_bulk_writer import BaseBulkWriter
+        return BaseBulkWriter(client=self)
 
     def batch(self) -> WriteBatch:
         """Get a batch instance from this client.
@@ -307,7 +307,7 @@ class Client(BaseClient):
         """
         return WriteBatch(self)
 
-    def bulk_batch(self) -> WriteBatch:
+    def bulk_batch(self) -> BulkWriteBatch:
         """Get a bulk batch instance from this client.
 
         Returns:

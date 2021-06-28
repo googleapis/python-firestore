@@ -28,7 +28,7 @@ from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 logger = logging.getLogger(__name__)
 
 
-class AsyncBulkWriterScheduler(base_bulk_writer.BaseBulkWriterScheduler):
+class AsyncBulkWriterScheduler(base_bulk_writer.BulkWriterScheduler):
 
     async def request_send(self, batch_size: int) -> bool:
         while True:
@@ -38,7 +38,7 @@ class AsyncBulkWriterScheduler(base_bulk_writer.BaseBulkWriterScheduler):
             return True
 
 
-class AsyncBulkWriterSender(base_bulk_writer.BaseBulkWriterSender):
+class AsyncBulkWriterSender(base_bulk_writer.BulkWriterSender):
 
     async def send(self, batch: AsyncBulkWriteBatch):
         await batch.commit()
