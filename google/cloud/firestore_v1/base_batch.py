@@ -15,11 +15,7 @@
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
 import abc
-<<<<<<< HEAD
 from typing import Dict, Union
-=======
-from typing import Dict, Optional, Set, Union
->>>>>>> f6ba765 (working impl or BW)
 
 # Types needed only for Type Hints
 from google.api_core import retry as retries  # type: ignore
