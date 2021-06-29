@@ -29,7 +29,7 @@ class BulkWriteBatch(BaseBatch):
     is not guaranteed, `batch_write` RPCs can never contain multiple operations
     to the same document. If calling code detects a second write operation to a
     known document reference, it should first cut off the previous batch and
-    send it, then create a new batch starting with the latest write operation. 
+    send it, then create a new batch starting with the latest write operation.
     In practice, the [Async]BulkWriter classes handle this.
 
     This has the same set of methods for write operations that

@@ -15,13 +15,12 @@
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
 import abc
-from typing import Dict, Optional, Set, Union
+from typing import Dict, Union
 
 # Types needed only for Type Hints
 from google.api_core import retry as retries  # type: ignore
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.base_document import BaseDocumentReference
-from google.cloud.firestore_v1.document import DocumentReference
 
 
 class BaseBatch(metaclass=abc.ABCMeta):
