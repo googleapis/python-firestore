@@ -53,10 +53,12 @@ class TestBulkWriteBatch(unittest.TestCase):
         client = _make_client("grand")
         client._firestore_api_internal = firestore_api
 
-        # Actually make a batch with some mutations and call write().
+        # Actually make a batch with some mutations and call commit().
         batch = self._make_one(client)
         document1 = client.document("a", "b")
+        self.assertFalse(document1 in batch)
         batch.create(document1, {"ten": 10, "buck": "ets"})
+        self.assertTrue(document1 in batch)
         document2 = client.document("c", "d", "e", "f")
         batch.delete(document2)
         write_pbs = batch._write_pbs[::]
