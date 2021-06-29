@@ -35,15 +35,15 @@ from google.cloud.firestore_v1.base_client import (
     _path_helper,
 )
 
-from google.cloud.firestore_v1.async_bulk_writer import AsyncBulkWriter
 from google.cloud.firestore_v1.async_query import AsyncCollectionGroup
-from google.cloud.firestore_v1.async_batch import AsyncBulkWriteBatch, AsyncWriteBatch
+from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 from google.cloud.firestore_v1.async_document import (
     AsyncDocumentReference,
     DocumentSnapshot,
 )
 from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+from google.cloud.firestore_v1.bulk_writer import BulkWriter
 from google.cloud.firestore_v1.services.firestore import (
     async_client as firestore_client,
 )
@@ -288,15 +288,15 @@ class AsyncClient(BaseClient):
         async for collection_id in iterator:
             yield self.collection(collection_id)
 
-    def bulk_writer(self) -> AsyncBulkWriter:
-        """Get a AsyncBulkWriter instance from this client.
+    def bulk_writer(self) -> BulkWriter:
+        """Get a BulkWriter instance from this client.
 
         Returns:
-            :class:`@google.cloud.firestore_v1.async_bulk_writer.AsyncBulkWriter`:
+            :class:`@google.cloud.firestore_v1.bulk_writer.BulkWriter`:
             A utility to efficiently create and save many `AsyncWriteBatch` instances
             to the server.
         """
-        return AsyncBulkWriter(client=self)
+        return BulkWriter(client=self)
 
     def batch(self) -> AsyncWriteBatch:
         """Get a batch instance from this client.
@@ -307,16 +307,6 @@ class AsyncClient(BaseClient):
             sending the changes all at once.
         """
         return AsyncWriteBatch(self)
-
-    def bulk_batch(self) -> AsyncBulkWriteBatch:
-        """Get a bulk batch instance from this client.
-
-        Returns:
-            :class:`~google.cloud.firestore_v1.async_batch.AsyncBulkWriteBatch`:
-            A "write" batch to be used for accumulating document changes and
-            sending the changes all at once.
-        """
-        return AsyncBulkWriteBatch(self)
 
     def transaction(self, **kwargs) -> AsyncTransaction:
         """Get a transaction that uses this client.
