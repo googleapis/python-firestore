@@ -179,25 +179,3 @@ class BaseWriteBatch(BaseBatch):
         }
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         return request, kwargs
-
-
-class BaseBulkWriteBatch(BaseBatch):
-    """Base class for a/sync implementations of the `batch_write` RPC. `batch_write` is useful
-    for higher volumes and when the order of write operations (within a batch) is
-    unimportant.
-
-    Because the order in which individual write operations land in the database is not guaranteed,
-    `batch_write` RPCs can never contain multiple operations to the same document. If calling code
-    detects a second write operation to a known document reference, it should first cut off the
-    previous batch and send it, then create a new batch starting with the latest write operation.
-    In practice, the [Async]BulkWriter classes handle this."""
-
-    def _prep_commit(self, retry: retries.Retry, timeout: float):
-        """Shared setup for async/sync :meth:`write`."""
-        request = {
-            "database": self._client._database_string,
-            "writes": self._write_pbs,
-            "labels": None,
-        }
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
-        return request, kwargs

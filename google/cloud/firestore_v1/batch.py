@@ -17,7 +17,7 @@
 from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
-from google.cloud.firestore_v1.base_batch import BaseBulkWriteBatch, BaseWriteBatch
+from google.cloud.firestore_v1.base_batch import BaseWriteBatch
 
 
 class WriteBatch(BaseWriteBatch):
@@ -66,52 +66,9 @@ class WriteBatch(BaseWriteBatch):
 
         return results
 
+    def __enter__(self):
+        return self
 
-class BulkWriteBatch(BaseBulkWriteBatch):
-    """Accumulate write operations to be sent in a batch. Use this over `WriteBatch`
-    for higher volumes (e.g., via `BulkWriter`) and when the order of operations
-    within a given batch is unimportant.
-
-    This has the same set of methods for write operations that
-    :class:`~google.cloud.firestore_v1.document.DocumentReference` does,
-    e.g. :meth:`~google.cloud.firestore_v1.document.DocumentReference.create`.
-
-    Args:
-        client (:class:`~google.cloud.firestore_v1.client.Client`):
-            The client that created this batch.
-    """
-
-    def __init__(self, client) -> None:
-        super(BulkWriteBatch, self).__init__(client=client)
-
-    def commit(
-        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None
-    ):
-        """Writes the changes accumulated in this batch.
-
-        Write operations are not guaranteed to be applied in order and must not
-        contain multiple writes to any given document. Preferred over `commit`
-        for performance reasons if these conditions are acceptable.
-
-        Args:
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
-
-        Returns:
-            List[:class:`google.cloud.proto.firestore.v1.write.BatchWriteResult`, ...]:
-            The write results corresponding to the changes committed, returned
-            in the same order as the changes were applied to this batch. A
-            write result contains an ``update_time`` field.
-        """
-        request, kwargs = self._prep_commit(retry, timeout)
-
-        save_response = self._client._firestore_api.batch_write(
-            request=request, metadata=self._client._rpc_metadata, **kwargs,
-        )
-
-        self._write_pbs = []
-        self.write_results = results = list(save_response.write_results)
-
-        return results
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type is None:
+            self.commit()
