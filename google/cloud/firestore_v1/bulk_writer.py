@@ -163,6 +163,9 @@ class AsyncBulkWriterMixin:
         if self._executor and not self._executor._shutdown:
             self._send_next_batch_when_ready()
 
+        self._process_response(batch, response)
+
+    def _process_response(self, batch: BulkWriteBatch, response: BatchWriteResponse) -> NoReturn:
         batch_references: List[BaseDocumentReference] = list(
             batch._document_references.values(),
         )
@@ -176,6 +179,36 @@ class AsyncBulkWriterMixin:
 
 class BulkWriter(AsyncBulkWriterMixin):
     """
+    Accumulate and efficiently save large amounts of document write operations
+    to the server.
+
+    BulkWriter can handle large data migrations or updates, buffering records
+    in memory and submitting them to the server in batches of 20. The submission
+    of batches is internally parallelized with a ThreadPoolExecutor, meaning
+    end developers do not need to manage an event loop or worry about asyncio
+    to see parallelization speed ups (which can easily 10x throughput). Because
+    of this, there is no companion `AsyncBulkWriter` class, as is usually seen
+    with other utility classes.
+
+    Usage:
+
+        # Instantiate the BulkWriter. This works from either `Client` or
+        # `AsyncClient`.
+        db = firestore.Client()
+        bulk_writer = db.bulk_writer()
+
+        # Attach a success listener. This will be called once per document.
+        bulk_writer.on_write_result(lambda ref, res: print(f'Saved {ref._document_path}'))
+
+        # Queue an arbitrary amount of write operations.
+        reference: DocumentReference
+        data: dict
+        for reference, data in my_new_records:
+            bulk_writer.create(reference, data)
+        
+        # Block until all pooled writes are complete.
+        bulk_writer.flush()
+
     Args:
         client(:class:`~google.cloud.firestore_v1.client.Client`):
             The client that created this BulkWriter.
@@ -192,7 +225,7 @@ class BulkWriter(AsyncBulkWriterMixin):
         scheduler: Optional[BulkWriterScheduler] = None,
     ):
         self._client = client
-        self._instantiate_executor()
+        self._reset_executor()
         self._scheduler: BulkWriterScheduler = scheduler or BulkWriterScheduler()
         # Redundantly set this variable for IDE type hints
         self._batch: BulkWriteBatch = self._reset_batch()
@@ -209,25 +242,36 @@ class BulkWriter(AsyncBulkWriterMixin):
         self._total_write_operations: int = 0
 
     def _reset_batch(self) -> BulkWriteBatch:
-        self._batch = self._client.bulk_batch()
+        self._batch = BulkWriteBatch(self._client)
         return self._batch
 
+    def _reset_executor(self):
+        self._executor = self._instantiate_executor()
+    
     def _instantiate_executor(self):
-        self._executor = concurrent.futures.ThreadPoolExecutor()
+        return concurrent.futures.ThreadPoolExecutor()
 
     def flush(self):
+        """
+        Block until all pooled write operations are complete and then resume
+        accepting new write operations.
+        """
         if len(self._batch) > 0:
             self._enqueue_current_batch()
         self._executor.shutdown()
         # Completely release this resource, allowing our sending methods to
         # easily detect if `flush` has been called and we should re-instantiate
         # the executor. The reason for this is that `flush` hangs until everything
-        # is sent (and calling `shutdown` is the easiest) way to do that, yet,
+        # is sent (and calling `shutdown` is the easiest way to do that), yet,
         # it should not completely end the life of this BulkWriter. That role
         # is filled by the `close` method.
         self._executor = None
 
     def close(self):
+        """
+        Block until all pooled write operations are complete and then reject
+        any futher write operations.
+        """
         self._is_open = False
         self.flush()
 
@@ -257,7 +301,7 @@ class BulkWriter(AsyncBulkWriterMixin):
         # Reset the executor if the user called `flush` and then resumed submission
         # of write operations.
         if not self._executor or self._executor._shutdown:
-            self._instantiate_executor()
+            self._reset_executor()
 
         # Lastly, trigger the sending of the batch in the front of the line.
         self._send_next_batch_when_ready()
