@@ -15,13 +15,13 @@
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
 import abc
-from google.cloud.firestore_v1 import _helpers
-from google.api_core import retry as retries  # type: ignore
+from typing import Dict, Optional, Set, Union
 
 # Types needed only for Type Hints
+from google.api_core import retry as retries  # type: ignore
+from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1.base_document import BaseDocumentReference
 from google.cloud.firestore_v1.document import DocumentReference
-
-from typing import Union
 
 
 class BaseBatch(metaclass=abc.ABCMeta):
@@ -39,11 +39,15 @@ class BaseBatch(metaclass=abc.ABCMeta):
     def __init__(self, client) -> None:
         self._client = client
         self._write_pbs = []
+        self._document_references: Dict[str, BaseDocumentReference] = {}
         self.write_results = None
         self.commit_time = None
 
     def __len__(self):
-        return len(self._write_pbs)
+        return len(self._document_references)
+
+    def __contains__(self, reference: BaseDocumentReference):
+        return reference._document_path in self._document_references
 
     def _add_write_pbs(self, write_pbs: list) -> None:
         """Add `Write`` protobufs to this transaction.
@@ -62,7 +66,7 @@ class BaseBatch(metaclass=abc.ABCMeta):
         write depend on the implementing class."""
         raise NotImplementedError()
 
-    def create(self, reference: DocumentReference, document_data: dict) -> None:
+    def create(self, reference: BaseDocumentReference, document_data: dict) -> None:
         """Add a "change" to this batch to create a document.
 
         If the document given by ``reference`` already exists, then this
@@ -75,11 +79,12 @@ class BaseBatch(metaclass=abc.ABCMeta):
                 creating a document.
         """
         write_pbs = _helpers.pbs_for_create(reference._document_path, document_data)
+        self._document_references[reference._document_path] = reference
         self._add_write_pbs(write_pbs)
 
     def set(
         self,
-        reference: DocumentReference,
+        reference: BaseDocumentReference,
         document_data: dict,
         merge: Union[bool, list] = False,
     ) -> None:
@@ -108,11 +113,12 @@ class BaseBatch(metaclass=abc.ABCMeta):
                 reference._document_path, document_data
             )
 
+        self._document_references[reference._document_path] = reference
         self._add_write_pbs(write_pbs)
 
     def update(
         self,
-        reference: DocumentReference,
+        reference: BaseDocumentReference,
         field_updates: dict,
         option: _helpers.WriteOption = None,
     ) -> None:
@@ -136,10 +142,11 @@ class BaseBatch(metaclass=abc.ABCMeta):
         write_pbs = _helpers.pbs_for_update(
             reference._document_path, field_updates, option
         )
+        self._document_references[reference._document_path] = reference
         self._add_write_pbs(write_pbs)
 
     def delete(
-        self, reference: DocumentReference, option: _helpers.WriteOption = None
+        self, reference: BaseDocumentReference, option: _helpers.WriteOption = None
     ) -> None:
         """Add a "change" to delete a document.
 
@@ -156,6 +163,7 @@ class BaseBatch(metaclass=abc.ABCMeta):
                 state of the document before applying changes.
         """
         write_pb = _helpers.pb_for_delete(reference._document_path, option)
+        self._document_references[reference._document_path] = reference
         self._add_write_pbs([write_pb])
 
 
@@ -169,28 +177,6 @@ class BaseWriteBatch(BaseBatch):
             "database": self._client._database_string,
             "writes": self._write_pbs,
             "transaction": None,
-        }
-        kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
-        return request, kwargs
-
-
-class BaseBulkWriteBatch(BaseBatch):
-    """Base class for a/sync implementations of the `batch_write` RPC. `batch_write` is useful
-    for higher volumes and when the order of write operations (within a batch) is
-    unimportant.
-
-    Because the order in which individual write operations land in the database is not guaranteed,
-    `batch_write` RPCs can never contain multiple operations to the same document. If calling code
-    detects a second write operation to a known document reference, it should first cut off the
-    previous batch and send it, then create a new batch starting with the latest write operation.
-    In practice, the [Async]BulkWriter classes handle this."""
-
-    def _prep_commit(self, retry: retries.Retry, timeout: float):
-        """Shared setup for async/sync :meth:`write`."""
-        request = {
-            "database": self._client._database_string,
-            "writes": self._write_pbs,
-            "labels": None,
         }
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         return request, kwargs
