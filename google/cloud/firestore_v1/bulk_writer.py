@@ -129,6 +129,7 @@ class AsyncBulkWriterMixin:
         return batch.commit()  # pragma: NO COVER
 
 
+
 class BulkWriter(AsyncBulkWriterMixin):
     """
     Accumulate and efficiently save large amounts of document write operations
