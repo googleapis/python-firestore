@@ -196,9 +196,12 @@ def encode_value(value) -> types.document.Value:
 
     # NOTE: We avoid doing an isinstance() check for a Document
     #       here to avoid import cycles.
-    document_path = getattr(value, "_document_path", None)
-    if document_path is not None:
-        return document.Value(reference_value=document_path)
+    # Add check to see if the object has a _document_path attribute
+    # to avoid getting a KeyError on embeded objects
+    if hasattr(value, "_document_path"):
+        document_path = getattr(value, "_document_path", None)
+        if document_path is not None:
+            return document.Value(reference_value=document_path)
 
     if isinstance(value, GeoPoint):
         return document.Value(geo_point_value=value.to_protobuf())
