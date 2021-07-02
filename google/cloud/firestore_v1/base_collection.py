@@ -158,7 +158,7 @@ class BaseCollectionReference(object):
     ) -> Tuple[DocumentReference, dict]:
         """Shared setup for async / sync :method:`add`"""
         if document_id is None:
-             document_id = _auto_id()
+            document_id = _auto_id()
 
         document_ref = self.document(document_id)
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
@@ -456,7 +456,7 @@ def _auto_id() -> str:
         str: A 20 character string composed of digits, uppercase and
         lowercase and letters.
     """
-    # Randome is not thread safe, reseed with a new
+    # Random is not thread safe, reseed with a new
     # uuid.uuid4() each iteration to avoid collisions.
     seed = uuid.uuid4()
     random.seed(seed)
