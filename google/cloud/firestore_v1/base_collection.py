@@ -14,6 +14,7 @@
 
 """Classes for representing collections for the Google Cloud Firestore API."""
 import random
+import sys
 import uuid
 
 from google.api_core import retry as retries  # type: ignore
@@ -456,10 +457,13 @@ def _auto_id() -> str:
         str: A 20 character string composed of digits, uppercase and
         lowercase and letters.
     """
-    # If this client is forked, random will be seeded the same and it is possible to have
-    # collisions across forked processes. Avoid by seeding with a uuid.uuid4()
-    seed = uuid.uuid4()
-    random.seed(seed)
+    if sys.version_info < (3, 7):
+        # TODO: remove when 3.6 support is discontinued.
+        # On python 3.6, random will provide the same results when forked. Reseed using a
+        # uuid4 on each iteration to avoid collisions.
+        seed = str(uuid.uuid4())
+        random.seed(seed)
+
     return "".join(random.choice(_AUTO_ID_CHARS) for _ in range(20))
 
 
