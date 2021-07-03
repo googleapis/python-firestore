@@ -456,8 +456,8 @@ def _auto_id() -> str:
         str: A 20 character string composed of digits, uppercase and
         lowercase and letters.
     """
-    # Random is not thread safe, reseed with a new
-    # uuid.uuid4() each iteration to avoid collisions.
+    # If this client is forked, random will be seeded the same and it is possible to have
+    # collisions across forked processes. Avoid by seeding with a uuid.uuid4()
     seed = uuid.uuid4()
     random.seed(seed)
     return "".join(random.choice(_AUTO_ID_CHARS) for _ in range(20))
