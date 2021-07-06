@@ -15,7 +15,6 @@
 """Classes for representing collections for the Google Cloud Firestore API."""
 import random
 import sys
-import uuid
 
 from google.api_core import retry as retries  # type: ignore
 
@@ -459,10 +458,9 @@ def _auto_id() -> str:
     """
     if sys.version_info < (3, 7):
         # TODO: remove when 3.6 support is discontinued.
-        # On python 3.6, random will provide the same results when forked. Reseed using a
-        # uuid4 on each iteration to avoid collisions.
-        seed = str(uuid.uuid4())
-        random.seed(seed)
+        # On python 3.6, random will provide the same results when forked. Reseed 
+        # on each iteration to avoid collisions.
+        random.seed()
 
     return "".join(random.choice(_AUTO_ID_CHARS) for _ in range(20))
 
