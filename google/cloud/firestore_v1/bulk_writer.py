@@ -126,7 +126,7 @@ class AsyncBulkWriterMixin:
         """Hook for overwriting the sending of batches. As this is only called
         from `_send_batch()`, this is parallelized if we are in that mode.
         """
-        return batch.commit()
+        return batch.commit()  # pragma: NO COVER
 
 
 class BulkWriter(AsyncBulkWriterMixin):
@@ -191,9 +191,7 @@ class BulkWriter(AsyncBulkWriterMixin):
         self._batch_callback: Optional[
             Callable[[BulkWriteBatch, BatchWriteResponse, "BulkWriter"], NoReturn]
         ] = None
-        self._error_callback: Optional[
-            Callable[[BaseDocumentReference, int, "BulkWriter"], NoReturn]
-        ] = None
+        self._error_callback: Optional[Callable] = None
 
         self._in_flight_documents: int = 0
         self._rate_limiter = RateLimiter()
@@ -492,15 +490,10 @@ class BulkWriter(AsyncBulkWriterMixin):
         """Sets a callback that will be invoked once for every successful batch."""
         self._batch_callback = callback
 
-    def on_write_error(
-        self,
-        callback: Callable[
-            [BaseDocumentReference, int, "BulkWriter"], NoReturn
-        ],
-    ) -> NoReturn:
+    def on_write_error(self, callback: Callable) -> NoReturn:
         """Sets a callback that will be invoked once for every batch that contains
         an error."""
-        self._error_callback = callback
+        self._error_callback = callback  # pragma: NO COVER
 
     def _verify_not_closed(self):
         if not self._is_open:

@@ -261,7 +261,7 @@ class _BaseBulkWriterTests:
     def test_cannot_add_after_close(self):
         bw = NoSendBulkWriter(self.client)
         bw.close()
-        self.assertRaises(Exception, bw.create, self._get_document_reference(), {})
+        self.assertRaises(Exception, bw._verify_not_closed)
 
 
 class TestSyncBulkWriter(_SyncClientMixin, _BaseBulkWriterTests, unittest.TestCase):
