@@ -37,7 +37,7 @@ from google.cloud.firestore_v1.base_client import (
 
 from google.cloud.firestore_v1.query import CollectionGroup
 from google.cloud.firestore_v1.batch import WriteBatch
-from google.cloud.firestore_v1.bulk_writer import BulkWriter
+from google.cloud.firestore_v1.bulk_writer import BulkWriter, SendMode
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.transaction import Transaction
@@ -45,7 +45,7 @@ from google.cloud.firestore_v1.services.firestore import client as firestore_cli
 from google.cloud.firestore_v1.services.firestore.transports import (
     grpc as firestore_grpc_transport,
 )
-from typing import Any, Generator, Iterable
+from typing import Any, Generator, Iterable, Optional
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -287,15 +287,20 @@ class Client(BaseClient):
         for collection_id in iterator:
             yield self.collection(collection_id)
 
-    def bulk_writer(self) -> BulkWriter:
+    def bulk_writer(self, send_mode: Optional[SendMode] = None) -> BulkWriter:
         """Get a BulkWriter instance from this client.
+
+        Args:
+            :class:`@google.cloud.firestore_v1.bulk_writer.SendMode`:
+            Control flag for whether this BulkWriter instance should should
+            parallelize the sending of batches.
 
         Returns:
             :class:`@google.cloud.firestore_v1.bulk_writer.BulkWriter`:
             A utility to efficiently create and save many `WriteBatch` instances
             to the server.
         """
-        return BulkWriter(client=self)
+        return BulkWriter(client=self, mode=send_mode)
 
     def batch(self) -> WriteBatch:
         """Get a batch instance from this client.

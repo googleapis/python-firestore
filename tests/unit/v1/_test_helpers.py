@@ -85,12 +85,11 @@ def build_document_snapshot(
 
 
 class FakeThreadPoolExecutor:
-
     def __init__(self, *args, **kwargs):
         self._shutdown = False
 
     def submit(self, callable) -> typing.NoReturn:
         callable()
-    
+
     def shutdown(self):
         self._shutdown = True
