@@ -159,6 +159,41 @@ class TestRateLimiter(unittest.TestCase):
         self.assertEqual(ramp._phase, 2)
         self.assertEqual(ramp._maximum_tokens, 1125)
 
+    @mock.patch.object(google.cloud.firestore_v1.rate_limiter, "utcnow")
+    def test_global_max_tokens(self, mocked_now):
+        mocked_now.return_value = fake_now
+
+        ramp = rate_limiter.RateLimiter(
+            global_max_tokens=499,
+        )
+        self.assertEqual(ramp._phase, 0)
+        self.assertEqual(ramp._maximum_tokens, 499)
+        ramp.take_tokens()
+
+        # Advance the clock 1 phase
+        mocked_now.return_value = now_plus_n(
+            seconds=rate_limiter.default_phase_length, microseconds=1,
+        )
+        ramp.take_tokens()
+        self.assertEqual(ramp._phase, 1)
+        self.assertEqual(ramp._maximum_tokens, 499)
+
+        # Advance the clock another phase
+        mocked_now.return_value = now_plus_n(
+            seconds=rate_limiter.default_phase_length * 2, microseconds=1,
+        )
+        ramp.take_tokens()
+        self.assertEqual(ramp._phase, 2)
+        self.assertEqual(ramp._maximum_tokens, 499)
+
+        # Advance the clock another ms and the phase should not advance
+        mocked_now.return_value = now_plus_n(
+            seconds=rate_limiter.default_phase_length * 2, microseconds=2,
+        )
+        ramp.take_tokens()
+        self.assertEqual(ramp._phase, 2)
+        self.assertEqual(ramp._maximum_tokens, 499)
+
     def test_utcnow(self):
         self.assertTrue(
             isinstance(

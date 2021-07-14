@@ -60,11 +60,17 @@ class RateLimiter:
 
     def __init__(
         self,
-        initial_tokens: Optional[int] = default_initial_tokens,
-        phase_length: Optional[int] = default_phase_length,
+        initial_tokens: int = default_initial_tokens,
+        global_max_tokens: Optional[int] = None,
+        phase_length: int = default_phase_length,
     ):
         # Tracks the volume of operations during a given ramp-up phase.
         self._operations_this_phase: int = 0
+
+        # If provided, this enforces a cap on the maximum number of writes per
+        # second we can ever attempt, regardless of how many 50% increases the
+        # 5/5/5 rule would grant.
+        self._global_max_tokens = global_max_tokens
 
         self._start: Optional[datetime.datetime] = None
         self._last_refill: Optional[datetime.datetime] = None
@@ -134,6 +140,8 @@ class RateLimiter:
 
     def _increase_maximum_tokens(self) -> NoReturn:
         self._maximum_tokens = round(self._maximum_tokens * 1.5)
+        if self._global_max_tokens != None:
+            self._maximum_tokens = min(self._maximum_tokens, self._global_max_tokens)
 
     def _refill(self) -> NoReturn:
         """Replenishes any tokens that should have regenerated since the last

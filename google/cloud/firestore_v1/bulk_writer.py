@@ -21,6 +21,7 @@ import enum
 import functools
 import logging
 import time
+from dataclasses import dataclass
 from typing import Callable, Dict, List, NoReturn, Optional, Union
 
 from google.cloud.firestore_v1 import _helpers
@@ -69,7 +70,7 @@ class AsyncBulkWriterMixin:
                 # Because of the decorator around `my_method`, the following
                 # method invocation:
                 self.my_method()
-                # becomes equivalent to `self._sender.submit(self.my_method)`
+                # becomes equivalent to `self._executor.submit(self.my_method)`
                 # when the send mode is `SendMode.parallel`.
 
         Use on entrypoint methods for code paths that *must* be parallelized.
@@ -78,7 +79,7 @@ class AsyncBulkWriterMixin:
         @functools.wraps(fn)
         def wrapper(self, *args, **kwargs):
             if self._send_mode == SendMode.parallel:
-                return self._sender.submit(lambda: fn(self, *args, **kwargs))
+                return self._executor.submit(lambda: fn(self, *args, **kwargs))
             else:
                 return fn(self, *args, **kwargs)
 
@@ -118,9 +119,12 @@ class AsyncBulkWriterMixin:
             self._batch_callback(batch, response, self)
         if self._success_callback:
             for index, result in enumerate(response.write_results):
-                if isinstance(result, WriteResult) and result.update_time:
+                if isinstance(result, WriteResult):
+                    # if `result.update_time` is None, this was probably a DELETE
                     self._success_callback(batch_references[index], result, self)
-                # TODO: error_cb and retry
+                else:
+                    # failure callback should go here
+                    pass
 
     def _send(self, batch: BulkWriteBatch) -> BatchWriteResponse:
         """Hook for overwriting the sending of batches. As this is only called
@@ -175,10 +179,11 @@ class BulkWriter(AsyncBulkWriterMixin):
     batch_size: int = 20
 
     def __init__(
-        self, client: Optional[BaseClient] = None, mode: Optional[SendMode] = None,
+        self, client: Optional[BaseClient] = None, options: Optional('BulkWriterOptions') = None,
     ):
         self._client = client
-        self._send_mode = mode or SendMode.parallel
+        self._options = options or BulkWriterOptions()
+        self._send_mode = self._options.mode
         # Redundantly set this variable for IDE type hints
         self._batch: BulkWriteBatch = self._reset_batch()
         self._queued_batches = collections.deque([])
@@ -194,7 +199,10 @@ class BulkWriter(AsyncBulkWriterMixin):
         self._error_callback: Optional[Callable] = None
 
         self._in_flight_documents: int = 0
-        self._rate_limiter = RateLimiter()
+        self._rate_limiter = RateLimiter(
+            initial_tokens=self._options.initial_ops_per_second,
+            global_max_tokens=self._options.max_ops_per_second,
+        )
 
         # Keep track of progress as batches and write operations are completed
         self._total_batches_sent: int = 0
@@ -207,7 +215,9 @@ class BulkWriter(AsyncBulkWriterMixin):
         return self._batch
 
     def _ensure_executor(self):
-        self._sender = getattr(self, "_sender", None) or self._instantiate_executor()
+        self._executor = (
+            getattr(self, "_executor", None) or self._instantiate_executor()
+        )
 
     def _ensure_sending(self):
         if not self._is_sending:
@@ -223,7 +233,7 @@ class BulkWriter(AsyncBulkWriterMixin):
         accepting new write operations.
         """
         # Calling `flush` consecutively is a no-op.
-        if not self._sender:
+        if not self._executor:
             return
 
         if len(self._batch) > 0:
@@ -234,14 +244,14 @@ class BulkWriter(AsyncBulkWriterMixin):
             time.sleep(0.1)
 
         self._is_sending = False
-        self._sender.shutdown()
+        self._executor.shutdown()
         # Completely release this resource, allowing our sending methods to
         # easily detect if `flush` has been called and we should re-instantiate
         # the executor. The reason for this is that `flush` hangs until everything
         # is sent (and calling `shutdown` is the easiest way to do that), yet,
         # it should not completely end the life of this BulkWriter. That role
         # is filled by the `close` method.
-        self._sender = None
+        self._executor = None
 
     def close(self):
         """
@@ -498,3 +508,10 @@ class BulkWriter(AsyncBulkWriterMixin):
     def _verify_not_closed(self):
         if not self._is_open:
             raise Exception("BulkWriter is closed and cannot accept new operations")
+
+
+@dataclass
+class BulkWriterOptions:
+    initial_ops_per_second: int = 500
+    max_ops_per_second: int = 500
+    mode: SendMode = SendMode.parallel
