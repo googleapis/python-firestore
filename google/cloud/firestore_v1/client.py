@@ -37,7 +37,11 @@ from google.cloud.firestore_v1.base_client import (
 
 from google.cloud.firestore_v1.query import CollectionGroup
 from google.cloud.firestore_v1.batch import WriteBatch
-from google.cloud.firestore_v1.bulk_writer import BulkWriter, SendMode
+from google.cloud.firestore_v1.bulk_writer import (
+    BulkWriter,
+    BulkWriterOptions,
+    SendMode,
+)
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.transaction import Transaction
@@ -300,7 +304,7 @@ class Client(BaseClient):
             A utility to efficiently create and save many `WriteBatch` instances
             to the server.
         """
-        return BulkWriter(client=self, mode=send_mode)
+        return BulkWriter(client=self, options=BulkWriterOptions(mode=send_mode))
 
     def batch(self) -> WriteBatch:
         """Get a batch instance from this client.

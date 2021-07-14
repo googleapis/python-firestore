@@ -163,9 +163,7 @@ class TestRateLimiter(unittest.TestCase):
     def test_global_max_tokens(self, mocked_now):
         mocked_now.return_value = fake_now
 
-        ramp = rate_limiter.RateLimiter(
-            global_max_tokens=499,
-        )
+        ramp = rate_limiter.RateLimiter(global_max_tokens=499,)
         self.assertEqual(ramp._phase, 0)
         self.assertEqual(ramp._maximum_tokens, 499)
         ramp.take_tokens()

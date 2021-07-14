@@ -25,7 +25,11 @@ from google.cloud.firestore_v1.base_document import BaseDocumentReference
 from google.cloud.firestore_v1.client import Client
 from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.bulk_batch import BulkWriteBatch
-from google.cloud.firestore_v1.bulk_writer import BulkWriter, SendMode
+from google.cloud.firestore_v1.bulk_writer import (
+    BulkWriter,
+    BulkWriterOptions,
+    SendMode,
+)
 from google.cloud.firestore_v1.types.firestore import BatchWriteResponse
 from google.cloud.firestore_v1.types.write import WriteResult
 from tests.unit.v1._test_helpers import FakeThreadPoolExecutor
@@ -194,7 +198,11 @@ class _BaseBulkWriterTests:
             assert isinstance(ref, BaseDocumentReference)
             assert isinstance(result, WriteResult)
             assert isinstance(bulk_writer, BulkWriter)
-            bulk_writer._sent_documents += 1
+            # Technically, a missing `update` time only means the operation did
+            # not involve an update, aka, was probably a `delete`. But this allows
+            # us to test that the data we expect was passed through to each callback.
+            if result.update_time is not None:
+                bulk_writer._sent_documents += 1
 
         bw.on_write_result(_on_write)
         bw.on_batch_result(_on_batch)
@@ -205,7 +213,9 @@ class _BaseBulkWriterTests:
         self.assertEqual(bw._sent_documents, 101 - 6)
 
     def test_serial_calls_send_correctly(self):
-        bw = NoSendBulkWriter(self.client, mode=SendMode.serial)
+        bw = NoSendBulkWriter(
+            self.client, options=BulkWriterOptions(mode=SendMode.serial)
+        )
         for ref, data in self._doc_iter(101):
             bw.create(ref, data)
         bw.flush()

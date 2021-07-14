@@ -179,7 +179,9 @@ class BulkWriter(AsyncBulkWriterMixin):
     batch_size: int = 20
 
     def __init__(
-        self, client: Optional[BaseClient] = None, options: Optional('BulkWriterOptions') = None,
+        self,
+        client: Optional[BaseClient] = None,
+        options: Optional["BulkWriterOptions"] = None,
     ):
         self._client = client
         self._options = options or BulkWriterOptions()
