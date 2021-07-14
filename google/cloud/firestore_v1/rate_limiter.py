@@ -84,7 +84,9 @@ class RateLimiter:
         self._maximum_tokens: int = self._available_tokens
 
         if self._global_max_tokens is not None:
-            self._available_tokens = min(self._available_tokens, self._global_max_tokens)
+            self._available_tokens = min(
+                self._available_tokens, self._global_max_tokens
+            )
             self._maximum_tokens = min(self._maximum_tokens, self._global_max_tokens)
 
         # Number of seconds after which the [_maximum_tokens] can increase by 50%.

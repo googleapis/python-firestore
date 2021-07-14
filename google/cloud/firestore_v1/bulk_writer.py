@@ -21,7 +21,6 @@ import enum
 import functools
 import logging
 import time
-from dataclasses import dataclass
 from typing import Callable, Dict, List, NoReturn, Optional, Union
 
 from google.cloud.firestore_v1 import _helpers
@@ -124,7 +123,9 @@ class AsyncBulkWriterMixin:
                     self._success_callback(batch_references[index], result, self)
                 else:
                     # failure callback should go here
-                    pass
+                    # when we figure out what the error situation looks like,
+                    # the NO COVER should also be removed.
+                    pass  # pragma: NO COVER
 
     def _send(self, batch: BulkWriteBatch) -> BatchWriteResponse:
         """Hook for overwriting the sending of batches. As this is only called
@@ -512,8 +513,25 @@ class BulkWriter(AsyncBulkWriterMixin):
             raise Exception("BulkWriter is closed and cannot accept new operations")
 
 
-@dataclass
-class BulkWriterOptions:
-    initial_ops_per_second: int = 500
-    max_ops_per_second: int = 500
-    mode: SendMode = SendMode.parallel
+try:
+    from dataclasses import dataclass
+
+    @dataclass
+    class BulkWriterOptions:
+        initial_ops_per_second: int = 500
+        max_ops_per_second: int = 500
+        mode: SendMode = SendMode.parallel
+
+
+except ImportError:
+
+    class BulkWriterOptions:
+        def __init__(
+            self,
+            initial_ops_per_second: int = 500,
+            max_ops_per_second: int = 500,
+            mode: SendMode = SendMode.parallel,
+        ):
+            self.initial_ops_per_second = initial_ops_per_second
+            self.max_ops_per_second = max_ops_per_second
+            self.mode = mode
