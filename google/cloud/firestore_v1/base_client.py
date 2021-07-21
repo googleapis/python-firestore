@@ -177,9 +177,10 @@ class BaseClient(ClientWithProject):
         # Insecure channels are used for the emulator as secure channels
         # cannot be used to communicate on some environments.
         # https://github.com/googleapis/python-firestore/issues/359
-        options = []
+        token = "owner"
         if self._credentials is not None and self._credentials.id_token is not None:
-            options.append(("Authorization", f"Bearer {self._credentials.id_token}"))
+            token = self._credentials.id_token
+        options = [("Authorization", f"Bearer {token}")]
 
         if "GrpcAsyncIOTransport" in str(transport.__name__):
             return grpc.aio.insecure_channel(self._emulator_host, options=options)
