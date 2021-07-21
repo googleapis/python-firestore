@@ -160,21 +160,6 @@ class TestBaseClient(unittest.TestCase):
         self.assertTrue(isinstance(channel, grpc.Channel))
         channel = client._emulator_channel(FirestoreGrpcAsyncIOTransport)
         self.assertTrue(isinstance(channel, grpc.aio.Channel))
-        # checks that the credentials are composite ones using a local channel from grpc
-        composite_credentials = client._local_composite_credentials()
-        self.assertTrue(isinstance(composite_credentials, grpc.ChannelCredentials))
-        self.assertTrue(
-            isinstance(
-                composite_credentials._credentials._call_credentialses[0],
-                grpc._cython.cygrpc.MetadataPluginCallCredentials,
-            )
-        )
-        self.assertTrue(
-            isinstance(
-                composite_credentials._credentials._channel_credentials,
-                grpc._cython.cygrpc.LocalChannelCredentials,
-            )
-        )
 
         # Verify that when credentials are provided with an id token it is used
         # for channel construction

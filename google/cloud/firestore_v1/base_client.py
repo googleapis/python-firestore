@@ -187,32 +187,6 @@ class BaseClient(ClientWithProject):
         else:
             return grpc.insecure_channel(self._emulator_host, options=options)
 
-    def _local_composite_credentials(self):
-        """
-        Creates the credentials for the local emulator channel
-        :return: grpc.ChannelCredentials
-        """
-        credentials = google.auth.credentials.with_scopes_if_required(
-            self._credentials, None
-        )
-        request = google.auth.transport.requests.Request()
-
-        # Create the metadata plugin for inserting the authorization header.
-        metadata_plugin = google.auth.transport.grpc.AuthMetadataPlugin(
-            credentials, request
-        )
-
-        # Create a set of grpc.CallCredentials using the metadata plugin.
-        google_auth_credentials = grpc.metadata_call_credentials(metadata_plugin)
-
-        # Using the local_credentials to allow connection to emulator
-        local_credentials = grpc.local_channel_credentials()
-
-        # Combine the local credentials and the authorization credentials.
-        return grpc.composite_channel_credentials(
-            local_credentials, google_auth_credentials
-        )
-
     def _target_helper(self, client_class) -> str:
         """Return the target (where the API is).
         Eg. "firestore.googleapis.com"
