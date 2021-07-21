@@ -146,11 +146,11 @@ class TestBaseClient(unittest.TestCase):
         )
 
         emulator_host = "localhost:8081"
+        credentials = _make_credentials()
+        database = "quanta"
         with mock.patch("os.getenv") as getenv:
             getenv.return_value = emulator_host
-
-            credentials = _make_credentials()
-            database = "quanta"
+            credentials.id_token = None
             client = self._make_one(
                 project=self.PROJECT, credentials=credentials, database=database
             )
@@ -166,13 +166,9 @@ class TestBaseClient(unittest.TestCase):
         # NOTE: On windows, emulation requires an insecure channel. If this is
         # altered to use a secure channel, start by verifying that it still
         # works as expected on windows.
-        emulator_host = "localhost:8081"
         with mock.patch("os.getenv") as getenv:
             getenv.return_value = emulator_host
-
-            credentials = _make_credentials()
             credentials.id_token = "test"
-            database = "quanta"
             client = self._make_one(
                 project=self.PROJECT, credentials=credentials, database=database
             )
