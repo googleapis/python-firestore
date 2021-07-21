@@ -392,10 +392,9 @@ class Test__get_doc_mask(unittest.TestCase):
 
 
 def _make_credentials():
-    import google.auth.credentials
+    import google.oauth2.credentials
 
-    return mock.Mock(spec=google.auth.credentials.Credentials)
-
+    return mock.Mock(spec=google.oauth2.credentials.Credentials)
 
 def _make_batch_response(**kwargs):
     from google.cloud.firestore_v1.types import firestore
