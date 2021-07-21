@@ -396,6 +396,7 @@ def _make_credentials():
 
     return mock.Mock(spec=google.oauth2.credentials.Credentials)
 
+
 def _make_batch_response(**kwargs):
     from google.cloud.firestore_v1.types import firestore
 
