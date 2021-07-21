@@ -181,7 +181,6 @@ class BaseClient(ClientWithProject):
         if self._credentials is not None and self._credentials.id_token is not None:
             options.append(("Authorization", f"Bearer {self._credentials.id_token}"))
 
-        channel = None
         if "GrpcAsyncIOTransport" in str(transport.__name__):
             return grpc.aio.insecure_channel(self._emulator_host, options=options)
         else:
