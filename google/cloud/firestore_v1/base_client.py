@@ -170,7 +170,7 @@ class BaseClient(ClientWithProject):
         Creates an insecure channel to communicate with the local emulator.
         If credentials are provided the token is extracted and added to the
         headers. this supports local testing of firestore rules if the credentials
-        have been created from a signed custom token. 
+        have been created from a signed custom token.
 
         :return: grpc.Channel or grpc.aio.Channel
         """

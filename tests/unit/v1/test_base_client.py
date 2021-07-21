@@ -176,6 +176,27 @@ class TestBaseClient(unittest.TestCase):
             )
         )
 
+        # Verify that when credentials are provided with an id token it is used
+        # for channel construction
+        # NOTE: On windows, emulation requires an insecure channel. If this is
+        # altered to use a secure channel, start by verifying that it still
+        # works as expected on windows.
+        emulator_host = "localhost:8081"
+        with mock.patch("os.getenv") as getenv:
+            getenv.return_value = emulator_host
+
+            credentials = _make_credentials()
+            credentials.id_token = "test"
+            database = "quanta"
+            client = self._make_one(
+                project=self.PROJECT, credentials=credentials, database=database
+            )
+        with mock.patch("grpc.insecure_channel") as insecure_channel:
+            channel = client._emulator_channel(FirestoreGrpcTransport)
+            insecure_channel.assert_called_once_with(
+                emulator_host, options=[("Authorization", "Bearer test")]
+            )
+
     def test_field_path(self):
         klass = self._get_target_class()
         self.assertEqual(klass.field_path("a", "b", "c"), "a.b.c")
