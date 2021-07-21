@@ -167,20 +167,24 @@ class BaseClient(ClientWithProject):
 
     def _emulator_channel(self, transport):
         """
-        Creates a channel using self._credentials in a similar way to grpc.secure_channel but
-        using grpc.local_channel_credentials() rather than grpc.ssh_channel_credentials() to allow easy connection
-        to a local firestore emulator. This allows local testing of firestore rules if the credentials have been
-        created from a signed custom token.
+        Creates an insecure channel to communicate with the local emulator.
+        If credentials are provided the token is extracted and added to the
+        headers. this supports local testing of firestore rules if the credentials
+        have been created from a signed custom token. 
 
         :return: grpc.Channel or grpc.aio.Channel
         """
-        # TODO: Implement a special credentials type for emulator and use
-        # "transport.create_channel" to create gRPC channels once google-auth
-        # extends it's allowed credentials types.
+        # Insecure channels are used for the emulator as secure channels
+        # cannot be used to communicate on some environments. https://github.com/googleapis/python-firestore/issues/359
+        options = []
+        if self._credentials is not None and self._credentials.id_token is not None:
+            options.append(("Authorization", f"Bearer {self._credentials.id_token}"))
+
+        channel = None
         if "GrpcAsyncIOTransport" in str(transport.__name__):
-            return grpc.aio.insecure_channel(self._emulator_host)
+            return grpc.aio.insecure_channel(self._emulator_host, options=options)
         else:
-            return grpc.insecure_channel(self._emulator_host)
+            return grpc.insecure_channel(self._emulator_host, options=options)
 
     def _local_composite_credentials(self):
         """
