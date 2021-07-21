@@ -169,7 +169,7 @@ class BaseClient(ClientWithProject):
         """
         Creates an insecure channel to communicate with the local emulator.
         If credentials are provided the token is extracted and added to the
-        headers. this supports local testing of firestore rules if the credentials
+        headers. This supports local testing of firestore rules if the credentials
         have been created from a signed custom token.
 
         :return: grpc.Channel or grpc.aio.Channel
@@ -177,6 +177,7 @@ class BaseClient(ClientWithProject):
         # Insecure channels are used for the emulator as secure channels
         # cannot be used to communicate on some environments.
         # https://github.com/googleapis/python-firestore/issues/359
+        # Default the token to a non-empty string, in this case "owner".
         token = "owner"
         if self._credentials is not None and self._credentials.id_token is not None:
             token = self._credentials.id_token
