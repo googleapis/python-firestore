@@ -177,15 +177,20 @@ class BaseClient(ClientWithProject):
         # TODO: Implement a special credentials type for emulator and use
         # "transport.create_channel" to create gRPC channels once google-auth
         # extends it's allowed credentials types.
+        # if "GrpcAsyncIOTransport" in str(transport.__name__):
+        #     return grpc.aio.secure_channel(
+        #         self._emulator_host, self._local_composite_credentials()
+        #     )
+        # else:
+        #     return grpc.secure_channel(
+        #         self._emulator_host, self._local_composite_credentials()
+        #     )
         if "GrpcAsyncIOTransport" in str(transport.__name__):
-            return grpc.aio.secure_channel(
-                self._emulator_host, self._local_composite_credentials()
-            )
+            return grpc.aio.insecure_channel(
+                self._emulator_host)
         else:
-            return grpc.secure_channel(
-                self._emulator_host, self._local_composite_credentials()
-            )
-
+            return grpc.insecure_channel(
+                self._emulator_host)
     def _local_composite_credentials(self):
         """
         Creates the credentials for the local emulator channel
