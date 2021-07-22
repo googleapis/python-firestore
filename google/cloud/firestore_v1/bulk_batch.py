@@ -26,7 +26,7 @@ class BulkWriteBatch(BaseBatch):
     `WriteBatch` for higher volumes (e.g., via `BulkWriter`) and when the order
     of operations within a given batch is unimportant.
 
-    Because the order in which individual write operations land in the database
+    Because the order in which individual write operations are applied to the database
     is not guaranteed, `batch_write` RPCs can never contain multiple operations
     to the same document. If calling code detects a second write operation to a
     known document reference, it should first cut off the previous batch and
