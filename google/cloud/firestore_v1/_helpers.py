@@ -70,20 +70,6 @@ _GRPC_ERROR_MAPPING = {
 }
 
 
-class EmptyParam:
-    """Default value for optional parameters used to disambiguate between
-    calling code passing `None` versus ignoring the parameter entirely.
-    
-    When seen, the pseudo-singleton `empty_param` value below serves as a sentinel
-    to indicate that the parameter was ignored by calling code."""
-
-    def __eq__(self, other):
-        return isinstance(other, EmptyParam)
-
-
-empty_param = EmptyParam()
-
-
 class GeoPoint(object):
     """Simple container for a geo point value.
 
