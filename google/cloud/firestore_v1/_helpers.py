@@ -76,6 +76,7 @@ class EmptyParam:
     
     When seen, the pseudo-singleton `empty_param` value below serves as a sentinel
     to indicate that the parameter was ignored by calling code."""
+
     def __eq__(self, other):
         return isinstance(other, EmptyParam)
 
