@@ -266,7 +266,7 @@ class BaseQuery(object):
     def _evaluate_param(self, value, fallback_value):
         """Helper which allows `None` to be passed into `copy` and be set on the
         copy instead of being misinterpreted as an unpassed parameter."""
-        return value if value != _not_passed else fallback_value
+        return value if value is not _not_passed else fallback_value
 
     def where(self, field_path: str, op_string: str, value) -> "BaseQuery":
         """Filter the query on a field.
