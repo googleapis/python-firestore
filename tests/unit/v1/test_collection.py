@@ -51,6 +51,9 @@ class TestCollectionReference(unittest.TestCase):
         from google.cloud.firestore_v1.query import Query
 
         query_methods = self._get_public_methods(Query)
+        # Remove the one query-only method
+        query_methods.remove("copy")
+
         klass = self._get_target_class()
         collection_methods = self._get_public_methods(klass)
         # Make sure every query method is present on

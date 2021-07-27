@@ -51,6 +51,9 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         from google.cloud.firestore_v1.async_query import AsyncQuery
 
         query_methods = self._get_public_methods(AsyncQuery)
+        # Remove the one query-only method
+        query_methods.remove("copy")
+
         klass = self._get_target_class()
         collection_methods = self._get_public_methods(klass)
         # Make sure every query method is present on
