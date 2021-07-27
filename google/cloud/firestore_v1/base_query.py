@@ -233,18 +233,7 @@ class BaseQuery(object):
                 for field_path in field_paths
             ]
         )
-        return self.__class__(
-            self._parent,
-            projection=new_projection,
-            field_filters=self._field_filters,
-            orders=self._orders,
-            limit=self._limit,
-            limit_to_last=self._limit_to_last,
-            offset=self._offset,
-            start_at=self._start_at,
-            end_at=self._end_at,
-            all_descendants=self._all_descendants,
-        )
+        return self._copy(projection=new_projection)
 
     def _copy(
         self,
