@@ -85,6 +85,8 @@ _NO_ORDERS_FOR_CURSOR = (
 )
 _MISMATCH_CURSOR_W_ORDER_BY = "The cursor {!r} does not match the order fields {!r}."
 
+_not_passed = object()
+
 
 class BaseQuery(object):
     """Represents a query to the Firestore API.
@@ -244,20 +246,18 @@ class BaseQuery(object):
             all_descendants=self._all_descendants,
         )
 
-    def copy(
+    def _copy(
         self,
         *,
-        projection: Optional[query.StructuredQuery.Projection] = _helpers.empty_param,
-        field_filters: Optional[
-            Tuple[query.StructuredQuery.FieldFilter]
-        ] = _helpers.empty_param,
-        orders: Optional[Tuple[query.StructuredQuery.Order]] = _helpers.empty_param,
-        limit: Optional[int] = _helpers.empty_param,
-        limit_to_last: Optional[bool] = _helpers.empty_param,
-        offset: Optional[int] = _helpers.empty_param,
-        start_at: Optional[Tuple[dict, bool]] = _helpers.empty_param,
-        end_at: Optional[Tuple[dict, bool]] = _helpers.empty_param,
-        all_descendants: Optional[bool] = _helpers.empty_param,
+        projection: Optional[query.StructuredQuery.Projection] = _not_passed,
+        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]] = _not_passed,
+        orders: Optional[Tuple[query.StructuredQuery.Order]] = _not_passed,
+        limit: Optional[int] = _not_passed,
+        limit_to_last: Optional[bool] = _not_passed,
+        offset: Optional[int] = _not_passed,
+        start_at: Optional[Tuple[dict, bool]] = _not_passed,
+        end_at: Optional[Tuple[dict, bool]] = _not_passed,
+        all_descendants: Optional[bool] = _not_passed,
     ) -> "BaseQuery":
         return self.__class__(
             self._parent,
@@ -277,7 +277,7 @@ class BaseQuery(object):
     def _evaluate_param(self, value, fallback_value):
         """Helper which allows `None` to be passed into `copy` and be set on the
         copy instead of being misinterpreted as an unpassed parameter."""
-        return value if value != _helpers.empty_param else fallback_value
+        return value if value != _not_passed else fallback_value
 
     def where(self, field_path: str, op_string: str, value) -> "BaseQuery":
         """Filter the query on a field.
@@ -336,7 +336,7 @@ class BaseQuery(object):
             )
 
         new_filters = self._field_filters + (filter_pb,)
-        return self.copy(field_filters=new_filters)
+        return self._copy(field_filters=new_filters)
 
     @staticmethod
     def _make_order(field_path, direction) -> StructuredQuery.Order:
@@ -378,7 +378,7 @@ class BaseQuery(object):
         order_pb = self._make_order(field_path, direction)
 
         new_orders = self._orders + (order_pb,)
-        return self.copy(orders=new_orders)
+        return self._copy(orders=new_orders)
 
     def limit(self, count: int) -> "BaseQuery":
         """Limit a query to return at most `count` matching results.
@@ -397,7 +397,7 @@ class BaseQuery(object):
             A limited query. Acts as a copy of the current query, modified
             with the newly added "limit" filter.
         """
-        return self.copy(limit=count, limit_to_last=False)
+        return self._copy(limit=count, limit_to_last=False)
 
     def limit_to_last(self, count: int) -> "BaseQuery":
         """Limit a query to return the last `count` matching results.
@@ -416,7 +416,7 @@ class BaseQuery(object):
             A limited query. Acts as a copy of the current query, modified
             with the newly added "limit" filter.
         """
-        return self.copy(limit=count, limit_to_last=True)
+        return self._copy(limit=count, limit_to_last=True)
 
     def offset(self, num_to_skip: int) -> "BaseQuery":
         """Skip to an offset in a query.
@@ -433,7 +433,7 @@ class BaseQuery(object):
             An offset query. Acts as a copy of the current query, modified
             with the newly added "offset" field.
         """
-        return self.copy(offset=num_to_skip)
+        return self._copy(offset=num_to_skip)
 
     def _check_snapshot(self, document_snapshot) -> None:
         """Validate local snapshots for non-collection-group queries.
@@ -503,7 +503,7 @@ class BaseQuery(object):
             query_kwargs["start_at"] = self._start_at
             query_kwargs["end_at"] = cursor_pair
 
-        return self.copy(**query_kwargs)
+        return self._copy(**query_kwargs)
 
     def start_at(
         self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
