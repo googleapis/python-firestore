@@ -1114,8 +1114,7 @@ async def test_recursive_query(client, cleanup):
                 cleanup(inner_doc_ref.delete)
 
     ids = [
-        doc.id
-        for doc in await db.collection_group("philosophers").recursive().get()
+        doc.id for doc in await db.collection_group("philosophers").recursive().get()
     ]
 
     expected_ids = [
@@ -1179,8 +1178,7 @@ async def test_nested_recursive_query(client, cleanup):
 
     aristotle = collection_ref.document(f"Aristotle{UNIQUE_RESOURCE_ID}-async")
     ids = [
-        doc.id
-        for doc in await aristotle.collection("pets")._query().recursive().get()
+        doc.id for doc in await aristotle.collection("pets")._query().recursive().get()
     ]
 
     expected_ids = [
