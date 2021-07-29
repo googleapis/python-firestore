@@ -48,7 +48,6 @@ def _get_credentials_and_project():
         credentials = EMULATOR_CREDS
         project = FIRESTORE_PROJECT
     else:
-        print(f"FIRESTORE_CREDS: {FIRESTORE_CREDS}")
         credentials = service_account.Credentials.from_service_account_file(
             FIRESTORE_CREDS
         )

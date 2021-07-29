@@ -835,7 +835,7 @@ class BaseQuery(object):
         if copied._parent and copied._parent.id:
             original_collection_id = "/".join(copied._parent._path)
 
-            # Reset the parent to nothing, so we can recurse through the
+            # Reset the parent to nothing so we can recurse through the
             # entire database. This is required to have `CollectionSelector.collection_id`
             # not override `CollectionSelector.all_descendants`, which happens
             # if both are set.
