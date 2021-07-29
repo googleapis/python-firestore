@@ -847,12 +847,12 @@ class BaseQuery(object):
             # add the following arcane filters.
 
             REFERENCE_NAME_MIN_ID = "__id-9223372036854775808__"
+            start_at = f'{original_collection_id}/{REFERENCE_NAME_MIN_ID}'
+            
+            # The backend interprets this null character is flipping the filter
+            # to mean the end of the range instead of the beginning.
             nullChar = "\0"
-            start_at = original_collection_id + "/" + REFERENCE_NAME_MIN_ID
-            end_at = original_collection_id + nullChar + "/" + REFERENCE_NAME_MIN_ID
-
-            # print(f'start_at: {type(start_at)} :: {start_at}')
-            # print(f'end_at: {type(end_at)} :: {end_at}')
+            end_at = f'{original_collection_id}{nullChar}/{REFERENCE_NAME_MIN_ID}'
 
             copied = (
                 copied.order_by(field_path_module.FieldPath.document_id())
