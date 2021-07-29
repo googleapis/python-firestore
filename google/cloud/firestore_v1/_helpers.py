@@ -139,14 +139,20 @@ def verify_path(path, is_collection) -> None:
     """
     num_elements = len(path)
     if num_elements == 0:
-        raise ValueError("Document or collection path cannot be empty")
+        raise ValueError(
+            f"Document or collection path cannot be empty. Encountered {path}"
+        )
 
     if is_collection:
         if num_elements % 2 == 0:
-            raise ValueError("A collection must have an odd number of path elements")
+            raise ValueError(
+                f"A collection must have an odd number of path elements. Encountered {path}"
+            )
     else:
         if num_elements % 2 == 1:
-            raise ValueError("A document must have an even number of path elements")
+            raise ValueError(
+                f"A document must have an even number of path elements. Encountered {path}"
+            )
 
     for element in path:
         if not isinstance(element, str):
