@@ -124,7 +124,10 @@ class BaseCollectionReference(object):
         if document_id is None:
             document_id = _auto_id()
 
-        child_path = self._path + (document_id,)
+        # Append `self._path` and the passed document's  Id as long as the first
+        # element in the path is not an empty string, which comes from setting the
+        # parent to "" for recursive queries.
+        child_path = self._path + (document_id,) if self._path[0] else (document_id,)
         return self._client.document(*child_path)
 
     def _parent_info(self) -> Tuple[Any, str]:
