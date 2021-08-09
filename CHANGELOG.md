@@ -5,6 +5,20 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+### [2.2.1](https://www.github.com/googleapis/python-firestore/compare/v2.2.0...v2.2.1) (2021-08-09)
+
+
+### Bug Fixes
+
+* enable self signed jwt for grpc ([#405](https://www.github.com/googleapis/python-firestore/issues/405)) ([8703b48](https://www.github.com/googleapis/python-firestore/commit/8703b48c45e7bb742a794cad9597740c44182f81))
+* move to using insecure grpc channels with emulator ([#402](https://www.github.com/googleapis/python-firestore/issues/402)) ([4381ad5](https://www.github.com/googleapis/python-firestore/commit/4381ad503ca3e83510b876281fc768d00d40d499))
+
+
+### Documentation
+
+* added generated docs for Bundles ([#416](https://www.github.com/googleapis/python-firestore/issues/416)) ([0176cc7](https://www.github.com/googleapis/python-firestore/commit/0176cc7fef8752433b5c2496046d3a56557eb824))
+* fixed broken links to devsite ([#417](https://www.github.com/googleapis/python-firestore/issues/417)) ([1adfc81](https://www.github.com/googleapis/python-firestore/commit/1adfc81237c4ddee665e81f1beaef808cddb860e))
+
 ## [2.2.0](https://www.github.com/googleapis/python-firestore/compare/v2.1.3...v2.2.0) (2021-07-22)
 
 
