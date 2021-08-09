@@ -52,7 +52,7 @@ class FirestoreBundle:
     Usage:
 
     .. code-block:: python
-    
+
         from google.cloud.firestore import Client, _helpers
         from google.cloud.firestore_bundle import FirestoreBundle
 
