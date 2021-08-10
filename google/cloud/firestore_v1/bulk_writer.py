@@ -15,32 +15,59 @@
 """Helpers for efficiently writing large amounts of data to the Google Cloud
 Firestore API."""
 
+import bisect
 import collections
 import concurrent.futures
+import datetime
 import enum
 import functools
 import logging
 import time
-from typing import Callable, Dict, List, NoReturn, Optional, Union
+
+from typing import Callable, Dict, List, Optional, Union, TYPE_CHECKING
+
+from google.rpc import status_pb2  # type: ignore
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.base_document import BaseDocumentReference
-from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.bulk_batch import BulkWriteBatch
 from google.cloud.firestore_v1.rate_limiter import RateLimiter
 from google.cloud.firestore_v1.types.firestore import BatchWriteResponse
 from google.cloud.firestore_v1.types.write import WriteResult
 
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.base_client import BaseClient  # pragma: NO COVER
+
 
 logger = logging.getLogger(__name__)
 
 
-class SendMode(enum.Enum):
-    """Control flag for whether a BulkWriter should commit batches in the main
-    thread or hand that work off to an executor.
-    """
+class BulkRetry(enum.Enum):
+    """Indicator for what retry strategy the BulkWriter should use."""
 
+    # Common exponential backoff algorithm. This strategy is largely incompatible
+    # with the default retry limit of 15, so use with caution.
+    exponential = enum.auto()
+
+    # Default strategy that adds 1 second of delay per retry.
+    linear = enum.auto()
+
+    # Immediate retries with no growing delays.
+    immediate = enum.auto()
+
+
+class SendMode(enum.Enum):
+    """Indicator for whether a BulkWriter should commit batches in the main
+    thread or hand that work off to an executor."""
+
+    # Default strategy that parallelizes network I/O on an executor. You almost
+    # certainly want this.
     parallel = enum.auto()
+
+    # Alternate strategy which blocks during all network I/O. Much slower, but
+    # assures all batches are sent to the server in order. Note that
+    # `SendMode.serial` is extremely susceptible to slowdowns from retries if
+    # there are a lot of errors.
     serial = enum.auto()
 
 
@@ -80,15 +107,22 @@ class AsyncBulkWriterMixin:
             if self._send_mode == SendMode.parallel:
                 return self._executor.submit(lambda: fn(self, *args, **kwargs))
             else:
-                return fn(self, *args, **kwargs)
+                # For code parity, even `SendMode.serial` scenarios should return
+                # a future here. Anything else would badly complicate calling code.
+                result = fn(self, *args, **kwargs)
+                future = concurrent.futures.Future()
+                future.set_result(result)
+                return future
 
         return wrapper
 
     @_with_send_mode
-    def _send_batch(self, batch: BulkWriteBatch):
+    def _send_batch(
+        self, batch: BulkWriteBatch, operations: List["BulkWriterOperation"]
+    ):
         """Sends a batch without regard to rate limits, meaning limits must have
         already been checked. To that end, do not call this directly; instead,
-        call `_send_next_batch_when_ready`.
+        call `_send_until_queue_is_empty`.
 
         Args:
             batch(:class:`~google.cloud.firestore_v1.base_batch.BulkWriteBatch`)
@@ -102,11 +136,14 @@ class AsyncBulkWriterMixin:
         self._total_batches_sent += 1
         self._total_write_operations += _len_batch
 
-        self._process_response(batch, response)
+        self._process_response(batch, response, operations)
 
     def _process_response(
-        self, batch: BulkWriteBatch, response: BatchWriteResponse
-    ) -> NoReturn:
+        self,
+        batch: BulkWriteBatch,
+        response: BatchWriteResponse,
+        operations: List["BulkWriterOperation"],
+    ) -> None:
         """Invokes submitted callbacks for each batch and each operation within
         each batch. As this is called from `_send_batch()`, this is parallelized
         if we are in that mode.
@@ -114,18 +151,52 @@ class AsyncBulkWriterMixin:
         batch_references: List[BaseDocumentReference] = list(
             batch._document_references.values(),
         )
-        if self._batch_callback:
-            self._batch_callback(batch, response, self)
-        if self._success_callback:
-            for index, result in enumerate(response.write_results):
-                if isinstance(result, WriteResult):
-                    # if `result.update_time` is None, this was probably a DELETE
-                    self._success_callback(batch_references[index], result, self)
-                else:
-                    # failure callback should go here
-                    # when we figure out what the error situation looks like,
-                    # the NO COVER should also be removed.
-                    pass  # pragma: NO COVER
+        self._batch_callback(batch, response, self)
+
+        status: status_pb2.Status
+        for index, status in enumerate(response.status):
+            if status.code == 0:
+                self._success_callback(
+                    # DocumentReference
+                    batch_references[index],
+                    # WriteResult
+                    response.write_results[index],
+                    # BulkWriter
+                    self,
+                )
+            else:
+                operation: BulkWriterOperation = operations[index]
+                should_retry: bool = self._error_callback(
+                    # BulkWriteFailure
+                    BulkWriteFailure(
+                        operation=operation, code=status.code, message=status.message,
+                    ),
+                    # BulkWriter
+                    self,
+                )
+                if should_retry:
+                    operation.attempts += 1
+                    self._retry_operation(operation)
+
+    def _retry_operation(
+        self, operation: "BulkWriterOperation",
+    ) -> concurrent.futures.Future:
+
+        delay: int = 0
+        if self._options.retry == BulkRetry.exponential:
+            delay = operation.attempts ** 2  # pragma: NO COVER
+        elif self._options.retry == BulkRetry.linear:
+            delay = operation.attempts
+
+        run_at = datetime.datetime.utcnow() + datetime.timedelta(seconds=delay)
+
+        # Use of `bisect.insort` maintains the requirement that `self._retries`
+        # always remain sorted by each object's `run_at` time. Note that it is
+        # able to do this because `OperationRetry` instances are entirely sortable
+        # by their `run_at` value.
+        bisect.insort(
+            self._retries, OperationRetry(operation=operation, run_at=run_at),
+        )
 
     def _send(self, batch: BulkWriteBatch) -> BatchWriteResponse:
         """Hook for overwriting the sending of batches. As this is only called
@@ -155,15 +226,15 @@ class BulkWriter(AsyncBulkWriterMixin):
         db = firestore.Client()
         bulk_writer = db.bulk_writer()
 
-        # Attach an optional success listener. This will be called once per
-        # document.
+        # Attach an optional success listener to be called once per document.
         bulk_writer.on_write_result(
-            lambda reference, result: print(f'Saved {reference._document_path}')
+            lambda reference, result, bulk_writer: print(f'Saved {reference._document_path}')
         )
 
         # Queue an arbitrary amount of write operations.
-        # `my_new_records` is a list of (DocumentReference, dict,) tuple-pairs
-        # that you supply.
+        # Assume `my_new_records` is a list of (DocumentReference, dict,)
+        # tuple-pairs that you supply.
+
         reference: DocumentReference
         data: dict
         for reference, data in my_new_records:
@@ -181,25 +252,52 @@ class BulkWriter(AsyncBulkWriterMixin):
 
     def __init__(
         self,
-        client: Optional[BaseClient] = None,
+        client: Optional["BaseClient"] = None,
         options: Optional["BulkWriterOptions"] = None,
     ):
-        self._client = client
+        # Because `BulkWriter` instances are all synchronous/blocking on the
+        # main thread (instead using other threads for asynchrony), it is
+        # incompatible with AsyncClient's various methods that return Futures.
+        # `BulkWriter` parallelizes all of its network I/O without the developer
+        # having to worry about awaiting async methods, so we must convert an
+        # AsyncClient instance into a plain Client instance.
+        self._client = (
+            client._to_sync_copy() if type(client).__name__ == "AsyncClient" else client
+        )
         self._options = options or BulkWriterOptions()
         self._send_mode = self._options.mode
-        # Redundantly set this variable for IDE type hints
-        self._batch: BulkWriteBatch = self._reset_batch()
+
+        self._operations: List[BulkWriterOperation]
+        # List of the `_document_path` attribute for each DocumentReference
+        # contained in the current `self._operations`. This is reset every time
+        # `self._operations` is reset.
+        self._operations_document_paths: List[BaseDocumentReference]
+        self._reset_operations()
+
+        # List of all `BulkWriterOperation` objects that are waiting to be retried.
+        # Each such object is wrapped in an `OperationRetry` object which pairs
+        # the raw operation with the `datetime` of its next scheduled attempt.
+        # `self._retries` must always remain sorted for efficient reads, so it is
+        # required to only ever add elements via `bisect.insort`.
+        self._retries: collections.deque["OperationRetry"] = collections.deque([])
+
         self._queued_batches = collections.deque([])
         self._is_open: bool = True
-        self._is_sending: bool = False
 
-        self._success_callback: Optional[
-            Callable[[BaseDocumentReference, WriteResult, "BulkWriter"], NoReturn]
-        ] = None
-        self._batch_callback: Optional[
-            Callable[[BulkWriteBatch, BatchWriteResponse, "BulkWriter"], NoReturn]
-        ] = None
-        self._error_callback: Optional[Callable] = None
+        # This list will go on to store the future returned from each submission
+        # to the executor, for the purpose of awaiting all of those futures'
+        # completions in the `flush` method.
+        self._pending_batch_futures: List[concurrent.futures.Future] = []
+
+        self._success_callback: Callable[
+            [BaseDocumentReference, WriteResult, "BulkWriter"], None
+        ] = BulkWriter._default_on_success
+        self._batch_callback: Callable[
+            [BulkWriteBatch, BatchWriteResponse, "BulkWriter"], None
+        ] = BulkWriter._default_on_batch
+        self._error_callback: Callable[
+            [BulkWriteFailure, BulkWriter], bool
+        ] = BulkWriter._default_on_error
 
         self._in_flight_documents: int = 0
         self._rate_limiter = RateLimiter(
@@ -213,19 +311,39 @@ class BulkWriter(AsyncBulkWriterMixin):
 
         self._ensure_executor()
 
-    def _reset_batch(self) -> BulkWriteBatch:
-        self._batch = BulkWriteBatch(self._client)
-        return self._batch
+    @staticmethod
+    def _default_on_batch(
+        batch: BulkWriteBatch, response: BatchWriteResponse, bulk_writer: "BulkWriter",
+    ) -> None:
+        pass
+
+    @staticmethod
+    def _default_on_success(
+        reference: BaseDocumentReference,
+        result: WriteResult,
+        bulk_writer: "BulkWriter",
+    ) -> None:
+        pass
+
+    @staticmethod
+    def _default_on_error(error: "BulkWriteFailure", bulk_writer: "BulkWriter") -> bool:
+        # Default number of retries for each operation is 15. This is a scary
+        # number to combine with an exponential backoff, and as such, our default
+        # backoff strategy is linear instead of exponential.
+        return error.attempts < 15
+
+    def _reset_operations(self) -> None:
+        self._operations = []
+        self._operations_document_paths = []
 
     def _ensure_executor(self):
-        self._executor = (
-            getattr(self, "_executor", None) or self._instantiate_executor()
-        )
+        """Reboots the executor used to send batches if it has been shutdown."""
+        if getattr(self, "_executor", None) is None or self._executor._shutdown:
+            self._executor = self._instantiate_executor()
 
     def _ensure_sending(self):
-        if not self._is_sending:
-            self._ensure_executor()
-            self._send_until_queue_is_empty()
+        self._ensure_executor()
+        self._send_until_queue_is_empty()
 
     def _instantiate_executor(self):
         return concurrent.futures.ThreadPoolExecutor()
@@ -236,30 +354,60 @@ class BulkWriter(AsyncBulkWriterMixin):
         accepting new write operations.
         """
         # Calling `flush` consecutively is a no-op.
-        if not self._executor:
+        if self._executor._shutdown:
             return
 
-        if len(self._batch) > 0:
-            self._enqueue_current_batch()
+        while True:
 
-        while self._queued_batches:
-            self._ensure_sending()
-            time.sleep(0.1)
+            # Queue any waiting operations and try our luck again.
+            # This can happen if users add a number of records not divisible by
+            # 20 and then call flush (which should be ~19 out of 20 use cases).
+            # Execution will arrive here and find the leftover operations that
+            # never filled up a batch organically, and so we must send them here.
+            if self._operations:
+                self._enqueue_current_batch()
+                continue
 
-        self._is_sending = False
+            # If we find queued but unsent batches or pending retries, begin
+            # sending immediately. Note that if we are waiting on retries, but
+            # they have longer to wait as specified by the retry backoff strategy,
+            # we may have to make several passes through this part of the loop.
+            # (This is related to the sleep and its explanation below.)
+            if self._queued_batches or self._retries:
+                self._ensure_sending()
+
+                # This sleep prevents max-speed laps through this loop, which can
+                # and will happen if the BulkWriter is doing nothing except waiting
+                # on retries to be ready to re-send. Removing this sleep will cause
+                # whatever thread is running this code to sit near 100% CPU until
+                # all retries are abandoned or successfully resolved.
+                time.sleep(0.1)
+                continue
+
+            # We store the executor's Future from each batch send operation, so
+            # the first pass through here, we are guaranteed to find "pending"
+            # batch futures and have to wait. However, the second pass through
+            # will be fast unless the last batch introduced more retries.
+            if self._pending_batch_futures:
+                _batches = self._pending_batch_futures
+                self._pending_batch_futures = []
+                concurrent.futures.wait(_batches)
+
+                # Continuing is critical here (as opposed to breaking) because
+                # the final batch may have introduced retries which is most
+                # straightforwardly verified by heading back to the top of the loop.
+                continue
+
+            break
+
+        # We no longer expect to have any queued batches or pending futures,
+        # so the executor can be shutdown.
         self._executor.shutdown()
-        # Completely release this resource, allowing our sending methods to
-        # easily detect if `flush` has been called and we should re-instantiate
-        # the executor. The reason for this is that `flush` hangs until everything
-        # is sent (and calling `shutdown` is the easiest way to do that), yet,
-        # it should not completely end the life of this BulkWriter. That role
-        # is filled by the `close` method.
-        self._executor = None
 
     def close(self):
         """
         Block until all pooled write operations are complete and then reject
-        any futher write operations.
+        any further write operations.
         """
         self._is_open = False
         self.flush()
@@ -268,28 +416,24 @@ class BulkWriter(AsyncBulkWriterMixin):
         """
         Checks to see whether the in-progress batch is full and, if it is,
         adds it to the sending queue.
-
-        Args:
-            force (bool): If true, sends the current batch even if it is only
-                partially full.
         """
-        if len(self._batch) >= self.batch_size:
+        if len(self._operations) >= self.batch_size:
             self._enqueue_current_batch()
 
     def _enqueue_current_batch(self):
         """Adds the current batch to the back of the sending line, resets the
-        local instance, and begins the process of actually sending whatever
+        list of queued ops, and begins the process of actually sending whatever
         batch is in the front of the line, which will often be a different batch.
         """
         # Put our batch in the back of the sending line
-        self._queued_batches.append(self._batch)
+        self._queued_batches.append(self._operations)
+
+        # Reset the local store of operations
+        self._reset_operations()
 
         # The sending loop powers off upon reaching the end of the queue, so
         # here we make sure that is running.
         self._ensure_sending()
-
-        # Reset the local instance
-        self._reset_batch()
 
     def _send_until_queue_is_empty(self):
         """First domino in the sending codepath. This does not need to be
@@ -306,39 +450,57 @@ class BulkWriter(AsyncBulkWriterMixin):
         Once `self._request_send()` returns, this method calls `self._send_batch()`,
         which parallelizes itself if that is our SendMode value.
 
-        And once `self._send_batch()` is called (which does not wait if we are
-        sending in parallel), this method calls itself; thus continuing to work
-        through all queued batches.
+        And once `self._send_batch()` is called (which does not block if we are
+        sending in parallel), jumps back to the top and re-checks for any queued
+        batches.
 
         Note that for sufficiently large data migrations, this can block the
         submission of additional write operations (e.g., the CRUD methods);
         but again, that is only if the maximum write speed is being exceeded,
         and thus this scenario does not actually further reduce performance.
         """
-        self._is_sending = True
-        # For FIFO order, add to the right of this deque (via `append`) and take
-        # from the left.
-        next_batch = self._queued_batches.popleft()
+        self._schedule_ready_retries()
 
-        # Block until we are cleared for takeoff, which is fine because this
-        # returns instantly unless the rate limiting logic determines that we
-        # are attempting to exceed the maximum write speed.
-        self._request_send(len(next_batch))
+        while self._queued_batches:
 
-        # Handle some bookkeeping, and ultimately put these bits on the wire.
-        # This call is optionally parallelized by `@_with_send_mode`.
-        self._send_batch(next_batch)
+            # For FIFO order, add to the right of this deque (via `append`) and take
+            # from the left (via `popleft`).
+            operations: List[BulkWriterOperation] = self._queued_batches.popleft()
 
-        if self._queued_batches:
-            # As long as there are more items to send, send the next one.
-            self._send_until_queue_is_empty()
-        else:
-            self._is_sending = False
+            # Block until we are cleared for takeoff, which is fine because this
+            # returns instantly unless the rate limiting logic determines that we
+            # are attempting to exceed the maximum write speed.
+            self._request_send(len(operations))
+
+            # Handle some bookkeeping, and ultimately put these bits on the wire.
+            batch = BulkWriteBatch(client=self._client)
+            op: BulkWriterOperation
+            for op in operations:
+                op.add_to_batch(batch)
+
+            # `_send_batch` is optionally parallelized by `@_with_send_mode`.
+            future = self._send_batch(batch=batch, operations=operations)
+            self._pending_batch_futures.append(future)
+
+            self._schedule_ready_retries()
+
+    def _schedule_ready_retries(self):
+        """Grabs all ready retries and re-queues them."""
+
+        # Because `self._retries` always exists in a sorted state (thanks to only
+        # ever adding to it via `bisect.insort`), and because `OperationRetry`
+        # objects are comparable against `datetime` objects, this bisect functionally
+        # returns the number of retires that are ready for immediate reenlistment.
+        take_until_index = bisect.bisect(self._retries, datetime.datetime.utcnow())
+
+        for _ in range(take_until_index):
+            retry: OperationRetry = self._retries.popleft()
+            retry.retry(self)
 
     def _request_send(self, batch_size: int) -> bool:
         # Set up this boolean to avoid repeatedly taking tokens if we're only
         # waiting on the `max_in_flight` limit.
-        can_send_batch: bool = False
+        have_received_tokens: bool = False
 
         while True:
             # To avoid bottlenecks on the server, an additional limit is that no
@@ -350,19 +512,23 @@ class BulkWriter(AsyncBulkWriterMixin):
             )
             # Ask for tokens each pass through this loop until they are granted,
             # and then stop.
-            can_send_batch = can_send_batch or self._rate_limiter.take_tokens(
-                batch_size
+            have_received_tokens = (
+                have_received_tokens or self._rate_limiter.take_tokens(batch_size)
             )
-            if not under_threshold or not can_send_batch:
+            if not under_threshold or not have_received_tokens:
                 # Try again until both checks are true.
+                # Note that this sleep is helpful to prevent the main BulkWriter
+                # thread from spinning through this loop as fast as possible and
+                # pointlessly burning CPU while we wait for the arrival of a
+                # fixed moment in the future.
                 time.sleep(0.01)
                 continue
 
             return True
 
     def create(
-        self, reference: BaseDocumentReference, document_data: Dict,
-    ) -> NoReturn:
+        self, reference: BaseDocumentReference, document_data: Dict, attempts: int = 0,
+    ) -> None:
         """Adds a `create` pb to the in-progress batch.
 
         If the in-progress batch already contains a write operation involving
@@ -382,17 +548,24 @@ class BulkWriter(AsyncBulkWriterMixin):
         """
         self._verify_not_closed()
 
-        if reference in self._batch:
+        if reference._document_path in self._operations_document_paths:
             self._enqueue_current_batch()
 
-        self._batch.create(reference, document_data)
+        self._operations.append(
+            BulkWriterCreateOperation(
+                reference=reference, document_data=document_data, attempts=attempts,
+            ),
+        )
+        self._operations_document_paths.append(reference._document_path)
+
         self._maybe_enqueue_current_batch()
 
     def delete(
         self,
         reference: BaseDocumentReference,
         option: Optional[_helpers.WriteOption] = None,
-    ) -> NoReturn:
+        attempts: int = 0,
+    ) -> None:
         """Adds a `delete` pb to the in-progress batch.
 
         If the in-progress batch already contains a write operation involving
@@ -412,10 +585,16 @@ class BulkWriter(AsyncBulkWriterMixin):
         """
         self._verify_not_closed()
 
-        if reference in self._batch:
+        if reference._document_path in self._operations_document_paths:
             self._enqueue_current_batch()
 
-        self._batch.delete(reference, option=option)
+        self._operations.append(
+            BulkWriterDeleteOperation(
+                reference=reference, option=option, attempts=attempts,
+            ),
+        )
+        self._operations_document_paths.append(reference._document_path)
+
         self._maybe_enqueue_current_batch()
 
     def set(
@@ -423,7 +602,8 @@ class BulkWriter(AsyncBulkWriterMixin):
         reference: BaseDocumentReference,
         document_data: Dict,
         merge: Union[bool, list] = False,
-    ) -> NoReturn:
+        attempts: int = 0,
+    ) -> None:
         """Adds a `set` pb to the in-progress batch.
 
         If the in-progress batch already contains a write operation involving
@@ -446,10 +626,19 @@ class BulkWriter(AsyncBulkWriterMixin):
         """
         self._verify_not_closed()
 
-        if reference in self._batch:
+        if reference._document_path in self._operations_document_paths:
             self._enqueue_current_batch()
 
-        self._batch.set(reference, document_data, merge=merge)
+        self._operations.append(
+            BulkWriterSetOperation(
+                reference=reference,
+                document_data=document_data,
+                merge=merge,
+                attempts=attempts,
+            )
+        )
+        self._operations_document_paths.append(reference._document_path)
+
         self._maybe_enqueue_current_batch()
 
     def update(
@@ -457,7 +646,8 @@ class BulkWriter(AsyncBulkWriterMixin):
         reference: BaseDocumentReference,
         field_updates: dict,
         option: Optional[_helpers.WriteOption] = None,
-    ) -> NoReturn:
+        attempts: int = 0,
+    ) -> None:
         """Adds an `update` pb to the in-progress batch.
 
         If the in-progress batch already contains a write operation involving
@@ -477,40 +667,148 @@ class BulkWriter(AsyncBulkWriterMixin):
             option (:class:`~google.cloud.firestore_v1._helpers.WriteOption`):
                 Optional flag to modify the nature of this write.
         """
+        # This check is copied from other Firestore classes for the purposes of
+        # surfacing the error immediately.
+        if option.__class__.__name__ == "ExistsOption":
+            raise ValueError("you must not pass an explicit write option to update.")
+
         self._verify_not_closed()
 
-        if reference in self._batch:
+        if reference._document_path in self._operations_document_paths:
             self._enqueue_current_batch()
 
-        self._batch.update(reference, field_updates, option=option)
+        self._operations.append(
+            BulkWriterUpdateOperation(
+                reference=reference,
+                field_updates=field_updates,
+                option=option,
+                attempts=attempts,
+            )
+        )
+        self._operations_document_paths.append(reference._document_path)
+
         self._maybe_enqueue_current_batch()
 
     def on_write_result(
         self,
-        callback: Callable[
-            [BaseDocumentReference, WriteResult, "BulkWriter"], NoReturn
-        ],
-    ) -> NoReturn:
+        callback: Callable[[BaseDocumentReference, WriteResult, "BulkWriter"], None],
+    ) -> None:
         """Sets a callback that will be invoked once for every successful operation."""
-        self._success_callback = callback
+        self._success_callback = callback or BulkWriter._default_on_success
 
     def on_batch_result(
         self,
-        callback: Callable[
-            [BulkWriteBatch, BatchWriteResponse, "BulkWriter"], NoReturn
-        ],
-    ) -> NoReturn:
+        callback: Callable[[BulkWriteBatch, BatchWriteResponse, "BulkWriter"], None],
+    ) -> None:
         """Sets a callback that will be invoked once for every successful batch."""
-        self._batch_callback = callback
+        self._batch_callback = callback or BulkWriter._default_on_batch
 
-    def on_write_error(self, callback: Callable) -> NoReturn:
+    def on_write_error(
+        self, callback: Callable[["BulkWriteFailure", "BulkWriter"], bool]
+    ) -> None:
         """Sets a callback that will be invoked once for every batch that contains
         an error."""
-        self._error_callback = callback  # pragma: NO COVER
+        self._error_callback = callback or BulkWriter._default_on_error
 
     def _verify_not_closed(self):
         if not self._is_open:
             raise Exception("BulkWriter is closed and cannot accept new operations")
+
+
+class BulkWriterOperation:
+    """Parent class for all operation container classes.
+
+    `BulkWriterOperation` exists to house all the necessary information for a
+    specific write task, including meta information like the current number of
+    attempts. If a write fails, it is its wrapper `BulkWriteOperation` class
+    that ferries it into its next retry without getting confused with other
+    similar writes to the same document.
+    """
+
+    def add_to_batch(self, batch: BulkWriteBatch):
+        """Adds `self` to the supplied batch."""
+        assert isinstance(batch, BulkWriteBatch)
+        if isinstance(self, BulkWriterCreateOperation):
+            return batch.create(
+                reference=self.reference, document_data=self.document_data,
+            )
+
+        if isinstance(self, BulkWriterDeleteOperation):
+            return batch.delete(reference=self.reference, option=self.option,)
+
+        if isinstance(self, BulkWriterSetOperation):
+            return batch.set(
+                reference=self.reference,
+                document_data=self.document_data,
+                merge=self.merge,
+            )
+
+        if isinstance(self, BulkWriterUpdateOperation):
+            return batch.update(
+                reference=self.reference,
+                field_updates=self.field_updates,
+                option=self.option,
+            )
+        raise TypeError(
+            f"Unexpected type of {self.__class__.__name__} for batch"
+        )  # pragma: NO COVER
+
+
+@functools.total_ordering
+class BaseOperationRetry:
+    """Parent class for both the @dataclass and old-style `OperationRetry`
+    classes.
+
+    Methods on this class be moved directly to `OperationRetry` when support for
+    Python 3.6 is dropped and `dataclasses` becomes universal.
+    """
+
+    def __lt__(self, other: "OperationRetry"):
+        """Allows use of `bisect` to maintain a sorted list of `OperationRetry`
+        instances, which in turn allows us to cheaply grab all that are ready to
+        run."""
+        if isinstance(other, OperationRetry):
+            return self.run_at < other.run_at
+        elif isinstance(other, datetime.datetime):
+            return self.run_at < other
+        return NotImplemented  # pragma: NO COVER
+
+    def retry(self, bulk_writer: BulkWriter) -> None:
+        """Call this after waiting any necessary time to re-add the enclosed
+        operation to the supplied BulkWriter's internal queue."""
+        if isinstance(self.operation, BulkWriterCreateOperation):
+            bulk_writer.create(
+                reference=self.operation.reference,
+                document_data=self.operation.document_data,
+                attempts=self.operation.attempts,
+            )
+
+        elif isinstance(self.operation, BulkWriterDeleteOperation):
+            bulk_writer.delete(
+                reference=self.operation.reference,
+                option=self.operation.option,
+                attempts=self.operation.attempts,
+            )
+
+        elif isinstance(self.operation, BulkWriterSetOperation):
+            bulk_writer.set(
+                reference=self.operation.reference,
+                document_data=self.operation.document_data,
+                merge=self.operation.merge,
+                attempts=self.operation.attempts,
+            )
+
+        elif isinstance(self.operation, BulkWriterUpdateOperation):
+            bulk_writer.update(
+                reference=self.operation.reference,
+                field_updates=self.operation.field_updates,
+                option=self.operation.option,
+                attempts=self.operation.attempts,
+            )
+        else:
+            raise TypeError(
+                f"Unexpected type of {self.operation.__class__.__name__} for OperationRetry.retry"
+            )  # pragma: NO COVER
 
 
 try:
@@ -521,9 +819,68 @@ try:
         initial_ops_per_second: int = 500
         max_ops_per_second: int = 500
         mode: SendMode = SendMode.parallel
+        retry: BulkRetry = BulkRetry.linear
+
+    @dataclass
+    class BulkWriteFailure:
+        operation: BulkWriterOperation
+        # https://grpc.github.io/grpc/core/md_doc_statuscodes.html
+        code: int
+        message: str
+
+        @property
+        def attempts(self) -> int:
+            return self.operation.attempts
+
+    @dataclass
+    class OperationRetry(BaseOperationRetry):
+        """Container for an additional attempt at an operation, scheduled for
+        the future."""
+
+        operation: BulkWriterOperation
+        run_at: datetime.datetime
+
+    @dataclass
+    class BulkWriterCreateOperation(BulkWriterOperation):
+        """Container for BulkWriter.create() operations."""
+
+        reference: BaseDocumentReference
+        document_data: Dict
+        attempts: int = 0
+
+    @dataclass
+    class BulkWriterUpdateOperation(BulkWriterOperation):
+        """Container for BulkWriter.update() operations."""
+
+        reference: BaseDocumentReference
+        field_updates: Dict
+        option: Optional[_helpers.WriteOption]
+        attempts: int = 0
+
+    @dataclass
+    class BulkWriterSetOperation(BulkWriterOperation):
+        """Container for BulkWriter.set() operations."""
+
+        reference: BaseDocumentReference
+        document_data: Dict
+        merge: Union[bool, list] = False
+        attempts: int = 0
+
+    @dataclass
+    class BulkWriterDeleteOperation(BulkWriterOperation):
+        """Container for BulkWriter.delete() operations."""
+
+        reference: BaseDocumentReference
+        option: Optional[_helpers.WriteOption]
+        attempts: int = 0
 
 
 except ImportError:
+
+    # Note: When support for Python 3.6 is dropped and `dataclasses` is reliably
+    # in the stdlib, this entire section can be dropped in favor of the dataclass
+    # versions above. Additonally, the methods on `BaseOperationRetry` can be added
+    # directly to `OperationRetry` and `BaseOperationRetry` can be deleted.
 
     class BulkWriterOptions:
         def __init__(
@@ -531,7 +888,91 @@ except ImportError:
             initial_ops_per_second: int = 500,
             max_ops_per_second: int = 500,
             mode: SendMode = SendMode.parallel,
+            retry: BulkRetry = BulkRetry.linear,
         ):
             self.initial_ops_per_second = initial_ops_per_second
             self.max_ops_per_second = max_ops_per_second
             self.mode = mode
+            self.retry = retry
+
+    class BulkWriteFailure:
+        def __init__(
+            self,
+            operation: BulkWriterOperation,
+            # https://grpc.github.io/grpc/core/md_doc_statuscodes.html
+            code: int,
+            message: str,
+        ):
+            self.operation = operation
+            self.code = code
+            self.message = message
+
+        @property
+        def attempts(self) -> int:
+            return self.operation.attempts
+
+    class OperationRetry(BaseOperationRetry):
+        """Container for an additional attempt at an operation, scheduled for
+        the future."""
+
+        def __init__(
+            self, operation: BulkWriterOperation, run_at: datetime.datetime,
+        ):
+            self.operation = operation
+            self.run_at = run_at
+
+    class BulkWriterCreateOperation(BulkWriterOperation):
+        """Container for BulkWriter.create() operations."""
+
+        def __init__(
+            self,
+            reference: BaseDocumentReference,
+            document_data: Dict,
+            attempts: int = 0,
+        ):
+            self.reference = reference
+            self.document_data = document_data
+            self.attempts = attempts
+
+    class BulkWriterUpdateOperation(BulkWriterOperation):
+        """Container for BulkWriter.update() operations."""
+
+        def __init__(
+            self,
+            reference: BaseDocumentReference,
+            field_updates: Dict,
+            option: Optional[_helpers.WriteOption],
+            attempts: int = 0,
+        ):
+            self.reference = reference
+            self.field_updates = field_updates
+            self.option = option
+            self.attempts = attempts
+
+    class BulkWriterSetOperation(BulkWriterOperation):
+        """Container for BulkWriter.set() operations."""
+
+        def __init__(
+            self,
+            reference: BaseDocumentReference,
+            document_data: Dict,
+            merge: Union[bool, list] = False,
+            attempts: int = 0,
+        ):
+            self.reference = reference
+            self.document_data = document_data
+            self.merge = merge
+            self.attempts = attempts
+
+    class BulkWriterDeleteOperation(BulkWriterOperation):
+        """Container for BulkWriter.delete() operations."""
+
+        def __init__(
+            self,
+            reference: BaseDocumentReference,
+            option: Optional[_helpers.WriteOption],
+            attempts: int = 0,
+        ):
+            self.reference = reference
+            self.option = option
+            self.attempts = attempts

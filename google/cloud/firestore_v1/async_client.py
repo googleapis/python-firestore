@@ -43,18 +43,13 @@ from google.cloud.firestore_v1.async_document import (
     DocumentSnapshot,
 )
 from google.cloud.firestore_v1.async_transaction import AsyncTransaction
-from google.cloud.firestore_v1.bulk_writer import (
-    BulkWriter,
-    BulkWriterOptions,
-    SendMode,
-)
 from google.cloud.firestore_v1.services.firestore import (
     async_client as firestore_client,
 )
 from google.cloud.firestore_v1.services.firestore.transports import (
     grpc_asyncio as firestore_grpc_transport,
 )
-from typing import Any, AsyncGenerator, Iterable, List, Optional
+from typing import Any, AsyncGenerator, Iterable, List
 
 
 class AsyncClient(BaseClient):
@@ -100,6 +95,19 @@ class AsyncClient(BaseClient):
             client_info=client_info,
             client_options=client_options,
         )
+
+    def _to_sync_copy(self):
+        from google.cloud.firestore_v1.client import Client
+
+        if not getattr(self, "_sync_copy", None):
+            self._sync_copy = Client(
+                project=self.project,
+                credentials=self._credentials,
+                database=self._database,
+                client_info=self._client_info,
+                client_options=self._client_options,
+            )
+        return self._sync_copy
 
     @property
     def _firestore_api(self):
@@ -291,16 +299,6 @@ class AsyncClient(BaseClient):
 
         async for collection_id in iterator:
             yield self.collection(collection_id)
-
-    def bulk_writer(self, send_mode: Optional[SendMode] = None) -> BulkWriter:
-        """Get a BulkWriter instance from this client.
-
-        Returns:
-            :class:`@google.cloud.firestore_v1.bulk_writer.BulkWriter`:
-            A utility to efficiently create and save many `AsyncWriteBatch` instances
-            to the server.
-        """
-        return BulkWriter(client=self, options=BulkWriterOptions(mode=send_mode))
 
     def batch(self) -> AsyncWriteBatch:
         """Get a batch instance from this client.
