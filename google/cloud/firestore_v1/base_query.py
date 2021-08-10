@@ -831,14 +831,22 @@ class BaseQuery(object):
         raise NotImplementedError
 
     def recursive(self) -> "BaseQuery":
+        """Returns a copy of this query whose iterator will yield all matching
+        documents as well as each of their descendent subcollections and documents.
+
+        This differs from the `all_descendents` flag, which only returns descendents
+        whose subcollection names match the parent collection's name. To return
+        all descendents, regardless of their subcollection name, use this.
+        """
         copied = self._copy(recursive=True, all_descendants=True)
         if copied._parent and copied._parent.id:
             original_collection_id = "/".join(copied._parent._path)
 
-            # Reset the parent to nothing so we can recurse through the
-            # entire database. This is required to have `CollectionSelector.collection_id`
-            # not override `CollectionSelector.all_descendants`, which happens
-            # if both are set.
+            # Reset the parent to nothing so we can recurse through the entire
+            # database. This is required to have
+            # `CollectionSelector.collection_id` not override
+            # `CollectionSelector.all_descendants`, which happens if both are
+            # set.
             copied._parent = copied._get_collection_reference_class()("")
             copied._parent._client = self._parent._client
 
