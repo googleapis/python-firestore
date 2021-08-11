@@ -1075,6 +1075,29 @@ def test_batch(client, cleanup):
     assert not document3.get().exists
 
 
+def test_live_bulk_writer(client, cleanup):
+    from google.cloud.firestore_v1.client import Client
+    from google.cloud.firestore_v1.bulk_writer import BulkWriter
+
+    db: Client = client
+    bw: BulkWriter = db.bulk_writer()
+    col = db.collection(f"bulkitems{UNIQUE_RESOURCE_ID}")
+
+    for index in range(50):
+        doc_ref = col.document(f"id-{index}")
+        bw.create(doc_ref, {"index": index})
+        cleanup(doc_ref.delete)
+
+    bw.close()
+    assert bw._total_batches_sent >= 3  # retries could lead to more than 3 batches
+    assert bw._total_write_operations >= 50  # same retries rule applies again
+    assert bw._in_flight_documents == 0
+    assert len(bw._operations) == 0
+
+    # And now assert that the documents were in fact written to the database
+    assert len(col.get()) == 50
+
+
 def test_watch_document(client, cleanup):
     db = client
     collection_ref = db.collection("wd-users" + UNIQUE_RESOURCE_ID)
@@ -1210,6 +1233,127 @@ def test_array_union(client, cleanup):
     expected["forest"]["tree-3"].append("palm")
     doc_ref.set(tree_3_part_2, merge=True)
     assert doc_ref.get().to_dict() == expected
+
+
+def test_recursive_query(client, cleanup):
+
+    philosophers = [
+        {
+            "data": {"name": "Socrates", "favoriteCity": "Athens"},
+            "subcollections": {
+                "pets": [{"name": "Scruffy"}, {"name": "Snowflake"}],
+                "hobbies": [{"name": "pontificating"}, {"name": "journaling"}],
+                "philosophers": [{"name": "Aristotle"}, {"name": "Plato"}],
+            },
+        },
+        {
+            "data": {"name": "Aristotle", "favoriteCity": "Sparta"},
+            "subcollections": {
+                "pets": [{"name": "Floof-Boy"}, {"name": "Doggy-Dog"}],
+                "hobbies": [{"name": "questioning-stuff"}, {"name": "meditation"}],
+            },
+        },
+        {
+            "data": {"name": "Plato", "favoriteCity": "Corinth"},
+            "subcollections": {
+                "pets": [{"name": "Cuddles"}, {"name": "Sergeant-Puppers"}],
+                "hobbies": [{"name": "abstraction"}, {"name": "hypotheticals"}],
+            },
+        },
+    ]
+
+    db = client
+    collection_ref = db.collection("philosophers")
+    for philosopher in philosophers:
+        ref = collection_ref.document(
+            f"{philosopher['data']['name']}{UNIQUE_RESOURCE_ID}"
+        )
+        ref.set(philosopher["data"])
+        cleanup(ref.delete)
+        for col_name, entries in philosopher["subcollections"].items():
+            sub_col = ref.collection(col_name)
+            for entry in entries:
+                inner_doc_ref = sub_col.document(entry["name"])
+                inner_doc_ref.set(entry)
+                cleanup(inner_doc_ref.delete)
+
+    ids = [doc.id for doc in db.collection_group("philosophers").recursive().get()]
+
+    expected_ids = [
+        # Aristotle doc and subdocs
+        f"Aristotle{UNIQUE_RESOURCE_ID}",
+        "meditation",
+        "questioning-stuff",
+        "Doggy-Dog",
+        "Floof-Boy",
+        # Plato doc and subdocs
+        f"Plato{UNIQUE_RESOURCE_ID}",
+        "abstraction",
+        "hypotheticals",
+        "Cuddles",
+        "Sergeant-Puppers",
+        # Socrates doc and subdocs
+        f"Socrates{UNIQUE_RESOURCE_ID}",
+        "journaling",
+        "pontificating",
+        "Scruffy",
+        "Snowflake",
+        "Aristotle",
+        "Plato",
+    ]
+
+    assert len(ids) == len(expected_ids)
+
+    for index in range(len(ids)):
+        error_msg = (
+            f"Expected '{expected_ids[index]}' at spot {index}, " "got '{ids[index]}'"
+        )
+        assert ids[index] == expected_ids[index], error_msg
+
+
+def test_nested_recursive_query(client, cleanup):
+
+    philosophers = [
+        {
+            "data": {"name": "Aristotle", "favoriteCity": "Sparta"},
+            "subcollections": {
+                "pets": [{"name": "Floof-Boy"}, {"name": "Doggy-Dog"}],
+                "hobbies": [{"name": "questioning-stuff"}, {"name": "meditation"}],
+            },
+        },
+    ]
+
+    db = client
+    collection_ref = db.collection("philosophers")
+    for philosopher in philosophers:
+        ref = collection_ref.document(
+            f"{philosopher['data']['name']}{UNIQUE_RESOURCE_ID}"
+        )
+        ref.set(philosopher["data"])
+        cleanup(ref.delete)
+        for col_name, entries in philosopher["subcollections"].items():
+            sub_col = ref.collection(col_name)
+            for entry in entries:
+                inner_doc_ref = sub_col.document(entry["name"])
+                inner_doc_ref.set(entry)
+                cleanup(inner_doc_ref.delete)
+
+    aristotle = collection_ref.document(f"Aristotle{UNIQUE_RESOURCE_ID}")
+    ids = [doc.id for doc in aristotle.collection("pets")._query().recursive().get()]
+
+    expected_ids = [
+        # Aristotle pets
+        "Doggy-Dog",
+        "Floof-Boy",
+    ]
+
+    assert len(ids) == len(expected_ids)
+
+    for index in range(len(ids)):
+        error_msg = (
+            f"Expected '{expected_ids[index]}' at spot {index}, " "got '{ids[index]}'"
+        )
+        assert ids[index] == expected_ids[index], error_msg
 
 
 def test_watch_query_order(client, cleanup):
