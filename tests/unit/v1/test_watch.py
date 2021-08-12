@@ -566,7 +566,9 @@ class TestWatch(unittest.TestCase):
         )
 
     def test_push_callback_called_no_changes(self):
-        dummy_time = (datetime.datetime.fromtimestamp(1534858278, datetime.timezone.utc),)
+        dummy_time = (
+            datetime.datetime.fromtimestamp(1534858278, datetime.timezone.utc),
+        )
 
         inst = self._makeOne()
         inst.push(dummy_time, "token")
