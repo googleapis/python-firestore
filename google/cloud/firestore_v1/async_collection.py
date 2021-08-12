@@ -72,6 +72,10 @@ class AsyncCollectionReference(BaseCollectionReference):
         """
         return async_query.AsyncQuery(self)
 
+    async def chunkify(self, chunk_size: int):
+        async for page in self._query().chunkify(chunk_size):
+            yield page
+
     async def add(
         self,
         document_data: dict,
