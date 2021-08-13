@@ -1434,7 +1434,7 @@ def test_chunked_query(client, cleanup):
         doc_ref.set({"index": index})
         cleanup(doc_ref.delete)
 
-    iter = col.chunkify(3)
+    iter = col._chunkify(3)
     assert len(next(iter)) == 3
     assert len(next(iter)) == 3
     assert len(next(iter)) == 3
@@ -1448,7 +1448,7 @@ def test_chunked_query_smaller_limit(client, cleanup):
         doc_ref.set({"index": index})
         cleanup(doc_ref.delete)
 
-    iter = col.limit(5).chunkify(9)
+    iter = col.limit(5)._chunkify(9)
     assert len(next(iter)) == 5
 
 
@@ -1476,7 +1476,7 @@ def test_chunked_and_recursive(client, cleanup):
     ]
     _persist_documents(client, col_id, documents, cleanup)
     collection_ref = client.collection(col_id)
-    iter = collection_ref.recursive().chunkify(5)
+    iter = collection_ref.recursive()._chunkify(5)
 
     page_1_ids = [
         "Root-1",

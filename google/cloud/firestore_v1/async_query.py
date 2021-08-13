@@ -127,11 +127,11 @@ class AsyncQuery(BaseQuery):
             recursive=recursive,
         )
 
-    async def chunkify(
+    async def _chunkify(
         self, chunk_size: int
     ) -> AsyncGenerator[List[DocumentSnapshot], None]:
         # Catch the edge case where a developer writes the following:
-        # `my_query.limit(500).chunkify(1000)`, which ultimately nullifies any
+        # `my_query.limit(500)._chunkify(1000)`, which ultimately nullifies any
         # need to yield chunks.
         if self._limit and chunk_size > self._limit:
             yield await self.get()

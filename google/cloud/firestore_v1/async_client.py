@@ -354,7 +354,7 @@ class AsyncClient(BaseClient):
             chunk: List[DocumentSnapshot]
             async for chunk in reference.recursive().select(
                 [FieldPath.document_id()]
-            ).chunkify(chunk_size):
+            )._chunkify(chunk_size):
                 doc_snap: DocumentSnapshot
                 for doc_snap in chunk:
                     num_deleted += 1

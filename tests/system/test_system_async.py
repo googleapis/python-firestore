@@ -1295,7 +1295,7 @@ async def test_chunked_query(client, cleanup):
         await doc_ref.set({"index": index})
         cleanup(doc_ref.delete)
 
-    lengths: List[int] = [len(chunk) async for chunk in col.chunkify(3)]
+    lengths: List[int] = [len(chunk) async for chunk in col._chunkify(3)]
     assert len(lengths) == 4
     assert lengths[0] == 3
     assert lengths[1] == 3
@@ -1310,7 +1310,7 @@ async def test_chunked_query_smaller_limit(client, cleanup):
         await doc_ref.set({"index": index})
         cleanup(doc_ref.delete)
 
-    lengths: List[int] = [len(chunk) async for chunk in col.limit(5).chunkify(9)]
+    lengths: List[int] = [len(chunk) async for chunk in col.limit(5)._chunkify(9)]
     assert len(lengths) == 1
     assert lengths[0] == 5
 
@@ -1339,7 +1339,7 @@ async def test_chunked_and_recursive(client, cleanup):
     ]
     await _persist_documents(client, col_id, documents, cleanup)
     collection_ref = client.collection(col_id)
-    iter = collection_ref.recursive().chunkify(5)
+    iter = collection_ref.recursive()._chunkify(5)
 
     pages = [page async for page in iter]
     doc_ids = [[doc.id for doc in page] for page in pages]

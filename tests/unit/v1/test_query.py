@@ -480,7 +480,7 @@ class TestQuery(unittest.TestCase):
 
         query = client.collection("asdf")._query()
 
-        for chunk in query.limit(5).chunkify(10):
+        for chunk in query.limit(5)._chunkify(10):
             self.assertEqual(len(chunk), 5)
 
     def test__resolve_chunk_size(self):

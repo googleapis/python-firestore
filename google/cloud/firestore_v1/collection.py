@@ -137,8 +137,8 @@ class CollectionReference(BaseCollectionReference):
         )
         return (_item_to_document_ref(self, i) for i in iterator)
 
-    def chunkify(self, chunk_size: int):
-        return self._query().chunkify(chunk_size)
+    def _chunkify(self, chunk_size: int):
+        return self._query()._chunkify(chunk_size)
 
     def get(
         self,

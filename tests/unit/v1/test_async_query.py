@@ -490,7 +490,7 @@ class TestAsyncQuery(aiounittest.AsyncTestCase):
 
         query = client.collection("asdf")._query()
 
-        async for chunk in query.limit(5).chunkify(10):
+        async for chunk in query.limit(5)._chunkify(10):
             self.assertEqual(len(chunk), 5)
 
 

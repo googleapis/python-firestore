@@ -167,11 +167,11 @@ class Query(BaseQuery):
 
         return list(result)
 
-    def chunkify(
+    def _chunkify(
         self, chunk_size: int
     ) -> Generator[List[DocumentSnapshot], None, None]:
         # Catch the edge case where a developer writes the following:
-        # `my_query.limit(500).chunkify(1000)`, which ultimately nullifies any
+        # `my_query.limit(500)._chunkify(1000)`, which ultimately nullifies any
         # need to yield chunks.
         if self._limit and chunk_size > self._limit:
             yield self.get()

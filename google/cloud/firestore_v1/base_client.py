@@ -314,7 +314,7 @@ class BaseClient(ClientWithProject):
         self,
         reference: Union[BaseCollectionReference, BaseDocumentReference],
         bulk_writer: Optional["BulkWriter"] = None,  # type: ignore
-    ):
+    ) -> int:
         raise NotImplementedError
 
     @staticmethod

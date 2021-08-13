@@ -237,7 +237,7 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
 
         counter = 0
         expected_lengths = [3, 3, 3, 1]
-        async for chunk in col.chunkify(3):
+        async for chunk in col._chunkify(3):
             msg = f"Expected chunk of length {expected_lengths[counter]} at index {counter}. Saw {len(chunk)}."
             self.assertEqual(len(chunk), expected_lengths[counter], msg)
             counter += 1
