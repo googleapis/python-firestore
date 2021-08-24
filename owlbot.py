@@ -31,7 +31,7 @@ firestore_admin_default_version = "v1"
 # This is a customized version of the s.get_staging_dirs() function from synthtool to
 # cater for copying 3 different folders from googleapis-gen
 # which are firestore, firestore/admin and firestore/bundle.
-# Source https://github.com/googleapis/synthtool/blob/master/synthtool/transforms.py#L280
+# Source https://github.com/googleapis/synthtool/blob/main/synthtool/transforms.py#L280
 def get_staging_dirs(
     default_version: Optional[str] = None, sub_directory: Optional[str] = None
 ) -> List[Path]:
@@ -269,4 +269,44 @@ To update the copy of these conformance tests used by this repository, run the p
 
 *************
 Test Coverage"""
+)
+
+# ----------------------------------------------------------------------------
+# Main Branch migration
+# ----------------------------------------------------------------------------
+
+s.replace(
+  "*.rst",
+  "master",
+  "main"
+)
+
+s.replace(
+  "CONTRIBUTING.rst",
+  "kubernetes/community/blob/main",
+  "kubernetes/community/blob/master"
+)
+
+s.replace(
+  "docs/*",
+  "master",
+  "main"
+)
+
+s.replace(
+  "docs/conf.py",
+  "main_doc",
+  "root_doc"
+)
+
+s.replace(
+  ".kokoro/*",
+  "master",
+  "main"
+)
+
+s.replace(
+  "samples/*",
+  "master",
+  "main"
 )
