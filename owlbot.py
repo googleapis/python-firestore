@@ -31,7 +31,7 @@ firestore_admin_default_version = "v1"
 # This is a customized version of the s.get_staging_dirs() function from synthtool to
 # cater for copying 3 different folders from googleapis-gen
 # which are firestore, firestore/admin and firestore/bundle.
-# Source https://github.com/googleapis/synthtool/blob/main/synthtool/transforms.py#L280
+# Source https://github.com/googleapis/synthtool/blob/master/synthtool/transforms.py#L280
 def get_staging_dirs(
     default_version: Optional[str] = None, sub_directory: Optional[str] = None
 ) -> List[Path]:
