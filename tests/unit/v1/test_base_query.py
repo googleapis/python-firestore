@@ -731,9 +731,7 @@ class TestBaseQuery(unittest.TestCase):
         docref = self._make_docref("here", "doc_id")
         collection = self._make_collection("here")
         query = (
-            self._make_one(collection)
-            .order_by("__name__", "DESCENDING")
-            .start_at(None)
+            self._make_one(collection).order_by("__name__", "DESCENDING").start_at(None)
         )
         expected = [query._make_order("__name__", "DESCENDING")]
         self.assertEqual(query._normalize_orders(), expected)
@@ -1166,7 +1164,8 @@ class TestBaseQuery(unittest.TestCase):
     def test_multiple_recursive_calls(self):
         query = self._make_one(_make_client().collection("asdf"))
         self.assertIsInstance(
-            query.recursive().recursive(), type(query),
+            query.recursive().recursive(),
+            type(query),
         )
 
 
