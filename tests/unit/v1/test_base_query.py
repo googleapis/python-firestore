@@ -727,8 +727,6 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(query._normalize_orders(), expected)
 
     def test__normalize_orders_w_name_orders_w_none_cursor(self):
-        values = {"a": 7, "b": "foo"}
-        docref = self._make_docref("here", "doc_id")
         collection = self._make_collection("here")
         query = (
             self._make_one(collection).order_by("__name__", "DESCENDING").start_at(None)
