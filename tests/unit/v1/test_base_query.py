@@ -1164,8 +1164,7 @@ class TestBaseQuery(unittest.TestCase):
     def test_multiple_recursive_calls(self):
         query = self._make_one(_make_client().collection("asdf"))
         self.assertIsInstance(
-            query.recursive().recursive(),
-            type(query),
+            query.recursive().recursive(), type(query),
         )
 
 
