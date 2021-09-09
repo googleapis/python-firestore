@@ -5,6 +5,55 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+### [2.3.1](https://www.github.com/googleapis/python-firestore/compare/v2.3.0...v2.3.1) (2021-08-30)
+
+
+### Bug Fixes
+
+* harden lookup of credentials id_token attribute ([#434](https://www.github.com/googleapis/python-firestore/issues/434)) ([e28272a](https://www.github.com/googleapis/python-firestore/commit/e28272a1a4e8f7a681f4506142f4d4cd6fa0b993))
+
+## [2.3.0](https://www.github.com/googleapis/python-firestore/compare/v2.2.0...v2.3.0) (2021-08-18)
+
+
+### Features
+
+* add bulk writer ([#396](https://www.github.com/googleapis/python-firestore/issues/396)) ([98a7753](https://www.github.com/googleapis/python-firestore/commit/98a7753f05240a2a75b9ffd42b7a148c65a6e87f))
+* add recursive delete ([#420](https://www.github.com/googleapis/python-firestore/issues/420)) ([813a57b](https://www.github.com/googleapis/python-firestore/commit/813a57b1070a1f6ac41d02897fab33f8039b83f9))
+* add support for recursive queries ([#407](https://www.github.com/googleapis/python-firestore/issues/407)) ([eb45a36](https://www.github.com/googleapis/python-firestore/commit/eb45a36e6c06b642106e061a32bfc119eb7e5bf0))
+
+
+### Bug Fixes
+
+* enable self signed jwt for grpc ([#405](https://www.github.com/googleapis/python-firestore/issues/405)) ([8703b48](https://www.github.com/googleapis/python-firestore/commit/8703b48c45e7bb742a794cad9597740c44182f81))
+* use insecure grpc channels with emulator ([#402](https://www.github.com/googleapis/python-firestore/issues/402)) ([4381ad5](https://www.github.com/googleapis/python-firestore/commit/4381ad503ca3e83510b876281fc768d00d40d499))
+* remove unused requirement pytz ([#422](https://www.github.com/googleapis/python-firestore/issues/422)) ([539c1d7](https://www.github.com/googleapis/python-firestore/commit/539c1d719191eb0ae3a49290c26b628de7c27cd5))
+
+
+### Documentation
+
+* added generated docs for Bundles ([#416](https://www.github.com/googleapis/python-firestore/issues/416)) ([0176cc7](https://www.github.com/googleapis/python-firestore/commit/0176cc7fef8752433b5c2496046d3a56557eb824))
+* fixed broken links to devsite ([#417](https://www.github.com/googleapis/python-firestore/issues/417)) ([1adfc81](https://www.github.com/googleapis/python-firestore/commit/1adfc81237c4ddee665e81f1beaef808cddb860e))
+
+## [2.2.0](https://www.github.com/googleapis/python-firestore/compare/v2.1.3...v2.2.0) (2021-07-22)
+
+
+### Features
+
+* add `always_use_jwt_access` ([#380](https://www.github.com/googleapis/python-firestore/issues/380)) ([2ef4194](https://www.github.com/googleapis/python-firestore/commit/2ef41949390f9f9ab11c1472e037b3a72c1b7ff6))
+
+
+### Bug Fixes
+
+* disable `always_use_jwt_access` ([#385](https://www.github.com/googleapis/python-firestore/issues/385)) ([13753e2](https://www.github.com/googleapis/python-firestore/commit/13753e2d4a9207e0b010b2599c9728ac1df4f8bf))
+* reseed RNG for each auto id on 3.6 to avoid collisions ([#388](https://www.github.com/googleapis/python-firestore/issues/388)) ([784e8ae](https://www.github.com/googleapis/python-firestore/commit/784e8ae27d42d8e25deacaf37c34d79369738b00))
+* update type hint for `async_collection.document()` ([#370](https://www.github.com/googleapis/python-firestore/issues/370)) ([ee6a1c2](https://www.github.com/googleapis/python-firestore/commit/ee6a1c25ed9af729eb39860a8756be2e9c0ba5ae))
+
+
+### Documentation
+
+* omit mention of Python 2.7 in `CONTRIBUTING.rst`([#377](https://www.github.com/googleapis/python-firestore/issues/377)) ([23ec468](https://www.github.com/googleapis/python-firestore/commit/23ec468bfc615dc2967022dd0ea689a94bc66aa9))
+* add "Samples" section to `CONTRIBUTING.rst` ([#401](https://www.github.com/googleapis/python-firestore/issues/401)) ([0f9184d](https://www.github.com/googleapis/python-firestore/commit/0f9184de72a39ba19e29e888ca6c44be5d21c043))
+
 ### [2.1.3](https://www.github.com/googleapis/python-firestore/compare/v2.1.2...v2.1.3) (2021-06-15)
 
 
@@ -549,7 +598,7 @@
 ### Documentation
 - Document Python 2 deprecation ([#6910](https://github.com/googleapis/google-cloud-python/pull/6910))
 - Nnormalize docs for `page_size` / `max_results` / `page_token`. ([#6842](https://github.com/googleapis/google-cloud-python/pull/6842))
-- Port changelog from 30.1 branch to master ([#6903](https://github.com/googleapis/google-cloud-python/pull/6903))
+- Port changelog from 30.1 branch to main ([#6903](https://github.com/googleapis/google-cloud-python/pull/6903))
 - Normalize use of support level badges ([#6159](https://github.com/googleapis/google-cloud-python/pull/6159))
 
 ### Internal / Testing Changes

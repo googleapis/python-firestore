@@ -33,7 +33,17 @@ from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.types import Cursor
 from google.cloud.firestore_v1.types import RunQueryResponse
 from google.cloud.firestore_v1.order import Order
-from typing import Any, Dict, Generator, Iterable, NoReturn, Optional, Tuple, Union
+from typing import (
+    Any,
+    Dict,
+    Generator,
+    Iterable,
+    NoReturn,
+    Optional,
+    Tuple,
+    Type,
+    Union,
+)
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -84,6 +94,8 @@ _NO_ORDERS_FOR_CURSOR = (
     "come from fields set in ``order_by()``."
 )
 _MISMATCH_CURSOR_W_ORDER_BY = "The cursor {!r} does not match the order fields {!r}."
+
+_not_passed = object()
 
 
 class BaseQuery(object):
@@ -142,6 +154,9 @@ class BaseQuery(object):
             When false, selects only collections that are immediate children
             of the `parent` specified in the containing `RunQueryRequest`.
             When true, selects all descendant collections.
+        recursive (Optional[bool]):
+            When true, returns all documents and all documents in any subcollections
+            below them. Defaults to false.
     """
 
     ASCENDING = "ASCENDING"
@@ -161,6 +176,7 @@ class BaseQuery(object):
         start_at=None,
         end_at=None,
         all_descendants=False,
+        recursive=False,
     ) -> None:
         self._parent = parent
         self._projection = projection
@@ -172,6 +188,7 @@ class BaseQuery(object):
         self._start_at = start_at
         self._end_at = end_at
         self._all_descendants = all_descendants
+        self._recursive = recursive
 
     def __eq__(self, other):
         if not isinstance(other, self.__class__):
@@ -231,18 +248,42 @@ class BaseQuery(object):
                 for field_path in field_paths
             ]
         )
+        return self._copy(projection=new_projection)
+
+    def _copy(
+        self,
+        *,
+        projection: Optional[query.StructuredQuery.Projection] = _not_passed,
+        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]] = _not_passed,
+        orders: Optional[Tuple[query.StructuredQuery.Order]] = _not_passed,
+        limit: Optional[int] = _not_passed,
+        limit_to_last: Optional[bool] = _not_passed,
+        offset: Optional[int] = _not_passed,
+        start_at: Optional[Tuple[dict, bool]] = _not_passed,
+        end_at: Optional[Tuple[dict, bool]] = _not_passed,
+        all_descendants: Optional[bool] = _not_passed,
+        recursive: Optional[bool] = _not_passed,
+    ) -> "BaseQuery":
         return self.__class__(
             self._parent,
-            projection=new_projection,
-            field_filters=self._field_filters,
-            orders=self._orders,
-            limit=self._limit,
-            limit_to_last=self._limit_to_last,
-            offset=self._offset,
-            start_at=self._start_at,
-            end_at=self._end_at,
-            all_descendants=self._all_descendants,
+            projection=self._evaluate_param(projection, self._projection),
+            field_filters=self._evaluate_param(field_filters, self._field_filters),
+            orders=self._evaluate_param(orders, self._orders),
+            limit=self._evaluate_param(limit, self._limit),
+            limit_to_last=self._evaluate_param(limit_to_last, self._limit_to_last),
+            offset=self._evaluate_param(offset, self._offset),
+            start_at=self._evaluate_param(start_at, self._start_at),
+            end_at=self._evaluate_param(end_at, self._end_at),
+            all_descendants=self._evaluate_param(
+                all_descendants, self._all_descendants
+            ),
+            recursive=self._evaluate_param(recursive, self._recursive),
         )
+
+    def _evaluate_param(self, value, fallback_value):
+        """Helper which allows `None` to be passed into `copy` and be set on the
+        copy instead of being misinterpreted as an unpassed parameter."""
+        return value if value is not _not_passed else fallback_value
 
     def where(self, field_path: str, op_string: str, value) -> "BaseQuery":
         """Filter the query on a field.
@@ -301,18 +342,7 @@ class BaseQuery(object):
             )
 
         new_filters = self._field_filters + (filter_pb,)
-        return self.__class__(
-            self._parent,
-            projection=self._projection,
-            field_filters=new_filters,
-            orders=self._orders,
-            limit=self._limit,
-            offset=self._offset,
-            limit_to_last=self._limit_to_last,
-            start_at=self._start_at,
-            end_at=self._end_at,
-            all_descendants=self._all_descendants,
-        )
+        return self._copy(field_filters=new_filters)
 
     @staticmethod
     def _make_order(field_path, direction) -> StructuredQuery.Order:
@@ -354,18 +384,7 @@ class BaseQuery(object):
         order_pb = self._make_order(field_path, direction)
 
         new_orders = self._orders + (order_pb,)
-        return self.__class__(
-            self._parent,
-            projection=self._projection,
-            field_filters=self._field_filters,
-            orders=new_orders,
-            limit=self._limit,
-            limit_to_last=self._limit_to_last,
-            offset=self._offset,
-            start_at=self._start_at,
-            end_at=self._end_at,
-            all_descendants=self._all_descendants,
-        )
+        return self._copy(orders=new_orders)
 
     def limit(self, count: int) -> "BaseQuery":
         """Limit a query to return at most `count` matching results.
@@ -384,18 +403,7 @@ class BaseQuery(object):
             A limited query. Acts as a copy of the current query, modified
             with the newly added "limit" filter.
         """
-        return self.__class__(
-            self._parent,
-            projection=self._projection,
-            field_filters=self._field_filters,
-            orders=self._orders,
-            limit=count,
-            limit_to_last=False,
-            offset=self._offset,
-            start_at=self._start_at,
-            end_at=self._end_at,
-            all_descendants=self._all_descendants,
-        )
+        return self._copy(limit=count, limit_to_last=False)
 
     def limit_to_last(self, count: int) -> "BaseQuery":
         """Limit a query to return the last `count` matching results.
@@ -414,18 +422,13 @@ class BaseQuery(object):
             A limited query. Acts as a copy of the current query, modified
             with the newly added "limit" filter.
         """
-        return self.__class__(
-            self._parent,
-            projection=self._projection,
-            field_filters=self._field_filters,
-            orders=self._orders,
-            limit=count,
-            limit_to_last=True,
-            offset=self._offset,
-            start_at=self._start_at,
-            end_at=self._end_at,
-            all_descendants=self._all_descendants,
-        )
+        return self._copy(limit=count, limit_to_last=True)
+
+    def _resolve_chunk_size(self, num_loaded: int, chunk_size: int) -> int:
+        """Utility function for chunkify."""
+        if self._limit is not None and (num_loaded + chunk_size) > self._limit:
+            return max(self._limit - num_loaded, 0)
+        return chunk_size
 
     def offset(self, num_to_skip: int) -> "BaseQuery":
         """Skip to an offset in a query.
@@ -442,18 +445,7 @@ class BaseQuery(object):
             An offset query. Acts as a copy of the current query, modified
             with the newly added "offset" field.
         """
-        return self.__class__(
-            self._parent,
-            projection=self._projection,
-            field_filters=self._field_filters,
-            orders=self._orders,
-            limit=self._limit,
-            limit_to_last=self._limit_to_last,
-            offset=num_to_skip,
-            start_at=self._start_at,
-            end_at=self._end_at,
-            all_descendants=self._all_descendants,
-        )
+        return self._copy(offset=num_to_skip)
 
     def _check_snapshot(self, document_snapshot) -> None:
         """Validate local snapshots for non-collection-group queries.
@@ -523,7 +515,7 @@ class BaseQuery(object):
             query_kwargs["start_at"] = self._start_at
             query_kwargs["end_at"] = cursor_pair
 
-        return self.__class__(self._parent, **query_kwargs)
+        return self._copy(**query_kwargs)
 
     def start_at(
         self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
@@ -763,7 +755,7 @@ class BaseQuery(object):
 
             document_fields = values
 
-        if len(document_fields) > len(orders):
+        if document_fields and len(document_fields) > len(orders):
             msg = _MISMATCH_CURSOR_W_ORDER_BY.format(document_fields, order_keys)
             raise ValueError(msg)
 
@@ -843,6 +835,46 @@ class BaseQuery(object):
 
     def on_snapshot(self, callback) -> NoReturn:
         raise NotImplementedError
+
+    def recursive(self) -> "BaseQuery":
+        """Returns a copy of this query whose iterator will yield all matching
+        documents as well as each of their descendent subcollections and documents.
+
+        This differs from the `all_descendents` flag, which only returns descendents
+        whose subcollection names match the parent collection's name. To return
+        all descendents, regardless of their subcollection name, use this.
+        """
+        copied = self._copy(recursive=True, all_descendants=True)
+        if copied._parent and copied._parent.id:
+            original_collection_id = "/".join(copied._parent._path)
+
+            # Reset the parent to nothing so we can recurse through the entire
+            # database. This is required to have
+            # `CollectionSelector.collection_id` not override
+            # `CollectionSelector.all_descendants`, which happens if both are
+            # set.
+            copied._parent = copied._get_collection_reference_class()("")
+            copied._parent._client = self._parent._client
+
+            # But wait! We don't want to load the entire database; only the
+            # collection the user originally specified. To accomplish that, we
+            # add the following arcane filters.
+
+            REFERENCE_NAME_MIN_ID = "__id-9223372036854775808__"
+            start_at = f"{original_collection_id}/{REFERENCE_NAME_MIN_ID}"
+
+            # The backend interprets this null character is flipping the filter
+            # to mean the end of the range instead of the beginning.
+            nullChar = "\0"
+            end_at = f"{original_collection_id}{nullChar}/{REFERENCE_NAME_MIN_ID}"
+
+            copied = (
+                copied.order_by(field_path_module.FieldPath.document_id())
+                .start_at({field_path_module.FieldPath.document_id(): start_at})
+                .end_at({field_path_module.FieldPath.document_id(): end_at})
+            )
+
+        return copied
 
     def _comparator(self, doc1, doc2) -> int:
         _orders = self._orders
@@ -1104,6 +1136,7 @@ class BaseCollectionGroup(BaseQuery):
         start_at=None,
         end_at=None,
         all_descendants=True,
+        recursive=False,
     ) -> None:
         if not all_descendants:
             raise ValueError("all_descendants must be True for collection group query.")
@@ -1119,6 +1152,7 @@ class BaseCollectionGroup(BaseQuery):
             start_at=start_at,
             end_at=end_at,
             all_descendants=all_descendants,
+            recursive=recursive,
         )
 
     def _validate_partition_query(self):
@@ -1162,6 +1196,10 @@ class BaseCollectionGroup(BaseQuery):
     def get_partitions(
         self, partition_count, retry: retries.Retry = None, timeout: float = None,
     ) -> NoReturn:
+        raise NotImplementedError
+
+    @staticmethod
+    def _get_collection_reference_class() -> Type["BaseCollectionGroup"]:
         raise NotImplementedError
 
 

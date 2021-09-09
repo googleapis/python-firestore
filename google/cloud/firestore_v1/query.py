@@ -18,7 +18,7 @@ A :class:`~google.cloud.firestore_v1.query.Query` can be created directly from
 a :class:`~google.cloud.firestore_v1.collection.Collection` and that can be
 a more common way to create a query than direct usage of the constructor.
 """
-
+from google.cloud import firestore_v1
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
@@ -34,7 +34,7 @@ from google.cloud.firestore_v1.base_query import (
 
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.watch import Watch
-from typing import Any, Callable, Generator, List
+from typing import Any, Callable, Generator, List, Optional, Type
 
 
 class Query(BaseQuery):
@@ -105,6 +105,7 @@ class Query(BaseQuery):
         start_at=None,
         end_at=None,
         all_descendants=False,
+        recursive=False,
     ) -> None:
         super(Query, self).__init__(
             parent=parent,
@@ -117,6 +118,7 @@ class Query(BaseQuery):
             start_at=start_at,
             end_at=end_at,
             all_descendants=all_descendants,
+            recursive=recursive,
         )
 
     def get(
@@ -164,6 +166,47 @@ class Query(BaseQuery):
             result = reversed(list(result))
 
         return list(result)
+
+    def _chunkify(
+        self, chunk_size: int
+    ) -> Generator[List[DocumentSnapshot], None, None]:
+        # Catch the edge case where a developer writes the following:
+        # `my_query.limit(500)._chunkify(1000)`, which ultimately nullifies any
+        # need to yield chunks.
+        if self._limit and chunk_size > self._limit:
+            yield self.get()
+            return
+
+        max_to_return: Optional[int] = self._limit
+        num_returned: int = 0
+        original: Query = self._copy()
+        last_document: Optional[DocumentSnapshot] = None
+
+        while True:
+            # Optionally trim the `chunk_size` down to honor a previously
+            # applied limits as set by `self.limit()`
+            _chunk_size: int = original._resolve_chunk_size(num_returned, chunk_size)
+
+            # Apply the optionally pruned limit and the cursor, if we are past
+            # the first page.
+            _q = original.limit(_chunk_size)
+            if last_document:
+                _q = _q.start_after(last_document)
+
+            snapshots = _q.get()
+            last_document = snapshots[-1]
+            num_returned += len(snapshots)
+
+            yield snapshots
+
+            # Terminate the iterator if we have reached either of two end
+            # conditions:
+            #   1. There are no more documents, or
+            #   2. We have reached the desired overall limit
+            if len(snapshots) < _chunk_size or (
+                max_to_return and num_returned >= max_to_return
+            ):
+                return
 
     def stream(
         self,
@@ -254,6 +297,14 @@ class Query(BaseQuery):
             self, callback, document.DocumentSnapshot, document.DocumentReference
         )
 
+    @staticmethod
+    def _get_collection_reference_class() -> Type[
+        "firestore_v1.collection.CollectionReference"
+    ]:
+        from google.cloud.firestore_v1.collection import CollectionReference
+
+        return CollectionReference
+
 
 class CollectionGroup(Query, BaseCollectionGroup):
     """Represents a Collection Group in the Firestore API.
@@ -279,6 +330,7 @@ class CollectionGroup(Query, BaseCollectionGroup):
         start_at=None,
         end_at=None,
         all_descendants=True,
+        recursive=False,
     ) -> None:
         super(CollectionGroup, self).__init__(
             parent=parent,
@@ -291,6 +343,7 @@ class CollectionGroup(Query, BaseCollectionGroup):
             start_at=start_at,
             end_at=end_at,
             all_descendants=all_descendants,
+            recursive=recursive,
         )
 
     @staticmethod

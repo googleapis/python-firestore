@@ -18,6 +18,7 @@ from typing import List, Optional
 
 import synthtool as s
 from synthtool import gcp
+from synthtool.languages import python
 
 common = gcp.CommonTemplates()
 
@@ -136,7 +137,9 @@ templated_files = common.py_library(
     system_test_external_dependencies=["pytest-asyncio"],
     microgenerator=True,
     cov_level=100,
+    split_system_tests=True,
 )
+python.py_samples(skip_readmes=True)
 
 s.move(templated_files)
 
@@ -267,3 +270,4 @@ To update the copy of these conformance tests used by this repository, run the p
 *************
 Test Coverage"""
 )
+

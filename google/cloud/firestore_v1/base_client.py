@@ -39,6 +39,7 @@ from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 from google.cloud.firestore_v1.field_path import render_field_path
+from google.cloud.firestore_v1.bulk_writer import BulkWriter, BulkWriterOptions
 from typing import (
     Any,
     AsyncGenerator,
@@ -167,50 +168,29 @@ class BaseClient(ClientWithProject):
 
     def _emulator_channel(self, transport):
         """
-        Creates a channel using self._credentials in a similar way to grpc.secure_channel but
-        using grpc.local_channel_credentials() rather than grpc.ssh_channel_credentials() to allow easy connection
-        to a local firestore emulator. This allows local testing of firestore rules if the credentials have been
-        created from a signed custom token.
+        Creates an insecure channel to communicate with the local emulator.
+        If credentials are provided the token is extracted and added to the
+        headers. This supports local testing of firestore rules if the credentials
+        have been created from a signed custom token.
 
         :return: grpc.Channel or grpc.aio.Channel
         """
-        # TODO: Implement a special credentials type for emulator and use
-        # "transport.create_channel" to create gRPC channels once google-auth
-        # extends it's allowed credentials types.
+        # Insecure channels are used for the emulator as secure channels
+        # cannot be used to communicate on some environments.
+        # https://github.com/googleapis/python-firestore/issues/359
+        # Default the token to a non-empty string, in this case "owner".
+        token = "owner"
+        if (
+            self._credentials is not None
+            and getattr(self._credentials, "id_token", None) is not None
+        ):
+            token = self._credentials.id_token
+        options = [("Authorization", f"Bearer {token}")]
+
         if "GrpcAsyncIOTransport" in str(transport.__name__):
-            return grpc.aio.secure_channel(
-                self._emulator_host, self._local_composite_credentials()
-            )
+            return grpc.aio.insecure_channel(self._emulator_host, options=options)
         else:
-            return grpc.secure_channel(
-                self._emulator_host, self._local_composite_credentials()
-            )
-
-    def _local_composite_credentials(self):
-        """
-        Creates the credentials for the local emulator channel
-        :return: grpc.ChannelCredentials
-        """
-        credentials = google.auth.credentials.with_scopes_if_required(
-            self._credentials, None
-        )
-        request = google.auth.transport.requests.Request()
-
-        # Create the metadata plugin for inserting the authorization header.
-        metadata_plugin = google.auth.transport.grpc.AuthMetadataPlugin(
-            credentials, request
-        )
-
-        # Create a set of grpc.CallCredentials using the metadata plugin.
-        google_auth_credentials = grpc.metadata_call_credentials(metadata_plugin)
-
-        # Using the local_credentials to allow connection to emulator
-        local_credentials = grpc.local_channel_credentials()
-
-        # Combine the local credentials and the authorization credentials.
-        return grpc.composite_channel_credentials(
-            local_credentials, google_auth_credentials
-        )
+            return grpc.insecure_channel(self._emulator_host, options=options)
 
     def _target_helper(self, client_class) -> str:
         """Return the target (where the API is).
@@ -302,6 +282,21 @@ class BaseClient(ClientWithProject):
     def document(self, *document_path) -> BaseDocumentReference:
         raise NotImplementedError
 
+    def bulk_writer(self, options: Optional[BulkWriterOptions] = None) -> BulkWriter:
+        """Get a BulkWriter instance from this client.
+
+        Args:
+            :class:`@google.cloud.firestore_v1.bulk_writer.BulkWriterOptions`:
+            Optional control parameters for the
+            :class:`@google.cloud.firestore_v1.bulk_writer.BulkWriter` returned.
+
+        Returns:
+            :class:`@google.cloud.firestore_v1.bulk_writer.BulkWriter`:
+            A utility to efficiently create and save many `WriteBatch` instances
+            to the server.
+        """
+        return BulkWriter(client=self, options=options)
+
     def _document_path_helper(self, *document_path) -> List[str]:
         """Standardize the format of path to tuple of path segments and strip the database string from path if present.
 
@@ -317,6 +312,13 @@ class BaseClient(ClientWithProject):
         if joined_path.startswith(base_path):
             joined_path = joined_path[len(base_path) :]
         return joined_path.split(_helpers.DOCUMENT_PATH_DELIMITER)
+
+    def recursive_delete(
+        self,
+        reference: Union[BaseCollectionReference, BaseDocumentReference],
+        bulk_writer: Optional["BulkWriter"] = None,  # type: ignore
+    ) -> int:
+        raise NotImplementedError
 
     @staticmethod
     def field_path(*field_names: str) -> str:

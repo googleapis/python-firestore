@@ -22,6 +22,7 @@ a more common way to create a query than direct usage of the constructor.
 from google.api_core import gapic_v1  # type: ignore
 from google.api_core import retry as retries  # type: ignore
 
+from google.cloud import firestore_v1
 from google.cloud.firestore_v1.base_query import (
     BaseCollectionGroup,
     BaseQuery,
@@ -32,7 +33,8 @@ from google.cloud.firestore_v1.base_query import (
 )
 
 from google.cloud.firestore_v1 import async_document
-from typing import AsyncGenerator
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from typing import AsyncGenerator, List, Optional, Type
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.transaction import Transaction
@@ -92,6 +94,9 @@ class AsyncQuery(BaseQuery):
             When false, selects only collections that are immediate children
             of the `parent` specified in the containing `RunQueryRequest`.
             When true, selects all descendant collections.
+        recursive (Optional[bool]):
+            When true, returns all documents and all documents in any subcollections
+            below them. Defaults to false.
     """
 
     def __init__(
@@ -106,6 +111,7 @@ class AsyncQuery(BaseQuery):
         start_at=None,
         end_at=None,
         all_descendants=False,
+        recursive=False,
     ) -> None:
         super(AsyncQuery, self).__init__(
             parent=parent,
@@ -118,7 +124,49 @@ class AsyncQuery(BaseQuery):
             start_at=start_at,
             end_at=end_at,
             all_descendants=all_descendants,
+            recursive=recursive,
         )
+
+    async def _chunkify(
+        self, chunk_size: int
+    ) -> AsyncGenerator[List[DocumentSnapshot], None]:
+        # Catch the edge case where a developer writes the following:
+        # `my_query.limit(500)._chunkify(1000)`, which ultimately nullifies any
+        # need to yield chunks.
+        if self._limit and chunk_size > self._limit:
+            yield await self.get()
+            return
+
+        max_to_return: Optional[int] = self._limit
+        num_returned: int = 0
+        original: AsyncQuery = self._copy()
+        last_document: Optional[DocumentSnapshot] = None
+
+        while True:
+            # Optionally trim the `chunk_size` down to honor a previously
+            # applied limit as set by `self.limit()`
+            _chunk_size: int = original._resolve_chunk_size(num_returned, chunk_size)
+
+            # Apply the optionally pruned limit and the cursor, if we are past
+            # the first page.
+            _q = original.limit(_chunk_size)
+            if last_document:
+                _q = _q.start_after(last_document)
+
+            snapshots = await _q.get()
+            last_document = snapshots[-1]
+            num_returned += len(snapshots)
+
+            yield snapshots
+
+            # Terminate the iterator if we have reached either of two end
+            # conditions:
+            #   1. There are no more documents, or
+            #   2. We have reached the desired overall limit
+            if len(snapshots) < _chunk_size or (
+                max_to_return and num_returned >= max_to_return
+            ):
+                return
 
     async def get(
         self,
@@ -224,6 +272,14 @@ class AsyncQuery(BaseQuery):
             if snapshot is not None:
                 yield snapshot
 
+    @staticmethod
+    def _get_collection_reference_class() -> Type[
+        "firestore_v1.async_collection.AsyncCollectionReference"
+    ]:
+        from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
+
+        return AsyncCollectionReference
+
 
 class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
     """Represents a Collection Group in the Firestore API.
@@ -249,6 +305,7 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
         start_at=None,
         end_at=None,
         all_descendants=True,
+        recursive=False,
     ) -> None:
         super(AsyncCollectionGroup, self).__init__(
             parent=parent,
@@ -261,6 +318,7 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
             start_at=start_at,
             end_at=end_at,
             all_descendants=all_descendants,
+            recursive=recursive,
         )
 
     @staticmethod

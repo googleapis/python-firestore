@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from google.cloud.firestore_v1.types.document import Document
+from google.cloud.firestore_v1.types.firestore import RunQueryResponse
 import pytest
 import types
 import aiounittest
@@ -205,6 +207,42 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         await self._add_helper(retry=retry, timeout=timeout)
 
     @pytest.mark.asyncio
+    async def test_chunkify(self):
+        client = _make_client()
+        col = client.collection("my-collection")
+
+        client._firestore_api_internal = mock.Mock(spec=["run_query"])
+
+        results = []
+        for index in range(10):
+            results.append(
+                RunQueryResponse(
+                    document=Document(
+                        name=f"projects/project-project/databases/(default)/documents/my-collection/{index}",
+                    ),
+                ),
+            )
+
+        chunks = [
+            results[:3],
+            results[3:6],
+            results[6:9],
+            results[9:],
+        ]
+
+        async def _get_chunk(*args, **kwargs):
+            return AsyncIter(chunks.pop(0))
+
+        client._firestore_api_internal.run_query.side_effect = _get_chunk
+
+        counter = 0
+        expected_lengths = [3, 3, 3, 1]
+        async for chunk in col._chunkify(3):
+            msg = f"Expected chunk of length {expected_lengths[counter]} at index {counter}. Saw {len(chunk)}."
+            self.assertEqual(len(chunk), expected_lengths[counter], msg)
+            counter += 1
+
+    @pytest.mark.asyncio
     async def _list_documents_helper(self, page_size=None, retry=None, timeout=None):
         from google.cloud.firestore_v1 import _helpers
         from google.api_core.page_iterator_async import AsyncIterator
@@ -374,6 +412,12 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
         query_class.assert_called_once_with(collection)
         query_instance = query_class.return_value
         query_instance.stream.assert_called_once_with(transaction=transaction)
+
+    def test_recursive(self):
+        from google.cloud.firestore_v1.async_query import AsyncQuery
+
+        col = self._make_one("collection")
+        self.assertIsInstance(col.recursive(), AsyncQuery)
 
 
 def _make_credentials():
