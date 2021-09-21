@@ -82,10 +82,12 @@ class NoSendBulkWriter(BulkWriter):
     def _instantiate_executor(self):
         return FakeThreadPoolExecutor()
 
+
 def _make_credentials():
     from google.auth.credentials import Credentials
 
     return mock.create_autospec(Credentials, project_id="project-id")
+
 
 class _SyncClientMixin:
     """Mixin which helps a `_BaseBulkWriterTests` subclass simulate usage of
@@ -106,10 +108,11 @@ class _AsyncClientMixin:
 
 
 class _BaseBulkWriterTests:
-
     @staticmethod
     def _get_document_reference(
-        client: BaseClient, collection_name: Optional[str] = "col", id: Optional[str] = None,
+        client: BaseClient,
+        collection_name: Optional[str] = "col",
+        id: Optional[str] = None,
     ) -> Type:
         return client.collection(collection_name).document(id)
 
@@ -481,9 +484,7 @@ class _BaseBulkWriterTests:
 
     def test_serial_calls_send_correctly(self):
         client = self._make_client()
-        bw = NoSendBulkWriter(
-            client, options=BulkWriterOptions(mode=SendMode.serial)
-        )
+        bw = NoSendBulkWriter(client, options=BulkWriterOptions(mode=SendMode.serial))
         for ref, data in self._doc_iter(client, 101):
             bw.create(ref, data)
         bw.flush()
@@ -579,7 +580,6 @@ class TestAsyncBulkWriter(
 
 
 class TestScheduling(unittest.TestCase):
-
     @staticmethod
     def _make_client() -> Client:
         return Client(credentials=_make_credentials(), project="project-id")

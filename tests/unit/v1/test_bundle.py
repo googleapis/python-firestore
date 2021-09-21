@@ -444,7 +444,8 @@ class TestBundleBuilder(_CollectionQueryMixin, unittest.TestCase):
         self.assertRaises(
             (ValueError, ParseError),  # protobuf 3.18.0 raises ParseError
             _helpers.deserialize_bundle,
-            _serialized, client=client,
+            _serialized,
+            client=client,
         )
 
         # The following assertions would test deserialization of NodeJS bundles
