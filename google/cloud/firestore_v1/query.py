@@ -276,9 +276,7 @@ class Query(BaseQuery):
 
         while True:
             try:
-                response = next(response_iterator)
-            except StopIteration:
-                break
+                response = next(response_iterator, None)
             except exceptions.GoogleAPICallError as exc:
                 if self._retry_query_after_exception(exc, retry, transaction):
                     new_query = self.start_after(last_snapshot)
@@ -288,6 +286,9 @@ class Query(BaseQuery):
                     continue
                 else:
                     raise
+
+            if response is None:  # EOI
+                break
 
             if self._all_descendants:
                 snapshot = _collection_group_query_response_to_snapshot(
