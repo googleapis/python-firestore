@@ -922,7 +922,7 @@ def test_collection_group_queries_filters(client, cleanup):
     assert found == set(["cg-doc2"])
 
 
-@pytest.mark.skipIf(
+@pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="PartitionQuery not implemented in emulator"
 )
 def test_partition_query_no_partitions(client, cleanup):
@@ -956,7 +956,7 @@ def test_partition_query_no_partitions(client, cleanup):
     assert found == expected
 
 
-@pytest.mark.skipIf(
+@pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="PartitionQuery not implemented in emulator"
 )
 def test_partition_query(client, cleanup):
