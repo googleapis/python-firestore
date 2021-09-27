@@ -14,8 +14,6 @@
 # limitations under the License.
 #
 import os
-from tests.system.test__helpers import FIRESTORE_EMULATOR
-import unittest
 import mock
 import packaging.version
 
@@ -2187,7 +2185,6 @@ async def test_run_query_field_headers_async():
     assert ("x-goog-request-params", "parent=parent/value",) in kw["metadata"]
 
 
-@unittest.skipIf(FIRESTORE_EMULATOR, "PartitionQuery not implemented in emulator")
 def test_partition_query(
     transport: str = "grpc", request_type=firestore.PartitionQueryRequest
 ):
