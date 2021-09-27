@@ -39,6 +39,7 @@ from tests.system.test__helpers import (
     EMULATOR_CREDS,
     FIRESTORE_EMULATOR,
 )
+import unittest
 
 _test_event_loop = asyncio.new_event_loop()
 pytestmark = pytest.mark.asyncio
@@ -917,6 +918,7 @@ async def test_collection_group_queries_filters(client, cleanup):
     assert found == set(["cg-doc2"])
 
 
+@unittest.skipIf(FIRESTORE_EMULATOR, "PartitionQuery not implemented in emulator")
 async def test_partition_query_no_partitions(client, cleanup):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
@@ -947,6 +949,7 @@ async def test_partition_query_no_partitions(client, cleanup):
     assert found == expected
 
 
+@unittest.skipIf(FIRESTORE_EMULATOR, "PartitionQuery not implemented in emulator")
 async def test_partition_query(client, cleanup):
     collection_group = "b" + UNIQUE_RESOURCE_ID
     n_docs = 128 * 2 + 127  # Minimum partition size is 128
