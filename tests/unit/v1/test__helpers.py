@@ -486,7 +486,8 @@ class Test_decode_value(unittest.TestCase):
         self.assertEqual(self._call_fut(value), float_val)
 
     @pytest.mark.skipIf(
-        (3,) <= sys.version_info < (3, 4, 4), "known datetime bug (bpo-23517) in Python"
+        (3,) <= sys.version_info < (3, 4, 4),
+        reason="known datetime bug (bpo-23517) in Python",
     )
     def test_datetime(self):
         from google.api_core.datetime_helpers import DatetimeWithNanoseconds

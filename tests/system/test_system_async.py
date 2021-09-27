@@ -948,7 +948,9 @@ async def test_partition_query_no_partitions(client, cleanup):
     assert found == expected
 
 
-@pytest.mark.skipIf(FIRESTORE_EMULATOR, "PartitionQuery not implemented in emulator")
+@pytest.mark.skipIf(
+    FIRESTORE_EMULATOR, reason="PartitionQuery not implemented in emulator"
+)
 async def test_partition_query(client, cleanup):
     collection_group = "b" + UNIQUE_RESOURCE_ID
     n_docs = 128 * 2 + 127  # Minimum partition size is 128
