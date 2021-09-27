@@ -485,7 +485,7 @@ class Test_decode_value(unittest.TestCase):
         value = _value_pb(double_value=float_val)
         self.assertEqual(self._call_fut(value), float_val)
 
-    @unittest.skipIf(
+    @pytest.mark.skipIf(
         (3,) <= sys.version_info < (3, 4, 4), "known datetime bug (bpo-23517) in Python"
     )
     def test_datetime(self):

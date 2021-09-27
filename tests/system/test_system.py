@@ -40,7 +40,6 @@ from tests.system.test__helpers import (
     EMULATOR_CREDS,
     FIRESTORE_EMULATOR,
 )
-import unittest
 
 
 def _get_credentials_and_project():
@@ -923,7 +922,7 @@ def test_collection_group_queries_filters(client, cleanup):
     assert found == set(["cg-doc2"])
 
 
-@unittest.skipIf(FIRESTORE_EMULATOR, "PartitionQuery not implemented in emulator")
+@pytest.mark.skipIf(FIRESTORE_EMULATOR, "PartitionQuery not implemented in emulator")
 def test_partition_query_no_partitions(client, cleanup):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
@@ -955,7 +954,7 @@ def test_partition_query_no_partitions(client, cleanup):
     assert found == expected
 
 
-@unittest.skipIf(FIRESTORE_EMULATOR, "PartitionQuery not implemented in emulator")
+@pytest.mark.skipIf(FIRESTORE_EMULATOR, "PartitionQuery not implemented in emulator")
 def test_partition_query(client, cleanup):
     collection_group = "b" + UNIQUE_RESOURCE_ID
     n_docs = 128 * 2 + 127  # Minimum partition size is 128
