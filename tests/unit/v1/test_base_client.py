@@ -41,7 +41,6 @@ class TestBaseClient(unittest.TestCase):
         from google.auth.credentials import AnonymousCredentials
         from google.cloud.firestore_v1.base_client import _FIRESTORE_EMULATOR_HOST
 
-        credentials = _make_credentials()
         emulator_host = "localhost:8081"
 
         with mock.patch("os.environ", {_FIRESTORE_EMULATOR_HOST: emulator_host}):
@@ -55,7 +54,6 @@ class TestBaseClient(unittest.TestCase):
         from google.auth.credentials import AnonymousCredentials
         from google.cloud.firestore_v1.base_client import _FIRESTORE_EMULATOR_HOST
 
-        credentials = _make_credentials()
         emulator_host = "localhost:8081"
 
         with mock.patch("os.environ", {_FIRESTORE_EMULATOR_HOST: emulator_host}):
