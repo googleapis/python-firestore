@@ -172,7 +172,16 @@ def system_emulated(session):
     session.env["FIRESTORE_EMULATOR_HOST"] = hostport
 
     p = subprocess.Popen(
-        ["gcloud", "beta", "emulators", "firestore", "start", "--host-port", hostport]
+        [
+            "gcloud",
+            "--quiet",
+            "beta",
+            "emulators",
+            "firestore",
+            "start",
+            "--host-port",
+            hostport,
+        ]
     )
 
     try:
