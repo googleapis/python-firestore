@@ -162,7 +162,8 @@ def system_emulated(session):
         system(session)
     finally:
         # Stop Emulator
-        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        # os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+        pass
 
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
