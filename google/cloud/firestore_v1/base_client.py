@@ -62,6 +62,7 @@ from google.cloud.firestore_v1.base_query import BaseQuery
 
 DEFAULT_DATABASE = "(default)"
 """str: The default database used in a :class:`~google.cloud.firestore_v1.client.Client`."""
+_DEFAULT_EMULATOR_PROJECT = "google-cloud-firestore-emulator"
 _BAD_OPTION_ERR = (
     "Exactly one of ``last_update_time`` or ``exists`` " "must be provided."
 )
@@ -129,7 +130,7 @@ class BaseClient(ClientWithProject):
             if credentials is None:
                 credentials = AnonymousCredentials()
             if project is None:
-                project = "nonesuch-project-123"
+                project = _DEFAULT_EMULATOR_PROJECT
 
         super(BaseClient, self).__init__(
             project=project,

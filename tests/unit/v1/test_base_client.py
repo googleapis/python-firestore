@@ -39,6 +39,7 @@ class TestBaseClient(unittest.TestCase):
 
     def test_constructor_with_emulator_host_defaults(self):
         from google.auth.credentials import AnonymousCredentials
+        from google.cloud.firestore_v1.base_client import _DEFAULT_EMULATOR_PROJECT
         from google.cloud.firestore_v1.base_client import _FIRESTORE_EMULATOR_HOST
 
         emulator_host = "localhost:8081"
@@ -48,7 +49,7 @@ class TestBaseClient(unittest.TestCase):
 
         self.assertEqual(client._emulator_host, emulator_host)
         self.assertIsInstance(client._credentials, AnonymousCredentials)
-        self.assertEqual(client.project, "nonesuch-project-123")
+        self.assertEqual(client.project, _DEFAULT_EMULATOR_PROJECT)
 
     def test_constructor_with_emulator_host_w_project(self):
         from google.auth.credentials import AnonymousCredentials
@@ -63,6 +64,7 @@ class TestBaseClient(unittest.TestCase):
         self.assertIsInstance(client._credentials, AnonymousCredentials)
 
     def test_constructor_with_emulator_host_w_creds(self):
+        from google.cloud.firestore_v1.base_client import _DEFAULT_EMULATOR_PROJECT
         from google.cloud.firestore_v1.base_client import _FIRESTORE_EMULATOR_HOST
 
         credentials = _make_credentials()
@@ -73,7 +75,7 @@ class TestBaseClient(unittest.TestCase):
 
         self.assertEqual(client._emulator_host, emulator_host)
         self.assertIs(client._credentials, credentials)
-        self.assertEqual(client.project, "nonesuch-project-123")
+        self.assertEqual(client.project, _DEFAULT_EMULATOR_PROJECT)
 
     @mock.patch(
         "google.cloud.firestore_v1.services.firestore.client.FirestoreClient",
