@@ -155,7 +155,7 @@ def place_before(path, text, *before_text, escape=None):
     s.replace([path], text, replacement)
 
 system_emulated_session = """
-@nox.session(python="3.8")
+@nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
 def system_emulated(session):
     import subprocess
     import signal
