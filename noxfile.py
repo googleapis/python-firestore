@@ -151,7 +151,7 @@ def system_emulated(session):
         ["gcloud", "components", "install", "beta", "cloud-firestore-emulator",]
     )
 
-    hostport = "0.0.0.0:8789"
+    hostport = "localhost:8789"
     session.env["FIRESTORE_EMULATOR_HOST"] = hostport
 
     p = subprocess.Popen(
