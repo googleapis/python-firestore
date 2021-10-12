@@ -17,7 +17,7 @@ from collections import OrderedDict
 from distutils import util
 import os
 import re
-from typing import Callable, Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Dict, Optional, Sequence, Tuple, Type, Union
 import pkg_resources
 
 from google.api_core import client_options as client_options_lib  # type: ignore
@@ -399,15 +399,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 client_cert_source_for_mtls=client_cert_source_func,
                 quota_project_id=client_options.quota_project_id,
                 client_info=client_info,
-                always_use_jwt_access=(
-                    Transport == type(self).get_transport_class("grpc")
-                    or Transport == type(self).get_transport_class("grpc_asyncio")
-                ),
+                always_use_jwt_access=True,
             )
 
     def create_index(
         self,
-        request: firestore_admin.CreateIndexRequest = None,
+        request: Union[firestore_admin.CreateIndexRequest, dict] = None,
         *,
         parent: str = None,
         index: gfa_index.Index = None,
@@ -422,7 +419,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.CreateIndexRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.CreateIndexRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.CreateIndex][google.firestore.admin.v1.FirestoreAdmin.CreateIndex].
             parent (str):
@@ -502,7 +499,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def list_indexes(
         self,
-        request: firestore_admin.ListIndexesRequest = None,
+        request: Union[firestore_admin.ListIndexesRequest, dict] = None,
         *,
         parent: str = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -512,7 +509,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Lists composite indexes.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.ListIndexesRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.ListIndexesRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.ListIndexes][google.firestore.admin.v1.FirestoreAdmin.ListIndexes].
             parent (str):
@@ -582,7 +579,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def get_index(
         self,
-        request: firestore_admin.GetIndexRequest = None,
+        request: Union[firestore_admin.GetIndexRequest, dict] = None,
         *,
         name: str = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -592,7 +589,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Gets a composite index.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.GetIndexRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.GetIndexRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.GetIndex][google.firestore.admin.v1.FirestoreAdmin.GetIndex].
             name (str):
@@ -654,7 +651,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def delete_index(
         self,
-        request: firestore_admin.DeleteIndexRequest = None,
+        request: Union[firestore_admin.DeleteIndexRequest, dict] = None,
         *,
         name: str = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -664,7 +661,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Deletes a composite index.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.DeleteIndexRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.DeleteIndexRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.DeleteIndex][google.firestore.admin.v1.FirestoreAdmin.DeleteIndex].
             name (str):
@@ -718,7 +715,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def get_field(
         self,
-        request: firestore_admin.GetFieldRequest = None,
+        request: Union[firestore_admin.GetFieldRequest, dict] = None,
         *,
         name: str = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -728,7 +725,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         r"""Gets the metadata and configuration for a Field.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.GetFieldRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.GetFieldRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.GetField][google.firestore.admin.v1.FirestoreAdmin.GetField].
             name (str):
@@ -792,7 +789,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def update_field(
         self,
-        request: firestore_admin.UpdateFieldRequest = None,
+        request: Union[firestore_admin.UpdateFieldRequest, dict] = None,
         *,
         field: gfa_field.Field = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -817,7 +814,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.UpdateFieldRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.UpdateFieldRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.UpdateField][google.firestore.admin.v1.FirestoreAdmin.UpdateField].
             field (google.cloud.firestore_admin_v1.types.Field):
@@ -893,7 +890,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def list_fields(
         self,
-        request: firestore_admin.ListFieldsRequest = None,
+        request: Union[firestore_admin.ListFieldsRequest, dict] = None,
         *,
         parent: str = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -910,7 +907,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         with the filter set to ``indexConfig.usesAncestorConfig:false``.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.ListFieldsRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.ListFieldsRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields].
             parent (str):
@@ -980,7 +977,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def export_documents(
         self,
-        request: firestore_admin.ExportDocumentsRequest = None,
+        request: Union[firestore_admin.ExportDocumentsRequest, dict] = None,
         *,
         name: str = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -999,7 +996,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Google Cloud Storage.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.ExportDocumentsRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.ExportDocumentsRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.ExportDocuments][google.firestore.admin.v1.FirestoreAdmin.ExportDocuments].
             name (str):
@@ -1073,7 +1070,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def import_documents(
         self,
-        request: firestore_admin.ImportDocumentsRequest = None,
+        request: Union[firestore_admin.ImportDocumentsRequest, dict] = None,
         *,
         name: str = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -1089,7 +1086,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         already been imported to Cloud Firestore.
 
         Args:
-            request (google.cloud.firestore_admin_v1.types.ImportDocumentsRequest):
+            request (Union[google.cloud.firestore_admin_v1.types.ImportDocumentsRequest, dict]):
                 The request object. The request for
                 [FirestoreAdmin.ImportDocuments][google.firestore.admin.v1.FirestoreAdmin.ImportDocuments].
             name (str):
@@ -1168,6 +1165,19 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         # Done; return the response.
         return response
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        """Releases underlying transport's resources.
+
+        .. warning::
+            ONLY use as a context manager if the transport is NOT shared
+            with other clients! Exiting the with block will CLOSE the transport
+            and may cause errors in other clients!
+        """
+        self.transport.close()
 
 
 try:

@@ -30,13 +30,14 @@ BLACK_PATHS = ["docs", "google", "tests", "noxfile.py", "setup.py"]
 
 DEFAULT_PYTHON_VERSION = "3.8"
 SYSTEM_TEST_PYTHON_VERSIONS = ["3.7"]
-UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9"]
+UNIT_TEST_PYTHON_VERSIONS = ["3.6", "3.7", "3.8", "3.9", "3.10"]
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 
 # 'docfx' is excluded since it only needs to run in 'docs-presubmit'
 nox.options.sessions = [
     "unit",
+    "system_emulated",
     "system",
     "cover",
     "lint",
@@ -126,6 +127,51 @@ def default(session):
 def unit(session):
     """Run the unit test suite."""
     default(session)
+
+
+@nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
+def system_emulated(session):
+    import subprocess
+    import signal
+
+    try:
+        # https://github.com/googleapis/python-firestore/issues/472
+        # Kokoro image doesn't have java installed, don't attempt to run emulator.
+        subprocess.call(["java", "--version"])
+    except OSError:
+        session.skip("java not found but required for emulator support")
+
+    try:
+        subprocess.call(["gcloud", "--version"])
+    except OSError:
+        session.skip("gcloud not found but required for emulator support")
+
+    # Currently, CI/CD doesn't have beta component of gcloud.
+    subprocess.call(
+        ["gcloud", "components", "install", "beta", "cloud-firestore-emulator",]
+    )
+
+    hostport = "localhost:8789"
+    session.env["FIRESTORE_EMULATOR_HOST"] = hostport
+
+    p = subprocess.Popen(
+        [
+            "gcloud",
+            "--quiet",
+            "beta",
+            "emulators",
+            "firestore",
+            "start",
+            "--host-port",
+            hostport,
+        ]
+    )
+
+    try:
+        system(session)
+    finally:
+        # Stop Emulator
+        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
 
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)

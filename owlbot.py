@@ -133,6 +133,7 @@ s.remove_staging_dirs()
 templated_files = common.py_library(
     samples=False,  # set to True only if there are samples
     system_test_python_versions=["3.7"],
+    unit_test_python_versions=["3.6", "3.7", "3.8", "3.9", "3.10"],
     unit_test_external_dependencies=["aiounittest"],
     system_test_external_dependencies=["pytest-asyncio"],
     microgenerator=True,
@@ -141,7 +142,84 @@ templated_files = common.py_library(
 )
 python.py_samples(skip_readmes=True)
 
-s.move(templated_files)
+s.move(templated_files, excludes=[".github/CODEOOWNERS"])
+
+# ----------------------------------------------------------------------------
+# Customize noxfile.py
+# ----------------------------------------------------------------------------
+
+def place_before(path, text, *before_text, escape=None):
+    replacement = "\n".join(before_text) + "\n" + text
+    if escape:
+        for c in escape:
+            text = text.replace(c, '\\' + c)
+    s.replace([path], text, replacement)
+
+system_emulated_session = """
+@nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
+def system_emulated(session):
+    import subprocess
+    import signal
+
+    try:
+        # https://github.com/googleapis/python-firestore/issues/472
+        # Kokoro image doesn't have java installed, don't attempt to run emulator.
+        subprocess.call(["java", "--version"])
+    except OSError:
+        session.skip("java not found but required for emulator support")
+
+    try:
+        subprocess.call(["gcloud", "--version"])
+    except OSError:
+        session.skip("gcloud not found but required for emulator support")
+
+    # Currently, CI/CD doesn't have beta component of gcloud.
+    subprocess.call(
+        ["gcloud", "components", "install", "beta", "cloud-firestore-emulator",]
+    )
+
+    hostport = "localhost:8789"
+    session.env["FIRESTORE_EMULATOR_HOST"] = hostport
+
+    p = subprocess.Popen(
+        [
+            "gcloud",
+            "--quiet",
+            "beta",
+            "emulators",
+            "firestore",
+            "start",
+            "--host-port",
+            hostport,
+        ]
+    )
+
+    try:
+        system(session)
+    finally:
+        # Stop Emulator
+        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
+
+"""
+
+place_before(
+    "noxfile.py",
+    "@nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)\n"
+    "def system(session):",
+    system_emulated_session,
+    escape="()"
+)
+
+# add system_emulated nox session
+s.replace("noxfile.py",
+    """nox.options.sessions = \[
+    "unit",
+    "system",""",
+    """nox.options.sessions = [
+    "unit",
+    "system_emulated",
+    "system",""",
+)
 
 s.replace(
     "noxfile.py",
