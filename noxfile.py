@@ -76,8 +76,7 @@ def blacken(session):
 
 @nox.session(python="3.7")
 def pytype(session):
-    """Run pytype
-    """
+    """Verify type hints are pytype compatible."""
     session.install(PYTYPE_VERSION)
     session.run("pytype",)
 
