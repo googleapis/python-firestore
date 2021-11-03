@@ -161,6 +161,27 @@ class TestQuery(unittest.TestCase):
             metadata=client._rpc_metadata,
         )
 
+    def test_unnecessary_chunkify(self):
+        client = _make_client()
+
+        firestore_api = mock.Mock(spec=["run_query"])
+        firestore_api.run_query.return_value = iter(
+            [
+                RunQueryResponse(
+                    document=Document(
+                        name=f"projects/project-project/databases/(default)/documents/asdf/{index}",
+                    ),
+                )
+                for index in range(5)
+            ]
+        )
+        client._firestore_api_internal = firestore_api
+
+        query = client.collection("asdf")._query()
+
+        for chunk in query.limit(5)._chunkify(10):
+            self.assertEqual(len(chunk), 5)
+
     def _stream_helper(self, retry=None, timeout=None):
         from google.cloud.firestore_v1 import _helpers
 
@@ -580,27 +601,6 @@ class TestQuery(unittest.TestCase):
         query = self._make_one(mock.sentinel.parent)
         query.on_snapshot(None)
         watch.for_query.assert_called_once()
-
-    def test_unnecessary_chunkify(self):
-        client = _make_client()
-
-        firestore_api = mock.Mock(spec=["run_query"])
-        firestore_api.run_query.return_value = iter(
-            [
-                RunQueryResponse(
-                    document=Document(
-                        name=f"projects/project-project/databases/(default)/documents/asdf/{index}",
-                    ),
-                )
-                for index in range(5)
-            ]
-        )
-        client._firestore_api_internal = firestore_api
-
-        query = client.collection("asdf")._query()
-
-        for chunk in query.limit(5)._chunkify(10):
-            self.assertEqual(len(chunk), 5)
 
 
 class TestCollectionGroup(unittest.TestCase):
