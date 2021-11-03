@@ -602,19 +602,6 @@ class TestQuery(unittest.TestCase):
         for chunk in query.limit(5)._chunkify(10):
             self.assertEqual(len(chunk), 5)
 
-    def test__resolve_chunk_size(self):
-        # With a global limit
-        query = _make_client().collection("asdf").limit(5)
-        self.assertEqual(query._resolve_chunk_size(3, 10), 2)
-        self.assertEqual(query._resolve_chunk_size(3, 1), 1)
-        self.assertEqual(query._resolve_chunk_size(3, 2), 2)
-
-        # With no limit
-        query = _make_client().collection("asdf")._query()
-        self.assertEqual(query._resolve_chunk_size(3, 10), 10)
-        self.assertEqual(query._resolve_chunk_size(3, 1), 1)
-        self.assertEqual(query._resolve_chunk_size(3, 2), 2)
-
 
 class TestCollectionGroup(unittest.TestCase):
     @staticmethod
