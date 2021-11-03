@@ -1325,28 +1325,33 @@ philosophers_data_set = [
 ]
 
 
-def _do_recursive_delete_with_bulk_writer(client,  bulk_writer=None, data=None):
+def _do_recursive_delete_with_bulk_writer(client, bulk_writer=None, data=None):
     philosophers = data if data is not None else [philosophers_data_set[0]]
     _persist_documents(client, f"philosophers{UNIQUE_RESOURCE_ID}", philosophers)
 
-    doc_paths = [
-        "",
-        "/pets/Scruffy",
-        "/pets/Snowflake",
-        "/hobbies/pontificating",
-        "/hobbies/journaling",
-        "/philosophers/Aristotle",
-        "/philosophers/Plato",
-    ] if philosophers else []
+    doc_paths = (
+        [
+            "",
+            "/pets/Scruffy",
+            "/pets/Snowflake",
+            "/hobbies/pontificating",
+            "/hobbies/journaling",
+            "/philosophers/Aristotle",
+            "/philosophers/Plato",
+        ]
+        if philosophers
+        else []
+    )
 
     # Assert all documents were created so that when they're missing after the
     # delete, we're actually testing something.
     collection_ref = client.collection(f"philosophers{UNIQUE_RESOURCE_ID}")
 
-    if philosophers:
-        for path in doc_paths:
-            snapshot = collection_ref.document(f"Socrates{path}").get()
-            assert snapshot.exists, f"Snapshot at Socrates{path} should have been created"
+    for path in doc_paths:
+        snapshot = collection_ref.document(f"Socrates{path}").get()
+        assert (
+            snapshot.exists
+        ), f"Snapshot at Socrates{path} should have been created"
 
     # Now delete.
     num_deleted = client.recursive_delete(collection_ref, bulk_writer=bulk_writer)
@@ -1373,11 +1378,13 @@ def test_recursive_delete_serialized(client, cleanup):
     bw = client.bulk_writer(options=BulkWriterOptions(mode=SendMode.serial))
     _do_recursive_delete_with_bulk_writer(client, bw)
 
+
 def test_recursive_delete_parallelized_empty(client, cleanup):
     from google.cloud.firestore_v1.bulk_writer import BulkWriterOptions, SendMode
 
     bw = client.bulk_writer(options=BulkWriterOptions(mode=SendMode.parallel))
     _do_recursive_delete_with_bulk_writer(client, bw, data=[])
+
 
 def test_recursive_delete_serialized_empty(client, cleanup):
     from google.cloud.firestore_v1.bulk_writer import BulkWriterOptions, SendMode
@@ -1385,8 +1392,10 @@ def test_recursive_delete_serialized_empty(client, cleanup):
     bw = client.bulk_writer(options=BulkWriterOptions(mode=SendMode.serial))
     _do_recursive_delete_with_bulk_writer(client, bw, data=[])
 
+
 def test_recursive_delete_no_bulk_writer(client, cleanup):
     _do_recursive_delete_with_bulk_writer(client)
+
 
 def test_recursive_query(client, cleanup):
     col_id: str = f"philosophers-recursive-query{UNIQUE_RESOURCE_ID}"
