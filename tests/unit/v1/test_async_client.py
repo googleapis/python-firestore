@@ -411,6 +411,25 @@ class TestAsyncClient(aiounittest.AsyncTestCase):
         self.assertEqual(num_deleted, len(results))
 
     @pytest.mark.asyncio
+    async def test_recursive_delete_empty(self):
+        client = self._make_default_one()
+        client._firestore_api_internal = AsyncMock(spec=["run_query"])
+        collection_ref = client.collection("my_collection")
+
+        def _get_chunk(*args, **kwargs):
+            return AsyncIter([])
+
+        client._firestore_api_internal.run_query.side_effect = _get_chunk
+
+        bulk_writer = mock.MagicMock()
+        bulk_writer.mock_add_spec(spec=["delete", "close"])
+
+        num_deleted = await client.recursive_delete(
+            collection_ref, bulk_writer=bulk_writer, chunk_size=3
+        )
+        self.assertEqual(num_deleted, 0)
+
+    @pytest.mark.asyncio
     async def test_recursive_delete_from_document(self):
         client = self._make_default_one()
         client._firestore_api_internal = mock.Mock(

@@ -332,9 +332,7 @@ class Client(BaseClient):
         depth: Optional[int] = 0,
     ) -> int:
         """Recursion helper for `recursive_delete."""
-        from google.cloud.firestore_v1.bulk_writer import BulkWriter
-
-        bulk_writer = bulk_writer or BulkWriter()
+        bulk_writer = bulk_writer or self.bulk_writer()
 
         num_deleted: int = 0
 

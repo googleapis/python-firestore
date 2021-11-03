@@ -154,7 +154,7 @@ class AsyncQuery(BaseQuery):
                 _q = _q.start_after(last_document)
 
             snapshots = await _q.get()
-            last_document = snapshots[-1]
+            last_document = snapshots[-1] if snapshots else None
             num_returned += len(snapshots)
 
             yield snapshots
