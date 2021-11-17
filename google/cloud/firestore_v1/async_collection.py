@@ -14,25 +14,18 @@
 
 """Classes for representing collections for the Google Cloud Firestore API."""
 
+from typing import Any, AsyncGenerator, AsyncIterator, cast, Tuple
+
 from google.api_core import gapic_v1
-from google.api_core import retry as retries
 
-from google.cloud.firestore_v1.base_collection import (
-    BaseCollectionReference,
-    _item_to_document_ref,
-)
-from google.cloud.firestore_v1 import (
-    async_query,
-    async_document,
-)
-
+from google.cloud.firestore_v1 import async_document
+from google.cloud.firestore_v1 import async_query
+from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+from google.cloud.firestore_v1.base_collection import _item_to_document_ref
 from google.cloud.firestore_v1.document import DocumentReference
-
-from typing import AsyncIterator
-from typing import Any, AsyncGenerator, Tuple
-
-# Types needed only for Type Hints
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
 from google.cloud.firestore_v1.transaction import Transaction
+from google.cloud.firestore_v1.types import write
 
 
 class AsyncCollectionReference(BaseCollectionReference):
@@ -80,7 +73,7 @@ class AsyncCollectionReference(BaseCollectionReference):
         self,
         document_data: dict,
         document_id: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Tuple[Any, Any]:
         """Create a document in the Firestore database with the provided data.
@@ -113,7 +106,8 @@ class AsyncCollectionReference(BaseCollectionReference):
         document_ref, kwargs = self._prep_add(
             document_data, document_id, retry, timeout,
         )
-        write_result = await document_ref.create(document_data, **kwargs)
+        document_ref = cast(async_document.AsyncDocumentReference, document_ref)
+        write_result: write.Write = await document_ref.create(document_data, **kwargs)
         return write_result.update_time, document_ref
 
     def document(
@@ -131,12 +125,13 @@ class AsyncCollectionReference(BaseCollectionReference):
             :class:`~google.cloud.firestore_v1.document.async_document.AsyncDocumentReference`:
             The child document.
         """
-        return super(AsyncCollectionReference, self).document(document_id)
+        document = super().document(document_id)
+        return cast(async_document.AsyncDocumentReference, document)
 
     async def list_documents(
         self,
         page_size: int = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> AsyncGenerator[DocumentReference, None]:
         """List all subdocuments of the current collection.
@@ -167,7 +162,7 @@ class AsyncCollectionReference(BaseCollectionReference):
     async def get(
         self,
         transaction: Transaction = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> list:
         """Read the documents in this collection.
@@ -198,7 +193,7 @@ class AsyncCollectionReference(BaseCollectionReference):
     async def stream(
         self,
         transaction: Transaction = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> AsyncIterator[async_document.DocumentSnapshot]:
         """Read the documents in this collection.

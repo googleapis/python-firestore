@@ -13,30 +13,17 @@
 # limitations under the License.
 
 """Classes for representing collections for the Google Cloud Firestore API."""
+
 import random
 import sys
-
-from google.api_core import retry as retries
+from typing import Any, Iterable, Tuple, Union
 
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.document import DocumentReference
-from typing import (
-    Any,
-    AsyncGenerator,
-    Coroutine,
-    Generator,
-    AsyncIterator,
-    Iterator,
-    Iterable,
-    NoReturn,
-    Tuple,
-    Union,
-)
-
-# Types needed only for Type Hints
+from google.cloud.firestore_v1.base_document import BaseDocumentReference
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_query import BaseQuery
-from google.cloud.firestore_v1.transaction import Transaction
+from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -108,7 +95,7 @@ class BaseCollectionReference(object):
     def _query(self) -> BaseQuery:
         raise NotImplementedError
 
-    def document(self, document_id: str = None) -> DocumentReference:
+    def document(self, document_id: str = None) -> BaseDocumentReference:
         """Create a sub-document underneath the current collection.
 
         Args:
@@ -118,7 +105,7 @@ class BaseCollectionReference(object):
                 uppercase and lowercase and letters.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.document.DocumentReference`:
+            :class:`~google.cloud.firestore_v1.document.BaseDocumentReference`:
             The child document.
         """
         if document_id is None:
@@ -156,9 +143,9 @@ class BaseCollectionReference(object):
         self,
         document_data: dict,
         document_id: str = None,
-        retry: retries.Retry = None,
+        retry: OptionalRetry = None,
         timeout: float = None,
-    ) -> Tuple[DocumentReference, dict]:
+    ) -> Tuple[BaseDocumentReference, dict]:
         """Shared setup for async / sync :method:`add`"""
         if document_id is None:
             document_id = _auto_id()
@@ -168,17 +155,8 @@ class BaseCollectionReference(object):
 
         return document_ref, kwargs
 
-    def add(
-        self,
-        document_data: dict,
-        document_id: str = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Union[Tuple[Any, Any], Coroutine[Any, Any, Tuple[Any, Any]]]:
-        raise NotImplementedError
-
     def _prep_list_documents(
-        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
+        self, page_size: int = None, retry: OptionalRetry = None, timeout: float = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async / sync :method:`list_documents`"""
         parent, _ = self._parent_info()
@@ -196,14 +174,7 @@ class BaseCollectionReference(object):
 
         return request, kwargs
 
-    def list_documents(
-        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
-    ) -> Union[
-        Generator[DocumentReference, Any, Any], AsyncGenerator[DocumentReference, Any]
-    ]:
-        raise NotImplementedError
-
-    def recursive(self) -> "BaseQuery":
+    def recursive(self) -> BaseQuery:
         return self._query().recursive()
 
     def select(self, field_paths: Iterable[str]) -> BaseQuery:
@@ -425,34 +396,13 @@ class BaseCollectionReference(object):
         return query.end_at(document_fields)
 
     def _prep_get_or_stream(
-        self, retry: retries.Retry = None, timeout: float = None,
+        self, retry: OptionalRetry = None, timeout: float = None,
     ) -> Tuple[Any, dict]:
         """Shared setup for async / sync :meth:`get` / :meth:`stream`"""
         query = self._query()
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return query, kwargs
-
-    def get(
-        self,
-        transaction: Transaction = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Union[
-        Generator[DocumentSnapshot, Any, Any], AsyncGenerator[DocumentSnapshot, Any]
-    ]:
-        raise NotImplementedError
-
-    def stream(
-        self,
-        transaction: Transaction = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Union[Iterator[DocumentSnapshot], AsyncIterator[DocumentSnapshot]]:
-        raise NotImplementedError
-
-    def on_snapshot(self, callback) -> NoReturn:
-        raise NotImplementedError
 
 
 def _auto_id() -> str:

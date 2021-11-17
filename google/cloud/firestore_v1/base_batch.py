@@ -15,12 +15,12 @@
 """Helpers for batch requests to the Google Cloud Firestore API."""
 
 import abc
-from typing import Dict, Union
+from typing import Dict, List, Optional, Sequence, Union
 
-# Types needed only for Type Hints
-from google.api_core import retry as retries
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.base_document import BaseDocumentReference
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
+from google.cloud.firestore_v1.types import write
 
 
 class BaseBatch(metaclass=abc.ABCMeta):
@@ -37,9 +37,9 @@ class BaseBatch(metaclass=abc.ABCMeta):
 
     def __init__(self, client) -> None:
         self._client = client
-        self._write_pbs = []
+        self._write_pbs: List[write.Write] = []
         self._document_references: Dict[str, BaseDocumentReference] = {}
-        self.write_results = None
+        self.write_results: Union[list, None] = None
         self.commit_time = None
 
     def __len__(self):
@@ -48,7 +48,7 @@ class BaseBatch(metaclass=abc.ABCMeta):
     def __contains__(self, reference: BaseDocumentReference):
         return reference._document_path in self._document_references
 
-    def _add_write_pbs(self, write_pbs: list) -> None:
+    def _add_write_pbs(self, write_pbs: Sequence[write.Write]) -> None:
         """Add `Write`` protobufs to this transaction.
 
         This method intended to be over-ridden by subclasses.
@@ -58,12 +58,6 @@ class BaseBatch(metaclass=abc.ABCMeta):
                 write_pb2.Write]): A list of write protobufs to be added.
         """
         self._write_pbs.extend(write_pbs)
-
-    @abc.abstractmethod
-    def commit(self):
-        """Sends all accumulated write operations to the server. The details of this
-        write depend on the implementing class."""
-        raise NotImplementedError()
 
     def create(self, reference: BaseDocumentReference, document_data: dict) -> None:
         """Add a "change" to this batch to create a document.
@@ -170,7 +164,7 @@ class BaseWriteBatch(BaseBatch):
     """Base class for a/sync implementations of the `commit` RPC. `commit` is useful
     for lower volumes or when the order of write operations is important."""
 
-    def _prep_commit(self, retry: retries.Retry, timeout: float):
+    def _prep_commit(self, retry: OptionalRetry, timeout: Optional[float]):
         """Shared setup for async/sync :meth:`commit`."""
         request = {
             "database": self._client._database_string,

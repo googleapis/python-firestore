@@ -19,24 +19,22 @@ a :class:`~google.cloud.firestore_v1.collection.Collection` and that can be
 a more common way to create a query than direct usage of the constructor.
 """
 
+from typing import AsyncGenerator, cast, List, Optional, Type
+
 from google.api_core import gapic_v1
-from google.api_core import retry as retries
 
 from google.cloud import firestore_v1
-from google.cloud.firestore_v1.base_query import (
-    BaseCollectionGroup,
-    BaseQuery,
-    QueryPartition,
-    _query_response_to_snapshot,
-    _collection_group_query_response_to_snapshot,
-    _enum_from_direction,
-)
-
 from google.cloud.firestore_v1 import async_document
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
-from typing import AsyncGenerator, List, Optional, Type
-
-# Types needed only for Type Hints
+from google.cloud.firestore_v1.base_query import BaseCollectionGroup
+from google.cloud.firestore_v1.base_query import BaseQuery
+from google.cloud.firestore_v1.base_query import QueryPartition
+from google.cloud.firestore_v1.base_query import (
+    _collection_group_query_response_to_snapshot,
+)
+from google.cloud.firestore_v1.base_query import _enum_from_direction
+from google.cloud.firestore_v1.base_query import _query_response_to_snapshot
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
 from google.cloud.firestore_v1.transaction import Transaction
 
 
@@ -132,7 +130,7 @@ class AsyncQuery(BaseQuery):
     ) -> AsyncGenerator[List[DocumentSnapshot], None]:
         max_to_return: Optional[int] = self._limit
         num_returned: int = 0
-        original: AsyncQuery = self._copy()
+        original: AsyncQuery = cast(AsyncQuery, self._copy())
         last_document: Optional[DocumentSnapshot] = None
 
         while True:
@@ -147,7 +145,7 @@ class AsyncQuery(BaseQuery):
             if last_document:
                 _q = _q.start_after(last_document)
 
-            snapshots = await _q.get()
+            snapshots = await cast(AsyncQuery, _q).get()
 
             if snapshots:
                 last_document = snapshots[-1]
@@ -168,7 +166,7 @@ class AsyncQuery(BaseQuery):
     async def get(
         self,
         transaction: Transaction = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> list:
         """Read the documents in the collection that match this query.
@@ -206,17 +204,21 @@ class AsyncQuery(BaseQuery):
                 )
             self._limit_to_last = False
 
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
-        result = [d async for d in result]
+        result = []
+        async for doc in self.stream(
+            transaction=transaction, retry=retry, timeout=timeout
+        ):
+            result.append(doc)
+
         if is_limited_to_last:
-            result = list(reversed(result))
+            result.reverse()
 
         return result
 
     async def stream(
         self,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
         """Read the documents in the collection that match this query.
@@ -325,7 +327,7 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
     async def get_partitions(
         self,
         partition_count,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> AsyncGenerator[QueryPartition, None]:
         """Partition a query for parallelization.

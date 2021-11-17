@@ -16,7 +16,7 @@ import datetime
 import unittest
 
 import mock
-from proto.datetime_helpers import DatetimeWithNanoseconds
+from proto.datetime_helpers import DatetimeWithNanoseconds # type: ignore
 
 
 class TestBaseDocumentReference(unittest.TestCase):
@@ -421,7 +421,7 @@ class Test__first_write_result(unittest.TestCase):
 
 
 def _make_credentials():
-    import google.auth.credentials
+    import google.auth.credentials  # type: ignore
 
     return mock.Mock(spec=google.auth.credentials.Credentials)
 

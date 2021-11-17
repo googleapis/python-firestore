@@ -14,10 +14,10 @@
 
 import datetime
 import unittest
-from typing import List, NoReturn, Optional, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type
 
-from google.rpc import status_pb2
 import aiounittest  # type: ignore
+from google.rpc import status_pb2  # type: ignore
 import mock
 
 from google.cloud.firestore_v1._helpers import build_timestamp, ExistsOption
@@ -49,7 +49,7 @@ class NoSendBulkWriter(BulkWriter):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._responses: List[
-            Tuple[BulkWriteBatch, BatchWriteResponse, BulkWriterOperation]
+            Tuple[BulkWriteBatch, BatchWriteResponse, List[BulkWriterOperation]]
         ] = []
         self._fail_indices: List[int] = []
 
@@ -75,7 +75,7 @@ class NoSendBulkWriter(BulkWriter):
         batch: BulkWriteBatch,
         response: BatchWriteResponse,
         operations: List[BulkWriterOperation],
-    ) -> NoReturn:
+    ):
         super()._process_response(batch, response, operations)
         self._responses.append((batch, response, operations))
 
@@ -84,7 +84,7 @@ class NoSendBulkWriter(BulkWriter):
 
 
 def _make_credentials():
-    from google.auth.credentials import Credentials
+    from google.auth.credentials import Credentials  # type: ignore
 
     return mock.create_autospec(Credentials, project_id="project-id")
 
@@ -139,9 +139,9 @@ class _BaseBulkWriterTests:
 
     @staticmethod
     def _get_document_reference(
-        client: BaseClient,
-        collection_name: Optional[str] = "col",
-        id: Optional[str] = None,
+        client,
+        collection_name: str = "col",
+        id: str = None,
     ) -> Type:
         return client.collection(collection_name).document(id)
 
@@ -150,35 +150,23 @@ class _BaseBulkWriterTests:
             id: Optional[str] = ids[_] if ids else None
             yield self._get_document_reference(client, id=id), {"id": _}
 
-    def _verify_bw_activity(self, bw: BulkWriter, counts: List[Tuple[int, int]]):
-        """
-        Args:
-            bw: (BulkWriter)
-                The BulkWriter instance to inspect.
-            counts: (tuple) A sequence of integer pairs, with 0-index integers
-                representing the size of sent batches, and 1-index integers
-                representing the number of times batches of that size should
-                have been sent.
-        """
+    def _verify_bw_activity(self, bw: NoSendBulkWriter, counts: List[Tuple[int, int]]):
         total_batches = sum([el[1] for el in counts])
         batches_word = "batches" if total_batches != 1 else "batch"
-        self.assertEqual(
-            len(bw._responses),
-            total_batches,
-            f"Expected to have sent {total_batches} {batches_word}, but only sent {len(bw._responses)}",
-        )
-        docs_count = {}
+        assert len(bw._responses) == total_batches
+
+        expected_counts = dict(counts)
+        docs_count: Dict[int, int] = {}
         resp: BatchWriteResponse
+
         for _, resp, ops in bw._responses:
             docs_count.setdefault(len(resp.write_results), 0)
             docs_count[len(resp.write_results)] += 1
 
-        self.assertEqual(len(docs_count), len(counts))
-        for size, num_sent in counts:
-            self.assertEqual(docs_count[size], num_sent)
+        assert docs_count == expected_counts
 
         # Assert flush leaves no operation behind
-        self.assertEqual(len(bw._operations), 0)
+        assert len(bw._operations) == 0
 
     def test_create_calls_send_correctly(self):
         client = self._make_client()

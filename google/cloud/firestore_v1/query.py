@@ -18,24 +18,24 @@ A :class:`~google.cloud.firestore_v1.query.Query` can be created directly from
 a :class:`~google.cloud.firestore_v1.collection.Collection` and that can be
 a more common way to create a query than direct usage of the constructor.
 """
-from google.cloud import firestore_v1
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from typing import Any, Callable, cast, Generator, List, Optional, Type
+
 from google.api_core import exceptions
 from google.api_core import gapic_v1
-from google.api_core import retry as retries
 
-from google.cloud.firestore_v1.base_query import (
-    BaseCollectionGroup,
-    BaseQuery,
-    QueryPartition,
-    _query_response_to_snapshot,
-    _collection_group_query_response_to_snapshot,
-    _enum_from_direction,
-)
-
+from google.cloud import firestore_v1  # to break cyccles in type decls
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1 import document
+from google.cloud.firestore_v1.base_query import BaseCollectionGroup
+from google.cloud.firestore_v1.base_query import BaseQuery
+from google.cloud.firestore_v1.base_query import QueryPartition
+from google.cloud.firestore_v1.base_query import (
+    _collection_group_query_response_to_snapshot,
+)
+from google.cloud.firestore_v1.base_query import _enum_from_direction
+from google.cloud.firestore_v1.base_query import _query_response_to_snapshot
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
 from google.cloud.firestore_v1.watch import Watch
-from typing import Any, Callable, Generator, List, Optional, Type
 
 
 class Query(BaseQuery):
@@ -125,7 +125,7 @@ class Query(BaseQuery):
     def get(
         self,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> List[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
@@ -162,11 +162,13 @@ class Query(BaseQuery):
                 )
             self._limit_to_last = False
 
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
+        result = list(
+            self.stream(transaction=transaction, retry=retry, timeout=timeout)
+        )
         if is_limited_to_last:
-            result = reversed(list(result))
+            result.reverse()
 
-        return list(result)
+        return result
 
     def _chunkify(
         self, chunk_size: int
@@ -174,7 +176,7 @@ class Query(BaseQuery):
 
         max_to_return: Optional[int] = self._limit
         num_returned: int = 0
-        original: Query = self._copy()
+        original: Query = cast(Query, self._copy())
         last_document: Optional[DocumentSnapshot] = None
 
         while True:
@@ -189,7 +191,7 @@ class Query(BaseQuery):
             if last_document:
                 _q = _q.start_after(last_document)
 
-            snapshots = _q.get()
+            snapshots = cast(Query, _q).get()
 
             if snapshots:
                 last_document = snapshots[-1]
@@ -233,8 +235,8 @@ class Query(BaseQuery):
     def stream(
         self,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
     ) -> Generator[document.DocumentSnapshot, Any, None]:
         """Read the documents in the collection that match this query.
 
@@ -277,7 +279,10 @@ class Query(BaseQuery):
                 response = next(response_iterator, None)
             except exceptions.GoogleAPICallError as exc:
                 if self._retry_query_after_exception(exc, retry, transaction):
-                    new_query = self.start_after(last_snapshot)
+                    if last_snapshot is not None:
+                        new_query = self.start_after(last_snapshot)
+                    else:
+                        new_query = self
                     response_iterator, _ = new_query._get_stream_iterator(
                         transaction, retry, timeout,
                     )
@@ -389,8 +394,8 @@ class CollectionGroup(Query, BaseCollectionGroup):
     def get_partitions(
         self,
         partition_count,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
     ) -> Generator[QueryPartition, None, None]:
         """Partition a query for parallelization.
 

@@ -14,8 +14,8 @@
 
 import datetime
 import unittest
-import grpc
 
+import grpc  # type: ignore
 import mock
 
 
@@ -38,7 +38,7 @@ class TestBaseClient(unittest.TestCase):
         return self._make_one(project=self.PROJECT, credentials=credentials)
 
     def test_constructor_with_emulator_host_defaults(self):
-        from google.auth.credentials import AnonymousCredentials
+        from google.auth.credentials import AnonymousCredentials  # type: ignore
         from google.cloud.firestore_v1.base_client import _DEFAULT_EMULATOR_PROJECT
         from google.cloud.firestore_v1.base_client import _FIRESTORE_EMULATOR_HOST
 
@@ -52,7 +52,7 @@ class TestBaseClient(unittest.TestCase):
         self.assertEqual(client.project, _DEFAULT_EMULATOR_PROJECT)
 
     def test_constructor_with_emulator_host_w_project(self):
-        from google.auth.credentials import AnonymousCredentials
+        from google.auth.credentials import AnonymousCredentials  # type: ignore
         from google.cloud.firestore_v1.base_client import _FIRESTORE_EMULATOR_HOST
 
         emulator_host = "localhost:8081"
@@ -434,7 +434,7 @@ class Test__get_doc_mask(unittest.TestCase):
 
 
 def _make_credentials():
-    import google.oauth2.credentials
+    import google.oauth2.credentials  # type: ignore
 
     return mock.Mock(spec=google.oauth2.credentials.Credentials)
 

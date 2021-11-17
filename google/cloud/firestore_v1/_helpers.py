@@ -41,7 +41,6 @@ from typing import (
     Generator,
     Iterator,
     List,
-    NoReturn,
     Optional,
     Tuple,
     Union,
@@ -496,7 +495,7 @@ class DocumentExtractor(object):
         self.increments = {}
         self.minimums = {}
         self.maximums = {}
-        self.set_fields = {}
+        self.set_fields: Dict[str, Any] = {}
         self.empty_document = False
 
         prefix_path = FieldPath()
@@ -559,13 +558,16 @@ class DocumentExtractor(object):
             + list(self.minimums)
         )
 
-    def _get_update_mask(self, allow_empty_mask=False) -> None:
+    def _get_update_mask(
+        self, allow_empty_mask=False
+    ) -> Union[types.common.DocumentMask, None]:
         return None
 
     def get_update_pb(
         self, document_path, exists=None, allow_empty_mask=False
     ) -> types.write.Write:
 
+        current_document: Union[common.Precondition, None]
         if exists is not None:
             current_document = common.Precondition(exists=exists)
         else:
@@ -725,9 +727,9 @@ class DocumentExtractorForMerge(DocumentExtractor):
 
     def __init__(self, document_data) -> None:
         super(DocumentExtractorForMerge, self).__init__(document_data)
-        self.data_merge = []
-        self.transform_merge = []
-        self.merge = []
+        self.data_merge: List[str] = []
+        self.transform_merge: List[FieldPath] = []
+        self.merge: List[FieldPath] = []
 
     def _apply_merge_all(self) -> None:
         self.data_merge = sorted(self.field_paths + self.deleted_fields)
@@ -783,7 +785,7 @@ class DocumentExtractorForMerge(DocumentExtractor):
                     self.data_merge.append(field_path)
 
         # Clear out data for fields not merged.
-        merged_set_fields = {}
+        merged_set_fields: Dict[str, Any] = {}
         for field_path in self.data_merge:
             value = get_field_value(self.document_data, field_path)
             set_field_value(merged_set_fields, field_path, value)
@@ -834,7 +836,7 @@ class DocumentExtractorForMerge(DocumentExtractor):
 
     def _get_update_mask(
         self, allow_empty_mask=False
-    ) -> Optional[types.common.DocumentMask]:
+    ) -> Union[types.common.DocumentMask, None]:
         # Mask uses dotted / quoted paths.
         mask_paths = [
             field_path.to_api_repr()
@@ -903,7 +905,9 @@ class DocumentExtractorForUpdate(DocumentExtractor):
     ) -> Generator[Tuple[Any, Any], Any, None]:
         return extract_fields(self.document_data, prefix_path, expand_dots=True)
 
-    def _get_update_mask(self, allow_empty_mask=False) -> types.common.DocumentMask:
+    def _get_update_mask(
+        self, allow_empty_mask=False
+    ) -> Union[types.common.DocumentMask, None]:
         mask_paths = []
         for field_path in self.top_level_paths:
             if field_path not in self.transform_paths:
@@ -1017,7 +1021,7 @@ def metadata_with_prefix(prefix: str, **kw) -> List[Tuple[str, str]]:
 class WriteOption(object):
     """Option used to assert a condition on a write operation."""
 
-    def modify_write(self, write, no_create_msg=None) -> NoReturn:
+    def modify_write(self, write) -> None:
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         This is a virtual method intended to be implemented by subclasses.
@@ -1026,8 +1030,6 @@ class WriteOption(object):
             write (google.cloud.firestore_v1.types.Write): A
                 ``Write`` protobuf instance to be modified with a precondition
                 determined by the state of this option.
-            no_create_msg (Optional[str]): A message to use to indicate that
-                a create operation is not allowed.
 
         Raises:
             NotImplementedError: Always, this method is virtual.
@@ -1233,6 +1235,8 @@ def deserialize_bundle(
         raise ValueError("Unexpected end to serialized FirestoreBundle")
 
     # Now, finally add the metadata element
+    assert bundle is not None
+
     bundle._add_bundle_element(
         metadata_bundle_element, client=client, type="metadata",  # type: ignore
     )
@@ -1296,7 +1300,8 @@ def _get_documents_from_bundle(
 
 def _get_document_from_bundle(
     bundle, *, document_id: str,
-) -> Optional["google.cloud.firestore.DocumentSnapshot"]:  # type: ignore
+) -> Union["google.cloud.firestore.DocumentSnapshot", None]:  # type: ignore
     bundled_doc = bundle.documents.get(document_id)
     if bundled_doc:
         return bundled_doc.snapshot
+    return None

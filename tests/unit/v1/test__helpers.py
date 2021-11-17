@@ -13,13 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import aiounittest
 import datetime
+from typing import List
 import unittest
 
+import aiounittest  # type: ignore
 import mock
-import pytest
-from typing import List
+import pytest  # type: ignore
 
 
 class AsyncMock(mock.MagicMock):
@@ -59,7 +59,7 @@ class TestGeoPoint(unittest.TestCase):
         self.assertEqual(geo_pt.longitude, lng)
 
     def test_to_protobuf(self):
-        from google.type import latlng_pb2
+        from google.type import latlng_pb2  # type: ignore
 
         lat = 0.015625
         lng = 20.03125
@@ -2517,7 +2517,7 @@ def _make_ref_string(project, database, *path):
 
 
 def _make_credentials():
-    import google.auth.credentials
+    import google.auth.credentials  # type: ignore
 
     return mock.Mock(spec=google.auth.credentials.Credentials)
 

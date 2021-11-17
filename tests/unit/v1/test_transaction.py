@@ -1019,7 +1019,7 @@ class Test__sleep(unittest.TestCase):
 
 
 def _make_credentials():
-    import google.auth.credentials
+    import google.auth.credentials  # type: ignore
 
     return mock.Mock(spec=google.auth.credentials.Credentials)
 

@@ -23,9 +23,9 @@ In the hierarchy of API concepts
 * a :class:`~google.cloud.firestore_v1.client.Client` owns a
   :class:`~google.cloud.firestore_v1.document.DocumentReference`
 """
+from typing import Any, cast, Generator, Iterable, List, Optional, Union
 
 from google.api_core import gapic_v1
-from google.api_core import retry as retries
 
 from google.cloud.firestore_v1.base_client import (
     BaseClient,
@@ -35,23 +35,20 @@ from google.cloud.firestore_v1.base_client import (
     _path_helper,
 )
 
-from google.cloud.firestore_v1.query import CollectionGroup
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.batch import WriteBatch
+from google.cloud.firestore_v1.bulk_writer import BulkWriter
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.field_path import FieldPath
-from google.cloud.firestore_v1.transaction import Transaction
+from google.cloud.firestore_v1.query import CollectionGroup
+from google.cloud.firestore_v1.query import Query
 from google.cloud.firestore_v1.services.firestore import client as firestore_client
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
 from google.cloud.firestore_v1.services.firestore.transports import (
     grpc as firestore_grpc_transport,
 )
-from typing import Any, Generator, Iterable, List, Optional, Union, TYPE_CHECKING
-
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
-
-if TYPE_CHECKING:
-    from google.cloud.firestore_v1.bulk_writer import BulkWriter  # pragma: NO COVER
+from google.cloud.firestore_v1.transaction import Transaction
 
 
 class Client(BaseClient):
@@ -209,12 +206,33 @@ class Client(BaseClient):
             *self._document_path_helper(*document_path), client=self
         )
 
+    def _get_collection_reference(self, collection_id: str) -> CollectionReference:
+        """Checks validity of collection_id and then uses subclasses collection implementation.
+
+        Args:
+            collection_id (str) Identifies the collections to query over.
+
+                Every collection or subcollection with this ID as the last segment of its
+                path will be included. Cannot contain a slash.
+
+        Returns:
+            The created collection.
+        """
+        if "/" in collection_id:
+            raise ValueError(
+                "Invalid collection_id "
+                + collection_id
+                + ". Collection IDs must not contain '/'."
+            )
+
+        return self.collection(collection_id)
+
     def get_all(
         self,
         references: list,
         field_paths: Iterable[str] = None,
         transaction: Transaction = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieve a batch of documents.
@@ -267,7 +285,7 @@ class Client(BaseClient):
             yield _parse_batch_get(get_doc_response, reference_map, self)
 
     def collections(
-        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None,
+        self, retry: OptionalRetry = gapic_v1.method.DEFAULT, timeout: float = None,
     ) -> Generator[Any, Any, None]:
         """List top-level collections of the client's database.
 
@@ -294,8 +312,8 @@ class Client(BaseClient):
         self,
         reference: Union[CollectionReference, DocumentReference],
         *,
-        bulk_writer: Optional["BulkWriter"] = None,
-        chunk_size: Optional[int] = 5000,
+        bulk_writer: Optional[BulkWriter] = None,
+        chunk_size: int = 5000,
     ) -> int:
         """Deletes documents and their subcollections, regardless of collection
         name.
@@ -319,17 +337,17 @@ class Client(BaseClient):
 
         """
         if bulk_writer is None:
-            bulk_writer or self.bulk_writer()
+            bulk_writer = self.bulk_writer()
 
         return self._recursive_delete(reference, bulk_writer, chunk_size=chunk_size,)
 
     def _recursive_delete(
         self,
         reference: Union[CollectionReference, DocumentReference],
-        bulk_writer: "BulkWriter",
+        bulk_writer: BulkWriter,
         *,
-        chunk_size: Optional[int] = 5000,
-        depth: Optional[int] = 0,
+        chunk_size: int = 5000,
+        depth: int = 0,
     ) -> int:
         """Recursion helper for `recursive_delete."""
 
@@ -337,11 +355,8 @@ class Client(BaseClient):
 
         if isinstance(reference, CollectionReference):
             chunk: List[DocumentSnapshot]
-            for chunk in (
-                reference.recursive()
-                .select([FieldPath.document_id()])
-                ._chunkify(chunk_size)
-            ):
+            query = reference.recursive().select([FieldPath.document_id()])
+            for chunk in cast(Query, query)._chunkify(chunk_size):
                 doc_snap: DocumentSnapshot
                 for doc_snap in chunk:
                     num_deleted += 1

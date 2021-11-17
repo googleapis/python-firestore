@@ -24,36 +24,39 @@ In the hierarchy of API concepts
   :class:`~google.cloud.firestore_v1.async_document.AsyncDocumentReference`
 """
 
-from google.api_core import gapic_v1
-from google.api_core import retry as retries
-
-from google.cloud.firestore_v1.base_client import (
-    BaseClient,
-    DEFAULT_DATABASE,
-    _CLIENT_INFO,
-    _parse_batch_get,  # type: ignore
-    _path_helper,
+from typing import (
+    Any,
+    cast,
+    AsyncGenerator,
+    Iterable,
+    List,
+    Optional,
+    Union,
 )
 
-from google.cloud.firestore_v1.async_query import AsyncCollectionGroup
+from google.api_core import gapic_v1
+
 from google.cloud.firestore_v1.async_batch import AsyncWriteBatch
 from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
-from google.cloud.firestore_v1.async_document import (
-    AsyncDocumentReference,
-    DocumentSnapshot,
-)
+from google.cloud.firestore_v1.async_document import AsyncDocumentReference
+from google.cloud.firestore_v1.async_document import DocumentSnapshot
+from google.cloud.firestore_v1.async_query import AsyncCollectionGroup
+from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+from google.cloud.firestore_v1.base_client import BaseClient
+from google.cloud.firestore_v1.base_client import DEFAULT_DATABASE
+from google.cloud.firestore_v1.base_client import _CLIENT_INFO
+from google.cloud.firestore_v1.base_client import _parse_batch_get  # type: ignore
+from google.cloud.firestore_v1.base_client import _path_helper
+from google.cloud.firestore_v1.bulk_writer import BulkWriter
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.services.firestore import (
     async_client as firestore_client,
 )
+from google.cloud.firestore_v1.services.firestore.async_client import OptionalRetry
 from google.cloud.firestore_v1.services.firestore.transports import (
     grpc_asyncio as firestore_grpc_transport,
 )
-from typing import Any, AsyncGenerator, Iterable, List, Optional, Union, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from google.cloud.firestore_v1.bulk_writer import BulkWriter  # pragma: NO COVER
 
 
 class AsyncClient(BaseClient):
@@ -189,6 +192,27 @@ class AsyncClient(BaseClient):
         """
         return AsyncCollectionGroup(self._get_collection_reference(collection_id))
 
+    def _get_collection_reference(self, collection_id: str) -> AsyncCollectionReference:
+        """Checks validity of collection_id and then uses subclasses collection implementation.
+
+        Args:
+            collection_id (str) Identifies the collections to query over.
+
+                Every collection or subcollection with this ID as the last segment of its
+                path will be included. Cannot contain a slash.
+
+        Returns:
+            The created collection.
+        """
+        if "/" in collection_id:
+            raise ValueError(
+                "Invalid collection_id "
+                + collection_id
+                + ". Collection IDs must not contain '/'."
+            )
+
+        return self.collection(collection_id)
+
     def document(self, *document_path: str) -> AsyncDocumentReference:
         """Get a reference to a document in a collection.
 
@@ -229,7 +253,7 @@ class AsyncClient(BaseClient):
         references: List[AsyncDocumentReference],
         field_paths: Iterable[str] = None,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> AsyncGenerator[DocumentSnapshot, Any]:
         """Retrieve a batch of documents.
@@ -282,7 +306,7 @@ class AsyncClient(BaseClient):
             yield _parse_batch_get(get_doc_response, reference_map, self)
 
     async def collections(
-        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None,
+        self, retry: OptionalRetry = gapic_v1.method.DEFAULT, timeout: float = None,
     ) -> AsyncGenerator[AsyncCollectionReference, Any]:
         """List top-level collections of the client's database.
 
@@ -309,7 +333,7 @@ class AsyncClient(BaseClient):
         reference: Union[AsyncCollectionReference, AsyncDocumentReference],
         *,
         bulk_writer: Optional["BulkWriter"] = None,
-        chunk_size: Optional[int] = 5000,
+        chunk_size: int = 5000,
     ):
         """Deletes documents and their subcollections, regardless of collection
         name.
@@ -343,8 +367,8 @@ class AsyncClient(BaseClient):
         reference: Union[AsyncCollectionReference, AsyncDocumentReference],
         bulk_writer: "BulkWriter",
         *,
-        chunk_size: Optional[int] = 5000,
-        depth: Optional[int] = 0,
+        chunk_size: int = 5000,
+        depth: int = 0,
     ) -> int:
         """Recursion helper for `recursive_delete."""
 
@@ -352,9 +376,8 @@ class AsyncClient(BaseClient):
 
         if isinstance(reference, AsyncCollectionReference):
             chunk: List[DocumentSnapshot]
-            async for chunk in reference.recursive().select(
-                [FieldPath.document_id()]
-            )._chunkify(chunk_size):
+            query = reference.recursive().select([FieldPath.document_id()])
+            async for chunk in cast(AsyncQuery, query)._chunkify(chunk_size):
                 doc_snap: DocumentSnapshot
                 for doc_snap in chunk:
                     num_deleted += 1

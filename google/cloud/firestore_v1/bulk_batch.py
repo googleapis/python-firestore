@@ -13,12 +13,14 @@
 # limitations under the License.
 
 """Helpers for batch requests to the Google Cloud Firestore API."""
+from typing import Optional
+
 from google.api_core import gapic_v1
-from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.base_batch import BaseBatch
 from google.cloud.firestore_v1.types.firestore import BatchWriteResponse
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
 
 
 class BulkWriteBatch(BaseBatch):
@@ -46,7 +48,9 @@ class BulkWriteBatch(BaseBatch):
         super(BulkWriteBatch, self).__init__(client=client)
 
     def commit(
-        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None
+        self,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
     ) -> BatchWriteResponse:
         """Writes the changes accumulated in this batch.
 
@@ -79,7 +83,7 @@ class BulkWriteBatch(BaseBatch):
 
         return save_response
 
-    def _prep_commit(self, retry: retries.Retry, timeout: float):
+    def _prep_commit(self, retry: OptionalRetry, timeout: Optional[float]):
         request = {
             "database": self._client._database_string,
             "writes": self._write_pbs,

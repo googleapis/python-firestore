@@ -18,7 +18,7 @@ import json
 import os
 
 import mock
-import pytest
+import pytest  # type: ignore
 
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import firestore
@@ -87,7 +87,7 @@ def _mock_firestore_api():
 def _make_client_document(firestore_api, testcase):
     from google.cloud.firestore_v1 import Client
     from google.cloud.firestore_v1.client import DEFAULT_DATABASE
-    import google.auth.credentials
+    import google.auth.credentials  # type: ignore
 
     _, project, _, database, _, doc_path = testcase.doc_ref_path.split("/", 5)
     assert database == DEFAULT_DATABASE
@@ -219,7 +219,7 @@ def test_listen_testprotos(test_proto):  # pragma: NO COVER
     from google.cloud.firestore_v1 import DocumentReference
     from google.cloud.firestore_v1 import DocumentSnapshot
     from google.cloud.firestore_v1 import Watch
-    import google.auth.credentials
+    import google.auth.credentials  # type: ignore
 
     testcase = test_proto.listen
     testname = test_proto.description
@@ -447,7 +447,7 @@ def parse_query(testcase):
     # 'DocSnapshot' contains:
     # 'path': str
     # 'json_data': str
-    from google.auth.credentials import Credentials
+    from google.auth.credentials import Credentials  # type: ignore
     from google.cloud.firestore_v1 import Client
     from google.cloud.firestore_v1 import Query
 

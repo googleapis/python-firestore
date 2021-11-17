@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pytest
-import aiounittest
-
+import aiounittest  # type: ignore
 import mock
+import pytest  # type: ignore
+
 from tests.unit.v1.test__helpers import AsyncMock
 
 
@@ -1023,7 +1023,7 @@ class Test__sleep(aiounittest.AsyncTestCase):
 
 
 def _make_credentials():
-    import google.auth.credentials
+    import google.auth.credentials  # type: ignore
 
     return mock.Mock(spec=google.auth.credentials.Credentials)
 

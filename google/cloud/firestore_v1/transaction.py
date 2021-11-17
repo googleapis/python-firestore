@@ -14,37 +14,32 @@
 
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
 
-
 import random
 import time
-
-from google.api_core import gapic_v1
-from google.api_core import retry as retries
-
-from google.cloud.firestore_v1.base_transaction import (
-    _BaseTransactional,
-    BaseTransaction,
-    MAX_ATTEMPTS,
-    _CANT_BEGIN,
-    _CANT_ROLLBACK,
-    _CANT_COMMIT,
-    _WRITE_READ_ONLY,
-    _INITIAL_SLEEP,
-    _MAX_SLEEP,
-    _MULTIPLIER,
-    _EXCEED_ATTEMPTS_TEMPLATE,
-)
+from typing import Any, Callable, Generator, Optional, Sequence
 
 from google.api_core import exceptions
-from google.cloud.firestore_v1 import batch
-from google.cloud.firestore_v1.document import DocumentReference
-from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.query import Query
+from google.api_core import gapic_v1
 
-# Types needed only for Type Hints
+from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1 import batch
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.base_transaction import BaseTransaction
+from google.cloud.firestore_v1.base_transaction import MAX_ATTEMPTS
+from google.cloud.firestore_v1.base_transaction import _BaseTransactional
+from google.cloud.firestore_v1.base_transaction import _CANT_BEGIN
+from google.cloud.firestore_v1.base_transaction import _CANT_COMMIT
+from google.cloud.firestore_v1.base_transaction import _CANT_ROLLBACK
+from google.cloud.firestore_v1.base_transaction import _EXCEED_ATTEMPTS_TEMPLATE
+from google.cloud.firestore_v1.base_transaction import _INITIAL_SLEEP
+from google.cloud.firestore_v1.base_transaction import _MAX_SLEEP
+from google.cloud.firestore_v1.base_transaction import _MULTIPLIER
+from google.cloud.firestore_v1.base_transaction import _WRITE_READ_ONLY
+from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1.query import Query
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
 from google.cloud.firestore_v1.types import CommitResponse
-from typing import Any, Callable, Generator, Optional
+from google.cloud.firestore_v1.types import write
 
 
 class Transaction(batch.WriteBatch, BaseTransaction):
@@ -65,7 +60,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         super(Transaction, self).__init__(client)
         BaseTransaction.__init__(self, max_attempts, read_only)
 
-    def _add_write_pbs(self, write_pbs: list) -> None:
+    def _add_write_pbs(self, write_pbs: Sequence[write.Write]) -> None:
         """Add `Write`` protobufs to this transaction.
 
         Args:
@@ -139,6 +134,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         if not self.in_progress:
             raise ValueError(_CANT_COMMIT)
 
+        assert self._id is not None
         commit_response = _commit_with_retry(self._client, self._write_pbs, self._id)
 
         self._clean_up()
@@ -147,7 +143,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
     def get_all(
         self,
         references: list,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieves multiple documents from Firestore.
@@ -170,7 +166,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
     def get(
         self,
         ref_or_query,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieve a document or a query result from the database.
@@ -331,7 +327,7 @@ def transactional(to_wrap: Callable) -> _Transactional:
 
 
 def _commit_with_retry(
-    client, write_pbs: list, transaction_id: bytes
+    client, write_pbs: Sequence[write.Write], transaction_id: bytes
 ) -> CommitResponse:
     """Call ``Commit`` on the GAPIC client with retry / sleep.
 

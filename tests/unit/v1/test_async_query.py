@@ -12,19 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import types
+
+import aiounittest  # type: ignore
+import mock
+import pytest  # type: ignore
+
 from google.cloud.firestore_v1.types.document import Document
 from google.cloud.firestore_v1.types.firestore import RunQueryResponse
-import pytest
-import types
-import aiounittest
-
-import mock
-from tests.unit.v1.test__helpers import AsyncIter, AsyncMock
-from tests.unit.v1.test_base_query import (
-    _make_credentials,
-    _make_query_response,
-    _make_cursor_pb,
-)
+from tests.unit.v1.test__helpers import AsyncIter
+from tests.unit.v1.test__helpers import AsyncMock
+from tests.unit.v1.test_base_query import _make_credentials
+from tests.unit.v1.test_base_query import _make_query_response
+from tests.unit.v1.test_base_query import _make_cursor_pb
 
 
 class TestAsyncQuery(aiounittest.AsyncTestCase):

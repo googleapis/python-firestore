@@ -16,7 +16,7 @@ import types
 import unittest
 
 import mock
-import pytest
+import pytest  # type: ignore
 
 from google.api_core import gapic_v1
 from google.cloud.firestore_v1.types.document import Document

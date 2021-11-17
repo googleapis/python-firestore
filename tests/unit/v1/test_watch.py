@@ -97,7 +97,7 @@ class Test_maybe_wrap_exception(unittest.TestCase):
         return _maybe_wrap_exception(exc)
 
     def test_is_grpc_error(self):
-        import grpc
+        import grpc  # type: ignore
         from google.api_core.exceptions import GoogleAPICallError
 
         exc = grpc.RpcError()

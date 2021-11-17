@@ -25,26 +25,8 @@ In the hierarchy of API concepts
 """
 
 import os
-import grpc  # type: ignore
-
-from google.auth.credentials import AnonymousCredentials
-import google.api_core.client_options
-import google.api_core.path_template
-from google.api_core import retry as retries
-from google.api_core.gapic_v1 import client_info
-from google.cloud.client import ClientWithProject  # type: ignore
-
-from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1 import __version__
-from google.cloud.firestore_v1 import types
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
-
-from google.cloud.firestore_v1.field_path import render_field_path
-from google.cloud.firestore_v1.bulk_writer import BulkWriter, BulkWriterOptions
 from typing import (
     Any,
-    AsyncGenerator,
-    Generator,
     Iterable,
     List,
     Optional,
@@ -52,12 +34,22 @@ from typing import (
     Union,
 )
 
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+import google.api_core.client_options
+import google.api_core.path_template
+from google.api_core.gapic_v1 import client_info
+from google.auth.credentials import AnonymousCredentials  # type: ignore
+from google.cloud.client import ClientWithProject  # type: ignore
+import grpc  # type: ignore
+
+from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1 import __version__
+from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.base_document import BaseDocumentReference
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_transaction import BaseTransaction
-from google.cloud.firestore_v1.base_batch import BaseWriteBatch
-from google.cloud.firestore_v1.base_query import BaseQuery
+from google.cloud.firestore_v1.bulk_writer import BulkWriter, BulkWriterOptions
+from google.cloud.firestore_v1.field_path import render_field_path
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
 
 
 DEFAULT_DATABASE = "(default)"
@@ -216,6 +208,16 @@ class BaseClient(ClientWithProject):
             return client_class.DEFAULT_ENDPOINT
 
     @property
+    def _target(self) -> str:
+        """Return the target (where the API is).
+        Eg. "firestore.googleapis.com"
+
+        Returns:
+            str: The location of the API.
+        """
+        raise NotImplementedError
+
+    @property
     def _database_string(self):
         """The database string corresponding to this client's project.
 
@@ -261,36 +263,6 @@ class BaseClient(ClientWithProject):
 
         return self._rpc_metadata_internal
 
-    def collection(self, *collection_path) -> BaseCollectionReference:
-        raise NotImplementedError
-
-    def collection_group(self, collection_id: str) -> BaseQuery:
-        raise NotImplementedError
-
-    def _get_collection_reference(self, collection_id: str) -> BaseCollectionReference:
-        """Checks validity of collection_id and then uses subclasses collection implementation.
-
-        Args:
-            collection_id (str) Identifies the collections to query over.
-
-                Every collection or subcollection with this ID as the last segment of its
-                path will be included. Cannot contain a slash.
-
-        Returns:
-            The created collection.
-        """
-        if "/" in collection_id:
-            raise ValueError(
-                "Invalid collection_id "
-                + collection_id
-                + ". Collection IDs must not contain '/'."
-            )
-
-        return self.collection(collection_id)
-
-    def document(self, *document_path) -> BaseDocumentReference:
-        raise NotImplementedError
-
     def bulk_writer(self, options: Optional[BulkWriterOptions] = None) -> BulkWriter:
         """Get a BulkWriter instance from this client.
 
@@ -306,7 +278,7 @@ class BaseClient(ClientWithProject):
         """
         return BulkWriter(client=self, options=options)
 
-    def _document_path_helper(self, *document_path) -> List[str]:
+    def _document_path_helper(self, *document_path: str) -> List[str]:
         """Standardize the format of path to tuple of path segments and strip the database string from path if present.
 
         Args:
@@ -321,13 +293,6 @@ class BaseClient(ClientWithProject):
         if joined_path.startswith(base_path):
             joined_path = joined_path[len(base_path) :]
         return joined_path.split(_helpers.DOCUMENT_PATH_DELIMITER)
-
-    def recursive_delete(
-        self,
-        reference: Union[BaseCollectionReference, BaseDocumentReference],
-        bulk_writer: Optional["BulkWriter"] = None,  # type: ignore
-    ) -> int:
-        raise NotImplementedError
 
     @staticmethod
     def field_path(*field_names: str) -> str:
@@ -416,7 +381,7 @@ class BaseClient(ClientWithProject):
         references: list,
         field_paths: Iterable[str] = None,
         transaction: BaseTransaction = None,
-        retry: retries.Retry = None,
+        retry: OptionalRetry = None,
         timeout: float = None,
     ) -> Tuple[dict, dict, dict]:
         """Shared setup for async/sync :meth:`get_all`."""
@@ -432,40 +397,14 @@ class BaseClient(ClientWithProject):
 
         return request, reference_map, kwargs
 
-    def get_all(
-        self,
-        references: list,
-        field_paths: Iterable[str] = None,
-        transaction: BaseTransaction = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Union[
-        AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
-    ]:
-        raise NotImplementedError
-
     def _prep_collections(
-        self, retry: retries.Retry = None, timeout: float = None,
+        self, retry: OptionalRetry = None, timeout: float = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {"parent": "{}/documents".format(self._database_string)}
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
-
-    def collections(
-        self, retry: retries.Retry = None, timeout: float = None,
-    ) -> Union[
-        AsyncGenerator[BaseCollectionReference, Any],
-        Generator[BaseCollectionReference, Any, Any],
-    ]:
-        raise NotImplementedError
-
-    def batch(self) -> BaseWriteBatch:
-        raise NotImplementedError
-
-    def transaction(self, **kwargs) -> BaseTransaction:
-        raise NotImplementedError
 
 
 def _reference_info(references: list) -> Tuple[list, dict]:
@@ -575,7 +514,9 @@ def _parse_batch_get(
     return snapshot
 
 
-def _get_doc_mask(field_paths: Iterable[str]) -> Optional[types.common.DocumentMask]:
+def _get_doc_mask(
+    field_paths: Optional[Iterable[str]],
+) -> Optional[types.common.DocumentMask]:
     """Get a document mask if field paths are provided.
 
     Args:
@@ -593,7 +534,7 @@ def _get_doc_mask(field_paths: Iterable[str]) -> Optional[types.common.DocumentM
         return types.DocumentMask(field_paths=field_paths)
 
 
-def _path_helper(path: tuple) -> Tuple[str]:
+def _path_helper(path: Tuple[str, ...]) -> Tuple[str, ...]:
     """Standardize path into a tuple of path segments.
 
     Args:
@@ -603,6 +544,6 @@ def _path_helper(path: tuple) -> Tuple[str]:
             * A tuple of path segments
     """
     if len(path) == 1:
-        return path[0].split(_helpers.DOCUMENT_PATH_DELIMITER)
+        return tuple(path[0].split(_helpers.DOCUMENT_PATH_DELIMITER))
     else:
         return path

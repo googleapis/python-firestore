@@ -14,21 +14,10 @@
 
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
 
-from google.api_core import retry as retries
+from typing import Any, Coroutine, List, NoReturn, Optional, Union
 
 from google.cloud.firestore_v1 import types
-from typing import Any, Coroutine, NoReturn, Optional, Union
-
-_CANT_BEGIN: str
-_CANT_COMMIT: str
-_CANT_RETRY_READ_ONLY: str
-_CANT_ROLLBACK: str
-_EXCEED_ATTEMPTS_TEMPLATE: str
-_INITIAL_SLEEP: float
-_MAX_SLEEP: float
-_MISSING_ID_TEMPLATE: str
-_MULTIPLIER: float
-_WRITE_READ_ONLY: str
+from google.cloud.firestore_v1.types import write
 
 
 MAX_ATTEMPTS = 5
@@ -64,9 +53,7 @@ class BaseTransaction(object):
         self._max_attempts = max_attempts
         self._read_only = read_only
         self._id = None
-
-    def _add_write_pbs(self, write_pbs) -> NoReturn:
-        raise NotImplementedError
+        self._write_pbs: List[write.Write] = []
 
     def _options_protobuf(
         self, retry_id: Union[bytes, None]
@@ -133,25 +120,6 @@ class BaseTransaction(object):
         self._write_pbs = []
         self._id = None
 
-    def _begin(self, retry_id=None) -> NoReturn:
-        raise NotImplementedError
-
-    def _rollback(self) -> NoReturn:
-        raise NotImplementedError
-
-    def _commit(self) -> Union[list, Coroutine[Any, Any, list]]:
-        raise NotImplementedError
-
-    def get_all(
-        self, references: list, retry: retries.Retry = None, timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
-    def get(
-        self, ref_or_query, retry: retries.Retry = None, timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
 
 class _BaseTransactional(object):
     """Provide a callable object to use as a transactional decorater.
@@ -175,12 +143,3 @@ class _BaseTransactional(object):
         """Unset the transaction IDs."""
         self.current_id = None
         self.retry_id = None
-
-    def _pre_commit(self, transaction, *args, **kwargs) -> NoReturn:
-        raise NotImplementedError
-
-    def _maybe_commit(self, transaction) -> NoReturn:
-        raise NotImplementedError
-
-    def __call__(self, transaction, *args, **kwargs):
-        raise NotImplementedError

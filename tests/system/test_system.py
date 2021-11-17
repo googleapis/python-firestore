@@ -16,9 +16,8 @@ import datetime
 import itertools
 import math
 import operator
-
-from google.oauth2 import service_account
-import pytest
+from time import sleep
+from typing import Callable, cast, Dict, List, Optional
 
 from google.api_core.exceptions import AlreadyExists
 from google.api_core.exceptions import FailedPrecondition
@@ -26,20 +25,17 @@ from google.api_core.exceptions import InvalidArgument
 from google.api_core.exceptions import NotFound
 from google.cloud._helpers import _datetime_to_pb_timestamp
 from google.cloud._helpers import UTC
+from google.oauth2 import service_account  # type: ignore
+import pytest  # type: ignore
+
 from google.cloud import firestore_v1 as firestore
-
-from time import sleep
-from typing import Callable, Dict, List, Optional
-
-from tests.system.test__helpers import (
-    FIRESTORE_CREDS,
-    FIRESTORE_PROJECT,
-    RANDOM_ID_REGEX,
-    MISSING_DOCUMENT,
-    UNIQUE_RESOURCE_ID,
-    EMULATOR_CREDS,
-    FIRESTORE_EMULATOR,
-)
+from tests.system.test__helpers import FIRESTORE_CREDS
+from tests.system.test__helpers import FIRESTORE_PROJECT
+from tests.system.test__helpers import RANDOM_ID_REGEX
+from tests.system.test__helpers import MISSING_DOCUMENT
+from tests.system.test__helpers import UNIQUE_RESOURCE_ID
+from tests.system.test__helpers import EMULATOR_CREDS
+from tests.system.test__helpers import FIRESTORE_EMULATOR
 
 
 def _get_credentials_and_project():
@@ -1269,7 +1265,7 @@ def _persist_documents(
     for block in documents:
         col_ref = client.collection(collection_name)
         document_id: str = block["data"]["name"]
-        doc_ref = col_ref.document(document_id)
+        doc_ref = cast(firestore.DocumentReference, col_ref.document(document_id))
         doc_ref.set(block["data"])
         if cleanup is not None:
             cleanup(doc_ref.delete)

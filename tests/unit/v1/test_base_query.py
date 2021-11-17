@@ -1463,7 +1463,7 @@ class Test__collection_group_query_response_to_snapshot(unittest.TestCase):
 
 
 def _make_credentials():
-    import google.auth.credentials
+    import google.auth.credentials  # type: ignore
 
     return mock.Mock(spec=google.auth.credentials.Credentials)
 

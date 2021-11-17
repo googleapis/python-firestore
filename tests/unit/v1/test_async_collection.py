@@ -12,14 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import types
+
+import aiounittest  # type: ignore
+import mock
+import pytest  # type: ignore
+
 from google.cloud.firestore_v1.types.document import Document
 from google.cloud.firestore_v1.types.firestore import RunQueryResponse
-import pytest
-import types
-import aiounittest
-
-import mock
-from tests.unit.v1.test__helpers import AsyncIter, AsyncMock
+from tests.unit.v1.test__helpers import AsyncIter
+from tests.unit.v1.test__helpers import AsyncMock
 
 
 class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
@@ -421,7 +423,7 @@ class TestAsyncCollectionReference(aiounittest.AsyncTestCase):
 
 
 def _make_credentials():
-    import google.auth.credentials
+    import google.auth.credentials  # type: ignore
 
     return mock.Mock(spec=google.auth.credentials.Credentials)
 
