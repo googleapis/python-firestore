@@ -279,10 +279,7 @@ class Query(BaseQuery):
                 response = next(response_iterator, None)
             except exceptions.GoogleAPICallError as exc:
                 if self._retry_query_after_exception(exc, retry, transaction):
-                    if last_snapshot is not None:
-                        new_query = self.start_after(last_snapshot)
-                    else:
-                        new_query = self
+                    new_query = cast(Query, self.start_after(last_snapshot))
                     response_iterator, _ = new_query._get_stream_iterator(
                         transaction, retry, timeout,
                     )

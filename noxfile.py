@@ -86,11 +86,7 @@ def mypy(session):
     """Verify type hints are mypy compatible."""
     session.install("-e", ".")
     session.install(
-        "mypy",
-        "types-setuptools",
-        "types-protobuf",
-        "types-dataclasses",
-        "types-mock",
+        "mypy", "types-setuptools", "types-protobuf", "types-dataclasses", "types-mock",
     )
     # Note: getenerated tests (in 'tests/unit/gapic') are not yet
     # mypy-safe

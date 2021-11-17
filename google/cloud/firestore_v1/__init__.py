@@ -18,15 +18,12 @@
 
 """Python idiomatic client for Google Cloud Firestore."""
 
-from typing import Union
-
 import pkg_resources
 
-__version__: Union[str, None]
 try:
     __version__ = pkg_resources.get_distribution("google-cloud-firestore").version
 except pkg_resources.DistributionNotFound:
-    __version__ = None
+    __version__ = None  # type: ignore
 
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1._helpers import GeoPoint

@@ -14,7 +14,6 @@
 
 import datetime
 import unittest
-from typing import Optional
 
 import mock
 import google

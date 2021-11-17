@@ -63,7 +63,9 @@ _BAD_DOC_TEMPLATE: str = (
 )
 _ACTIVE_TXN: str = "There is already an active transaction."
 _INACTIVE_TXN: str = "There is no active transaction."
-_CLIENT_INFO: Any = client_info.ClientInfo(client_library_version=__version__)
+_CLIENT_INFO: Any = client_info.ClientInfo(
+    client_library_version=__version__  # type: ignore
+)
 _FIRESTORE_EMULATOR_HOST: str = "FIRESTORE_EMULATOR_HOST"
 
 

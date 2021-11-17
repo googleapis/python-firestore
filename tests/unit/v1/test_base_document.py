@@ -16,7 +16,7 @@ import datetime
 import unittest
 
 import mock
-from proto.datetime_helpers import DatetimeWithNanoseconds # type: ignore
+from proto.datetime_helpers import DatetimeWithNanoseconds  # type: ignore
 
 
 class TestBaseDocumentReference(unittest.TestCase):

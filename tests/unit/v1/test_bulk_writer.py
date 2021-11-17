@@ -24,7 +24,6 @@ from google.cloud.firestore_v1._helpers import build_timestamp, ExistsOption
 from google.cloud.firestore_v1.async_client import AsyncClient
 from google.cloud.firestore_v1.base_document import BaseDocumentReference
 from google.cloud.firestore_v1.client import Client
-from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.bulk_batch import BulkWriteBatch
 from google.cloud.firestore_v1.bulk_writer import (
     BulkRetry,
@@ -139,9 +138,7 @@ class _BaseBulkWriterTests:
 
     @staticmethod
     def _get_document_reference(
-        client,
-        collection_name: str = "col",
-        id: str = None,
+        client, collection_name: str = "col", id: str = None,
     ) -> Type:
         return client.collection(collection_name).document(id)
 
@@ -152,7 +149,6 @@ class _BaseBulkWriterTests:
 
     def _verify_bw_activity(self, bw: NoSendBulkWriter, counts: List[Tuple[int, int]]):
         total_batches = sum([el[1] for el in counts])
-        batches_word = "batches" if total_batches != 1 else "batch"
         assert len(bw._responses) == total_batches
 
         expected_counts = dict(counts)

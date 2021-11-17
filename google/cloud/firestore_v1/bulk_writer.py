@@ -23,7 +23,7 @@ import enum
 import functools
 import logging
 import time
-from typing import Callable, Deque, Dict, List, Optional, Union, TYPE_CHECKING
+from typing import Callable, Deque, Dict, List, Optional, Union
 
 from google.rpc import status_pb2  # type: ignore
 
@@ -79,6 +79,7 @@ class AsyncBulkWriterMixin:
     The entrypoint to the parallelizable code path is `_send_batch()`, which is
     wrapped in a decorator which ensures that the `SendMode` is honored.
     """
+
     _in_flight_documents: int = 0
     _total_batches_sent: int = 0
     _total_write_operations: int = 0
@@ -503,7 +504,7 @@ class BulkWriter(AsyncBulkWriterMixin):
     def _request_send(self, batch_size: int) -> bool:
         # Set up this boolean to avoid repeatedly taking tokens if we're only
         # waiting on the `max_in_flight` limit.
-        have_received_tokens: bool = False
+        got_tokens: bool = False
 
         while True:
             # To avoid bottlenecks on the server, an additional limit is that no
@@ -515,10 +516,9 @@ class BulkWriter(AsyncBulkWriterMixin):
             )
             # Ask for tokens each pass through this loop until they are granted,
             # and then stop.
-            if not have_received_tokens:
-                have_received_tokens = bool(self._rate_limiter.take_tokens(batch_size))
+            got_tokens = got_tokens or bool(self._rate_limiter.take_tokens(batch_size))
 
-            if not under_threshold or not have_received_tokens:
+            if not under_threshold or not got_tokens:
                 # Try again until both checks are true.
                 # Note that this sleep is helpful to prevent the main BulkWriter
                 # thread from spinning through this loop as fast as possible and
@@ -727,6 +727,7 @@ class BulkWriterOperation:
     that ferries it into its next retry without getting confused with other
     similar writes to the same document.
     """
+
     attempts: int
 
     def add_to_batch(self, batch: BulkWriteBatch):
@@ -766,6 +767,7 @@ class BaseOperationRetry:
     Methods on this class be moved directly to `OperationRetry` when support for
     Python 3.6 is dropped and `dataclasses` becomes universal.
     """
+
     operation: BulkWriterOperation
     run_at: datetime.datetime
 

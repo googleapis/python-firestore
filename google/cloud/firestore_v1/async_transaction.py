@@ -192,7 +192,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
                 [ref_or_query], transaction=self, **kwargs
             )
         elif isinstance(ref_or_query, AsyncQuery):
-            return await ref_or_query.stream(transaction=self, **kwargs) # type: ignore
+            return await ref_or_query.stream(transaction=self, **kwargs)  # type: ignore
         else:
             raise ValueError(
                 'Value for argument "ref_or_query" must be a AsyncDocumentReference or a AsyncQuery.'

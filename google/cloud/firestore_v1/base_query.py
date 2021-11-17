@@ -45,6 +45,7 @@ from google.cloud.firestore_v1.types import Cursor
 from google.cloud.firestore_v1.types import RunQueryResponse
 from google.cloud.firestore_v1.order import Order
 
+
 _BAD_DIR_STRING: str
 _BAD_OP_NAN_NULL: str
 _BAD_OP_STRING: str
@@ -107,7 +108,8 @@ OptionalOrders = Union[Tuple[query.StructuredQuery.Order], _NotPassed]
 OptionalInt = Union[int, _NotPassed]
 OptionalBool = Union[bool, _NotPassed]
 CursorParamStripped = Tuple[Union[tuple, dict, list], bool]
-CursorParam = Tuple[Union[tuple, dict, list, DocumentSnapshot], bool]
+CursorArg = Union[DocumentSnapshot, dict, list, tuple, None]
+CursorParam = Tuple[CursorArg, bool]
 OptionalCursorParam = Union[CursorParam, _NotPassed]
 
 
@@ -474,10 +476,7 @@ class BaseQuery(object):
             raise ValueError("Cannot use snapshot from another collection as a cursor.")
 
     def _cursor_helper(
-        self,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
-        before: bool,
-        start: bool,
+        self, document_fields_or_snapshot: CursorArg, before: bool, start: bool,
     ) -> "BaseQuery":
         """Set values to be used for a ``start_at`` or ``end_at`` cursor.
 
@@ -530,9 +529,7 @@ class BaseQuery(object):
 
         return self._copy(**query_kwargs)
 
-    def start_at(
-        self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> "BaseQuery":
+    def start_at(self, document_fields_or_snapshot: CursorArg) -> "BaseQuery":
         """Start query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -562,9 +559,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields_or_snapshot, before=True, start=True)
 
-    def start_after(
-        self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> "BaseQuery":
+    def start_after(self, document_fields_or_snapshot: CursorArg) -> "BaseQuery":
         """Start query results after a particular document value.
 
         The result set will **exclude** the document specified by
@@ -595,9 +590,7 @@ class BaseQuery(object):
             document_fields_or_snapshot, before=False, start=True
         )
 
-    def end_before(
-        self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> "BaseQuery":
+    def end_before(self, document_fields_or_snapshot: CursorArg) -> "BaseQuery":
         """End query results before a particular document value.
 
         The result set will **exclude** the document specified by
@@ -628,9 +621,7 @@ class BaseQuery(object):
             document_fields_or_snapshot, before=True, start=False
         )
 
-    def end_at(
-        self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> "BaseQuery":
+    def end_at(self, document_fields_or_snapshot: CursorArg) -> "BaseQuery":
         """End query results at a particular document value.
 
         The result set will **include** the document specified by
