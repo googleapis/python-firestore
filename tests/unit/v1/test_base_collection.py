@@ -205,6 +205,27 @@ class TestCollectionReference(unittest.TestCase):
             self.assertEqual(query, mock_query.where.return_value)
 
     @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
+    def test_where_w___name___w_value_as_list(self, mock_query):
+        from google.cloud.firestore_v1.base_collection import BaseCollectionReference
+
+        with mock.patch.object(BaseCollectionReference, "_query") as _query:
+            _query.return_value = mock_query
+
+            client = _make_client()
+            collection = self._make_one("collection", client=client)
+            field_path = "__name__"
+            op_string = "in"
+            names = ["hello", "world"]
+
+            query = collection.where(field_path, op_string, names)
+
+            expected_refs = [collection.document(name) for name in names]
+            mock_query.where.assert_called_once_with(
+                field_path, op_string, expected_refs
+            )
+            self.assertEqual(query, mock_query.where.return_value)
+
+    @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
     def test_order_by(self, mock_query):
         from google.cloud.firestore_v1.base_query import BaseQuery
         from google.cloud.firestore_v1.base_collection import BaseCollectionReference
