@@ -216,7 +216,6 @@ def test_listen_testprotos(test_proto):  # pragma: NO COVER
     # 'docs' (list of 'google.firestore_v1.Document'),
     # 'changes' (list lof local 'DocChange', and 'read_time' timestamp.
     from google.cloud.firestore_v1 import Client
-    from google.cloud.firestore_v1 import DocumentReference
     from google.cloud.firestore_v1 import DocumentSnapshot
     from google.cloud.firestore_v1 import Watch
     import google.auth.credentials
@@ -227,64 +226,63 @@ def test_listen_testprotos(test_proto):  # pragma: NO COVER
     credentials = mock.Mock(spec=google.auth.credentials.Credentials)
     client = Client(project="project", credentials=credentials)
     modulename = "google.cloud.firestore_v1.watch"
-    with mock.patch("%s.Watch.ResumableBidiRpc" % modulename, DummyRpc):
-        with mock.patch(
-            "%s.Watch.BackgroundConsumer" % modulename, DummyBackgroundConsumer
-        ):
-            with mock.patch(  # conformance data sets WATCH_TARGET_ID to 1
-                "%s.WATCH_TARGET_ID" % modulename, 1
+    with mock.patch(  # conformance data sets WATCH_TARGET_ID to 1
+        "%s.WATCH_TARGET_ID" % modulename, 1
+    ):
+        snapshots = []
+
+        def callback(keys, applied_changes, read_time):
+            snapshots.append((keys, applied_changes, read_time))
+
+        collection = DummyCollection(client=client)
+        query = DummyQuery(parent=collection)
+        watch = Watch.for_query(
+            query,
+            callback,
+            DocumentSnapshot,
+            background_consumer_cls=DummyBackgroundConsumer,
+            resumable_bidi_rpc_cls=DummyRpc,
+        )
+        # conformance data has db string as this
+        db_str = "projects/projectID/databases/(default)"
+        watch._firestore._database_string_internal = db_str
+
+        wrapped_responses = [
+            firestore.ListenResponse.wrap(proto) for proto in testcase.responses
+        ]
+        if testcase.is_error:
+            try:
+                for proto in wrapped_responses:
+                    watch.on_snapshot(proto)
+            except RuntimeError:
+                # listen-target-add-wrong-id.textpro
+                # listen-target-remove.textpro
+                pass
+
+        else:
+            for proto in wrapped_responses:
+                watch.on_snapshot(proto)
+
+            assert len(snapshots) == len(testcase.snapshots)
+            for i, (expected_snapshot, actual_snapshot) in enumerate(
+                zip(testcase.snapshots, snapshots)
             ):
-                snapshots = []
-
-                def callback(keys, applied_changes, read_time):
-                    snapshots.append((keys, applied_changes, read_time))
-
-                collection = DummyCollection(client=client)
-                query = DummyQuery(parent=collection)
-                watch = Watch.for_query(
-                    query, callback, DocumentSnapshot, DocumentReference
-                )
-                # conformance data has db string as this
-                db_str = "projects/projectID/databases/(default)"
-                watch._firestore._database_string_internal = db_str
-
-                wrapped_responses = [
-                    firestore.ListenResponse.wrap(proto) for proto in testcase.responses
-                ]
-                if testcase.is_error:
-                    try:
-                        for proto in wrapped_responses:
-                            watch.on_snapshot(proto)
-                    except RuntimeError:
-                        # listen-target-add-wrong-id.textpro
-                        # listen-target-remove.textpro
-                        pass
-
-                else:
-                    for proto in wrapped_responses:
-                        watch.on_snapshot(proto)
-
-                    assert len(snapshots) == len(testcase.snapshots)
-                    for i, (expected_snapshot, actual_snapshot) in enumerate(
-                        zip(testcase.snapshots, snapshots)
-                    ):
-                        expected_changes = expected_snapshot.changes
-                        actual_changes = actual_snapshot[1]
-                        if len(expected_changes) != len(actual_changes):
-                            raise AssertionError(
-                                "change length mismatch in %s (snapshot #%s)"
-                                % (testname, i)
-                            )
-                        for y, (expected_change, actual_change) in enumerate(
-                            zip(expected_changes, actual_changes)
-                        ):
-                            expected_change_kind = expected_change.kind
-                            actual_change_kind = actual_change.type.value
-                            if expected_change_kind != actual_change_kind:
-                                raise AssertionError(
-                                    "change type mismatch in %s (snapshot #%s, change #%s')"
-                                    % (testname, i, y)
-                                )
+                expected_changes = expected_snapshot.changes
+                actual_changes = actual_snapshot[1]
+                if len(expected_changes) != len(actual_changes):
+                    raise AssertionError(
+                        "change length mismatch in %s (snapshot #%s)" % (testname, i)
+                    )
+                for y, (expected_change, actual_change) in enumerate(
+                    zip(expected_changes, actual_changes)
+                ):
+                    expected_change_kind = expected_change.kind
+                    actual_change_kind = actual_change.type.value
+                    if expected_change_kind != actual_change_kind:
+                        raise AssertionError(
+                            "change type mismatch in %s (snapshot #%s, change #%s')"
+                            % (testname, i, y)
+                        )
 
 
 @pytest.mark.parametrize("test_proto", _QUERY_TESTPROTOS)

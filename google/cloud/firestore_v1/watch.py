@@ -165,10 +165,6 @@ def _should_terminate(exception):
 
 
 class Watch(object):
-
-    BackgroundConsumer = BackgroundConsumer  # FBO unit tests
-    ResumableBidiRpc = ResumableBidiRpc  # FBO unit tests
-
     def __init__(
         self,
         document_reference,
@@ -177,9 +173,8 @@ class Watch(object):
         comparator,
         snapshot_callback,
         document_snapshot_cls,
-        document_reference_cls,
-        BackgroundConsumer=None,  # FBO unit testing
-        ResumableBidiRpc=None,  # FBO unit testing
+        background_consumer_cls=BackgroundConsumer,  # FBO unit testing
+        resumable_bidi_rpc_cls=ResumableBidiRpc,  # FBO unit testing
     ):
         """
         Args:
@@ -197,35 +192,18 @@ class Watch(object):
                         snapshot was obtained.
 
             document_snapshot_cls: instance of DocumentSnapshot
-            document_reference_cls: instance of DocumentReference
         """
         self._document_reference = document_reference
         self._firestore = firestore
-        self._api = firestore._firestore_api
         self._targets = target
         self._comparator = comparator
-        self.DocumentSnapshot = document_snapshot_cls
-        self.DocumentReference = document_reference_cls
+        self._document_snapshot_cls = document_snapshot_cls
         self._snapshot_callback = snapshot_callback
+        self._api = firestore._firestore_api
         self._closing = threading.Lock()
         self._closed = False
 
         self.resume_token = None
-
-        rpc_request = self._get_rpc_request
-
-        if ResumableBidiRpc is None:
-            ResumableBidiRpc = self.ResumableBidiRpc  # FBO unit tests
-
-        self._rpc = ResumableBidiRpc(
-            self._api._transport.listen,
-            should_recover=_should_recover,
-            should_terminate=_should_terminate,
-            initial_request=rpc_request,
-            metadata=self._firestore._rpc_metadata,
-        )
-
-        self._rpc.add_done_callback(self._on_rpc_done)
 
         # Initialize state for on_snapshot
         # The sorted tree of QueryDocumentSnapshots as sent in the last
@@ -248,16 +226,31 @@ class Watch(object):
         # aren't docs.
         self.has_pushed = False
 
-        # The server assigns and updates the resume token.
-        if BackgroundConsumer is None:  # FBO unit tests
-            BackgroundConsumer = self.BackgroundConsumer
+        self._background_consumer_cls = background_consumer_cls
+        self._resumable_bidi_rpc_cls = resumable_bidi_rpc_cls
 
-        self._consumer = BackgroundConsumer(self._rpc, self.on_snapshot)
+        self._init_stream()
+
+    def _init_stream(self):
+
+        self._rpc = self._resumable_bidi_rpc_cls(
+            self._api._transport.listen,
+            should_recover=_should_recover,
+            should_terminate=_should_terminate,
+            initial_request=self._get_rpc_request,
+            metadata=self._firestore._rpc_metadata,
+        )
+
+        self._rpc.add_done_callback(self._on_rpc_done)
+
+        self._consumer = self._background_consumer_cls(self._rpc, self.on_snapshot)
         self._consumer.start()
 
     def _get_rpc_request(self):
         if self.resume_token is not None:
             self._targets["resume_token"] = self.resume_token
+        else:
+            self._targets.pop("resume_token", None)
 
         return firestore.ListenRequest(
             database=self._firestore._database_string, add_target=self._targets
@@ -330,8 +323,9 @@ class Watch(object):
         cls,
         document_ref,
         snapshot_callback,
-        snapshot_class_instance,
-        reference_class_instance,
+        document_snapshot_cls,
+        background_consumer_cls=BackgroundConsumer,  # FBO unit testing
+        resumable_bidi_rpc_cls=ResumableBidiRpc,  # FBO unit testing
     ):
         """
         Creates a watch snapshot listener for a document. snapshot_callback
@@ -341,10 +335,8 @@ class Watch(object):
         Args:
             document_ref: Reference to Document
             snapshot_callback: callback to be called on snapshot
-            snapshot_class_instance: instance of DocumentSnapshot to make
+            document_snapshot_cls: DocumentSnapshot class to make
                 snapshots with to pass to snapshot_callback
-            reference_class_instance: instance of DocumentReference to make
-                references
 
         """
         return cls(
@@ -356,13 +348,19 @@ class Watch(object):
             },
             document_watch_comparator,
             snapshot_callback,
-            snapshot_class_instance,
-            reference_class_instance,
+            document_snapshot_cls,
+            background_consumer_cls,
+            resumable_bidi_rpc_cls,
         )
 
     @classmethod
     def for_query(
-        cls, query, snapshot_callback, snapshot_class_instance, reference_class_instance
+        cls,
+        query,
+        snapshot_callback,
+        document_snapshot_cls,
+        background_consumer_cls=BackgroundConsumer,  # FBO unit testing
+        resumable_bidi_rpc_cls=ResumableBidiRpc,  # FBO unit testing
     ):
         parent_path, _ = query._parent._parent_info()
         query_target = firestore.Target.QueryTarget(
@@ -375,8 +373,9 @@ class Watch(object):
             {"query": query_target._pb, "target_id": WATCH_TARGET_ID},
             query._comparator,
             snapshot_callback,
-            snapshot_class_instance,
-            reference_class_instance,
+            document_snapshot_cls,
+            background_consumer_cls,
+            resumable_bidi_rpc_cls,
         )
 
     def _on_snapshot_target_change_no_change(self, proto):
@@ -503,7 +502,7 @@ class Watch(object):
 
                 document_ref = self._firestore.document(document_name)
 
-                snapshot = self.DocumentSnapshot(
+                snapshot = self._document_snapshot_cls(
                     reference=document_ref,
                     data=data,
                     exists=True,
@@ -534,11 +533,18 @@ class Watch(object):
         elif filter_:
             _LOGGER.debug("on_snapshot: filter update")
             if filter_.count != self._current_size():
-                # We need to remove all the current results.
-                self._reset_docs()
                 # The filter didn't match, so re-issue the query.
-                # TODO: reset stream method?
-                # self._reset_stream();
+                # First, shut down current stream
+                _LOGGER.info("Filter mismatch -- restarting stream.")
+                thread = threading.Thread(
+                    name=_RPC_ERROR_THREAD_NAME, target=self.close,
+                )
+                thread.start()
+                thread.join()  # wait for shutdown to complete
+                # Then, remove all the current results.
+                self._reset_docs()
+                # Finally, restart stream.
+                self._init_stream()
 
         elif proto is None:
             self.close()

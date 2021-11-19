@@ -171,7 +171,6 @@ class TestWatch(unittest.TestCase):
         comparator=None,
         snapshot_callback=None,
         snapshot_class=None,
-        reference_class=None,
     ):  # pragma: NO COVER
         from google.cloud.firestore_v1.watch import Watch
 
@@ -188,8 +187,6 @@ class TestWatch(unittest.TestCase):
             snapshot_callback = self._snapshot_callback
         if snapshot_class is None:
             snapshot_class = DummyDocumentSnapshot
-        if reference_class is None:
-            reference_class = DummyDocumentReference
         inst = Watch(
             document_reference,
             firestore,
@@ -197,9 +194,8 @@ class TestWatch(unittest.TestCase):
             comparator,
             snapshot_callback,
             snapshot_class,
-            reference_class,
-            BackgroundConsumer=DummyBackgroundConsumer,
-            ResumableBidiRpc=DummyRpc,
+            background_consumer_cls=DummyBackgroundConsumer,
+            resumable_bidi_rpc_cls=DummyRpc,
         )
         return inst
 
@@ -265,45 +261,32 @@ class TestWatch(unittest.TestCase):
         from google.cloud.firestore_v1.watch import Watch
 
         docref = DummyDocumentReference()
-        snapshot_callback = self._snapshot_callback
-        snapshot_class_instance = DummyDocumentSnapshot
-        document_reference_class_instance = DummyDocumentReference
-        modulename = "google.cloud.firestore_v1.watch"
-        with mock.patch("%s.Watch.ResumableBidiRpc" % modulename, DummyRpc):
-            with mock.patch(
-                "%s.Watch.BackgroundConsumer" % modulename, DummyBackgroundConsumer
-            ):
-                inst = Watch.for_document(
-                    docref,
-                    snapshot_callback,
-                    snapshot_class_instance,
-                    document_reference_class_instance,
-                )
+        inst = Watch.for_document(
+            docref,
+            self._snapshot_callback,
+            document_snapshot_cls=DummyDocumentSnapshot,
+            background_consumer_cls=DummyBackgroundConsumer,
+            resumable_bidi_rpc_cls=DummyRpc,
+        )
         self.assertTrue(inst._consumer.started)
         self.assertTrue(inst._rpc.callbacks, [inst._on_rpc_done])
 
     def test_for_query(self):
         from google.cloud.firestore_v1.watch import Watch
 
-        snapshot_callback = self._snapshot_callback
-        snapshot_class_instance = DummyDocumentSnapshot
-        document_reference_class_instance = DummyDocumentReference
         client = DummyFirestore()
         parent = DummyCollection(client)
         modulename = "google.cloud.firestore_v1.watch"
-        pb2 = DummyPb2()
-        with mock.patch("%s.firestore" % modulename, pb2):
-            with mock.patch("%s.Watch.ResumableBidiRpc" % modulename, DummyRpc):
-                with mock.patch(
-                    "%s.Watch.BackgroundConsumer" % modulename, DummyBackgroundConsumer
-                ):
-                    query = DummyQuery(parent=parent)
-                    inst = Watch.for_query(
-                        query,
-                        snapshot_callback,
-                        snapshot_class_instance,
-                        document_reference_class_instance,
-                    )
+        firestore_types = DummyFirestoreTypesModule()
+        with mock.patch("%s.firestore" % modulename, firestore_types):
+            query = DummyQuery(parent=parent)
+            inst = Watch.for_query(
+                query,
+                self._snapshot_callback,
+                document_snapshot_cls=DummyDocumentSnapshot,
+                background_consumer_cls=DummyBackgroundConsumer,
+                resumable_bidi_rpc_cls=DummyRpc,
+            )
         self.assertTrue(inst._consumer.started)
         self.assertTrue(inst._rpc.callbacks, [inst._on_rpc_done])
         self.assertEqual(inst._targets["query"], "dummy query target")
@@ -311,27 +294,21 @@ class TestWatch(unittest.TestCase):
     def test_for_query_nested(self):
         from google.cloud.firestore_v1.watch import Watch
 
-        snapshot_callback = self._snapshot_callback
-        snapshot_class_instance = DummyDocumentSnapshot
-        document_reference_class_instance = DummyDocumentReference
         client = DummyFirestore()
         root = DummyCollection(client)
         grandparent = DummyDocument("document", parent=root)
         parent = DummyCollection(client, parent=grandparent)
         modulename = "google.cloud.firestore_v1.watch"
-        pb2 = DummyPb2()
-        with mock.patch("%s.firestore" % modulename, pb2):
-            with mock.patch("%s.Watch.ResumableBidiRpc" % modulename, DummyRpc):
-                with mock.patch(
-                    "%s.Watch.BackgroundConsumer" % modulename, DummyBackgroundConsumer
-                ):
-                    query = DummyQuery(parent=parent)
-                    inst = Watch.for_query(
-                        query,
-                        snapshot_callback,
-                        snapshot_class_instance,
-                        document_reference_class_instance,
-                    )
+        firestore_types = DummyFirestoreTypesModule()
+        with mock.patch("%s.firestore" % modulename, firestore_types):
+            query = DummyQuery(parent=parent)
+            inst = Watch.for_query(
+                query,
+                self._snapshot_callback,
+                document_snapshot_cls=DummyDocumentSnapshot,
+                background_consumer_cls=DummyBackgroundConsumer,
+                resumable_bidi_rpc_cls=DummyRpc,
+            )
         self.assertTrue(inst._consumer.started)
         self.assertTrue(inst._rpc.callbacks, [inst._on_rpc_done])
         self.assertEqual(inst._targets["query"], "dummy query target")
@@ -996,7 +973,7 @@ class DummyQueryTarget(object):
         return "dummy query target"
 
 
-class DummyPb2(object):
+class DummyFirestoreTypesModule(object):
 
     Target = DummyTarget()
 
