@@ -17,6 +17,32 @@ import unittest
 
 import mock
 
+def _make_base_query():
+    from google.cloud.firestore_v1.base_query import BaseQuery
+
+    return BaseQuery
+
+def _make_base_query_all_fields(
+    self, limit=9876, offset=12, skip_fields=(), parent=None, all_descendants=True
+):
+    kwargs = {
+        "projection": mock.sentinel.projection,
+        "field_filters": mock.sentinel.filters,
+        "orders": mock.sentinel.orders,
+        "limit": limit,
+        "offset": offset,
+        "start_at": mock.sentinel.start_at,
+        "end_at": mock.sentinel.end_at,
+        "all_descendants": all_descendants,
+    }
+
+    for field in skip_fields:
+        kwargs.pop(field)
+
+    if parent is None:
+        parent = mock.sentinel.parent
+
+    return _make_base_query(parent, **kwargs)
 
 class TestBaseQuery(unittest.TestCase):
     @staticmethod
@@ -29,8 +55,8 @@ class TestBaseQuery(unittest.TestCase):
         klass = self._get_target_class()
         return klass(*args, **kwargs)
 
-    def test_constructor_defaults(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_constructor_defaults(self):
+        query = _make_base_query(mock.sentinel.parent)
         self.assertIs(query._parent, mock.sentinel.parent)
         self.assertIsNone(query._projection)
         self.assertEqual(query._field_filters, ())
@@ -41,29 +67,10 @@ class TestBaseQuery(unittest.TestCase):
         self.assertIsNone(query._end_at)
         self.assertFalse(query._all_descendants)
 
-    def _make_one_all_fields(
-        self, limit=9876, offset=12, skip_fields=(), parent=None, all_descendants=True
-    ):
-        kwargs = {
-            "projection": mock.sentinel.projection,
-            "field_filters": mock.sentinel.filters,
-            "orders": mock.sentinel.orders,
-            "limit": limit,
-            "offset": offset,
-            "start_at": mock.sentinel.start_at,
-            "end_at": mock.sentinel.end_at,
-            "all_descendants": all_descendants,
-        }
-        for field in skip_fields:
-            kwargs.pop(field)
-        if parent is None:
-            parent = mock.sentinel.parent
-        return self._make_one(parent, **kwargs)
-
-    def test_constructor_explicit(self):
+    def test_basequery_constructor_explicit(self):
         limit = 234
         offset = 56
-        query = self._make_one_all_fields(limit=limit, offset=offset)
+        query = _make_base_query_all_fields(limit=limit, offset=offset)
         self.assertIs(query._parent, mock.sentinel.parent)
         self.assertIs(query._projection, mock.sentinel.projection)
         self.assertIs(query._field_filters, mock.sentinel.filters)
@@ -74,84 +81,84 @@ class TestBaseQuery(unittest.TestCase):
         self.assertIs(query._end_at, mock.sentinel.end_at)
         self.assertTrue(query._all_descendants)
 
-    def test__client_property(self):
+    def test_basequery__client_property(self):
         parent = mock.Mock(_client=mock.sentinel.client, spec=["_client"])
-        query = self._make_one(parent)
+        query = _make_base_query(parent)
         self.assertIs(query._client, mock.sentinel.client)
 
-    def test___eq___other_type(self):
-        query = self._make_one_all_fields()
+    def test_basequery___eq___other_type(self):
+        query = _make_base_query_all_fields()
         other = object()
         self.assertFalse(query == other)
 
-    def test___eq___different_parent(self):
+    def test_basequery___eq___different_parent(self):
         parent = mock.sentinel.parent
         other_parent = mock.sentinel.other_parent
-        query = self._make_one_all_fields(parent=parent)
-        other = self._make_one_all_fields(parent=other_parent)
+        query = _make_base_query_all_fields(parent=parent)
+        other = _make_base_query_all_fields(parent=other_parent)
         self.assertFalse(query == other)
 
-    def test___eq___different_projection(self):
+    def test_basequery___eq___different_projection(self):
         parent = mock.sentinel.parent
-        query = self._make_one_all_fields(parent=parent, skip_fields=("projection",))
+        query = _make_base_query_all_fields(parent=parent, skip_fields=("projection",))
         query._projection = mock.sentinel.projection
-        other = self._make_one_all_fields(parent=parent, skip_fields=("projection",))
+        other = _make_base_query_all_fields(parent=parent, skip_fields=("projection",))
         other._projection = mock.sentinel.other_projection
         self.assertFalse(query == other)
 
-    def test___eq___different_field_filters(self):
+    def test_basequery___eq___different_field_filters(self):
         parent = mock.sentinel.parent
-        query = self._make_one_all_fields(parent=parent, skip_fields=("field_filters",))
+        query = _make_base_query_all_fields(parent=parent, skip_fields=("field_filters",))
         query._field_filters = mock.sentinel.field_filters
-        other = self._make_one_all_fields(parent=parent, skip_fields=("field_filters",))
+        other = _make_base_query_all_fields(parent=parent, skip_fields=("field_filters",))
         other._field_filters = mock.sentinel.other_field_filters
         self.assertFalse(query == other)
 
-    def test___eq___different_orders(self):
+    def test_basequery___eq___different_orders(self):
         parent = mock.sentinel.parent
-        query = self._make_one_all_fields(parent=parent, skip_fields=("orders",))
+        query = _make_base_query_all_fields(parent=parent, skip_fields=("orders",))
         query._orders = mock.sentinel.orders
-        other = self._make_one_all_fields(parent=parent, skip_fields=("orders",))
+        other = _make_base_query_all_fields(parent=parent, skip_fields=("orders",))
         other._orders = mock.sentinel.other_orders
         self.assertFalse(query == other)
 
-    def test___eq___different_limit(self):
+    def test_basequery___eq___different_limit(self):
         parent = mock.sentinel.parent
-        query = self._make_one_all_fields(parent=parent, limit=10)
-        other = self._make_one_all_fields(parent=parent, limit=20)
+        query = _make_base_query_all_fields(parent=parent, limit=10)
+        other = _make_base_query_all_fields(parent=parent, limit=20)
         self.assertFalse(query == other)
 
-    def test___eq___different_offset(self):
+    def test_basequery___eq___different_offset(self):
         parent = mock.sentinel.parent
-        query = self._make_one_all_fields(parent=parent, offset=10)
-        other = self._make_one_all_fields(parent=parent, offset=20)
+        query = _make_base_query_all_fields(parent=parent, offset=10)
+        other = _make_base_query_all_fields(parent=parent, offset=20)
         self.assertFalse(query == other)
 
-    def test___eq___different_start_at(self):
+    def test_basequery___eq___different_start_at(self):
         parent = mock.sentinel.parent
-        query = self._make_one_all_fields(parent=parent, skip_fields=("start_at",))
+        query = _make_base_query_all_fields(parent=parent, skip_fields=("start_at",))
         query._start_at = mock.sentinel.start_at
-        other = self._make_one_all_fields(parent=parent, skip_fields=("start_at",))
+        other = _make_base_query_all_fields(parent=parent, skip_fields=("start_at",))
         other._start_at = mock.sentinel.other_start_at
         self.assertFalse(query == other)
 
-    def test___eq___different_end_at(self):
+    def test_basequery___eq___different_end_at(self):
         parent = mock.sentinel.parent
-        query = self._make_one_all_fields(parent=parent, skip_fields=("end_at",))
+        query = _make_base_query_all_fields(parent=parent, skip_fields=("end_at",))
         query._end_at = mock.sentinel.end_at
-        other = self._make_one_all_fields(parent=parent, skip_fields=("end_at",))
+        other = _make_base_query_all_fields(parent=parent, skip_fields=("end_at",))
         other._end_at = mock.sentinel.other_end_at
         self.assertFalse(query == other)
 
-    def test___eq___different_all_descendants(self):
+    def test_basequery___eq___different_all_descendants(self):
         parent = mock.sentinel.parent
-        query = self._make_one_all_fields(parent=parent, all_descendants=True)
-        other = self._make_one_all_fields(parent=parent, all_descendants=False)
+        query = _make_base_query_all_fields(parent=parent, all_descendants=True)
+        other = _make_base_query_all_fields(parent=parent, all_descendants=False)
         self.assertFalse(query == other)
 
-    def test___eq___hit(self):
-        query = self._make_one_all_fields()
-        other = self._make_one_all_fields()
+    def test_basequery___eq___hit(self):
+        query = _make_base_query_all_fields()
+        other = _make_base_query_all_fields()
         self.assertTrue(query == other)
 
     def _compare_queries(self, query1, query2, *attr_names):
@@ -179,14 +186,15 @@ class TestBaseQuery(unittest.TestCase):
             ]
         )
 
-    def test_select_invalid_path(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_select_invalid_path(self):
+        query = _make_base_query(mock.sentinel.parent)
 
         with self.assertRaises(ValueError):
             query.select(["*"])
 
-    def test_select(self):
-        query1 = self._make_one_all_fields(all_descendants=True)
+    def test_basequery_select(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
+        query1 = _make_base_query_all_fields(all_descendants=True)
 
         field_paths2 = ["foo", "bar"]
         query2 = query1.select(field_paths2)
@@ -207,18 +215,19 @@ class TestBaseQuery(unittest.TestCase):
         )
         self._compare_queries(query2, query3, "_projection")
 
-    def test_where_invalid_path(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_where_invalid_path(self):
+        query = _make_base_query(mock.sentinel.parent)
 
         with self.assertRaises(ValueError):
             query.where("*", "==", 1)
 
-    def test_where(self):
+    def test_basequery_where(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
         from google.cloud.firestore_v1.types import StructuredQuery
         from google.cloud.firestore_v1.types import document
         from google.cloud.firestore_v1.types import query
 
-        query_inst = self._make_one_all_fields(
+        query_inst = _make_base_query_all_fields(
             skip_fields=("field_filters",), all_descendants=True
         )
         new_query = query_inst.where("power.level", ">", 9000)
@@ -237,9 +246,10 @@ class TestBaseQuery(unittest.TestCase):
         self._compare_queries(query_inst, new_query, "_field_filters")
 
     def _where_unary_helper(self, value, op_enum, op_string="=="):
+        from google.cloud.firestore_v1.base_query import BaseQuery
         from google.cloud.firestore_v1.types import StructuredQuery
 
-        query_inst = self._make_one_all_fields(skip_fields=("field_filters",))
+        query_inst = _make_base_query_all_fields(skip_fields=("field_filters",))
         field_path = "feeeld"
         new_query = query_inst.where(field_path, op_string, value)
 
@@ -254,61 +264,62 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(field_pb, expected_pb)
         self._compare_queries(query_inst, new_query, "_field_filters")
 
-    def test_where_eq_null(self):
+    def test_basequery_where_eq_null(self):
         from google.cloud.firestore_v1.types import StructuredQuery
 
         op_enum = StructuredQuery.UnaryFilter.Operator.IS_NULL
         self._where_unary_helper(None, op_enum)
 
-    def test_where_gt_null(self):
+    def test_basequery_where_gt_null(self):
         with self.assertRaises(ValueError):
             self._where_unary_helper(None, 0, op_string=">")
 
-    def test_where_eq_nan(self):
+    def test_basequery_where_eq_nan(self):
         from google.cloud.firestore_v1.types import StructuredQuery
 
         op_enum = StructuredQuery.UnaryFilter.Operator.IS_NAN
         self._where_unary_helper(float("nan"), op_enum)
 
-    def test_where_le_nan(self):
+    def test_basequery_where_le_nan(self):
         with self.assertRaises(ValueError):
             self._where_unary_helper(float("nan"), 0, op_string="<=")
 
-    def test_where_w_delete(self):
+    def test_basequery_where_w_delete(self):
         from google.cloud.firestore_v1 import DELETE_FIELD
 
         with self.assertRaises(ValueError):
             self._where_unary_helper(DELETE_FIELD, 0)
 
-    def test_where_w_server_timestamp(self):
+    def test_basequery_where_w_server_timestamp(self):
         from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 
         with self.assertRaises(ValueError):
             self._where_unary_helper(SERVER_TIMESTAMP, 0)
 
-    def test_where_w_array_remove(self):
+    def test_basequery_where_w_array_remove(self):
         from google.cloud.firestore_v1 import ArrayRemove
 
         with self.assertRaises(ValueError):
             self._where_unary_helper(ArrayRemove([1, 3, 5]), 0)
 
-    def test_where_w_array_union(self):
+    def test_basequery_where_w_array_union(self):
         from google.cloud.firestore_v1 import ArrayUnion
 
         with self.assertRaises(ValueError):
             self._where_unary_helper(ArrayUnion([2, 4, 8]), 0)
 
-    def test_order_by_invalid_path(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_order_by_invalid_path(self):
+        query = _make_base_query(mock.sentinel.parent)
 
         with self.assertRaises(ValueError):
             query.order_by("*")
 
-    def test_order_by(self):
+    def test_basequery_order_by(self):
         from google.cloud.firestore_v1.types import StructuredQuery
+        from google.cloud.firestore_v1.base_query import BaseQuery
 
         klass = self._get_target_class()
-        query1 = self._make_one_all_fields(
+        query1 = _make_base_query_all_fields(
             skip_fields=("orders",), all_descendants=True
         )
 
@@ -329,8 +340,9 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(query3._orders, (order, order_pb3))
         self._compare_queries(query2, query3, "_orders")
 
-    def test_limit(self):
-        query1 = self._make_one_all_fields(all_descendants=True)
+    def test_basequery_limit(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
+        query1 = _make_base_query_all_fields(all_descendants=True)
 
         limit2 = 100
         query2 = query1.limit(limit2)
@@ -348,8 +360,9 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(query3._limit, limit3)
         self._compare_queries(query2, query3, "_limit")
 
-    def test_limit_to_last(self):
-        query1 = self._make_one_all_fields(all_descendants=True)
+    def test_basequery_limit_to_last(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
+        query1 = _make_base_query_all_fields(all_descendants=True)
 
         limit2 = 100
         query2 = query1.limit_to_last(limit2)
@@ -367,7 +380,7 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(query3._limit, limit3)
         self._compare_queries(query2, query3, "_limit", "_limit_to_last")
 
-    def test__resolve_chunk_size(self):
+    def test_basequery__resolve_chunk_size(self):
         # With a global limit
         query = _make_client().collection("asdf").limit(5)
         self.assertEqual(query._resolve_chunk_size(3, 10), 2)
@@ -380,8 +393,9 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(query._resolve_chunk_size(3, 1), 1)
         self.assertEqual(query._resolve_chunk_size(3, 2), 2)
 
-    def test_offset(self):
-        query1 = self._make_one_all_fields(all_descendants=True)
+    def test_basequery_offset(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
+        query1 = _make_base_query_all_fields(all_descendants=True)
 
         offset2 = 23
         query2 = query1.offset(offset2)
@@ -416,9 +430,9 @@ class TestBaseQuery(unittest.TestCase):
 
         return document.DocumentSnapshot(docref, values, True, None, None, None)
 
-    def test__cursor_helper_w_dict(self):
+    def test_basequery__cursor_helper_w_dict(self):
         values = {"a": 7, "b": "foo"}
-        query1 = self._make_one(mock.sentinel.parent)
+        query1 = _make_base_query(mock.sentinel.parent)
         query1._all_descendants = True
         query2 = query1._cursor_helper(values, True, True)
 
@@ -436,9 +450,9 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(cursor, values)
         self.assertTrue(before)
 
-    def test__cursor_helper_w_tuple(self):
+    def test_basequery__cursor_helper_w_tuple(self):
         values = (7, "foo")
-        query1 = self._make_one(mock.sentinel.parent)
+        query1 = _make_base_query(mock.sentinel.parent)
         query2 = query1._cursor_helper(values, False, True)
 
         self.assertIs(query2._parent, mock.sentinel.parent)
@@ -454,9 +468,9 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(cursor, list(values))
         self.assertFalse(before)
 
-    def test__cursor_helper_w_list(self):
+    def test_basequery__cursor_helper_w_list(self):
         values = [7, "foo"]
-        query1 = self._make_one(mock.sentinel.parent)
+        query1 = _make_base_query(mock.sentinel.parent)
         query2 = query1._cursor_helper(values, True, False)
 
         self.assertIs(query2._parent, mock.sentinel.parent)
@@ -473,22 +487,22 @@ class TestBaseQuery(unittest.TestCase):
         self.assertIsNot(cursor, values)
         self.assertTrue(before)
 
-    def test__cursor_helper_w_snapshot_wrong_collection(self):
+    def test_basequery__cursor_helper_w_snapshot_wrong_collection(self):
         values = {"a": 7, "b": "foo"}
         docref = self._make_docref("there", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         collection = self._make_collection("here")
-        query = self._make_one(collection)
+        query = _make_base_query(collection)
 
         with self.assertRaises(ValueError):
             query._cursor_helper(snapshot, False, False)
 
-    def test__cursor_helper_w_snapshot_other_collection_all_descendants(self):
+    def test_basequery__cursor_helper_w_snapshot_other_collection_all_descendants(self):
         values = {"a": 7, "b": "foo"}
         docref = self._make_docref("there", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         collection = self._make_collection("here")
-        query1 = self._make_one(collection, all_descendants=True)
+        query1 = _make_base_query(collection, all_descendants=True)
 
         query2 = query1._cursor_helper(snapshot, False, False)
 
@@ -505,12 +519,12 @@ class TestBaseQuery(unittest.TestCase):
         self.assertIs(cursor, snapshot)
         self.assertFalse(before)
 
-    def test__cursor_helper_w_snapshot(self):
+    def test_basequery__cursor_helper_w_snapshot(self):
         values = {"a": 7, "b": "foo"}
         docref = self._make_docref("here", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         collection = self._make_collection("here")
-        query1 = self._make_one(collection)
+        query1 = _make_base_query(collection)
 
         query2 = query1._cursor_helper(snapshot, False, False)
 
@@ -527,9 +541,10 @@ class TestBaseQuery(unittest.TestCase):
         self.assertIs(cursor, snapshot)
         self.assertFalse(before)
 
-    def test_start_at(self):
+    def test_basequery_start_at(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
         collection = self._make_collection("here")
-        query1 = self._make_one_all_fields(
+        query1 = _make_base_query_all_fields(
             parent=collection, skip_fields=("orders",), all_descendants=True
         )
         query2 = query1.order_by("hi")
@@ -552,9 +567,10 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(query5._start_at, (document_fields5, True))
         self._compare_queries(query4, query5, "_start_at")
 
-    def test_start_after(self):
+    def test_basequery_start_after(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
         collection = self._make_collection("here")
-        query1 = self._make_one_all_fields(parent=collection, skip_fields=("orders",))
+        query1 = _make_base_query_all_fields(parent=collection, skip_fields=("orders",))
         query2 = query1.order_by("down")
 
         document_fields3 = {"down": 99.75}
@@ -575,9 +591,10 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(query5._start_at, (document_fields5, False))
         self._compare_queries(query4, query5, "_start_at")
 
-    def test_end_before(self):
+    def test_basequery_end_before(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
         collection = self._make_collection("here")
-        query1 = self._make_one_all_fields(parent=collection, skip_fields=("orders",))
+        query1 = _make_base_query_all_fields(parent=collection, skip_fields=("orders",))
         query2 = query1.order_by("down")
 
         document_fields3 = {"down": 99.75}
@@ -599,9 +616,10 @@ class TestBaseQuery(unittest.TestCase):
         self._compare_queries(query4, query5, "_end_at")
         self._compare_queries(query4, query5, "_end_at")
 
-    def test_end_at(self):
+    def test_basequery_end_at(self):
+        from google.cloud.firestore_v1.base_query import BaseQuery
         collection = self._make_collection("here")
-        query1 = self._make_one_all_fields(parent=collection, skip_fields=("orders",))
+        query1 = _make_base_query_all_fields(parent=collection, skip_fields=("orders",))
         query2 = query1.order_by("hi")
 
         document_fields3 = {"hi": "mom"}
@@ -622,18 +640,18 @@ class TestBaseQuery(unittest.TestCase):
         self.assertEqual(query5._end_at, (document_fields5, False))
         self._compare_queries(query4, query5, "_end_at")
 
-    def test__filters_pb_empty(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery__filters_pb_empty(self):
+        query = _make_base_query(mock.sentinel.parent)
         self.assertEqual(len(query._field_filters), 0)
         self.assertIsNone(query._filters_pb())
 
-    def test__filters_pb_single(self):
+    def test_basequery__filters_pb_single(self):
         from google.cloud.firestore_v1.types import StructuredQuery
 
         from google.cloud.firestore_v1.types import document
         from google.cloud.firestore_v1.types import query
 
-        query1 = self._make_one(mock.sentinel.parent)
+        query1 = _make_base_query(mock.sentinel.parent)
         query2 = query1.where("x.y", ">", 50.5)
         filter_pb = query2._filters_pb()
         expected_pb = query.StructuredQuery.Filter(
@@ -645,13 +663,13 @@ class TestBaseQuery(unittest.TestCase):
         )
         self.assertEqual(filter_pb, expected_pb)
 
-    def test__filters_pb_multi(self):
+    def test_basequery__filters_pb_multi(self):
         from google.cloud.firestore_v1.types import StructuredQuery
 
         from google.cloud.firestore_v1.types import document
         from google.cloud.firestore_v1.types import query
 
-        query1 = self._make_one(mock.sentinel.parent)
+        query1 = _make_base_query(mock.sentinel.parent)
         query2 = query1.where("x.y", ">", 50.5)
         query3 = query2.where("ABC", "==", 123)
 
@@ -684,61 +702,61 @@ class TestBaseQuery(unittest.TestCase):
         )
         self.assertEqual(filter_pb, expected_pb)
 
-    def test__normalize_projection_none(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery__normalize_projection_none(self):
+        query = _make_base_query(mock.sentinel.parent)
         self.assertIsNone(query._normalize_projection(None))
 
-    def test__normalize_projection_empty(self):
+    def test_basequery__normalize_projection_empty(self):
         projection = self._make_projection_for_select([])
-        query = self._make_one(mock.sentinel.parent)
+        query = _make_base_query(mock.sentinel.parent)
         normalized = query._normalize_projection(projection)
         field_paths = [field_ref.field_path for field_ref in normalized.fields]
         self.assertEqual(field_paths, ["__name__"])
 
-    def test__normalize_projection_non_empty(self):
+    def test_basequery__normalize_projection_non_empty(self):
         projection = self._make_projection_for_select(["a", "b"])
-        query = self._make_one(mock.sentinel.parent)
+        query = _make_base_query(mock.sentinel.parent)
         self.assertIs(query._normalize_projection(projection), projection)
 
-    def test__normalize_orders_wo_orders_wo_cursors(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery__normalize_orders_wo_orders_wo_cursors(self):
+        query = _make_base_query(mock.sentinel.parent)
         expected = []
         self.assertEqual(query._normalize_orders(), expected)
 
-    def test__normalize_orders_w_orders_wo_cursors(self):
-        query = self._make_one(mock.sentinel.parent).order_by("a")
+    def test_basequery__normalize_orders_w_orders_wo_cursors(self):
+        query = _make_base_query(mock.sentinel.parent).order_by("a")
         expected = [query._make_order("a", "ASCENDING")]
         self.assertEqual(query._normalize_orders(), expected)
 
-    def test__normalize_orders_wo_orders_w_snapshot_cursor(self):
+    def test_basequery__normalize_orders_wo_orders_w_snapshot_cursor(self):
         values = {"a": 7, "b": "foo"}
         docref = self._make_docref("here", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         collection = self._make_collection("here")
-        query = self._make_one(collection).start_at(snapshot)
+        query = _make_base_query(collection).start_at(snapshot)
         expected = [query._make_order("__name__", "ASCENDING")]
         self.assertEqual(query._normalize_orders(), expected)
 
-    def test__normalize_orders_w_name_orders_w_snapshot_cursor(self):
+    def test_basequery__normalize_orders_w_name_orders_w_snapshot_cursor(self):
         values = {"a": 7, "b": "foo"}
         docref = self._make_docref("here", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         collection = self._make_collection("here")
         query = (
-            self._make_one(collection)
+            _make_base_query(collection)
             .order_by("__name__", "DESCENDING")
             .start_at(snapshot)
         )
         expected = [query._make_order("__name__", "DESCENDING")]
         self.assertEqual(query._normalize_orders(), expected)
 
-    def test__normalize_orders_wo_orders_w_snapshot_cursor_w_neq_exists(self):
+    def test_basequery__normalize_orders_wo_orders_w_snapshot_cursor_w_neq_exists(self):
         values = {"a": 7, "b": "foo"}
         docref = self._make_docref("here", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         collection = self._make_collection("here")
         query = (
-            self._make_one(collection)
+            _make_base_query(collection)
             .where("c", "<=", 20)
             .order_by("c", "DESCENDING")
             .start_at(snapshot)
@@ -749,151 +767,151 @@ class TestBaseQuery(unittest.TestCase):
         ]
         self.assertEqual(query._normalize_orders(), expected)
 
-    def test__normalize_orders_wo_orders_w_snapshot_cursor_w_neq_where(self):
+    def test_basequery__normalize_orders_wo_orders_w_snapshot_cursor_w_neq_where(self):
         values = {"a": 7, "b": "foo"}
         docref = self._make_docref("here", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         collection = self._make_collection("here")
-        query = self._make_one(collection).where("c", "<=", 20).end_at(snapshot)
+        query = _make_base_query(collection).where("c", "<=", 20).end_at(snapshot)
         expected = [
             query._make_order("c", "ASCENDING"),
             query._make_order("__name__", "ASCENDING"),
         ]
         self.assertEqual(query._normalize_orders(), expected)
 
-    def test__normalize_orders_wo_orders_w_snapshot_cursor_w_isnull_where(self):
+    def test_basequery__normalize_orders_wo_orders_w_snapshot_cursor_w_isnull_where(self):
         values = {"a": 7, "b": "foo"}
         docref = self._make_docref("here", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         collection = self._make_collection("here")
-        query = self._make_one(collection).where("c", "==", None).end_at(snapshot)
+        query = _make_base_query(collection).where("c", "==", None).end_at(snapshot)
         expected = [
             query._make_order("__name__", "ASCENDING"),
         ]
         self.assertEqual(query._normalize_orders(), expected)
 
-    def test__normalize_orders_w_name_orders_w_none_cursor(self):
+    def test_basequery__normalize_orders_w_name_orders_w_none_cursor(self):
         collection = self._make_collection("here")
         query = (
-            self._make_one(collection).order_by("__name__", "DESCENDING").start_at(None)
+            _make_base_query(collection).order_by("__name__", "DESCENDING").start_at(None)
         )
         expected = [query._make_order("__name__", "DESCENDING")]
         self.assertEqual(query._normalize_orders(), expected)
 
-    def test__normalize_cursor_none(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery__normalize_cursor_none(self):
+        query = _make_base_query(mock.sentinel.parent)
         self.assertIsNone(query._normalize_cursor(None, query._orders))
 
-    def test__normalize_cursor_no_order(self):
+    def test_basequery__normalize_cursor_no_order(self):
         cursor = ([1], True)
-        query = self._make_one(mock.sentinel.parent)
+        query = _make_base_query(mock.sentinel.parent)
 
         with self.assertRaises(ValueError):
             query._normalize_cursor(cursor, query._orders)
 
-    def test__normalize_cursor_as_list_mismatched_order(self):
+    def test_basequery__normalize_cursor_as_list_mismatched_order(self):
         cursor = ([1, 2], True)
-        query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b", "ASCENDING")
 
         with self.assertRaises(ValueError):
             query._normalize_cursor(cursor, query._orders)
 
-    def test__normalize_cursor_as_dict_mismatched_order(self):
+    def test_basequery__normalize_cursor_as_dict_mismatched_order(self):
         cursor = ({"a": 1}, True)
-        query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b", "ASCENDING")
 
         with self.assertRaises(ValueError):
             query._normalize_cursor(cursor, query._orders)
 
-    def test__normalize_cursor_as_dict_extra_orders_ok(self):
+    def test_basequery__normalize_cursor_as_dict_extra_orders_ok(self):
         cursor = ({"name": "Springfield"}, True)
-        query = self._make_one(mock.sentinel.parent).order_by("name").order_by("state")
+        query = _make_base_query(mock.sentinel.parent).order_by("name").order_by("state")
 
         normalized = query._normalize_cursor(cursor, query._orders)
         self.assertEqual(normalized, (["Springfield"], True))
 
-    def test__normalize_cursor_extra_orders_ok(self):
+    def test_basequery__normalize_cursor_extra_orders_ok(self):
         cursor = (["Springfield"], True)
-        query = self._make_one(mock.sentinel.parent).order_by("name").order_by("state")
+        query = _make_base_query(mock.sentinel.parent).order_by("name").order_by("state")
 
         query._normalize_cursor(cursor, query._orders)
 
-    def test__normalize_cursor_w_delete(self):
+    def test_basequery__normalize_cursor_w_delete(self):
         from google.cloud.firestore_v1 import DELETE_FIELD
 
         cursor = ([DELETE_FIELD], True)
-        query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b", "ASCENDING")
 
         with self.assertRaises(ValueError):
             query._normalize_cursor(cursor, query._orders)
 
-    def test__normalize_cursor_w_server_timestamp(self):
+    def test_basequery__normalize_cursor_w_server_timestamp(self):
         from google.cloud.firestore_v1 import SERVER_TIMESTAMP
 
         cursor = ([SERVER_TIMESTAMP], True)
-        query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b", "ASCENDING")
 
         with self.assertRaises(ValueError):
             query._normalize_cursor(cursor, query._orders)
 
-    def test__normalize_cursor_w_array_remove(self):
+    def test_basequery__normalize_cursor_w_array_remove(self):
         from google.cloud.firestore_v1 import ArrayRemove
 
         cursor = ([ArrayRemove([1, 3, 5])], True)
-        query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b", "ASCENDING")
 
         with self.assertRaises(ValueError):
             query._normalize_cursor(cursor, query._orders)
 
-    def test__normalize_cursor_w_array_union(self):
+    def test_basequery__normalize_cursor_w_array_union(self):
         from google.cloud.firestore_v1 import ArrayUnion
 
         cursor = ([ArrayUnion([2, 4, 8])], True)
-        query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b", "ASCENDING")
 
         with self.assertRaises(ValueError):
             query._normalize_cursor(cursor, query._orders)
 
-    def test__normalize_cursor_as_list_hit(self):
+    def test_basequery__normalize_cursor_as_list_hit(self):
         cursor = ([1], True)
-        query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b", "ASCENDING")
 
         self.assertEqual(query._normalize_cursor(cursor, query._orders), ([1], True))
 
-    def test__normalize_cursor_as_dict_hit(self):
+    def test_basequery__normalize_cursor_as_dict_hit(self):
         cursor = ({"b": 1}, True)
-        query = self._make_one(mock.sentinel.parent).order_by("b", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b", "ASCENDING")
 
         self.assertEqual(query._normalize_cursor(cursor, query._orders), ([1], True))
 
-    def test__normalize_cursor_as_dict_with_dot_key_hit(self):
+    def test_basequery__normalize_cursor_as_dict_with_dot_key_hit(self):
         cursor = ({"b.a": 1}, True)
-        query = self._make_one(mock.sentinel.parent).order_by("b.a", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b.a", "ASCENDING")
         self.assertEqual(query._normalize_cursor(cursor, query._orders), ([1], True))
 
-    def test__normalize_cursor_as_dict_with_inner_data_hit(self):
+    def test_basequery__normalize_cursor_as_dict_with_inner_data_hit(self):
         cursor = ({"b": {"a": 1}}, True)
-        query = self._make_one(mock.sentinel.parent).order_by("b.a", "ASCENDING")
+        query = _make_base_query(mock.sentinel.parent).order_by("b.a", "ASCENDING")
         self.assertEqual(query._normalize_cursor(cursor, query._orders), ([1], True))
 
-    def test__normalize_cursor_as_snapshot_hit(self):
+    def test_basequery__normalize_cursor_as_snapshot_hit(self):
         values = {"b": 1}
         docref = self._make_docref("here", "doc_id")
         snapshot = self._make_snapshot(docref, values)
         cursor = (snapshot, True)
         collection = self._make_collection("here")
-        query = self._make_one(collection).order_by("b", "ASCENDING")
+        query = _make_base_query(collection).order_by("b", "ASCENDING")
 
         self.assertEqual(query._normalize_cursor(cursor, query._orders), ([1], True))
 
-    def test__normalize_cursor_w___name___w_reference(self):
+    def test_basequery__normalize_cursor_w___name___w_reference(self):
         db_string = "projects/my-project/database/(default)"
         client = mock.Mock(spec=["_database_string"])
         client._database_string = db_string
         parent = mock.Mock(spec=["_path", "_client"])
         parent._client = client
         parent._path = ["C"]
-        query = self._make_one(parent).order_by("__name__", "ASCENDING")
+        query = _make_base_query(parent).order_by("__name__", "ASCENDING")
         docref = self._make_docref("here", "doc_id")
         values = {"a": 7}
         snapshot = self._make_snapshot(docref, values)
@@ -904,7 +922,7 @@ class TestBaseQuery(unittest.TestCase):
             query._normalize_cursor(cursor, query._orders), ([expected], True)
         )
 
-    def test__normalize_cursor_w___name___wo_slash(self):
+    def test_basequery__normalize_cursor_w___name___wo_slash(self):
         db_string = "projects/my-project/database/(default)"
         client = mock.Mock(spec=["_database_string"])
         client._database_string = db_string
@@ -912,7 +930,7 @@ class TestBaseQuery(unittest.TestCase):
         parent._client = client
         parent._path = ["C"]
         document = parent.document.return_value = mock.Mock(spec=[])
-        query = self._make_one(parent).order_by("__name__", "ASCENDING")
+        query = _make_base_query(parent).order_by("__name__", "ASCENDING")
         cursor = (["b"], True)
         expected = document
 
@@ -921,7 +939,7 @@ class TestBaseQuery(unittest.TestCase):
         )
         parent.document.assert_called_once_with("b")
 
-    def test__to_protobuf_all_fields(self):
+    def test_basequery__to_protobuf_all_fields(self):
         from google.protobuf import wrappers_pb2
         from google.cloud.firestore_v1.types import StructuredQuery
 
@@ -929,7 +947,7 @@ class TestBaseQuery(unittest.TestCase):
         from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="cat", spec=["id"])
-        query1 = self._make_one(parent)
+        query1 = _make_base_query(parent)
         query2 = query1.select(["X", "Y", "Z"])
         query3 = query2.where("Y", ">", 2.5)
         query4 = query3.order_by("X")
@@ -967,11 +985,11 @@ class TestBaseQuery(unittest.TestCase):
         expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test__to_protobuf_select_only(self):
+    def test_basequery__to_protobuf_select_only(self):
         from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="cat", spec=["id"])
-        query1 = self._make_one(parent)
+        query1 = _make_base_query(parent)
         field_paths = ["a.b", "a.c", "d"]
         query2 = query1.select(field_paths)
 
@@ -990,14 +1008,14 @@ class TestBaseQuery(unittest.TestCase):
         expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test__to_protobuf_where_only(self):
+    def test_basequery__to_protobuf_where_only(self):
         from google.cloud.firestore_v1.types import StructuredQuery
 
         from google.cloud.firestore_v1.types import document
         from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="dog", spec=["id"])
-        query1 = self._make_one(parent)
+        query1 = _make_base_query(parent)
         query2 = query1.where("a", "==", u"b")
 
         structured_query_pb = query2._to_protobuf()
@@ -1016,13 +1034,13 @@ class TestBaseQuery(unittest.TestCase):
         expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test__to_protobuf_order_by_only(self):
+    def test_basequery__to_protobuf_order_by_only(self):
         from google.cloud.firestore_v1.types import StructuredQuery
 
         from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="fish", spec=["id"])
-        query1 = self._make_one(parent)
+        query1 = _make_base_query(parent)
         query2 = query1.order_by("abc")
 
         structured_query_pb = query2._to_protobuf()
@@ -1035,7 +1053,7 @@ class TestBaseQuery(unittest.TestCase):
         expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test__to_protobuf_start_at_only(self):
+    def test_basequery__to_protobuf_start_at_only(self):
         # NOTE: "only" is wrong since we must have ``order_by`` as well.
         from google.cloud.firestore_v1.types import StructuredQuery
 
@@ -1044,7 +1062,7 @@ class TestBaseQuery(unittest.TestCase):
 
         parent = mock.Mock(id="phish", spec=["id"])
         query_inst = (
-            self._make_one(parent).order_by("X.Y").start_after({"X": {"Y": u"Z"}})
+            _make_base_query(parent).order_by("X.Y").start_after({"X": {"Y": u"Z"}})
         )
 
         structured_query_pb = query_inst._to_protobuf()
@@ -1056,7 +1074,7 @@ class TestBaseQuery(unittest.TestCase):
         expected_pb = StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test__to_protobuf_end_at_only(self):
+    def test_basequery__to_protobuf_end_at_only(self):
         # NOTE: "only" is wrong since we must have ``order_by`` as well.
         from google.cloud.firestore_v1.types import StructuredQuery
 
@@ -1064,7 +1082,7 @@ class TestBaseQuery(unittest.TestCase):
         from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="ghoti", spec=["id"])
-        query_inst = self._make_one(parent).order_by("a").end_at({"a": 88})
+        query_inst = _make_base_query(parent).order_by("a").end_at({"a": 88})
 
         structured_query_pb = query_inst._to_protobuf()
         query_kwargs = {
@@ -1077,11 +1095,11 @@ class TestBaseQuery(unittest.TestCase):
         expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test__to_protobuf_offset_only(self):
+    def test_basequery__to_protobuf_offset_only(self):
         from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="cartt", spec=["id"])
-        query1 = self._make_one(parent)
+        query1 = _make_base_query(parent)
         offset = 14
         query2 = query1.offset(offset)
 
@@ -1095,12 +1113,12 @@ class TestBaseQuery(unittest.TestCase):
         expected_pb = query.StructuredQuery(**query_kwargs)
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test__to_protobuf_limit_only(self):
+    def test_basequery__to_protobuf_limit_only(self):
         from google.protobuf import wrappers_pb2
         from google.cloud.firestore_v1.types import query
 
         parent = mock.Mock(id="donut", spec=["id"])
-        query1 = self._make_one(parent)
+        query1 = _make_base_query(parent)
         limit = 31
         query2 = query1.limit(limit)
 
@@ -1115,8 +1133,8 @@ class TestBaseQuery(unittest.TestCase):
 
         self.assertEqual(structured_query_pb, expected_pb)
 
-    def test_comparator_no_ordering(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_comparator_no_ordering(self):
+        query = _make_base_query(mock.sentinel.parent)
         query._orders = []
         doc1 = mock.Mock()
         doc1.reference._path = ("col", "adocument1")
@@ -1127,8 +1145,8 @@ class TestBaseQuery(unittest.TestCase):
         sort = query._comparator(doc1, doc2)
         self.assertEqual(sort, -1)
 
-    def test_comparator_no_ordering_same_id(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_comparator_no_ordering_same_id(self):
+        query = _make_base_query(mock.sentinel.parent)
         query._orders = []
         doc1 = mock.Mock()
         doc1.reference._path = ("col", "adocument1")
@@ -1139,8 +1157,8 @@ class TestBaseQuery(unittest.TestCase):
         sort = query._comparator(doc1, doc2)
         self.assertEqual(sort, 0)
 
-    def test_comparator_ordering(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_comparator_ordering(self):
+        query = _make_base_query(mock.sentinel.parent)
         orderByMock = mock.Mock()
         orderByMock.field.field_path = "last"
         orderByMock.direction = 1  # ascending
@@ -1162,8 +1180,8 @@ class TestBaseQuery(unittest.TestCase):
         sort = query._comparator(doc1, doc2)
         self.assertEqual(sort, 1)
 
-    def test_comparator_ordering_descending(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_comparator_ordering_descending(self):
+        query = _make_base_query(mock.sentinel.parent)
         orderByMock = mock.Mock()
         orderByMock.field.field_path = "last"
         orderByMock.direction = -1  # descending
@@ -1185,8 +1203,8 @@ class TestBaseQuery(unittest.TestCase):
         sort = query._comparator(doc1, doc2)
         self.assertEqual(sort, -1)
 
-    def test_comparator_missing_order_by_field_in_data_raises(self):
-        query = self._make_one(mock.sentinel.parent)
+    def test_basequery_comparator_missing_order_by_field_in_data_raises(self):
+        query = _make_base_query(mock.sentinel.parent)
         orderByMock = mock.Mock()
         orderByMock.field.field_path = "last"
         orderByMock.direction = 1  # ascending
@@ -1205,8 +1223,8 @@ class TestBaseQuery(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Can only compare fields "):
             query._comparator(doc1, doc2)
 
-    def test_multiple_recursive_calls(self):
-        query = self._make_one(_make_client().collection("asdf"))
+    def test_basequery_multiple_recursive_calls(self):
+        query = _make_base_query(_make_client().collection("asdf"))
         self.assertIsInstance(
             query.recursive().recursive(), type(query),
         )
