@@ -72,6 +72,27 @@ def test_client_constructor_explicit():
     assert client._client_options is client_options
 
 
+def test_client__firestore_api_property():
+    credentials = _make_credentials()
+    client = _make_client(project=PROJECT, credentials=credentials)
+    helper = client._firestore_api_helper = mock.Mock()
+
+    g_patch = mock.patch("google.cloud.firestore_v1.client.firestore_grpc_transport")
+    f_patch = mock.patch("google.cloud.firestore_v1.client.firestore_client")
+
+    with g_patch as grpc_transport:
+        with f_patch as firestore_client:
+            api = client._firestore_api
+
+    assert api is helper.return_value
+
+    helper.assert_called_once_with(
+        grpc_transport.FirestoreGrpcTransport,
+        firestore_client.FirestoreClient,
+        firestore_client,
+    )
+
+
 def test_client_constructor_w_client_options():
     credentials = _make_credentials()
     client = _make_client(
