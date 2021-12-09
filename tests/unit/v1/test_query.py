@@ -137,6 +137,7 @@ def test_query_get_limit_to_last():
 
     snapshot = returned[0]
     assert snapshot.reference._path == ("dee", "sleep")
+    assert snapshot.to_dict() == data
 
     snapshot2 = returned[1]
     assert snapshot2.reference._path == ("dee", "sleep")
