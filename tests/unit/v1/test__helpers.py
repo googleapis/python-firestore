@@ -1788,7 +1788,7 @@ def test__pbs_for_set_w_transform():
 
 
 def test__pbs_for_set_w_transform_and_empty_value():
-    # Exercise #5944
+    # Exercise https://github.com/googleapis/google-cloud-python/issuses/5944
     _pbs_for_set_no_merge_helper(do_transform=True, empty_val=True)
 
 
