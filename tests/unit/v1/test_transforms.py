@@ -73,25 +73,24 @@ def _make_numeric_value(*args, **kwargs):
     return _NumericValue(*args, **kwargs)
 
 
-def test__numericvalue_ctor_w_invalid_types():
-    invalid_values = (None, u"phred", b"DEADBEEF", [], {}, object())
-    for invalid_value in invalid_values:
-        with pytest.raises(ValueError):
-            _make_numeric_value(invalid_value)
+@pytest.mark.parametrize(
+    "invalid_value", [(None, u"phred", b"DEADBEEF", [], {}, object())],
+)
+def test__numericvalue_ctor_w_invalid_types(invalid_value):
+    with pytest.raises(ValueError):
+        _make_numeric_value(invalid_value)
 
 
-def test__numericvalue_ctor_w_int():
-    values = (-10, -1, 0, 1, 10)
-    for value in values:
-        inst = _make_numeric_value(value)
-        assert inst.value == value
+@pytest.mark.parametrize("value", [-10, -1, 0, 1, 10])
+def test__numericvalue_ctor_w_int(value):
+    inst = _make_numeric_value(value)
+    assert inst.value == value
 
 
-def test__numericvalue_ctor_w_float():
-    values = (-10.0, -1.0, 0.0, 1.0, 10.0)
-    for value in values:
-        inst = _make_numeric_value(value)
-        assert inst.value == value
+@pytest.mark.parametrize("value", [-10.0, -1.0, 0.0, 1.0, 10.0])
+def test__numericvalue_ctor_w_float(value):
+    inst = _make_numeric_value(value)
+    assert inst.value == value
 
 
 def test__numericvalue___eq___other_type():
