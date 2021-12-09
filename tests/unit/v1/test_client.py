@@ -500,7 +500,8 @@ def test_client_recursive_delete_from_document():
 
 def test_client_recursive_delete_raises():
     client = _make_default_client()
-    pytest.raises(TypeError, client.recursive_delete, object())
+    with pytest.raises(TypeError):
+        client.recursive_delete(object())
 
 
 def test_client_batch():
