@@ -1351,7 +1351,7 @@ def test_documentextractor_get_update_pb_w_exists_precondition():
 
     document_data = {}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     update_pb = inst.get_update_pb(document_path, exists=False)
 
@@ -1368,7 +1368,7 @@ def test_documentextractor_get_update_pb_wo_exists_precondition():
 
     document_data = {"a": 1}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     update_pb = inst.get_update_pb(document_path)
 
@@ -1381,7 +1381,7 @@ def test_documentextractor_get_update_pb_wo_exists_precondition():
 def test_documentextractor_get_field_transform_pbs_miss():
     document_data = {"a": 1}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     field_transform_pbs = inst.get_field_transform_pbs(document_path)
 
@@ -1395,7 +1395,7 @@ def test_documentextractor_get_field_transform_pbs_w_server_timestamp():
 
     document_data = {"a": SERVER_TIMESTAMP}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     field_transform_pbs = inst.get_field_transform_pbs(document_path)
 
@@ -1413,7 +1413,7 @@ def test_documentextractor_get_transform_pb_w_server_timestamp_w_exists_precondi
 
     document_data = {"a": SERVER_TIMESTAMP}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path, exists=False)
 
@@ -1435,7 +1435,7 @@ def test_documentextractor_get_transform_pb_w_server_timestamp_wo_exists_precond
 
     document_data = {"a": {"b": {"c": SERVER_TIMESTAMP}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
@@ -1462,7 +1462,7 @@ def test_documentextractor_get_transform_pb_w_array_remove():
     values = [2, 4, 8]
     document_data = {"a": {"b": {"c": ArrayRemove(values)}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
@@ -1484,7 +1484,7 @@ def test_documentextractor_get_transform_pb_w_array_union():
     values = [1, 3, 5]
     document_data = {"a": {"b": {"c": ArrayUnion(values)}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
@@ -1506,7 +1506,7 @@ def test_documentextractor_get_transform_pb_w_increment_int():
     value = 1
     document_data = {"a": {"b": {"c": Increment(value)}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
@@ -1528,7 +1528,7 @@ def test_documentextractor_get_transform_pb_w_increment_float():
     value = 3.1415926
     document_data = {"a": {"b": {"c": Increment(value)}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
@@ -1550,7 +1550,7 @@ def test_documentextractor_get_transform_pb_w_maximum_int():
     value = 1
     document_data = {"a": {"b": {"c": Maximum(value)}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
@@ -1572,7 +1572,7 @@ def test_documentextractor_get_transform_pb_w_maximum_float():
     value = 3.1415926
     document_data = {"a": {"b": {"c": Maximum(value)}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
@@ -1594,7 +1594,7 @@ def test_documentextractor_get_transform_pb_w_minimum_int():
     value = 1
     document_data = {"a": {"b": {"c": Minimum(value)}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
@@ -1616,7 +1616,7 @@ def test_documentextractor_get_transform_pb_w_minimum_float():
     value = 3.1415926
     document_data = {"a": {"b": {"c": Minimum(value)}}}
     inst = _make_document_extractor(document_data)
-    document_path = "projects/project-id/databases/(default)/" "documents/document-id"
+    document_path = "projects/project-id/databases/(default)/documents/document-id"
 
     transform_pb = inst.get_transform_pb(document_path)
 
