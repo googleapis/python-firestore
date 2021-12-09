@@ -351,7 +351,7 @@ def test_query_stream_no_results():
     run_query_response = iter([empty_response])
     firestore_api.run_query.return_value = run_query_response
 
-    # Attach he fake GAPIC to a real client.
+    # Attach the fake GAPIC to a real client.
     client = _make_client()
     client._firestore_api_internal = firestore_api
 
