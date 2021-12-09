@@ -127,11 +127,10 @@ def test_basedocumentreference__ne__same_type():
     document3 = _make_base_document_reference("X", "YY", client=mock.sentinel.client2)
     document4 = _make_base_document_reference("X", "YY", client=mock.sentinel.client)
 
-    document1 != document2
-    document1 != document3
-    document2 != document3
+    assert document1 != document2
+    assert document1 != document3
+    assert document2 != document3
 
-    # We use != explicitly since assertEqual would use ==.
     assert not (document1 != document4)
     assert document1 is not document4
 
@@ -139,7 +138,7 @@ def test_basedocumentreference__ne__same_type():
 def test_basedocumentreference__ne__other_type():
     document = _make_base_document_reference("X", "YY", client=mock.sentinel.client)
     other = object()
-    document != other
+    assert document != other
     assert document.__ne__(other) is NotImplemented
 
 
@@ -350,7 +349,7 @@ def test_documentsnapshot_to_dict():
     # Check that the data remains unchanged.
     as_dict["b"].append("hi")
     assert data == snapshot.to_dict()
-    data != as_dict
+    assert data != as_dict
 
 
 def test_documentsnapshot_non_existent():
