@@ -534,6 +534,7 @@ def test_query_stream_w_collection_group():
     )
 
 
+# Marker: avoids needing to import 'gapic_v1' at module scope.
 _not_passed = object()
 
 
