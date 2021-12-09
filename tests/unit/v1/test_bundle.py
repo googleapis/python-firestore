@@ -496,6 +496,8 @@ class TestBundleBuilder(_CollectionQueryMixin):
         ):  # protobuf 3.18.0 raises ParseError
             _helpers.deserialize_bundle(_serialized, client=client)
 
+        # See https://github.com/googleapis/python-firestore/issues/505
+        #
         # The following assertions would test deserialization of NodeJS bundles
         # were explicit handling of that edge case to be added.
 
