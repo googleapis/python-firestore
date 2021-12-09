@@ -742,7 +742,7 @@ def test__transactional___call__success_second_attempt():
         request={"database": db_str, "writes": [], "transaction": txn_id},
         metadata=transaction._client._rpc_metadata,
     )
-    assert firestore_api.commit.mock_calls, [commit_call == commit_call]
+    assert firestore_api.commit.mock_calls == [commit_call, commit_call]
 
 
 def test__transactional___call__failure():
