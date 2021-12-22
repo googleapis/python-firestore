@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import datetime
-from typing import NoReturn, Optional
+from typing import Optional
 
 
 def utcnow():
@@ -99,7 +99,7 @@ class RateLimiter:
         self._start = self._start or utcnow()
         self._last_refill = self._last_refill or utcnow()
 
-    def take_tokens(self, num: Optional[int] = 1, allow_less: bool = False) -> int:
+    def take_tokens(self, num: int = 1, allow_less: bool = False) -> int:
         """Returns the number of available tokens, up to the amount requested."""
         self._start_clock()
         self._check_phase()
@@ -144,12 +144,12 @@ class RateLimiter:
         if operations_last_phase and self._phase > previous_phase:
             self._increase_maximum_tokens()
 
-    def _increase_maximum_tokens(self) -> NoReturn:
+    def _increase_maximum_tokens(self):
         self._maximum_tokens = round(self._maximum_tokens * 1.5)
         if self._global_max_tokens is not None:
             self._maximum_tokens = min(self._maximum_tokens, self._global_max_tokens)
 
-    def _refill(self) -> NoReturn:
+    def _refill(self):
         """Replenishes any tokens that should have regenerated since the last
         operation."""
         now: datetime.datetime = utcnow()

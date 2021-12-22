@@ -89,7 +89,7 @@ class FakeThreadPoolExecutor:
     def __init__(self, *args, **kwargs):
         self._shutdown = False
 
-    def submit(self, callable) -> typing.NoReturn:
+    def submit(self, callable):
         if self._shutdown:
             raise RuntimeError(
                 "cannot schedule new futures after shutdown"

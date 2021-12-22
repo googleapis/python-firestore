@@ -22,7 +22,7 @@ import mock
 fake_now = datetime.datetime.utcnow()
 
 
-def now_plus_n(seconds: int = 0, microseconds: int = 0) -> datetime.timedelta:
+def now_plus_n(seconds: int = 0, microseconds: int = 0) -> datetime.datetime:
     return fake_now + datetime.timedelta(seconds=seconds, microseconds=microseconds,)
 
 

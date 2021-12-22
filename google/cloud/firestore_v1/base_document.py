@@ -15,18 +15,15 @@
 """Classes for representing documents for the Google Cloud Firestore API."""
 
 import copy
+from typing import Any, Dict, Iterable, Optional, Union, Tuple
 
-from google.api_core import retry as retries
-
-from google.cloud.firestore_v1.types import Document
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
+from google.cloud.firestore_v1.types import Document
 from google.cloud.firestore_v1.types import common
-
-# Types needed only for Type Hints
 from google.cloud.firestore_v1.types import firestore
 from google.cloud.firestore_v1.types import write
-from typing import Any, Dict, Iterable, NoReturn, Optional, Union, Tuple
 
 
 class BaseDocumentReference(object):
@@ -187,7 +184,7 @@ class BaseDocumentReference(object):
         return self._client.collection(*child_path)
 
     def _prep_create(
-        self, document_data: dict, retry: retries.Retry = None, timeout: float = None,
+        self, document_data: dict, retry: OptionalRetry = None, timeout: float = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
         batch.create(self, document_data)
@@ -195,16 +192,11 @@ class BaseDocumentReference(object):
 
         return batch, kwargs
 
-    def create(
-        self, document_data: dict, retry: retries.Retry = None, timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
     def _prep_set(
         self,
         document_data: dict,
         merge: bool = False,
-        retry: retries.Retry = None,
+        retry: OptionalRetry = None,
         timeout: float = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
@@ -213,20 +205,11 @@ class BaseDocumentReference(object):
 
         return batch, kwargs
 
-    def set(
-        self,
-        document_data: dict,
-        merge: bool = False,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
     def _prep_update(
         self,
         field_updates: dict,
         option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
+        retry: OptionalRetry = None,
         timeout: float = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
@@ -235,19 +218,10 @@ class BaseDocumentReference(object):
 
         return batch, kwargs
 
-    def update(
-        self,
-        field_updates: dict,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
     def _prep_delete(
         self,
         option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
+        retry: OptionalRetry = None,
         timeout: float = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`delete`."""
@@ -261,25 +235,18 @@ class BaseDocumentReference(object):
 
         return request, kwargs
 
-    def delete(
-        self,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
     def _prep_batch_get(
         self,
         field_paths: Iterable[str] = None,
         transaction=None,
-        retry: retries.Retry = None,
+        retry: OptionalRetry = None,
         timeout: float = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`get`."""
         if isinstance(field_paths, str):
             raise ValueError("'field_paths' must be a sequence of paths, not a string.")
 
+        mask: Union[common.DocumentMask, None]
         if field_paths is not None:
             mask = common.DocumentMask(field_paths=sorted(field_paths))
         else:
@@ -295,31 +262,14 @@ class BaseDocumentReference(object):
 
         return request, kwargs
 
-    def get(
-        self,
-        field_paths: Iterable[str] = None,
-        transaction=None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> "DocumentSnapshot":
-        raise NotImplementedError
-
     def _prep_collections(
-        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
+        self, page_size: int = None, retry: OptionalRetry = None, timeout: float = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {"parent": self._document_path, "page_size": page_size}
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
-
-    def collections(
-        self, page_size: int = None, retry: retries.Retry = None, timeout: float = None,
-    ) -> None:
-        raise NotImplementedError
-
-    def on_snapshot(self, callback) -> None:
-        raise NotImplementedError
 
 
 class DocumentSnapshot(object):

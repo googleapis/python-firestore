@@ -13,7 +13,7 @@
 # limitations under the License.
 
 import datetime
-from typing import List, NoReturn, Optional, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type
 
 import aiounittest  # type: ignore
 import mock
@@ -42,7 +42,7 @@ def _make_no_send_bulk_writer(*args, **kwargs):
         def __init__(self, *args, **kwargs):
             super().__init__(*args, **kwargs)
             self._responses: List[
-                Tuple[BulkWriteBatch, BatchWriteResponse, BulkWriterOperation]
+                Tuple[BulkWriteBatch, BatchWriteResponse, List[BulkWriterOperation]]
             ] = []
             self._fail_indices: List[int] = []
 
@@ -68,7 +68,7 @@ def _make_no_send_bulk_writer(*args, **kwargs):
             batch: BulkWriteBatch,
             response: BatchWriteResponse,
             operations: List[BulkWriterOperation],
-        ) -> NoReturn:
+        ):
             super()._process_response(batch, response, operations)
             self._responses.append((batch, response, operations))
 
@@ -145,28 +145,18 @@ class _BaseBulkWriterTests:
             yield _get_document_reference(client, id=id), {"id": _}
 
     def _verify_bw_activity(self, bw, counts: List[Tuple[int, int]]):
-        """
-        Args:
-            bw: (BulkWriter)
-                The BulkWriter instance to inspect.
-            counts: (tuple) A sequence of integer pairs, with 0-index integers
-                representing the size of sent batches, and 1-index integers
-                representing the number of times batches of that size should
-                have been sent.
-        """
         from google.cloud.firestore_v1.types.firestore import BatchWriteResponse
 
         total_batches = sum([el[1] for el in counts])
         assert len(bw._responses) == total_batches
-        docs_count = {}
+        expected_counts = dict(counts)
+        docs_count: Dict[int, int] = {}
         resp: BatchWriteResponse
         for _, resp, ops in bw._responses:
             docs_count.setdefault(len(resp.write_results), 0)
             docs_count[len(resp.write_results)] += 1
 
-        assert len(docs_count) == len(counts)
-        for size, num_sent in counts:
-            assert docs_count[size] == num_sent
+        assert docs_count == expected_counts
 
         # Assert flush leaves no operation behind
         assert len(bw._operations) == 0
@@ -700,8 +690,6 @@ def test_scheduling_operation_retry_scheduling():
 
 
 def _get_document_reference(
-    client: base_client.BaseClient,
-    collection_name: Optional[str] = "col",
-    id: Optional[str] = None,
+    client, collection_name: str = "col", id: str = None,
 ) -> Type:
     return client.collection(collection_name).document(id)

@@ -14,21 +14,10 @@
 
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
 
-from google.api_core import retry as retries
+from typing import List, Union
 
 from google.cloud.firestore_v1 import types
-from typing import Any, Coroutine, NoReturn, Optional, Union
-
-_CANT_BEGIN: str
-_CANT_COMMIT: str
-_CANT_RETRY_READ_ONLY: str
-_CANT_ROLLBACK: str
-_EXCEED_ATTEMPTS_TEMPLATE: str
-_INITIAL_SLEEP: float
-_MAX_SLEEP: float
-_MISSING_ID_TEMPLATE: str
-_MULTIPLIER: float
-_WRITE_READ_ONLY: str
+from google.cloud.firestore_v1.types import write
 
 
 MAX_ATTEMPTS = 5
@@ -52,10 +41,10 @@ class BaseTransaction(object):
     """Accumulate read-and-write operations to be sent in a transaction.
 
     Args:
-        max_attempts (Optional[int]): The maximum number of attempts for
+        max_attempts (int): The maximum number of attempts for
             the transaction (i.e. allowing retries). Defaults to
             :attr:`~google.cloud.firestore_v1.transaction.MAX_ATTEMPTS`.
-        read_only (Optional[bool]): Flag indicating if the transaction
+        read_only (bool): Flag indicating if the transaction
             should be read-only or should allow writes. Defaults to
             :data:`False`.
     """
@@ -64,13 +53,11 @@ class BaseTransaction(object):
         self._max_attempts = max_attempts
         self._read_only = read_only
         self._id = None
-
-    def _add_write_pbs(self, write_pbs) -> NoReturn:
-        raise NotImplementedError
+        self._write_pbs: List[write.Write] = []
 
     def _options_protobuf(
         self, retry_id: Union[bytes, None]
-    ) -> Optional[types.common.TransactionOptions]:
+    ) -> Union[types.common.TransactionOptions, None]:
         """Convert the current object to protobuf.
 
         The ``retry_id`` value is used when retrying a transaction that
@@ -82,7 +69,6 @@ class BaseTransaction(object):
                 to be retried.
 
         Returns:
-            Optional[google.cloud.firestore_v1.types.TransactionOptions]:
             The protobuf ``TransactionOptions`` if ``read_only==True`` or if
             there is a transaction ID to be retried, else :data:`None`.
 
@@ -120,7 +106,7 @@ class BaseTransaction(object):
         """Get the current transaction ID.
 
         Returns:
-            Optional[bytes]: The transaction ID (or :data:`None` if the
+            Union[bytes, None]: The transaction ID (or :data:`None` if the
             current transaction is not in progress).
         """
         return self._id
@@ -132,25 +118,6 @@ class BaseTransaction(object):
         """
         self._write_pbs = []
         self._id = None
-
-    def _begin(self, retry_id=None) -> NoReturn:
-        raise NotImplementedError
-
-    def _rollback(self) -> NoReturn:
-        raise NotImplementedError
-
-    def _commit(self) -> Union[list, Coroutine[Any, Any, list]]:
-        raise NotImplementedError
-
-    def get_all(
-        self, references: list, retry: retries.Retry = None, timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
-    def get(
-        self, ref_or_query, retry: retries.Retry = None, timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
 
 
 class _BaseTransactional(object):
@@ -167,20 +134,11 @@ class _BaseTransactional(object):
     def __init__(self, to_wrap) -> None:
         self.to_wrap = to_wrap
         self.current_id = None
-        """Optional[bytes]: The current transaction ID."""
+        """Union[bytes, None]: The current transaction ID."""
         self.retry_id = None
-        """Optional[bytes]: The ID of the first attempted transaction."""
+        """Union[bytes, None]: The ID of the first attempted transaction."""
 
     def _reset(self) -> None:
         """Unset the transaction IDs."""
         self.current_id = None
         self.retry_id = None
-
-    def _pre_commit(self, transaction, *args, **kwargs) -> NoReturn:
-        raise NotImplementedError
-
-    def _maybe_commit(self, transaction) -> NoReturn:
-        raise NotImplementedError
-
-    def __call__(self, transaction, *args, **kwargs):
-        raise NotImplementedError

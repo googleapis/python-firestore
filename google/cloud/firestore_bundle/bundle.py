@@ -16,30 +16,25 @@
 
 import datetime
 import json
+from typing import Dict, List, Optional, Union
 
-from google.cloud.firestore_bundle.types.bundle import (
-    BundledDocumentMetadata,
-    BundledQuery,
-    BundleElement,
-    BundleMetadata,
-    NamedQuery,
-)
-from google.cloud._helpers import _datetime_to_pb_timestamp, UTC  # type: ignore
+from google.cloud._helpers import _datetime_to_pb_timestamp
+from google.cloud._helpers import UTC
+from google.protobuf.timestamp_pb2 import Timestamp
+from google.protobuf import json_format
+
 from google.cloud.firestore_bundle._helpers import limit_type_of_query
+from google.cloud.firestore_bundle.types.bundle import BundleElement
+from google.cloud.firestore_bundle.types.bundle import BundleMetadata
+from google.cloud.firestore_bundle.types.bundle import BundledDocumentMetadata
+from google.cloud.firestore_bundle.types.bundle import BundledQuery
+from google.cloud.firestore_bundle.types.bundle import NamedQuery
+from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.document import DocumentReference
-from google.cloud.firestore_v1 import _helpers
-from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
-from google.protobuf import json_format  # type: ignore
-from typing import (
-    Dict,
-    List,
-    Optional,
-    Union,
-)
 
 
 class FirestoreBundle:
@@ -333,8 +328,10 @@ class FirestoreBundle:
                 BundleElement(document_metadata=bundled_document.metadata)
             )
             document_count += 1
+            document_msg = bundled_document.snapshot._to_protobuf()
+            assert document_msg is not None
             buffer += self._compile_bundle_element(
-                BundleElement(document=bundled_document.snapshot._to_protobuf()._pb,)
+                BundleElement(document=document_msg._pb,)
             )
 
         metadata: BundleElement = BundleElement(

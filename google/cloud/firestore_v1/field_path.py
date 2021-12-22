@@ -56,7 +56,7 @@ def _tokenize_field_path(path: str):
     match = get_token(path)
     while match is not None:
         type_ = match.lastgroup
-        value = match.group(type_)
+        value = match.group(type_)  # type: ignore
         yield value
         pos = match.end()
         match = get_token(path, pos)

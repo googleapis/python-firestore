@@ -20,33 +20,31 @@ a more common way to create a query than direct usage of the constructor.
 """
 import copy
 import math
-
-from google.api_core import retry as retries
-from google.protobuf import wrappers_pb2
-
-from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1 import document
-from google.cloud.firestore_v1 import field_path as field_path_module
-from google.cloud.firestore_v1 import transforms
-from google.cloud.firestore_v1.types import StructuredQuery
-from google.cloud.firestore_v1.types import query
-from google.cloud.firestore_v1.types import Cursor
-from google.cloud.firestore_v1.types import RunQueryResponse
-from google.cloud.firestore_v1.order import Order
 from typing import (
     Any,
     Dict,
-    Generator,
     Iterable,
-    NoReturn,
     Optional,
     Tuple,
     Type,
     Union,
 )
 
-# Types needed only for Type Hints
+from google.api_core import gapic_v1
+from google.protobuf import wrappers_pb2
+
+from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1 import document
+from google.cloud.firestore_v1 import field_path as field_path_module
+from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.services.firestore.client import OptionalRetry
+from google.cloud.firestore_v1.types import StructuredQuery
+from google.cloud.firestore_v1.types import query
+from google.cloud.firestore_v1.types import Cursor
+from google.cloud.firestore_v1.types import RunQueryResponse
+from google.cloud.firestore_v1.order import Order
+
 
 _BAD_DIR_STRING: str
 _BAD_OP_NAN_NULL: str
@@ -95,7 +93,24 @@ _NO_ORDERS_FOR_CURSOR = (
 )
 _MISMATCH_CURSOR_W_ORDER_BY = "The cursor {!r} does not match the order fields {!r}."
 
-_not_passed = object()
+
+class _NotPassed:
+    """Marker for optoinal paramerters
+
+    Used where ``None`` is a possible explicit value.
+    """
+
+
+_not_passed = _NotPassed()
+OptionalProjection = Union[query.StructuredQuery.Projection, _NotPassed]
+OptionalFieldFilters = Union[Tuple[query.StructuredQuery.FieldFilter], _NotPassed]
+OptionalOrders = Union[Tuple[query.StructuredQuery.Order], _NotPassed]
+OptionalInt = Union[int, _NotPassed]
+OptionalBool = Union[bool, _NotPassed]
+CursorParamStripped = Tuple[Union[tuple, dict, list], bool]
+CursorArg = Union[DocumentSnapshot, dict, list, tuple, None]
+CursorParam = Tuple[CursorArg, bool]
+OptionalCursorParam = Union[CursorParam, _NotPassed]
 
 
 class BaseQuery(object):
@@ -253,16 +268,16 @@ class BaseQuery(object):
     def _copy(
         self,
         *,
-        projection: Optional[query.StructuredQuery.Projection] = _not_passed,
-        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]] = _not_passed,
-        orders: Optional[Tuple[query.StructuredQuery.Order]] = _not_passed,
-        limit: Optional[int] = _not_passed,
-        limit_to_last: Optional[bool] = _not_passed,
-        offset: Optional[int] = _not_passed,
-        start_at: Optional[Tuple[dict, bool]] = _not_passed,
-        end_at: Optional[Tuple[dict, bool]] = _not_passed,
-        all_descendants: Optional[bool] = _not_passed,
-        recursive: Optional[bool] = _not_passed,
+        projection: OptionalProjection = _not_passed,
+        field_filters: OptionalFieldFilters = _not_passed,
+        orders: OptionalOrders = _not_passed,
+        limit: OptionalInt = _not_passed,
+        limit_to_last: OptionalBool = _not_passed,
+        offset: OptionalInt = _not_passed,
+        start_at: OptionalCursorParam = _not_passed,
+        end_at: OptionalCursorParam = _not_passed,
+        all_descendants: OptionalBool = _not_passed,
+        recursive: OptionalBool = _not_passed,
     ) -> "BaseQuery":
         return self.__class__(
             self._parent,
@@ -461,10 +476,7 @@ class BaseQuery(object):
             raise ValueError("Cannot use snapshot from another collection as a cursor.")
 
     def _cursor_helper(
-        self,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
-        before: bool,
-        start: bool,
+        self, document_fields_or_snapshot: CursorArg, before: bool, start: bool,
     ) -> "BaseQuery":
         """Set values to be used for a ``start_at`` or ``end_at`` cursor.
 
@@ -517,9 +529,7 @@ class BaseQuery(object):
 
         return self._copy(**query_kwargs)
 
-    def start_at(
-        self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> "BaseQuery":
+    def start_at(self, document_fields_or_snapshot: CursorArg) -> "BaseQuery":
         """Start query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -549,9 +559,7 @@ class BaseQuery(object):
         """
         return self._cursor_helper(document_fields_or_snapshot, before=True, start=True)
 
-    def start_after(
-        self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> "BaseQuery":
+    def start_after(self, document_fields_or_snapshot: CursorArg) -> "BaseQuery":
         """Start query results after a particular document value.
 
         The result set will **exclude** the document specified by
@@ -582,9 +590,7 @@ class BaseQuery(object):
             document_fields_or_snapshot, before=False, start=True
         )
 
-    def end_before(
-        self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> "BaseQuery":
+    def end_before(self, document_fields_or_snapshot: CursorArg) -> "BaseQuery":
         """End query results before a particular document value.
 
         The result set will **exclude** the document specified by
@@ -615,9 +621,7 @@ class BaseQuery(object):
             document_fields_or_snapshot, before=True, start=False
         )
 
-    def end_at(
-        self, document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> "BaseQuery":
+    def end_at(self, document_fields_or_snapshot: CursorArg) -> "BaseQuery":
         """End query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -648,7 +652,7 @@ class BaseQuery(object):
             document_fields_or_snapshot, before=False, start=False
         )
 
-    def _filters_pb(self) -> StructuredQuery.Filter:
+    def _filters_pb(self) -> Union[StructuredQuery.Filter, None]:
         """Convert all the filters into a single generic Filter protobuf.
 
         This may be a lone field filter or unary filter, may be a composite
@@ -720,10 +724,10 @@ class BaseQuery(object):
 
         return orders
 
-    def _normalize_cursor(self, cursor, orders) -> Optional[Tuple[Any, Any]]:
+    def _normalize_cursor(self, cursor, orders) -> Union[CursorParamStripped, None]:
         """Helper: convert cursor to a list of values based on orders."""
         if cursor is None:
-            return
+            return None
 
         if not orders:
             raise ValueError(_NO_ORDERS_FOR_CURSOR)
@@ -806,13 +810,8 @@ class BaseQuery(object):
             query_kwargs["limit"] = wrappers_pb2.Int32Value(value=self._limit)
         return query.StructuredQuery(**query_kwargs)
 
-    def get(
-        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
-    ) -> Iterable[DocumentSnapshot]:
-        raise NotImplementedError
-
     def _prep_stream(
-        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
+        self, transaction=None, retry: OptionalRetry = None, timeout: float = None,
     ) -> Tuple[dict, str, dict]:
         """Shared setup for async / sync :meth:`stream`"""
         if self._limit_to_last:
@@ -830,14 +829,6 @@ class BaseQuery(object):
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, expected_prefix, kwargs
-
-    def stream(
-        self, transaction=None, retry: retries.Retry = None, timeout: float = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
-        raise NotImplementedError
-
-    def on_snapshot(self, callback) -> NoReturn:
-        raise NotImplementedError
 
     def recursive(self) -> "BaseQuery":
         """Returns a copy of this query whose iterator will yield all matching
@@ -924,6 +915,10 @@ class BaseQuery(object):
                 return orderBy.direction * comp
 
         return 0
+
+    @staticmethod
+    def _get_collection_reference_class() -> Type:
+        raise NotImplementedError
 
 
 def _enum_from_op_string(op_string: str) -> int:
@@ -1021,7 +1016,7 @@ def _filter_pb(field_or_unary) -> StructuredQuery.Filter:
         raise ValueError("Unexpected filter type", type(field_or_unary), field_or_unary)
 
 
-def _cursor_pb(cursor_pair: Tuple[list, bool]) -> Optional[Cursor]:
+def _cursor_pb(cursor_pair: Optional[CursorParamStripped]) -> Union[Cursor, None]:
     """Convert a cursor pair to a protobuf.
 
     If ``cursor_pair`` is :data:`None`, just returns :data:`None`.
@@ -1040,6 +1035,8 @@ def _cursor_pb(cursor_pair: Tuple[list, bool]) -> Optional[Cursor]:
         data, before = cursor_pair
         value_pbs = [_helpers.encode_value(value) for value in data]
         return query.Cursor(values=value_pbs, before=before)
+
+    return None
 
 
 def _query_response_to_snapshot(
@@ -1175,7 +1172,10 @@ class BaseCollectionGroup(BaseQuery):
         raise NotImplementedError
 
     def _prep_get_partitions(
-        self, partition_count, retry: retries.Retry = None, timeout: float = None,
+        self,
+        partition_count,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
     ) -> Tuple[dict, dict]:
         self._validate_partition_query()
         parent_path, expected_prefix = self._parent._parent_info()
@@ -1196,13 +1196,8 @@ class BaseCollectionGroup(BaseQuery):
 
         return request, kwargs
 
-    def get_partitions(
-        self, partition_count, retry: retries.Retry = None, timeout: float = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
     @staticmethod
-    def _get_collection_reference_class() -> Type["BaseCollectionGroup"]:
+    def _get_collection_reference_class() -> Type:
         raise NotImplementedError
 
 
