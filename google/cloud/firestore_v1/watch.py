@@ -428,7 +428,7 @@ class Watch(object):
         return document_name
 
     def on_snapshot(self, proto):
-        """Process a response from the BIDI stream.
+        """Process a response from the bi-directional gRPC stream.
 
         Collect changes and push the changes in a batch to the customer
         when we receive 'current' from the listen response.
