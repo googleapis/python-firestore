@@ -91,9 +91,10 @@ def test_baseclient__firestore_api_helper_w_already():
 
 
 def test_baseclient__firestore_api_helper_wo_emulator():
+    endpoint = "https://example.com/api"
     client = _make_default_base_client()
     client_options = client._client_options = mock.Mock()
-    target = client._target = mock.Mock()
+    client_options.api_endpoint = endpoint
     assert client._firestore_api_internal is None
 
     transport_class = mock.Mock()
@@ -106,10 +107,10 @@ def test_baseclient__firestore_api_helper_wo_emulator():
     assert client._firestore_api_internal is api
     channel_options = {"grpc.keepalive_time_ms": 30000}
     transport_class.create_channel.assert_called_once_with(
-        target, credentials=client._credentials, options=channel_options.items()
+        endpoint, credentials=client._credentials, options=channel_options.items()
     )
     transport_class.assert_called_once_with(
-        host=target, channel=transport_class.create_channel.return_value,
+        host=endpoint, channel=transport_class.create_channel.return_value,
     )
     client_class.assert_called_once_with(
         transport=transport_class.return_value, client_options=client_options
@@ -123,7 +124,6 @@ def test_baseclient__firestore_api_helper_w_emulator():
         client = _make_default_base_client()
 
     client_options = client._client_options = mock.Mock()
-    target = client._target = mock.Mock()
     emulator_channel = client._emulator_channel = mock.Mock()
     assert client._firestore_api_internal is None
 
@@ -138,7 +138,7 @@ def test_baseclient__firestore_api_helper_w_emulator():
 
     emulator_channel.assert_called_once_with(transport_class)
     transport_class.assert_called_once_with(
-        host=target, channel=emulator_channel.return_value,
+        host=emulator_host, channel=emulator_channel.return_value,
     )
     client_class.assert_called_once_with(
         transport=transport_class.return_value, client_options=client_options

@@ -79,6 +79,8 @@ class Client(BaseClient):
             should be set through client_options.
     """
 
+    _API_CLIENT_CLASS = firestore_client.FirestoreClient
+
     def __init__(
         self,
         project=None,
@@ -107,16 +109,6 @@ class Client(BaseClient):
             firestore_client.FirestoreClient,
             firestore_client,
         )
-
-    @property
-    def _target(self):
-        """Return the target (where the API is).
-        Eg. "firestore.googleapis.com"
-
-        Returns:
-            str: The location of the API.
-        """
-        return self._target_helper(firestore_client.FirestoreClient)
 
     def collection(self, *collection_path: str) -> CollectionReference:
         """Get a reference to a collection.

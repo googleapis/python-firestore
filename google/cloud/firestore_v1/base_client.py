@@ -103,6 +103,7 @@ class BaseClient(ClientWithProject):
     )
     """The scopes required for authenticating with the Firestore service."""
 
+    _API_CLIENT_CLASS = None
     _firestore_api_internal = None
     _database_string_internal = None
     _rpc_metadata_internal = None
@@ -210,14 +211,14 @@ class BaseClient(ClientWithProject):
             return client_class.DEFAULT_ENDPOINT
 
     @property
-    def _target(self) -> str:
+    def _target(self):
         """Return the target (where the API is).
         Eg. "firestore.googleapis.com"
 
         Returns:
             str: The location of the API.
         """
-        raise NotImplementedError
+        return self._target_helper(self._API_CLIENT_CLASS)
 
     @property
     def _database_string(self):

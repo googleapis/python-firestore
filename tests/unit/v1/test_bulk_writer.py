@@ -21,7 +21,6 @@ import pytest
 
 from google.cloud.firestore_v1 import async_client
 from google.cloud.firestore_v1 import client
-from google.cloud.firestore_v1 import base_client
 
 
 def _make_no_send_bulk_writer(*args, **kwargs):

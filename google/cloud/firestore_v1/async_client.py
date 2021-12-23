@@ -87,6 +87,8 @@ class AsyncClient(BaseClient):
             should be set through client_options.
     """
 
+    _API_CLIENT_CLASS = firestore_client.FirestoreAsyncClient
+
     def __init__(
         self,
         project=None,
@@ -128,16 +130,6 @@ class AsyncClient(BaseClient):
             firestore_client.FirestoreAsyncClient,
             firestore_client,
         )
-
-    @property
-    def _target(self):
-        """Return the target (where the API is).
-        Eg. "firestore.googleapis.com"
-
-        Returns:
-            str: The location of the API.
-        """
-        return self._target_helper(firestore_client.FirestoreAsyncClient)
 
     def collection(self, *collection_path: str) -> AsyncCollectionReference:
         """Get a reference to a collection.
