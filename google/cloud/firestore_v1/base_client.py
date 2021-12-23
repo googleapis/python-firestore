@@ -31,6 +31,7 @@ from typing import (
     List,
     Optional,
     Tuple,
+    Type,
     Union,
 )
 
@@ -103,7 +104,7 @@ class BaseClient(ClientWithProject):
     )
     """The scopes required for authenticating with the Firestore service."""
 
-    _API_CLIENT_CLASS = None
+    _API_CLIENT_CLASS: Optional[Type] = None
     _firestore_api_internal = None
     _database_string_internal = None
     _rpc_metadata_internal = None
