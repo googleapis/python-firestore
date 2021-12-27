@@ -370,6 +370,9 @@ class DocumentSnapshot(object):
     def __hash__(self):
         return hash(self._reference) + hash(self.update_time)
 
+    def __repr__(self):
+        return repr(self.to_dict())
+
     @property
     def _client(self):
         """The client that owns the document reference for this snapshot.
