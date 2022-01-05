@@ -17,10 +17,7 @@ import proto  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.firestore.admin.v1',
-    manifest={
-        'Database',
-    },
+    package="google.firestore.admin.v1", manifest={"Database",},
 )
 
 
@@ -52,6 +49,7 @@ class Database(proto.Message):
             update and delete requests to ensure the client
             has an up-to-date value before proceeding.
     """
+
     class DatabaseType(proto.Enum):
         r"""The type of the database.
         See https://cloud.google.com/datastore/docs/firestore-or-
@@ -68,28 +66,11 @@ class Database(proto.Message):
         PESSIMISTIC = 2
         OPTIMISTIC_WITH_ENTITY_GROUPS = 3
 
-    name = proto.Field(
-        proto.STRING,
-        number=1,
-    )
-    location_id = proto.Field(
-        proto.STRING,
-        number=9,
-    )
-    type_ = proto.Field(
-        proto.ENUM,
-        number=10,
-        enum=DatabaseType,
-    )
-    concurrency_mode = proto.Field(
-        proto.ENUM,
-        number=15,
-        enum=ConcurrencyMode,
-    )
-    etag = proto.Field(
-        proto.STRING,
-        number=99,
-    )
+    name = proto.Field(proto.STRING, number=1,)
+    location_id = proto.Field(proto.STRING, number=9,)
+    type_ = proto.Field(proto.ENUM, number=10, enum=DatabaseType,)
+    concurrency_mode = proto.Field(proto.ENUM, number=15, enum=ConcurrencyMode,)
+    etag = proto.Field(proto.STRING, number=99,)
 
 
 __all__ = tuple(sorted(__protobuf__.manifest))
