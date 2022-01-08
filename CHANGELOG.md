@@ -5,6 +5,29 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.4.0](https://www.github.com/googleapis/python-firestore/compare/v2.3.4...v2.4.0) (2022-01-08)
+
+
+### Features
+
+* add context manager support in client ([#470](https://www.github.com/googleapis/python-firestore/issues/470)) ([1e1de20](https://www.github.com/googleapis/python-firestore/commit/1e1de20000c4441c4c015709d5c3512a53c74d6b))
+* add support for Python 3.10 ([#469](https://www.github.com/googleapis/python-firestore/issues/469)) ([ddcb099](https://www.github.com/googleapis/python-firestore/commit/ddcb0990e092416eb9a334fac5d8d9251bc43496))
+* allow 'Collection.where(__name__, in, [hello, world])' ([#501](https://www.github.com/googleapis/python-firestore/issues/501)) ([7d71244](https://www.github.com/googleapis/python-firestore/commit/7d71244c3dab0052452d93f52e1f71bdae88459c))
+* update client libraries to support Database operations ([#513](https://www.github.com/googleapis/python-firestore/issues/513)) ([74d8171](https://www.github.com/googleapis/python-firestore/commit/74d81716c9168b0e3e2fdd203a47292ebb28eb6f))
+
+
+### Bug Fixes
+
+* **deps:** drop packaging dependency ([6b5a779](https://www.github.com/googleapis/python-firestore/commit/6b5a7795bb2827b65f8015fcef6663880a29a65d))
+* **deps:** require google-api-core >= 1.28.0 ([6b5a779](https://www.github.com/googleapis/python-firestore/commit/6b5a7795bb2827b65f8015fcef6663880a29a65d))
+* handle empty last chunk correctly in 'Query._chunkify' ([#489](https://www.github.com/googleapis/python-firestore/issues/489)) ([3ddc718](https://www.github.com/googleapis/python-firestore/commit/3ddc718d50143e33b8af4ff1ba29e7cadf76a57c))
+* hash snapshots using correct type for 'update_time' ([#467](https://www.github.com/googleapis/python-firestore/issues/467)) ([5e66a73](https://www.github.com/googleapis/python-firestore/commit/5e66a73f7e9d3131f483bf5961e8dc308f5e8dc3))
+
+
+### Documentation
+
+* list oneofs in docstring ([6b5a779](https://www.github.com/googleapis/python-firestore/commit/6b5a7795bb2827b65f8015fcef6663880a29a65d))
+
 ### [2.3.4](https://www.github.com/googleapis/python-firestore/compare/v2.3.3...v2.3.4) (2021-09-30)
 
 
