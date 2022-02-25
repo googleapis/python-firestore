@@ -406,8 +406,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> document.Document:
         r"""Gets a single document.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -477,8 +476,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> pagers.ListDocumentsPager:
         r"""Lists documents.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -561,8 +559,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> gf_document.Document:
         r"""Updates or inserts a document.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -670,8 +667,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> None:
         r"""Deletes a document.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -754,8 +750,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         be returned in the same order that they were requested.
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -827,8 +822,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> firestore.BeginTransactionResponse:
         r"""Starts a new transaction.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -921,8 +915,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         documents.
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1022,8 +1015,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> None:
         r"""Rolls back a transaction.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1112,8 +1104,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> Iterable[firestore.RunQueryResponse]:
         r"""Runs a query.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1189,8 +1180,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         results.
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1271,8 +1261,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         order.
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1353,8 +1342,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> Iterable[firestore.ListenResponse]:
         r"""Listens to changes.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1430,8 +1418,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> pagers.ListCollectionIdsPager:
         r"""Lists all the collection IDs underneath a document.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1543,8 +1530,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
         [Commit][google.firestore.v1.Firestore.Commit] instead.
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1613,8 +1599,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
     ) -> document.Document:
         r"""Creates a new document.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 

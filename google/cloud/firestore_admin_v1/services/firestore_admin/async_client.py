@@ -269,7 +269,7 @@ class FirestoreAdminAsyncClient:
         [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -382,7 +382,7 @@ class FirestoreAdminAsyncClient:
     ) -> pagers.ListIndexesAsyncPager:
         r"""Lists composite indexes.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -493,7 +493,7 @@ class FirestoreAdminAsyncClient:
     ) -> index.Index:
         r"""Gets a composite index.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -595,7 +595,7 @@ class FirestoreAdminAsyncClient:
     ) -> None:
         r"""Deletes a composite index.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -686,7 +686,7 @@ class FirestoreAdminAsyncClient:
     ) -> field.Field:
         r"""Gets the metadata and configuration for a Field.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -806,7 +806,7 @@ class FirestoreAdminAsyncClient:
         ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -927,7 +927,7 @@ class FirestoreAdminAsyncClient:
         .
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1052,7 +1052,7 @@ class FirestoreAdminAsyncClient:
         https://cloud.google.com/firestore/docs/manage-data/export-import
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1166,7 +1166,7 @@ class FirestoreAdminAsyncClient:
         already been imported to Cloud Firestore.
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1281,7 +1281,7 @@ class FirestoreAdminAsyncClient:
     ) -> database.Database:
         r"""Gets information about a database.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1373,7 +1373,7 @@ class FirestoreAdminAsyncClient:
     ) -> firestore_admin.ListDatabasesResponse:
         r"""List all the databases in the project.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1462,7 +1462,7 @@ class FirestoreAdminAsyncClient:
     ) -> operation_async.AsyncOperation:
         r"""Updates a database.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
