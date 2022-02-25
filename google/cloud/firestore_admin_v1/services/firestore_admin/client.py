@@ -503,8 +503,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -617,8 +616,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     ) -> pagers.ListIndexesPager:
         r"""Lists composite indexes.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -718,8 +716,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     ) -> index.Index:
         r"""Gets a composite index.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -810,8 +807,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     ) -> None:
         r"""Deletes a composite index.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -891,8 +887,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     ) -> field.Field:
         r"""Gets the metadata and configuration for a Field.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1001,8 +996,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1123,8 +1117,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         .
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1238,8 +1231,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         https://cloud.google.com/firestore/docs/manage-data/export-import
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1353,8 +1345,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         already been imported to Cloud Firestore.
 
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1469,8 +1460,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     ) -> database.Database:
         r"""Gets information about a database.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1562,8 +1552,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     ) -> firestore_admin.ListDatabasesResponse:
         r"""List all the databases in the project.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 
@@ -1652,8 +1641,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     ) -> gac_operation.Operation:
         r"""Updates a database.
 
-
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_admin_v1
 

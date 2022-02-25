@@ -229,7 +229,7 @@ class FirestoreAsyncClient:
     ) -> document.Document:
         r"""Gets a single document.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -310,7 +310,7 @@ class FirestoreAsyncClient:
     ) -> pagers.ListDocumentsAsyncPager:
         r"""Lists documents.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -404,7 +404,7 @@ class FirestoreAsyncClient:
     ) -> gf_document.Document:
         r"""Updates or inserts a document.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -522,7 +522,7 @@ class FirestoreAsyncClient:
     ) -> None:
         r"""Deletes a document.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -617,7 +617,7 @@ class FirestoreAsyncClient:
         be returned in the same order that they were requested.
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -700,7 +700,7 @@ class FirestoreAsyncClient:
     ) -> firestore.BeginTransactionResponse:
         r"""Starts a new transaction.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -805,7 +805,7 @@ class FirestoreAsyncClient:
         documents.
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -915,7 +915,7 @@ class FirestoreAsyncClient:
     ) -> None:
         r"""Rolls back a transaction.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1016,7 +1016,7 @@ class FirestoreAsyncClient:
     ) -> Awaitable[AsyncIterable[firestore.RunQueryResponse]]:
         r"""Runs a query.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1103,7 +1103,7 @@ class FirestoreAsyncClient:
         results.
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1195,7 +1195,7 @@ class FirestoreAsyncClient:
         order.
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1280,7 +1280,7 @@ class FirestoreAsyncClient:
     ) -> Awaitable[AsyncIterable[firestore.ListenResponse]]:
         r"""Listens to changes.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1372,7 +1372,7 @@ class FirestoreAsyncClient:
     ) -> pagers.ListCollectionIdsAsyncPager:
         r"""Lists all the collection IDs underneath a document.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1496,7 +1496,7 @@ class FirestoreAsyncClient:
         [Commit][google.firestore.v1.Firestore.Commit] instead.
 
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
@@ -1575,7 +1575,7 @@ class FirestoreAsyncClient:
     ) -> document.Document:
         r"""Creates a new document.
 
-        .. code-block::
+        .. code-block:: python
 
             from google.cloud import firestore_v1
 
