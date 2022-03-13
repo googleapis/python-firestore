@@ -23,6 +23,9 @@ export PYTHONUNBUFFERED=1
 # Debug: show build environment
 env | grep KOKORO
 
+# Setup firestore account credentials
+export FIRESTORE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/firebase-credentials.json
+
 # Setup service account credentials.
 export GOOGLE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/service-account.json
 
@@ -36,4 +39,10 @@ python3.6 -m pip uninstall --yes --quiet nox-automation
 python3.6 -m pip install --upgrade --quiet nox
 python3.6 -m nox --version
 
-python3.6 -m nox
+# If NOX_SESSION is set, it only runs the specified session,
+# otherwise run all the sessions.
+if [[ -n "${NOX_SESSION:-}" ]]; then
+    python3.6 -m nox -s "${NOX_SESSION:-}"
+else
+    python3.6 -m nox
+fi

@@ -53,6 +53,19 @@ for version in versions:
     )
 
 # TODO(busunkim): remove during microgenerator transition
+# This re-adds imports used by resource helpers below
+n = s.replace(
+    "google/cloud/**/firestore_client.py",
+    """import google.api_core.page_iterator""",
+    """\
+import google.api_core.page_iterator
+import google.api_core.path_template""",
+)
+
+if n != 2:
+    raise Exception("Required replacement in firestore_client.py not made.")
+
+# TODO(busunkim): remove during microgenerator transition
 # This re-adds a resource helpers that were removed in a regeneration
 n = s.replace(
     "google/cloud/**/firestore_client.py",
@@ -206,3 +219,13 @@ s.replace(
 )
 
 s.shell.run(["nox", "-s", "blacken"], hide_output=False)
+
+s.replace(
+    ".kokoro/build.sh",
+    "# Setup service account credentials.",
+    """\
+# Setup firestore account credentials
+export FIRESTORE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/firebase-credentials.json
+
+# Setup service account credentials."""
+)
