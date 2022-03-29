@@ -24,6 +24,7 @@ import shutil
 import nox
 
 
+PYTYPE_VERSION = "pytype==2020.7.24"
 BLACK_VERSION = "black==22.3.0"
 BLACK_PATHS = ["docs", "google", "tests", "noxfile.py", "setup.py"]
 
