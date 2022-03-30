@@ -361,7 +361,7 @@ class BaseClient(ClientWithProject):
     @staticmethod
     def write_option(
         **kwargs,
-    ) -> Union[_helpers.ExistsOption, _helpers.LastUpdateOption,]:
+    ) -> Union[_helpers.ExistsOption, _helpers.LastUpdateOption, ]:
         """Create a write option for write operations.
 
         Write operations include :meth:`~google.cloud.DocumentReference.set`,
