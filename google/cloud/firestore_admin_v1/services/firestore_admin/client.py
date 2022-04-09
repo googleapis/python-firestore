@@ -16,7 +16,7 @@
 from collections import OrderedDict
 import os
 import re
-from typing import Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Dict, Mapping, Optional, Sequence, Tuple, Type, Union
 import pkg_resources
 
 from google.api_core import client_options as client_options_lib
@@ -552,7 +552,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_create_index():
                 # Create a client
@@ -670,7 +670,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_list_indexes():
                 # Create a client
@@ -778,7 +778,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_get_index():
                 # Create a client
@@ -874,7 +874,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_delete_index():
                 # Create a client
@@ -957,7 +957,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_get_field():
                 # Create a client
@@ -1071,7 +1071,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_update_field():
                 # Create a client
@@ -1197,7 +1197,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_list_fields():
                 # Create a client
@@ -1319,7 +1319,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_export_documents():
                 # Create a client
@@ -1438,7 +1438,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_import_documents():
                 # Create a client
@@ -1558,7 +1558,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_get_database():
                 # Create a client
@@ -1655,7 +1655,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_list_databases():
                 # Create a client
@@ -1749,7 +1749,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_admin_v1
+                    from google.cloud import firestore_admin_v1
 
             def sample_update_database():
                 # Create a client

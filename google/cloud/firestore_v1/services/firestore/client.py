@@ -16,7 +16,17 @@
 from collections import OrderedDict
 import os
 import re
-from typing import Dict, Optional, Iterable, Iterator, Sequence, Tuple, Type, Union
+from typing import (
+    Dict,
+    Mapping,
+    Optional,
+    Iterable,
+    Iterator,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+)
 import pkg_resources
 
 from google.api_core import client_options as client_options_lib
@@ -429,7 +439,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_get_document():
                 # Create a client
@@ -504,7 +514,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_list_documents():
                 # Create a client
@@ -595,7 +605,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_update_document():
                 # Create a client
@@ -708,7 +718,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_delete_document():
                 # Create a client
@@ -794,7 +804,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_batch_get_documents():
                 # Create a client
@@ -871,7 +881,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_begin_transaction():
                 # Create a client
@@ -969,7 +979,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_commit():
                 # Create a client
@@ -1074,7 +1084,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_rollback():
                 # Create a client
@@ -1166,7 +1176,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_run_query():
                 # Create a client
@@ -1247,7 +1257,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_partition_query():
                 # Create a client
@@ -1336,7 +1346,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_write():
                 # Create a client
@@ -1422,7 +1432,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_listen():
                 # Create a client
@@ -1503,7 +1513,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_list_collection_ids():
                 # Create a client
@@ -1623,7 +1633,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_batch_write():
                 # Create a client
@@ -1697,7 +1707,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         .. code-block:: python
 
-            from google.cloud import firestore_v1
+                    from google.cloud import firestore_v1
 
             def sample_create_document():
                 # Create a client
