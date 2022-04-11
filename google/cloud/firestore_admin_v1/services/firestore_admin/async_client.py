@@ -16,7 +16,7 @@
 from collections import OrderedDict
 import functools
 import re
-from typing import Dict, Optional, Sequence, Tuple, Type, Union
+from typing import Dict, Mapping, Optional, Sequence, Tuple, Type, Union
 import pkg_resources
 
 from google.api_core.client_options import ClientOptions
@@ -268,7 +268,6 @@ class FirestoreAdminAsyncClient:
         metadata for the operation will be the type
         [IndexOperationMetadata][google.firestore.admin.v1.IndexOperationMetadata].
 
-
         .. code-block:: python
 
             from google.cloud import firestore_admin_v1
@@ -459,9 +458,7 @@ class FirestoreAdminAsyncClient:
                 maximum=60.0,
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
+                    core_exceptions.GoogleAPICallError,
                 ),
                 deadline=60.0,
             ),
@@ -575,9 +572,7 @@ class FirestoreAdminAsyncClient:
                 maximum=60.0,
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
+                    core_exceptions.GoogleAPICallError,
                 ),
                 deadline=60.0,
             ),
@@ -672,9 +667,7 @@ class FirestoreAdminAsyncClient:
                 maximum=60.0,
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
+                    core_exceptions.GoogleAPICallError,
                 ),
                 deadline=60.0,
             ),
@@ -778,9 +771,7 @@ class FirestoreAdminAsyncClient:
                 maximum=60.0,
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
+                    core_exceptions.GoogleAPICallError,
                 ),
                 deadline=60.0,
             ),
@@ -830,7 +821,6 @@ class FirestoreAdminAsyncClient:
         To configure the default field settings for the database, use
         the special ``Field`` with resource name:
         ``projects/{project_id}/databases/{database_id}/collectionGroups/__default__/fields/*``.
-
 
         .. code-block:: python
 
@@ -957,7 +947,6 @@ class FirestoreAdminAsyncClient:
         with the filter set to ``indexConfig.usesAncestorConfig:false``
         .
 
-
         .. code-block:: python
 
             from google.cloud import firestore_admin_v1
@@ -1030,9 +1019,7 @@ class FirestoreAdminAsyncClient:
                 maximum=60.0,
                 multiplier=1.3,
                 predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
+                    core_exceptions.GoogleAPICallError,
                 ),
                 deadline=60.0,
             ),
@@ -1089,7 +1076,6 @@ class FirestoreAdminAsyncClient:
         For more details on export behavior and output format,
         refer to:
         https://cloud.google.com/firestore/docs/manage-data/export-import
-
 
         .. code-block:: python
 
@@ -1208,7 +1194,6 @@ class FirestoreAdminAsyncClient:
         is created. If an ImportDocuments operation is
         cancelled, it is possible that a subset of the data has
         already been imported to Cloud Firestore.
-
 
         .. code-block:: python
 
