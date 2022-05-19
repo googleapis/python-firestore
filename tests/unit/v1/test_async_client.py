@@ -15,7 +15,10 @@
 import datetime
 import types
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 from tests.unit.v1.test__helpers import AsyncIter

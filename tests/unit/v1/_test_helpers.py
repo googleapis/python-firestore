@@ -14,7 +14,10 @@
 
 import concurrent.futures
 import datetime
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import typing
 
 import google

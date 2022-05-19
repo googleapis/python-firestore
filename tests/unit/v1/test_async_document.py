@@ -14,7 +14,10 @@
 
 import collections
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 from tests.unit.v1.test__helpers import AsyncIter, AsyncMock

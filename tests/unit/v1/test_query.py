@@ -14,7 +14,10 @@
 
 import types
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 from tests.unit.v1.test_base_query import _make_credentials

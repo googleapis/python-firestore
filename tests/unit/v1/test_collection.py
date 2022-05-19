@@ -14,7 +14,10 @@
 
 import types
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 def _make_collection_reference(*args, **kwargs):

@@ -16,7 +16,10 @@ import datetime
 from typing import List, NoReturn, Optional, Tuple, Type
 
 import aiounittest  # type: ignore
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 from google.cloud.firestore_v1 import async_client

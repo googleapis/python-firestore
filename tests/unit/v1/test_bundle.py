@@ -16,7 +16,10 @@
 
 import typing
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 from google.cloud.firestore_v1 import base_query

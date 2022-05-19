@@ -15,7 +15,10 @@
 import datetime
 import grpc
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 import pytest
 
 PROJECT = "my-prahjekt"

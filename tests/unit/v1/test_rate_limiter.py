@@ -14,7 +14,10 @@
 
 import datetime
 
-import mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
 
 
 # Pick a point in time as the center of our universe for this test run.
