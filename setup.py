@@ -28,6 +28,7 @@ dependencies = [
     "google-api-core[grpc] >= 1.31.5, <3.0.0dev,!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0",
     "google-cloud-core >= 1.4.1, < 2.0dev",
     "pytz",
+    "protobuf<4.0.0dev",
 ]
 extras = {}
 
