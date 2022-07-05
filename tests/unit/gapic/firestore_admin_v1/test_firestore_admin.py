@@ -4107,7 +4107,6 @@ def test_firestore_admin_transport_auth_adc(transport_class):
     [
         transports.FirestoreAdminGrpcTransport,
         transports.FirestoreAdminGrpcAsyncIOTransport,
-        transports.FirestoreAdminRestTransport,
     ],
 )
 def test_firestore_admin_transport_auth_gdch_credentials(transport_class):
