@@ -830,12 +830,14 @@ class BaseOperationRetry:
 
 from dataclasses import dataclass
 
+
 @dataclass
 class BulkWriterOptions:
     initial_ops_per_second: int = 500
     max_ops_per_second: int = 500
     mode: SendMode = SendMode.parallel
     retry: BulkRetry = BulkRetry.linear
+
 
 @dataclass
 class BulkWriteFailure:
@@ -848,6 +850,7 @@ class BulkWriteFailure:
     def attempts(self) -> int:
         return self.operation.attempts
 
+
 @dataclass
 class OperationRetry(BaseOperationRetry):
     """Container for an additional attempt at an operation, scheduled for
@@ -856,6 +859,7 @@ class OperationRetry(BaseOperationRetry):
     operation: BulkWriterOperation
     run_at: datetime.datetime
 
+
 @dataclass
 class BulkWriterCreateOperation(BulkWriterOperation):
     """Container for BulkWriter.create() operations."""
@@ -863,6 +867,7 @@ class BulkWriterCreateOperation(BulkWriterOperation):
     reference: BaseDocumentReference
     document_data: Dict
     attempts: int = 0
+
 
 @dataclass
 class BulkWriterUpdateOperation(BulkWriterOperation):
@@ -873,6 +878,7 @@ class BulkWriterUpdateOperation(BulkWriterOperation):
     option: Optional[_helpers.WriteOption]
     attempts: int = 0
 
+
 @dataclass
 class BulkWriterSetOperation(BulkWriterOperation):
     """Container for BulkWriter.set() operations."""
@@ -881,6 +887,7 @@ class BulkWriterSetOperation(BulkWriterOperation):
     document_data: Dict
     merge: Union[bool, list] = False
     attempts: int = 0
+
 
 @dataclass
 class BulkWriterDeleteOperation(BulkWriterOperation):
