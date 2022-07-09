@@ -14,7 +14,6 @@
 
 """Classes for representing collections for the Google Cloud Firestore API."""
 import random
-import sys
 
 from google.api_core import retry as retries
 
