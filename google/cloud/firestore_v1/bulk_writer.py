@@ -24,6 +24,7 @@ import functools
 import logging
 import time
 
+from dataclasses import dataclass
 from typing import Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
 from google.rpc import status_pb2  # type: ignore
@@ -826,9 +827,6 @@ class BaseOperationRetry:
             raise TypeError(
                 f"Unexpected type of {self.operation.__class__.__name__} for OperationRetry.retry"
             )  # pragma: NO COVER
-
-
-from dataclasses import dataclass
 
 
 @dataclass
