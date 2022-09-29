@@ -61,6 +61,23 @@ def test_constructor():
     assert collection._path == expected_path
 
 
+def test_repr():
+    collection_id1 = "rooms"
+    document_id = "roomA"
+    collection_id2 = "messages"
+    client = mock.sentinel.client
+
+    collection = _make_collection_reference(collection_id1, document_id, collection_id2)
+    assert repr(collection) == "CollectionReference('rooms', 'roomA', 'messages')"
+    collection = _make_collection_reference(
+        collection_id1, document_id, collection_id2, client=client
+    )
+    assert (
+        repr(collection)
+        == "CollectionReference('rooms', 'roomA', 'messages', client=sentinel.client)"
+    )
+
+
 def test_add_auto_assigned():
     from google.cloud.firestore_v1.types import document
     from google.cloud.firestore_v1.document import DocumentReference

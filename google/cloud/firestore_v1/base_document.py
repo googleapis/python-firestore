@@ -121,6 +121,12 @@ class BaseDocumentReference(object):
         else:
             return NotImplemented
 
+    def __repr__(self):
+        client = ""
+        if self._client is not None:
+            client = f", client={self._client!r}"
+        return f"{self.__class__.__name__}({', '.join(repr(p) for p in self._path)}{client})"
+
     @property
     def path(self):
         """Database-relative for this document.

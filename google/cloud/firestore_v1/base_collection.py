@@ -80,6 +80,12 @@ class BaseCollectionReference(object):
             return NotImplemented
         return self._path == other._path and self._client == other._client
 
+    def __repr__(self):
+        client = ""
+        if self._client is not None:
+            client = f", client={self._client!r}"
+        return f"{self.__class__.__name__}({', '.join(repr(p) for p in self._path)}{client})"
+
     @property
     def id(self):
         """The collection identifier.

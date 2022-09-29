@@ -54,6 +54,25 @@ def test_asynccollectionreference_constructor():
     assert collection._path == expected_path
 
 
+def test_asynccollectionreference_repr():
+    collection_id1 = "rooms"
+    document_id = "roomA"
+    collection_id2 = "messages"
+    client = mock.sentinel.client
+
+    collection = _make_async_collection_reference(
+        collection_id1, document_id, collection_id2
+    )
+    assert repr(collection) == "AsyncCollectionReference('rooms', 'roomA', 'messages')"
+    collection = _make_async_collection_reference(
+        collection_id1, document_id, collection_id2, client=client
+    )
+    assert (
+        repr(collection)
+        == "AsyncCollectionReference('rooms', 'roomA', 'messages', client=sentinel.client)"
+    )
+
+
 def test_asynccollectionreference_query_method_matching():
     from google.cloud.firestore_v1.async_query import AsyncQuery
     from google.cloud.firestore_v1.async_collection import AsyncCollectionReference

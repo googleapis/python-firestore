@@ -44,6 +44,29 @@ def test_asyncdocumentreference_constructor():
     assert document.path == expected_path
 
 
+def test_asyncdocumentreference_repr():
+    collection_id1 = "users"
+    document_id1 = "alovelace"
+    collection_id2 = "platform"
+    document_id2 = "*nix"
+    client = mock.sentinel.client
+
+    document = _make_async_document_reference(
+        collection_id1, document_id1, collection_id2, document_id2
+    )
+    assert (
+        repr(document)
+        == "AsyncDocumentReference('users', 'alovelace', 'platform', '*nix')"
+    )
+    document = _make_async_document_reference(
+        collection_id1, document_id1, collection_id2, document_id2, client=client
+    )
+    assert (
+        repr(document)
+        == "AsyncDocumentReference('users', 'alovelace', 'platform', '*nix', client=sentinel.client)"
+    )
+
+
 def _make_commit_repsonse(write_results=None):
     from google.cloud.firestore_v1.types import firestore
 

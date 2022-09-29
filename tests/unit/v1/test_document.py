@@ -41,6 +41,28 @@ def test_constructor():
     assert document.path == expected_path
 
 
+def test_repr():
+    collection_id1 = "users"
+    document_id1 = "alovelace"
+    collection_id2 = "platform"
+    document_id2 = "*nix"
+    client = mock.sentinel.client
+
+    document = _make_document_reference(
+        collection_id1, document_id1, collection_id2, document_id2
+    )
+    assert (
+        repr(document) == "DocumentReference('users', 'alovelace', 'platform', '*nix')"
+    )
+    document = _make_document_reference(
+        collection_id1, document_id1, collection_id2, document_id2, client=client
+    )
+    assert (
+        repr(document)
+        == "DocumentReference('users', 'alovelace', 'platform', '*nix', client=sentinel.client)"
+    )
+
+
 def _make_commit_repsonse(write_results=None):
     from google.cloud.firestore_v1.types import firestore
 
