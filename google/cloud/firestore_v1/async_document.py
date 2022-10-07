@@ -329,7 +329,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
-    ) -> Union[DocumentSnapshot, Coroutine[Any, Any, DocumentSnapshot]]:
+    ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
         See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for
