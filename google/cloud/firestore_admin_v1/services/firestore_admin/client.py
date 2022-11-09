@@ -16,7 +16,18 @@
 from collections import OrderedDict
 import os
 import re
-from typing import Dict, Mapping, Optional, Sequence, Tuple, Type, Union, cast
+from typing import (
+    Dict,
+    Mapping,
+    MutableMapping,
+    MutableSequence,
+    Optional,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+    cast,
+)
 import pkg_resources
 
 from google.api_core import client_options as client_options_lib
@@ -70,7 +81,7 @@ class FirestoreAdminClientMeta(type):
 
     def get_transport_class(
         cls,
-        label: str = None,
+        label: Optional[str] = None,
     ) -> Type[FirestoreAdminTransport]:
         """Returns an appropriate transport class.
 
@@ -441,7 +452,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         self,
         *,
         credentials: Optional[ga_credentials.Credentials] = None,
-        transport: Union[str, FirestoreAdminTransport, None] = None,
+        transport: Optional[Union[str, FirestoreAdminTransport]] = None,
         client_options: Optional[Union[client_options_lib.ClientOptions, dict]] = None,
         client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
     ) -> None:
@@ -539,12 +550,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def create_index(
         self,
-        request: Union[firestore_admin.CreateIndexRequest, dict] = None,
+        request: Optional[Union[firestore_admin.CreateIndexRequest, dict]] = None,
         *,
-        parent: str = None,
-        index: gfa_index.Index = None,
+        parent: Optional[str] = None,
+        index: Optional[gfa_index.Index] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> gac_operation.Operation:
         r"""Creates a composite index. This returns a
@@ -669,11 +680,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def list_indexes(
         self,
-        request: Union[firestore_admin.ListIndexesRequest, dict] = None,
+        request: Optional[Union[firestore_admin.ListIndexesRequest, dict]] = None,
         *,
-        parent: str = None,
+        parent: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> pagers.ListIndexesPager:
         r"""Lists composite indexes.
@@ -784,11 +795,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def get_index(
         self,
-        request: Union[firestore_admin.GetIndexRequest, dict] = None,
+        request: Optional[Union[firestore_admin.GetIndexRequest, dict]] = None,
         *,
-        name: str = None,
+        name: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> index.Index:
         r"""Gets a composite index.
@@ -887,11 +898,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def delete_index(
         self,
-        request: Union[firestore_admin.DeleteIndexRequest, dict] = None,
+        request: Optional[Union[firestore_admin.DeleteIndexRequest, dict]] = None,
         *,
-        name: str = None,
+        name: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> None:
         r"""Deletes a composite index.
@@ -977,11 +988,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def get_field(
         self,
-        request: Union[firestore_admin.GetFieldRequest, dict] = None,
+        request: Optional[Union[firestore_admin.GetFieldRequest, dict]] = None,
         *,
-        name: str = None,
+        name: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> field.Field:
         r"""Gets the metadata and configuration for a Field.
@@ -1082,11 +1093,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def update_field(
         self,
-        request: Union[firestore_admin.UpdateFieldRequest, dict] = None,
+        request: Optional[Union[firestore_admin.UpdateFieldRequest, dict]] = None,
         *,
-        field: gfa_field.Field = None,
+        field: Optional[gfa_field.Field] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> gac_operation.Operation:
         r"""Updates a field configuration. Currently, field updates apply
@@ -1221,11 +1232,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def list_fields(
         self,
-        request: Union[firestore_admin.ListFieldsRequest, dict] = None,
+        request: Optional[Union[firestore_admin.ListFieldsRequest, dict]] = None,
         *,
-        parent: str = None,
+        parent: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> pagers.ListFieldsPager:
         r"""Lists the field configuration and metadata for this database.
@@ -1344,11 +1355,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def export_documents(
         self,
-        request: Union[firestore_admin.ExportDocumentsRequest, dict] = None,
+        request: Optional[Union[firestore_admin.ExportDocumentsRequest, dict]] = None,
         *,
-        name: str = None,
+        name: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> gac_operation.Operation:
         r"""Exports a copy of all or a subset of documents from
@@ -1476,11 +1487,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def import_documents(
         self,
-        request: Union[firestore_admin.ImportDocumentsRequest, dict] = None,
+        request: Optional[Union[firestore_admin.ImportDocumentsRequest, dict]] = None,
         *,
-        name: str = None,
+        name: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> gac_operation.Operation:
         r"""Imports documents into Google Cloud Firestore.
@@ -1606,11 +1617,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def get_database(
         self,
-        request: Union[firestore_admin.GetDatabaseRequest, dict] = None,
+        request: Optional[Union[firestore_admin.GetDatabaseRequest, dict]] = None,
         *,
-        name: str = None,
+        name: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> database.Database:
         r"""Gets information about a database.
@@ -1710,11 +1721,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def list_databases(
         self,
-        request: Union[firestore_admin.ListDatabasesRequest, dict] = None,
+        request: Optional[Union[firestore_admin.ListDatabasesRequest, dict]] = None,
         *,
-        parent: str = None,
+        parent: Optional[str] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> firestore_admin.ListDatabasesResponse:
         r"""List all the databases in the project.
@@ -1810,12 +1821,12 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def update_database(
         self,
-        request: Union[firestore_admin.UpdateDatabaseRequest, dict] = None,
+        request: Optional[Union[firestore_admin.UpdateDatabaseRequest, dict]] = None,
         *,
-        database: gfa_database.Database = None,
-        update_mask: field_mask_pb2.FieldMask = None,
+        database: Optional[gfa_database.Database] = None,
+        update_mask: Optional[field_mask_pb2.FieldMask] = None,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> gac_operation.Operation:
         r"""Updates a database.
@@ -1948,10 +1959,10 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def list_operations(
         self,
-        request: operations_pb2.ListOperationsRequest = None,
+        request: Optional[operations_pb2.ListOperationsRequest] = None,
         *,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> operations_pb2.ListOperationsResponse:
         r"""Lists operations that match the specified filter in the request.
@@ -2002,10 +2013,10 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def get_operation(
         self,
-        request: operations_pb2.GetOperationRequest = None,
+        request: Optional[operations_pb2.GetOperationRequest] = None,
         *,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> operations_pb2.Operation:
         r"""Gets the latest state of a long-running operation.
@@ -2056,10 +2067,10 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def delete_operation(
         self,
-        request: operations_pb2.DeleteOperationRequest = None,
+        request: Optional[operations_pb2.DeleteOperationRequest] = None,
         *,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> None:
         r"""Deletes a long-running operation.
@@ -2111,10 +2122,10 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
     def cancel_operation(
         self,
-        request: operations_pb2.CancelOperationRequest = None,
+        request: Optional[operations_pb2.CancelOperationRequest] = None,
         *,
         retry: OptionalRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         metadata: Sequence[Tuple[str, str]] = (),
     ) -> None:
         r"""Starts asynchronous cancellation on a long-running operation.
