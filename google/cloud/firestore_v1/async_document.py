@@ -28,7 +28,7 @@ from google.cloud.firestore_v1.base_document import (
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import write
 from google.protobuf.timestamp_pb2 import Timestamp
-from typing import Any, AsyncGenerator, Coroutine, Iterable, Union
+from typing import AsyncGenerator, Iterable
 
 
 logger = logging.getLogger(__name__)
