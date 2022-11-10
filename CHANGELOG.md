@@ -5,6 +5,20 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.7.2](https://github.com/googleapis/python-firestore/compare/v2.7.1...v2.7.2) (2022-10-10)
+
+
+### Bug Fixes
+
+* **deps:** Allow protobuf 3.19.5 ([#648](https://github.com/googleapis/python-firestore/issues/648)) ([9ffbd75](https://github.com/googleapis/python-firestore/commit/9ffbd759772dbb3c34054fd2a0cf6c99a1a060f6))
+
+## [2.7.1](https://github.com/googleapis/python-firestore/compare/v2.7.0...v2.7.1) (2022-09-29)
+
+
+### Bug Fixes
+
+* **deps:** Require protobuf >= 3.20.2 ([#644](https://github.com/googleapis/python-firestore/issues/644)) ([dd7d10b](https://github.com/googleapis/python-firestore/commit/dd7d10b982bf74b242b0310921372097993e822c))
+
 ## [2.7.0](https://github.com/googleapis/python-firestore/compare/v2.6.1...v2.7.0) (2022-09-13)
 
 
