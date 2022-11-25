@@ -115,9 +115,14 @@ for library in get_staging_dirs(sub_directory="firestore_bundle"):
 
     s.replace(
         library / "google/cloud/bundle/__init__.py",
-        "\'BundledQuery\',",
-        "\"BundledQuery\",\n\"FirestoreBundle\",",
+        "from google.cloud.bundle import gapic_version as package_version\n",
+        "from google.cloud.firestore_bundle import gapic_version as package_version\n",
     )
+
+    s.replace(
+        library / "google/cloud/bundle/__init__.py",
+        "\'BundledQuery\',",
+        "\"BundledQuery\",\n\"FirestoreBundle\",",)
 
     s.move(
         library / f"google/cloud/bundle",
