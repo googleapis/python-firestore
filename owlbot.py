@@ -83,7 +83,7 @@ except ImportError:
     )
 
 for library in get_staging_dirs(default_version=firestore_default_version, sub_directory="firestore"):
-    s.move(library / f"google/cloud/firestore_{library.name}", excludes=[f"__init__.py"])
+    s.move(library / f"google/cloud/firestore_{library.name}", excludes=[f"__init__.py", "**/gapic_version.py"])
     s.move(library / f"tests/", f"tests")
     update_fixup_scripts(library)
     s.move(library / "scripts")
@@ -127,6 +127,7 @@ for library in get_staging_dirs(sub_directory="firestore_bundle"):
     s.move(
         library / f"google/cloud/bundle",
         f"google/cloud/firestore_bundle",
+        excludes=["**/gapic_version.py"],
     )
     s.move(library / f"tests", f"tests")
 
@@ -149,8 +150,6 @@ s.move(templated_files,
        excludes=[".github/release-please.yml"])
 
 python.py_samples(skip_readmes=True)
-
-python.configure_previous_major_version_branches()
 
 # ----------------------------------------------------------------------------
 # Customize noxfile.py
