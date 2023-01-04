@@ -423,7 +423,7 @@ def test_aggregation_query_stream_w_retriable_exc_w_transaction():
     _aggregation_query_stream_w_retriable_exc_helper(transaction=txn)
 
 
-async def test_aggregation_from_query():
+def test_aggregation_from_query():
     from google.cloud.firestore_v1 import _helpers
 
     # Create a minimal fake GAPIC.
@@ -453,7 +453,7 @@ async def test_aggregation_from_query():
 
     # Execute the query and check the response.
     aggregation_query = query.count(alias="total")
-    returned = await aggregation_query.get(transaction=transaction, **kwargs)
+    returned = aggregation_query.get(transaction=transaction, **kwargs)
     assert isinstance(returned, list)
     assert len(returned) == 1
 
