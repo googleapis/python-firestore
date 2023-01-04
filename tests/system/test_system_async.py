@@ -579,6 +579,14 @@ async def query_docs(client):
         await operation()
 
 
+@pytest_asyncio.fixture
+async def async_query(query_docs):
+    collection, stored, allowed_vals = query_docs
+    query = collection.where("a", "==", 1)
+
+    return query
+
+
 async def test_query_stream_w_simple_field_eq_op(query_docs):
     collection, stored, allowed_vals = query_docs
     query = collection.where("a", "==", 1)
@@ -1399,3 +1407,133 @@ async def _chain(*iterators):
     for iterator in iterators:
         async for value in iterator:
             yield value
+
+
+async def test_count_async_query_get_default_alias(async_query):
+    count_query = async_query.count()
+    result = await count_query.get()
+    for r in result[0]:
+        assert r.alias == "field_1"
+
+
+async def test_async_count_query_get_with_alias(async_query):
+
+    count_query = async_query.count(alias="total")
+    result = await count_query.get()
+    for r in result[0]:
+        assert r.alias == "total"
+
+
+async def test_async_count_query_get_with_limit(async_query):
+
+    count_query = async_query.count(alias="total")
+    result = await count_query.get()
+    for r in result[0]:
+        assert r.alias == "total"
+        assert r.value == 5
+
+    # count with limit
+    count_query = async_query.limit(2).count(alias="total")
+    result = await count_query.get()
+    for r in result[0]:
+        assert r.alias == "total"
+        assert r.value == 2
+
+
+async def test_async_count_query_get_multiple_aggregations(async_query):
+
+    count_query = async_query.count(alias="total").count(alias="all")
+
+    result = await count_query.get()
+    assert len(result[0]) == 2
+    for r in result[0]:
+        assert r.alias in ["total", "all"]
+
+
+async def test_async_count_query_get_multiple_aggregations_duplicated_alias(
+    async_query,
+):
+
+    count_query = async_query.count(alias="total").count(alias="total")
+
+    with pytest.raises(InvalidArgument) as exc_info:
+        await count_query.get()
+
+    assert "Aggregation aliases contain duplicate alias" in exc_info.value.message
+
+
+async def test_async_count_query_get_empty_aggregation(async_query):
+    from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
+
+    aggregation_query = AsyncAggregationQuery(async_query)
+
+    with pytest.raises(InvalidArgument) as exc_info:
+        await aggregation_query.get()
+
+    assert "Aggregations can not be empty" in exc_info.value.message
+
+
+async def test_count_async_query_stream_default_alias(async_query):
+
+    count_query = async_query.count()
+
+    async for result in count_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "field_1"
+
+
+async def test_async_count_query_stream_with_alias(async_query):
+
+    count_query = async_query.count(alias="total")
+    async for result in count_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "total"
+
+
+async def test_async_count_query_stream_with_limit(async_query):
+    # count without limit
+    count_query = async_query.count(alias="total")
+    async for result in count_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.value == 5
+
+    # count with limit
+    count_query = async_query.limit(2).count(alias="total")
+    async for result in count_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.value == 2
+
+
+async def test_async_count_query_stream_multiple_aggregations(async_query):
+
+    count_query = async_query.count(alias="total").count(alias="all")
+
+    async for result in count_query.stream():
+        assert len(result) == 2
+        for aggregation_result in result:
+            assert aggregation_result.alias in ["total", "all"]
+
+
+async def test_async_count_query_stream_multiple_aggregations_duplicated_alias(
+    async_query,
+):
+
+    count_query = async_query.count(alias="total").count(alias="total")
+
+    with pytest.raises(InvalidArgument) as exc_info:
+        async for _ in count_query.stream():
+            pass
+
+    assert "Aggregation aliases contain duplicate alias" in exc_info.value.message
+
+
+async def test_async_count_query_stream_empty_aggregation(async_query):
+    from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
+
+    aggregation_query = AsyncAggregationQuery(async_query)
+
+    with pytest.raises(InvalidArgument) as exc_info:
+        async for _ in aggregation_query.stream():
+            pass
+
+    assert "Aggregations can not be empty" in exc_info.value.message
