@@ -226,7 +226,7 @@ class AsyncQuery(BaseQuery):
                 (Optional[str]): The alias for the count
 
         Returns:
-            :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery:
+            :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery`:
             An instance of an AsyncAggregationQuery object
         """
         return AsyncAggregationQuery(self).count(alias=alias)
