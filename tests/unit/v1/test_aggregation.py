@@ -421,3 +421,56 @@ def test_aggregation_query_stream_w_retriable_exc_w_transaction():
     txn = transaction.Transaction(client=mock.Mock(spec=[]))
     txn._id = b"DEADBEEF"
     _aggregation_query_stream_w_retriable_exc_helper(transaction=txn)
+
+
+async def test_aggregation_from_query():
+    from google.cloud.firestore_v1 import _helpers
+
+    # Create a minimal fake GAPIC.
+    firestore_api = mock.Mock(spec=["run_aggregation_query"])
+
+    # Attach the fake GAPIC to a real client.
+    client = make_client()
+    client._firestore_api_internal = firestore_api
+
+    # Make a **real** collection reference as parent.
+    parent = client.collection("dee")
+    query = make_query(parent)
+
+    transaction = client.transaction()
+
+    txn_id = b"\x00\x00\x01-work-\xf2"
+    transaction._id = txn_id
+
+    aggregation_result = AggregationResult(alias="total", value=5)
+    response_pb = make_aggregation_query_response(
+        [aggregation_result], transaction=txn_id
+    )
+    firestore_api.run_aggregation_query.return_value = iter([response_pb])
+    retry = None
+    timeout = None
+    kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+
+    # Execute the query and check the response.
+    aggregation_query = query.count(alias="total")
+    returned = await aggregation_query.get(transaction=transaction, **kwargs)
+    assert isinstance(returned, list)
+    assert len(returned) == 1
+
+    for result in returned:
+        for r in result:
+            assert r.alias == aggregation_result.alias
+            assert r.value == aggregation_result.value
+
+    # Verify the mock call.
+    parent_path, _ = parent._parent_info()
+
+    firestore_api.run_aggregation_query.assert_called_once_with(
+        request={
+            "parent": parent_path,
+            "structured_aggregation_query": aggregation_query._to_protobuf(),
+            "transaction": txn_id,
+        },
+        metadata=client._rpc_metadata,
+        **kwargs,
+    )
