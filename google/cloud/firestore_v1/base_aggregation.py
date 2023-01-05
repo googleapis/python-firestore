@@ -96,6 +96,7 @@ class BaseAggregationQuery(ABC):
     def add_aggregation(self, aggregation: BaseAggregation) -> None:
         """
         Adds an aggregation operation to the nested query
+
         :type aggregation: :class:`google.cloud.firestore_v1.aggregation.BaseAggregation`
         :param aggregation: An aggregation operation, e.g. a CountAggregation
         """
@@ -104,6 +105,7 @@ class BaseAggregationQuery(ABC):
     def add_aggregations(self, aggregations: List[BaseAggregation]) -> None:
         """
         Adds a list of aggregations to the nested query
+
         :type aggregations: list
         :param aggregations: a list of aggregation operations
         """
@@ -145,7 +147,8 @@ class BaseAggregationQuery(ABC):
     ) -> List[AggregationResult] | Coroutine[Any, Any, List[AggregationResult]]:
         """Runs the aggregation query.
 
-        This sends a``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
+        This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
+
         Args:
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
@@ -177,6 +180,7 @@ class BaseAggregationQuery(ABC):
         """Runs the aggregation query.
 
         This sends a``RunAggregationQuery`` RPC and returns an iterator in the stream of ``RunAggregationQueryResponse`` messages.
+
         Args:
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):

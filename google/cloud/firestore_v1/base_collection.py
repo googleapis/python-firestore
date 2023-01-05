@@ -482,7 +482,8 @@ class BaseCollectionReference(object):
 
     def count(self, alias=None):
         """
-        Adds a count over the nested query
+        Adds a count over the nested query.
+
         :type alias: str
         :param alias: (Optional) The alias for the count
         """

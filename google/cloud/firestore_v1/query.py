@@ -241,7 +241,8 @@ class Query(BaseQuery):
         self, alias: str | None = None
     ) -> Type["firestore_v1.aggregation.AggregationQuery"]:
         """
-        Adds a count over the query
+        Adds a count over the query.
+
         :type alias: str
         :param alias: (Optional) The alias for the count
         """

@@ -53,7 +53,8 @@ class AggregationQuery(BaseAggregationQuery):
     ) -> List[AggregationResult]:
         """Runs the aggregation query.
 
-        This sends a``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
+        This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
+
         Args:
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
