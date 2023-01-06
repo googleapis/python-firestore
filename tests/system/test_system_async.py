@@ -1448,7 +1448,9 @@ async def test_async_count_query_get_multiple_aggregations(async_query):
     assert len(result[0]) == 2
 
     expected_aliases = ["total", "all"]
-    found_alias = set([r.alias for r in result[0]])  # ensure unique elements in the result
+    found_alias = set(
+        [r.alias for r in result[0]]
+    )  # ensure unique elements in the result
     assert len(found_alias) == 2
     assert found_alias == set(expected_aliases)
 
