@@ -1446,8 +1446,11 @@ async def test_async_count_query_get_multiple_aggregations(async_query):
 
     result = await count_query.get()
     assert len(result[0]) == 2
-    for r in result[0]:
-        assert r.alias in ["total", "all"]
+
+    expected_aliases = ["total", "all"]
+    found_alias = set([r.alias for r in result[0]])  # ensure unique elements in the result
+    assert len(found_alias) == 2
+    assert found_alias == set(expected_aliases)
 
 
 async def test_async_count_query_get_multiple_aggregations_duplicated_alias(
@@ -1537,3 +1540,49 @@ async def test_async_count_query_stream_empty_aggregation(async_query):
             pass
 
     assert "Aggregations can not be empty" in exc_info.value.message
+
+
+@firestore.async_transactional
+async def create_in_transaction_helper(transaction, client, collection_id, cleanup):
+    collection = client.collection(collection_id)
+    query = collection.where("a", "==", 1)
+    count_query = query.count()
+    result = await count_query.get(transaction=transaction)
+
+    for r in result[0]:
+        if r.value < 2:
+            document_id_3 = "doc3" + UNIQUE_RESOURCE_ID
+            document_3 = client.document(collection_id, document_id_3)
+            cleanup(document_3.delete)
+            document_3.create({"a": 1})
+        else:  # transaction is rolled back
+            raise ValueError("Collection can't have more than 2 docs")
+
+
+async def test_count_query_in_transaction(client, cleanup):
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
+    document_id_2 = "doc2" + UNIQUE_RESOURCE_ID
+
+    document_1 = client.document(collection_id, document_id_1)
+    document_2 = client.document(collection_id, document_id_2)
+
+    cleanup(document_1.delete)
+    cleanup(document_2.delete)
+
+    await document_1.create({"a": 1})
+    await document_2.create({"a": 1})
+
+    transaction = client.transaction()
+
+    with pytest.raises(ValueError) as exc:
+        await create_in_transaction_helper(transaction, client, collection_id, cleanup)
+        assert exc.exc_info == "Collection can't have more than 2 documents"
+
+    collection = client.collection(collection_id)
+
+    query = collection.where("a", "==", 1)
+    count_query = query.count()
+    result = await count_query.get()
+    for r in result[0]:
+        assert r.value == 2  # there are still only 2 docs
