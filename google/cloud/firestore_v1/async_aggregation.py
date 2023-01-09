@@ -23,7 +23,7 @@ from __future__ import annotations
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
-from typing import List, Union
+from typing import List, Union, AsyncGenerator
 
 
 from google.cloud.firestore_v1.base_aggregation import (
@@ -70,9 +70,11 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             list: The aggregation query results
 
         """
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
-        result = [aggregation async for aggregation in result]
-        return result
+        stream_result = self.stream(
+            transaction=transaction, retry=retry, timeout=timeout
+        )
+        result = [aggregation async for aggregation in stream_result]
+        return result  # type: ignore
 
     async def stream(
         self,
@@ -81,7 +83,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             retries.Retry, None, gapic_v1.method._MethodDefault
         ] = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
-    ):  # -> Generator[document.DocumentSnapshot, Any, None]: AsyncGenerator
+    ) -> Union[AsyncGenerator[List[AggregationResult], None]]:
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns an iterator which
