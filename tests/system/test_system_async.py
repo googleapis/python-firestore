@@ -19,6 +19,8 @@ import math
 import pytest
 import pytest_asyncio
 import operator
+import google.auth
+
 from typing import Callable, Dict, List, Optional
 
 from google.oauth2 import service_account
@@ -65,11 +67,13 @@ def _get_credentials_and_project():
     if FIRESTORE_EMULATOR:
         credentials = EMULATOR_CREDS
         project = FIRESTORE_PROJECT
-    else:
+    elif FIRESTORE_CREDS:
         credentials = service_account.Credentials.from_service_account_file(
             FIRESTORE_CREDS
         )
         project = FIRESTORE_PROJECT or credentials.project_id
+    else:
+        credentials, project = google.auth.default()
     return credentials, project
 
 

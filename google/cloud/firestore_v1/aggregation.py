@@ -82,13 +82,11 @@ class AggregationQuery(BaseAggregationQuery):
             timeout,
         )
 
-        response_iterator = self._client._firestore_api.run_aggregation_query(
+        return self._client._firestore_api.run_aggregation_query(
             request=request,
             metadata=self._client._rpc_metadata,
             **kwargs,
         )
-
-        return response_iterator
 
     def _retry_query_after_exception(self, exc, retry, transaction):
         """Helper method for :meth:`stream`."""
