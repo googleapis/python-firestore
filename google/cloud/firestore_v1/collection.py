@@ -79,9 +79,9 @@ class CollectionReference(BaseCollectionReference):
     def add(
         self,
         document_data: dict,
-        document_id: str = None,
+        document_id: str | None = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: float | None = None,
     ) -> Tuple[Any, Any]:
         """Create a document in the Firestore database with the provided data.
 
@@ -121,9 +121,9 @@ class CollectionReference(BaseCollectionReference):
 
     def list_documents(
         self,
-        page_size: int = None,
+        page_size: int | None = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: float | None = None,
     ) -> Generator[Any, Any, None]:
         """List all subdocuments of the current collection.
 
@@ -156,9 +156,9 @@ class CollectionReference(BaseCollectionReference):
 
     def get(
         self,
-        transaction: Transaction = None,
+        transaction: Transaction | None = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: float | None = None,
     ) -> list:
         """Read the documents in this collection.
 
@@ -187,9 +187,9 @@ class CollectionReference(BaseCollectionReference):
 
     def stream(
         self,
-        transaction: Transaction = None,
+        transaction: Transaction | None = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: float | None = None,
     ) -> Generator[document.DocumentSnapshot, Any, None]:
         """Read the documents in this collection.
 
