@@ -27,7 +27,7 @@ from google.api_core import path_template
 from google.api_core import gapic_v1
 
 from google.protobuf import json_format
-from google.cloud.location import locations_pb2 # type: ignore
+from google.cloud.location import locations_pb2  # type: ignore
 from google.longrunning import operations_pb2
 from requests import __version__ as requests_version
 import dataclasses
@@ -180,7 +180,12 @@ class FirestoreRestInterceptor:
 
 
     """
-    def pre_batch_get_documents(self, request: firestore.BatchGetDocumentsRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.BatchGetDocumentsRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_batch_get_documents(
+        self,
+        request: firestore.BatchGetDocumentsRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.BatchGetDocumentsRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for batch_get_documents
 
         Override in a subclass to manipulate the request or metadata
@@ -188,7 +193,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_batch_get_documents(self, response: rest_streaming.ResponseIterator) -> rest_streaming.ResponseIterator:
+    def post_batch_get_documents(
+        self, response: rest_streaming.ResponseIterator
+    ) -> rest_streaming.ResponseIterator:
         """Post-rpc interceptor for batch_get_documents
 
         Override in a subclass to manipulate the response
@@ -196,7 +203,10 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_batch_write(self, request: firestore.BatchWriteRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.BatchWriteRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_batch_write(
+        self, request: firestore.BatchWriteRequest, metadata: Sequence[Tuple[str, str]]
+    ) -> Tuple[firestore.BatchWriteRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for batch_write
 
         Override in a subclass to manipulate the request or metadata
@@ -204,7 +214,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_batch_write(self, response: firestore.BatchWriteResponse) -> firestore.BatchWriteResponse:
+    def post_batch_write(
+        self, response: firestore.BatchWriteResponse
+    ) -> firestore.BatchWriteResponse:
         """Post-rpc interceptor for batch_write
 
         Override in a subclass to manipulate the response
@@ -212,7 +224,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_begin_transaction(self, request: firestore.BeginTransactionRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.BeginTransactionRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_begin_transaction(
+        self,
+        request: firestore.BeginTransactionRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.BeginTransactionRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for begin_transaction
 
         Override in a subclass to manipulate the request or metadata
@@ -220,7 +237,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_begin_transaction(self, response: firestore.BeginTransactionResponse) -> firestore.BeginTransactionResponse:
+    def post_begin_transaction(
+        self, response: firestore.BeginTransactionResponse
+    ) -> firestore.BeginTransactionResponse:
         """Post-rpc interceptor for begin_transaction
 
         Override in a subclass to manipulate the response
@@ -228,7 +247,10 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_commit(self, request: firestore.CommitRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.CommitRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_commit(
+        self, request: firestore.CommitRequest, metadata: Sequence[Tuple[str, str]]
+    ) -> Tuple[firestore.CommitRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for commit
 
         Override in a subclass to manipulate the request or metadata
@@ -236,7 +258,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_commit(self, response: firestore.CommitResponse) -> firestore.CommitResponse:
+    def post_commit(
+        self, response: firestore.CommitResponse
+    ) -> firestore.CommitResponse:
         """Post-rpc interceptor for commit
 
         Override in a subclass to manipulate the response
@@ -244,7 +268,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_create_document(self, request: firestore.CreateDocumentRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.CreateDocumentRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_create_document(
+        self,
+        request: firestore.CreateDocumentRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.CreateDocumentRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for create_document
 
         Override in a subclass to manipulate the request or metadata
@@ -260,7 +289,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_delete_document(self, request: firestore.DeleteDocumentRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.DeleteDocumentRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_delete_document(
+        self,
+        request: firestore.DeleteDocumentRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.DeleteDocumentRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for delete_document
 
         Override in a subclass to manipulate the request or metadata
@@ -268,7 +302,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def pre_get_document(self, request: firestore.GetDocumentRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.GetDocumentRequest, Sequence[Tuple[str, str]]]:
+    def pre_get_document(
+        self, request: firestore.GetDocumentRequest, metadata: Sequence[Tuple[str, str]]
+    ) -> Tuple[firestore.GetDocumentRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for get_document
 
         Override in a subclass to manipulate the request or metadata
@@ -284,7 +320,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_list_collection_ids(self, request: firestore.ListCollectionIdsRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.ListCollectionIdsRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_list_collection_ids(
+        self,
+        request: firestore.ListCollectionIdsRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.ListCollectionIdsRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for list_collection_ids
 
         Override in a subclass to manipulate the request or metadata
@@ -292,7 +333,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_list_collection_ids(self, response: firestore.ListCollectionIdsResponse) -> firestore.ListCollectionIdsResponse:
+    def post_list_collection_ids(
+        self, response: firestore.ListCollectionIdsResponse
+    ) -> firestore.ListCollectionIdsResponse:
         """Post-rpc interceptor for list_collection_ids
 
         Override in a subclass to manipulate the response
@@ -300,7 +343,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_list_documents(self, request: firestore.ListDocumentsRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.ListDocumentsRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_list_documents(
+        self,
+        request: firestore.ListDocumentsRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.ListDocumentsRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for list_documents
 
         Override in a subclass to manipulate the request or metadata
@@ -308,7 +356,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_list_documents(self, response: firestore.ListDocumentsResponse) -> firestore.ListDocumentsResponse:
+    def post_list_documents(
+        self, response: firestore.ListDocumentsResponse
+    ) -> firestore.ListDocumentsResponse:
         """Post-rpc interceptor for list_documents
 
         Override in a subclass to manipulate the response
@@ -316,7 +366,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_partition_query(self, request: firestore.PartitionQueryRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.PartitionQueryRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_partition_query(
+        self,
+        request: firestore.PartitionQueryRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.PartitionQueryRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for partition_query
 
         Override in a subclass to manipulate the request or metadata
@@ -324,7 +379,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_partition_query(self, response: firestore.PartitionQueryResponse) -> firestore.PartitionQueryResponse:
+    def post_partition_query(
+        self, response: firestore.PartitionQueryResponse
+    ) -> firestore.PartitionQueryResponse:
         """Post-rpc interceptor for partition_query
 
         Override in a subclass to manipulate the response
@@ -332,7 +389,10 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_rollback(self, request: firestore.RollbackRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.RollbackRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_rollback(
+        self, request: firestore.RollbackRequest, metadata: Sequence[Tuple[str, str]]
+    ) -> Tuple[firestore.RollbackRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for rollback
 
         Override in a subclass to manipulate the request or metadata
@@ -340,7 +400,11 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def pre_run_aggregation_query(self, request: firestore.RunAggregationQueryRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.RunAggregationQueryRequest, Sequence[Tuple[str, str]]]:
+    def pre_run_aggregation_query(
+        self,
+        request: firestore.RunAggregationQueryRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.RunAggregationQueryRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for run_aggregation_query
 
         Override in a subclass to manipulate the request or metadata
@@ -348,7 +412,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_run_aggregation_query(self, response: rest_streaming.ResponseIterator) -> rest_streaming.ResponseIterator:
+    def post_run_aggregation_query(
+        self, response: rest_streaming.ResponseIterator
+    ) -> rest_streaming.ResponseIterator:
         """Post-rpc interceptor for run_aggregation_query
 
         Override in a subclass to manipulate the response
@@ -356,7 +422,10 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_run_query(self, request: firestore.RunQueryRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.RunQueryRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_run_query(
+        self, request: firestore.RunQueryRequest, metadata: Sequence[Tuple[str, str]]
+    ) -> Tuple[firestore.RunQueryRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for run_query
 
         Override in a subclass to manipulate the request or metadata
@@ -364,7 +433,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_run_query(self, response: rest_streaming.ResponseIterator) -> rest_streaming.ResponseIterator:
+    def post_run_query(
+        self, response: rest_streaming.ResponseIterator
+    ) -> rest_streaming.ResponseIterator:
         """Post-rpc interceptor for run_query
 
         Override in a subclass to manipulate the response
@@ -372,7 +443,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_update_document(self, request: firestore.UpdateDocumentRequest, metadata: Sequence[Tuple[str, str]]) -> Tuple[firestore.UpdateDocumentRequest, Sequence[Tuple[str, str]]]:
+
+    def pre_update_document(
+        self,
+        request: firestore.UpdateDocumentRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> Tuple[firestore.UpdateDocumentRequest, Sequence[Tuple[str, str]]]:
         """Pre-rpc interceptor for update_document
 
         Override in a subclass to manipulate the request or metadata
@@ -380,7 +456,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_update_document(self, response: gf_document.Document) -> gf_document.Document:
+    def post_update_document(
+        self, response: gf_document.Document
+    ) -> gf_document.Document:
         """Post-rpc interceptor for update_document
 
         Override in a subclass to manipulate the response
@@ -389,7 +467,11 @@ class FirestoreRestInterceptor:
         """
         return response
 
-    def pre_cancel_operation(self, request: operations_pb2.CancelOperationRequest, metadata: Sequence[Tuple[str, str]]) -> None:
+    def pre_cancel_operation(
+        self,
+        request: operations_pb2.CancelOperationRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> None:
         """Pre-rpc interceptor for cancel_operation
 
         Override in a subclass to manipulate the request or metadata
@@ -397,7 +479,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_cancel_operation(self, response: operations_pb2.CancelOperationRequest) -> None:
+    def post_cancel_operation(
+        self, response: operations_pb2.CancelOperationRequest
+    ) -> None:
         """Post-rpc interceptor for cancel_operation
 
         Override in a subclass to manipulate the response
@@ -405,7 +489,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_delete_operation(self, request: operations_pb2.DeleteOperationRequest, metadata: Sequence[Tuple[str, str]]) -> None:
+
+    def pre_delete_operation(
+        self,
+        request: operations_pb2.DeleteOperationRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> None:
         """Pre-rpc interceptor for delete_operation
 
         Override in a subclass to manipulate the request or metadata
@@ -413,7 +502,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_delete_operation(self, response: operations_pb2.DeleteOperationRequest) -> None:
+    def post_delete_operation(
+        self, response: operations_pb2.DeleteOperationRequest
+    ) -> None:
         """Post-rpc interceptor for delete_operation
 
         Override in a subclass to manipulate the response
@@ -421,7 +512,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_get_operation(self, request: operations_pb2.GetOperationRequest, metadata: Sequence[Tuple[str, str]]) -> operations_pb2.Operation:
+
+    def pre_get_operation(
+        self,
+        request: operations_pb2.GetOperationRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> operations_pb2.Operation:
         """Pre-rpc interceptor for get_operation
 
         Override in a subclass to manipulate the request or metadata
@@ -429,7 +525,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_get_operation(self, response: operations_pb2.GetOperationRequest) -> operations_pb2.Operation:
+    def post_get_operation(
+        self, response: operations_pb2.GetOperationRequest
+    ) -> operations_pb2.Operation:
         """Post-rpc interceptor for get_operation
 
         Override in a subclass to manipulate the response
@@ -437,7 +535,12 @@ class FirestoreRestInterceptor:
         it is returned to user code.
         """
         return response
-    def pre_list_operations(self, request: operations_pb2.ListOperationsRequest, metadata: Sequence[Tuple[str, str]]) -> operations_pb2.ListOperationsResponse:
+
+    def pre_list_operations(
+        self,
+        request: operations_pb2.ListOperationsRequest,
+        metadata: Sequence[Tuple[str, str]],
+    ) -> operations_pb2.ListOperationsResponse:
         """Pre-rpc interceptor for list_operations
 
         Override in a subclass to manipulate the request or metadata
@@ -445,7 +548,9 @@ class FirestoreRestInterceptor:
         """
         return request, metadata
 
-    def post_list_operations(self, response: operations_pb2.ListOperationsRequest) -> operations_pb2.ListOperationsResponse:
+    def post_list_operations(
+        self, response: operations_pb2.ListOperationsRequest
+    ) -> operations_pb2.ListOperationsResponse:
         """Post-rpc interceptor for list_operations
 
         Override in a subclass to manipulate the response
@@ -482,20 +587,21 @@ class FirestoreRestTransport(FirestoreTransport):
 
     """
 
-    def __init__(self, *,
-            host: str = 'firestore.googleapis.com',
-            credentials: Optional[ga_credentials.Credentials] = None,
-            credentials_file: Optional[str] = None,
-            scopes: Optional[Sequence[str]] = None,
-            client_cert_source_for_mtls: Optional[Callable[[
-                ], Tuple[bytes, bytes]]] = None,
-            quota_project_id: Optional[str] = None,
-            client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
-            always_use_jwt_access: Optional[bool] = False,
-            url_scheme: str = 'https',
-            interceptor: Optional[FirestoreRestInterceptor] = None,
-            api_audience: Optional[str] = None,
-            ) -> None:
+    def __init__(
+        self,
+        *,
+        host: str = "firestore.googleapis.com",
+        credentials: Optional[ga_credentials.Credentials] = None,
+        credentials_file: Optional[str] = None,
+        scopes: Optional[Sequence[str]] = None,
+        client_cert_source_for_mtls: Optional[Callable[[], Tuple[bytes, bytes]]] = None,
+        quota_project_id: Optional[str] = None,
+        client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
+        always_use_jwt_access: Optional[bool] = False,
+        url_scheme: str = "https",
+        interceptor: Optional[FirestoreRestInterceptor] = None,
+        api_audience: Optional[str] = None,
+    ) -> None:
         """Instantiate the transport.
 
         Args:
@@ -534,7 +640,9 @@ class FirestoreRestTransport(FirestoreTransport):
         # credentials object
         maybe_url_match = re.match("^(?P<scheme>http(?:s)?://)?(?P<host>.*)$", host)
         if maybe_url_match is None:
-            raise ValueError(f"Unexpected hostname structure: {host}")  # pragma: NO COVER
+            raise ValueError(
+                f"Unexpected hostname structure: {host}"
+            )  # pragma: NO COVER
 
         url_match_items = maybe_url_match.groupdict()
 
@@ -545,10 +653,11 @@ class FirestoreRestTransport(FirestoreTransport):
             credentials=credentials,
             client_info=client_info,
             always_use_jwt_access=always_use_jwt_access,
-            api_audience=api_audience
+            api_audience=api_audience,
         )
         self._session = AuthorizedSession(
-            self._credentials, default_host=self.DEFAULT_HOST)
+            self._credentials, default_host=self.DEFAULT_HOST
+        )
         if client_cert_source_for_mtls:
             self._session.configure_mtls_channel(client_cert_source_for_mtls)
         self._interceptor = interceptor or FirestoreRestInterceptor()
@@ -558,19 +667,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("BatchGetDocuments")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.BatchGetDocumentsRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> rest_streaming.ResponseIterator:
+        def __call__(
+            self,
+            request: firestore.BatchGetDocumentsRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> rest_streaming.ResponseIterator:
             r"""Call the batch get documents method over HTTP.
 
             Args:
@@ -591,46 +705,51 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{database=projects/*/databases/*}/documents:batchGet',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{database=projects/*/databases/*}/documents:batchGet",
+                    "body": "*",
+                },
             ]
-            request, metadata = self._interceptor.pre_batch_get_documents(request, metadata)
+            request, metadata = self._interceptor.pre_batch_get_documents(
+                request, metadata
+            )
             pb_request = firestore.BatchGetDocumentsRequest.pb(request)
             transcoded_request = path_template.transcode(http_options, pb_request)
 
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -638,7 +757,9 @@ class FirestoreRestTransport(FirestoreTransport):
                 raise core_exceptions.from_http_response(response)
 
             # Return the response
-            resp = rest_streaming.ResponseIterator(response, firestore.BatchGetDocumentsResponse)
+            resp = rest_streaming.ResponseIterator(
+                response, firestore.BatchGetDocumentsResponse
+            )
             resp = self._interceptor.post_batch_get_documents(resp)
             return resp
 
@@ -646,19 +767,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("BatchWrite")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.BatchWriteRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> firestore.BatchWriteResponse:
+        def __call__(
+            self,
+            request: firestore.BatchWriteRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> firestore.BatchWriteResponse:
             r"""Call the batch write method over HTTP.
 
             Args:
@@ -679,11 +805,12 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{database=projects/*/databases/*}/documents:batchWrite',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{database=projects/*/databases/*}/documents:batchWrite",
+                    "body": "*",
+                },
             ]
             request, metadata = self._interceptor.pre_batch_write(request, metadata)
             pb_request = firestore.BatchWriteRequest.pb(request)
@@ -692,33 +819,35 @@ class FirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -737,19 +866,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("BeginTransaction")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.BeginTransactionRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> firestore.BeginTransactionResponse:
+        def __call__(
+            self,
+            request: firestore.BeginTransactionRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> firestore.BeginTransactionResponse:
             r"""Call the begin transaction method over HTTP.
 
             Args:
@@ -770,46 +904,51 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{database=projects/*/databases/*}/documents:beginTransaction',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{database=projects/*/databases/*}/documents:beginTransaction",
+                    "body": "*",
+                },
             ]
-            request, metadata = self._interceptor.pre_begin_transaction(request, metadata)
+            request, metadata = self._interceptor.pre_begin_transaction(
+                request, metadata
+            )
             pb_request = firestore.BeginTransactionRequest.pb(request)
             transcoded_request = path_template.transcode(http_options, pb_request)
 
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -828,19 +967,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("Commit")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.CommitRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> firestore.CommitResponse:
+        def __call__(
+            self,
+            request: firestore.CommitRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> firestore.CommitResponse:
             r"""Call the commit method over HTTP.
 
             Args:
@@ -861,11 +1005,12 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{database=projects/*/databases/*}/documents:commit',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{database=projects/*/databases/*}/documents:commit",
+                    "body": "*",
+                },
             ]
             request, metadata = self._interceptor.pre_commit(request, metadata)
             pb_request = firestore.CommitRequest.pb(request)
@@ -874,33 +1019,35 @@ class FirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -919,19 +1066,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("CreateDocument")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.CreateDocumentRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> document.Document:
+        def __call__(
+            self,
+            request: firestore.CreateDocumentRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> document.Document:
             r"""Call the create document method over HTTP.
 
             Args:
@@ -952,11 +1104,12 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}',
-                'body': 'document',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents/**}/{collection_id}",
+                    "body": "document",
+                },
             ]
             request, metadata = self._interceptor.pre_create_document(request, metadata)
             pb_request = firestore.CreateDocumentRequest.pb(request)
@@ -965,33 +1118,35 @@ class FirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1010,19 +1165,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("DeleteDocument")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.DeleteDocumentRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ):
+        def __call__(
+            self,
+            request: firestore.DeleteDocumentRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ):
             r"""Call the delete document method over HTTP.
 
             Args:
@@ -1037,37 +1197,40 @@ class FirestoreRestTransport(FirestoreTransport):
                     sent along with the request as metadata.
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'delete',
-                'uri': '/v1/{name=projects/*/databases/*/documents/*/**}',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "delete",
+                    "uri": "/v1/{name=projects/*/databases/*/documents/*/**}",
+                },
             ]
             request, metadata = self._interceptor.pre_delete_document(request, metadata)
             pb_request = firestore.DeleteDocumentRequest.pb(request)
             transcoded_request = path_template.transcode(http_options, pb_request)
 
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
 
             # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True,
-            ))
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1078,19 +1241,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("GetDocument")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.GetDocumentRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> document.Document:
+        def __call__(
+            self,
+            request: firestore.GetDocumentRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> document.Document:
             r"""Call the get document method over HTTP.
 
             Args:
@@ -1111,37 +1279,40 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'get',
-                'uri': '/v1/{name=projects/*/databases/*/documents/*/**}',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "get",
+                    "uri": "/v1/{name=projects/*/databases/*/documents/*/**}",
+                },
             ]
             request, metadata = self._interceptor.pre_get_document(request, metadata)
             pb_request = firestore.GetDocumentRequest.pb(request)
             transcoded_request = path_template.transcode(http_options, pb_request)
 
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
 
             # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True,
-            ))
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1160,19 +1331,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("ListCollectionIds")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.ListCollectionIdsRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> firestore.ListCollectionIdsResponse:
+        def __call__(
+            self,
+            request: firestore.ListCollectionIdsRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> firestore.ListCollectionIdsResponse:
             r"""Call the list collection ids method over HTTP.
 
             Args:
@@ -1193,51 +1369,56 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents}:listCollectionIds',
-                'body': '*',
-            },
-{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents}:listCollectionIds",
+                    "body": "*",
+                },
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents/*/**}:listCollectionIds",
+                    "body": "*",
+                },
             ]
-            request, metadata = self._interceptor.pre_list_collection_ids(request, metadata)
+            request, metadata = self._interceptor.pre_list_collection_ids(
+                request, metadata
+            )
             pb_request = firestore.ListCollectionIdsRequest.pb(request)
             transcoded_request = path_template.transcode(http_options, pb_request)
 
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1256,19 +1437,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("ListDocuments")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.ListDocumentsRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> firestore.ListDocumentsResponse:
+        def __call__(
+            self,
+            request: firestore.ListDocumentsRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> firestore.ListDocumentsResponse:
             r"""Call the list documents method over HTTP.
 
             Args:
@@ -1289,41 +1475,44 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'get',
-                'uri': '/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}',
-            },
-{
-                'method': 'get',
-                'uri': '/v1/{parent=projects/*/databases/*/documents}/{collection_id}',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "get",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents/*/**}/{collection_id}",
+                },
+                {
+                    "method": "get",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents}/{collection_id}",
+                },
             ]
             request, metadata = self._interceptor.pre_list_documents(request, metadata)
             pb_request = firestore.ListDocumentsRequest.pb(request)
             transcoded_request = path_template.transcode(http_options, pb_request)
 
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
 
             # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True,
-            ))
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1342,32 +1531,40 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("Listen")
 
-        def __call__(self,
-                request: firestore.ListenRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> rest_streaming.ResponseIterator:
+        def __call__(
+            self,
+            request: firestore.ListenRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> rest_streaming.ResponseIterator:
             raise NotImplementedError(
                 "Method Listen is not available over REST transport"
             )
+
     class _PartitionQuery(FirestoreRestStub):
         def __hash__(self):
             return hash("PartitionQuery")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.PartitionQueryRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> firestore.PartitionQueryResponse:
+        def __call__(
+            self,
+            request: firestore.PartitionQueryRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> firestore.PartitionQueryResponse:
             r"""Call the partition query method over HTTP.
 
             Args:
@@ -1388,16 +1585,17 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents}:partitionQuery',
-                'body': '*',
-            },
-{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents/*/**}:partitionQuery',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents}:partitionQuery",
+                    "body": "*",
+                },
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents/*/**}:partitionQuery",
+                    "body": "*",
+                },
             ]
             request, metadata = self._interceptor.pre_partition_query(request, metadata)
             pb_request = firestore.PartitionQueryRequest.pb(request)
@@ -1406,33 +1604,35 @@ class FirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1451,19 +1651,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("Rollback")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.RollbackRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ):
+        def __call__(
+            self,
+            request: firestore.RollbackRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ):
             r"""Call the rollback method over HTTP.
 
             Args:
@@ -1478,11 +1683,12 @@ class FirestoreRestTransport(FirestoreTransport):
                     sent along with the request as metadata.
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{database=projects/*/databases/*}/documents:rollback',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{database=projects/*/databases/*}/documents:rollback",
+                    "body": "*",
+                },
             ]
             request, metadata = self._interceptor.pre_rollback(request, metadata)
             pb_request = firestore.RollbackRequest.pb(request)
@@ -1491,33 +1697,35 @@ class FirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1528,19 +1736,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("RunAggregationQuery")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.RunAggregationQueryRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> rest_streaming.ResponseIterator:
+        def __call__(
+            self,
+            request: firestore.RunAggregationQueryRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> rest_streaming.ResponseIterator:
             r"""Call the run aggregation query method over HTTP.
 
             Args:
@@ -1561,51 +1774,56 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents}:runAggregationQuery',
-                'body': '*',
-            },
-{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents/*/**}:runAggregationQuery',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents}:runAggregationQuery",
+                    "body": "*",
+                },
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents/*/**}:runAggregationQuery",
+                    "body": "*",
+                },
             ]
-            request, metadata = self._interceptor.pre_run_aggregation_query(request, metadata)
+            request, metadata = self._interceptor.pre_run_aggregation_query(
+                request, metadata
+            )
             pb_request = firestore.RunAggregationQueryRequest.pb(request)
             transcoded_request = path_template.transcode(http_options, pb_request)
 
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1613,7 +1831,9 @@ class FirestoreRestTransport(FirestoreTransport):
                 raise core_exceptions.from_http_response(response)
 
             # Return the response
-            resp = rest_streaming.ResponseIterator(response, firestore.RunAggregationQueryResponse)
+            resp = rest_streaming.ResponseIterator(
+                response, firestore.RunAggregationQueryResponse
+            )
             resp = self._interceptor.post_run_aggregation_query(resp)
             return resp
 
@@ -1621,19 +1841,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("RunQuery")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.RunQueryRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> rest_streaming.ResponseIterator:
+        def __call__(
+            self,
+            request: firestore.RunQueryRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> rest_streaming.ResponseIterator:
             r"""Call the run query method over HTTP.
 
             Args:
@@ -1654,16 +1879,17 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents}:runQuery',
-                'body': '*',
-            },
-{
-                'method': 'post',
-                'uri': '/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents}:runQuery",
+                    "body": "*",
+                },
+                {
+                    "method": "post",
+                    "uri": "/v1/{parent=projects/*/databases/*/documents/*/**}:runQuery",
+                    "body": "*",
+                },
             ]
             request, metadata = self._interceptor.pre_run_query(request, metadata)
             pb_request = firestore.RunQueryRequest.pb(request)
@@ -1672,33 +1898,35 @@ class FirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1714,19 +1942,24 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("UpdateDocument")
 
-        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] =  {
-        }
+        __REQUIRED_FIELDS_DEFAULT_VALUES: Dict[str, str] = {}
 
         @classmethod
         def _get_unset_required_fields(cls, message_dict):
-            return {k: v for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items() if k not in message_dict}
+            return {
+                k: v
+                for k, v in cls.__REQUIRED_FIELDS_DEFAULT_VALUES.items()
+                if k not in message_dict
+            }
 
-        def __call__(self,
-                request: firestore.UpdateDocumentRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> gf_document.Document:
+        def __call__(
+            self,
+            request: firestore.UpdateDocumentRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> gf_document.Document:
             r"""Call the update document method over HTTP.
 
             Args:
@@ -1747,11 +1980,12 @@ class FirestoreRestTransport(FirestoreTransport):
 
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'patch',
-                'uri': '/v1/{document.name=projects/*/databases/*/documents/*/**}',
-                'body': 'document',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "patch",
+                    "uri": "/v1/{document.name=projects/*/databases/*/documents/*/**}",
+                    "body": "document",
+                },
             ]
             request, metadata = self._interceptor.pre_update_document(request, metadata)
             pb_request = firestore.UpdateDocumentRequest.pb(request)
@@ -1760,33 +1994,35 @@ class FirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request['body'],
-                including_default_value_fields=False,
-                use_integers_for_enums=True
-            )
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
-
-            # Jsonify the query params
-            query_params = json.loads(json_format.MessageToJson(
-                transcoded_request['query_params'],
+                transcoded_request["body"],
                 including_default_value_fields=False,
                 use_integers_for_enums=True,
-            ))
+            )
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+
+            # Jsonify the query params
+            query_params = json.loads(
+                json_format.MessageToJson(
+                    transcoded_request["query_params"],
+                    including_default_value_fields=False,
+                    use_integers_for_enums=True,
+                )
+            )
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
                 timeout=timeout,
                 headers=headers,
                 params=rest_helpers.flatten_query_params(query_params, strict=True),
                 data=body,
-                )
+            )
 
             # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
             # subclass.
@@ -1805,155 +2041,159 @@ class FirestoreRestTransport(FirestoreTransport):
         def __hash__(self):
             return hash("Write")
 
-        def __call__(self,
-                request: firestore.WriteRequest, *,
-                retry: OptionalRetry=gapic_v1.method.DEFAULT,
-                timeout: Optional[float]=None,
-                metadata: Sequence[Tuple[str, str]]=(),
-                ) -> rest_streaming.ResponseIterator:
+        def __call__(
+            self,
+            request: firestore.WriteRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> rest_streaming.ResponseIterator:
             raise NotImplementedError(
                 "Method Write is not available over REST transport"
             )
 
     @property
-    def batch_get_documents(self) -> Callable[
-            [firestore.BatchGetDocumentsRequest],
-            firestore.BatchGetDocumentsResponse]:
+    def batch_get_documents(
+        self,
+    ) -> Callable[
+        [firestore.BatchGetDocumentsRequest], firestore.BatchGetDocumentsResponse
+    ]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._BatchGetDocuments(self._session, self._host, self._interceptor) # type: ignore
+        return self._BatchGetDocuments(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def batch_write(self) -> Callable[
-            [firestore.BatchWriteRequest],
-            firestore.BatchWriteResponse]:
+    def batch_write(
+        self,
+    ) -> Callable[[firestore.BatchWriteRequest], firestore.BatchWriteResponse]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._BatchWrite(self._session, self._host, self._interceptor) # type: ignore
+        return self._BatchWrite(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def begin_transaction(self) -> Callable[
-            [firestore.BeginTransactionRequest],
-            firestore.BeginTransactionResponse]:
+    def begin_transaction(
+        self,
+    ) -> Callable[
+        [firestore.BeginTransactionRequest], firestore.BeginTransactionResponse
+    ]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._BeginTransaction(self._session, self._host, self._interceptor) # type: ignore
+        return self._BeginTransaction(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def commit(self) -> Callable[
-            [firestore.CommitRequest],
-            firestore.CommitResponse]:
+    def commit(self) -> Callable[[firestore.CommitRequest], firestore.CommitResponse]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._Commit(self._session, self._host, self._interceptor) # type: ignore
+        return self._Commit(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def create_document(self) -> Callable[
-            [firestore.CreateDocumentRequest],
-            document.Document]:
+    def create_document(
+        self,
+    ) -> Callable[[firestore.CreateDocumentRequest], document.Document]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._CreateDocument(self._session, self._host, self._interceptor) # type: ignore
+        return self._CreateDocument(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def delete_document(self) -> Callable[
-            [firestore.DeleteDocumentRequest],
-            empty_pb2.Empty]:
+    def delete_document(
+        self,
+    ) -> Callable[[firestore.DeleteDocumentRequest], empty_pb2.Empty]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._DeleteDocument(self._session, self._host, self._interceptor) # type: ignore
+        return self._DeleteDocument(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def get_document(self) -> Callable[
-            [firestore.GetDocumentRequest],
-            document.Document]:
+    def get_document(
+        self,
+    ) -> Callable[[firestore.GetDocumentRequest], document.Document]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._GetDocument(self._session, self._host, self._interceptor) # type: ignore
+        return self._GetDocument(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def list_collection_ids(self) -> Callable[
-            [firestore.ListCollectionIdsRequest],
-            firestore.ListCollectionIdsResponse]:
+    def list_collection_ids(
+        self,
+    ) -> Callable[
+        [firestore.ListCollectionIdsRequest], firestore.ListCollectionIdsResponse
+    ]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._ListCollectionIds(self._session, self._host, self._interceptor) # type: ignore
+        return self._ListCollectionIds(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def list_documents(self) -> Callable[
-            [firestore.ListDocumentsRequest],
-            firestore.ListDocumentsResponse]:
+    def list_documents(
+        self,
+    ) -> Callable[[firestore.ListDocumentsRequest], firestore.ListDocumentsResponse]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._ListDocuments(self._session, self._host, self._interceptor) # type: ignore
+        return self._ListDocuments(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def listen(self) -> Callable[
-            [firestore.ListenRequest],
-            firestore.ListenResponse]:
+    def listen(self) -> Callable[[firestore.ListenRequest], firestore.ListenResponse]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._Listen(self._session, self._host, self._interceptor) # type: ignore
+        return self._Listen(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def partition_query(self) -> Callable[
-            [firestore.PartitionQueryRequest],
-            firestore.PartitionQueryResponse]:
+    def partition_query(
+        self,
+    ) -> Callable[[firestore.PartitionQueryRequest], firestore.PartitionQueryResponse]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._PartitionQuery(self._session, self._host, self._interceptor) # type: ignore
+        return self._PartitionQuery(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def rollback(self) -> Callable[
-            [firestore.RollbackRequest],
-            empty_pb2.Empty]:
+    def rollback(self) -> Callable[[firestore.RollbackRequest], empty_pb2.Empty]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._Rollback(self._session, self._host, self._interceptor) # type: ignore
+        return self._Rollback(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def run_aggregation_query(self) -> Callable[
-            [firestore.RunAggregationQueryRequest],
-            firestore.RunAggregationQueryResponse]:
+    def run_aggregation_query(
+        self,
+    ) -> Callable[
+        [firestore.RunAggregationQueryRequest], firestore.RunAggregationQueryResponse
+    ]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._RunAggregationQuery(self._session, self._host, self._interceptor) # type: ignore
+        return self._RunAggregationQuery(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def run_query(self) -> Callable[
-            [firestore.RunQueryRequest],
-            firestore.RunQueryResponse]:
+    def run_query(
+        self,
+    ) -> Callable[[firestore.RunQueryRequest], firestore.RunQueryResponse]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._RunQuery(self._session, self._host, self._interceptor) # type: ignore
+        return self._RunQuery(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def update_document(self) -> Callable[
-            [firestore.UpdateDocumentRequest],
-            gf_document.Document]:
+    def update_document(
+        self,
+    ) -> Callable[[firestore.UpdateDocumentRequest], gf_document.Document]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._UpdateDocument(self._session, self._host, self._interceptor) # type: ignore
+        return self._UpdateDocument(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
-    def write(self) -> Callable[
-            [firestore.WriteRequest],
-            firestore.WriteResponse]:
+    def write(self) -> Callable[[firestore.WriteRequest], firestore.WriteResponse]:
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
-        return self._Write(self._session, self._host, self._interceptor) # type: ignore
+        return self._Write(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
     def cancel_operation(self):
-        return self._CancelOperation(self._session, self._host, self._interceptor) # type: ignore
+        return self._CancelOperation(self._session, self._host, self._interceptor)  # type: ignore
 
     class _CancelOperation(FirestoreRestStub):
-        def __call__(self,
-            request: operations_pb2.CancelOperationRequest, *,
-            retry: OptionalRetry=gapic_v1.method.DEFAULT,
-            timeout: Optional[float]=None,
-            metadata: Sequence[Tuple[str, str]]=(),
-            ) -> None:
+        def __call__(
+            self,
+            request: operations_pb2.CancelOperationRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> None:
 
             r"""Call the cancel operation method over HTTP.
 
@@ -1967,28 +2207,30 @@ class FirestoreRestTransport(FirestoreTransport):
                     sent along with the request as metadata.
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'post',
-                'uri': '/v1/{name=projects/*/databases/*/operations/*}:cancel',
-                'body': '*',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "post",
+                    "uri": "/v1/{name=projects/*/databases/*/operations/*}:cancel",
+                    "body": "*",
+                },
             ]
 
-            request, metadata = self._interceptor.pre_cancel_operation(request, metadata)
+            request, metadata = self._interceptor.pre_cancel_operation(
+                request, metadata
+            )
             request_kwargs = json_format.MessageToDict(request)
-            transcoded_request = path_template.transcode(
-                http_options, **request_kwargs)
+            transcoded_request = path_template.transcode(http_options, **request_kwargs)
 
-            body = json.loads(json.dumps(transcoded_request['body']))
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
+            body = json.loads(json.dumps(transcoded_request["body"]))
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
 
             # Jsonify the query params
-            query_params = json.loads(json.dumps(transcoded_request['query_params']))
+            query_params = json.loads(json.dumps(transcoded_request["query_params"]))
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
 
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
@@ -2007,15 +2249,17 @@ class FirestoreRestTransport(FirestoreTransport):
 
     @property
     def delete_operation(self):
-        return self._DeleteOperation(self._session, self._host, self._interceptor) # type: ignore
+        return self._DeleteOperation(self._session, self._host, self._interceptor)  # type: ignore
 
     class _DeleteOperation(FirestoreRestStub):
-        def __call__(self,
-            request: operations_pb2.DeleteOperationRequest, *,
-            retry: OptionalRetry=gapic_v1.method.DEFAULT,
-            timeout: Optional[float]=None,
-            metadata: Sequence[Tuple[str, str]]=(),
-            ) -> None:
+        def __call__(
+            self,
+            request: operations_pb2.DeleteOperationRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> None:
 
             r"""Call the delete operation method over HTTP.
 
@@ -2029,26 +2273,28 @@ class FirestoreRestTransport(FirestoreTransport):
                     sent along with the request as metadata.
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'delete',
-                'uri': '/v1/{name=projects/*/databases/*/operations/*}',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "delete",
+                    "uri": "/v1/{name=projects/*/databases/*/operations/*}",
+                },
             ]
 
-            request, metadata = self._interceptor.pre_delete_operation(request, metadata)
+            request, metadata = self._interceptor.pre_delete_operation(
+                request, metadata
+            )
             request_kwargs = json_format.MessageToDict(request)
-            transcoded_request = path_template.transcode(
-                http_options, **request_kwargs)
+            transcoded_request = path_template.transcode(http_options, **request_kwargs)
 
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
 
             # Jsonify the query params
-            query_params = json.loads(json.dumps(transcoded_request['query_params']))
+            query_params = json.loads(json.dumps(transcoded_request["query_params"]))
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
 
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
@@ -2066,15 +2312,17 @@ class FirestoreRestTransport(FirestoreTransport):
 
     @property
     def get_operation(self):
-        return self._GetOperation(self._session, self._host, self._interceptor) # type: ignore
+        return self._GetOperation(self._session, self._host, self._interceptor)  # type: ignore
 
     class _GetOperation(FirestoreRestStub):
-        def __call__(self,
-            request: operations_pb2.GetOperationRequest, *,
-            retry: OptionalRetry=gapic_v1.method.DEFAULT,
-            timeout: Optional[float]=None,
-            metadata: Sequence[Tuple[str, str]]=(),
-            ) -> operations_pb2.Operation:
+        def __call__(
+            self,
+            request: operations_pb2.GetOperationRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> operations_pb2.Operation:
 
             r"""Call the get operation method over HTTP.
 
@@ -2091,26 +2339,26 @@ class FirestoreRestTransport(FirestoreTransport):
                 operations_pb2.Operation: Response from GetOperation method.
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'get',
-                'uri': '/v1/{name=projects/*/databases/*/operations/*}',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "get",
+                    "uri": "/v1/{name=projects/*/databases/*/operations/*}",
+                },
             ]
 
             request, metadata = self._interceptor.pre_get_operation(request, metadata)
             request_kwargs = json_format.MessageToDict(request)
-            transcoded_request = path_template.transcode(
-                http_options, **request_kwargs)
+            transcoded_request = path_template.transcode(http_options, **request_kwargs)
 
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
 
             # Jsonify the query params
-            query_params = json.loads(json.dumps(transcoded_request['query_params']))
+            query_params = json.loads(json.dumps(transcoded_request["query_params"]))
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
 
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
@@ -2131,15 +2379,17 @@ class FirestoreRestTransport(FirestoreTransport):
 
     @property
     def list_operations(self):
-        return self._ListOperations(self._session, self._host, self._interceptor) # type: ignore
+        return self._ListOperations(self._session, self._host, self._interceptor)  # type: ignore
 
     class _ListOperations(FirestoreRestStub):
-        def __call__(self,
-            request: operations_pb2.ListOperationsRequest, *,
-            retry: OptionalRetry=gapic_v1.method.DEFAULT,
-            timeout: Optional[float]=None,
-            metadata: Sequence[Tuple[str, str]]=(),
-            ) -> operations_pb2.ListOperationsResponse:
+        def __call__(
+            self,
+            request: operations_pb2.ListOperationsRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, str]] = (),
+        ) -> operations_pb2.ListOperationsResponse:
 
             r"""Call the list operations method over HTTP.
 
@@ -2156,26 +2406,26 @@ class FirestoreRestTransport(FirestoreTransport):
                 operations_pb2.ListOperationsResponse: Response from ListOperations method.
             """
 
-            http_options: List[Dict[str, str]] = [{
-                'method': 'get',
-                'uri': '/v1/{name=projects/*/databases/*}/operations',
-            },
+            http_options: List[Dict[str, str]] = [
+                {
+                    "method": "get",
+                    "uri": "/v1/{name=projects/*/databases/*}/operations",
+                },
             ]
 
             request, metadata = self._interceptor.pre_list_operations(request, metadata)
             request_kwargs = json_format.MessageToDict(request)
-            transcoded_request = path_template.transcode(
-                http_options, **request_kwargs)
+            transcoded_request = path_template.transcode(http_options, **request_kwargs)
 
-            uri = transcoded_request['uri']
-            method = transcoded_request['method']
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
 
             # Jsonify the query params
-            query_params = json.loads(json.dumps(transcoded_request['query_params']))
+            query_params = json.loads(json.dumps(transcoded_request["query_params"]))
 
             # Send the request
             headers = dict(metadata)
-            headers['Content-Type'] = 'application/json'
+            headers["Content-Type"] = "application/json"
 
             response = getattr(self._session, method)(
                 "{host}{uri}".format(host=self._host, uri=uri),
@@ -2202,6 +2452,4 @@ class FirestoreRestTransport(FirestoreTransport):
         self._session.close()
 
 
-__all__=(
-    'FirestoreRestTransport',
-)
+__all__ = ("FirestoreRestTransport",)

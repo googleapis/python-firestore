@@ -63,6 +63,7 @@ from google.rpc import status_pb2  # type: ignore
 from .transports.base import FirestoreTransport, DEFAULT_CLIENT_INFO
 from .transports.grpc import FirestoreGrpcTransport
 from .transports.grpc_asyncio import FirestoreGrpcAsyncIOTransport
+from .transports.rest import FirestoreRestTransport
 
 
 class FirestoreClientMeta(type):
@@ -76,6 +77,7 @@ class FirestoreClientMeta(type):
     _transport_registry = OrderedDict()  # type: Dict[str, Type[FirestoreTransport]]
     _transport_registry["grpc"] = FirestoreGrpcTransport
     _transport_registry["grpc_asyncio"] = FirestoreGrpcAsyncIOTransport
+    _transport_registry["rest"] = FirestoreRestTransport
 
     def get_transport_class(
         cls,
