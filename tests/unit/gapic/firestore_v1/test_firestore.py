@@ -4318,7 +4318,6 @@ def test_list_documents_rest_required_fields(
 
     request_init = {}
     request_init["parent"] = ""
-    request_init["collection_id"] = ""
     request = request_type(**request_init)
     pb_request = request_type.pb(request)
     jsonified_request = json.loads(
@@ -4339,7 +4338,6 @@ def test_list_documents_rest_required_fields(
     # verify required fields with default values are now present
 
     jsonified_request["parent"] = "parent_value"
-    jsonified_request["collectionId"] = "collection_id_value"
 
     unset_fields = transport_class(
         credentials=ga_credentials.AnonymousCredentials()
@@ -4361,8 +4359,6 @@ def test_list_documents_rest_required_fields(
     # verify required fields with non-default values are left alone
     assert "parent" in jsonified_request
     assert jsonified_request["parent"] == "parent_value"
-    assert "collectionId" in jsonified_request
-    assert jsonified_request["collectionId"] == "collection_id_value"
 
     client = FirestoreClient(
         credentials=ga_credentials.AnonymousCredentials(),
@@ -4422,12 +4418,7 @@ def test_list_documents_rest_unset_required_fields():
                 "transaction",
             )
         )
-        & set(
-            (
-                "parent",
-                "collectionId",
-            )
-        )
+        & set(("parent",))
     )
 
 

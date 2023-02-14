@@ -576,8 +576,8 @@ class FirestoreRestTransport(FirestoreTransport):
     syncing, and querying data for your mobile, web, and IoT apps at
     global scale. Its client libraries provide live synchronization
     and offline support, while its security features and
-    integrations with Firebase and Google Cloud Platform (GCP)
-    accelerate building truly serverless apps.
+    integrations with Firebase and Google Cloud Platform accelerate
+    building truly serverless apps.
 
     This class defines the same methods as the primary client, so the
     primary client can load the underlying transport implementation
