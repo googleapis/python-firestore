@@ -289,18 +289,32 @@ def _where_unary_helper_field_filter(value, op_enum, op_string="=="):
     _compare_queries(query_inst, new_query, "_field_filters")
 
 
-def test_basequery_where_eq_null():
+@pytest.mark.parametrize(
+    "unary_helper_function",
+    [
+        (_where_unary_helper),
+        (_where_unary_helper_field_filter),
+    ],
+)
+def test_basequery_where_eq_null(unary_helper_function):
     from google.cloud.firestore_v1.types import StructuredQuery
 
     op_enum = StructuredQuery.UnaryFilter.Operator.IS_NULL
-    _where_unary_helper(None, op_enum)
+    unary_helper_function(None, op_enum)
 
 
-def test_basequery_where_gt_null():
+@pytest.mark.parametrize(
+    "unary_helper_function",
+    [
+        (_where_unary_helper),
+        (_where_unary_helper_field_filter),
+    ],
+)
+def test_basequery_where_gt_null(unary_helper_function):
     from google.cloud.firestore_v1.base_query import _BAD_OP_NAN_NULL
 
     with pytest.raises(ValueError) as exc:
-        _where_unary_helper(None, 0, op_string=">")
+        unary_helper_function(None, 0, op_string=">")
     assert str(exc.value) == _BAD_OP_NAN_NULL
 
 
