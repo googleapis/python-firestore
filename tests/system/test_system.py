@@ -1846,7 +1846,7 @@ def test_count_query_in_transaction(client, cleanup):
 
     with pytest.raises(ValueError) as exc:
         create_in_transaction_helper(transaction, client, collection_id, cleanup)
-        assert exc.exc_info == "Collection can't have more than 2 documents"
+    assert str(exc.value) == "Collection can't have more than 2 docs"
 
     collection = client.collection(collection_id)
 
@@ -1885,7 +1885,6 @@ def test_query_with_or_composite_filter(query_docs):
     lt_10 = 0
     for result in query.stream():
         value = result.get("stats.product")
-        print(value)
         assert value > 5 or value < 10
         if value > 5:
             gt_5 += 1
@@ -1907,8 +1906,6 @@ def test_query_with_complex_composite_filter(query_docs):
     sum_0 = 0
     sum_4 = 0
     for result in query.stream():
-        value = result.to_dict()
-        assert value["b"] == 0
         assert result.get("b") == 0
         assert result.get("stats.sum") == 0 or result.get("stats.sum") == 4
         if result.get("stats.sum") == 0:
@@ -1918,3 +1915,47 @@ def test_query_with_complex_composite_filter(query_docs):
 
     assert sum_0 > 0
     assert sum_4 > 0
+
+
+def test_or_query_in_transaction(client, cleanup):
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
+    document_id_2 = "doc2" + UNIQUE_RESOURCE_ID
+
+    document_1 = client.document(collection_id, document_id_1)
+    document_2 = client.document(collection_id, document_id_2)
+
+    cleanup(document_1.delete)
+    cleanup(document_2.delete)
+
+    document_1.create({"a": 1, "b": 2})
+    document_2.create({"a": 1, "b": 1})
+
+    transaction = client.transaction()
+
+    with pytest.raises(ValueError) as exc:
+        create_in_transaction_helper(transaction, client, collection_id, cleanup)
+    assert str(exc.value) == "Collection can't have more than 2 docs"
+
+    collection = client.collection(collection_id)
+
+    query = collection.where(filter=FieldFilter("a", "==", 1)).where(
+        filter=Or([FieldFilter("b", "==", 1), FieldFilter("b", "==", 2)])
+    )
+    b_1 = False
+    b_2 = False
+    count = 0
+    for result in query.stream():
+        assert result.get("a") == 1  # assert a==1 is True in both results
+        assert result.get("b") == 1 or result.get("b") == 2
+        if result.get("b") == 1:
+            b_1 = True
+        if result.get("b") == 2:
+            b_2 = True
+        count += 1
+
+    assert b_1 is True  # assert one of them is b == 1
+    assert b_2 is True  # assert one of them is b == 2
+    assert (
+        count == 2
+    )  # assert only 2 results, the third one was rolledback and not created
