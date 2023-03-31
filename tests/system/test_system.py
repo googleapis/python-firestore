@@ -1919,7 +1919,10 @@ def test_query_with_complex_composite_filter(query_docs):
 
     # b == 3 || (stats.sum == 4  && a == 4)
     comp_filter = Or(
-        filters=[FieldFilter("b", "==", 3), And([FieldFilter("stats.sum", "==", 4), FieldFilter("a", "==", 4)])]
+        filters=[
+            FieldFilter("b", "==", 3),
+            And([FieldFilter("stats.sum", "==", 4), FieldFilter("a", "==", 4)]),
+        ]
     )
     query = collection.where(filter=comp_filter)
 
