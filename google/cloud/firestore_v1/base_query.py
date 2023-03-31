@@ -439,7 +439,7 @@ class BaseQuery(object):
                 "'Or' and 'And' objects must be passed using keyword argument 'filter'"
             )
 
-        field_path_module.split_field_path(field_path)  # raises
+        field_path_module.split_field_path(field_path)
         new_filters = self._field_filters
 
         if field_path is not None and op_string is not None:
