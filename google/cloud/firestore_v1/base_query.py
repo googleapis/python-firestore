@@ -343,7 +343,7 @@ class BaseQuery(object):
         """
         field_paths = list(field_paths)
         for field_path in field_paths:
-            field_path_module.split_field_path(field_path)  # raises
+            field_path_module.split_field_path(field_path)
 
         new_projection = query.StructuredQuery.Projection(
             fields=[
