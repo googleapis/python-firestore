@@ -548,6 +548,21 @@ def query(query_docs):
     return query
 
 
+def test_query_stream_legacy_where(query_docs):
+    """Assert the legacy code still works and returns value"""
+    collection, stored, allowed_vals = query_docs
+    with pytest.warns(
+        UserWarning,
+        match="Detected filter using positional arguments",
+    ):
+        query = collection.where("a", "==", 1)
+        values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
+        assert len(values) == len(allowed_vals)
+        for key, value in values.items():
+            assert stored[key] == value
+            assert value["a"] == 1
+
+
 def test_query_stream_w_simple_field_eq_op(query_docs):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("a", "==", 1))
