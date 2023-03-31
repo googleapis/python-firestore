@@ -1659,6 +1659,7 @@ async def test_query_with_complex_composite_filter(query_docs):
     or_filter = Or(
         filters=[FieldFilter("stats.sum", "==", 0), FieldFilter("stats.sum", "==", 4)]
     )
+    # b == 0 && (stats.sum == 0 || stats.sum == 4)
     query = collection.where(filter=field_filter).where(filter=or_filter)
 
     sum_0 = 0
@@ -1673,6 +1674,25 @@ async def test_query_with_complex_composite_filter(query_docs):
 
     assert sum_0 > 0
     assert sum_4 > 0
+
+    # b == 3 || (stats.sum == 4  && a == 4)
+    comp_filter = Or(
+        filters=[FieldFilter("b", "==", 3), And([FieldFilter("stats.sum", "==", 4), FieldFilter("a", "==", 4)])]
+    )
+    query = collection.where(filter=comp_filter)
+
+    b_3 = False
+    b_not_3 = False
+    async for result in query.stream():
+        if result.get("b") == 3:
+            b_3 = True
+        else:
+            b_not_3 = True
+            assert result.get("stats.sum") == 4
+            assert result.get("a") == 4
+
+    assert b_3 is True
+    assert b_not_3 is True
 
 
 async def test_or_query_in_transaction(client, cleanup):
