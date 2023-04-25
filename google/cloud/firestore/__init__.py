@@ -29,8 +29,8 @@ from google.cloud.firestore_v1 import AsyncQuery
 from google.cloud.firestore_v1 import async_transactional
 from google.cloud.firestore_v1 import AsyncTransaction
 from google.cloud.firestore_v1 import AsyncWriteBatch
-from google.cloud.firestore_v1 import CountAggregation
 from google.cloud.firestore_v1 import Client
+from google.cloud.firestore_v1 import CountAggregation
 from google.cloud.firestore_v1 import CollectionGroup
 from google.cloud.firestore_v1 import CollectionReference
 from google.cloud.firestore_v1 import DELETE_FIELD
@@ -70,9 +70,9 @@ __all__: List[str] = [
     "AsyncTransaction",
     "AsyncWriteBatch",
     "Client",
+    "CountAggregation",
     "CollectionGroup",
     "CollectionReference",
-    "CountAggregation",
     "DELETE_FIELD",
     "DocumentReference",
     "DocumentSnapshot",
