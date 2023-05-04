@@ -21,10 +21,10 @@ import proto  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.firestore.v1',
+    package="google.firestore.v1",
     manifest={
-        'BitSequence',
-        'BloomFilter',
+        "BitSequence",
+        "BloomFilter",
     },
 )
 
@@ -96,10 +96,10 @@ class BloomFilter(proto.Message):
             The number of hashes used by the algorithm.
     """
 
-    bits: 'BitSequence' = proto.Field(
+    bits: "BitSequence" = proto.Field(
         proto.MESSAGE,
         number=1,
-        message='BitSequence',
+        message="BitSequence",
     )
     hash_count: int = proto.Field(
         proto.INT32,
