@@ -19,6 +19,8 @@ from datetime import datetime, timezone, timedelta
 
 from google.cloud.firestore_v1.base_aggregation import (
     CountAggregation,
+    SumAggregation,
+    AvgAggregation,
     AggregationResult,
 )
 
@@ -54,10 +56,21 @@ def test_async_aggregation_query_add_aggregation():
     aggregation_query = make_async_aggregation_query(query)
 
     aggregation_query.add_aggregation(CountAggregation(alias="all"))
+    aggregation_query.add_aggregation(SumAggregation("someref", alias="sum_all"))
+    aggregation_query.add_aggregation(AvgAggregation("otherref", alias="avg_all"))
 
-    assert len(aggregation_query._aggregations) == 1
+    assert len(aggregation_query._aggregations) == 3
+
     assert aggregation_query._aggregations[0].alias == "all"
     assert isinstance(aggregation_query._aggregations[0], CountAggregation)
+
+    assert aggregation_query._aggregations[1].field_ref == "someref"
+    assert aggregation_query._aggregations[1].alias == "sum_all"
+    assert isinstance(aggregation_query._aggregations[1], SumAggregation)
+
+    assert aggregation_query._aggregations[2].field_ref == "otherref"
+    assert aggregation_query._aggregations[2].alias == "avg_all"
+    assert isinstance(aggregation_query._aggregations[2], AvgAggregation)
 
 
 def test_async_aggregation_query_add_aggregations():
@@ -67,15 +80,28 @@ def test_async_aggregation_query_add_aggregations():
     aggregation_query = make_async_aggregation_query(query)
 
     aggregation_query.add_aggregations(
-        [CountAggregation(alias="all"), CountAggregation(alias="total")]
+        [
+            CountAggregation(alias="all"),
+            CountAggregation(alias="total"),
+            SumAggregation("someref", alias="sum_all"),
+            AvgAggregation("otherref", alias="avg_all"),
+        ]
     )
 
-    assert len(aggregation_query._aggregations) == 2
+    assert len(aggregation_query._aggregations) == 4
     assert aggregation_query._aggregations[0].alias == "all"
     assert aggregation_query._aggregations[1].alias == "total"
 
+    assert aggregation_query._aggregations[2].field_ref == "someref"
+    assert aggregation_query._aggregations[2].alias == "sum_all"
+
+    assert aggregation_query._aggregations[3].field_ref == "otherref"
+    assert aggregation_query._aggregations[3].alias == "avg_all"
+
     assert isinstance(aggregation_query._aggregations[0], CountAggregation)
     assert isinstance(aggregation_query._aggregations[1], CountAggregation)
+    assert isinstance(aggregation_query._aggregations[2], SumAggregation)
+    assert isinstance(aggregation_query._aggregations[3], AvgAggregation)
 
 
 def test_async_aggregation_query_count():
@@ -108,6 +134,41 @@ def test_async_aggregation_query_count_twice():
     assert isinstance(aggregation_query._aggregations[1], CountAggregation)
 
 
+def test_async_aggregation_sum():
+    client = make_async_client()
+    parent = client.collection("dee")
+    query = make_async_query(parent)
+    aggregation_query = make_async_aggregation_query(query)
+
+    aggregation_query.sum("someref", alias="sum_all")
+
+    assert len(aggregation_query._aggregations) == 1
+    assert aggregation_query._aggregations[0].alias == "sum_all"
+    assert aggregation_query._aggregations[0].field_ref == "someref"
+
+    assert isinstance(aggregation_query._aggregations[0], SumAggregation)
+
+
+def test_async_aggregation_query_sum_twice():
+    client = make_async_client()
+    parent = client.collection("dee")
+    query = make_async_query(parent)
+    aggregation_query = make_async_aggregation_query(query)
+
+    aggregation_query.sum("someref", alias="sum_all").sum(
+        "another_ref", alias="sum_total"
+    )
+
+    assert len(aggregation_query._aggregations) == 2
+    assert aggregation_query._aggregations[0].alias == "sum_all"
+    assert aggregation_query._aggregations[0].field_ref == "someref"
+    assert aggregation_query._aggregations[1].alias == "sum_total"
+    assert aggregation_query._aggregations[1].field_ref == "another_ref"
+
+    assert isinstance(aggregation_query._aggregations[0], SumAggregation)
+    assert isinstance(aggregation_query._aggregations[1], SumAggregation)
+
+
 def test_async_aggregation_query_to_protobuf():
     client = make_async_client()
     parent = client.collection("dee")
@@ -115,11 +176,15 @@ def test_async_aggregation_query_to_protobuf():
     aggregation_query = make_async_aggregation_query(query)
 
     aggregation_query.count(alias="all")
+    aggregation_query.sum("someref", alias="sum_all")
+    aggregation_query.avg("someref", alias="avg_all")
     pb = aggregation_query._to_protobuf()
 
     assert pb.structured_query == parent._query()._to_protobuf()
-    assert len(pb.aggregations) == 1
+    assert len(pb.aggregations) == 3
     assert pb.aggregations[0] == aggregation_query._aggregations[0]._to_protobuf()
+    assert pb.aggregations[1] == aggregation_query._aggregations[1]._to_protobuf()
+    assert pb.aggregations[2] == aggregation_query._aggregations[2]._to_protobuf()
 
 
 def test_async_aggregation_query_prep_stream():
@@ -129,7 +194,8 @@ def test_async_aggregation_query_prep_stream():
     aggregation_query = make_async_aggregation_query(query)
 
     aggregation_query.count(alias="all")
-
+    aggregation_query.sum("someref", alias="sum_all")
+    aggregation_query.avg("someref", alias="avg_all")
     request, kwargs = aggregation_query._prep_stream()
 
     parent_path, _ = parent._parent_info()
@@ -152,6 +218,8 @@ def test_async_aggregation_query_prep_stream_with_transaction():
     query = make_async_query(parent)
     aggregation_query = make_async_aggregation_query(query)
     aggregation_query.count(alias="all")
+    aggregation_query.sum("someref", alias="sum_all")
+    aggregation_query.avg("someref", alias="avg_all")
 
     request, kwargs = aggregation_query._prep_stream(transaction=transaction)
 

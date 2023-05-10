@@ -1807,6 +1807,200 @@ def test_count_query_stream_empty_aggregation(query):
     assert "Aggregations can not be empty" in exc_info.value.message
 
 
+def test_sum_query_get_default_alias(query):
+    sum_query = query.sum("stats.product")
+    result = sum_query.get()
+    assert len(result) == 1
+    for r in result[0]:
+        assert r.alias == "field_1"
+        assert r.value == 6
+
+
+def test_sum_query_get_with_alias(query):
+    sum_query = query.sum("stats.product", alias="total")
+    result = sum_query.get()
+    assert len(result) == 1
+    for r in result[0]:
+        assert r.alias == "total"
+        assert r.value == 6
+
+
+def test_sum_query_get_with_limit(query):
+    # sum without limit
+    sum_query = query.sum("stats.product", alias="total")
+    result = sum_query.get()
+    assert len(result) == 1
+    for r in result[0]:
+        assert r.alias == "total"
+        assert r.value == 6
+
+    # sum with limit
+    sum_query = query.limit(2).sum("stats.product", alias="total")
+
+    result = sum_query.get()
+    assert len(result) == 1
+    for r in result[0]:
+        assert r.alias == "total"
+        assert r.value == 1
+
+
+def test_sum_query_get_multiple_aggregations(query):
+    sum_query = query.sum("stats.product", alias="total").sum(
+        "stats.product", alias="all"
+    )
+
+    result = sum_query.get()
+    assert len(result[0]) == 2
+
+    expected_aliases = ["total", "all"]
+    found_alias = set(
+        [r.alias for r in result[0]]
+    )  # ensure unique elements in the result
+    assert len(found_alias) == 2
+    assert found_alias == set(expected_aliases)
+
+
+def test_sum_query_stream_default_alias(query):
+    sum_query = query.sum("stats.product")
+    for result in sum_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "field_1"
+            assert aggregation_result.value == 6
+
+
+def test_sum__query_stream_with_alias(query):
+
+    sum_query = query.sum("stats.product", alias="total")
+    for result in sum_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "total"
+            assert aggregation_result.value == 6
+
+
+def test_sum_query_stream_with_limit(query):
+    # sum without limit
+    sum_query = query.sum("stats.product", alias="total")
+    for result in sum_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "total"
+            assert aggregation_result.value == 5
+
+    # sum with limit
+    sum_query = query.limit(2).sum("stats.product", alias="total")
+
+    for result in sum_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "total"
+            assert aggregation_result.value == 1
+
+
+def test_sum_query_stream_multiple_aggregations(query):
+    sum_query = query.sum("stats.product", alias="total").sum(
+        "stats.product", alias="all"
+    )
+
+    for result in sum_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias in ["total", "all"]
+
+
+def test_avg_query_get_default_alias(query):
+    avg_query = query.avg("stats.product")
+    result = avg_query.get()
+    assert len(result) == 1
+    for r in result[0]:
+        assert r.alias == "field_1"
+        assert r.value == 1.5
+
+
+def test_avg_query_get_with_alias(query):
+    avg_query = query.avg("stats.product", alias="total")
+    result = avg_query.get()
+    assert len(result) == 1
+    for r in result[0]:
+        assert r.alias == "total"
+        assert r.value == 1.5
+
+
+def test_avg_query_get_with_limit(query):
+    # avg without limit
+    avg_query = query.avg("stats.product", alias="total")
+    result = avg_query.get()
+    assert len(result) == 1
+    for r in result[0]:
+        assert r.alias == "total"
+        assert r.value == 1.5
+
+    # avg with limit
+    avg_query = query.limit(2).avg("stats.product", alias="total")
+
+    result = avg_query.get()
+    assert len(result) == 1
+    for r in result[0]:
+        assert r.alias == "total"
+        assert r.value == 1
+
+
+def test_avg_query_get_multiple_aggregations(query):
+    avg_query = query.avg("stats.product", alias="total").avg(
+        "stats.product", alias="all"
+    )
+
+    result = avg_query.get()
+    assert len(result[0]) == 2
+
+    expected_aliases = ["total", "all"]
+    found_alias = set(
+        [r.alias for r in result[0]]
+    )  # ensure unique elements in the result
+    assert len(found_alias) == 2
+    assert found_alias == set(expected_aliases)
+
+
+def test_avg_query_stream_default_alias(query):
+    avg_query = query.avg("stats.product")
+    for result in avg_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "field_1"
+            assert aggregation_result.value == 1.5
+
+
+def test_avg__query_stream_with_alias(query):
+
+    avg_query = query.avg("stats.product", alias="total")
+    for result in avg_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "total"
+            assert aggregation_result.value == 1.5
+
+
+def test_avg_query_stream_with_limit(query):
+    # avg without limit
+    avg_query = query.sum("stats.product", alias="total")
+    for result in avg_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "total"
+            assert aggregation_result.value == 1.5
+
+    # avg with limit
+    avg_query = query.limit(2).avg("stats.product", alias="total")
+
+    for result in avg_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias == "total"
+            assert aggregation_result.value == 0.5
+
+
+def test_avg_query_stream_multiple_aggregations(query):
+    avg_query = query.avg("stats.product", alias="total").avg(
+        "stats.product", alias="all"
+    )
+
+    for result in avg_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.alias in ["total", "all"]
+
+
 @firestore.transactional
 def create_in_transaction(collection_id, transaction, cleanup):
     collection = client.collection(collection_id)

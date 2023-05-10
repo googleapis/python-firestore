@@ -963,6 +963,16 @@ class BaseQuery(object):
     ) -> Type["firestore_v1.base_aggregation.BaseAggregationQuery"]:
         raise NotImplementedError
 
+    def sum(
+        self, property_ref: str, alias: str | None = None
+    ) -> Type["firestore_v1.base_aggregation.BaseAggregationQuery"]:
+        raise NotImplementedError
+
+    def avg(
+        self, property_ref: str, alias: str | None = None
+    ) -> Type["firestore_v1.base_aggregation.BaseAggregationQuery"]:
+        raise NotImplementedError
+
     def get(
         self,
         transaction=None,

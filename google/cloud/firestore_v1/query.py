@@ -248,6 +248,34 @@ class Query(BaseQuery):
         """
         return aggregation.AggregationQuery(self).count(alias=alias)
 
+    def sum(
+        self, field_ref: str, alias: str | None = None
+    ) -> Type["firestore_v1.aggregation.AggregationQuery"]:
+        """
+        Adds a sum over the query.
+
+        :type field_ref: str
+        :param field_ref: The field_ref for the sum
+
+        :type alias: str
+        :param alias: (Optional) The alias for the sum
+        """
+        return aggregation.AggregationQuery(self).sum(field_ref, alias=alias)
+
+    def avg(
+        self, field_ref: str, alias: str | None = None
+    ) -> Type["firestore_v1.aggregation.AggregationQuery"]:
+        """
+        Adds an avg over the query.
+
+        :type field_ref: str
+        :param field_ref: The field_ref for the avg
+
+        :type alias: str
+        :param alias: (Optional) The alias for the avg
+        """
+        return aggregation.AggregationQuery(self).avg(field_ref, alias=alias)
+
     def stream(
         self,
         transaction=None,

@@ -231,6 +231,40 @@ class AsyncQuery(BaseQuery):
         """
         return AsyncAggregationQuery(self).count(alias=alias)
 
+    def sum(
+        self, field_ref: str, alias: str | None = None
+    ) -> Type["firestore_v1.async_aggregation.AsyncAggregationQuery"]:
+        """Adds a sum over the nested query.
+
+        Args:
+            field(str): The field for the sum
+
+            alias
+                (Optional[str]): The alias for the sum
+
+        Returns:
+            :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery`:
+            An instance of an AsyncAggregationQuery object
+        """
+        return AsyncAggregationQuery(self).sum(field_ref, alias=alias)
+
+    def avg(
+        self, field_ref: str, alias: str | None = None
+    ) -> Type["firestore_v1.async_aggregation.AsyncAggregationQuery"]:
+        """Adds an avg over the nested query.
+
+        Args:
+            field_ref(str): The field_ref for the avg
+
+            alias
+                (Optional[str]): The alias for the avg
+
+        Returns:
+            :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery`:
+            An instance of an AsyncAggregationQuery object
+        """
+        return AsyncAggregationQuery(self).avg(field_ref, alias=alias)
+
     async def stream(
         self,
         transaction=None,

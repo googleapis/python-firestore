@@ -507,6 +507,30 @@ class BaseCollectionReference(object):
         """
         return self._aggregation_query().count(alias=alias)
 
+    def sum(self, field_ref: str, alias=None):
+        """
+        Adds a sum over the nested query.
+
+        :type field_ref: str
+        :param field_ref: The field_ref for the aggregation
+
+        :type alias: str
+        :param alias: (Optional) The alias for the aggregation
+        """
+        return self._aggregation_query().sum(field_ref, alias=alias)
+
+    def avg(self, field_ref: str, alias=None):
+        """
+        Adds an avg over the nested query.
+
+        :type field_ref: str
+        :param field_ref: The field_ref for the aggregation
+
+        :type alias: str
+        :param alias: (Optional) The alias for the aggregation
+        """
+        return self._aggregation_query().avg(field_ref, alias=alias)
+
 
 def _auto_id() -> str:
     """Generate a "random" automatically generated ID.
