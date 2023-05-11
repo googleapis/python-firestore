@@ -17,7 +17,7 @@ from typing import NoReturn, Optional
 
 
 def utcnow():
-    return datetime.datetime.utcnow()
+    return datetime.datetime.now(tz=datetime.timezone.utc)
 
 
 default_initial_tokens: int = 500

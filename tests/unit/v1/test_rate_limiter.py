@@ -19,7 +19,7 @@ import mock
 
 # Pick a point in time as the center of our universe for this test run.
 # It is okay for this to update every time the tests are run.
-fake_now = datetime.datetime.utcnow()
+fake_now = datetime.datetime.now(tz=datetime.timezone.utc)
 
 
 def now_plus_n(seconds: int = 0, microseconds: int = 0) -> datetime.timedelta:

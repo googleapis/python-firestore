@@ -1128,7 +1128,9 @@ def build_timestamp(
     dt: Optional[Union[DatetimeWithNanoseconds, datetime.datetime]] = None
 ) -> Timestamp:
     """Returns the supplied datetime (or "now") as a Timestamp"""
-    return _datetime_to_pb_timestamp(dt or DatetimeWithNanoseconds.utcnow())
+    return _datetime_to_pb_timestamp(
+        dt or DatetimeWithNanoseconds.now(tz=datetime.timezone.utc)
+    )
 
 
 def compare_timestamps(

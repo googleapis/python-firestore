@@ -33,7 +33,6 @@ from google.api_core.exceptions import FailedPrecondition
 from google.api_core.exceptions import InvalidArgument
 from google.api_core.exceptions import NotFound
 from google.cloud._helpers import _datetime_to_pb_timestamp
-from google.cloud._helpers import UTC
 from google.cloud import firestore_v1 as firestore
 from google.cloud.firestore_v1.base_query import FieldFilter, And, Or
 
@@ -118,7 +117,7 @@ async def test_collections_w_import():
 
 
 async def test_create_document(client, cleanup):
-    now = datetime.datetime.utcnow().replace(tzinfo=UTC)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     document_id = "doc" + UNIQUE_RESOURCE_ID
     document = client.document(collection_id, document_id)
@@ -394,7 +393,7 @@ def check_snapshot(snapshot, document, data, write_result):
 
 
 async def test_document_get(client, cleanup):
-    now = datetime.datetime.utcnow().replace(tzinfo=UTC)
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
     document_id = "for-get" + UNIQUE_RESOURCE_ID
     document = client.document("created", document_id)
     # Add to clean-up before API request (in case ``create()`` fails).
