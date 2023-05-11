@@ -17,7 +17,7 @@ import types
 import mock
 import pytest
 
-from google.cloud.firestore_v1.client import DEFAULT_DATABASE
+from google.cloud.firestore_v1.base_client import DEFAULT_DATABASE
 
 from tests.unit.v1.test_base_query import _make_cursor_pb
 from tests.unit.v1.test_base_query import _make_query_response
