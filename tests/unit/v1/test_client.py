@@ -60,6 +60,17 @@ def test_client_constructor_defaults(database, expected):
     assert client._client_info is _CLIENT_INFO
 
 
+def test_client_constructor_without_db():
+    from google.cloud.firestore_v1.client import _CLIENT_INFO
+
+    credentials = _make_credentials()
+    client = _make_client(project=PROJECT, credentials=credentials)
+    assert client.project == PROJECT
+    assert client._credentials == credentials
+    assert client._database == DEFAULT_DATABASE
+    assert client._client_info is _CLIENT_INFO
+
+
 @pytest.mark.parametrize(
     "database, expected",
     [
