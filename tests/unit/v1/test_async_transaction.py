@@ -14,8 +14,9 @@
 
 import mock
 import pytest
+import types
 
-from tests.unit.v1.test__helpers import AsyncMock
+from tests.unit.v1.test__helpers import AsyncMock, AsyncIter
 
 
 def _make_async_transaction(*args, **kwargs):
@@ -287,19 +288,21 @@ async def test_asynctransaction__commit_failure():
 async def _get_all_helper(retry=None, timeout=None):
     from google.cloud.firestore_v1 import _helpers
 
-    client = AsyncMock(spec=["get_all"])
+    client = mock.Mock(spec=["get_all"])
+    response_iterator = AsyncIter([])
+    client.get_all.return_value = response_iterator
     transaction = _make_async_transaction(client)
     ref1, ref2 = mock.Mock(), mock.Mock()
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
-    result = await transaction.get_all([ref1, ref2], **kwargs)
-
+    snapshots = transaction.get_all([ref1, ref2], **kwargs)
+    assert isinstance(snapshots, types.AsyncGeneratorType)
+    _ = [s async for s in snapshots]
     client.get_all.assert_called_once_with(
         [ref1, ref2],
         transaction=transaction,
         **kwargs,
     )
-    assert result is client.get_all.return_value
 
 
 @pytest.mark.asyncio
@@ -320,15 +323,17 @@ async def _get_w_document_ref_helper(retry=None, timeout=None):
     from google.cloud.firestore_v1.async_document import AsyncDocumentReference
     from google.cloud.firestore_v1 import _helpers
 
-    client = AsyncMock(spec=["get_all"])
+    client = mock.Mock(spec=["get_all"])
+    response_iterator = AsyncIter([])
+    client.get_all.return_value = response_iterator
     transaction = _make_async_transaction(client)
     ref = AsyncDocumentReference("documents", "doc-id")
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
-    result = await transaction.get(ref, **kwargs)
-
+    snapshots = transaction.get(ref, **kwargs)
+    assert isinstance(snapshots, types.AsyncGeneratorType)
+    _ = [s async for s in snapshots]
     client.get_all.assert_called_once_with([ref], transaction=transaction, **kwargs)
-    assert result is client.get_all.return_value
 
 
 @pytest.mark.asyncio
@@ -352,19 +357,18 @@ async def _get_w_query_helper(retry=None, timeout=None):
     client = AsyncMock(spec=[])
     transaction = _make_async_transaction(client)
     query = AsyncQuery(parent=AsyncMock(spec=[]))
-    query.stream = AsyncMock()
+    query.stream = mock.Mock()
+    response_iterator = AsyncIter([])
+    query.stream.return_value = response_iterator
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
-    result = await transaction.get(
-        query,
-        **kwargs,
-    )
-
+    snapshots = transaction.get(query, **kwargs)
+    assert isinstance(snapshots, types.AsyncGeneratorType)
+    _ = [s async for s in snapshots]
     query.stream.assert_called_once_with(
         transaction=transaction,
         **kwargs,
     )
-    assert result is query.stream.return_value
 
 
 @pytest.mark.asyncio
@@ -383,7 +387,8 @@ async def test_asynctransaction_get_failure():
     transaction = _make_async_transaction(client)
     ref_or_query = object()
     with pytest.raises(ValueError):
-        await transaction.get(ref_or_query)
+        async for _ in transaction.get(ref_or_query):
+            pass
 
 
 def _make_async_transactional(*args, **kwargs):

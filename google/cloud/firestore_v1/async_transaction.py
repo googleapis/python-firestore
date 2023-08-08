@@ -169,7 +169,10 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
             query, or :data:`None` if the document does not exist.
         """
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
-        return await self._client.get_all(references, transaction=self, **kwargs)
+        async for snapshot in self._client.get_all(
+            references, transaction=self, **kwargs
+        ):
+            yield snapshot
 
     async def get(
         self,
@@ -193,11 +196,13 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         """
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         if isinstance(ref_or_query, AsyncDocumentReference):
-            return await self._client.get_all(
+            async for snapshot in self._client.get_all(
                 [ref_or_query], transaction=self, **kwargs
-            )
+            ):
+                yield snapshot
         elif isinstance(ref_or_query, AsyncQuery):
-            return await ref_or_query.stream(transaction=self, **kwargs)
+            async for snapshot in ref_or_query.stream(transaction=self, **kwargs):
+                yield snapshot
         else:
             raise ValueError(
                 'Value for argument "ref_or_query" must be a AsyncDocumentReference or a AsyncQuery.'
