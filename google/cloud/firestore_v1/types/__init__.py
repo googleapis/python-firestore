@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,10 @@
 #
 from .aggregation_result import (
     AggregationResult,
+)
+from .bloom_filter import (
+    BitSequence,
+    BloomFilter,
 )
 from .common import (
     DocumentMask,
@@ -75,6 +79,8 @@ from .write import (
 
 __all__ = (
     "AggregationResult",
+    "BitSequence",
+    "BloomFilter",
     "DocumentMask",
     "Precondition",
     "TransactionOptions",

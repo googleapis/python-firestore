@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ from typing import MutableMapping, MutableSequence
 
 import proto  # type: ignore
 
+from google.cloud.firestore_v1.types import bloom_filter
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document as gf_document
 from google.protobuf import timestamp_pb2  # type: ignore
@@ -471,6 +472,27 @@ class ExistenceFilter(proto.Message):
             If different from the count of documents in the client that
             match, the client must manually determine which documents no
             longer match the target.
+
+            The client can use the ``unchanged_names`` bloom filter to
+            assist with this determination by testing ALL the document
+            names against the filter; if the document name is NOT in the
+            filter, it means the document no longer matches the target.
+        unchanged_names (google.cloud.firestore_v1.types.BloomFilter):
+            A bloom filter that, despite its name, contains the UTF-8
+            byte encodings of the resource names of ALL the documents
+            that match
+            [target_id][google.firestore.v1.ExistenceFilter.target_id],
+            in the form
+            ``projects/{project_id}/databases/{database_id}/documents/{document_path}``.
+
+            This bloom filter may be omitted at the server's discretion,
+            such as if it is deemed that the client will not make use of
+            it or if it is too computationally expensive to calculate or
+            transmit. Clients must gracefully handle this field being
+            absent by falling back to the logic used before this field
+            existed; that is, re-add the target without a resume token
+            to figure out which documents in the client's cache are out
+            of sync.
     """
 
     target_id: int = proto.Field(
@@ -480,6 +502,11 @@ class ExistenceFilter(proto.Message):
     count: int = proto.Field(
         proto.INT32,
         number=2,
+    )
+    unchanged_names: bloom_filter.BloomFilter = proto.Field(
+        proto.MESSAGE,
+        number=3,
+        message=bloom_filter.BloomFilter,
     )
 
 

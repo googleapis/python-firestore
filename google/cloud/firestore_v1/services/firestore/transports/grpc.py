@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -555,8 +555,8 @@ class FirestoreGrpcTransport(FirestoreTransport):
         r"""Return a callable for the write method over gRPC.
 
         Streams batches of document updates and deletes, in
-        order. This method is only available via the gRPC API
-        (not REST).
+        order. This method is only available via gRPC or
+        WebChannel (not REST).
 
         Returns:
             Callable[[~.WriteRequest],
@@ -581,7 +581,7 @@ class FirestoreGrpcTransport(FirestoreTransport):
         r"""Return a callable for the listen method over gRPC.
 
         Listens to changes. This method is only available via
-        the gRPC API (not REST).
+        gRPC or WebChannel (not REST).
 
         Returns:
             Callable[[~.ListenRequest],

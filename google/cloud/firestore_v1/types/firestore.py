@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ from google.cloud.firestore_v1.types import document as gf_document
 from google.cloud.firestore_v1.types import query as gf_query
 from google.cloud.firestore_v1.types import write
 from google.protobuf import timestamp_pb2  # type: ignore
+from google.protobuf import wrappers_pb2  # type: ignore
 from google.rpc import status_pb2  # type: ignore
 
 
@@ -92,8 +93,11 @@ class GetDocumentRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads the version of the document at the
-            given time. This may not be older than 270
-            seconds.
+            given time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -185,7 +189,10 @@ class ListDocumentsRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Perform the read at the provided time.
-            This may not be older than 270 seconds.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
         show_missing (bool):
@@ -446,7 +453,11 @@ class BatchGetDocumentsRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads documents as they were at the given
-            time. This may not be older than 270 seconds.
+            time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -698,7 +709,11 @@ class RunQueryRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads documents as they were at the given
-            time. This may not be older than 270 seconds.
+            time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -835,10 +850,10 @@ class RunAggregationQueryRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Executes the query at the given timestamp.
-
-            Requires:
-
-            -  Cannot be more than 270 seconds in the past.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -886,8 +901,14 @@ class RunAggregationQueryResponse(proto.Message):
             Only present on the first response when the
             request requested to start a new transaction.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
-            The time at which the aggregate value is
-            valid for.
+            The time at which the aggregate result was computed. This is
+            always monotonically increasing; in this case, the previous
+            AggregationResult in the result stream are guaranteed not to
+            have changed between their ``read_time`` and this one.
+
+            If the query returns no results, a response with
+            ``read_time`` and no ``result`` will be sent, and this
+            represents the time at which the query was run.
     """
 
     result: aggregation_result.AggregationResult = proto.Field(
@@ -968,7 +989,11 @@ class PartitionQueryRequest(proto.Message):
             ``partition_count``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads documents as they were at the given
-            time. This may not be older than 270 seconds.
+            time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -1332,6 +1357,15 @@ class Target(proto.Message):
         once (bool):
             If the target should be removed once it is
             current and consistent.
+        expected_count (google.protobuf.wrappers_pb2.Int32Value):
+            The number of documents that last matched the query at the
+            resume token or read time.
+
+            This value is only relevant when a ``resume_type`` is
+            provided. This value being present and greater than zero
+            signals that the client wants
+            ``ExistenceFilter.unchanged_names`` to be included in the
+            response.
     """
 
     class DocumentsTarget(proto.Message):
@@ -1412,6 +1446,11 @@ class Target(proto.Message):
     once: bool = proto.Field(
         proto.BOOL,
         number=6,
+    )
+    expected_count: wrappers_pb2.Int32Value = proto.Field(
+        proto.MESSAGE,
+        number=12,
+        message=wrappers_pb2.Int32Value,
     )
 
 
@@ -1529,7 +1568,11 @@ class ListCollectionIdsRequest(proto.Message):
             [ListCollectionIdsResponse][google.firestore.v1.ListCollectionIdsResponse].
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads documents as they were at the given
-            time. This may not be older than 270 seconds.
+            time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """

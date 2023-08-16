@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -38,7 +38,12 @@ class StructuredQuery(proto.Message):
 
     Attributes:
         select (google.cloud.firestore_v1.types.StructuredQuery.Projection):
-            The projection to return.
+            Optional sub-set of the fields to return.
+
+            This acts as a
+            [DocumentMask][google.firestore.v1.DocumentMask] over the
+            documents returned from a query. When not set, assumes that
+            the caller wants all fields returned.
         from_ (MutableSequence[google.cloud.firestore_v1.types.StructuredQuery.CollectionSelector]):
             The collections to query.
         where (google.cloud.firestore_v1.types.StructuredQuery.Filter):
@@ -328,18 +333,20 @@ class StructuredQuery(proto.Message):
 
                     Requires:
 
-                    -  That ``value`` is a non-empty ``ArrayValue`` with at most
-                       10 values.
-                    -  No other ``IN`` or ``ARRAY_CONTAINS_ANY`` or ``NOT_IN``.
+                    -  That ``value`` is a non-empty ``ArrayValue``, subject to
+                       disjunction limits.
+                    -  No ``NOT_IN`` filters in the same query.
                 ARRAY_CONTAINS_ANY (9):
                     The given ``field`` is an array that contains any of the
                     values in the given array.
 
                     Requires:
 
-                    -  That ``value`` is a non-empty ``ArrayValue`` with at most
-                       10 values.
-                    -  No other ``IN`` or ``ARRAY_CONTAINS_ANY`` or ``NOT_IN``.
+                    -  That ``value`` is a non-empty ``ArrayValue``, subject to
+                       disjunction limits.
+                    -  No other ``ARRAY_CONTAINS_ANY`` filters within the same
+                       disjunction.
+                    -  No ``NOT_IN`` filters in the same query.
                 NOT_IN (10):
                     The value of the ``field`` is not in the given array.
 
@@ -347,8 +354,9 @@ class StructuredQuery(proto.Message):
 
                     -  That ``value`` is a non-empty ``ArrayValue`` with at most
                        10 values.
-                    -  No other ``IN``, ``ARRAY_CONTAINS_ANY``, ``NOT_IN``,
-                       ``NOT_EQUAL``, ``IS_NOT_NULL``, or ``IS_NOT_NAN``.
+                    -  No other ``OR``, ``IN``, ``ARRAY_CONTAINS_ANY``,
+                       ``NOT_IN``, ``NOT_EQUAL``, ``IS_NOT_NULL``, or
+                       ``IS_NOT_NAN``.
                     -  That ``field`` comes first in the ``order_by``.
             """
             OPERATOR_UNSPECIFIED = 0
@@ -558,13 +566,26 @@ class StructuredAggregationQuery(proto.Message):
     """
 
     class Aggregation(proto.Message):
-        r"""Defines a aggregation that produces a single result.
+        r"""Defines an aggregation that produces a single result.
+
+        This message has `oneof`_ fields (mutually exclusive fields).
+        For each oneof, at most one member field can be set at the same time.
+        Setting any member of the oneof automatically clears all other
+        members.
 
         .. _oneof: https://proto-plus-python.readthedocs.io/en/stable/fields.html#oneofs-mutually-exclusive-fields
 
         Attributes:
             count (google.cloud.firestore_v1.types.StructuredAggregationQuery.Aggregation.Count):
                 Count aggregator.
+
+                This field is a member of `oneof`_ ``operator``.
+            sum (google.cloud.firestore_v1.types.StructuredAggregationQuery.Aggregation.Sum):
+                Sum aggregator.
+
+                This field is a member of `oneof`_ ``operator``.
+            avg (google.cloud.firestore_v1.types.StructuredAggregationQuery.Aggregation.Avg):
+                Average aggregator.
 
                 This field is a member of `oneof`_ ``operator``.
             alias (str):
@@ -581,7 +602,7 @@ class StructuredAggregationQuery(proto.Message):
                      COUNT_UP_TO(1) AS count_up_to_1,
                      COUNT_UP_TO(2),
                      COUNT_UP_TO(3) AS count_up_to_3,
-                     COUNT_UP_TO(4)
+                     COUNT(*)
                    OVER (
                      ...
                    );
@@ -594,7 +615,7 @@ class StructuredAggregationQuery(proto.Message):
                      COUNT_UP_TO(1) AS count_up_to_1,
                      COUNT_UP_TO(2) AS field_1,
                      COUNT_UP_TO(3) AS count_up_to_3,
-                     COUNT_UP_TO(4) AS field_2
+                     COUNT(*) AS field_2
                    OVER (
                      ...
                    );
@@ -618,7 +639,7 @@ class StructuredAggregationQuery(proto.Message):
                     documents to count.
 
                     This provides a way to set an upper bound on the number of
-                    documents to scan, limiting latency and cost.
+                    documents to scan, limiting latency, and cost.
 
                     Unspecified is interpreted as no bound.
 
@@ -639,11 +660,82 @@ class StructuredAggregationQuery(proto.Message):
                 message=wrappers_pb2.Int64Value,
             )
 
+        class Sum(proto.Message):
+            r"""Sum of the values of the requested field.
+
+            -  Only numeric values will be aggregated. All non-numeric values
+               including ``NULL`` are skipped.
+
+            -  If the aggregated values contain ``NaN``, returns ``NaN``.
+               Infinity math follows IEEE-754 standards.
+
+            -  If the aggregated value set is empty, returns 0.
+
+            -  Returns a 64-bit integer if all aggregated numbers are integers
+               and the sum result does not overflow. Otherwise, the result is
+               returned as a double. Note that even if all the aggregated values
+               are integers, the result is returned as a double if it cannot fit
+               within a 64-bit signed integer. When this occurs, the returned
+               value will lose precision.
+
+            -  When underflow occurs, floating-point aggregation is
+               non-deterministic. This means that running the same query
+               repeatedly without any changes to the underlying values could
+               produce slightly different results each time. In those cases,
+               values should be stored as integers over floating-point numbers.
+
+            Attributes:
+                field (google.cloud.firestore_v1.types.StructuredQuery.FieldReference):
+                    The field to aggregate on.
+            """
+
+            field: "StructuredQuery.FieldReference" = proto.Field(
+                proto.MESSAGE,
+                number=1,
+                message="StructuredQuery.FieldReference",
+            )
+
+        class Avg(proto.Message):
+            r"""Average of the values of the requested field.
+
+            -  Only numeric values will be aggregated. All non-numeric values
+               including ``NULL`` are skipped.
+
+            -  If the aggregated values contain ``NaN``, returns ``NaN``.
+               Infinity math follows IEEE-754 standards.
+
+            -  If the aggregated value set is empty, returns ``NULL``.
+
+            -  Always returns the result as a double.
+
+            Attributes:
+                field (google.cloud.firestore_v1.types.StructuredQuery.FieldReference):
+                    The field to aggregate on.
+            """
+
+            field: "StructuredQuery.FieldReference" = proto.Field(
+                proto.MESSAGE,
+                number=1,
+                message="StructuredQuery.FieldReference",
+            )
+
         count: "StructuredAggregationQuery.Aggregation.Count" = proto.Field(
             proto.MESSAGE,
             number=1,
             oneof="operator",
             message="StructuredAggregationQuery.Aggregation.Count",
+        )
+        sum: "StructuredAggregationQuery.Aggregation.Sum" = proto.Field(
+            proto.MESSAGE,
+            number=2,
+            oneof="operator",
+            message="StructuredAggregationQuery.Aggregation.Sum",
+        )
+        avg: "StructuredAggregationQuery.Aggregation.Avg" = proto.Field(
+            proto.MESSAGE,
+            number=3,
+            oneof="operator",
+            message="StructuredAggregationQuery.Aggregation.Avg",
         )
         alias: str = proto.Field(
             proto.STRING,
