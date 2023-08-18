@@ -54,10 +54,10 @@ def test_sum_aggregation_to_pb():
     sum_aggregation = SumAggregation("someref", alias="total")
 
     expected_aggregation_query_pb = query_pb2.StructuredAggregationQuery.Aggregation()
-    expected_aggregation_query_pb.sum_ = (
+    expected_aggregation_query_pb.sum = (
         query_pb2.StructuredAggregationQuery.Aggregation.Sum()
     )
-    expected_aggregation_query_pb.sum_.field.field_path = "someref"
+    expected_aggregation_query_pb.sum.field.field_path = "someref"
 
     expected_aggregation_query_pb.alias = sum_aggregation.alias
     assert sum_aggregation._to_protobuf() == expected_aggregation_query_pb

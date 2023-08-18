@@ -89,8 +89,8 @@ class SumAggregation(BaseAggregation):
         """Convert this instance to the protobuf representation"""
         aggregation_pb = StructuredAggregationQuery.Aggregation()
         aggregation_pb.alias = self.alias
-        aggregation_pb.sum_ = StructuredAggregationQuery.Aggregation.Sum()
-        aggregation_pb.sum_.field.field_path = self.field_ref
+        aggregation_pb.sum = StructuredAggregationQuery.Aggregation.Sum()
+        aggregation_pb.sum.field.field_path = self.field_ref
         return aggregation_pb
 
 
