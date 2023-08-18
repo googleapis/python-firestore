@@ -221,7 +221,6 @@ def test_aggregation_query_sum_no_alias():
     assert isinstance(aggregation_query._aggregations[0], SumAggregation)
 
 
-
 def test_aggregation_query_avg():
     client = make_client()
     parent = client.collection("dee")
@@ -268,7 +267,6 @@ def test_aggregation_query_avg_no_alias():
     assert aggregation_query._aggregations[0].field_ref == "someref"
 
     assert isinstance(aggregation_query._aggregations[0], AvgAggregation)
-
 
 
 def test_aggregation_query_to_protobuf():
