@@ -169,6 +169,69 @@ def test_async_aggregation_query_sum_twice():
     assert isinstance(aggregation_query._aggregations[1], SumAggregation)
 
 
+def test_async_aggregation_sum_no_alias():
+    client = make_async_client()
+    parent = client.collection("dee")
+    query = make_async_query(parent)
+    aggregation_query = make_async_aggregation_query(query)
+
+    aggregation_query.sum("someref")
+
+    assert len(aggregation_query._aggregations) == 1
+    assert aggregation_query._aggregations[0].alias is None
+    assert aggregation_query._aggregations[0].field_ref == "someref"
+
+    assert isinstance(aggregation_query._aggregations[0], SumAggregation)
+
+
+def test_aggregation_query_avg():
+    client = make_async_client()
+    parent = client.collection("dee")
+    query = make_async_query(parent)
+    aggregation_query = make_async_aggregation_query(query)
+
+    aggregation_query.avg("someref", alias="all")
+
+    assert len(aggregation_query._aggregations) == 1
+    assert aggregation_query._aggregations[0].alias == "all"
+    assert aggregation_query._aggregations[0].field_ref == "someref"
+
+    assert isinstance(aggregation_query._aggregations[0], AvgAggregation)
+
+
+def test_aggregation_query_avg_twice():
+    client = make_async_client()
+    parent = client.collection("dee")
+    query = make_async_query(parent)
+    aggregation_query = make_async_aggregation_query(query)
+
+    aggregation_query.avg("someref", alias="all").avg("another_ref", alias="total")
+
+    assert len(aggregation_query._aggregations) == 2
+    assert aggregation_query._aggregations[0].alias == "all"
+    assert aggregation_query._aggregations[0].field_ref == "someref"
+    assert aggregation_query._aggregations[1].alias == "total"
+    assert aggregation_query._aggregations[1].field_ref == "another_ref"
+
+    assert isinstance(aggregation_query._aggregations[0], AvgAggregation)
+    assert isinstance(aggregation_query._aggregations[1], AvgAggregation)
+
+
+def test_aggregation_query_avg_no_alias():
+    client = make_async_client()
+    parent = client.collection("dee")
+    query = make_async_query(parent)
+    aggregation_query = make_async_aggregation_query(query)
+
+    aggregation_query.avg("someref")
+
+    assert len(aggregation_query._aggregations) == 1
+    assert aggregation_query._aggregations[0].alias is None
+    assert aggregation_query._aggregations[0].field_ref == "someref"
+
+    assert isinstance(aggregation_query._aggregations[0], AvgAggregation)
+
+
 def test_async_aggregation_query_to_protobuf():
     client = make_async_client()
     parent = client.collection("dee")
