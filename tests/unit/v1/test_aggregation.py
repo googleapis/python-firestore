@@ -206,6 +206,22 @@ def test_aggregation_query_sum_twice():
     assert isinstance(aggregation_query._aggregations[1], SumAggregation)
 
 
+def test_aggregation_query_sum_no_alias():
+    client = make_client()
+    parent = client.collection("dee")
+    query = make_query(parent)
+    aggregation_query = make_aggregation_query(query)
+
+    aggregation_query.sum("someref")
+
+    assert len(aggregation_query._aggregations) == 1
+    assert aggregation_query._aggregations[0].alias is None
+    assert aggregation_query._aggregations[0].field_ref == "someref"
+
+    assert isinstance(aggregation_query._aggregations[0], SumAggregation)
+
+
+
 def test_aggregation_query_avg():
     client = make_client()
     parent = client.collection("dee")
@@ -237,6 +253,22 @@ def test_aggregation_query_avg_twice():
 
     assert isinstance(aggregation_query._aggregations[0], AvgAggregation)
     assert isinstance(aggregation_query._aggregations[1], AvgAggregation)
+
+
+def test_aggregation_query_avg_no_alias():
+    client = make_client()
+    parent = client.collection("dee")
+    query = make_query(parent)
+    aggregation_query = make_aggregation_query(query)
+
+    aggregation_query.avg("someref")
+
+    assert len(aggregation_query._aggregations) == 1
+    assert aggregation_query._aggregations[0].alias is None
+    assert aggregation_query._aggregations[0].field_ref == "someref"
+
+    assert isinstance(aggregation_query._aggregations[0], AvgAggregation)
+
 
 
 def test_aggregation_query_to_protobuf():
