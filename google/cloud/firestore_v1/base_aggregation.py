@@ -114,7 +114,8 @@ def _query_response_to_result(
     results = [
         AggregationResult(
             alias=key,
-            value=response_pb.result.aggregate_fields[key].integer_value or response_pb.result.aggregate_fields[key].double_value,
+            value=response_pb.result.aggregate_fields[key].integer_value
+            or response_pb.result.aggregate_fields[key].double_value,
             read_time=response_pb.read_time,
         )
         for key in response_pb.result.aggregate_fields.pb.keys()
