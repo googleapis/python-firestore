@@ -1881,7 +1881,8 @@ def test_count_query_stream_empty_aggregation(query, database):
     assert "Aggregations can not be empty" in exc_info.value.message
 
 
-def test_sum_query_get_default_alias(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum_query_get_default_alias(query, database):
     sum_query = query.sum("stats.product")
     result = sum_query.get()
     assert len(result) == 1
@@ -1890,7 +1891,8 @@ def test_sum_query_get_default_alias(query):
         assert r.value == 6
 
 
-def test_sum_query_get_with_alias(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum_query_get_with_alias(query, database):
     sum_query = query.sum("stats.product", alias="total")
     result = sum_query.get()
     assert len(result) == 1
@@ -1899,7 +1901,8 @@ def test_sum_query_get_with_alias(query):
         assert r.value == 6
 
 
-def test_sum_query_get_with_limit(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum_query_get_with_limit(query, database):
     # sum without limit
     sum_query = query.sum("stats.product", alias="total")
     result = sum_query.get()
@@ -1918,7 +1921,8 @@ def test_sum_query_get_with_limit(query):
         assert r.value == 1
 
 
-def test_sum_query_get_multiple_aggregations(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum_query_get_multiple_aggregations(query, database):
     sum_query = query.sum("stats.product", alias="total").sum(
         "stats.product", alias="all"
     )
@@ -1934,7 +1938,8 @@ def test_sum_query_get_multiple_aggregations(query):
     assert found_alias == set(expected_aliases)
 
 
-def test_sum_query_stream_default_alias(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum_query_stream_default_alias(query, database):
     sum_query = query.sum("stats.product")
     for result in sum_query.stream():
         for aggregation_result in result:
@@ -1942,7 +1947,8 @@ def test_sum_query_stream_default_alias(query):
             assert aggregation_result.value == 6
 
 
-def test_sum__query_stream_with_alias(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum__query_stream_with_alias(query, database):
 
     sum_query = query.sum("stats.product", alias="total")
     for result in sum_query.stream():
@@ -1951,7 +1957,8 @@ def test_sum__query_stream_with_alias(query):
             assert aggregation_result.value == 6
 
 
-def test_sum_query_stream_with_limit(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum_query_stream_with_limit(query, database):
     # sum without limit
     sum_query = query.sum("stats.product", alias="total")
     for result in sum_query.stream():
@@ -1968,7 +1975,8 @@ def test_sum_query_stream_with_limit(query):
             assert aggregation_result.value == 1
 
 
-def test_sum_query_stream_multiple_aggregations(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum_query_stream_multiple_aggregations(query, database):
     sum_query = query.sum("stats.product", alias="total").sum(
         "stats.product", alias="all"
     )
@@ -1978,7 +1986,8 @@ def test_sum_query_stream_multiple_aggregations(query):
             assert aggregation_result.alias in ["total", "all"]
 
 
-def test_avg_query_get_default_alias(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg_query_get_default_alias(query, database):
     avg_query = query.avg("stats.product")
     result = avg_query.get()
     assert len(result) == 1
@@ -1987,7 +1996,8 @@ def test_avg_query_get_default_alias(query):
         assert r.value == 1.5
 
 
-def test_avg_query_get_with_alias(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg_query_get_with_alias(query, database):
     avg_query = query.avg("stats.product", alias="total")
     result = avg_query.get()
     assert len(result) == 1
@@ -1996,7 +2006,8 @@ def test_avg_query_get_with_alias(query):
         assert r.value == 1.5
 
 
-def test_avg_query_get_with_limit(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg_query_get_with_limit(query, database):
     # avg without limit
     avg_query = query.avg("stats.product", alias="total")
     result = avg_query.get()
@@ -2015,7 +2026,8 @@ def test_avg_query_get_with_limit(query):
         assert r.value == 1
 
 
-def test_avg_query_get_multiple_aggregations(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg_query_get_multiple_aggregations(query, database):
     avg_query = query.avg("stats.product", alias="total").avg(
         "stats.product", alias="all"
     )
@@ -2031,7 +2043,8 @@ def test_avg_query_get_multiple_aggregations(query):
     assert found_alias == set(expected_aliases)
 
 
-def test_avg_query_stream_default_alias(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg_query_stream_default_alias(query, database):
     avg_query = query.avg("stats.product")
     for result in avg_query.stream():
         for aggregation_result in result:
@@ -2039,7 +2052,8 @@ def test_avg_query_stream_default_alias(query):
             assert aggregation_result.value == 1.5
 
 
-def test_avg__query_stream_with_alias(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg__query_stream_with_alias(query, database):
 
     avg_query = query.avg("stats.product", alias="total")
     for result in avg_query.stream():
@@ -2048,7 +2062,8 @@ def test_avg__query_stream_with_alias(query):
             assert aggregation_result.value == 1.5
 
 
-def test_avg_query_stream_with_limit(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg_query_stream_with_limit(query, database):
     # avg without limit
     avg_query = query.sum("stats.product", alias="total")
     for result in avg_query.stream():
@@ -2065,7 +2080,8 @@ def test_avg_query_stream_with_limit(query):
             assert aggregation_result.value == 0.5
 
 
-def test_avg_query_stream_multiple_aggregations(query):
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg_query_stream_multiple_aggregations(query, database):
     avg_query = query.avg("stats.product", alias="total").avg(
         "stats.product", alias="all"
     )
