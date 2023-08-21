@@ -2023,7 +2023,7 @@ def test_avg_query_get_with_limit(query, database):
     assert len(result) == 1
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 1
+        assert r.value == 0.5
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)

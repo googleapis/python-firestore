@@ -1673,7 +1673,7 @@ async def test_async_sum_query_get_with_alias(async_query, database):
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_sum_query_get_with_limit(async_query, database):
 
-    sum_query = async_query.sum(alias="total")
+    sum_query = async_query.sum("stats.product", alias="total")
     result = await sum_query.get()
     for r in result[0]:
         assert r.alias == "total"
@@ -1775,7 +1775,7 @@ async def test_async_avg_query_get_with_alias(async_query, database):
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_avg_query_get_with_limit(async_query, database):
 
-    avg_query = async_query.avg(alias="total")
+    avg_query = async_query.avg("stats.product", alias="total")
     result = await avg_query.get()
     for r in result[0]:
         assert r.alias == "total"
