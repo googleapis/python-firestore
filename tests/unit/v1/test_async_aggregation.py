@@ -450,7 +450,6 @@ async def test_async_aggregation_from_query():
     response_pb = make_aggregation_query_response(
         [aggregation_result], transaction=txn_id
     )
-    firestore_api.run_aggregation_query.return_value = AsyncIter([response_pb])
     retry = None
     timeout = None
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
@@ -463,7 +462,7 @@ async def test_async_aggregation_from_query():
     ]:
         # reset api mock
         firestore_api.run_aggregation_query.reset_mock()
-        firestore_api.run_aggregation_query.return_value = iter([response_pb])
+        firestore_api.run_aggregation_query.return_value = AsyncIter([response_pb])
         # run query
         returned = await aggregation_query.get(transaction=transaction, **kwargs)
         assert isinstance(returned, list)
