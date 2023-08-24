@@ -611,7 +611,11 @@ def test_aggregation_from_query():
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     # Execute the query and check the response.
-    for aggregation_query in [query.count(alias="total"), query.sum("foo", alias="total"), query.avg("foo", alias="total")]:
+    for aggregation_query in [
+        query.count(alias="total"),
+        query.sum("foo", alias="total"),
+        query.avg("foo", alias="total"),
+    ]:
         # reset api mock
         firestore_api.run_aggregation_query.reset_mock()
         firestore_api.run_aggregation_query.return_value = iter([response_pb])
