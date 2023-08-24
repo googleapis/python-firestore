@@ -606,31 +606,34 @@ def test_aggregation_from_query():
     response_pb = make_aggregation_query_response(
         [aggregation_result], transaction=txn_id
     )
-    firestore_api.run_aggregation_query.return_value = iter([response_pb])
     retry = None
     timeout = None
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     # Execute the query and check the response.
-    aggregation_query = query.count(alias="total")
-    returned = aggregation_query.get(transaction=transaction, **kwargs)
-    assert isinstance(returned, list)
-    assert len(returned) == 1
+    for aggregation_query in [query.count(alias="total"), query.sum("foo", alias="total"), query.avg("foo", alias="total")]:
+        # reset api mock
+        firestore_api.run_aggregation_query.reset_mock()
+        firestore_api.run_aggregation_query.return_value = iter([response_pb])
+        # run query
+        returned = aggregation_query.get(transaction=transaction, **kwargs)
+        assert isinstance(returned, list)
+        assert len(returned) == 1
 
-    for result in returned:
-        for r in result:
-            assert r.alias == aggregation_result.alias
-            assert r.value == aggregation_result.value
+        for result in returned:
+            for r in result:
+                assert r.alias == aggregation_result.alias
+                assert r.value == aggregation_result.value
 
-    # Verify the mock call.
-    parent_path, _ = parent._parent_info()
+        # Verify the mock call.
+        parent_path, _ = parent._parent_info()
 
-    firestore_api.run_aggregation_query.assert_called_once_with(
-        request={
-            "parent": parent_path,
-            "structured_aggregation_query": aggregation_query._to_protobuf(),
-            "transaction": txn_id,
-        },
-        metadata=client._rpc_metadata,
-        **kwargs,
-    )
+        firestore_api.run_aggregation_query.assert_called_once_with(
+            request={
+                "parent": parent_path,
+                "structured_aggregation_query": aggregation_query._to_protobuf(),
+                "transaction": txn_id,
+            },
+            metadata=client._rpc_metadata,
+            **kwargs,
+        )
