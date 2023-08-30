@@ -2091,44 +2091,20 @@ def test_avg_query_stream_multiple_aggregations(query, database):
             assert aggregation_result.alias in ["total", "all"]
 
 
-@firestore.transactional
-def create_in_transaction(collection_id, transaction, cleanup):
-    collection = client.collection(collection_id)
-
-    query = collection.where(filter=FieldFilter("a", "==", 1))
-    count_query = query.count()
-
-    result = count_query.get(transaction=transaction)
-    for r in result[0]:
-        assert r.value <= 2
-        if r.value < 2:
-            document_id_3 = "doc3" + UNIQUE_RESOURCE_ID
-            document_3 = client.document(collection_id, document_id_3)
-            cleanup(document_3.delete)
-            document_3.create({"a": 1})
-        else:
-            raise ValueError("Collection can't have more than 2 documents")
-
-
-@firestore.transactional
-def create_in_transaction_helper(transaction, client, collection_id, cleanup, database):
-    collection = client.collection(collection_id)
-    query = collection.where(filter=FieldFilter("a", "==", 1))
-    count_query = query.count()
-    result = count_query.get(transaction=transaction)
-
-    for r in result[0]:
-        if r.value < 2:
-            document_id_3 = "doc3" + UNIQUE_RESOURCE_ID
-            document_3 = client.document(collection_id, document_id_3)
-            cleanup(document_3.delete)
-            document_3.create({"a": 1})
-        else:  # transaction is rolled back
-            raise ValueError("Collection can't have more than 2 docs")
-
-
+@pytest.mark.parametrize(
+    "aggregation_type,aggregation_args,expected",
+    [("count", (), 2), ("sum", ("a"), 10), ("avg", ("a"), 5)],
+)
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_count_query_in_transaction(client, cleanup, database):
+def test_aggregation_query_in_transaction(
+    client, cleanup, database, aggregation_type, aggregation_args, expected
+):
+    """ "
+    Test creating an aggregation query inside a transaction
+    Should send transaction id along with request. Results should be consistent with non-transactional query
+    """
+    import mock
+
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
     document_id_2 = "doc2" + UNIQUE_RESOURCE_ID
@@ -2139,24 +2115,41 @@ def test_count_query_in_transaction(client, cleanup, database):
     cleanup(document_1.delete)
     cleanup(document_2.delete)
 
-    document_1.create({"a": 1})
-    document_2.create({"a": 1})
-
-    transaction = client.transaction()
-
-    with pytest.raises(ValueError) as exc:
-        create_in_transaction_helper(
-            transaction, client, collection_id, cleanup, database
-        )
-    assert str(exc.value) == "Collection can't have more than 2 docs"
+    document_1.create({"a": 5})
+    document_2.create({"a": 5})
 
     collection = client.collection(collection_id)
+    query = collection.where(filter=FieldFilter("a", "==", 5))
+    aggregation_query = getattr(query, aggregation_type)(*aggregation_args)
 
-    query = collection.where(filter=FieldFilter("a", "==", 1))
-    count_query = query.count()
-    result = count_query.get()
-    for r in result[0]:
-        assert r.value == 2  # there are still only 2 docs
+    with client.transaction() as transaction:
+        # should fail if transaction has not been initiated
+        with pytest.raises(ValueError):
+            aggregation_query.get(transaction=transaction)
+
+        # should work when transaction is initiated through transactional decorator
+        @firestore.transactional
+        def in_transaction(transaction):
+            result = aggregation_query.get(transaction=transaction)
+            assert len(result) == 1
+            assert len(result[0]) == 1
+            assert result[0][0].value == expected
+            # ensure transaction id is sent in grpc request
+            with mock.patch.object(
+                aggregation_query._client._firestore_api, "run_aggregation_query"
+            ) as mock_gapic:
+                mock_gapic.side_effect = RuntimeError("call cancelled")
+                try:
+                    aggregation_query.get(transaction=transaction)
+                except RuntimeError:
+                    # expected failure on API call
+                    pass
+                assert mock_gapic.call_count == 1
+                request = mock_gapic.call_args[1]["request"]
+                transaction_id = request["transaction"]
+                assert transaction_id == transaction.id
+
+        in_transaction(transaction)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -2247,6 +2240,11 @@ def test_query_with_complex_composite_filter(query_docs, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_or_query_in_transaction(client, cleanup, database):
+    """
+    Test running or query inside a transaction. Should pass transaction id along with request
+    """
+    import mock
+
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
     document_id_2 = "doc2" + UNIQUE_RESOURCE_ID
@@ -2260,33 +2258,93 @@ def test_or_query_in_transaction(client, cleanup, database):
     document_1.create({"a": 1, "b": 2})
     document_2.create({"a": 1, "b": 1})
 
-    transaction = client.transaction()
-
-    with pytest.raises(ValueError) as exc:
-        create_in_transaction_helper(
-            transaction, client, collection_id, cleanup, database
-        )
-    assert str(exc.value) == "Collection can't have more than 2 docs"
-
     collection = client.collection(collection_id)
-
     query = collection.where(filter=FieldFilter("a", "==", 1)).where(
         filter=Or([FieldFilter("b", "==", 1), FieldFilter("b", "==", 2)])
     )
-    b_1 = False
-    b_2 = False
-    count = 0
-    for result in query.stream():
-        assert result.get("a") == 1  # assert a==1 is True in both results
-        assert result.get("b") == 1 or result.get("b") == 2
-        if result.get("b") == 1:
-            b_1 = True
-        if result.get("b") == 2:
-            b_2 = True
-        count += 1
 
-    assert b_1 is True  # assert one of them is b == 1
-    assert b_2 is True  # assert one of them is b == 2
-    assert (
-        count == 2
-    )  # assert only 2 results, the third one was rolledback and not created
+    with client.transaction() as transaction:
+        # should fail if transaction has not been initiated
+        with pytest.raises(ValueError):
+            query.get(transaction=transaction)
+
+        # should work when transaction is initiated through transactional decorator
+        @firestore.transactional
+        def in_transaction(transaction):
+            result = query.get(transaction=transaction)
+            assert len(result) == 2
+            # both documents should have a == 1
+            assert result[0].get("a") == 1
+            assert result[1].get("a") == 1
+            # one document should have b == 1 and the other should have b == 2
+            assert (result[0].get("b") == 1 and result[1].get("b") == 2) or (
+                result[0].get("b") == 2 and result[1].get("b") == 1
+            )
+            # ensure transaction id is sent in grpc request
+            with mock.patch.object(
+                query._client._firestore_api, "run_query"
+            ) as mock_gapic:
+                mock_gapic.side_effect = RuntimeError("call cancelled")
+                try:
+                    query.get(transaction=transaction)
+                except RuntimeError:
+                    # expected failure on API call
+                    pass
+                assert mock_gapic.call_count == 1
+                request = mock_gapic.call_args[1]["request"]
+                transaction_id = request["transaction"]
+                assert transaction_id == transaction.id
+
+        in_transaction(transaction)
+
+
+@pytest.mark.parametrize("with_rollback,expected", [(True, 2), (False, 3)])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_transaction_rollback(client, cleanup, database, with_rollback, expected):
+    """
+    Create a document in a transaction that is rolled back
+    Document should not show up in later queries
+    """
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
+    document_id_2 = "doc2" + UNIQUE_RESOURCE_ID
+
+    document_1 = client.document(collection_id, document_id_1)
+    document_2 = client.document(collection_id, document_id_2)
+
+    cleanup(document_1.delete)
+    cleanup(document_2.delete)
+
+    document_1.create({"a": 1})
+    document_2.create({"a": 1})
+
+    transaction = client.transaction()
+
+    @firestore.transactional
+    def in_transaction(transaction, rollback):
+        """
+        create a document in a transaction that is rolled back (raises an exception)
+        """
+        document_id_3 = "doc3" + UNIQUE_RESOURCE_ID
+        document_3 = client.document(collection_id, document_id_3)
+        cleanup(document_3.delete)
+        transaction.create(document_3, {"a": 1})
+        if rollback:
+            raise RuntimeError("rollback")
+
+    if with_rollback:
+        # run transaction in function that results in a rollback
+        with pytest.raises(RuntimeError) as exc:
+            in_transaction(transaction, with_rollback)
+        assert str(exc.value) == "rollback"
+    else:
+        # no rollback expected
+        in_transaction(transaction, with_rollback)
+
+    collection = client.collection(collection_id)
+
+    query = collection.where(filter=FieldFilter("a", "==", 1)).count()
+    result = query.get()
+    assert len(result) == 1
+    assert len(result[0]) == 1
+    assert result[0][0].value == expected
