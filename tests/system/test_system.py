@@ -2216,6 +2216,7 @@ def test_aggregation_query_in_transaction(
             assert len(result[0]) == 1
             assert result[0][0].value == expected
             inner_fn_ran = True
+
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function
         assert inner_fn_ran is True
@@ -2260,6 +2261,7 @@ def test_or_query_in_transaction(client, cleanup, database):
                 result[0].get("b") == 2 and result[1].get("b") == 1
             )
             inner_fn_ran = True
+
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function
         assert inner_fn_ran is True
