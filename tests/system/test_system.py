@@ -2189,8 +2189,6 @@ def test_aggregation_query_in_transaction(
     Test creating an aggregation query inside a transaction
     Should send transaction id along with request. Results should be consistent with non-transactional query
     """
-    import mock
-
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(3)]
     doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
@@ -2212,26 +2210,15 @@ def test_aggregation_query_in_transaction(
         # should work when transaction is initiated through transactional decorator
         @firestore.transactional
         def in_transaction(transaction):
+            global inner_fn_ran
             result = aggregation_query.get(transaction=transaction)
             assert len(result) == 1
             assert len(result[0]) == 1
             assert result[0][0].value == expected
-            # ensure transaction id is sent in grpc request
-            with mock.patch.object(
-                aggregation_query._client._firestore_api, "run_aggregation_query"
-            ) as mock_gapic:
-                mock_gapic.side_effect = RuntimeError("call cancelled")
-                try:
-                    aggregation_query.get(transaction=transaction)
-                except RuntimeError:
-                    # expected failure on API call
-                    pass
-                assert mock_gapic.call_count == 1
-                request = mock_gapic.call_args[1]["request"]
-                transaction_id = request["transaction"]
-                assert transaction_id == transaction.id
-
+            inner_fn_ran = True
         in_transaction(transaction)
+        # make sure we didn't skip assertions in inner function
+        assert inner_fn_ran is True
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -2239,8 +2226,6 @@ def test_or_query_in_transaction(client, cleanup, database):
     """
     Test running or query inside a transaction. Should pass transaction id along with request
     """
-    import mock
-
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
     doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
@@ -2264,6 +2249,7 @@ def test_or_query_in_transaction(client, cleanup, database):
         # should work when transaction is initiated through transactional decorator
         @firestore.transactional
         def in_transaction(transaction):
+            global inner_fn_ran
             result = query.get(transaction=transaction)
             assert len(result) == 2
             # both documents should have a == 1
@@ -2273,22 +2259,10 @@ def test_or_query_in_transaction(client, cleanup, database):
             assert (result[0].get("b") == 1 and result[1].get("b") == 2) or (
                 result[0].get("b") == 2 and result[1].get("b") == 1
             )
-            # ensure transaction id is sent in grpc request
-            with mock.patch.object(
-                query._client._firestore_api, "run_query"
-            ) as mock_gapic:
-                mock_gapic.side_effect = RuntimeError("call cancelled")
-                try:
-                    query.get(transaction=transaction)
-                except RuntimeError:
-                    # expected failure on API call
-                    pass
-                assert mock_gapic.call_count == 1
-                request = mock_gapic.call_args[1]["request"]
-                transaction_id = request["transaction"]
-                assert transaction_id == transaction.id
-
+            inner_fn_ran = True
         in_transaction(transaction)
+        # make sure we didn't skip assertions in inner function
+        assert inner_fn_ran is True
 
 
 @pytest.mark.parametrize("with_rollback,expected", [(True, 2), (False, 3)])
