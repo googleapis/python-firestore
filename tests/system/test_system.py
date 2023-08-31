@@ -2091,67 +2091,6 @@ def test_avg_query_stream_multiple_aggregations(query, database):
             assert aggregation_result.alias in ["total", "all"]
 
 
-@pytest.mark.parametrize(
-    "aggregation_type,aggregation_args,expected",
-    [("count", (), 2), ("sum", ("a"), 10), ("avg", ("a"), 5)],
-)
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_aggregation_query_in_transaction(
-    client, cleanup, database, aggregation_type, aggregation_args, expected
-):
-    """ "
-    Test creating an aggregation query inside a transaction
-    Should send transaction id along with request. Results should be consistent with non-transactional query
-    """
-    import mock
-
-    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
-    document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
-    document_id_2 = "doc2" + UNIQUE_RESOURCE_ID
-
-    document_1 = client.document(collection_id, document_id_1)
-    document_2 = client.document(collection_id, document_id_2)
-
-    cleanup(document_1.delete)
-    cleanup(document_2.delete)
-
-    document_1.create({"a": 5})
-    document_2.create({"a": 5})
-
-    collection = client.collection(collection_id)
-    query = collection.where(filter=FieldFilter("a", "==", 5))
-    aggregation_query = getattr(query, aggregation_type)(*aggregation_args)
-
-    with client.transaction() as transaction:
-        # should fail if transaction has not been initiated
-        with pytest.raises(ValueError):
-            aggregation_query.get(transaction=transaction)
-
-        # should work when transaction is initiated through transactional decorator
-        @firestore.transactional
-        def in_transaction(transaction):
-            result = aggregation_query.get(transaction=transaction)
-            assert len(result) == 1
-            assert len(result[0]) == 1
-            assert result[0][0].value == expected
-            # ensure transaction id is sent in grpc request
-            with mock.patch.object(
-                aggregation_query._client._firestore_api, "run_aggregation_query"
-            ) as mock_gapic:
-                mock_gapic.side_effect = RuntimeError("call cancelled")
-                try:
-                    aggregation_query.get(transaction=transaction)
-                except RuntimeError:
-                    # expected failure on API call
-                    pass
-                assert mock_gapic.call_count == 1
-                request = mock_gapic.call_args[1]["request"]
-                transaction_id = request["transaction"]
-                assert transaction_id == transaction.id
-
-        in_transaction(transaction)
-
-
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_query_with_and_composite_filter(query_docs, database):
     collection, stored, allowed_vals = query_docs
@@ -2238,6 +2177,63 @@ def test_query_with_complex_composite_filter(query_docs, database):
     assert b_not_3 is True
 
 
+@pytest.mark.parametrize(
+    "aggregation_type,aggregation_args,expected",
+    [("count", (), 2), ("sum", ("a"), 8), ("avg", ("a"), 4)],
+)
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_aggregation_query_in_transaction(
+    client, cleanup, database, aggregation_type, aggregation_args, expected
+):
+    """
+    Test creating an aggregation query inside a transaction
+    Should send transaction id along with request. Results should be consistent with non-transactional query
+    """
+    import mock
+
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(3)]
+    doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
+    for doc_ref in doc_refs:
+        cleanup(doc_ref.delete)
+    doc_refs[0].create({"a": 3, "b": 1})
+    doc_refs[1].create({"a": 5, "b": 1})
+    doc_refs[2].create({"a": 10, "b": 0})  # should be ignored by query
+
+    collection = client.collection(collection_id)
+    query = collection.where(filter=FieldFilter("b", "==", 1))
+    aggregation_query = getattr(query, aggregation_type)(*aggregation_args)
+
+    with client.transaction() as transaction:
+        # should fail if transaction has not been initiated
+        with pytest.raises(ValueError):
+            aggregation_query.get(transaction=transaction)
+
+        # should work when transaction is initiated through transactional decorator
+        @firestore.transactional
+        def in_transaction(transaction):
+            result = aggregation_query.get(transaction=transaction)
+            assert len(result) == 1
+            assert len(result[0]) == 1
+            assert result[0][0].value == expected
+            # ensure transaction id is sent in grpc request
+            with mock.patch.object(
+                aggregation_query._client._firestore_api, "run_aggregation_query"
+            ) as mock_gapic:
+                mock_gapic.side_effect = RuntimeError("call cancelled")
+                try:
+                    aggregation_query.get(transaction=transaction)
+                except RuntimeError:
+                    # expected failure on API call
+                    pass
+                assert mock_gapic.call_count == 1
+                request = mock_gapic.call_args[1]["request"]
+                transaction_id = request["transaction"]
+                assert transaction_id == transaction.id
+
+        in_transaction(transaction)
+
+
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_or_query_in_transaction(client, cleanup, database):
     """
@@ -2246,17 +2242,14 @@ def test_or_query_in_transaction(client, cleanup, database):
     import mock
 
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
-    document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
-    document_id_2 = "doc2" + UNIQUE_RESOURCE_ID
-
-    document_1 = client.document(collection_id, document_id_1)
-    document_2 = client.document(collection_id, document_id_2)
-
-    cleanup(document_1.delete)
-    cleanup(document_2.delete)
-
-    document_1.create({"a": 1, "b": 2})
-    document_2.create({"a": 1, "b": 1})
+    doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
+    doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
+    for doc_ref in doc_refs:
+        cleanup(doc_ref.delete)
+    doc_refs[0].create({"a": 1, "b": 2})
+    doc_refs[1].create({"a": 1, "b": 1})
+    doc_refs[2].create({"a": 2, "b": 1})  # should be ignored by query
+    doc_refs[3].create({"a": 1, "b": 0})  # should be ignored by query
 
     collection = client.collection(collection_id)
     query = collection.where(filter=FieldFilter("a", "==", 1)).where(
@@ -2306,17 +2299,13 @@ def test_transaction_rollback(client, cleanup, database, with_rollback, expected
     Document should not show up in later queries
     """
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
-    document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
-    document_id_2 = "doc2" + UNIQUE_RESOURCE_ID
-
-    document_1 = client.document(collection_id, document_id_1)
-    document_2 = client.document(collection_id, document_id_2)
-
-    cleanup(document_1.delete)
-    cleanup(document_2.delete)
-
-    document_1.create({"a": 1})
-    document_2.create({"a": 1})
+    doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(3)]
+    doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
+    for doc_ref in doc_refs:
+        cleanup(doc_ref.delete)
+    doc_refs[0].create({"a": 1})
+    doc_refs[1].create({"a": 1})
+    doc_refs[2].create({"a": 2})  # should be ignored by query
 
     transaction = client.transaction()
 
@@ -2325,10 +2314,10 @@ def test_transaction_rollback(client, cleanup, database, with_rollback, expected
         """
         create a document in a transaction that is rolled back (raises an exception)
         """
-        document_id_3 = "doc3" + UNIQUE_RESOURCE_ID
-        document_3 = client.document(collection_id, document_id_3)
-        cleanup(document_3.delete)
-        transaction.create(document_3, {"a": 1})
+        new_document_id = "in_transaction_doc" + UNIQUE_RESOURCE_ID
+        new_document_ref = client.document(collection_id, new_document_id)
+        cleanup(new_document_ref.delete)
+        transaction.create(new_document_ref, {"a": 1})
         if rollback:
             raise RuntimeError("rollback")
 
