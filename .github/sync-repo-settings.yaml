@@ -19,7 +19,7 @@ branchProtectionRules:
     - 'Kokoro'
     - 'Kokoro system-3.8'
     - 'cla/google'
-    - 'OwlBot Post Processor — 🦉'
+    - 'OwlBot Post Processor'
     - 'docs / docs (pull_request)'
     - 'docs / docfx (pull_request)'
     - 'lint / lint (pull_request)'
