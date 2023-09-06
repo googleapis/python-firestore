@@ -130,6 +130,7 @@ class AggregationQuery(BaseAggregationQuery):
             :class:`~google.cloud.firestore_v1.base_aggregation.AggregationResult`:
             The result of aggregations of this query
         """
+
         response_iterator = self._get_stream_iterator(
             transaction,
             retry,
