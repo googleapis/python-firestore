@@ -40,6 +40,7 @@ UNIT_TEST_STANDARD_DEPENDENCIES = [
     "pytest",
     "pytest-cov",
     "pytest-asyncio",
+    "six",
 ]
 UNIT_TEST_EXTERNAL_DEPENDENCIES = [
     "aiounittest",
