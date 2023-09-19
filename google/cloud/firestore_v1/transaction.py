@@ -280,10 +280,10 @@ class _Transactional(_BaseTransactional):
                 if transaction._read_only:
                     # don't retry read-only transactions
                     raise
-                elif attempt == transaction._max_attempts - 1:
+                elif attempt >= transaction._max_attempts - 1:
                     last_retryable_exc = exc
 
-            # retry Aborted exceptions status code
+            # retry Aborted exceptions
 
             # Subsequent requests will use the failed transaction ID as part of
             # the ``BeginTransactionRequest`` when restarting this transaction

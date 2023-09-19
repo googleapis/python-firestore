@@ -258,34 +258,6 @@ class _AsyncTransactional(_BaseTransactional):
             await transaction._rollback()
             raise
 
-    async def _maybe_commit(self, transaction: AsyncTransaction) -> bool:
-        """Try to commit the transaction.
-
-        If the transaction is read-write and the ``Commit`` fails with the
-        ``ABORTED`` status code, it will be retried. Any other failure will
-        not be caught.
-
-        Args:
-            transaction
-                (:class:`~google.cloud.firestore_v1.transaction.Transaction`):
-                The transaction to be ``Commit``-ed.
-
-        Returns:
-            bool: Indicating if the commit succeeded.
-        """
-        try:
-            await transaction._commit()
-            return True
-        except exceptions.GoogleAPICallError as exc:
-            if transaction._read_only:
-                raise
-
-            if isinstance(exc, exceptions.Aborted):
-                # If a read-write transaction returns ABORTED, retry.
-                return False
-            else:
-                raise
-
     async def __call__(self, transaction, *args, **kwargs):
         """Execute the wrapped callable within a transaction.
 
@@ -306,12 +278,21 @@ class _AsyncTransactional(_BaseTransactional):
                 ``max_attempts``.
         """
         self._reset()
+        last_retryable_exc = None
 
         for attempt in range(transaction._max_attempts):
             result = await self._pre_commit(transaction, *args, **kwargs)
-            succeeded = await self._maybe_commit(transaction)
-            if succeeded:
+            try:
+                await transaction._commit()
                 return result
+            except exceptions.Aborted as exc:
+                if transaction._read_only:
+                    # don't retry read-only transactions
+                    raise
+                elif attempt >= transaction._max_attempts - 1:
+                    last_retryable_exc = exc
+
+            # retry Aborted exceptions
 
             # Subsequent requests will use the failed transaction ID as part of
             # the ``BeginTransactionRequest`` when restarting this transaction
@@ -321,7 +302,7 @@ class _AsyncTransactional(_BaseTransactional):
 
         await transaction._rollback()
         msg = _EXCEED_ATTEMPTS_TEMPLATE.format(transaction._max_attempts)
-        raise ValueError(msg)
+        raise ValueError(msg) from last_retryable_exc
 
 
 def async_transactional(
