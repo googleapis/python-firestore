@@ -103,14 +103,18 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         )
         self._id = transaction_response.transaction
 
-    def _rollback(self) -> None:
+    def _rollback(self, source_exc=None) -> None:
         """Roll back the transaction.
 
+        Args:
+            source_exc (Optional[Exception]): The exception that caused the
+                rollback to occur. If an exception is created while rolling
+                back, it will be chained to this one.
         Raises:
             ValueError: If no transaction is in progress.
         """
         if not self.in_progress:
-            raise ValueError(_CANT_ROLLBACK)
+            raise ValueError(_CANT_ROLLBACK) from source_exc
 
         try:
             # NOTE: The response is just ``google.protobuf.Empty``.
@@ -241,13 +245,7 @@ class _Transactional(_BaseTransactional):
         self.current_id = transaction._id
         if self.retry_id is None:
             self.retry_id = self.current_id
-        try:
-            return self.to_wrap(transaction, *args, **kwargs)
-        except:  # noqa
-            # NOTE: If ``rollback`` fails this will lose the information
-            #       from the original failure.
-            transaction._rollback()
-            raise
+        return self.to_wrap(transaction, *args, **kwargs)
 
     def __call__(self, transaction: Transaction, *args, **kwargs):
         """Execute the wrapped callable within a transaction.
@@ -269,31 +267,30 @@ class _Transactional(_BaseTransactional):
                 ``max_attempts``.
         """
         self._reset()
-        last_retryable_exc = None
+        retryable_exceptions = (exceptions.Aborted) if not transaction._read_only else ()
 
-        for attempt in range(transaction._max_attempts):
-            result = self._pre_commit(transaction, *args, **kwargs)
-            try:
-                transaction._commit()
-                return result
-            except exceptions.Aborted as exc:
-                if transaction._read_only:
-                    # don't retry read-only transactions
-                    raise
-                elif attempt >= transaction._max_attempts - 1:
-                    last_retryable_exc = exc
+        try:
+            for attempt in range(transaction._max_attempts):
+                result = self._pre_commit(transaction, *args, **kwargs)
+                try:
+                    transaction._commit()
+                    return result
+                except retryable_exceptions as exc:
+                    if attempt >= transaction._max_attempts - 1:
+                        # wrap the last exception in a ValueError before raising
+                        msg = _EXCEED_ATTEMPTS_TEMPLATE.format(transaction._max_attempts)
+                        raise ValueError(msg) from exc
 
-            # retry Aborted exceptions
-
-            # Subsequent requests will use the failed transaction ID as part of
-            # the ``BeginTransactionRequest`` when restarting this transaction
-            # (via ``options.retry_transaction``). This preserves the "spot in
-            # line" of the transaction, so exponential backoff is not required
-            # in this case.
-
-        transaction._rollback()
-        msg = _EXCEED_ATTEMPTS_TEMPLATE.format(transaction._max_attempts)
-        raise ValueError(msg) from last_retryable_exc
+                # Retry attempts that result in retryable exceptions
+                # Subsequent requests will use the failed transaction ID as part of
+                # the ``BeginTransactionRequest`` when restarting this transaction
+                # (via ``options.retry_transaction``). This preserves the "spot in
+                # line" of the transaction, so exponential backoff is not required
+                # in this case.
+        except BaseException as exc:  # noqa: B901
+            # rollback the transaction on any error
+            transaction._rollback(source_exc=exc)
+            raise exc
 
 
 def transactional(to_wrap: Callable) -> _Transactional:
