@@ -267,7 +267,9 @@ class _Transactional(_BaseTransactional):
                 ``max_attempts``.
         """
         self._reset()
-        retryable_exceptions = (exceptions.Aborted) if not transaction._read_only else ()
+        retryable_exceptions = (
+            (exceptions.Aborted) if not transaction._read_only else ()
+        )
 
         try:
             for attempt in range(transaction._max_attempts):
@@ -278,7 +280,9 @@ class _Transactional(_BaseTransactional):
                 except retryable_exceptions as exc:
                     if attempt >= transaction._max_attempts - 1:
                         # wrap the last exception in a ValueError before raising
-                        msg = _EXCEED_ATTEMPTS_TEMPLATE.format(transaction._max_attempts)
+                        msg = _EXCEED_ATTEMPTS_TEMPLATE.format(
+                            transaction._max_attempts
+                        )
                         raise ValueError(msg) from exc
 
                 # Retry attempts that result in retryable exceptions
