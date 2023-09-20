@@ -19,7 +19,6 @@ branchProtectionRules:
     - 'Kokoro'
     - 'Kokoro system-3.7'
     - 'cla/google'
-    - 'OwlBot Post Processor'
     - 'docs'
     - 'docfx'
     - 'lint'
