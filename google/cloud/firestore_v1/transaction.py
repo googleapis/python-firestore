@@ -218,10 +218,6 @@ class _Transactional(_BaseTransactional):
     def _pre_commit(self, transaction: Transaction, *args, **kwargs) -> Any:
         """Begin transaction and call the wrapped callable.
 
-        If the callable raises an exception, the transaction will be rolled
-        back. If not, the transaction will be "ready" for ``Commit`` (i.e.
-        it will have staged writes).
-
         Args:
             transaction
                 (:class:`~google.cloud.firestore_v1.transaction.Transaction`):

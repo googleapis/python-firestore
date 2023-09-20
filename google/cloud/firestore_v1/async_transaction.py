@@ -227,10 +227,6 @@ class _AsyncTransactional(_BaseTransactional):
     ) -> Coroutine:
         """Begin transaction and call the wrapped coroutine.
 
-        If the coroutine raises an exception, the transaction will be rolled
-        back. If not, the transaction will be "ready" for ``Commit`` (i.e.
-        it will have staged writes).
-
         Args:
             transaction
                 (:class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction`):
