@@ -269,6 +269,7 @@ class _Transactional(_BaseTransactional):
         retryable_exceptions = (
             (exceptions.Aborted) if not transaction._read_only else ()
         )
+        last_exc = None
 
         try:
             for attempt in range(transaction._max_attempts):
@@ -277,19 +278,18 @@ class _Transactional(_BaseTransactional):
                     transaction._commit()
                     return result
                 except retryable_exceptions as exc:
-                    if attempt >= transaction._max_attempts - 1:
-                        # wrap the last exception in a ValueError before raising
-                        msg = _EXCEED_ATTEMPTS_TEMPLATE.format(
-                            transaction._max_attempts
-                        )
-                        raise ValueError(msg) from exc
-
+                    last_exc = exc
                 # Retry attempts that result in retryable exceptions
                 # Subsequent requests will use the failed transaction ID as part of
                 # the ``BeginTransactionRequest`` when restarting this transaction
                 # (via ``options.retry_transaction``). This preserves the "spot in
                 # line" of the transaction, so exponential backoff is not required
                 # in this case.
+            # wrap the last exception in a ValueError before raising
+            msg = _EXCEED_ATTEMPTS_TEMPLATE.format(
+                transaction._max_attempts
+            )
+            raise ValueError(msg) from last_exc
         except BaseException as exc:  # noqa: B901
             # rollback the transaction on any error
             transaction._rollback(source_exc=exc)
