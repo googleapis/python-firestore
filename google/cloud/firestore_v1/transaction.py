@@ -44,7 +44,7 @@ from google.cloud.firestore_v1.query import Query
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.types import CommitResponse
-from typing import Any, Callable, Generator, Optional
+from typing import Any, Callable, Generator
 
 
 class Transaction(batch.WriteBatch, BaseTransaction):

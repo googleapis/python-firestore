@@ -686,7 +686,6 @@ async def test_asynctransactional___call__failure_with_non_retryable(max_attempt
     Should rollback raise immediately
     """
     from google.api_core import exceptions
-    from google.cloud.firestore_v1.types import common
 
     to_wrap = AsyncMock(return_value=mock.sentinel.result, spec=[])
     wrapped = _make_async_transactional(to_wrap)
@@ -741,7 +740,6 @@ async def test_asynctransactional___call__failure_with_rollback_failure():
     should maintain first failure as __cause__
     """
     from google.api_core import exceptions
-    from google.cloud.firestore_v1.types import common
 
     to_wrap = AsyncMock(return_value=mock.sentinel.result, spec=[])
     wrapped = _make_async_transactional(to_wrap)
