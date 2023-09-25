@@ -125,6 +125,9 @@ class Transaction(batch.WriteBatch, BaseTransaction):
                 },
                 metadata=self._client._rpc_metadata,
             )
+        except Exception as exc:
+            # attach source_exc to the exception raised by rollback
+            raise exc from source_exc
         finally:
             self._clean_up()
 

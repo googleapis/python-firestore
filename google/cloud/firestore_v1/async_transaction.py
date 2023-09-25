@@ -127,6 +127,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
                 },
                 metadata=self._client._rpc_metadata,
             )
+        except Exception as exc:  # pylint: disable=broad-except
+            # attach source_exc to the exception raised by rollback
+            raise exc from source_exc
         finally:
             self._clean_up()
 

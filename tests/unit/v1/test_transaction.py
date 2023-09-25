@@ -152,8 +152,9 @@ def test_transaction__rollback(database):
     )
 
 
+@pytest.mark.parametrize("cause", [None, ValueError("testing")])
 @pytest.mark.parametrize("database", [None, "somedb"])
-def test_transaction__rollback_not_allowed(database):
+def test_transaction__rollback_not_allowed(database, cause):
     from google.cloud.firestore_v1.base_transaction import _CANT_ROLLBACK
 
     client = _make_client(database=database)
@@ -161,13 +162,15 @@ def test_transaction__rollback_not_allowed(database):
     assert transaction._id is None
 
     with pytest.raises(ValueError) as exc_info:
-        transaction._rollback()
+        transaction._rollback(source_exc=cause)
 
     assert exc_info.value.args == (_CANT_ROLLBACK,)
+    assert exc_info.value.__cause__ == cause
 
 
+@pytest.mark.parametrize("cause", [None, ValueError("testing")])
 @pytest.mark.parametrize("database", [None, "somedb"])
-def test_transaction__rollback_failure(database):
+def test_transaction__rollback_failure(database, cause):
     from google.api_core import exceptions
     from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
@@ -188,9 +191,10 @@ def test_transaction__rollback_failure(database):
     transaction._id = txn_id
 
     with pytest.raises(exceptions.InternalServerError) as exc_info:
-        transaction._rollback()
+        transaction._rollback(source_exc=cause)
 
     assert exc_info.value is exc
+    assert exc_info.value.__cause__ == cause
     assert transaction._id is None
     assert transaction._write_pbs == []
 

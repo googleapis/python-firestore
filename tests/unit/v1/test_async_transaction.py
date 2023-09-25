@@ -148,8 +148,9 @@ async def test_asynctransaction__rollback():
     )
 
 
+@pytest.mark.parametrize("cause", [None, ValueError("testing")])
 @pytest.mark.asyncio
-async def test_asynctransaction__rollback_not_allowed():
+async def test_asynctransaction__rollback_not_allowed(cause):
     from google.cloud.firestore_v1.base_transaction import _CANT_ROLLBACK
 
     client = _make_client()
@@ -157,13 +158,13 @@ async def test_asynctransaction__rollback_not_allowed():
     assert transaction._id is None
 
     with pytest.raises(ValueError) as exc_info:
-        await transaction._rollback()
-
+        await transaction._rollback(source_exc=cause)
+    assert exc_info.value.__cause__ == cause
     assert exc_info.value.args == (_CANT_ROLLBACK,)
 
-
+@pytest.mark.parametrize("cause", [None, ValueError("testing")])
 @pytest.mark.asyncio
-async def test_asynctransaction__rollback_failure():
+async def test_asynctransaction__rollback_failure(cause):
     from google.api_core import exceptions
 
     # Create a minimal fake GAPIC with a dummy failure.
@@ -181,9 +182,10 @@ async def test_asynctransaction__rollback_failure():
     transaction._id = txn_id
 
     with pytest.raises(exceptions.InternalServerError) as exc_info:
-        await transaction._rollback()
+        await transaction._rollback(source_exc=cause)
 
     assert exc_info.value is exc
+    assert exc_info.value.__cause__ == cause
     assert transaction._id is None
     assert transaction._write_pbs == []
 
