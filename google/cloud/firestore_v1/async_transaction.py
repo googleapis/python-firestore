@@ -294,6 +294,7 @@ class _AsyncTransactional(_BaseTransactional):
                 # (via ``options.retry_transaction``). This preserves the "spot in
                 # line" of the transaction, so exponential backoff is not required
                 # in this case.
+            # retries exhausted
             # wrap the last exception in a ValueError before raising
             msg = _EXCEED_ATTEMPTS_TEMPLATE.format(transaction._max_attempts)
             raise ValueError(msg) from last_exc
