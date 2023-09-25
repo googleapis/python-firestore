@@ -569,7 +569,9 @@ def test_asynctransactional___call__failure_max_attempts(database, max_attempts)
     wrapped = _make__transactional(to_wrap)
 
     txn_id = b"attempt_exhaustion"
-    transaction = _make_transaction_pb(txn_id, database=database, max_attempts=max_attempts)
+    transaction = _make_transaction_pb(
+        txn_id, database=database, max_attempts=max_attempts
+    )
 
     # Actually force the ``commit`` to fail.
     exc = exceptions.Aborted("Contention just once.")
@@ -599,11 +601,12 @@ def test_asynctransactional___call__failure_max_attempts(database, max_attempts)
     expected_calls = [
         mock.call(
             request={
-                "database":  transaction._client._database_string, 
-                "options": None if i == 0 else options_
+                "database": transaction._client._database_string,
+                "options": None if i == 0 else options_,
             },
             metadata=transaction._client._rpc_metadata,
-        ) for i in range(max_attempts)
+        )
+        for i in range(max_attempts)
     ]
     assert firestore_api.begin_transaction.call_args_list == expected_calls
     assert firestore_api.commit.call_count == max_attempts
@@ -637,7 +640,9 @@ def test_asynctransactional___call__failure_readonly(database, max_attempts):
     wrapped = _make__transactional(to_wrap)
 
     txn_id = b"read_only_fail"
-    transaction = _make_transaction_pb(txn_id, database=database, max_attempts=max_attempts, read_only=True)
+    transaction = _make_transaction_pb(
+        txn_id, database=database, max_attempts=max_attempts, read_only=True
+    )
 
     # Actually force the ``commit`` to fail.
     exc = exceptions.Aborted("Contention just once.")
@@ -659,7 +664,9 @@ def test_asynctransactional___call__failure_readonly(database, max_attempts):
     firestore_api.begin_transaction.assert_called_once_with(
         request={
             "database": transaction._client._database_string,
-            "options": common.TransactionOptions(read_only=common.TransactionOptions.ReadOnly())
+            "options": common.TransactionOptions(
+                read_only=common.TransactionOptions.ReadOnly()
+            ),
         },
         metadata=transaction._client._rpc_metadata,
     )
@@ -694,7 +701,9 @@ def test_asynctransactional___call__failure_with_non_retryable(database, max_att
     wrapped = _make__transactional(to_wrap)
 
     txn_id = b"non_retryable"
-    transaction = _make_transaction_pb(txn_id, database=database, max_attempts=max_attempts)
+    transaction = _make_transaction_pb(
+        txn_id, database=database, max_attempts=max_attempts
+    )
 
     # Actually force the ``commit`` to fail.
     exc = exceptions.InvalidArgument("non retryable")

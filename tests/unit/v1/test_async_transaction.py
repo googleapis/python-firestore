@@ -162,6 +162,7 @@ async def test_asynctransaction__rollback_not_allowed(cause):
     assert exc_info.value.__cause__ == cause
     assert exc_info.value.args == (_CANT_ROLLBACK,)
 
+
 @pytest.mark.parametrize("cause", [None, ValueError("testing")])
 @pytest.mark.asyncio
 async def test_asynctransaction__rollback_failure(cause):
@@ -593,11 +594,12 @@ async def test_asynctransactional___call__failure_max_attempts(max_attempts):
     expected_calls = [
         mock.call(
             request={
-                "database":  transaction._client._database_string, 
-                "options": None if i == 0 else options_
+                "database": transaction._client._database_string,
+                "options": None if i == 0 else options_,
             },
             metadata=transaction._client._rpc_metadata,
-        ) for i in range(max_attempts)
+        )
+        for i in range(max_attempts)
     ]
     assert firestore_api.begin_transaction.call_args_list == expected_calls
     assert firestore_api.commit.call_count == max_attempts
@@ -616,6 +618,7 @@ async def test_asynctransactional___call__failure_max_attempts(max_attempts):
         },
         metadata=transaction._client._rpc_metadata,
     )
+
 
 @pytest.mark.parametrize("max_attempts", [1, 5])
 @pytest.mark.asyncio
@@ -652,7 +655,9 @@ async def test_asynctransactional___call__failure_readonly(max_attempts):
     firestore_api.begin_transaction.assert_called_once_with(
         request={
             "database": transaction._client._database_string,
-            "options": common.TransactionOptions(read_only=common.TransactionOptions.ReadOnly())
+            "options": common.TransactionOptions(
+                read_only=common.TransactionOptions.ReadOnly()
+            ),
         },
         metadata=transaction._client._rpc_metadata,
     )
@@ -727,6 +732,7 @@ async def test_asynctransactional___call__failure_with_non_retryable(max_attempt
         },
         metadata=transaction._client._rpc_metadata,
     )
+
 
 @pytest.mark.asyncio
 async def test_asynctransactional___call__failure_with_rollback_failure():

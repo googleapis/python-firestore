@@ -286,9 +286,7 @@ class _Transactional(_BaseTransactional):
                 # line" of the transaction, so exponential backoff is not required
                 # in this case.
             # wrap the last exception in a ValueError before raising
-            msg = _EXCEED_ATTEMPTS_TEMPLATE.format(
-                transaction._max_attempts
-            )
+            msg = _EXCEED_ATTEMPTS_TEMPLATE.format(transaction._max_attempts)
             raise ValueError(msg) from last_exc
         except BaseException as exc:  # noqa: B901
             # rollback the transaction on any error
