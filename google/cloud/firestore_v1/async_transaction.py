@@ -105,18 +105,15 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         )
         self._id = transaction_response.transaction
 
-    async def _rollback(self, source_exc=None) -> None:
+    async def _rollback(self) -> None:
         """Roll back the transaction.
 
-        Args:
-            source_exc (Optional[Exception]): The exception that caused the
-                rollback to occur. If an exception is created while rolling
-                back, it will be chained to this one.
         Raises:
             ValueError: If no transaction is in progress.
+            google.api_core.exceptions.GoogleAPICallError: If the rollback fails.
         """
         if not self.in_progress:
-            raise ValueError(_CANT_ROLLBACK) from source_exc
+            raise ValueError(_CANT_ROLLBACK)
 
         try:
             # NOTE: The response is just ``google.protobuf.Empty``.
@@ -127,10 +124,8 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
                 },
                 metadata=self._client._rpc_metadata,
             )
-        except Exception as exc:  # pylint: disable=broad-except
-            # attach source_exc to the exception raised by rollback
-            raise exc from source_exc
         finally:
+            # clean up, even if rollback fails
             self._clean_up()
 
     async def _commit(self) -> list:
@@ -299,9 +294,11 @@ class _AsyncTransactional(_BaseTransactional):
             msg = _EXCEED_ATTEMPTS_TEMPLATE.format(transaction._max_attempts)
             raise ValueError(msg) from last_exc
 
-        except BaseException as exc:
-            await transaction._rollback(source_exc=exc)
-            raise exc
+        except BaseException:
+            # rollback the transaction on any error
+            # errors raised during _rollback will be chained to the original error through __context__
+            await transaction._rollback()
+            raise
 
 
 def async_transactional(

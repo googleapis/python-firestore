@@ -148,9 +148,8 @@ async def test_asynctransaction__rollback():
     )
 
 
-@pytest.mark.parametrize("cause", [None, ValueError("testing")])
 @pytest.mark.asyncio
-async def test_asynctransaction__rollback_not_allowed(cause):
+async def test_asynctransaction__rollback_not_allowed():
     from google.cloud.firestore_v1.base_transaction import _CANT_ROLLBACK
 
     client = _make_client()
@@ -158,14 +157,12 @@ async def test_asynctransaction__rollback_not_allowed(cause):
     assert transaction._id is None
 
     with pytest.raises(ValueError) as exc_info:
-        await transaction._rollback(source_exc=cause)
-    assert exc_info.value.__cause__ == cause
+        await transaction._rollback()
     assert exc_info.value.args == (_CANT_ROLLBACK,)
 
 
-@pytest.mark.parametrize("cause", [None, ValueError("testing")])
 @pytest.mark.asyncio
-async def test_asynctransaction__rollback_failure(cause):
+async def test_asynctransaction__rollback_failure():
     from google.api_core import exceptions
 
     # Create a minimal fake GAPIC with a dummy failure.
@@ -183,10 +180,9 @@ async def test_asynctransaction__rollback_failure(cause):
     transaction._id = txn_id
 
     with pytest.raises(exceptions.InternalServerError) as exc_info:
-        await transaction._rollback(source_exc=cause)
+        await transaction._rollback()
 
     assert exc_info.value is exc
-    assert exc_info.value.__cause__ == cause
     assert transaction._id is None
     assert transaction._write_pbs == []
 
@@ -737,7 +733,7 @@ async def test_asynctransactional___call__failure_with_non_retryable(max_attempt
 async def test_asynctransactional___call__failure_with_rollback_failure():
     """
     Test second failure as part of rollback
-    should maintain first failure as __cause__
+    should maintain first failure as __context__
     """
     from google.api_core import exceptions
 
@@ -761,7 +757,7 @@ async def test_asynctransactional___call__failure_with_rollback_failure():
         await wrapped(transaction, "here", there=1.5)
 
     assert exc_info.value == rb_exc
-    assert exc_info.value.__cause__ == exc
+    assert exc_info.value.__context__ == exc
 
     assert transaction._id is None
     assert wrapped.current_id == txn_id
