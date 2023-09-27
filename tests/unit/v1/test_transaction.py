@@ -557,13 +557,13 @@ def test__transactional___call__success_second_attempt(database):
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 @pytest.mark.parametrize("max_attempts", [1, 5])
-def test_asynctransactional___call__failure_max_attempts(database, max_attempts):
+def test_transactional___call__failure_max_attempts(database, max_attempts):
     """
     rasie retryable error and exhause max_attempts
     """
     from google.api_core import exceptions
     from google.cloud.firestore_v1.types import common
-    from google.cloud.firestore_v1.async_transaction import _EXCEED_ATTEMPTS_TEMPLATE
+    from google.cloud.firestore_v1.transaction import _EXCEED_ATTEMPTS_TEMPLATE
 
     to_wrap = mock.Mock(return_value=mock.sentinel.result, spec=[])
     wrapped = _make__transactional(to_wrap)
@@ -629,7 +629,7 @@ def test_asynctransactional___call__failure_max_attempts(database, max_attempts)
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 @pytest.mark.parametrize("max_attempts", [1, 5])
-def test_asynctransactional___call__failure_readonly(database, max_attempts):
+def test_transactional___call__failure_readonly(database, max_attempts):
     """
     readonly transaction should never retry
     """
@@ -689,7 +689,7 @@ def test_asynctransactional___call__failure_readonly(database, max_attempts):
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 @pytest.mark.parametrize("max_attempts", [1, 5])
-def test_asynctransactional___call__failure_with_non_retryable(database, max_attempts):
+def test_transactional___call__failure_with_non_retryable(database, max_attempts):
     """
     call fails due to an exception that is not retryable.
     Should rollback raise immediately
@@ -745,7 +745,7 @@ def test_asynctransactional___call__failure_with_non_retryable(database, max_att
 
 
 @pytest.mark.parametrize("database", [None, "somedb"])
-def test_asynctransactional___call__failure_with_rollback_failure(database):
+def test_transactional___call__failure_with_rollback_failure(database):
     """
     Test second failure as part of rollback
     should maintain first failure as __cause__
@@ -767,7 +767,7 @@ def test_asynctransactional___call__failure_with_rollback_failure(database):
     firestore_api.rollback.side_effect = rb_exc
 
     # Call the __call__-able ``wrapped``.
-    # should raise seocond error with first error as __cause__
+    # should raise second error with first error as __context__
     with pytest.raises(exceptions.InternalServerError) as exc_info:
         wrapped(transaction, "here", there=1.5)
 

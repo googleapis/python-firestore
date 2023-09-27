@@ -756,7 +756,7 @@ async def test_asynctransactional___call__failure_with_rollback_failure():
     firestore_api.rollback.side_effect = rb_exc
 
     # Call the __call__-able ``wrapped``.
-    # should raise seocond error with first error as __cause__
+    # should raise second error with first error as __context__
     with pytest.raises(exceptions.InternalServerError) as exc_info:
         await wrapped(transaction, "here", there=1.5)
 
