@@ -237,10 +237,8 @@ class AsyncQuery(BaseQuery):
         """Adds a sum over the nested query.
 
         Args:
-            field(str): The field for the sum
-
-            alias
-                (Optional[str]): The alias for the sum
+            field_ref(str): The field for the sum
+            alias(Optional[str]): The alias for the sum
 
         Returns:
             :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery`:
@@ -256,8 +254,7 @@ class AsyncQuery(BaseQuery):
         Args:
             field_ref(str): The field_ref for the avg
 
-            alias
-                (Optional[str]): The alias for the avg
+            alias(Optional[str]): The alias for the avg
 
         Returns:
             :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery`:
