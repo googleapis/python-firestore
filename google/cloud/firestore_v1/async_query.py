@@ -223,8 +223,8 @@ class AsyncQuery(BaseQuery):
         """Adds a count over the nested query.
 
         Args:
-            alias
-                (Optional[str]): The alias for the count
+            alias(Optional[str]): Optional name of the field to store the result of the aggregation into.
+                If not provided, Firestore will pick a default name following the format field_<incremental_id++>.
 
         Returns:
             :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery`:
@@ -238,8 +238,9 @@ class AsyncQuery(BaseQuery):
         """Adds a sum over the nested query.
 
         Args:
-            field_ref(Union[str, google.cloud.firestore_v1.field_path.FieldPath]): The field for the sum
-            alias(Optional[str]): The alias for the sum
+            field_ref(Union[str, google.cloud.firestore_v1.field_path.FieldPath]): The field to aggregate across.
+            alias(Optional[str]): Optional name of the field to store the result of the aggregation into.
+                If not provided, Firestore will pick a default name following the format field_<incremental_id++>.
 
         Returns:
             :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery`:
@@ -253,8 +254,9 @@ class AsyncQuery(BaseQuery):
         """Adds an avg over the nested query.
 
         Args:
-            field_ref(Union[str, google.cloud.firestore_v1.field_path.FieldPath]): The field for the avg
-            alias(Optional[str]): The alias for the avg
+            field_ref(Union[str, google.cloud.firestore_v1.field_path.FieldPath]): The field to aggregate across.
+            alias(Optional[str]): Optional name of the field to store the result of the aggregation into.
+                If not provided, Firestore will pick a default name following the format field_<incremental_id++>.
 
         Returns:
             :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery`:
