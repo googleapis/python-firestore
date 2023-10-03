@@ -33,8 +33,8 @@ from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
 
+from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.types import RunAggregationQueryResponse
-
 from google.cloud.firestore_v1.types import StructuredAggregationQuery
 from google.cloud.firestore_v1 import _helpers
 
@@ -81,7 +81,10 @@ class CountAggregation(BaseAggregation):
 
 
 class SumAggregation(BaseAggregation):
-    def __init__(self, field_ref: str, alias: str | None = None):
+    def __init__(self, field_ref: str | FieldPath, alias: str | None = None):
+        if isinstance(field_ref, FieldPath):
+            # convert field path to string
+            field_ref = field_ref.to_api_repr()
         self.field_ref = field_ref
         super(SumAggregation, self).__init__(alias=alias)
 
@@ -95,7 +98,10 @@ class SumAggregation(BaseAggregation):
 
 
 class AvgAggregation(BaseAggregation):
-    def __init__(self, field_ref: str, alias: str | None = None):
+    def __init__(self, field_ref: str | FieldPath, alias: str | None = None):
+        if isinstance(field_ref, FieldPath):
+            # convert field path to string
+            field_ref = field_ref.to_api_repr()
         self.field_ref = field_ref
         super(AvgAggregation, self).__init__(alias=alias)
 
@@ -145,7 +151,7 @@ class BaseAggregationQuery(ABC):
         self._aggregations.append(count_aggregation)
         return self
 
-    def sum(self, field_ref, alias=None):
+    def sum(self, field_ref: str | FieldPath, alias: str | None = None):
         """
         Adds a sum over the nested query
         """
@@ -153,7 +159,7 @@ class BaseAggregationQuery(ABC):
         self._aggregations.append(sum_aggregation)
         return self
 
-    def avg(self, field_ref, alias=None):
+    def avg(self, field_ref: str | FieldPath, alias: str | None = None):
         """
         Adds an avg over the nested query
         """

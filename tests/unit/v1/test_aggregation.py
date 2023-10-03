@@ -48,6 +48,28 @@ def test_count_aggregation_to_pb():
     assert count_aggregation._to_protobuf() == expected_aggregation_query_pb
 
 
+def test_sum_aggregation_w_field_path():
+    """
+    SumAggregation should convert FieldPath inputs into strings
+    """
+    from google.cloud.firestore_v1.field_path import FieldPath
+
+    field_path = FieldPath("foo", "bar")
+    sum_aggregation = SumAggregation(field_path, alias="total")
+    assert sum_aggregation.field_ref == "foo.bar"
+
+
+def test_avg_aggregation_w_field_path():
+    """
+    AvgAggregation should convert FieldPath inputs into strings
+    """
+    from google.cloud.firestore_v1.field_path import FieldPath
+
+    field_path = FieldPath("foo", "bar")
+    avg_aggregation = AvgAggregation(field_path, alias="total")
+    assert avg_aggregation.field_ref == "foo.bar"
+
+
 def test_sum_aggregation_to_pb():
     from google.cloud.firestore_v1.types import query as query_pb2
 

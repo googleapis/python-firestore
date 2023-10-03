@@ -34,13 +34,14 @@ from google.cloud.firestore_v1.base_query import (
 )
 
 from google.cloud.firestore_v1 import async_document
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
-from typing import AsyncGenerator, List, Optional, Type
-
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.transaction import Transaction
-
 from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from typing import AsyncGenerator, List, Optional, Type, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # Types needed only for Type Hints
+    from google.cloud.firestore_v1.transaction import Transaction
+    from google.cloud.firestore_v1.field_path import FieldPath
 
 
 class AsyncQuery(BaseQuery):
@@ -232,12 +233,12 @@ class AsyncQuery(BaseQuery):
         return AsyncAggregationQuery(self).count(alias=alias)
 
     def sum(
-        self, field_ref: str, alias: str | None = None
+        self, field_ref: str | FieldPath, alias: str | None = None
     ) -> Type["firestore_v1.async_aggregation.AsyncAggregationQuery"]:
         """Adds a sum over the nested query.
 
         Args:
-            field_ref(str): The field for the sum
+            field_ref(Union[str, google.cloud.firestore_v1.field_path.FieldPath]): The field for the sum
             alias(Optional[str]): The alias for the sum
 
         Returns:
@@ -247,13 +248,12 @@ class AsyncQuery(BaseQuery):
         return AsyncAggregationQuery(self).sum(field_ref, alias=alias)
 
     def avg(
-        self, field_ref: str, alias: str | None = None
+        self, field_ref: str | FieldPath, alias: str | None = None
     ) -> Type["firestore_v1.async_aggregation.AsyncAggregationQuery"]:
         """Adds an avg over the nested query.
 
         Args:
-            field_ref(str): The field_ref for the avg
-
+            field_ref(Union[str, google.cloud.firestore_v1.field_path.FieldPath]): The field for the avg
             alias(Optional[str]): The alias for the avg
 
         Returns:
