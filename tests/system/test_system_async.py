@@ -613,6 +613,7 @@ async def collection(query_docs):
     collection, _, _ = query_docs
     yield collection
 
+
 @pytest_asyncio.fixture
 async def async_query(collection):
     return collection.where(filter=FieldFilter("a", "==", 1))
@@ -1790,7 +1791,7 @@ async def test_async_avg_query_get_with_limit(collection, database):
     result = await avg_query.get()
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 5/12
+        assert r.value == 5 / 12
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -1844,7 +1845,7 @@ async def test_async_avg_query_stream_with_limit(collection, database):
     avg_query = collection.limit(12).avg("stats.product", alias="total")
     async for result in avg_query.stream():
         for aggregation_result in result:
-            assert aggregation_result.value == 5/12
+            assert aggregation_result.value == 5 / 12
             assert isinstance(aggregation_result.value, float)
 
 

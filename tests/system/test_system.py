@@ -2001,6 +2001,7 @@ def test_avg_query_get_default_alias(collection, database):
         assert r.value == 4.0
         assert isinstance(r.value, float)
 
+
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_avg_query_get_with_alias(collection, database):
     avg_query = collection.avg("stats.product", alias="total")
@@ -2029,7 +2030,7 @@ def test_avg_query_get_with_limit(collection, database):
     assert len(result) == 1
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 5/12
+        assert r.value == 5 / 12
         assert isinstance(r.value, float)
 
 
@@ -2084,7 +2085,7 @@ def test_avg_query_stream_with_limit(collection, database):
     for result in avg_query.stream():
         for aggregation_result in result:
             assert aggregation_result.alias == "total"
-            assert aggregation_result.value == 5/12
+            assert aggregation_result.value == 5 / 12
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
