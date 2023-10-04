@@ -609,10 +609,13 @@ async def query_docs(client):
 
 
 @pytest_asyncio.fixture
-async def async_query(query_docs):
-    collection, stored, allowed_vals = query_docs
-    query = collection.where(filter=FieldFilter("a", "==", 1))
+async def collection(query_docs):
+    collection, _, _ = query_docs
+    yield collection
 
+@pytest_asyncio.fixture
+async def async_query(collection):
+    return collection.where(filter=FieldFilter("a", "==", 1))
     return query
 
 
@@ -1580,7 +1583,7 @@ async def test_async_count_query_get_empty_aggregation(async_query, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_count_async_query_stream_default_alias(async_query, database):
+async def test_async_count_query_stream_default_alias(async_query, database):
 
     count_query = async_query.count()
 
@@ -1652,45 +1655,45 @@ async def test_async_count_query_stream_empty_aggregation(async_query, database)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_sum_async_query_get_default_alias(async_query, database):
-    sum_query = async_query.sum("stats.product")
+async def test_async_sum_query_get_default_alias(collection, database):
+    sum_query = collection.sum("stats.product")
     result = await sum_query.get()
     for r in result[0]:
         assert r.alias == "field_1"
-        assert r.value == 10
+        assert r.value == 100
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_sum_query_get_with_alias(async_query, database):
+async def test_async_sum_query_get_with_alias(collection, database):
 
-    sum_query = async_query.sum("stats.product", alias="total")
+    sum_query = collection.sum("stats.product", alias="total")
     result = await sum_query.get()
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 10
+        assert r.value == 100
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_sum_query_get_with_limit(async_query, database):
+async def test_async_sum_query_get_with_limit(collection, database):
 
-    sum_query = async_query.sum("stats.product", alias="total")
+    sum_query = collection.sum("stats.product", alias="total")
     result = await sum_query.get()
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 10
+        assert r.value == 100
 
     # sum with limit
-    sum_query = async_query.limit(2).sum("stats.product", alias="total")
+    sum_query = collection.limit(12).sum("stats.product", alias="total")
     result = await sum_query.get()
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 1
+        assert r.value == 5
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_sum_query_get_multiple_aggregations(async_query, database):
+async def test_async_sum_query_get_multiple_aggregations(collection, database):
 
-    sum_query = async_query.sum("stats.product", alias="total").sum(
+    sum_query = collection.sum("stats.product", alias="total").sum(
         "stats.product", alias="all"
     )
 
@@ -1706,44 +1709,44 @@ async def test_async_sum_query_get_multiple_aggregations(async_query, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_sum_async_query_stream_default_alias(async_query, database):
+async def test_async_sum_query_stream_default_alias(collection, database):
 
-    sum_query = async_query.sum("stats.product")
+    sum_query = collection.sum("stats.product")
 
     async for result in sum_query.stream():
         for aggregation_result in result:
             assert aggregation_result.alias == "field_1"
-            assert aggregation_result.value == 10
+            assert aggregation_result.value == 100
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_sum_query_stream_with_alias(async_query, database):
+async def test_async_sum_query_stream_with_alias(collection, database):
 
-    sum_query = async_query.sum("stats.product", alias="total")
+    sum_query = collection.sum("stats.product", alias="total")
     async for result in sum_query.stream():
         for aggregation_result in result:
             assert aggregation_result.alias == "total"
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_sum_query_stream_with_limit(async_query, database):
+async def test_async_sum_query_stream_with_limit(collection, database):
     # sum without limit
-    sum_query = async_query.sum("stats.product", alias="total")
+    sum_query = collection.sum("stats.product", alias="total")
     async for result in sum_query.stream():
         for aggregation_result in result:
-            assert aggregation_result.value == 10
+            assert aggregation_result.value == 100
 
     # sum with limit
-    sum_query = async_query.limit(2).sum("stats.product", alias="total")
+    sum_query = collection.limit(12).sum("stats.product", alias="total")
     async for result in sum_query.stream():
         for aggregation_result in result:
-            assert aggregation_result.value == 1
+            assert aggregation_result.value == 5
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_sum_query_stream_multiple_aggregations(async_query, database):
+async def test_async_sum_query_stream_multiple_aggregations(collection, database):
 
-    sum_query = async_query.sum("stats.product", alias="total").sum(
+    sum_query = collection.sum("stats.product", alias="total").sum(
         "stats.product", alias="all"
     )
 
@@ -1754,45 +1757,46 @@ async def test_async_sum_query_stream_multiple_aggregations(async_query, databas
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_avg_async_query_get_default_alias(async_query, database):
-    avg_query = async_query.avg("stats.product")
+async def test_async_avg_query_get_default_alias(collection, database):
+    avg_query = collection.avg("stats.product")
     result = await avg_query.get()
     for r in result[0]:
         assert r.alias == "field_1"
-        assert r.value == 2
+        assert r.value == 4
+        assert isinstance(r.value, float)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_avg_query_get_with_alias(async_query, database):
+async def test_async_avg_query_get_with_alias(collection, database):
 
-    avg_query = async_query.avg("stats.product", alias="total")
+    avg_query = collection.avg("stats.product", alias="total")
     result = await avg_query.get()
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 2
+        assert r.value == 4
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_avg_query_get_with_limit(async_query, database):
+async def test_async_avg_query_get_with_limit(collection, database):
 
-    avg_query = async_query.avg("stats.product", alias="total")
+    avg_query = collection.avg("stats.product", alias="total")
     result = await avg_query.get()
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 2
+        assert r.value == 4
 
     # avg with limit
-    avg_query = async_query.limit(2).avg("stats.product", alias="total")
+    avg_query = collection.limit(12).avg("stats.product", alias="total")
     result = await avg_query.get()
     for r in result[0]:
         assert r.alias == "total"
-        assert r.value == 0.5
+        assert r.value == 5/12
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_avg_query_get_multiple_aggregations(async_query, database):
+async def test_async_avg_query_get_multiple_aggregations(collection, database):
 
-    avg_query = async_query.avg("stats.product", alias="total").avg(
+    avg_query = collection.avg("stats.product", alias="total").avg(
         "stats.product", alias="all"
     )
 
@@ -1808,44 +1812,46 @@ async def test_async_avg_query_get_multiple_aggregations(async_query, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_avg_async_query_stream_default_alias(async_query, database):
+async def test_async_avg_query_stream_default_alias(collection, database):
 
-    avg_query = async_query.avg("stats.product")
+    avg_query = collection.avg("stats.product")
 
     async for result in avg_query.stream():
         for aggregation_result in result:
             assert aggregation_result.alias == "field_1"
-            assert aggregation_result.value == 2
+            assert aggregation_result.value == 4.0
+            assert isinstance(aggregation_result.value, float)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_avg_query_stream_with_alias(async_query, database):
+async def test_async_avg_query_stream_with_alias(collection, database):
 
-    avg_query = async_query.avg("stats.product", alias="total")
+    avg_query = collection.avg("stats.product", alias="total")
     async for result in avg_query.stream():
         for aggregation_result in result:
             assert aggregation_result.alias == "total"
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_avg_query_stream_with_limit(async_query, database):
+async def test_async_avg_query_stream_with_limit(collection, database):
     # avg without limit
-    avg_query = async_query.avg("stats.product", alias="total")
+    avg_query = collection.avg("stats.product", alias="total")
     async for result in avg_query.stream():
         for aggregation_result in result:
-            assert aggregation_result.value == 2
+            assert aggregation_result.value == 4.0
 
     # avg with limit
-    avg_query = async_query.limit(2).avg("stats.product", alias="total")
+    avg_query = collection.limit(12).avg("stats.product", alias="total")
     async for result in avg_query.stream():
         for aggregation_result in result:
-            assert aggregation_result.value == 0.5
+            assert aggregation_result.value == 5/12
+            assert isinstance(aggregation_result.value, float)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_async_avg_query_stream_multiple_aggregations(async_query, database):
+async def test_async_avg_query_stream_multiple_aggregations(collection, database):
 
-    avg_query = async_query.avg("stats.product", alias="total").avg(
+    avg_query = collection.avg("stats.product", alias="total").avg(
         "stats.product", alias="all"
     )
 
