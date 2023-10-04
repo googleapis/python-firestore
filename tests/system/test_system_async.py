@@ -617,7 +617,6 @@ async def collection(query_docs):
 @pytest_asyncio.fixture
 async def async_query(collection):
     return collection.where(filter=FieldFilter("a", "==", 1))
-    return query
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
