@@ -1952,7 +1952,6 @@ def test_sum_query_stream_default_alias(collection, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_sum_query_stream_with_alias(collection, database):
-
     sum_query = collection.sum("stats.product", alias="total")
     for result in sum_query.stream():
         for aggregation_result in result:
@@ -2060,7 +2059,6 @@ def test_avg_query_stream_default_alias(collection, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_avg_query_stream_with_alias(collection, database):
-
     avg_query = collection.avg("stats.product", alias="total")
     for result in avg_query.stream():
         for aggregation_result in result:

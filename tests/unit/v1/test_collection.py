@@ -82,7 +82,6 @@ def test_collection_count():
 
 
 def test_collection_sum():
-
     collection_id1 = "rooms"
     document_id = "roomA"
     collection_id2 = "messages"
@@ -102,7 +101,6 @@ def test_collection_sum():
 
 
 def test_collection_avg():
-
     collection_id1 = "rooms"
     document_id = "roomA"
     collection_id2 = "messages"
