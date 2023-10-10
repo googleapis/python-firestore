@@ -1884,6 +1884,25 @@ def test_count_query_stream_empty_aggregation(query, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_count_query_with_start_at(query, database):
+    """
+    Ensure that count aggregation queries work when chained with a start_at
+
+    eg `col.where(...).startAt(...).count()`
+    """
+    result = query.get()
+    start_doc = result[1]
+    # find count excluding first result
+    expected_count = len(result) - 1
+    # start new query that starts at the second result
+    count_query = query.start_at(start_doc).count("a")
+    # ensure that the first doc was skipped in sum aggregation
+    for result in count_query.stream():
+        for aggregation_result in result:
+            assert aggregation_result.value == expected_count
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_sum_query_get_default_alias(collection, database):
     sum_query = collection.sum("stats.product")
     result = sum_query.get()
@@ -1986,6 +2005,24 @@ def test_sum_query_stream_multiple_aggregations(collection, database):
     for result in sum_query.stream():
         for aggregation_result in result:
             assert aggregation_result.alias in ["total", "all"]
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_sum_query_with_start_at(query, database):
+    """
+    Ensure that sum aggregation queries work when chained with a start_at
+
+    eg `col.where(...).startAt(...).sum()`
+    """
+    result = query.get()
+    start_doc = result[1]
+    # find sum excluding first result
+    expected_sum = sum([doc.get("a") for doc in result[1:]])
+    # start new query that starts at the second result
+    sum_result = query.start_at(start_doc).sum("a").get()
+    assert len(sum_result) == 1
+    # ensure that the first doc was skipped in sum aggregation
+    assert sum_result[0].value == expected_sum
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -2093,6 +2130,26 @@ def test_avg_query_stream_multiple_aggregations(collection, database):
     for result in avg_query.stream():
         for aggregation_result in result:
             assert aggregation_result.alias in ["total", "all"]
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_avg_query_with_start_at(query, database):
+    """
+    Ensure that avg aggregation queries work when chained with a start_at
+
+    eg `col.where(...).startAt(...).avg()`
+    """
+    from statistics import mean
+
+    result = query.get()
+    start_doc = result[1]
+    # find average, excluding first result
+    expected_avg = mean([doc.get("a") for doc in result[1:]])
+    # start new query that starts at the second result
+    avg_result = query.start_at(start_doc).avg("a").get()
+    assert len(avg_result) == 1
+    # ensure that the first doc was skipped in avg aggregation
+    assert avg_result[0].value == expected_avg
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
