@@ -1286,7 +1286,6 @@ philosophers_data_set = [
 
 
 async def _do_recursive_delete(client, bulk_writer, empty_philosophers=False):
-
     if empty_philosophers:
         philosophers = doc_paths = []
     else:
@@ -1517,7 +1516,6 @@ async def test_count_async_query_get_default_alias(async_query, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_count_query_get_with_alias(async_query, database):
-
     count_query = async_query.count(alias="total")
     result = await count_query.get()
     for r in result[0]:
@@ -1526,7 +1524,6 @@ async def test_async_count_query_get_with_alias(async_query, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_count_query_get_with_limit(async_query, database):
-
     count_query = async_query.count(alias="total")
     result = await count_query.get()
     for r in result[0]:
@@ -1543,7 +1540,6 @@ async def test_async_count_query_get_with_limit(async_query, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_count_query_get_multiple_aggregations(async_query, database):
-
     count_query = async_query.count(alias="total").count(alias="all")
 
     result = await count_query.get()
@@ -1561,7 +1557,6 @@ async def test_async_count_query_get_multiple_aggregations(async_query, database
 async def test_async_count_query_get_multiple_aggregations_duplicated_alias(
     async_query, database
 ):
-
     count_query = async_query.count(alias="total").count(alias="total")
 
     with pytest.raises(InvalidArgument) as exc_info:
@@ -1584,7 +1579,6 @@ async def test_async_count_query_get_empty_aggregation(async_query, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_count_query_stream_default_alias(async_query, database):
-
     count_query = async_query.count()
 
     async for result in count_query.stream():
@@ -1594,7 +1588,6 @@ async def test_async_count_query_stream_default_alias(async_query, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_count_query_stream_with_alias(async_query, database):
-
     count_query = async_query.count(alias="total")
     async for result in count_query.stream():
         for aggregation_result in result:
@@ -1618,7 +1611,6 @@ async def test_async_count_query_stream_with_limit(async_query, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_count_query_stream_multiple_aggregations(async_query, database):
-
     count_query = async_query.count(alias="total").count(alias="all")
 
     async for result in count_query.stream():
@@ -1631,7 +1623,6 @@ async def test_async_count_query_stream_multiple_aggregations(async_query, datab
 async def test_async_count_query_stream_multiple_aggregations_duplicated_alias(
     async_query, database
 ):
-
     count_query = async_query.count(alias="total").count(alias="total")
 
     with pytest.raises(InvalidArgument) as exc_info:
