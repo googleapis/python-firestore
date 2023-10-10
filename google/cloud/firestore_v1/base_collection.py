@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Classes for representing collections for the Google Cloud Firestore API."""
+from __future__ import annotations
 import random
 
 from google.api_core import retry as retries
@@ -38,11 +39,10 @@ from typing import (
 )
 
 # Types needed only for Type Hints
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
-from google.cloud.firestore_v1.base_query import BaseQuery
-from google.cloud.firestore_v1.transaction import Transaction
-
 if TYPE_CHECKING:
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.base_query import BaseQuery
+    from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.field_path import FieldPath
 
 
@@ -248,7 +248,7 @@ class BaseCollectionReference(object):
         op_string: Optional[str] = None,
         value=None,
         *,
-        filter=None
+        filter=None,
     ) -> BaseQuery:
         """Create a "where" query with this collection as parent.
 
