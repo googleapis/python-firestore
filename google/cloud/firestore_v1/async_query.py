@@ -38,7 +38,7 @@ from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from typing import AsyncGenerator, List, Optional, Type, TYPE_CHECKING
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
     # Types needed only for Type Hints
     from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.field_path import FieldPath

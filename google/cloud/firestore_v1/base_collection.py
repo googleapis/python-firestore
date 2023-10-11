@@ -38,8 +38,8 @@ from typing import (
     TYPE_CHECKING,
 )
 
-# Types needed only for Type Hints
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: no cover
+    # Types needed only for Type Hints
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.base_query import BaseQuery
     from google.cloud.firestore_v1.transaction import Transaction
