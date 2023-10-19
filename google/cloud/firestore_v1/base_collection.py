@@ -249,7 +249,7 @@ class BaseCollectionReference(Generic[QueryType]):
         op_string: Optional[str] = None,
         value=None,
         *,
-        filter=None
+        filter=None,
     ) -> QueryType:
         """Create a "where" query with this collection as parent.
 
