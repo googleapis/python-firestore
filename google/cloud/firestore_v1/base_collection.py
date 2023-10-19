@@ -29,6 +29,7 @@ from typing import (
     AsyncGenerator,
     Coroutine,
     Generator,
+    Generic,
     AsyncIterator,
     Iterator,
     Iterable,
@@ -38,18 +39,18 @@ from typing import (
     TYPE_CHECKING,
 )
 
+
 if TYPE_CHECKING:  # pragma: no cover
     # Types needed only for Type Hints
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
-    from google.cloud.firestore_v1.base_query import BaseQuery
+    from google.cloud.firestore_v1.base_query import QueryType
     from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.field_path import FieldPath
-
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 
-class BaseCollectionReference(object):
+class BaseCollectionReference(Generic[QueryType]):
     """A reference to a collection in a Firestore database.
 
     The collection may already exist or this class can facilitate creation
@@ -113,7 +114,7 @@ class BaseCollectionReference(object):
             parent_path = self._path[:-1]
         return self._client.document(*parent_path)
 
-    def _query(self) -> BaseQuery:
+    def _query(self) -> QueryType:
         raise NotImplementedError
 
     def _aggregation_query(self) -> BaseAggregationQuery:
@@ -220,10 +221,10 @@ class BaseCollectionReference(object):
     ]:
         raise NotImplementedError
 
-    def recursive(self) -> "BaseQuery":
+    def recursive(self) -> QueryType:
         return self._query().recursive()
 
-    def select(self, field_paths: Iterable[str]) -> BaseQuery:
+    def select(self, field_paths: Iterable[str]) -> QueryType:
         """Create a "select" query with this collection as parent.
 
         See
@@ -248,8 +249,8 @@ class BaseCollectionReference(object):
         op_string: Optional[str] = None,
         value=None,
         *,
-        filter=None,
-    ) -> BaseQuery:
+        filter=None
+    ) -> QueryType:
         """Create a "where" query with this collection as parent.
 
         See
@@ -295,7 +296,7 @@ class BaseCollectionReference(object):
         else:
             return query.where(filter=filter)
 
-    def order_by(self, field_path: str, **kwargs) -> BaseQuery:
+    def order_by(self, field_path: str, **kwargs) -> QueryType:
         """Create an "order by" query with this collection as parent.
 
         See
@@ -317,7 +318,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.order_by(field_path, **kwargs)
 
-    def limit(self, count: int) -> BaseQuery:
+    def limit(self, count: int) -> QueryType:
         """Create a limited query with this collection as parent.
 
         .. note::
@@ -360,7 +361,7 @@ class BaseCollectionReference(object):
         query = self._query()
         return query.limit_to_last(count)
 
-    def offset(self, num_to_skip: int) -> BaseQuery:
+    def offset(self, num_to_skip: int) -> QueryType:
         """Skip to an offset in a query with this collection as parent.
 
         See
@@ -380,7 +381,7 @@ class BaseCollectionReference(object):
 
     def start_at(
         self, document_fields: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> BaseQuery:
+    ) -> QueryType:
         """Start query at a cursor with this collection as parent.
 
         See
@@ -403,7 +404,7 @@ class BaseCollectionReference(object):
 
     def start_after(
         self, document_fields: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> BaseQuery:
+    ) -> QueryType:
         """Start query after a cursor with this collection as parent.
 
         See
@@ -426,7 +427,7 @@ class BaseCollectionReference(object):
 
     def end_before(
         self, document_fields: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> BaseQuery:
+    ) -> QueryType:
         """End query before a cursor with this collection as parent.
 
         See
@@ -449,7 +450,7 @@ class BaseCollectionReference(object):
 
     def end_at(
         self, document_fields: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> BaseQuery:
+    ) -> QueryType:
         """End query at a cursor with this collection as parent.
 
         See
