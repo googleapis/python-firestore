@@ -55,7 +55,7 @@ from typing import (
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.field_path import FieldPath
 
 _BAD_DIR_STRING: str

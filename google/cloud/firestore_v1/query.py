@@ -40,7 +40,7 @@ from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Callable, Generator, List, Optional, Type, TYPE_CHECKING
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.field_path import FieldPath
 
 

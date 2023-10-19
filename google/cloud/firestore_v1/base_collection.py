@@ -41,7 +41,7 @@ from typing import (
 )
 
 
-if TYPE_CHECKING:  # pragma: no cover
+if TYPE_CHECKING:  # pragma: NO COVER
     # Types needed only for Type Hints
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.transaction import Transaction
