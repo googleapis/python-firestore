@@ -2007,6 +2007,9 @@ def test_sum_query_stream_multiple_aggregations(collection, database):
             assert aggregation_result.alias in ["total", "all"]
 
 
+# tests for issue reported in b/306241058
+# we will skip test in client for now, until backend fix is implemented
+@pytest.mark.skip(reason="backend fix required")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_sum_query_with_start_at(query, database):
     """
@@ -2132,6 +2135,9 @@ def test_avg_query_stream_multiple_aggregations(collection, database):
             assert aggregation_result.alias in ["total", "all"]
 
 
+# tests for issue reported in b/306241058
+# we will skip test in client for now, until backend fix is implemented
+@pytest.mark.skip(reason="backend fix required")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_avg_query_with_start_at(query, database):
     """
