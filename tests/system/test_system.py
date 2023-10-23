@@ -223,7 +223,7 @@ def test_document_set_w_nested_list(client, cleanup, database):
     assert snapshot.to_dict() is None
 
     # 1. Use ``create()`` to create the document.
-    data1 = {"a": {"x": 1, "y":2}}
+    data1 = {"a": {"x": 1, "y": 2}}
     write_result1 = document.create(data1)
     snapshot1 = document.get()
     assert snapshot1.to_dict() == data1
@@ -232,7 +232,7 @@ def test_document_set_w_nested_list(client, cleanup, database):
     assert snapshot1.update_time == write_result1.update_time
 
     # 2. Call ``set()`` again to delete sub-field
-    data2 = {"a": {"x":firestore.DELETE_FIELD}}
+    data2 = {"a": {"x": firestore.DELETE_FIELD}}
     write_result2 = document.set(data2, merge=True)
     snapshot2 = document.get()
     assert snapshot2.to_dict() == {"a": {"y": 2}}
