@@ -450,6 +450,9 @@ def extract_fields(
             if isinstance(value, dict):
                 for s_path, s_value in extract_fields(value, field_path):
                     yield s_path, s_value
+            elif isinstance(value, (list, tuple, set, frozenset)):
+                for s_value in value:
+                    yield field_path, s_value
             else:
                 yield field_path, value
 

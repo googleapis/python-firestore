@@ -209,6 +209,39 @@ def test_document_set(client, cleanup, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_document_set_w_nested_list(client, cleanup, database):
+    """
+    Test case for https://github.com/googleapis/python-firestore/issues/665
+    """
+    document_id = "for-set" + UNIQUE_RESOURCE_ID
+    document = client.document("i-did-it", document_id)
+    # Add to clean-up before API request (in case ``set()`` fails).
+    cleanup(document.delete)
+
+    # 0. Make sure the document doesn't exist yet
+    snapshot = document.get()
+    assert snapshot.to_dict() is None
+
+    # 1. Use ``create()`` to create the document.
+    data1 = {"a": {"x": 1, "y":2}}
+    write_result1 = document.create(data1)
+    snapshot1 = document.get()
+    assert snapshot1.to_dict() == data1
+    # Make sure the update is what created the document.
+    assert snapshot1.create_time == snapshot1.update_time
+    assert snapshot1.update_time == write_result1.update_time
+
+    # 2. Call ``set()`` again to delete sub-field
+    data2 = {"a": {"x":firestore.DELETE_FIELD}}
+    write_result2 = document.set(data2, merge=True)
+    snapshot2 = document.get()
+    assert snapshot2.to_dict() == {"a": {"y": 2}}
+    # Make sure the create time hasn't changed.
+    assert snapshot2.create_time == snapshot1.create_time
+    assert snapshot2.update_time == write_result2.update_time
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_document_integer_field(client, cleanup, database):
     document_id = "for-set" + UNIQUE_RESOURCE_ID
     document = client.document("i-did-it", document_id)
