@@ -868,7 +868,7 @@ class BaseQuery(object):
                 _has_snapshot_cursor = True
         if _has_snapshot_cursor:
             # added orders should use direction of last order
-            direction = orders[-1].direction if orders else BaseQuery.ASCENDING
+            last_direction = orders[-1].direction if orders else BaseQuery.ASCENDING
             order_keys = [order.field.field_path for order in orders]
             for filter_ in self._field_filters:
                 # FieldFilter.Operator should not compare equal to
@@ -880,10 +880,10 @@ class BaseQuery(object):
                         filter_.op not in _EQUALITY_OPERATORS
                         and field not in order_keys
                     ):
-                        orders.append(self._make_order(field, direction))
+                        orders.append(self._make_order(field, last_direction))
             # add __name__ if not already in orders
             if "__name__" not in [order.field.field_path for order in orders]:
-                orders.append(self._make_order("__name__", direction))
+                orders.append(self._make_order("__name__", last_direction))
 
         return orders
 
