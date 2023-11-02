@@ -868,7 +868,7 @@ class BaseQuery(object):
                 _has_snapshot_cursor = True
         if _has_snapshot_cursor:
             # added orders should use direction of last order
-            direction = orders[-1].direction if orders else "ASCENDING"  # enum?
+            direction = orders[-1].direction if orders else BaseQuery.ASCENDING
             order_keys = [order.field.field_path for order in orders]
             for filter_ in self._field_filters:
                 # FieldFilter.Operator should not compare equal to
