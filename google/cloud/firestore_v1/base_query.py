@@ -86,7 +86,7 @@ _COMPARISON_OPERATORS = {
     "array_contains_any": _operator_enum.ARRAY_CONTAINS_ANY,
 }
 # set of operators that involve equlity comparisons
-# should  be skipped when normalizing query
+# should be skipped when normalizing query
 _EQUALITY_OPERATORS = (
     _operator_enum.EQUAL,
     _operator_enum.ARRAY_CONTAINS,
