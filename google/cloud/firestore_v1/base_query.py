@@ -91,7 +91,7 @@ _EQUALITY_OPERATORS = (
     _operator_enum.EQUAL,
     _operator_enum.ARRAY_CONTAINS,
     _operator_enum.ARRAY_CONTAINS_ANY,
-    _operator_enum.IN
+    _operator_enum.IN,
 )
 _BAD_OP_STRING = "Operator string {!r} is invalid. Valid choices are: {}."
 _BAD_OP_NAN_NULL = 'Only an equality filter ("==") can be used with None or NaN values'
@@ -876,7 +876,10 @@ class BaseQuery(object):
                 if isinstance(filter_.op, StructuredQuery.FieldFilter.Operator):
                     field = filter_.field.field_path
                     # skip equality filters and filters on fields already ordered
-                    if filter_.op not in _EQUALITY_OPERATORS and field not in order_keys:
+                    if (
+                        filter_.op not in _EQUALITY_OPERATORS
+                        and field not in order_keys
+                    ):
                         orders.append(self._make_order(field, direction))
             # add __name__ if not already in orders
             if "__name__" not in [order.field.field_path for order in orders]:
