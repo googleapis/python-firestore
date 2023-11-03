@@ -878,10 +878,7 @@ class BaseQuery(object):
                 if isinstance(filter_.op, StructuredQuery.FieldFilter.Operator):
                     field = filter_.field.field_path
                     # skip equality filters and filters on fields already ordered
-                    if (
-                        filter_.op in _INEQUALITY_OPERATORS
-                        and field not in order_keys
-                    ):
+                    if filter_.op in _INEQUALITY_OPERATORS and field not in order_keys:
                         orders.append(self._make_order(field, last_direction))
             # add __name__ if not already in orders
             if "__name__" not in [order.field.field_path for order in orders]:
