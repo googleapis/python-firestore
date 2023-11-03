@@ -85,13 +85,15 @@ _COMPARISON_OPERATORS = {
     "not-in": _operator_enum.NOT_IN,
     "array_contains_any": _operator_enum.ARRAY_CONTAINS_ANY,
 }
-# set of operators that involve equlity comparisons
-# should be skipped when normalizing query
-_EQUALITY_OPERATORS = (
-    _operator_enum.EQUAL,
-    _operator_enum.ARRAY_CONTAINS,
-    _operator_enum.ARRAY_CONTAINS_ANY,
-    _operator_enum.IN,
+# set of operators that don't involve equlity comparisons
+# will be used in query normalization
+_INEQUALITY_OPERATORS = (
+    _operator_enum.LESS_THAN,
+    _operator_enum.LESS_THAN_OR_EQUAL,
+    _operator_enum.GREATER_THAN_OR_EQUAL,
+    _operator_enum.GREATER_THAN,
+    _operator_enum.NOT_EQUAL,
+    _operator_enum.NOT_IN,
 )
 _BAD_OP_STRING = "Operator string {!r} is invalid. Valid choices are: {}."
 _BAD_OP_NAN_NULL = 'Only an equality filter ("==") can be used with None or NaN values'
@@ -877,7 +879,7 @@ class BaseQuery(object):
                     field = filter_.field.field_path
                     # skip equality filters and filters on fields already ordered
                     if (
-                        filter_.op not in _EQUALITY_OPERATORS
+                        filter_.op in _INEQUALITY_OPERATORS
                         and field not in order_keys
                     ):
                         orders.append(self._make_order(field, last_direction))
