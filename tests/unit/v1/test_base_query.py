@@ -1244,18 +1244,19 @@ def test_basequery__normalize_orders_w_cursor_descending_w_inequality():
         _make_base_query(collection)
         .where(filter=FieldFilter("a", "==", 1))
         .where(filter=FieldFilter("b", "in", [1, 2, 3]))
-        .where(filter=FieldFilter("b", "not-in", [4, 5, 6]))
-        .order_by("c", "DESCENDING")
+        .where(filter=FieldFilter("c", "not-in", [4, 5, 6]))
+        .order_by("d", "DESCENDING")
     )
     query_w_snapshot = query.start_after(snapshot)
 
     normalized = query._normalize_orders()
-    expected = [query._make_order("c", "DESCENDING")]
+    expected = [query._make_order("d", "DESCENDING")]
     assert normalized == expected
 
     normalized_w_snapshot = query_w_snapshot._normalize_orders()
-    expected_w_snapshot = expected + [
-        query._make_order("b", "DESCENDING"),
+    expected_w_snapshot = [
+        query._make_order("d", "DESCENDING")
+        query._make_order("c", "DESCENDING"),
         query._make_order("__name__", "DESCENDING"),
     ]
     assert normalized_w_snapshot == expected_w_snapshot
