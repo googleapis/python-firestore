@@ -1255,7 +1255,7 @@ def test_basequery__normalize_orders_w_cursor_descending_w_inequality():
 
     normalized_w_snapshot = query_w_snapshot._normalize_orders()
     expected_w_snapshot = [
-        query._make_order("d", "DESCENDING")
+        query._make_order("d", "DESCENDING"),
         query._make_order("c", "DESCENDING"),
         query._make_order("__name__", "DESCENDING"),
     ]
