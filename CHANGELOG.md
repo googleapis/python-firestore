@@ -5,7 +5,7 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
-## [2.14.0](https://github.com/googleapis/python-firestore/compare/v2.13.1...v2.14.0) (2023-11-30)
+## [2.14.0rc1](https://github.com/googleapis/python-firestore/compare/v2.13.1...v2.14.0rc1) (2023-11-30)
 
 
 ### Features
