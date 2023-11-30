@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -116,6 +116,8 @@ class TransactionOptions(proto.Message):
     class ReadWrite(proto.Message):
         r"""Options for a transaction that can be used to read and write
         documents.
+        Firestore does not allow 3rd party auth requests to create
+        read-write. transactions.
 
         Attributes:
             retry_transaction (bytes):
@@ -137,7 +139,11 @@ class TransactionOptions(proto.Message):
         Attributes:
             read_time (google.protobuf.timestamp_pb2.Timestamp):
                 Reads documents at the given time.
-                This may not be older than 60 seconds.
+
+                This must be a microsecond precision timestamp
+                within the past one hour, or if Point-in-Time
+                Recovery is enabled, can additionally be a whole
+                minute timestamp within the past 7 days.
 
                 This field is a member of `oneof`_ ``consistency_selector``.
         """

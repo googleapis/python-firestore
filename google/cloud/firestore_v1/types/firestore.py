@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -93,8 +93,11 @@ class GetDocumentRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads the version of the document at the
-            given time. This may not be older than 270
-            seconds.
+            given time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -186,7 +189,11 @@ class ListDocumentsRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Perform the read at the provided time.
-            This may not be older than 270 seconds.
+
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
         show_missing (bool):
@@ -341,6 +348,7 @@ class UpdateDocumentRequest(proto.Message):
             The fields to update.
             None of the field paths in the mask may contain
             a reserved name.
+
             If the document exists on the server and has
             fields not referenced in the mask, they are left
             unchanged.
@@ -447,7 +455,11 @@ class BatchGetDocumentsRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads documents as they were at the given
-            time. This may not be older than 270 seconds.
+            time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -589,6 +601,7 @@ class CommitRequest(proto.Message):
             ``projects/{project_id}/databases/{database_id}``.
         writes (MutableSequence[google.cloud.firestore_v1.types.Write]):
             The writes to apply.
+
             Always executed atomically and in order.
         transaction (bytes):
             If set, applies all writes in this
@@ -617,6 +630,7 @@ class CommitResponse(proto.Message):
     Attributes:
         write_results (MutableSequence[google.cloud.firestore_v1.types.WriteResult]):
             The result of applying the writes.
+
             This i-th write result corresponds to the i-th
             write in the request.
         commit_time (google.protobuf.timestamp_pb2.Timestamp):
@@ -699,7 +713,11 @@ class RunQueryRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads documents as they were at the given
-            time. This may not be older than 270 seconds.
+            time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -837,9 +855,10 @@ class RunAggregationQueryRequest(proto.Message):
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Executes the query at the given timestamp.
 
-            Requires:
-
-            -  Cannot be more than 270 seconds in the past.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -880,6 +899,7 @@ class RunAggregationQueryResponse(proto.Message):
     Attributes:
         result (google.cloud.firestore_v1.types.AggregationResult):
             A single aggregation result.
+
             Not present when reporting partial progress.
         transaction (bytes):
             The transaction that was started as part of
@@ -975,7 +995,11 @@ class PartitionQueryRequest(proto.Message):
             ``partition_count``.
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads documents as they were at the given
-            time. This may not be older than 270 seconds.
+            time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -1032,7 +1056,8 @@ class PartitionQueryResponse(proto.Message):
             -  query, start_at B
 
             An empty result may indicate that the query has too few
-            results to be partitioned.
+            results to be partitioned, or that the query is not yet
+            supported for partitioning.
         next_page_token (str):
             A page token that may be used to request an additional set
             of results, up to the number specified by
@@ -1080,6 +1105,7 @@ class WriteRequest(proto.Message):
             left empty, a new write stream will be created.
         writes (MutableSequence[google.cloud.firestore_v1.types.Write]):
             The writes to apply.
+
             Always executed atomically and in order.
             This must be empty on the first request.
             This may be empty on the last request.
@@ -1142,9 +1168,11 @@ class WriteResponse(proto.Message):
             A token that represents the position of this
             response in the stream. This can be used by a
             client to resume the stream at this point.
+
             This field is always set.
         write_results (MutableSequence[google.cloud.firestore_v1.types.WriteResult]):
             The result of applying the writes.
+
             This i-th write result corresponds to the i-th
             write in the request.
         commit_time (google.protobuf.timestamp_pb2.Timestamp):
@@ -1333,9 +1361,26 @@ class Target(proto.Message):
 
             This field is a member of `oneof`_ ``resume_type``.
         target_id (int):
-            The target ID that identifies the target on
-            the stream. Must be a positive number and
-            non-zero.
+            The target ID that identifies the target on the stream. Must
+            be a positive number and non-zero.
+
+            If ``target_id`` is 0 (or unspecified), the server will
+            assign an ID for this target and return that in a
+            ``TargetChange::ADD`` event. Once a target with
+            ``target_id=0`` is added, all subsequent targets must also
+            have ``target_id=0``. If an ``AddTarget`` request with
+            ``target_id != 0`` is sent to the server after a target with
+            ``target_id=0`` is added, the server will immediately send a
+            response with a ``TargetChange::Remove`` event.
+
+            Note that if the client sends multiple ``AddTarget``
+            requests without an ID, the order of IDs returned in
+            ``TargetChage.target_ids`` are undefined. Therefore, clients
+            should provide a target ID instead of relying on the server
+            to assign one.
+
+            If ``target_id`` is non-zero, there must not be an existing
+            active target on this stream with the same ID.
         once (bool):
             If the target should be removed once it is
             current and consistent.
@@ -1444,6 +1489,7 @@ class TargetChange(proto.Message):
             The type of change that occurred.
         target_ids (MutableSequence[int]):
             The target IDs of targets that have changed.
+
             If empty, the change applies to all targets.
 
             The order of the target IDs is not defined.
@@ -1550,7 +1596,11 @@ class ListCollectionIdsRequest(proto.Message):
             [ListCollectionIdsResponse][google.firestore.v1.ListCollectionIdsResponse].
         read_time (google.protobuf.timestamp_pb2.Timestamp):
             Reads documents as they were at the given
-            time. This may not be older than 270 seconds.
+            time.
+            This must be a microsecond precision timestamp
+            within the past one hour, or if Point-in-Time
+            Recovery is enabled, can additionally be a whole
+            minute timestamp within the past 7 days.
 
             This field is a member of `oneof`_ ``consistency_selector``.
     """
@@ -1611,6 +1661,7 @@ class BatchWriteRequest(proto.Message):
             ``projects/{project_id}/databases/{database_id}``.
         writes (MutableSequence[google.cloud.firestore_v1.types.Write]):
             The writes to apply.
+
             Method does not apply writes atomically and does
             not guarantee ordering. Each write succeeds or
             fails independently. You cannot write to the
@@ -1642,10 +1693,12 @@ class BatchWriteResponse(proto.Message):
     Attributes:
         write_results (MutableSequence[google.cloud.firestore_v1.types.WriteResult]):
             The result of applying the writes.
+
             This i-th write result corresponds to the i-th
             write in the request.
         status (MutableSequence[google.rpc.status_pb2.Status]):
             The status of applying the writes.
+
             This i-th write status corresponds to the i-th
             write in the request.
     """

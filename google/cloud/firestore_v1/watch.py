@@ -230,7 +230,6 @@ class Watch(object):
         self._init_stream()
 
     def _init_stream(self):
-
         rpc_request = self._get_rpc_request
 
         self._rpc = ResumableBidiRpc(
@@ -401,7 +400,9 @@ class Watch(object):
 
         error_message = "Error %s:  %s" % (code, message)
 
-        raise RuntimeError(error_message)
+        raise RuntimeError(error_message) from exceptions.from_grpc_status(
+            code, message
+        )
 
     def _on_snapshot_target_change_reset(self, target_change):
         # Whatever changes have happened so far no longer matter.
@@ -443,7 +444,6 @@ class Watch(object):
         which = pb.WhichOneof("response_type")
 
         if which == "target_change":
-
             target_change_type = pb.target_change.target_change_type
             _LOGGER.debug(f"on_snapshot: target change: {target_change_type}")
 

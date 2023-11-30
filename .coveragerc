@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2020 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,8 +31,6 @@ exclude_lines =
     def __repr__
     # Ignore abstract methods
     raise NotImplementedError
-    # Ignore setuptools-less fallback
-    except pkg_resources.DistributionNotFound:
 omit =
   */gapic/*.py
   */proto/*.py

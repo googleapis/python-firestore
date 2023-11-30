@@ -702,7 +702,7 @@ def test_decode_dict_w_many_types():
 
 
 def _dummy_ref_string(collection_id):
-    from google.cloud.firestore_v1.client import DEFAULT_DATABASE
+    from google.cloud.firestore_v1.base_client import DEFAULT_DATABASE
 
     project = "bazzzz"
     return "projects/{}/databases/{}/documents/{}".format(
@@ -1900,7 +1900,6 @@ def test_documentextractorformerge_apply_merge_list_fields_w_delete():
 
 
 def test_documentextractorformerge_apply_merge_list_fields_w_prefixes():
-
     document_data = {"a": {"b": {"c": 123}}}
     inst = _make_document_extractor_for_merge(document_data)
 
@@ -1909,7 +1908,6 @@ def test_documentextractorformerge_apply_merge_list_fields_w_prefixes():
 
 
 def test_documentextractorformerge_apply_merge_lists_w_missing_data_paths():
-
     document_data = {"write_me": "value", "ignore_me": 123}
     inst = _make_document_extractor_for_merge(document_data)
 
@@ -1918,7 +1916,6 @@ def test_documentextractorformerge_apply_merge_lists_w_missing_data_paths():
 
 
 def test_documentextractorformerge_apply_merge_list_fields_w_non_merge_field():
-
     document_data = {"write_me": "value", "ignore_me": 123}
     inst = _make_document_extractor_for_merge(document_data)
 

@@ -20,6 +20,8 @@ import os
 import mock
 import pytest
 
+import proto as proto_plus
+
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import firestore
 from google.cloud.firestore_v1.types import write
@@ -86,7 +88,7 @@ def _mock_firestore_api():
 
 def _make_client_document(firestore_api, testcase):
     from google.cloud.firestore_v1 import Client
-    from google.cloud.firestore_v1.client import DEFAULT_DATABASE
+    from google.cloud.firestore_v1.base_client import DEFAULT_DATABASE
     import google.auth.credentials
 
     _, project, _, database, _, doc_path = testcase.doc_ref_path.split("/", 5)
@@ -244,7 +246,10 @@ def test_listen_testprotos(test_proto):  # pragma: NO COVER
                 watch = Watch.for_query(query, callback, DocumentSnapshot)
 
                 wrapped_responses = [
-                    firestore.ListenResponse.wrap(proto) for proto in testcase.responses
+                    firestore.ListenResponse.wrap(proto._pb)
+                    if isinstance(proto, proto_plus.Message)
+                    else firestore.ListenResponse.wrap(proto)
+                    for proto in testcase.responses
                 ]
                 if testcase.is_error:
                     try:
@@ -336,10 +341,15 @@ def convert_set_option(option):
 def convert_precondition(precond):
     from google.cloud.firestore_v1 import Client
 
-    if precond.HasField("exists"):
+    if isinstance(precond, proto_plus.Message):
+        precond_pb = precond._pb
+    else:
+        precond_pb = precond
+
+    if precond_pb.HasField("exists"):
         return Client.write_option(exists=precond.exists)
 
-    assert precond.HasField("update_time")
+    assert precond_pb.HasField("update_time")
     return Client.write_option(last_update_time=precond.update_time)
 
 
@@ -455,7 +465,6 @@ def parse_query(testcase):
     query = collection
 
     for clause in testcase.clauses:
-
         if "select" in clause:
             field_paths = [
                 ".".join(field_path.field) for field_path in clause.select.fields

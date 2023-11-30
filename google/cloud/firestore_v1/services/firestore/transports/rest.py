@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,7 +28,6 @@ from google.api_core import gapic_v1
 
 from google.protobuf import json_format
 from google.cloud.location import locations_pb2  # type: ignore
-from google.longrunning import operations_pb2
 from requests import __version__ as requests_version
 import dataclasses
 import re
@@ -45,6 +44,7 @@ from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import document as gf_document
 from google.cloud.firestore_v1.types import firestore
 from google.protobuf import empty_pb2  # type: ignore
+from google.longrunning import operations_pb2  # type: ignore
 
 from .base import FirestoreTransport, DEFAULT_CLIENT_INFO as BASE_DEFAULT_CLIENT_INFO
 
@@ -567,6 +567,7 @@ class FirestoreRestTransport(FirestoreTransport):
     """REST backend transport for Firestore.
 
     The Cloud Firestore service.
+
     Cloud Firestore is a fast, fully managed, serverless,
     cloud-native NoSQL document database that simplifies storing,
     syncing, and querying data for your mobile, web, and IoT apps at
@@ -1091,6 +1092,7 @@ class FirestoreRestTransport(FirestoreTransport):
             Returns:
                 ~.document.Document:
                     A Firestore document.
+
                 Must not exceed 1 MiB - 4 bytes.
 
             """
@@ -1264,6 +1266,7 @@ class FirestoreRestTransport(FirestoreTransport):
             Returns:
                 ~.document.Document:
                     A Firestore document.
+
                 Must not exceed 1 MiB - 4 bytes.
 
             """
@@ -1958,6 +1961,7 @@ class FirestoreRestTransport(FirestoreTransport):
             Returns:
                 ~.gf_document.Document:
                     A Firestore document.
+
                 Must not exceed 1 MiB - 4 bytes.
 
             """
@@ -2176,7 +2180,6 @@ class FirestoreRestTransport(FirestoreTransport):
             timeout: Optional[float] = None,
             metadata: Sequence[Tuple[str, str]] = (),
         ) -> None:
-
             r"""Call the cancel operation method over HTTP.
 
             Args:
@@ -2203,7 +2206,7 @@ class FirestoreRestTransport(FirestoreTransport):
             request_kwargs = json_format.MessageToDict(request)
             transcoded_request = path_template.transcode(http_options, **request_kwargs)
 
-            body = json.loads(json.dumps(transcoded_request["body"]))
+            body = json.dumps(transcoded_request["body"])
             uri = transcoded_request["uri"]
             method = transcoded_request["method"]
 
@@ -2242,7 +2245,6 @@ class FirestoreRestTransport(FirestoreTransport):
             timeout: Optional[float] = None,
             metadata: Sequence[Tuple[str, str]] = (),
         ) -> None:
-
             r"""Call the delete operation method over HTTP.
 
             Args:
@@ -2305,7 +2307,6 @@ class FirestoreRestTransport(FirestoreTransport):
             timeout: Optional[float] = None,
             metadata: Sequence[Tuple[str, str]] = (),
         ) -> operations_pb2.Operation:
-
             r"""Call the get operation method over HTTP.
 
             Args:
@@ -2372,7 +2373,6 @@ class FirestoreRestTransport(FirestoreTransport):
             timeout: Optional[float] = None,
             metadata: Sequence[Tuple[str, str]] = (),
         ) -> operations_pb2.ListOperationsResponse:
-
             r"""Call the list operations method over HTTP.
 
             Args:

@@ -29,7 +29,6 @@ from google.api_core import retry as retries
 
 from google.cloud.firestore_v1.base_client import (
     BaseClient,
-    DEFAULT_DATABASE,
     _CLIENT_INFO,
     _parse_batch_get,
     _path_helper,
@@ -70,8 +69,7 @@ class Client(BaseClient):
             OAuth2 Credentials to use for this client. If not passed, falls
             back to the default inferred from the environment.
         database (Optional[str]): The database name that the client targets.
-            For now, :attr:`DEFAULT_DATABASE` (the default value) is the
-            only valid database.
+            If not passed, falls back to :attr:`DEFAULT_DATABASE`.
         client_info (Optional[google.api_core.gapic_v1.client_info.ClientInfo]):
             The client info used to send a user-agent string along with API
             requests. If ``None``, then default info will be used. Generally,
@@ -86,7 +84,7 @@ class Client(BaseClient):
         self,
         project=None,
         credentials=None,
-        database=DEFAULT_DATABASE,
+        database=None,
         client_info=_CLIENT_INFO,
         client_options=None,
     ) -> None:

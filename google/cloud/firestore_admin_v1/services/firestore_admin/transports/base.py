@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -32,7 +32,6 @@ from google.cloud.firestore_admin_v1.types import field
 from google.cloud.firestore_admin_v1.types import firestore_admin
 from google.cloud.firestore_admin_v1.types import index
 from google.cloud.location import locations_pb2  # type: ignore
-from google.longrunning import operations_pb2
 from google.longrunning import operations_pb2  # type: ignore
 from google.protobuf import empty_pb2  # type: ignore
 
@@ -234,6 +233,11 @@ class FirestoreAdminTransport(abc.ABC):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
+            self.create_database: gapic_v1.method.wrap_method(
+                self.create_database,
+                default_timeout=None,
+                client_info=client_info,
+            ),
             self.get_database: gapic_v1.method.wrap_method(
                 self.get_database,
                 default_timeout=None,
@@ -346,6 +350,15 @@ class FirestoreAdminTransport(abc.ABC):
         self,
     ) -> Callable[
         [firestore_admin.ImportDocumentsRequest],
+        Union[operations_pb2.Operation, Awaitable[operations_pb2.Operation]],
+    ]:
+        raise NotImplementedError()
+
+    @property
+    def create_database(
+        self,
+    ) -> Callable[
+        [firestore_admin.CreateDatabaseRequest],
         Union[operations_pb2.Operation, Awaitable[operations_pb2.Operation]],
     ]:
         raise NotImplementedError()

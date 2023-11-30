@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2022 Google LLC
+# Copyright 2023 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,7 +30,6 @@ from google.cloud.firestore_admin_v1.types import field
 from google.cloud.firestore_admin_v1.types import firestore_admin
 from google.cloud.firestore_admin_v1.types import index
 from google.cloud.location import locations_pb2  # type: ignore
-from google.longrunning import operations_pb2
 from google.longrunning import operations_pb2  # type: ignore
 from google.protobuf import empty_pb2  # type: ignore
 from .base import FirestoreAdminTransport, DEFAULT_CLIENT_INFO
@@ -527,6 +526,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
 
         For more details on export behavior and output format,
         refer to:
+
         https://cloud.google.com/firestore/docs/manage-data/export-import
 
         Returns:
@@ -580,6 +580,34 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 response_deserializer=operations_pb2.Operation.FromString,
             )
         return self._stubs["import_documents"]
+
+    @property
+    def create_database(
+        self,
+    ) -> Callable[
+        [firestore_admin.CreateDatabaseRequest], Awaitable[operations_pb2.Operation]
+    ]:
+        r"""Return a callable for the create database method over gRPC.
+
+        Create a database.
+
+        Returns:
+            Callable[[~.CreateDatabaseRequest],
+                    Awaitable[~.Operation]]:
+                A function that, when called, will call the underlying RPC
+                on the server.
+        """
+        # Generate a "stub function" on-the-fly which will actually make
+        # the request.
+        # gRPC handles serialization and deserialization, so we just need
+        # to pass in the functions for each.
+        if "create_database" not in self._stubs:
+            self._stubs["create_database"] = self.grpc_channel.unary_unary(
+                "/google.firestore.admin.v1.FirestoreAdmin/CreateDatabase",
+                request_serializer=firestore_admin.CreateDatabaseRequest.serialize,
+                response_deserializer=operations_pb2.Operation.FromString,
+            )
+        return self._stubs["create_database"]
 
     @property
     def get_database(
