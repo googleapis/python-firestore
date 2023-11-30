@@ -5,6 +5,19 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.14.0](https://github.com/googleapis/python-firestore/compare/v2.13.1...v2.14.0) (2023-11-30)
+
+
+### Features
+
+* Add support for Python 3.12 ([#795](https://github.com/googleapis/python-firestore/issues/795)) ([b301f8b](https://github.com/googleapis/python-firestore/commit/b301f8b10a80b38103fb3fbca544adeab594a8af))
+* Introduce compatibility with native namespace packages ([#792](https://github.com/googleapis/python-firestore/issues/792)) ([510adce](https://github.com/googleapis/python-firestore/commit/510adce5405fef37f00e57416fa9269f8cf4f02a))
+
+
+### Bug Fixes
+
+* Use `retry_async` instead of `retry` in async client ([cae9e46](https://github.com/googleapis/python-firestore/commit/cae9e46262c2b5fbbdda372c7fd5dbf9833fc77e))
+
 ## [2.13.1](https://github.com/googleapis/python-firestore/compare/v2.13.0...v2.13.1) (2023-11-06)
 
 
