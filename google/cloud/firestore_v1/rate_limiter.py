@@ -14,10 +14,20 @@
 
 import datetime
 from typing import NoReturn, Optional
+import warnings
 
 
 def utcnow():
-    return datetime.datetime.now(tz=datetime.timezone.utc)
+    """
+    google.cloud.firestore_v1.rate_limiter.utcnow() is deprecated.
+    Use datetime.datetime.now(datetime.timezone.utc) instead.
+    """
+    warnings.warn(
+        "google.cloud.firestore_v1.rate_limiter.utcnow() is deprecated. "
+        "Use datetime.datetime.now(datetime.timezone.utc) instead.",
+        DeprecationWarning,
+    )
+    return datetime.datetime.utcnow()
 
 
 default_initial_tokens: int = 500
