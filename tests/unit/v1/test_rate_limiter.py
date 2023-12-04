@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import datetime
+import pytest
 
 import freezegun
 
@@ -226,5 +227,9 @@ def test_global_max_tokens():
 
 
 def test_utcnow():
-    now = rate_limiter.utcnow()
+    with pytest.warns(
+        DeprecationWarning,
+        match="google.cloud.firestore_v1.rate_limiter.utcnow",
+    ):
+        now = rate_limiter.utcnow()
     assert isinstance(now, datetime.datetime)
