@@ -48,7 +48,7 @@ from tests.system.test__helpers import (
 )
 
 
-RETRIES = retries.Retry(
+RETRIES = retries.AsyncRetry(
     initial=0.1,
     maximum=60.0,
     multiplier=1.3,
