@@ -25,7 +25,7 @@ from typing import Callable, Dict, List, Optional
 
 from google.oauth2 import service_account
 
-from google.api_core import retry as retries
+from google.api_core import retry_async as retries
 from google.api_core import exceptions as core_exceptions
 
 from google.api_core.exceptions import AlreadyExists
