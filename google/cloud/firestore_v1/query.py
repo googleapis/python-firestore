@@ -113,7 +113,7 @@ class Query(BaseQuery):
         end_at=None,
         all_descendants=False,
         recursive=False,
-    ) -> None:
+    ):
         super(Query, self).__init__(
             parent=parent,
             projection=projection,
@@ -131,9 +131,9 @@ class Query(BaseQuery):
     def get(
         self,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> List[DocumentSnapshot]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -174,18 +174,16 @@ class Query(BaseQuery):
 
         return list(result)
 
-    def _chunkify(
-        self, chunk_size: int
-    ) -> Generator[List[DocumentSnapshot], None, None]:
-        max_to_return: Optional[int] = self._limit
-        num_returned: int = 0
-        original: Query = self._copy()
-        last_document: Optional[DocumentSnapshot] = None
+    def _chunkify(self, chunk_size):
+        max_to_return = self._limit
+        num_returned = 0
+        original = self._copy()
+        last_document = None
 
         while True:
             # Optionally trim the `chunk_size` down to honor a previously
             # applied limits as set by `self.limit()`
-            _chunk_size: int = original._resolve_chunk_size(num_returned, chunk_size)
+            _chunk_size = original._resolve_chunk_size(num_returned, chunk_size)
 
             # Apply the optionally pruned limit and the cursor, if we are past
             # the first page.
@@ -239,9 +237,7 @@ class Query(BaseQuery):
 
         return False
 
-    def count(
-        self, alias: str | None = None
-    ) -> Type["firestore_v1.aggregation.AggregationQuery"]:
+    def count(self, alias=None):
         """
         Adds a count over the query.
 
@@ -251,9 +247,7 @@ class Query(BaseQuery):
         """
         return aggregation.AggregationQuery(self).count(alias=alias)
 
-    def sum(
-        self, field_ref: str | FieldPath, alias: str | None = None
-    ) -> Type["firestore_v1.aggregation.AggregationQuery"]:
+    def sum(self, field_ref, alias=None):
         """
         Adds a sum over the query.
 
@@ -266,9 +260,7 @@ class Query(BaseQuery):
         """
         return aggregation.AggregationQuery(self).sum(field_ref, alias=alias)
 
-    def avg(
-        self, field_ref: str | FieldPath, alias: str | None = None
-    ) -> Type["firestore_v1.aggregation.AggregationQuery"]:
+    def avg(self, field_ref, alias=None):
         """
         Adds an avg over the query.
 
@@ -284,9 +276,9 @@ class Query(BaseQuery):
     def stream(
         self,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -355,7 +347,7 @@ class Query(BaseQuery):
                 last_snapshot = snapshot
                 yield snapshot
 
-    def on_snapshot(self, callback: Callable) -> Watch:
+    def on_snapshot(self, callback):
         """Monitor the documents in this collection that match this query.
 
         This starts a watch on this query using a background thread. The
@@ -387,9 +379,7 @@ class Query(BaseQuery):
         return Watch.for_query(self, callback, document.DocumentSnapshot)
 
     @staticmethod
-    def _get_collection_reference_class() -> (
-        Type["firestore_v1.collection.CollectionReference"]
-    ):
+    def _get_collection_reference_class():
         from google.cloud.firestore_v1.collection import CollectionReference
 
         return CollectionReference
@@ -420,7 +410,7 @@ class CollectionGroup(Query, BaseCollectionGroup):
         end_at=None,
         all_descendants=True,
         recursive=False,
-    ) -> None:
+    ):
         super(CollectionGroup, self).__init__(
             parent=parent,
             projection=projection,
@@ -442,9 +432,9 @@ class CollectionGroup(Query, BaseCollectionGroup):
     def get_partitions(
         self,
         partition_count,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Generator[QueryPartition, None, None]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Partition a query for parallelization.
 
         Partitions a query by returning partition cursors that can be used to run the

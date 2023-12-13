@@ -60,15 +60,15 @@ class DocumentReference(BaseDocumentReference):
         TypeError: If a keyword other than ``client`` is used.
     """
 
-    def __init__(self, *path, **kwargs) -> None:
+    def __init__(self, *path, **kwargs):
         super(DocumentReference, self).__init__(*path, **kwargs)
 
     def create(
         self,
-        document_data: dict,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> write.WriteResult:
+        document_data,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Create a document in the Firestore database.
 
         >>> document_data = {"a": 1, "b": {"c": "Two"}}
@@ -101,11 +101,11 @@ class DocumentReference(BaseDocumentReference):
 
     def set(
         self,
-        document_data: dict,
-        merge: bool = False,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> write.WriteResult:
+        document_data,
+        merge=False,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Create / replace / merge a document in the Firestore database.
 
         - To "upsert" a document (create if it doesn't exist, replace completely
@@ -169,11 +169,11 @@ class DocumentReference(BaseDocumentReference):
 
     def update(
         self,
-        field_updates: dict,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> write.WriteResult:
+        field_updates,
+        option=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Update an existing document in the Firestore database.
 
         By default, this method verifies that the document exists on the
@@ -327,10 +327,10 @@ class DocumentReference(BaseDocumentReference):
 
     def delete(
         self,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Timestamp:
+        option=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Delete the current document in the Firestore database.
 
         Args:
@@ -361,11 +361,11 @@ class DocumentReference(BaseDocumentReference):
 
     def get(
         self,
-        field_paths: Iterable[str] = None,
+        field_paths=None,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> DocumentSnapshot:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Retrieve a snapshot of the current document.
 
         See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for
@@ -431,10 +431,10 @@ class DocumentReference(BaseDocumentReference):
 
     def collections(
         self,
-        page_size: int = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Generator[Any, Any, None]:
+        page_size=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """List subcollections of the current document.
 
         Args:
@@ -463,7 +463,7 @@ class DocumentReference(BaseDocumentReference):
         for collection_id in iterator:
             yield self.collection(collection_id)
 
-    def on_snapshot(self, callback: Callable) -> Watch:
+    def on_snapshot(self, callback):
         """Watch this document.
 
         This starts a watch on this document using a background thread. The

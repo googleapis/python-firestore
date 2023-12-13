@@ -39,17 +39,15 @@ class AsyncAggregationQuery(BaseAggregationQuery):
     def __init__(
         self,
         nested_query,
-    ) -> None:
+    ):
         super(AsyncAggregationQuery, self).__init__(nested_query)
 
     async def get(
         self,
         transaction=None,
-        retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
-        ] = gapic_v1.method.DEFAULT,
-        timeout: float | None = None,
-    ) -> List[AggregationResult]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
@@ -79,11 +77,9 @@ class AsyncAggregationQuery(BaseAggregationQuery):
     async def stream(
         self,
         transaction=None,
-        retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
-        ] = gapic_v1.method.DEFAULT,
-        timeout: float | None = None,
-    ) -> Union[AsyncGenerator[List[AggregationResult], None]]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns an iterator which

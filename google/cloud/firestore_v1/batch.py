@@ -34,12 +34,10 @@ class WriteBatch(BaseWriteBatch):
             The client that created this batch.
     """
 
-    def __init__(self, client) -> None:
+    def __init__(self, client):
         super(WriteBatch, self).__init__(client=client)
 
-    def commit(
-        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None
-    ) -> list:
+    def commit(self, retry=gapic_v1.method.DEFAULT, timeout=None):
         """Commit the changes accumulated in this batch.
 
         Args:

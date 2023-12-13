@@ -21,7 +21,7 @@
 
 from google.cloud.firestore_v1 import gapic_version as package_version
 
-__version__ = package_version.__version__
+__version__: str = package_version.__version__
 
 from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1._helpers import GeoPoint
@@ -109,7 +109,7 @@ from typing import List
 # from .types.write import Write
 # from .types.write import WriteResult
 
-__all__: List[str] = [
+__all__ = [
     "__version__",
     "And",
     "ArrayRemove",

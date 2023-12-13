@@ -57,10 +57,10 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         TypeError: If a keyword other than ``client`` is used.
     """
 
-    def __init__(self, *path, **kwargs) -> None:
+    def __init__(self, *path, **kwargs):
         super(CollectionReference, self).__init__(*path, **kwargs)
 
-    def _query(self) -> query_mod.Query:
+    def _query(self):
         """Query factory.
 
         Returns:
@@ -68,7 +68,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         """
         return query_mod.Query(self)
 
-    def _aggregation_query(self) -> aggregation.AggregationQuery:
+    def _aggregation_query(self):
         """AggregationQuery factory.
 
         Returns:
@@ -78,11 +78,11 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
     def add(
         self,
-        document_data: dict,
-        document_id: Union[str, None] = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: Union[float, None] = None,
-    ) -> Tuple[Any, Any]:
+        document_data,
+        document_id=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Create a document in the Firestore database with the provided data.
 
         Args:
@@ -121,10 +121,10 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
     def list_documents(
         self,
-        page_size: Union[int, None] = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: Union[float, None] = None,
-    ) -> Generator[Any, Any, None]:
+        page_size=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """List all subdocuments of the current collection.
 
         Args:
@@ -151,15 +151,15 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         )
         return (_item_to_document_ref(self, i) for i in iterator)
 
-    def _chunkify(self, chunk_size: int):
+    def _chunkify(self, chunk_size):
         return self._query()._chunkify(chunk_size)
 
     def get(
         self,
-        transaction: Union[Transaction, None] = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: Union[float, None] = None,
-    ) -> list:
+        transaction=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -187,10 +187,10 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
     def stream(
         self,
-        transaction: Union[Transaction, None] = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: Union[float, None] = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
+        transaction=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -225,7 +225,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
         return query.stream(transaction=transaction, **kwargs)
 
-    def on_snapshot(self, callback: Callable) -> Watch:
+    def on_snapshot(self, callback):
         """Monitor the documents in this collection.
 
         This starts a watch on this collection using a background thread. The

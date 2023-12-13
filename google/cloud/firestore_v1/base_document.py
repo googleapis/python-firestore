@@ -56,7 +56,7 @@ class BaseDocumentReference(object):
 
     _document_path_internal = None
 
-    def __init__(self, *path, **kwargs) -> None:
+    def __init__(self, *path, **kwargs):
         _helpers.verify_path(path, is_collection=False)
         self._path = path
         self._client = kwargs.pop("client", None)
@@ -172,7 +172,7 @@ class BaseDocumentReference(object):
         parent_path = self._path[:-1]
         return self._client.collection(*parent_path)
 
-    def collection(self, collection_id: str) -> Any:
+    def collection(self, collection_id):
         """Create a sub-collection underneath the current document.
 
         Args:
@@ -188,10 +188,10 @@ class BaseDocumentReference(object):
 
     def _prep_create(
         self,
-        document_data: dict,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[Any, dict]:
+        document_data,
+        retry=None,
+        timeout=None,
+    ):
         batch = self._client.batch()
         batch.create(self, document_data)
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
@@ -200,19 +200,19 @@ class BaseDocumentReference(object):
 
     def create(
         self,
-        document_data: dict,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
+        document_data,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def _prep_set(
         self,
-        document_data: dict,
-        merge: bool = False,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[Any, dict]:
+        document_data,
+        merge=False,
+        retry=None,
+        timeout=None,
+    ):
         batch = self._client.batch()
         batch.set(self, document_data, merge=merge)
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
@@ -221,20 +221,20 @@ class BaseDocumentReference(object):
 
     def set(
         self,
-        document_data: dict,
-        merge: bool = False,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
+        document_data,
+        merge=False,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def _prep_update(
         self,
-        field_updates: dict,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[Any, dict]:
+        field_updates,
+        option=None,
+        retry=None,
+        timeout=None,
+    ):
         batch = self._client.batch()
         batch.update(self, field_updates, option=option)
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
@@ -243,19 +243,19 @@ class BaseDocumentReference(object):
 
     def update(
         self,
-        field_updates: dict,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
+        field_updates,
+        option=None,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def _prep_delete(
         self,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[dict, dict]:
+        option=None,
+        retry=None,
+        timeout=None,
+    ):
         """Shared setup for async/sync :meth:`delete`."""
         write_pb = _helpers.pb_for_delete(self._document_path, option)
         request = {
@@ -269,19 +269,19 @@ class BaseDocumentReference(object):
 
     def delete(
         self,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
+        option=None,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def _prep_batch_get(
         self,
-        field_paths: Iterable[str] = None,
+        field_paths=None,
         transaction=None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[dict, dict]:
+        retry=None,
+        timeout=None,
+    ):
         """Shared setup for async/sync :meth:`get`."""
         if isinstance(field_paths, str):
             raise ValueError("'field_paths' must be a sequence of paths, not a string.")
@@ -303,19 +303,19 @@ class BaseDocumentReference(object):
 
     def get(
         self,
-        field_paths: Iterable[str] = None,
+        field_paths=None,
         transaction=None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> "DocumentSnapshot":
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def _prep_collections(
         self,
-        page_size: int = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[dict, dict]:
+        page_size=None,
+        retry=None,
+        timeout=None,
+    ):
         """Shared setup for async/sync :meth:`collections`."""
         request = {"parent": self._document_path, "page_size": page_size}
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
@@ -324,13 +324,13 @@ class BaseDocumentReference(object):
 
     def collections(
         self,
-        page_size: int = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> None:
+        page_size=None,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
-    def on_snapshot(self, callback) -> None:
+    def on_snapshot(self, callback):
         raise NotImplementedError
 
 
@@ -362,9 +362,7 @@ class DocumentSnapshot(object):
             The time that this document was last updated.
     """
 
-    def __init__(
-        self, reference, data, exists, read_time, create_time, update_time
-    ) -> None:
+    def __init__(self, reference, data, exists, read_time, create_time, update_time):
         self._reference = reference
         # We want immutable data, so callers can't modify this value
         # out from under us.
@@ -423,7 +421,7 @@ class DocumentSnapshot(object):
         """
         return self._reference
 
-    def get(self, field_path: str) -> Any:
+    def get(self, field_path):
         """Get a value from the snapshot data.
 
         If the data is nested, for example:
@@ -487,7 +485,7 @@ class DocumentSnapshot(object):
         nested_data = field_path_module.get_nested_value(field_path, self._data)
         return copy.deepcopy(nested_data)
 
-    def to_dict(self) -> Union[Dict[str, Any], None]:
+    def to_dict(self):
         """Retrieve the data contained in this snapshot.
 
         A copy is returned since the data may contain mutable values,
@@ -502,11 +500,11 @@ class DocumentSnapshot(object):
             return None
         return copy.deepcopy(self._data)
 
-    def _to_protobuf(self) -> Optional[Document]:
+    def _to_protobuf(self):
         return _helpers.document_snapshot_to_protobuf(self)
 
 
-def _get_document_path(client, path: Tuple[str]) -> str:
+def _get_document_path(client, path):
     """Convert a path tuple into a full path string.
 
     Of the form:
@@ -527,7 +525,7 @@ def _get_document_path(client, path: Tuple[str]) -> str:
     return _helpers.DOCUMENT_PATH_DELIMITER.join(parts)
 
 
-def _consume_single_get(response_iterator) -> firestore.BatchGetDocumentsResponse:
+def _consume_single_get(response_iterator):
     """Consume a gRPC stream that should contain a single response.
 
     The stream will correspond to a ``BatchGetDocuments`` request made
@@ -558,7 +556,7 @@ def _consume_single_get(response_iterator) -> firestore.BatchGetDocumentsRespons
     return all_responses[0]
 
 
-def _first_write_result(write_results: list) -> write.WriteResult:
+def _first_write_result(write_results):
     """Get first write result from list.
 
     For cases where ``len(write_results) > 1``, this assumes the writes

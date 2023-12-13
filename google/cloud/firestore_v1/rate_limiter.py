@@ -30,9 +30,9 @@ def utcnow():
     return datetime.datetime.utcnow()
 
 
-default_initial_tokens: int = 500
-default_phase_length: int = 60 * 5  # 5 minutes
-microseconds_per_second: int = 1000000
+default_initial_tokens = 500
+default_phase_length = 60 * 5  # 5 minutes
+microseconds_per_second = 1000000
 
 
 class RateLimiter:
@@ -70,28 +70,28 @@ class RateLimiter:
 
     def __init__(
         self,
-        initial_tokens: int = default_initial_tokens,
-        global_max_tokens: Optional[int] = None,
-        phase_length: int = default_phase_length,
+        initial_tokens=default_initial_tokens,
+        global_max_tokens=None,
+        phase_length=default_phase_length,
     ):
         # Tracks the volume of operations during a given ramp-up phase.
-        self._operations_this_phase: int = 0
+        self._operations_this_phase = 0
 
         # If provided, this enforces a cap on the maximum number of writes per
         # second we can ever attempt, regardless of how many 50% increases the
         # 5/5/5 rule would grant.
         self._global_max_tokens = global_max_tokens
 
-        self._start: Optional[datetime.datetime] = None
-        self._last_refill: Optional[datetime.datetime] = None
+        self._start = None
+        self._last_refill = None
 
         # Current number of available operations. Decrements with every
         # permitted request and refills over time.
-        self._available_tokens: int = initial_tokens
+        self._available_tokens = initial_tokens
 
         # Maximum size of the available operations. Can increase by 50%
         # every [phase_length] number of seconds.
-        self._maximum_tokens: int = self._available_tokens
+        self._maximum_tokens = self._available_tokens
 
         if self._global_max_tokens is not None:
             self._available_tokens = min(
@@ -100,17 +100,17 @@ class RateLimiter:
             self._maximum_tokens = min(self._maximum_tokens, self._global_max_tokens)
 
         # Number of seconds after which the [_maximum_tokens] can increase by 50%.
-        self._phase_length: int = phase_length
+        self._phase_length = phase_length
 
         # Tracks how many times the [_maximum_tokens] has increased by 50%.
-        self._phase: int = 0
+        self._phase = 0
 
     def _start_clock(self):
         utcnow = datetime.datetime.now(datetime.timezone.utc)
         self._start = self._start or utcnow
         self._last_refill = self._last_refill or utcnow
 
-    def take_tokens(self, num: Optional[int] = 1, allow_less: bool = False) -> int:
+    def take_tokens(self, num=1, allow_less=False):
         """Returns the number of available tokens, up to the amount requested."""
         self._start_clock()
         self._check_phase()
@@ -134,39 +134,37 @@ class RateLimiter:
         This is a no-op unless a new [_phase_length] number of seconds since the
         start was crossed since it was last called.
         """
-        age: datetime.timedelta = (
-            datetime.datetime.now(datetime.timezone.utc) - self._start
-        )
+        age = datetime.datetime.now(datetime.timezone.utc) - self._start
 
         # Uses integer division to calculate the expected phase. We start in
         # Phase 0, so until [_phase_length] seconds have passed, this will
         # not resolve to 1.
-        expected_phase: int = age.seconds // self._phase_length
+        expected_phase = age.seconds // self._phase_length
 
         # Short-circuit if we are still in the expected phase.
         if expected_phase == self._phase:
             return
 
-        operations_last_phase: int = self._operations_this_phase
+        operations_last_phase = self._operations_this_phase
         self._operations_this_phase = 0
 
-        previous_phase: int = self._phase
+        previous_phase = self._phase
         self._phase = expected_phase
 
         # No-op if we did nothing for an entire phase
         if operations_last_phase and self._phase > previous_phase:
             self._increase_maximum_tokens()
 
-    def _increase_maximum_tokens(self) -> NoReturn:
+    def _increase_maximum_tokens(self):
         self._maximum_tokens = round(self._maximum_tokens * 1.5)
         if self._global_max_tokens is not None:
             self._maximum_tokens = min(self._maximum_tokens, self._global_max_tokens)
 
-    def _refill(self) -> NoReturn:
+    def _refill(self):
         """Replenishes any tokens that should have regenerated since the last
         operation."""
-        now: datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
-        time_since_last_refill: datetime.timedelta = now - self._last_refill
+        now = datetime.datetime.now(datetime.timezone.utc)
+        time_since_last_refill = now - self._last_refill
 
         if time_since_last_refill:
             self._last_refill = now
@@ -179,10 +177,10 @@ class RateLimiter:
             # If we have done something in the last 1s, then we know we should
             # allocate proportional tokens.
             else:
-                _percent_of_max: float = (
+                _percent_of_max = (
                     time_since_last_refill.microseconds / microseconds_per_second
                 )
-                new_tokens: int = round(_percent_of_max * self._maximum_tokens)
+                new_tokens = round(_percent_of_max * self._maximum_tokens)
 
                 # Add the number of provisioned tokens, capped at the maximum size.
                 self._available_tokens = min(

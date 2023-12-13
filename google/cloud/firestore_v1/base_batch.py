@@ -35,20 +35,20 @@ class BaseBatch(metaclass=abc.ABCMeta):
             The client that created this batch.
     """
 
-    def __init__(self, client) -> None:
+    def __init__(self, client):
         self._client = client
         self._write_pbs = []
-        self._document_references: Dict[str, BaseDocumentReference] = {}
+        self._document_references = {}
         self.write_results = None
         self.commit_time = None
 
     def __len__(self):
         return len(self._document_references)
 
-    def __contains__(self, reference: BaseDocumentReference):
+    def __contains__(self, reference):
         return reference._document_path in self._document_references
 
-    def _add_write_pbs(self, write_pbs: list) -> None:
+    def _add_write_pbs(self, write_pbs):
         """Add `Write`` protobufs to this transaction.
 
         This method intended to be over-ridden by subclasses.
@@ -65,7 +65,7 @@ class BaseBatch(metaclass=abc.ABCMeta):
         write depend on the implementing class."""
         raise NotImplementedError()
 
-    def create(self, reference: BaseDocumentReference, document_data: dict) -> None:
+    def create(self, reference, document_data):
         """Add a "change" to this batch to create a document.
 
         If the document given by ``reference`` already exists, then this
@@ -83,10 +83,10 @@ class BaseBatch(metaclass=abc.ABCMeta):
 
     def set(
         self,
-        reference: BaseDocumentReference,
-        document_data: dict,
-        merge: Union[bool, list] = False,
-    ) -> None:
+        reference,
+        document_data,
+        merge=False,
+    ):
         """Add a "change" to replace a document.
 
         See
@@ -117,10 +117,10 @@ class BaseBatch(metaclass=abc.ABCMeta):
 
     def update(
         self,
-        reference: BaseDocumentReference,
-        field_updates: dict,
-        option: _helpers.WriteOption = None,
-    ) -> None:
+        reference,
+        field_updates,
+        option=None,
+    ):
         """Add a "change" to update a document.
 
         See
@@ -144,9 +144,7 @@ class BaseBatch(metaclass=abc.ABCMeta):
         self._document_references[reference._document_path] = reference
         self._add_write_pbs(write_pbs)
 
-    def delete(
-        self, reference: BaseDocumentReference, option: _helpers.WriteOption = None
-    ) -> None:
+    def delete(self, reference, option=None):
         """Add a "change" to delete a document.
 
         See
@@ -170,7 +168,7 @@ class BaseWriteBatch(BaseBatch):
     """Base class for a/sync implementations of the `commit` RPC. `commit` is useful
     for lower volumes or when the order of write operations is important."""
 
-    def _prep_commit(self, retry: retries.Retry, timeout: float):
+    def _prep_commit(self, retry, timeout):
         """Shared setup for async/sync :meth:`commit`."""
         request = {
             "database": self._client._database_string,

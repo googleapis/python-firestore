@@ -43,7 +43,7 @@ TOKENS_PATTERN = "|".join("(?P<{}>{})".format(*pair) for pair in PATH_ELEMENT_TO
 TOKENS_REGEX = re.compile(TOKENS_PATTERN)
 
 
-def _tokenize_field_path(path: str):
+def _tokenize_field_path(path):
     """Lex a field path into tokens (including dots).
 
     Args:
@@ -64,7 +64,7 @@ def _tokenize_field_path(path: str):
         raise ValueError("Path {} not consumed, residue: {}".format(path, path[pos:]))
 
 
-def split_field_path(path: str):
+def split_field_path(path):
     """Split a field path into valid elements (without dots).
 
     Args:
@@ -99,7 +99,7 @@ def split_field_path(path: str):
     return elements
 
 
-def parse_field_path(api_repr: str):
+def parse_field_path(api_repr):
     """Parse a **field path** from into a list of nested field names.
 
     See :func:`field_path` for more on **field paths**.
@@ -128,7 +128,7 @@ def parse_field_path(api_repr: str):
     return field_names
 
 
-def render_field_path(field_names: Iterable[str]):
+def render_field_path(field_names):
     """Create a **field path** from a list of nested field names.
 
     A **field path** is a ``.``-delimited concatenation of the field
@@ -172,7 +172,7 @@ def render_field_path(field_names: Iterable[str]):
 get_field_path = render_field_path  # backward-compatibility
 
 
-def get_nested_value(field_path: str, data: dict):
+def get_nested_value(field_path, data):
     """Get a (potentially nested) value from a dictionary.
 
     If the data is nested, for example:
@@ -273,7 +273,7 @@ class FieldPath(object):
         self.parts = tuple(parts)
 
     @classmethod
-    def from_api_repr(cls, api_repr: str):
+    def from_api_repr(cls, api_repr):
         """Factory: create a FieldPath from the string formatted per the API.
 
         Args:
@@ -290,7 +290,7 @@ class FieldPath(object):
         return cls(*parse_field_path(api_repr))
 
     @classmethod
-    def from_string(cls, path_string: str):
+    def from_string(cls, path_string):
         """Factory: create a FieldPath from a unicode string representation.
 
         This method splits on the character `.` and disallows the

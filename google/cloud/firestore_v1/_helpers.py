@@ -47,8 +47,8 @@ from typing import (
     Union,
 )
 
-_EmptyDict: transforms.Sentinel
-_GRPC_ERROR_MAPPING: dict
+# _EmptyDict: transforms.Sentinel
+# _GRPC_ERROR_MAPPING: dict
 
 
 BAD_PATH_TEMPLATE = "A path element must be a string. Received {}, which is a {}."
@@ -78,11 +78,11 @@ class GeoPoint(object):
         longitude (float): Longitude of a point.
     """
 
-    def __init__(self, latitude, longitude) -> None:
+    def __init__(self, latitude, longitude):
         self.latitude = latitude
         self.longitude = longitude
 
-    def to_protobuf(self) -> latlng_pb2.LatLng:
+    def to_protobuf(self):
         """Convert the current object to protobuf.
 
         Returns:
@@ -118,7 +118,7 @@ class GeoPoint(object):
             return not equality_val
 
 
-def verify_path(path, is_collection) -> None:
+def verify_path(path, is_collection):
     """Verifies that a ``path`` has the correct form.
 
     Checks that all of the elements in ``path`` are strings.
@@ -155,7 +155,7 @@ def verify_path(path, is_collection) -> None:
             raise ValueError(msg)
 
 
-def encode_value(value) -> types.document.Value:
+def encode_value(value):
     """Converts a native Python value into a Firestore protobuf ``Value``.
 
     Args:
@@ -219,7 +219,7 @@ def encode_value(value) -> types.document.Value:
     )
 
 
-def encode_dict(values_dict) -> dict:
+def encode_dict(values_dict):
     """Encode a dictionary into protobuf ``Value``-s.
 
     Args:
@@ -233,7 +233,7 @@ def encode_dict(values_dict) -> dict:
     return {key: encode_value(value) for key, value in values_dict.items()}
 
 
-def document_snapshot_to_protobuf(snapshot: "google.cloud.firestore_v1.base_document.DocumentSnapshot") -> Optional["google.cloud.firestore_v1.types.Document"]:  # type: ignore
+def document_snapshot_to_protobuf(snapshot):  # type: ignore
     from google.cloud.firestore_v1.types import Document
 
     if not snapshot.exists:
@@ -263,7 +263,7 @@ class DocumentReferenceValue:
         ValueError: If the supplied value cannot satisfy a complete path.
     """
 
-    def __init__(self, reference_value: str):
+    def __init__(self, reference_value):
         self._reference_value = reference_value
 
         # The first 5 parts are
@@ -279,13 +279,13 @@ class DocumentReferenceValue:
         self.document_id = "/".join(parts[6:])
 
     @property
-    def full_key(self) -> str:
+    def full_key(self):
         """Computed property for a DocumentReference's collection_name and
         document Id"""
         return "/".join([self.collection_name, self.document_id])
 
     @property
-    def full_path(self) -> str:
+    def full_path(self):
         return self._reference_value or "/".join(
             [
                 "projects",
@@ -299,7 +299,7 @@ class DocumentReferenceValue:
         )
 
 
-def reference_value_to_document(reference_value, client) -> Any:
+def reference_value_to_document(reference_value, client):
     """Convert a reference value string to a document.
 
     Args:
@@ -321,7 +321,7 @@ def reference_value_to_document(reference_value, client) -> Any:
 
     doc_ref_value = DocumentReferenceValue(reference_value)
 
-    document: BaseDocumentReference = client.document(doc_ref_value.full_key)
+    document = client.document(doc_ref_value.full_key)
     if document._document_path != reference_value:
         msg = WRONG_APP_REFERENCE.format(reference_value, client._database_string)
         raise ValueError(msg)
@@ -329,9 +329,7 @@ def reference_value_to_document(reference_value, client) -> Any:
     return document
 
 
-def decode_value(
-    value, client
-) -> Union[None, bool, int, float, list, datetime.datetime, str, bytes, dict, GeoPoint]:
+def decode_value(value, client):
     """Converts a Firestore protobuf ``Value`` to a native Python value.
 
     Args:
@@ -382,7 +380,7 @@ def decode_value(
         raise ValueError("Unknown ``value_type``", value_type)
 
 
-def decode_dict(value_fields, client) -> dict:
+def decode_dict(value_fields, client):
     """Converts a protobuf map of Firestore ``Value``-s.
 
     Args:
@@ -401,7 +399,7 @@ def decode_dict(value_fields, client) -> dict:
     return {key: decode_value(value, client) for key, value in value_fields_pb.items()}
 
 
-def get_doc_id(document_pb, expected_prefix) -> str:
+def get_doc_id(document_pb, expected_prefix):
     """Parse a document ID from a document protobuf.
 
     Args:
@@ -432,9 +430,7 @@ def get_doc_id(document_pb, expected_prefix) -> str:
 _EmptyDict = transforms.Sentinel("Marker for an empty dict value")
 
 
-def extract_fields(
-    document_data, prefix_path: FieldPath, expand_dots=False
-) -> Generator[Tuple[Any, Any], Any, None]:
+def extract_fields(document_data, prefix_path, expand_dots=False):
     """Do depth-first walk of tree, yielding field_path, value"""
     if not document_data:
         yield prefix_path, _EmptyDict
@@ -454,7 +450,7 @@ def extract_fields(
                 yield field_path, value
 
 
-def set_field_value(document_data, field_path, value) -> None:
+def set_field_value(document_data, field_path, value):
     """Set a value into a document for a field_path"""
     current = document_data
     for element in field_path.parts[:-1]:
@@ -464,7 +460,7 @@ def set_field_value(document_data, field_path, value) -> None:
     current[field_path.parts[-1]] = value
 
 
-def get_field_value(document_data, field_path) -> Any:
+def get_field_value(document_data, field_path):
     if not field_path.parts:
         raise ValueError("Empty path")
 
@@ -485,7 +481,7 @@ class DocumentExtractor(object):
             a document.
     """
 
-    def __init__(self, document_data) -> None:
+    def __init__(self, document_data):
         self.document_data = document_data
         self.field_paths = []
         self.deleted_fields = []
@@ -530,9 +526,7 @@ class DocumentExtractor(object):
                 self.field_paths.append(field_path)
                 set_field_value(self.set_fields, field_path, value)
 
-    def _get_document_iterator(
-        self, prefix_path: FieldPath
-    ) -> Generator[Tuple[Any, Any], Any, None]:
+    def _get_document_iterator(self, prefix_path):
         return extract_fields(self.document_data, prefix_path)
 
     @property
@@ -557,12 +551,10 @@ class DocumentExtractor(object):
             + list(self.minimums)
         )
 
-    def _get_update_mask(self, allow_empty_mask=False) -> None:
+    def _get_update_mask(self, allow_empty_mask=False):
         return None
 
-    def get_update_pb(
-        self, document_path, exists=None, allow_empty_mask=False
-    ) -> types.write.Write:
+    def get_update_pb(self, document_path, exists=None, allow_empty_mask=False):
         if exists is not None:
             current_document = common.Precondition(exists=exists)
         else:
@@ -578,9 +570,7 @@ class DocumentExtractor(object):
 
         return update_pb
 
-    def get_field_transform_pbs(
-        self, document_path
-    ) -> List[types.write.DocumentTransform.FieldTransform]:
+    def get_field_transform_pbs(self, document_path):
         def make_array_value(values):
             value_list = [encode_value(element) for element in values]
             return document.ArrayValue(values=value_list)
@@ -646,7 +636,7 @@ class DocumentExtractor(object):
         )
         return [transform for path, transform in sorted(path_field_transforms)]
 
-    def get_transform_pb(self, document_path, exists=None) -> types.write.Write:
+    def get_transform_pb(self, document_path, exists=None):
         field_transforms = self.get_field_transform_pbs(document_path)
         transform_pb = write.Write(
             transform=write.DocumentTransform(
@@ -661,7 +651,7 @@ class DocumentExtractor(object):
         return transform_pb
 
 
-def pbs_for_create(document_path, document_data) -> List[types.write.Write]:
+def pbs_for_create(document_path, document_data):
     """Make ``Write`` protobufs for ``create()`` methods.
 
     Args:
@@ -687,7 +677,7 @@ def pbs_for_create(document_path, document_data) -> List[types.write.Write]:
     return [create_pb]
 
 
-def pbs_for_set_no_merge(document_path, document_data) -> List[types.write.Write]:
+def pbs_for_set_no_merge(document_path, document_data):
     """Make ``Write`` protobufs for ``set()`` methods.
 
     Args:
@@ -719,26 +709,26 @@ def pbs_for_set_no_merge(document_path, document_data) -> List[types.write.Write
 class DocumentExtractorForMerge(DocumentExtractor):
     """Break document data up into actual data and transforms."""
 
-    def __init__(self, document_data) -> None:
+    def __init__(self, document_data):
         super(DocumentExtractorForMerge, self).__init__(document_data)
         self.data_merge = []
         self.transform_merge = []
         self.merge = []
 
-    def _apply_merge_all(self) -> None:
+    def _apply_merge_all(self):
         self.data_merge = sorted(self.field_paths + self.deleted_fields)
         # TODO: other transforms
         self.transform_merge = self.transform_paths
         self.merge = sorted(self.data_merge + self.transform_paths)
 
-    def _construct_merge_paths(self, merge) -> Generator[Any, Any, None]:
+    def _construct_merge_paths(self, merge):
         for merge_field in merge:
             if isinstance(merge_field, FieldPath):
                 yield merge_field
             else:
                 yield FieldPath(*parse_field_path(merge_field))
 
-    def _normalize_merge_paths(self, merge) -> list:
+    def _normalize_merge_paths(self, merge):
         merge_paths = sorted(self._construct_merge_paths(merge))
 
         # Raise if any merge path is a parent of another.  Leverage sorting
@@ -758,7 +748,7 @@ class DocumentExtractorForMerge(DocumentExtractor):
 
         return merge_paths
 
-    def _apply_merge_paths(self, merge) -> None:
+    def _apply_merge_paths(self, merge):
         if self.empty_document:
             raise ValueError("Cannot merge specific fields with empty document.")
 
@@ -820,15 +810,13 @@ class DocumentExtractorForMerge(DocumentExtractor):
             if path in merged_transform_paths
         }
 
-    def apply_merge(self, merge) -> None:
+    def apply_merge(self, merge):
         if merge is True:  # merge all fields
             self._apply_merge_all()
         else:
             self._apply_merge_paths(merge)
 
-    def _get_update_mask(
-        self, allow_empty_mask=False
-    ) -> Optional[types.common.DocumentMask]:
+    def _get_update_mask(self, allow_empty_mask=False):
         # Mask uses dotted / quoted paths.
         mask_paths = [
             field_path.to_api_repr()
@@ -839,9 +827,7 @@ class DocumentExtractorForMerge(DocumentExtractor):
         return common.DocumentMask(field_paths=mask_paths)
 
 
-def pbs_for_set_with_merge(
-    document_path, document_data, merge
-) -> List[types.write.Write]:
+def pbs_for_set_with_merge(document_path, document_data, merge):
     """Make ``Write`` protobufs for ``set()`` methods.
 
     Args:
@@ -870,7 +856,7 @@ def pbs_for_set_with_merge(
 class DocumentExtractorForUpdate(DocumentExtractor):
     """Break document data up into actual data and transforms."""
 
-    def __init__(self, document_data) -> None:
+    def __init__(self, document_data):
         super(DocumentExtractorForUpdate, self).__init__(document_data)
         self.top_level_paths = sorted(
             [FieldPath.from_string(key) for key in document_data]
@@ -891,12 +877,10 @@ class DocumentExtractorForUpdate(DocumentExtractor):
                     "Cannot update with nest delete: {}".format(field_path)
                 )
 
-    def _get_document_iterator(
-        self, prefix_path: FieldPath
-    ) -> Generator[Tuple[Any, Any], Any, None]:
+    def _get_document_iterator(self, prefix_path):
         return extract_fields(self.document_data, prefix_path, expand_dots=True)
 
-    def _get_update_mask(self, allow_empty_mask=False) -> types.common.DocumentMask:
+    def _get_update_mask(self, allow_empty_mask=False):
         mask_paths = []
         for field_path in self.top_level_paths:
             if field_path not in self.transform_paths:
@@ -905,7 +889,7 @@ class DocumentExtractorForUpdate(DocumentExtractor):
         return common.DocumentMask(field_paths=mask_paths)
 
 
-def pbs_for_update(document_path, field_updates, option) -> List[types.write.Write]:
+def pbs_for_update(document_path, field_updates, option):
     """Make ``Write`` protobufs for ``update()`` methods.
 
     Args:
@@ -938,7 +922,7 @@ def pbs_for_update(document_path, field_updates, option) -> List[types.write.Wri
     return [update_pb]
 
 
-def pb_for_delete(document_path, option) -> types.write.Write:
+def pb_for_delete(document_path, option):
     """Make a ``Write`` protobuf for ``delete()`` methods.
 
     Args:
@@ -965,7 +949,7 @@ class ReadAfterWriteError(Exception):
     """
 
 
-def get_transaction_id(transaction, read_operation=True) -> Union[bytes, None]:
+def get_transaction_id(transaction, read_operation=True):
     """Get the transaction ID from a ``Transaction`` object.
 
     Args:
@@ -995,7 +979,7 @@ def get_transaction_id(transaction, read_operation=True) -> Union[bytes, None]:
         return transaction.id
 
 
-def metadata_with_prefix(prefix: str, **kw) -> List[Tuple[str, str]]:
+def metadata_with_prefix(prefix, **kw):
     """Create RPC metadata containing a prefix.
 
     Args:
@@ -1010,7 +994,7 @@ def metadata_with_prefix(prefix: str, **kw) -> List[Tuple[str, str]]:
 class WriteOption(object):
     """Option used to assert a condition on a write operation."""
 
-    def modify_write(self, write, no_create_msg=None) -> NoReturn:
+    def modify_write(self, write, no_create_msg=None):
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         This is a virtual method intended to be implemented by subclasses.
@@ -1042,7 +1026,7 @@ class LastUpdateOption(WriteOption):
             as part of a "write result" protobuf or directly.
     """
 
-    def __init__(self, last_update_time) -> None:
+    def __init__(self, last_update_time):
         self._last_update_time = last_update_time
 
     def __eq__(self, other):
@@ -1050,7 +1034,7 @@ class LastUpdateOption(WriteOption):
             return NotImplemented
         return self._last_update_time == other._last_update_time
 
-    def modify_write(self, write, **unused_kwargs) -> None:
+    def modify_write(self, write, **unused_kwargs):
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         The ``last_update_time`` is added to ``write_pb`` as an "update time"
@@ -1079,7 +1063,7 @@ class ExistsOption(WriteOption):
             should already exist.
     """
 
-    def __init__(self, exists) -> None:
+    def __init__(self, exists):
         self._exists = exists
 
     def __eq__(self, other):
@@ -1087,7 +1071,7 @@ class ExistsOption(WriteOption):
             return NotImplemented
         return self._exists == other._exists
 
-    def modify_write(self, write, **unused_kwargs) -> None:
+    def modify_write(self, write, **unused_kwargs):
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         If:
@@ -1106,7 +1090,7 @@ class ExistsOption(WriteOption):
         write._pb.current_document.CopyFrom(current_doc._pb)
 
 
-def make_retry_timeout_kwargs(retry, timeout) -> dict:
+def make_retry_timeout_kwargs(retry, timeout):
     """Helper fo API methods which take optional 'retry' / 'timeout' args."""
     kwargs = {}
 
@@ -1119,9 +1103,7 @@ def make_retry_timeout_kwargs(retry, timeout) -> dict:
     return kwargs
 
 
-def build_timestamp(
-    dt: Optional[Union[DatetimeWithNanoseconds, datetime.datetime]] = None
-) -> Timestamp:
+def build_timestamp(dt=None):
     """Returns the supplied datetime (or "now") as a Timestamp"""
     return _datetime_to_pb_timestamp(
         dt or DatetimeWithNanoseconds.now(tz=datetime.timezone.utc)
@@ -1129,9 +1111,9 @@ def build_timestamp(
 
 
 def compare_timestamps(
-    ts1: Union[Timestamp, datetime.datetime],
-    ts2: Union[Timestamp, datetime.datetime],
-) -> int:
+    ts1,
+    ts2,
+):
     ts1 = build_timestamp(ts1) if not isinstance(ts1, Timestamp) else ts1
     ts2 = build_timestamp(ts2) if not isinstance(ts2, Timestamp) else ts2
     ts1_nanos = ts1.nanos + ts1.seconds * 1e9
@@ -1142,9 +1124,9 @@ def compare_timestamps(
 
 
 def deserialize_bundle(
-    serialized: Union[str, bytes],
-    client: "google.cloud.firestore_v1.client.BaseClient",  # type: ignore
-) -> "google.cloud.firestore_bundle.FirestoreBundle":  # type: ignore
+    serialized,
+    client,  # type: ignore
+):  # type: ignore
     """Inverse operation to a `FirestoreBundle` instance's `build()` method.
 
     Args:
@@ -1172,26 +1154,26 @@ def deserialize_bundle(
         "documentMetadata": ["document"],
         "document": ["documentMetadata", "__end__"],
     }
-    allowed_next_element_types: List[str] = bundle_state_machine["__initial__"]
+    allowed_next_element_types = bundle_state_machine["__initial__"]
 
     # This must be saved and added last, since we cache it to preserve timestamps,
     # yet must flush it whenever a new document or query is added to a bundle.
     # The process of deserializing a bundle uses these methods which flush a
     # cached metadata element, and thus, it must be the last BundleElement
     # added during deserialization.
-    metadata_bundle_element: Optional[BundleElement] = None
+    metadata_bundle_element = None
 
-    bundle: Optional[FirestoreBundle] = None
-    data: Dict
+    bundle = None
+    # data: Dict
     for data in _parse_bundle_elements_data(serialized):
         # BundleElements are serialized as JSON containing one key outlining
         # the type, with all further data nested under that key
-        keys: List[str] = list(data.keys())
+        keys = list(data.keys())
 
         if len(keys) != 1:
             raise ValueError("Expected serialized BundleElement with one top-level key")
 
-        key: str = keys[0]
+        key = keys[0]
 
         if key not in allowed_next_element_types:
             raise ValueError(
@@ -1200,9 +1182,9 @@ def deserialize_bundle(
             )
 
         # Create and add our BundleElement
-        bundle_element: BundleElement
+        # bundle_element: BundleElement
         try:
-            bundle_element: BundleElement = BundleElement.from_json(json.dumps(data))  # type: ignore
+            bundle_element = BundleElement.from_json(json.dumps(data))  # type: ignore
         except AttributeError as e:
             # Some bad serialization formats cannot be universally deserialized.
             if e.args[0] == "'dict' object has no attribute 'find'":  # pragma: NO COVER
@@ -1237,7 +1219,7 @@ def deserialize_bundle(
     return bundle
 
 
-def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict, None, None]:  # type: ignore
+def _parse_bundle_elements_data(serialized):  # type: ignore
     """Reads through a serialized FirestoreBundle and yields JSON chunks that
     were created via `BundleElement.to_json(bundle_element)`.
 
@@ -1250,18 +1232,18 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
         ValueError: If a chunk of JSON ever starts without following a length
             prefix.
     """
-    _serialized: Iterator[int] = iter(
+    _serialized = iter(
         serialized if isinstance(serialized, bytes) else serialized.encode("utf-8")
     )
 
-    length_prefix: str = ""
+    length_prefix = ""
     while True:
-        byte: Optional[int] = next(_serialized, None)
+        byte = next(_serialized, None)
 
         if byte is None:
             return None
 
-        _str: str = chr(byte)
+        _str = chr(byte)
         if _str.isnumeric():
             length_prefix += _str
         else:
@@ -1279,12 +1261,10 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
             yield json.loads(_bytes.decode("utf-8"))
 
 
-def _get_documents_from_bundle(
-    bundle, *, query_name: Optional[str] = None
-) -> Generator["google.cloud.firestore.DocumentSnapshot", None, None]:  # type: ignore
+def _get_documents_from_bundle(bundle, *, query_name=None):  # type: ignore
     from google.cloud.firestore_bundle.bundle import _BundledDocument
 
-    bundled_doc: _BundledDocument
+    # bundled_doc: _BundledDocument
     for bundled_doc in bundle.documents.values():
         if query_name and query_name not in bundled_doc.metadata.queries:
             continue
@@ -1294,8 +1274,8 @@ def _get_documents_from_bundle(
 def _get_document_from_bundle(
     bundle,
     *,
-    document_id: str,
-) -> Optional["google.cloud.firestore.DocumentSnapshot"]:  # type: ignore
+    document_id,
+):  # type: ignore
     bundled_doc = bundle.documents.get(document_id)
     if bundled_doc:
         return bundled_doc.snapshot

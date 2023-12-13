@@ -42,12 +42,10 @@ class BulkWriteBatch(BaseBatch):
             The client that created this batch.
     """
 
-    def __init__(self, client) -> None:
+    def __init__(self, client):
         super(BulkWriteBatch, self).__init__(client=client)
 
-    def commit(
-        self, retry: retries.Retry = gapic_v1.method.DEFAULT, timeout: float = None
-    ) -> BatchWriteResponse:
+    def commit(self, retry=gapic_v1.method.DEFAULT, timeout=None):
         """Writes the changes accumulated in this batch.
 
         Write operations are not guaranteed to be applied in order and must not
@@ -70,7 +68,7 @@ class BulkWriteBatch(BaseBatch):
         request, kwargs = self._prep_commit(retry, timeout)
 
         _api = self._client._firestore_api
-        save_response: BatchWriteResponse = _api.batch_write(
+        save_response = _api.batch_write(
             request=request,
             metadata=self._client._rpc_metadata,
             **kwargs,
@@ -81,7 +79,7 @@ class BulkWriteBatch(BaseBatch):
 
         return save_response
 
-    def _prep_commit(self, retry: retries.Retry, timeout: float):
+    def _prep_commit(self, retry, timeout):
         request = {
             "database": self._client._database_string,
             "writes": self._write_pbs,
