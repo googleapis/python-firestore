@@ -20,7 +20,7 @@ class Sentinel(object):
 
     __slots__ = ("description",)
 
-    def __init__(self, description) -> None:
+    def __init__(self, description):
         self.description = description
 
     def __repr__(self):
@@ -44,7 +44,7 @@ class _ValueList(object):
 
     slots = ("_values",)
 
-    def __init__(self, values) -> None:
+    def __init__(self, values):
         if not isinstance(values, (list, tuple)):
             raise ValueError("'values' must be a list or tuple.")
 
@@ -97,7 +97,7 @@ class _NumericValue(object):
         value (int | float): value held in the helper.
     """
 
-    def __init__(self, value) -> None:
+    def __init__(self, value):
         if not isinstance(value, (int, float)):
             raise ValueError("Pass an integer / float value.")
 

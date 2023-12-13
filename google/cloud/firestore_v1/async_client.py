@@ -90,7 +90,7 @@ class AsyncClient(BaseClient):
         database=None,
         client_info=_CLIENT_INFO,
         client_options=None,
-    ) -> None:
+    ):
         super(AsyncClient, self).__init__(
             project=project,
             credentials=credentials,
@@ -135,7 +135,7 @@ class AsyncClient(BaseClient):
         """
         return self._target_helper(firestore_client.FirestoreAsyncClient)
 
-    def collection(self, *collection_path: str) -> AsyncCollectionReference:
+    def collection(self, *collection_path):
         """Get a reference to a collection.
 
         For a top-level collection:
@@ -166,7 +166,7 @@ class AsyncClient(BaseClient):
         """
         return AsyncCollectionReference(*_path_helper(collection_path), client=self)
 
-    def collection_group(self, collection_id: str) -> AsyncCollectionGroup:
+    def collection_group(self, collection_id):
         """
         Creates and returns a new AsyncQuery that includes all documents in the
         database that are contained in a collection or subcollection with the
@@ -188,7 +188,7 @@ class AsyncClient(BaseClient):
         """
         return AsyncCollectionGroup(self._get_collection_reference(collection_id))
 
-    def document(self, *document_path: str) -> AsyncDocumentReference:
+    def document(self, *document_path):
         """Get a reference to a document in a collection.
 
         For a top-level document:
@@ -225,12 +225,12 @@ class AsyncClient(BaseClient):
 
     async def get_all(
         self,
-        references: List[AsyncDocumentReference],
-        field_paths: Iterable[str] = None,
+        references,
+        field_paths=None,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncGenerator[DocumentSnapshot, Any]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Retrieve a batch of documents.
 
         .. note::
@@ -284,9 +284,9 @@ class AsyncClient(BaseClient):
 
     async def collections(
         self,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncGenerator[AsyncCollectionReference, Any]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """List top-level collections of the client's database.
 
         Args:
@@ -311,10 +311,10 @@ class AsyncClient(BaseClient):
 
     async def recursive_delete(
         self,
-        reference: Union[AsyncCollectionReference, AsyncDocumentReference],
+        reference,
         *,
-        bulk_writer: Optional["BulkWriter"] = None,
-        chunk_size: Optional[int] = 5000,
+        bulk_writer=None,
+        chunk_size=5000,
     ):
         """Deletes documents and their subcollections, regardless of collection
         name.
@@ -347,28 +347,28 @@ class AsyncClient(BaseClient):
 
     async def _recursive_delete(
         self,
-        reference: Union[AsyncCollectionReference, AsyncDocumentReference],
-        bulk_writer: "BulkWriter",
+        reference,
+        bulk_writer,
         *,
-        chunk_size: Optional[int] = 5000,
-        depth: Optional[int] = 0,
-    ) -> int:
+        chunk_size=5000,
+        depth=0,
+    ):
         """Recursion helper for `recursive_delete."""
 
-        num_deleted: int = 0
+        num_deleted = 0
 
         if isinstance(reference, AsyncCollectionReference):
-            chunk: List[DocumentSnapshot]
+            # chunk: List[DocumentSnapshot]
             async for chunk in reference.recursive().select(
                 [FieldPath.document_id()]
             )._chunkify(chunk_size):
-                doc_snap: DocumentSnapshot
+                # doc_snap: DocumentSnapshot
                 for doc_snap in chunk:
                     num_deleted += 1
                     bulk_writer.delete(doc_snap.reference)
 
         elif isinstance(reference, AsyncDocumentReference):
-            col_ref: AsyncCollectionReference
+            # col_ref: AsyncCollectionReference
             async for col_ref in reference.collections():
                 num_deleted += await self._recursive_delete(
                     col_ref,
@@ -389,7 +389,7 @@ class AsyncClient(BaseClient):
 
         return num_deleted
 
-    def batch(self) -> AsyncWriteBatch:
+    def batch(self):
         """Get a batch instance from this client.
 
         Returns:
@@ -399,7 +399,7 @@ class AsyncClient(BaseClient):
         """
         return AsyncWriteBatch(self)
 
-    def transaction(self, **kwargs) -> AsyncTransaction:
+    def transaction(self, **kwargs):
         """Get a transaction that uses this client.
 
         See :class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction` for

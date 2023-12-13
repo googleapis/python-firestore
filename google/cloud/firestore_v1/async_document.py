@@ -59,15 +59,15 @@ class AsyncDocumentReference(BaseDocumentReference):
         TypeError: If a keyword other than ``client`` is used.
     """
 
-    def __init__(self, *path, **kwargs) -> None:
+    def __init__(self, *path, **kwargs):
         super(AsyncDocumentReference, self).__init__(*path, **kwargs)
 
     async def create(
         self,
-        document_data: dict,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> write.WriteResult:
+        document_data,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Create the current document in the Firestore database.
 
         Args:
@@ -93,11 +93,11 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def set(
         self,
-        document_data: dict,
-        merge: bool = False,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> write.WriteResult:
+        document_data,
+        merge=False,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Replace the current document in the Firestore database.
 
         A write ``option`` can be specified to indicate preconditions of
@@ -133,11 +133,11 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def update(
         self,
-        field_updates: dict,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> write.WriteResult:
+        field_updates,
+        option=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Update an existing document in the Firestore database.
 
         By default, this method verifies that the document exists on the
@@ -291,10 +291,10 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def delete(
         self,
-        option: _helpers.WriteOption = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Timestamp:
+        option=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Delete the current document in the Firestore database.
 
         Args:
@@ -325,11 +325,11 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def get(
         self,
-        field_paths: Iterable[str] = None,
+        field_paths=None,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> DocumentSnapshot:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Retrieve a snapshot of the current document.
 
         See :meth:`~google.cloud.firestore_v1.base_client.BaseClient.field_path` for
@@ -394,10 +394,10 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def collections(
         self,
-        page_size: int = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncGenerator:
+        page_size=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """List subcollections of the current document.
 
         Args:

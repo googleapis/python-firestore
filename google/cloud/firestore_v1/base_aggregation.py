@@ -50,7 +50,7 @@ class AggregationResult(object):
     :param value: The resulting read_time
     """
 
-    def __init__(self, alias: str, value: int, read_time=None):
+    def __init__(self, alias, value, read_time=None):
         self.alias = alias
         self.value = value
         self.read_time = read_time
@@ -60,7 +60,7 @@ class AggregationResult(object):
 
 
 class BaseAggregation(ABC):
-    def __init__(self, alias: str | None = None):
+    def __init__(self, alias=None):
         self.alias = alias
 
     @abc.abstractmethod
@@ -69,7 +69,7 @@ class BaseAggregation(ABC):
 
 
 class CountAggregation(BaseAggregation):
-    def __init__(self, alias: str | None = None):
+    def __init__(self, alias=None):
         super(CountAggregation, self).__init__(alias=alias)
 
     def _to_protobuf(self):
@@ -81,7 +81,7 @@ class CountAggregation(BaseAggregation):
 
 
 class SumAggregation(BaseAggregation):
-    def __init__(self, field_ref: str | FieldPath, alias: str | None = None):
+    def __init__(self, field_ref, alias=None):
         if isinstance(field_ref, FieldPath):
             # convert field path to string
             field_ref = field_ref.to_api_repr()
@@ -98,7 +98,7 @@ class SumAggregation(BaseAggregation):
 
 
 class AvgAggregation(BaseAggregation):
-    def __init__(self, field_ref: str | FieldPath, alias: str | None = None):
+    def __init__(self, field_ref, alias=None):
         if isinstance(field_ref, FieldPath):
             # convert field path to string
             field_ref = field_ref.to_api_repr()
@@ -115,8 +115,8 @@ class AvgAggregation(BaseAggregation):
 
 
 def _query_response_to_result(
-    response_pb: RunAggregationQueryResponse,
-) -> List[AggregationResult]:
+    response_pb,
+):
     results = [
         AggregationResult(
             alias=key,
@@ -133,17 +133,17 @@ def _query_response_to_result(
 class BaseAggregationQuery(ABC):
     """Represents an aggregation query to the Firestore API."""
 
-    def __init__(self, nested_query, alias: str | None = None) -> None:
+    def __init__(self, nested_query, alias=None):
         self._nested_query = nested_query
         self._alias = alias
         self._collection_ref = nested_query._parent
-        self._aggregations: List[BaseAggregation] = []
+        self._aggregations = []
 
     @property
     def _client(self):
         return self._collection_ref._client
 
-    def count(self, alias: str | None = None):
+    def count(self, alias=None):
         """
         Adds a count over the nested query
         """
@@ -151,7 +151,7 @@ class BaseAggregationQuery(ABC):
         self._aggregations.append(count_aggregation)
         return self
 
-    def sum(self, field_ref: str | FieldPath, alias: str | None = None):
+    def sum(self, field_ref, alias=None):
         """
         Adds a sum over the nested query
         """
@@ -159,7 +159,7 @@ class BaseAggregationQuery(ABC):
         self._aggregations.append(sum_aggregation)
         return self
 
-    def avg(self, field_ref: str | FieldPath, alias: str | None = None):
+    def avg(self, field_ref, alias=None):
         """
         Adds an avg over the nested query
         """
@@ -167,7 +167,7 @@ class BaseAggregationQuery(ABC):
         self._aggregations.append(avg_aggregation)
         return self
 
-    def add_aggregation(self, aggregation: BaseAggregation) -> None:
+    def add_aggregation(self, aggregation):
         """
         Adds an aggregation operation to the nested query
 
@@ -176,7 +176,7 @@ class BaseAggregationQuery(ABC):
         """
         self._aggregations.append(aggregation)
 
-    def add_aggregations(self, aggregations: List[BaseAggregation]) -> None:
+    def add_aggregations(self, aggregations):
         """
         Adds a list of aggregations to the nested query
 
@@ -185,7 +185,7 @@ class BaseAggregationQuery(ABC):
         """
         self._aggregations.extend(aggregations)
 
-    def _to_protobuf(self) -> StructuredAggregationQuery:
+    def _to_protobuf(self):
         pb = StructuredAggregationQuery()
         pb.structured_query = self._nested_query._to_protobuf()
 
@@ -197,9 +197,9 @@ class BaseAggregationQuery(ABC):
     def _prep_stream(
         self,
         transaction=None,
-        retry: Union[retries.Retry, None, gapic_v1.method._MethodDefault] = None,
-        timeout: float | None = None,
-    ) -> Tuple[dict, dict]:
+        retry=None,
+        timeout=None,
+    ):
         parent_path, expected_prefix = self._collection_ref._parent_info()
         request = {
             "parent": parent_path,
@@ -214,11 +214,9 @@ class BaseAggregationQuery(ABC):
     def get(
         self,
         transaction=None,
-        retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
-        ] = gapic_v1.method.DEFAULT,
-        timeout: float | None = None,
-    ) -> List[AggregationResult] | Coroutine[Any, Any, List[AggregationResult]]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
@@ -244,13 +242,8 @@ class BaseAggregationQuery(ABC):
     def stream(
         self,
         transaction=None,
-        retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
-        ] = gapic_v1.method.DEFAULT,
-        timeout: float | None = None,
-    ) -> (
-        Generator[List[AggregationResult], Any, None]
-        | AsyncGenerator[List[AggregationResult], None]
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
     ):
         """Runs the aggregation query.
 

@@ -63,11 +63,11 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
             :data:`False`.
     """
 
-    def __init__(self, client, max_attempts=MAX_ATTEMPTS, read_only=False) -> None:
+    def __init__(self, client, max_attempts=MAX_ATTEMPTS, read_only=False):
         super(AsyncTransaction, self).__init__(client)
         BaseTransaction.__init__(self, max_attempts, read_only)
 
-    def _add_write_pbs(self, write_pbs: list) -> None:
+    def _add_write_pbs(self, write_pbs):
         """Add `Write`` protobufs to this transaction.
 
         Args:
@@ -82,7 +82,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
         super(AsyncTransaction, self)._add_write_pbs(write_pbs)
 
-    async def _begin(self, retry_id: bytes = None) -> None:
+    async def _begin(self, retry_id=None):
         """Begin the transaction.
 
         Args:
@@ -105,7 +105,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         )
         self._id = transaction_response.transaction
 
-    async def _rollback(self) -> None:
+    async def _rollback(self):
         """Roll back the transaction.
 
         Raises:
@@ -128,7 +128,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
             # clean up, even if rollback fails
             self._clean_up()
 
-    async def _commit(self) -> list:
+    async def _commit(self):
         """Transactionally commit the changes accumulated.
 
         Returns:
@@ -152,10 +152,10 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
     async def get_all(
         self,
-        references: list,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncGenerator[DocumentSnapshot, Any]:
+        references,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Retrieves multiple documents from Firestore.
 
         Args:
@@ -176,9 +176,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
     async def get(
         self,
         ref_or_query,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncGenerator[DocumentSnapshot, Any]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """
         Retrieve a document or a query result from the database.
 
@@ -217,12 +217,10 @@ class _AsyncTransactional(_BaseTransactional):
             A coroutine that should be run (and retried) in a transaction.
     """
 
-    def __init__(self, to_wrap) -> None:
+    def __init__(self, to_wrap):
         super(_AsyncTransactional, self).__init__(to_wrap)
 
-    async def _pre_commit(
-        self, transaction: AsyncTransaction, *args, **kwargs
-    ) -> Coroutine:
+    async def _pre_commit(self, transaction, *args, **kwargs):
         """Begin transaction and call the wrapped coroutine.
 
         Args:
@@ -301,9 +299,7 @@ class _AsyncTransactional(_BaseTransactional):
             raise
 
 
-def async_transactional(
-    to_wrap: Callable[[AsyncTransaction], Any]
-) -> _AsyncTransactional:
+def async_transactional(to_wrap):
     """Decorate a callable so that it runs in a transaction.
 
     Args:
@@ -319,9 +315,7 @@ def async_transactional(
 
 
 # TODO(crwilcox): this was 'coroutine' from pytype merge-pyi...
-async def _commit_with_retry(
-    client: Client, write_pbs: list, transaction_id: bytes
-) -> types.CommitResponse:
+async def _commit_with_retry(client, write_pbs, transaction_id):
     """Call ``Commit`` on the GAPIC client with retry / sleep.
 
     Retries the ``Commit`` RPC on Unavailable. Usually this RPC-level
@@ -364,9 +358,7 @@ async def _commit_with_retry(
         current_sleep = await _sleep(current_sleep)
 
 
-async def _sleep(
-    current_sleep: float, max_sleep: float = _MAX_SLEEP, multiplier: float = _MULTIPLIER
-) -> float:
+async def _sleep(current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER):
     """Sleep and produce a new sleep time.
 
     .. _Exponential Backoff And Jitter: https://www.awsarchitectureblog.com/\

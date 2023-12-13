@@ -87,7 +87,7 @@ class Client(BaseClient):
         database=None,
         client_info=_CLIENT_INFO,
         client_options=None,
-    ) -> None:
+    ):
         super(Client, self).__init__(
             project=project,
             credentials=credentials,
@@ -119,7 +119,7 @@ class Client(BaseClient):
         """
         return self._target_helper(firestore_client.FirestoreClient)
 
-    def collection(self, *collection_path: str) -> CollectionReference:
+    def collection(self, *collection_path):
         """Get a reference to a collection.
 
         For a top-level collection:
@@ -150,7 +150,7 @@ class Client(BaseClient):
         """
         return CollectionReference(*_path_helper(collection_path), client=self)
 
-    def collection_group(self, collection_id: str) -> CollectionGroup:
+    def collection_group(self, collection_id):
         """
         Creates and returns a new Query that includes all documents in the
         database that are contained in a collection or subcollection with the
@@ -172,7 +172,7 @@ class Client(BaseClient):
         """
         return CollectionGroup(self._get_collection_reference(collection_id))
 
-    def document(self, *document_path: str) -> DocumentReference:
+    def document(self, *document_path):
         """Get a reference to a document in a collection.
 
         For a top-level document:
@@ -209,12 +209,12 @@ class Client(BaseClient):
 
     def get_all(
         self,
-        references: list,
-        field_paths: Iterable[str] = None,
-        transaction: Transaction = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Generator[DocumentSnapshot, Any, None]:
+        references,
+        field_paths=None,
+        transaction=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Retrieve a batch of documents.
 
         .. note::
@@ -268,9 +268,9 @@ class Client(BaseClient):
 
     def collections(
         self,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Generator[Any, Any, None]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """List top-level collections of the client's database.
 
         Args:
@@ -296,11 +296,11 @@ class Client(BaseClient):
 
     def recursive_delete(
         self,
-        reference: Union[CollectionReference, DocumentReference],
+        reference,
         *,
-        bulk_writer: Optional["BulkWriter"] = None,
-        chunk_size: Optional[int] = 5000,
-    ) -> int:
+        bulk_writer=None,
+        chunk_size=5000,
+    ):
         """Deletes documents and their subcollections, regardless of collection
         name.
 
@@ -333,30 +333,30 @@ class Client(BaseClient):
 
     def _recursive_delete(
         self,
-        reference: Union[CollectionReference, DocumentReference],
-        bulk_writer: "BulkWriter",
+        reference,
+        bulk_writer,
         *,
-        chunk_size: Optional[int] = 5000,
-        depth: Optional[int] = 0,
-    ) -> int:
+        chunk_size=5000,
+        depth=0,
+    ):
         """Recursion helper for `recursive_delete."""
 
-        num_deleted: int = 0
+        num_deleted = 0
 
         if isinstance(reference, CollectionReference):
-            chunk: List[DocumentSnapshot]
+            # chunk: List[DocumentSnapshot]
             for chunk in (
                 reference.recursive()
                 .select([FieldPath.document_id()])
                 ._chunkify(chunk_size)
             ):
-                doc_snap: DocumentSnapshot
+                # doc_snap: DocumentSnapshot
                 for doc_snap in chunk:
                     num_deleted += 1
                     bulk_writer.delete(doc_snap.reference)
 
         elif isinstance(reference, DocumentReference):
-            col_ref: CollectionReference
+            # col_ref: CollectionReference
             for col_ref in reference.collections():
                 num_deleted += self._recursive_delete(
                     col_ref,
@@ -377,7 +377,7 @@ class Client(BaseClient):
 
         return num_deleted
 
-    def batch(self) -> WriteBatch:
+    def batch(self):
         """Get a batch instance from this client.
 
         Returns:
@@ -387,7 +387,7 @@ class Client(BaseClient):
         """
         return WriteBatch(self)
 
-    def transaction(self, **kwargs) -> Transaction:
+    def transaction(self, **kwargs):
         """Get a transaction that uses this client.
 
         See :class:`~google.cloud.firestore_v1.transaction.Transaction` for

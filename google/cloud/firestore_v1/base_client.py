@@ -66,13 +66,13 @@ _DEFAULT_EMULATOR_PROJECT = "google-cloud-firestore-emulator"
 _BAD_OPTION_ERR = (
     "Exactly one of ``last_update_time`` or ``exists`` " "must be provided."
 )
-_BAD_DOC_TEMPLATE: str = (
+_BAD_DOC_TEMPLATE = (
     "Document {!r} appeared in response but was not present among references"
 )
-_ACTIVE_TXN: str = "There is already an active transaction."
-_INACTIVE_TXN: str = "There is no active transaction."
-_CLIENT_INFO: Any = client_info.ClientInfo(client_library_version=__version__)
-_FIRESTORE_EMULATOR_HOST: str = "FIRESTORE_EMULATOR_HOST"
+_ACTIVE_TXN = "There is already an active transaction."
+_INACTIVE_TXN = "There is no active transaction."
+_CLIENT_INFO = client_info.ClientInfo(client_library_version=__version__)
+_FIRESTORE_EMULATOR_HOST = "FIRESTORE_EMULATOR_HOST"
 
 
 class BaseClient(ClientWithProject):
@@ -120,7 +120,7 @@ class BaseClient(ClientWithProject):
         database=None,
         client_info=_CLIENT_INFO,
         client_options=None,
-    ) -> None:
+    ):
         database = database or DEFAULT_DATABASE
         # NOTE: This API has no use for the _http argument, but sending it
         #       will have no impact since the _http() @property only lazily
@@ -149,7 +149,7 @@ class BaseClient(ClientWithProject):
 
         self._database = database
 
-    def _firestore_api_helper(self, transport, client_class, client_module) -> Any:
+    def _firestore_api_helper(self, transport, client_class, client_module):
         """Lazy-loading getter GAPIC Firestore API.
         Returns:
             The GAPIC client with the credentials of the current client.
@@ -202,7 +202,7 @@ class BaseClient(ClientWithProject):
         else:
             return grpc.insecure_channel(self._emulator_host, options=options)
 
-    def _target_helper(self, client_class) -> str:
+    def _target_helper(self, client_class):
         """Return the target (where the API is).
         Eg. "firestore.googleapis.com"
 
@@ -262,15 +262,13 @@ class BaseClient(ClientWithProject):
 
         return self._rpc_metadata_internal
 
-    def collection(self, *collection_path) -> BaseCollectionReference[BaseQuery]:
+    def collection(self, *collection_path):
         raise NotImplementedError
 
-    def collection_group(self, collection_id: str) -> BaseQuery:
+    def collection_group(self, collection_id):
         raise NotImplementedError
 
-    def _get_collection_reference(
-        self, collection_id: str
-    ) -> BaseCollectionReference[BaseQuery]:
+    def _get_collection_reference(self, collection_id):
         """Checks validity of collection_id and then uses subclasses collection implementation.
 
         Args:
@@ -291,10 +289,10 @@ class BaseClient(ClientWithProject):
 
         return self.collection(collection_id)
 
-    def document(self, *document_path) -> BaseDocumentReference:
+    def document(self, *document_path):
         raise NotImplementedError
 
-    def bulk_writer(self, options: Optional[BulkWriterOptions] = None) -> BulkWriter:
+    def bulk_writer(self, options=None):
         """Get a BulkWriter instance from this client.
 
         Args:
@@ -309,7 +307,7 @@ class BaseClient(ClientWithProject):
         """
         return BulkWriter(client=self, options=options)
 
-    def _document_path_helper(self, *document_path) -> List[str]:
+    def _document_path_helper(self, *document_path):
         """Standardize the format of path to tuple of path segments and strip the database string from path if present.
 
         Args:
@@ -327,13 +325,13 @@ class BaseClient(ClientWithProject):
 
     def recursive_delete(
         self,
-        reference: Union[BaseCollectionReference[BaseQuery], BaseDocumentReference],
-        bulk_writer: Optional["BulkWriter"] = None,  # type: ignore
-    ) -> int:
+        reference,
+        bulk_writer=None,  # type: ignore
+    ):
         raise NotImplementedError
 
     @staticmethod
-    def field_path(*field_names: str) -> str:
+    def field_path(*field_names):
         """Create a **field path** from a list of nested field names.
 
         A **field path** is a ``.``-delimited concatenation of the field
@@ -364,7 +362,7 @@ class BaseClient(ClientWithProject):
     @staticmethod
     def write_option(
         **kwargs,
-    ) -> Union[_helpers.ExistsOption, _helpers.LastUpdateOption]:
+    ):
         """Create a write option for write operations.
 
         Write operations include :meth:`~google.cloud.DocumentReference.set`,
@@ -414,12 +412,12 @@ class BaseClient(ClientWithProject):
 
     def _prep_get_all(
         self,
-        references: list,
-        field_paths: Iterable[str] = None,
-        transaction: BaseTransaction = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[dict, dict, dict]:
+        references,
+        field_paths=None,
+        transaction=None,
+        retry=None,
+        timeout=None,
+    ):
         """Shared setup for async/sync :meth:`get_all`."""
         document_paths, reference_map = _reference_info(references)
         mask = _get_doc_mask(field_paths)
@@ -435,21 +433,19 @@ class BaseClient(ClientWithProject):
 
     def get_all(
         self,
-        references: list,
-        field_paths: Iterable[str] = None,
-        transaction: BaseTransaction = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Union[
-        AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
-    ]:
+        references,
+        field_paths=None,
+        transaction=None,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def _prep_collections(
         self,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Tuple[dict, dict]:
+        retry=None,
+        timeout=None,
+    ):
         """Shared setup for async/sync :meth:`collections`."""
         request = {"parent": "{}/documents".format(self._database_string)}
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
@@ -458,22 +454,19 @@ class BaseClient(ClientWithProject):
 
     def collections(
         self,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Union[
-        AsyncGenerator[BaseCollectionReference[BaseQuery], Any],
-        Generator[BaseCollectionReference[BaseQuery], Any, Any],
-    ]:
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
-    def batch(self) -> BaseWriteBatch:
+    def batch(self):
         raise NotImplementedError
 
-    def transaction(self, **kwargs) -> BaseTransaction:
+    def transaction(self, **kwargs):
         raise NotImplementedError
 
 
-def _reference_info(references: list) -> Tuple[list, dict]:
+def _reference_info(references):
     """Get information about document references.
 
     Helper for :meth:`~google.cloud.firestore_v1.client.Client.get_all`.
@@ -500,7 +493,7 @@ def _reference_info(references: list) -> Tuple[list, dict]:
     return document_paths, reference_map
 
 
-def _get_reference(document_path: str, reference_map: dict) -> BaseDocumentReference:
+def _get_reference(document_path, reference_map):
     """Get a document reference from a dictionary.
 
     This just wraps a simple dictionary look-up with a helpful error that is
@@ -527,10 +520,10 @@ def _get_reference(document_path: str, reference_map: dict) -> BaseDocumentRefer
 
 
 def _parse_batch_get(
-    get_doc_response: types.BatchGetDocumentsResponse,
-    reference_map: dict,
-    client: BaseClient,
-) -> DocumentSnapshot:
+    get_doc_response,
+    reference_map,
+    client,
+):
     """Parse a `BatchGetDocumentsResponse` protobuf.
 
     Args:
@@ -580,7 +573,7 @@ def _parse_batch_get(
     return snapshot
 
 
-def _get_doc_mask(field_paths: Iterable[str]) -> Optional[types.common.DocumentMask]:
+def _get_doc_mask(field_paths):
     """Get a document mask if field paths are provided.
 
     Args:
@@ -598,7 +591,7 @@ def _get_doc_mask(field_paths: Iterable[str]) -> Optional[types.common.DocumentM
         return types.DocumentMask(field_paths=field_paths)
 
 
-def _path_helper(path: tuple) -> Tuple[str]:
+def _path_helper(path):
     """Standardize path into a tuple of path segments.
 
     Args:

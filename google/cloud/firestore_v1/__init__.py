@@ -109,7 +109,7 @@ from typing import List
 # from .types.write import Write
 # from .types.write import WriteResult
 
-__all__: List[str] = [
+__all__ = [
     "__version__",
     "And",
     "ArrayRemove",

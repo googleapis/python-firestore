@@ -33,14 +33,14 @@ class AsyncWriteBatch(BaseWriteBatch):
             The client that created this batch.
     """
 
-    def __init__(self, client) -> None:
+    def __init__(self, client):
         super(AsyncWriteBatch, self).__init__(client=client)
 
     async def commit(
         self,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> list:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Commit the changes accumulated in this batch.
 
         Args:

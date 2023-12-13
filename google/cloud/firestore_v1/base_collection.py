@@ -76,7 +76,7 @@ class BaseCollectionReference(Generic[QueryType]):
         TypeError: If a keyword other than ``client`` is used.
     """
 
-    def __init__(self, *path, **kwargs) -> None:
+    def __init__(self, *path, **kwargs):
         _helpers.verify_path(path, is_collection=True)
         self._path = path
         self._client = kwargs.pop("client", None)
@@ -114,13 +114,13 @@ class BaseCollectionReference(Generic[QueryType]):
             parent_path = self._path[:-1]
         return self._client.document(*parent_path)
 
-    def _query(self) -> QueryType:
+    def _query(self):
         raise NotImplementedError
 
-    def _aggregation_query(self) -> BaseAggregationQuery:
+    def _aggregation_query(self):
         raise NotImplementedError
 
-    def document(self, document_id: Optional[str] = None) -> DocumentReference:
+    def document(self, document_id=None):
         """Create a sub-document underneath the current collection.
 
         Args:
@@ -142,7 +142,7 @@ class BaseCollectionReference(Generic[QueryType]):
         child_path = self._path + (document_id,) if self._path[0] else (document_id,)
         return self._client.document(*child_path)
 
-    def _parent_info(self) -> Tuple[Any, str]:
+    def _parent_info(self):
         """Get fully-qualified parent path and prefix for this collection.
 
         Returns:
@@ -166,11 +166,11 @@ class BaseCollectionReference(Generic[QueryType]):
 
     def _prep_add(
         self,
-        document_data: dict,
-        document_id: Optional[str] = None,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
-    ) -> Tuple[DocumentReference, dict]:
+        document_data,
+        document_id=None,
+        retry=None,
+        timeout=None,
+    ):
         """Shared setup for async / sync :method:`add`"""
         if document_id is None:
             document_id = _auto_id()
@@ -182,19 +182,19 @@ class BaseCollectionReference(Generic[QueryType]):
 
     def add(
         self,
-        document_data: dict,
-        document_id: Optional[str] = None,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
-    ) -> Union[Tuple[Any, Any], Coroutine[Any, Any, Tuple[Any, Any]]]:
+        document_data,
+        document_id=None,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def _prep_list_documents(
         self,
-        page_size: Optional[int] = None,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
-    ) -> Tuple[dict, dict]:
+        page_size=None,
+        retry=None,
+        timeout=None,
+    ):
         """Shared setup for async / sync :method:`list_documents`"""
         parent, _ = self._parent_info()
         request = {
@@ -213,18 +213,16 @@ class BaseCollectionReference(Generic[QueryType]):
 
     def list_documents(
         self,
-        page_size: Optional[int] = None,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
-    ) -> Union[
-        Generator[DocumentReference, Any, Any], AsyncGenerator[DocumentReference, Any]
-    ]:
+        page_size=None,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
-    def recursive(self) -> QueryType:
+    def recursive(self):
         return self._query().recursive()
 
-    def select(self, field_paths: Iterable[str]) -> QueryType:
+    def select(self, field_paths):
         """Create a "select" query with this collection as parent.
 
         See
@@ -245,12 +243,12 @@ class BaseCollectionReference(Generic[QueryType]):
 
     def where(
         self,
-        field_path: Optional[str] = None,
-        op_string: Optional[str] = None,
+        field_path=None,
+        op_string=None,
         value=None,
         *,
         filter=None,
-    ) -> QueryType:
+    ):
         """Create a "where" query with this collection as parent.
 
         See
@@ -296,7 +294,7 @@ class BaseCollectionReference(Generic[QueryType]):
         else:
             return query.where(filter=filter)
 
-    def order_by(self, field_path: str, **kwargs) -> QueryType:
+    def order_by(self, field_path, **kwargs):
         """Create an "order by" query with this collection as parent.
 
         See
@@ -318,7 +316,7 @@ class BaseCollectionReference(Generic[QueryType]):
         query = self._query()
         return query.order_by(field_path, **kwargs)
 
-    def limit(self, count: int) -> QueryType:
+    def limit(self, count):
         """Create a limited query with this collection as parent.
 
         .. note::
@@ -340,7 +338,7 @@ class BaseCollectionReference(Generic[QueryType]):
         query = self._query()
         return query.limit(count)
 
-    def limit_to_last(self, count: int):
+    def limit_to_last(self, count):
         """Create a limited to last query with this collection as parent.
 
         .. note::
@@ -361,7 +359,7 @@ class BaseCollectionReference(Generic[QueryType]):
         query = self._query()
         return query.limit_to_last(count)
 
-    def offset(self, num_to_skip: int) -> QueryType:
+    def offset(self, num_to_skip):
         """Skip to an offset in a query with this collection as parent.
 
         See
@@ -379,9 +377,7 @@ class BaseCollectionReference(Generic[QueryType]):
         query = self._query()
         return query.offset(num_to_skip)
 
-    def start_at(
-        self, document_fields: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> QueryType:
+    def start_at(self, document_fields):
         """Start query at a cursor with this collection as parent.
 
         See
@@ -402,9 +398,7 @@ class BaseCollectionReference(Generic[QueryType]):
         query = self._query()
         return query.start_at(document_fields)
 
-    def start_after(
-        self, document_fields: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> QueryType:
+    def start_after(self, document_fields):
         """Start query after a cursor with this collection as parent.
 
         See
@@ -425,9 +419,7 @@ class BaseCollectionReference(Generic[QueryType]):
         query = self._query()
         return query.start_after(document_fields)
 
-    def end_before(
-        self, document_fields: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> QueryType:
+    def end_before(self, document_fields):
         """End query before a cursor with this collection as parent.
 
         See
@@ -448,9 +440,7 @@ class BaseCollectionReference(Generic[QueryType]):
         query = self._query()
         return query.end_before(document_fields)
 
-    def end_at(
-        self, document_fields: Union[DocumentSnapshot, dict, list, tuple]
-    ) -> QueryType:
+    def end_at(self, document_fields):
         """End query at a cursor with this collection as parent.
 
         See
@@ -473,9 +463,9 @@ class BaseCollectionReference(Generic[QueryType]):
 
     def _prep_get_or_stream(
         self,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
-    ) -> Tuple[Any, dict]:
+        retry=None,
+        timeout=None,
+    ):
         """Shared setup for async / sync :meth:`get` / :meth:`stream`"""
         query = self._query()
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
@@ -484,23 +474,21 @@ class BaseCollectionReference(Generic[QueryType]):
 
     def get(
         self,
-        transaction: Optional[Transaction] = None,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
-    ) -> Union[
-        Generator[DocumentSnapshot, Any, Any], AsyncGenerator[DocumentSnapshot, Any]
-    ]:
+        transaction=None,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def stream(
         self,
-        transaction: Optional[Transaction] = None,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
-    ) -> Union[Iterator[DocumentSnapshot], AsyncIterator[DocumentSnapshot]]:
+        transaction=None,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
-    def on_snapshot(self, callback) -> NoReturn:
+    def on_snapshot(self, callback):
         raise NotImplementedError
 
     def count(self, alias=None):
@@ -512,7 +500,7 @@ class BaseCollectionReference(Generic[QueryType]):
         """
         return self._aggregation_query().count(alias=alias)
 
-    def sum(self, field_ref: str | FieldPath, alias=None):
+    def sum(self, field_ref, alias=None):
         """
         Adds a sum over the nested query.
 
@@ -526,7 +514,7 @@ class BaseCollectionReference(Generic[QueryType]):
         """
         return self._aggregation_query().sum(field_ref, alias=alias)
 
-    def avg(self, field_ref: str | FieldPath, alias=None):
+    def avg(self, field_ref, alias=None):
         """
         Adds an avg over the nested query.
 
@@ -540,7 +528,7 @@ class BaseCollectionReference(Generic[QueryType]):
         return self._aggregation_query().avg(field_ref, alias=alias)
 
 
-def _auto_id() -> str:
+def _auto_id():
     """Generate a "random" automatically generated ID.
 
     Returns:
@@ -551,7 +539,7 @@ def _auto_id() -> str:
     return "".join(random.choice(_AUTO_ID_CHARS) for _ in range(20))
 
 
-def _item_to_document_ref(collection_reference, item) -> DocumentReference:
+def _item_to_document_ref(collection_reference, item):
     """Convert Document resource to document ref.
 
     Args:

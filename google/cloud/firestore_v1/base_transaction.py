@@ -19,33 +19,33 @@ from google.api_core import retry as retries
 from google.cloud.firestore_v1 import types
 from typing import Any, Coroutine, NoReturn, Optional, Union
 
-_CANT_BEGIN: str
-_CANT_COMMIT: str
-_CANT_RETRY_READ_ONLY: str
-_CANT_ROLLBACK: str
-_EXCEED_ATTEMPTS_TEMPLATE: str
-_INITIAL_SLEEP: float
-_MAX_SLEEP: float
-_MISSING_ID_TEMPLATE: str
-_MULTIPLIER: float
-_WRITE_READ_ONLY: str
+# _CANT_BEGIN: str
+# _CANT_COMMIT: str
+# _CANT_RETRY_READ_ONLY: str
+# _CANT_ROLLBACK: str
+# _EXCEED_ATTEMPTS_TEMPLATE: str
+# _INITIAL_SLEEP: float
+# _MAX_SLEEP: float
+# _MISSING_ID_TEMPLATE: str
+# _MULTIPLIER: float
+# _WRITE_READ_ONLY: str
 
 
 MAX_ATTEMPTS = 5
 """int: Default number of transaction attempts (with retries)."""
-_CANT_BEGIN: str = "The transaction has already begun. Current transaction ID: {!r}."
-_MISSING_ID_TEMPLATE: str = "The transaction has no transaction ID, so it cannot be {}."
-_CANT_ROLLBACK: str = _MISSING_ID_TEMPLATE.format("rolled back")
-_CANT_COMMIT: str = _MISSING_ID_TEMPLATE.format("committed")
-_WRITE_READ_ONLY: str = "Cannot perform write operation in read-only transaction."
-_INITIAL_SLEEP: float = 1.0
+_CANT_BEGIN = "The transaction has already begun. Current transaction ID: {!r}."
+_MISSING_ID_TEMPLATE = "The transaction has no transaction ID, so it cannot be {}."
+_CANT_ROLLBACK = _MISSING_ID_TEMPLATE.format("rolled back")
+_CANT_COMMIT = _MISSING_ID_TEMPLATE.format("committed")
+_WRITE_READ_ONLY = "Cannot perform write operation in read-only transaction."
+_INITIAL_SLEEP = 1.0
 """float: Initial "max" for sleep interval. To be used in :func:`_sleep`."""
-_MAX_SLEEP: float = 30.0
+_MAX_SLEEP = 30.0
 """float: Eventual "max" sleep time. To be used in :func:`_sleep`."""
-_MULTIPLIER: float = 2.0
+_MULTIPLIER = 2.0
 """float: Multiplier for exponential backoff. To be used in :func:`_sleep`."""
-_EXCEED_ATTEMPTS_TEMPLATE: str = "Failed to commit transaction in {:d} attempts."
-_CANT_RETRY_READ_ONLY: str = "Only read-write transactions can be retried."
+_EXCEED_ATTEMPTS_TEMPLATE = "Failed to commit transaction in {:d} attempts."
+_CANT_RETRY_READ_ONLY = "Only read-write transactions can be retried."
 
 
 class BaseTransaction(object):
@@ -60,17 +60,15 @@ class BaseTransaction(object):
             :data:`False`.
     """
 
-    def __init__(self, max_attempts=MAX_ATTEMPTS, read_only=False) -> None:
+    def __init__(self, max_attempts=MAX_ATTEMPTS, read_only=False):
         self._max_attempts = max_attempts
         self._read_only = read_only
         self._id = None
 
-    def _add_write_pbs(self, write_pbs) -> NoReturn:
+    def _add_write_pbs(self, write_pbs):
         raise NotImplementedError
 
-    def _options_protobuf(
-        self, retry_id: Union[bytes, None]
-    ) -> Optional[types.common.TransactionOptions]:
+    def _options_protobuf(self, retry_id):
         """Convert the current object to protobuf.
 
         The ``retry_id`` value is used when retrying a transaction that
@@ -125,7 +123,7 @@ class BaseTransaction(object):
         """
         return self._id
 
-    def _clean_up(self) -> None:
+    def _clean_up(self):
         """Clean up the instance after :meth:`_rollback`` or :meth:`_commit``.
 
         This intended to occur on success or failure of the associated RPCs.
@@ -133,29 +131,29 @@ class BaseTransaction(object):
         self._write_pbs = []
         self._id = None
 
-    def _begin(self, retry_id=None) -> NoReturn:
+    def _begin(self, retry_id=None):
         raise NotImplementedError
 
-    def _rollback(self) -> NoReturn:
+    def _rollback(self):
         raise NotImplementedError
 
-    def _commit(self) -> Union[list, Coroutine[Any, Any, list]]:
+    def _commit(self):
         raise NotImplementedError
 
     def get_all(
         self,
-        references: list,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
+        references,
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
     def get(
         self,
         ref_or_query,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
+        retry=None,
+        timeout=None,
+    ):
         raise NotImplementedError
 
 
@@ -170,19 +168,19 @@ class _BaseTransactional(object):
             A callable that should be run (and retried) in a transaction.
     """
 
-    def __init__(self, to_wrap) -> None:
+    def __init__(self, to_wrap):
         self.to_wrap = to_wrap
         self.current_id = None
         """Optional[bytes]: The current transaction ID."""
         self.retry_id = None
         """Optional[bytes]: The ID of the first attempted transaction."""
 
-    def _reset(self) -> None:
+    def _reset(self):
         """Unset the transaction IDs."""
         self.current_id = None
         self.retry_id = None
 
-    def _pre_commit(self, transaction, *args, **kwargs) -> NoReturn:
+    def _pre_commit(self, transaction, *args, **kwargs):
         raise NotImplementedError
 
     def __call__(self, transaction, *args, **kwargs):

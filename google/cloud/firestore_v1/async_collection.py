@@ -58,10 +58,10 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         TypeError: If a keyword other than ``client`` is used.
     """
 
-    def __init__(self, *path, **kwargs) -> None:
+    def __init__(self, *path, **kwargs):
         super(AsyncCollectionReference, self).__init__(*path, **kwargs)
 
-    def _query(self) -> async_query.AsyncQuery:
+    def _query(self):
         """Query factory.
 
         Returns:
@@ -69,7 +69,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         """
         return async_query.AsyncQuery(self)
 
-    def _aggregation_query(self) -> async_aggregation.AsyncAggregationQuery:
+    def _aggregation_query(self):
         """AsyncAggregationQuery factory.
 
         Returns:
@@ -77,17 +77,17 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         """
         return async_aggregation.AsyncAggregationQuery(self._query())
 
-    async def _chunkify(self, chunk_size: int):
+    async def _chunkify(self, chunk_size):
         async for page in self._query()._chunkify(chunk_size):
             yield page
 
     async def add(
         self,
-        document_data: dict,
-        document_id: str = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Tuple[Any, Any]:
+        document_data,
+        document_id=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Create a document in the Firestore database with the provided data.
 
         Args:
@@ -124,9 +124,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         write_result = await document_ref.create(document_data, **kwargs)
         return write_result.update_time, document_ref
 
-    def document(
-        self, document_id: str = None
-    ) -> async_document.AsyncDocumentReference:
+    def document(self, document_id=None):
         """Create a sub-document underneath the current collection.
 
         Args:
@@ -143,10 +141,10 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
 
     async def list_documents(
         self,
-        page_size: int = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncGenerator[DocumentReference, None]:
+        page_size=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """List all subdocuments of the current collection.
 
         Args:
@@ -176,10 +174,10 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
 
     async def get(
         self,
-        transaction: Transaction = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> list:
+        transaction=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -207,10 +205,10 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
 
     async def stream(
         self,
-        transaction: Transaction = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncIterator[async_document.DocumentSnapshot]:
+        transaction=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which

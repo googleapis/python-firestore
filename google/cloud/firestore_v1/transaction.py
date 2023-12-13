@@ -61,11 +61,11 @@ class Transaction(batch.WriteBatch, BaseTransaction):
             :data:`False`.
     """
 
-    def __init__(self, client, max_attempts=MAX_ATTEMPTS, read_only=False) -> None:
+    def __init__(self, client, max_attempts=MAX_ATTEMPTS, read_only=False):
         super(Transaction, self).__init__(client)
         BaseTransaction.__init__(self, max_attempts, read_only)
 
-    def _add_write_pbs(self, write_pbs: list) -> None:
+    def _add_write_pbs(self, write_pbs):
         """Add `Write`` protobufs to this transaction.
 
         Args:
@@ -80,7 +80,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
 
         super(Transaction, self)._add_write_pbs(write_pbs)
 
-    def _begin(self, retry_id: bytes = None) -> None:
+    def _begin(self, retry_id=None):
         """Begin the transaction.
 
         Args:
@@ -103,7 +103,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         )
         self._id = transaction_response.transaction
 
-    def _rollback(self) -> None:
+    def _rollback(self):
         """Roll back the transaction.
 
         Raises:
@@ -126,7 +126,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
             # clean up, even if rollback fails
             self._clean_up()
 
-    def _commit(self) -> list:
+    def _commit(self):
         """Transactionally commit the changes accumulated.
 
         Returns:
@@ -148,10 +148,10 @@ class Transaction(batch.WriteBatch, BaseTransaction):
 
     def get_all(
         self,
-        references: list,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Generator[DocumentSnapshot, Any, None]:
+        references,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Retrieves multiple documents from Firestore.
 
         Args:
@@ -172,9 +172,9 @@ class Transaction(batch.WriteBatch, BaseTransaction):
     def get(
         self,
         ref_or_query,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Generator[DocumentSnapshot, Any, None]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Retrieve a document or a query result from the database.
 
         Args:
@@ -210,10 +210,10 @@ class _Transactional(_BaseTransactional):
             A callable that should be run (and retried) in a transaction.
     """
 
-    def __init__(self, to_wrap) -> None:
+    def __init__(self, to_wrap):
         super(_Transactional, self).__init__(to_wrap)
 
-    def _pre_commit(self, transaction: Transaction, *args, **kwargs) -> Any:
+    def _pre_commit(self, transaction, *args, **kwargs):
         """Begin transaction and call the wrapped callable.
 
         Args:
@@ -241,7 +241,7 @@ class _Transactional(_BaseTransactional):
             self.retry_id = self.current_id
         return self.to_wrap(transaction, *args, **kwargs)
 
-    def __call__(self, transaction: Transaction, *args, **kwargs):
+    def __call__(self, transaction, *args, **kwargs):
         """Execute the wrapped callable within a transaction.
 
         Args:
@@ -291,7 +291,7 @@ class _Transactional(_BaseTransactional):
             raise
 
 
-def transactional(to_wrap: Callable) -> _Transactional:
+def transactional(to_wrap):
     """Decorate a callable so that it runs in a transaction.
 
     Args:
@@ -306,9 +306,7 @@ def transactional(to_wrap: Callable) -> _Transactional:
     return _Transactional(to_wrap)
 
 
-def _commit_with_retry(
-    client, write_pbs: list, transaction_id: bytes
-) -> CommitResponse:
+def _commit_with_retry(client, write_pbs, transaction_id):
     """Call ``Commit`` on the GAPIC client with retry / sleep.
 
     Retries the ``Commit`` RPC on Unavailable. Usually this RPC-level
@@ -351,9 +349,7 @@ def _commit_with_retry(
         current_sleep = _sleep(current_sleep)
 
 
-def _sleep(
-    current_sleep: float, max_sleep: float = _MAX_SLEEP, multiplier: float = _MULTIPLIER
-) -> float:
+def _sleep(current_sleep, max_sleep=_MAX_SLEEP, multiplier=_MULTIPLIER):
     """Sleep and produce a new sleep time.
 
     .. _Exponential Backoff And Jitter: https://www.awsarchitectureblog.com/\

@@ -116,7 +116,7 @@ class AsyncQuery(BaseQuery):
         end_at=None,
         all_descendants=False,
         recursive=False,
-    ) -> None:
+    ):
         super(AsyncQuery, self).__init__(
             parent=parent,
             projection=projection,
@@ -131,18 +131,16 @@ class AsyncQuery(BaseQuery):
             recursive=recursive,
         )
 
-    async def _chunkify(
-        self, chunk_size: int
-    ) -> AsyncGenerator[List[DocumentSnapshot], None]:
-        max_to_return: Optional[int] = self._limit
-        num_returned: int = 0
-        original: AsyncQuery = self._copy()
-        last_document: Optional[DocumentSnapshot] = None
+    async def _chunkify(self, chunk_size):
+        max_to_return = self._limit
+        num_returned = 0
+        original = self._copy()
+        last_document = None
 
         while True:
             # Optionally trim the `chunk_size` down to honor a previously
             # applied limit as set by `self.limit()`
-            _chunk_size: int = original._resolve_chunk_size(num_returned, chunk_size)
+            _chunk_size = original._resolve_chunk_size(num_returned, chunk_size)
 
             # Apply the optionally pruned limit and the cursor, if we are past
             # the first page.
@@ -171,10 +169,10 @@ class AsyncQuery(BaseQuery):
 
     async def get(
         self,
-        transaction: Transaction = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> list:
+        transaction=None,
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -217,9 +215,7 @@ class AsyncQuery(BaseQuery):
 
         return result
 
-    def count(
-        self, alias: str | None = None
-    ) -> Type["firestore_v1.async_aggregation.AsyncAggregationQuery"]:
+    def count(self, alias=None):
         """Adds a count over the nested query.
 
         Args:
@@ -232,9 +228,7 @@ class AsyncQuery(BaseQuery):
         """
         return AsyncAggregationQuery(self).count(alias=alias)
 
-    def sum(
-        self, field_ref: str | FieldPath, alias: str | None = None
-    ) -> Type["firestore_v1.async_aggregation.AsyncAggregationQuery"]:
+    def sum(self, field_ref, alias=None):
         """Adds a sum over the nested query.
 
         Args:
@@ -248,9 +242,7 @@ class AsyncQuery(BaseQuery):
         """
         return AsyncAggregationQuery(self).sum(field_ref, alias=alias)
 
-    def avg(
-        self, field_ref: str | FieldPath, alias: str | None = None
-    ) -> Type["firestore_v1.async_aggregation.AsyncAggregationQuery"]:
+    def avg(self, field_ref, alias=None):
         """Adds an avg over the nested query.
 
         Args:
@@ -267,9 +259,9 @@ class AsyncQuery(BaseQuery):
     async def stream(
         self,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -325,9 +317,7 @@ class AsyncQuery(BaseQuery):
                 yield snapshot
 
     @staticmethod
-    def _get_collection_reference_class() -> (
-        Type["firestore_v1.async_collection.AsyncCollectionReference"]
-    ):
+    def _get_collection_reference_class():
         from google.cloud.firestore_v1.async_collection import AsyncCollectionReference
 
         return AsyncCollectionReference
@@ -358,7 +348,7 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
         end_at=None,
         all_descendants=True,
         recursive=False,
-    ) -> None:
+    ):
         super(AsyncCollectionGroup, self).__init__(
             parent=parent,
             projection=projection,
@@ -380,9 +370,9 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
     async def get_partitions(
         self,
         partition_count,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> AsyncGenerator[QueryPartition, None]:
+        retry=gapic_v1.method.DEFAULT,
+        timeout=None,
+    ):
         """Partition a query for parallelization.
 
         Partitions a query by returning partition cursors that can be used to run the
