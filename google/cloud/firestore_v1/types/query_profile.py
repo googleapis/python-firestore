@@ -23,11 +23,11 @@ from google.protobuf import struct_pb2  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.firestore.v1',
+    package="google.firestore.v1",
     manifest={
-        'QueryMode',
-        'QueryPlan',
-        'ResultSetStats',
+        "QueryMode",
+        "QueryPlan",
+        "ResultSetStats",
     },
 )
 
@@ -89,10 +89,10 @@ class ResultSetStats(proto.Message):
             "100.7 msecs" }
     """
 
-    query_plan: 'QueryPlan' = proto.Field(
+    query_plan: "QueryPlan" = proto.Field(
         proto.MESSAGE,
         number=1,
-        message='QueryPlan',
+        message="QueryPlan",
     )
     query_stats: struct_pb2.Struct = proto.Field(
         proto.MESSAGE,
