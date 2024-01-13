@@ -484,8 +484,8 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         only supports listing fields that have been explicitly
         overridden. To issue this query, call
         [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
-        with the filter set to
-        ``indexConfig.usesAncestorConfig:false or``\ ttlConfig:*`.
+        with the filter set to ``indexConfig.usesAncestorConfig:false``
+        or ``ttlConfig:*``.
 
         Returns:
             Callable[[~.ListFieldsRequest],
