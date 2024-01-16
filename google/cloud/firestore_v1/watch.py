@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import asyncio
 import collections
 from enum import Enum
 import functools
@@ -22,6 +22,7 @@ from google.api_core.bidi import ResumableBidiRpc
 from google.api_core.bidi import BackgroundConsumer
 from google.api_core import exceptions
 import grpc  # type: ignore
+import asyncio
 
 from google.cloud.firestore_v1.types.firestore import ListenRequest
 from google.cloud.firestore_v1.types.firestore import Target
@@ -556,8 +557,7 @@ class Watch(object):
             # on insert. For now, we sort here.
             key = functools.cmp_to_key(self._comparator)
             keys = sorted(updated_tree.keys(), key=key)
-
-            self._snapshot_callback(keys, appliedChanges, read_time)
+            asyncio.run(self._snapshot_callback(keys, appliedChanges, read_time))
             self.has_pushed = True
 
         self.doc_tree = updated_tree
