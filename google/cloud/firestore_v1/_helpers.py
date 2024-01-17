@@ -26,6 +26,7 @@ import grpc  # type: ignore
 
 from google.cloud import exceptions  # type: ignore
 from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
+from google.cloud.firestore_v1.types.vector import Vector
 from google.cloud.firestore_v1.types.write import DocumentTransform
 from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1 import types
@@ -208,6 +209,11 @@ def encode_value(value) -> types.document.Value:
         value_list = tuple(encode_value(element) for element in value)
         value_pb = document.ArrayValue(values=value_list)
         return document.Value(array_value=value_pb)
+
+    if isinstance(value, Vector):
+        value_dict = encode_dict(value.to_map_value())
+        value_pb = document.MapValue(fields=value_dict)
+        return document.Value(map_value=value_pb)
 
     if isinstance(value, dict):
         value_dict = encode_dict(value)
