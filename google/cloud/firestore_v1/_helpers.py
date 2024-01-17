@@ -211,9 +211,7 @@ def encode_value(value) -> types.document.Value:
         return document.Value(array_value=value_pb)
 
     if isinstance(value, Vector):
-        value_dict = encode_dict(value.to_map_value())
-        value_pb = document.MapValue(fields=value_dict)
-        return document.Value(map_value=value_pb)
+        return encode_value(value.to_map_value())
 
     if isinstance(value, dict):
         value_dict = encode_dict(value)

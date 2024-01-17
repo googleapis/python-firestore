@@ -14,9 +14,11 @@
 # limitations under the License.
 
 import mock
+import google.auth.credentials
 
 from google.api_core import gapic_v1
-
+from google.cloud.firestore_v1.client import Client
+from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.types.vector import Vector
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
@@ -24,24 +26,6 @@ from google.cloud.firestore_v1.types import write
 from google.cloud.firestore_v1 import _helpers
 
 from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT
-
-
-def _make_document_reference(*args, **kwargs):
-    from google.cloud.firestore_v1.document import DocumentReference
-
-    return DocumentReference(*args, **kwargs)
-
-def _make_credentials():
-    import google.auth.credentials
-
-    return mock.Mock(spec=google.auth.credentials.Credentials)
-
-
-def _make_client(project=DEFAULT_TEST_PROJECT, database=None):
-    from google.cloud.firestore_v1.client import Client
-
-    credentials = _make_credentials()
-    return Client(project=project, credentials=credentials, database=database)
 
 
 def _make_commit_repsonse(write_results=None):
@@ -52,6 +36,13 @@ def _make_commit_repsonse(write_results=None):
     response.commit_time = mock.sentinel.commit_time
     return response
 
+
+def test_vector_type():
+    vector = Vector([1.0, 2.0, 3.0])
+    assert vector.to_map_value() == {
+        "__type__": "__vector__",
+        "value": [1.0, 2.0, 3.0]
+    }
 
 def test_vector():
     vector = Vector([1.0, 2.0, 3.0])
@@ -66,11 +57,11 @@ def test_vector():
     firestore_api.commit.return_value = _make_commit_repsonse()
 
     # Attach the fake GAPIC to a real client.
-    client = _make_client("dignity", database=None)
+    client = Client(project="dignity", credentials=mock.Mock(spec=google.auth.credentials.Credentials), database=None)
     client._firestore_api_internal = firestore_api
 
     # Actually make a document and call create().
-    mocked_document = _make_document_reference("foo", "twelve", client=client)
+    mocked_document = DocumentReference("foo", "twelve", client=client)
     document_data = {"hello": "goodbye", "embedding": vector}
     write_result = mocked_document.create(document_data)
 
