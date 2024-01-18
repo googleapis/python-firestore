@@ -557,7 +557,10 @@ class Watch(object):
             # on insert. For now, we sort here.
             key = functools.cmp_to_key(self._comparator)
             keys = sorted(updated_tree.keys(), key=key)
-            asyncio.run(self._snapshot_callback(keys, appliedChanges, read_time))
+            if asyncio.iscoroutinefunction(self._snapshot_callback):
+                asyncio.run(self._snapshot_callback(keys, appliedChanges, read_time))
+            else:
+                self._snapshot_callback(keys, appliedChanges, read_time)
             self.has_pushed = True
 
         self.doc_tree = updated_tree
