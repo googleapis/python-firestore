@@ -1,0 +1,2 @@
+recursive-include google/cloud/bundle *.py
+recursive-include google/cloud/bundle *.py
