@@ -33,21 +33,37 @@ from google.cloud.firestore_v1.base_query import FieldFilter, And, Or
 from time import sleep
 from typing import Callable, Dict, List, Optional
 
-from tests.system.test__helpers import (
-    FIRESTORE_CREDS,
-    FIRESTORE_PROJECT,
-    RANDOM_ID_REGEX,
-    MISSING_DOCUMENT,
-    UNIQUE_RESOURCE_ID,
-    EMULATOR_CREDS,
-    FIRESTORE_EMULATOR,
-    FIRESTORE_OTHER_DB,
-)
+# from tests.system.test__helpers import (
+#     FIRESTORE_CREDS,
+#     FIRESTORE_PROJECT,
+#     RANDOM_ID_REGEX,
+#     MISSING_DOCUMENT,
+#     UNIQUE_RESOURCE_ID,
+#     EMULATOR_CREDS,
+#     FIRESTORE_EMULATOR,
+#     FIRESTORE_OTHER_DB,
+# )
+
+import os
+import re
+from google.cloud.firestore_v1.base_client import _FIRESTORE_EMULATOR_HOST
+# from test_utils.system import unique_resource_id
+# from test_utils.system import EmulatorCreds
+FIRESTORE_CREDS = os.environ.get("FIRESTORE_APPLICATION_CREDENTIALS")
+FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
+RANDOM_ID_REGEX = re.compile("^[a-zA-Z0-9]{20}$")
+MISSING_DOCUMENT = "No document to update: "
+DOCUMENT_EXISTS = "Document already exists: "
+UNIQUE_RESOURCE_ID = "123"
+# UNIQUE_RESOURCE_ID = unique_resource_id("-")
+# EMULATOR_CREDS = EmulatorCreds()
+FIRESTORE_EMULATOR = os.environ.get(_FIRESTORE_EMULATOR_HOST) is not None
+FIRESTORE_OTHER_DB = os.environ.get("SYSTEM_TESTS_DATABASE", "system-tests-named-db")
 
 
 def _get_credentials_and_project():
     if FIRESTORE_EMULATOR:
-        credentials = EMULATOR_CREDS
+        credentials = "123"
         project = FIRESTORE_PROJECT
     elif FIRESTORE_CREDS:
         credentials = service_account.Credentials.from_service_account_file(
