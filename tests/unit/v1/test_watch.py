@@ -178,15 +178,19 @@ def _make_watch_no_mocks(
     if snapshots is None:
         snapshots = []
 
-    def snapshot_callback(*args):
+    def default_callback(*args):
         snapshots.append(args)
+
+    snapshot_callback = default_callback
+    if custom_callback is not None:
+        snapshot_callback = custom_callback
 
     return Watch(
         document_reference=DummyDocumentReference(),
         firestore=DummyFirestore(),
         target=target,
         comparator=comparator,
-        snapshot_callback=custom_callback,
+        snapshot_callback=snapshot_callback,
         document_snapshot_cls=DummyDocumentSnapshot,
     )
 
