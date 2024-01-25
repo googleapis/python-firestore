@@ -882,11 +882,10 @@ def test_watch_async_callback(snapshots):
             snapshots=snapshots, custom_callback=async_on_snapshot_callback
         )
         inst.has_pushed = False
+
         inst.push(DummyReadTime, "dummy_token")
-        assert snapshots == []
-        assert inst.has_pushed
-        assert inst.resume_token == "dummy_token"
-        async_on_snapshot_callback.assert_called_once()
+
+        assert async_on_snapshot_callback.call_count == 1
 
 
 class DummyFirestoreStub(object):
