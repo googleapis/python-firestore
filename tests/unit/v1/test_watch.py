@@ -13,9 +13,12 @@
 # limitations under the License.
 
 import datetime
+from typing import Callable
 
 import mock
 import pytest
+
+from tests.unit.v1.test__helpers import AsyncMock
 
 
 def _make_watch_doc_tree(*args, **kwargs):
@@ -165,6 +168,7 @@ def _document_watch_comparator(doc1, doc2):  # pragma: NO COVER
 def _make_watch_no_mocks(
     snapshots=None,
     comparator=_document_watch_comparator,
+    custom_callback: Callable = None,
 ):
     from google.cloud.firestore_v1.watch import Watch
 
@@ -182,15 +186,19 @@ def _make_watch_no_mocks(
         firestore=DummyFirestore(),
         target=target,
         comparator=comparator,
-        snapshot_callback=snapshot_callback,
+        snapshot_callback=custom_callback,
         document_snapshot_cls=DummyDocumentSnapshot,
     )
 
 
-def _make_watch(snapshots=None, comparator=_document_watch_comparator):
+def _make_watch(
+    snapshots=None,
+    comparator=_document_watch_comparator,
+    custom_callback: Callable = None,
+):
     with mock.patch("google.cloud.firestore_v1.watch.ResumableBidiRpc"):
         with mock.patch("google.cloud.firestore_v1.watch.BackgroundConsumer"):
-            return _make_watch_no_mocks(snapshots, comparator)
+            return _make_watch_no_mocks(snapshots, comparator, custom_callback)
 
 
 def test_watch_ctor():
@@ -860,6 +868,25 @@ def test_watch_resume_token_sent_on_recovery():
     inst.resume_token = b"ABCD0123"
     request = inst._get_rpc_request()
     assert request.add_target.resume_token == b"ABCD0123"
+
+
+def test_watch_async_callback(snapshots):
+    class DummyReadTime(object):
+        seconds = 1534858278
+
+    with mock.patch("asyncio.iscoroutinefunction") as is_coroutine_fn:
+        # NOTE: Make sure that asyncio recognize this as a coroutine
+        is_coroutine_fn.return_value = True
+        async_on_snapshot_callback = AsyncMock(return_value=None)
+        inst = _make_watch(
+            snapshots=snapshots, custom_callback=async_on_snapshot_callback
+        )
+        inst.has_pushed = False
+        inst.push(DummyReadTime, "dummy_token")
+        assert snapshots == []
+        assert inst.has_pushed
+        assert inst.resume_token == "dummy_token"
+        async_on_snapshot_callback.assert_called_once()
 
 
 class DummyFirestoreStub(object):
