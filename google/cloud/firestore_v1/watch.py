@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import asyncio
 import collections
 from enum import Enum
 import functools
@@ -182,7 +181,7 @@ class Watch(object):
             firestore:
             target:
             comparator:
-            snapshot_callback: Callback method to process snapshots.
+            snapshot_callback: Sync/Async Callback method to process snapshots.
                 Args:
                     docs (List(DocumentSnapshot)): A callback that returns the
                         ordered list of documents stored in this snapshot.
