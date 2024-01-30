@@ -25,6 +25,13 @@ class Vector():
     def __init__(self, value: list[float]):
         self.value = value
 
+    def __eq__(self, other: 'Vector') -> bool:
+        if not isinstance(other, Vector):
+            # don't attempt to compare against unrelated types
+            return NotImplemented
+
+        return self.value == other.value
+
     def to_map_value(self):
         return {
             "__type__": "__vector__",

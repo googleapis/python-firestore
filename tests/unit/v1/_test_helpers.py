@@ -102,6 +102,11 @@ def make_aggregation_query_response(aggregations, read_time=None, transaction=No
 
     return firestore.RunAggregationQueryResponse(**kwargs)
 
+def make_vector_query(*args, **kw):
+    from google.cloud.firestore_v1.vector_query import VectorQuery
+
+    return VectorQuery(*args, **kw)
+
 
 def build_test_timestamp(
     year: int = 2021,

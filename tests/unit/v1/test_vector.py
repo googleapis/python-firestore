@@ -19,7 +19,7 @@ import google.auth.credentials
 from google.api_core import gapic_v1
 from google.cloud.firestore_v1.client import Client
 from google.cloud.firestore_v1.document import DocumentReference
-from google.cloud.firestore_v1.types.vector import Vector
+from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import write

@@ -26,7 +26,7 @@ import grpc  # type: ignore
 
 from google.cloud import exceptions  # type: ignore
 from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
-from google.cloud.firestore_v1.types.vector import Vector
+from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.types.write import DocumentTransform
 from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1 import types
@@ -386,7 +386,7 @@ def decode_value(
         raise ValueError("Unknown ``value_type``", value_type)
 
 
-def decode_dict(value_fields, client) -> dict:
+def decode_dict(value_fields, client) -> dict | Vector:
     """Converts a protobuf map of Firestore ``Value``-s.
 
     Args:
@@ -401,8 +401,16 @@ def decode_dict(value_fields, client) -> dict:
         of native Python values converted from the ``value_fields``.
     """
     value_fields_pb = getattr(value_fields, "_pb", value_fields)
+    res = {}
 
-    return {key: decode_value(value, client) for key, value in value_fields_pb.items()}
+    for key, value in value_fields_pb.items():
+        res[key] = decode_value(value, client)
+
+    if len(res) == 2 and '__type__' in res:
+        if res['__type__'] == '__vector__':
+            return Vector(res['value'])
+
+    return res
 
 
 def get_doc_id(document_pb, expected_prefix) -> str:

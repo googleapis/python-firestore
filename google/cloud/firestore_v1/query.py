@@ -34,6 +34,9 @@ from google.cloud.firestore_v1.base_query import (
     _collection_group_query_response_to_snapshot,
     _enum_from_direction,
 )
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+from google.cloud.firestore_v1.vector_query import VectorQuery
+from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1 import aggregation
 
 from google.cloud.firestore_v1 import document
@@ -238,6 +241,26 @@ class Query(BaseQuery):
             return retry._predicate(exc)
 
         return False
+
+    def find_nearest(
+        self, 
+        vector_field: str, 
+        query_vector: Vector, 
+        limit: int,
+        distance_measure: DistanceMeasure
+    ) -> Type["firestore_v1.vector_query.VectorQuery"]:
+        """
+        Adds a count over the query.
+
+        :type alias: Optional[str]
+        :param alias: Optional name of the field to store the result of the aggregation into.
+            If not provided, Firestore will pick a default name following the format field_<incremental_id++>.
+        """
+        return VectorQuery(self).find_nearest(
+            vector_field=vector_field, 
+            query_vector=query_vector, 
+            limit=limit, 
+            distance_measure=distance_measure)
 
     def count(
         self, alias: str | None = None

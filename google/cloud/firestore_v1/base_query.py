@@ -33,6 +33,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1 import field_path as field_path_module
 from google.cloud.firestore_v1 import transforms
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.types import StructuredQuery
 from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.types import Cursor
@@ -971,6 +972,15 @@ class BaseQuery(object):
         if self._limit is not None:
             query_kwargs["limit"] = wrappers_pb2.Int32Value(value=self._limit)
         return query.StructuredQuery(**query_kwargs)
+
+    def find_nearest(
+        self, 
+        vector_field: str, 
+        queryVector: Vector, 
+        limit: int,
+        distance_measure: DistanceMeasure
+    ) -> Type["firestore_v1.base_vector_query.BaseVectorQuery"]:
+        raise NotImplementedError
 
     def count(
         self, alias: str | None = None
