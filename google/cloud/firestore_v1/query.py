@@ -250,11 +250,6 @@ class Query(BaseQuery):
         distance_measure: DistanceMeasure
     ) -> Type["firestore_v1.vector_query.VectorQuery"]:
         """
-        Adds a count over the query.
-
-        :type alias: Optional[str]
-        :param alias: Optional name of the field to store the result of the aggregation into.
-            If not provided, Firestore will pick a default name following the format field_<incremental_id++>.
         """
         return VectorQuery(self).find_nearest(
             vector_field=vector_field, 
