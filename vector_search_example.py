@@ -15,7 +15,7 @@ db = firestore.Client(
 )
 
 """
-Crete the single-field index before runing the vector search.
+Crete the single-field index to run the vector search without a pre-filter.
 $ gcloud alpha firestore indexes composite create 
   --collection-group="cccc"  
   --query-scope=COLLECTION 
@@ -46,7 +46,7 @@ for doc in docs:
 
 
 """
-Crete the single-field index before runing the vector search.
+Crete a composite index to run the vector search with a pre-filter.
 $ gcloud alpha firestore indexes composite create 
   --collection-group="cccc"  
   --query-scope=COLLECTION 
