@@ -118,8 +118,6 @@ def test_client_constructor_emulator(extra_env, project_expected):
 
     If project is not set, should be detected from GCLOUD_PROJECT or GOOGLE_CLOUD_PROJECT
     """
-    from google.cloud.firestore_v1.client import _CLIENT_INFO
-
     expected_host = "localhost:8080"
     environment = {"FIRESTORE_EMULATOR_HOST": expected_host}
     if extra_env:
