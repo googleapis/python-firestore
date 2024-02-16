@@ -132,7 +132,11 @@ class BaseClient(ClientWithProject):
                 credentials = AnonymousCredentials()
             if project is None:
                 # extract project from env var, or use system default
-                project = os.getenv("GCLOUD_PROJECT", _DEFAULT_EMULATOR_PROJECT)
+                project = (
+                    os.getenv("GOOGLE_CLOUD_PROJECT")
+                    or os.getenv("GCLOUD_PROJECT")
+                    or _DEFAULT_EMULATOR_PROJECT
+                )
 
         super(BaseClient, self).__init__(
             project=project,
