@@ -360,7 +360,7 @@ def test__validate_universe_domain(client_class, transport_class, transport_name
     google_auth_major, google_auth_minor = [
         int(part) for part in google.auth.__version__.split(".")[0:2]
     ]
-    if google_auth_major > 2 or (google_auth_major == 2 and google_auth_minor >= 23):
+    if google_auth_major > 2 or (google_auth_major == 2 and google_auth_minor >= 23):  # pragma: no cover
         credentials = ga_credentials.AnonymousCredentials()
         credentials._universe_domain = "foo.com"
         # Test the case when there is a universe mismatch from the credentials.
