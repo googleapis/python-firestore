@@ -325,7 +325,9 @@ def test__get_universe_domain():
         (FirestoreAdminClient, transports.FirestoreAdminRestTransport, "rest"),
     ],
 )
-def test__validate_universe_domain(client_class, transport_class, transport_name):  # pragma: no cover
+def test__validate_universe_domain(
+    client_class, transport_class, transport_name
+):  # pragma: no cover
     client = client_class(
         transport=transport_class(credentials=ga_credentials.AnonymousCredentials())
     )
