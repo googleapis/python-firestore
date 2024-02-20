@@ -325,9 +325,7 @@ def test__get_universe_domain():
         (FirestoreAdminClient, transports.FirestoreAdminRestTransport, "rest"),
     ],
 )
-def test__validate_universe_domain(
-    client_class, transport_class, transport_name
-):  # pragma: no cover
+def test__validate_universe_domain(client_class, transport_class, transport_name):
     client = client_class(
         transport=transport_class(credentials=ga_credentials.AnonymousCredentials())
     )
@@ -362,7 +360,7 @@ def test__validate_universe_domain(
     google_auth_major, google_auth_minor = [
         int(part) for part in google.auth.__version__.split(".")[0:2]
     ]
-    if google_auth_major > 2 or (google_auth_major == 2 and google_auth_minor >= 23):
+    if google_auth_major > 2 or (google_auth_major == 2 and google_auth_minor >= 23):  # pragma: NO COVER
         credentials = ga_credentials.AnonymousCredentials()
         credentials._universe_domain = "foo.com"
         # Test the case when there is a universe mismatch from the credentials.
