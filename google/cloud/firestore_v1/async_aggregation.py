@@ -23,9 +23,9 @@ from __future__ import annotations
 from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
 
-from typing import List, Union, AsyncGenerator
+from typing import List, Union, AsyncGenerator, Optional
 
-
+from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 from google.cloud.firestore_v1.base_aggregation import (
     AggregationResult,
     _query_response_to_result,
@@ -44,7 +44,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
 
     async def get(
         self,
-        transaction=None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: Union[
             retries.AsyncRetry, None, gapic_v1.method._MethodDefault
         ] = gapic_v1.method.DEFAULT,
@@ -78,7 +78,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
 
     async def stream(
         self,
-        transaction=None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: Union[
             retries.AsyncRetry, None, gapic_v1.method._MethodDefault
         ] = gapic_v1.method.DEFAULT,

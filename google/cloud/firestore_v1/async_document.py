@@ -26,9 +26,10 @@ from google.cloud.firestore_v1.base_document import (
     _first_write_result,
 )
 from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 from google.cloud.firestore_v1.types import write
 from google.protobuf.timestamp_pb2 import Timestamp
-from typing import AsyncGenerator, Iterable
+from typing import AsyncGenerator, Iterable, Optional
 
 
 logger = logging.getLogger(__name__)
@@ -66,7 +67,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         self,
         document_data: dict,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> write.WriteResult:
         """Create the current document in the Firestore database.
 
@@ -96,7 +97,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         document_data: dict,
         merge: bool = False,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> write.WriteResult:
         """Replace the current document in the Firestore database.
 
@@ -134,9 +135,9 @@ class AsyncDocumentReference(BaseDocumentReference):
     async def update(
         self,
         field_updates: dict,
-        option: _helpers.WriteOption = None,
+        option: Optional[_helpers.WriteOption] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> write.WriteResult:
         """Update an existing document in the Firestore database.
 
@@ -291,9 +292,9 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def delete(
         self,
-        option: _helpers.WriteOption = None,
+        option: Optional[_helpers.WriteOption] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> Timestamp:
         """Delete the current document in the Firestore database.
 
@@ -325,10 +326,10 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def get(
         self,
-        field_paths: Iterable[str] = None,
-        transaction=None,
+        field_paths: Optional[Iterable[str]] = None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
@@ -394,9 +395,9 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def collections(
         self,
-        page_size: int = None,
+        page_size: Optional[int] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> AsyncGenerator:
         """List subcollections of the current document.
 

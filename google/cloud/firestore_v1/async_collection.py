@@ -22,14 +22,13 @@ from google.cloud.firestore_v1.base_collection import (
     _item_to_document_ref,
 )
 from google.cloud.firestore_v1 import async_query, async_document, async_aggregation
+from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+from google.protobuf.timestamp_pb2 import Timestamp
 
 from google.cloud.firestore_v1.document import DocumentReference
 
 from typing import AsyncIterator
-from typing import Any, AsyncGenerator, Tuple
-
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.transaction import Transaction
+from typing import AsyncGenerator, Tuple, Optional
 
 
 class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
@@ -84,10 +83,10 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
     async def add(
         self,
         document_data: dict,
-        document_id: str = None,
+        document_id: Optional[str] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Tuple[Any, Any]:
+        timeout: Optional[float] = None,
+    ) -> Tuple[Timestamp, async_document.AsyncDocumentReference]:
         """Create a document in the Firestore database with the provided data.
 
         Args:
@@ -125,7 +124,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         return write_result.update_time, document_ref
 
     def document(
-        self, document_id: str = None
+        self, document_id: Optional[str] = None
     ) -> async_document.AsyncDocumentReference:
         """Create a sub-document underneath the current collection.
 
@@ -143,9 +142,9 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
 
     async def list_documents(
         self,
-        page_size: int = None,
+        page_size: Optional[int] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> AsyncGenerator[DocumentReference, None]:
         """List all subdocuments of the current collection.
 
@@ -176,9 +175,9 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
 
     async def get(
         self,
-        transaction: Transaction = None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> list:
         """Read the documents in this collection.
 
@@ -207,9 +206,9 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
 
     async def stream(
         self,
-        transaction: Transaction = None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> AsyncIterator[async_document.DocumentSnapshot]:
         """Read the documents in this collection.
 
