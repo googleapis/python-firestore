@@ -10,7 +10,7 @@ API Reference
 
   firestore_admin_v1/admin_client
 
-  firestore_bundles/bundles
+  firestore_bundle/bundles
 
   firestore_v1/aggregation
   firestore_v1/batch
