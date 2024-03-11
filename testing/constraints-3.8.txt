@@ -1,1 +1,1 @@
-google-auth==2.14.1
+google-api-core==2.15.0
