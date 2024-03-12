@@ -24,12 +24,12 @@ from google.protobuf import struct_pb2  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.firestore.v1',
+    package="google.firestore.v1",
     manifest={
-        'ExplainOptions',
-        'ExplainMetrics',
-        'PlanSummary',
-        'ExecutionStats',
+        "ExplainOptions",
+        "ExplainMetrics",
+        "PlanSummary",
+        "ExecutionStats",
     },
 )
 
@@ -69,15 +69,15 @@ class ExplainMetrics(proto.Message):
             is set to true.
     """
 
-    plan_summary: 'PlanSummary' = proto.Field(
+    plan_summary: "PlanSummary" = proto.Field(
         proto.MESSAGE,
         number=1,
-        message='PlanSummary',
+        message="PlanSummary",
     )
-    execution_stats: 'ExecutionStats' = proto.Field(
+    execution_stats: "ExecutionStats" = proto.Field(
         proto.MESSAGE,
         number=2,
-        message='ExecutionStats',
+        message="ExecutionStats",
     )
 
 
