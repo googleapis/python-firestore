@@ -25,11 +25,11 @@ from google.type import dayofweek_pb2  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.firestore.admin.v1',
+    package="google.firestore.admin.v1",
     manifest={
-        'BackupSchedule',
-        'DailyRecurrence',
-        'WeeklyRecurrence',
+        "BackupSchedule",
+        "DailyRecurrence",
+        "WeeklyRecurrence",
     },
 )
 
@@ -102,17 +102,17 @@ class BackupSchedule(proto.Message):
         number=6,
         message=duration_pb2.Duration,
     )
-    daily_recurrence: 'DailyRecurrence' = proto.Field(
+    daily_recurrence: "DailyRecurrence" = proto.Field(
         proto.MESSAGE,
         number=7,
-        oneof='recurrence',
-        message='DailyRecurrence',
+        oneof="recurrence",
+        message="DailyRecurrence",
     )
-    weekly_recurrence: 'WeeklyRecurrence' = proto.Field(
+    weekly_recurrence: "WeeklyRecurrence" = proto.Field(
         proto.MESSAGE,
         number=8,
-        oneof='recurrence',
-        message='WeeklyRecurrence',
+        oneof="recurrence",
+        message="WeeklyRecurrence",
     )
 
 
