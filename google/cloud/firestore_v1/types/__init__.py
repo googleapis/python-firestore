@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -67,6 +67,12 @@ from .query import (
     StructuredAggregationQuery,
     StructuredQuery,
 )
+from .query_profile import (
+    ExecutionStats,
+    ExplainMetrics,
+    ExplainOptions,
+    PlanSummary,
+)
 from .write import (
     DocumentChange,
     DocumentDelete,
@@ -120,6 +126,10 @@ __all__ = (
     "Cursor",
     "StructuredAggregationQuery",
     "StructuredQuery",
+    "ExecutionStats",
+    "ExplainMetrics",
+    "ExplainOptions",
+    "PlanSummary",
     "DocumentChange",
     "DocumentDelete",
     "DocumentRemove",

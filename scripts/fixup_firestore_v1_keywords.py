@@ -1,6 +1,6 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,8 +57,8 @@ class firestoreCallTransformer(cst.CSTTransformer):
         'listen': ('database', 'add_target', 'remove_target', 'labels', ),
         'partition_query': ('parent', 'structured_query', 'partition_count', 'page_token', 'page_size', 'read_time', ),
         'rollback': ('database', 'transaction', ),
-        'run_aggregation_query': ('parent', 'structured_aggregation_query', 'transaction', 'new_transaction', 'read_time', ),
-        'run_query': ('parent', 'structured_query', 'transaction', 'new_transaction', 'read_time', ),
+        'run_aggregation_query': ('parent', 'structured_aggregation_query', 'transaction', 'new_transaction', 'read_time', 'explain_options', ),
+        'run_query': ('parent', 'structured_query', 'transaction', 'new_transaction', 'read_time', 'explain_options', ),
         'update_document': ('document', 'update_mask', 'mask', 'current_document', ),
         'write': ('database', 'stream_id', 'writes', 'stream_token', 'labels', ),
     }
