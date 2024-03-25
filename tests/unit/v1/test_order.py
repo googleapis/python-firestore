@@ -33,7 +33,7 @@ def test_order_compare_across_heterogenous_values():
     float_nan = float("nan")
     inf = float("inf")
 
-    groups = [None] * 65
+    groups = [None] * 68
 
     groups[0] = [nullValue()]
 
@@ -123,12 +123,17 @@ def test_order_compare_across_heterogenous_values():
     groups[58] = [_array_value(["foo", 1])]
     groups[59] = [_array_value(["foo", "0"])]
 
+    # vectors
+    groups[60] = [_object_value({"__type__": "vector", "value": [3.0, 2.0]})]
+    groups[61] = [_object_value({"__type__": "vector", "value": [1.0, 2.0, 5.0]})]
+    groups[62] = [_object_value({"__type__": "vector", "value": [2.0, 2.0, 5.0]})]
+
     # objects
-    groups[60] = [_object_value({"bar": 0})]
-    groups[61] = [_object_value({"bar": 0, "foo": 1})]
-    groups[62] = [_object_value({"bar": 1})]
-    groups[63] = [_object_value({"bar": 2})]
-    groups[64] = [_object_value({"bar": "0"})]
+    groups[63] = [_object_value({"bar": 0})]
+    groups[64] = [_object_value({"bar": 0, "foo": 1})]
+    groups[65] = [_object_value({"bar": 1})]
+    groups[66] = [_object_value({"bar": 2})]
+    groups[67] = [_object_value({"bar": "0"})]
 
     target = _make_order()
 

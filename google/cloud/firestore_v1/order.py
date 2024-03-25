@@ -29,7 +29,8 @@ class TypeOrder(Enum):
     REF = 6
     GEO_POINT = 7
     ARRAY = 8
-    OBJECT = 9
+    VECTOR = 9
+    OBJECT = 10
 
     @staticmethod
     def from_value(value) -> Any:
@@ -51,6 +52,10 @@ class TypeOrder(Enum):
 
         if v not in lut:
             raise ValueError(f"Could not detect value type for {v}")
+
+        if v == "map_value":
+            if "__type__" in value.map_value.fields and value.map_value.fields["__type__"].string_value == "vector":
+                return TypeOrder.VECTOR
         return lut[v]
 
 
@@ -96,8 +101,10 @@ class Order(object):
             return cls.compare_geo_points(left, right)
         elif value_type == "array_value":
             return cls.compare_arrays(left, right)
-        elif value_type == "map_value":
+        elif leftType == TypeOrder.VECTOR.value:
             # ARRAYs < VECTORs < MAPs
+            return cls.compare_vectors(left, right)
+        elif value_type == "map_value":
             return cls.compare_objects(left, right)
         else:
             raise ValueError(f"Unknown ``value_type`` {value_type}")
@@ -165,6 +172,19 @@ class Order(object):
                 return cmp
 
         return Order._compare_to(len(l_values), len(r_values))
+
+    @staticmethod
+    def compare_vectors(left, right) -> int:
+        l_values = left.map_value.fields["value"]
+        r_values = right.map_value.fields["value"]
+
+        left_length = len(l_values.array_value.values)
+        right_length = len(r_values.array_value.values)
+
+        if left_length != right_length:
+            return Order._compare_to(left_length, right_length)
+
+        return Order.compare_arrays(l_values, r_values)
 
     @staticmethod
     def compare_objects(left, right) -> int:
