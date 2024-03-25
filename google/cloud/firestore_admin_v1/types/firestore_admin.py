@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,9 +19,11 @@ from typing import MutableMapping, MutableSequence
 
 import proto  # type: ignore
 
+from google.cloud.firestore_admin_v1.types import backup as gfa_backup
 from google.cloud.firestore_admin_v1.types import database as gfa_database
 from google.cloud.firestore_admin_v1.types import field as gfa_field
 from google.cloud.firestore_admin_v1.types import index as gfa_index
+from google.cloud.firestore_admin_v1.types import schedule
 from google.protobuf import field_mask_pb2  # type: ignore
 from google.protobuf import timestamp_pb2  # type: ignore
 
@@ -36,6 +38,14 @@ __protobuf__ = proto.module(
         "GetDatabaseRequest",
         "UpdateDatabaseRequest",
         "UpdateDatabaseMetadata",
+        "DeleteDatabaseRequest",
+        "DeleteDatabaseMetadata",
+        "CreateBackupScheduleRequest",
+        "GetBackupScheduleRequest",
+        "UpdateBackupScheduleRequest",
+        "ListBackupSchedulesRequest",
+        "ListBackupSchedulesResponse",
+        "DeleteBackupScheduleRequest",
         "CreateIndexRequest",
         "ListIndexesRequest",
         "ListIndexesResponse",
@@ -47,6 +57,11 @@ __protobuf__ = proto.module(
         "ListFieldsResponse",
         "ExportDocumentsRequest",
         "ImportDocumentsRequest",
+        "GetBackupRequest",
+        "ListBackupsRequest",
+        "ListBackupsResponse",
+        "DeleteBackupRequest",
+        "RestoreDatabaseRequest",
     },
 )
 
@@ -78,11 +93,15 @@ class CreateDatabaseRequest(proto.Message):
         database (google.cloud.firestore_admin_v1.types.Database):
             Required. The Database to create.
         database_id (str):
-            Required. The ID to use for the database,
-            which will become the final component of the
-            database's resource name.
+            Required. The ID to use for the database, which will become
+            the final component of the database's resource name.
 
-            The value must be set to "(default)".
+            This value should be 4-63 characters. Valid characters are
+            /[a-z][0-9]-/ with first character a letter and the last a
+            letter or a number. Must not be UUID-like
+            /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+
+            "(default)" database id is also valid.
     """
 
     parent: str = proto.Field(
@@ -110,12 +129,28 @@ class ListDatabasesResponse(proto.Message):
     Attributes:
         databases (MutableSequence[google.cloud.firestore_admin_v1.types.Database]):
             The databases in the project.
+        unreachable (MutableSequence[str]):
+            In the event that data about individual databases cannot be
+            listed they will be recorded here.
+
+            An example entry might be:
+            projects/some_project/locations/some_location This can
+            happen if the Cloud Region that the Database resides in is
+            currently unavailable. In this case we can't fetch all the
+            details about the database. You may be able to get a more
+            detailed error message (or possibly fetch the resource) by
+            sending a 'Get' request for the resource or a 'List' request
+            for the specific location.
     """
 
     databases: MutableSequence[gfa_database.Database] = proto.RepeatedField(
         proto.MESSAGE,
         number=1,
         message=gfa_database.Database,
+    )
+    unreachable: MutableSequence[str] = proto.RepeatedField(
+        proto.STRING,
+        number=3,
     )
 
 
@@ -160,6 +195,150 @@ class UpdateDatabaseRequest(proto.Message):
 
 class UpdateDatabaseMetadata(proto.Message):
     r"""Metadata related to the update database operation."""
+
+
+class DeleteDatabaseRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.DeleteDatabase][google.firestore.admin.v1.FirestoreAdmin.DeleteDatabase].
+
+    Attributes:
+        name (str):
+            Required. A name of the form
+            ``projects/{project_id}/databases/{database_id}``
+        etag (str):
+            The current etag of the Database. If an etag is provided and
+            does not match the current etag of the database, deletion
+            will be blocked and a FAILED_PRECONDITION error will be
+            returned.
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+    etag: str = proto.Field(
+        proto.STRING,
+        number=3,
+    )
+
+
+class DeleteDatabaseMetadata(proto.Message):
+    r"""Metadata related to the delete database operation."""
+
+
+class CreateBackupScheduleRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.CreateBackupSchedule][google.firestore.admin.v1.FirestoreAdmin.CreateBackupSchedule].
+
+    Attributes:
+        parent (str):
+            Required. The parent database.
+
+            Format ``projects/{project}/databases/{database}``
+        backup_schedule (google.cloud.firestore_admin_v1.types.BackupSchedule):
+            Required. The backup schedule to create.
+    """
+
+    parent: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+    backup_schedule: schedule.BackupSchedule = proto.Field(
+        proto.MESSAGE,
+        number=2,
+        message=schedule.BackupSchedule,
+    )
+
+
+class GetBackupScheduleRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.GetBackupSchedule][google.firestore.admin.v1.FirestoreAdmin.GetBackupSchedule].
+
+    Attributes:
+        name (str):
+            Required. The name of the backup schedule.
+
+            Format
+            ``projects/{project}/databases/{database}/backupSchedules/{backup_schedule}``
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class UpdateBackupScheduleRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.UpdateBackupSchedule][google.firestore.admin.v1.FirestoreAdmin.UpdateBackupSchedule].
+
+    Attributes:
+        backup_schedule (google.cloud.firestore_admin_v1.types.BackupSchedule):
+            Required. The backup schedule to update.
+        update_mask (google.protobuf.field_mask_pb2.FieldMask):
+            The list of fields to be updated.
+    """
+
+    backup_schedule: schedule.BackupSchedule = proto.Field(
+        proto.MESSAGE,
+        number=1,
+        message=schedule.BackupSchedule,
+    )
+    update_mask: field_mask_pb2.FieldMask = proto.Field(
+        proto.MESSAGE,
+        number=2,
+        message=field_mask_pb2.FieldMask,
+    )
+
+
+class ListBackupSchedulesRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.ListBackupSchedules][google.firestore.admin.v1.FirestoreAdmin.ListBackupSchedules].
+
+    Attributes:
+        parent (str):
+            Required. The parent database.
+
+            Format is ``projects/{project}/databases/{database}``.
+    """
+
+    parent: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class ListBackupSchedulesResponse(proto.Message):
+    r"""The response for
+    [FirestoreAdmin.ListBackupSchedules][google.firestore.admin.v1.FirestoreAdmin.ListBackupSchedules].
+
+    Attributes:
+        backup_schedules (MutableSequence[google.cloud.firestore_admin_v1.types.BackupSchedule]):
+            List of all backup schedules.
+    """
+
+    backup_schedules: MutableSequence[schedule.BackupSchedule] = proto.RepeatedField(
+        proto.MESSAGE,
+        number=1,
+        message=schedule.BackupSchedule,
+    )
+
+
+class DeleteBackupScheduleRequest(proto.Message):
+    r"""The request for [FirestoreAdmin.DeleteBackupSchedules][].
+
+    Attributes:
+        name (str):
+            Required. The name of backup schedule.
+
+            Format
+            ``projects/{project}/databases/{database}/backupSchedules/{backup_schedule}``
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
 
 
 class CreateIndexRequest(proto.Message):
@@ -414,9 +593,9 @@ class ExportDocumentsRequest(proto.Message):
             a bucket (without a namespace path), a prefix will be
             generated based on the start time.
         namespace_ids (MutableSequence[str]):
-            Unspecified means all namespaces. This is the
-            preferred usage for databases that don't use
-            namespaces.
+            An empty list represents all namespaces. This
+            is the preferred usage for databases that don't
+            use namespaces.
 
             An empty string element represents the default
             namespace. This should be used if the database
@@ -474,9 +653,9 @@ class ImportDocumentsRequest(proto.Message):
             export that has completed successfully. See:
             [google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix][google.firestore.admin.v1.ExportDocumentsResponse.output_uri_prefix].
         namespace_ids (MutableSequence[str]):
-            Unspecified means all namespaces. This is the
-            preferred usage for databases that don't use
-            namespaces.
+            An empty list represents all namespaces. This
+            is the preferred usage for databases that don't
+            use namespaces.
 
             An empty string element represents the default
             namespace. This should be used if the database
@@ -500,6 +679,133 @@ class ImportDocumentsRequest(proto.Message):
     namespace_ids: MutableSequence[str] = proto.RepeatedField(
         proto.STRING,
         number=4,
+    )
+
+
+class GetBackupRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.GetBackup][google.firestore.admin.v1.FirestoreAdmin.GetBackup].
+
+    Attributes:
+        name (str):
+            Required. Name of the backup to fetch.
+
+            Format is
+            ``projects/{project}/locations/{location}/backups/{backup}``.
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class ListBackupsRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.ListBackups][google.firestore.admin.v1.FirestoreAdmin.ListBackups].
+
+    Attributes:
+        parent (str):
+            Required. The location to list backups from.
+
+            Format is ``projects/{project}/locations/{location}``. Use
+            ``{location} = '-'`` to list backups from all locations for
+            the given project. This allows listing backups from a single
+            location or from all locations.
+    """
+
+    parent: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class ListBackupsResponse(proto.Message):
+    r"""The response for
+    [FirestoreAdmin.ListBackups][google.firestore.admin.v1.FirestoreAdmin.ListBackups].
+
+    Attributes:
+        backups (MutableSequence[google.cloud.firestore_admin_v1.types.Backup]):
+            List of all backups for the project.
+        unreachable (MutableSequence[str]):
+            List of locations that existing backups were
+            not able to be fetched from.
+            Instead of failing the entire requests when a
+            single location is unreachable, this response
+            returns a partial result set and list of
+            locations unable to be reached here. The request
+            can be retried against a single location to get
+            a concrete error.
+    """
+
+    backups: MutableSequence[gfa_backup.Backup] = proto.RepeatedField(
+        proto.MESSAGE,
+        number=1,
+        message=gfa_backup.Backup,
+    )
+    unreachable: MutableSequence[str] = proto.RepeatedField(
+        proto.STRING,
+        number=3,
+    )
+
+
+class DeleteBackupRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.DeleteBackup][google.firestore.admin.v1.FirestoreAdmin.DeleteBackup].
+
+    Attributes:
+        name (str):
+            Required. Name of the backup to delete.
+
+            format is
+            ``projects/{project}/locations/{location}/backups/{backup}``.
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class RestoreDatabaseRequest(proto.Message):
+    r"""The request message for
+    [FirestoreAdmin.RestoreDatabase][google.firestore.admin.v1.RestoreDatabase].
+
+    Attributes:
+        parent (str):
+            Required. The project to restore the database in. Format is
+            ``projects/{project_id}``.
+        database_id (str):
+            Required. The ID to use for the database, which will become
+            the final component of the database's resource name. This
+            database id must not be associated with an existing
+            database.
+
+            This value should be 4-63 characters. Valid characters are
+            /[a-z][0-9]-/ with first character a letter and the last a
+            letter or a number. Must not be UUID-like
+            /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+
+            "(default)" database id is also valid.
+        backup (str):
+            Required. Backup to restore from. Must be from the same
+            project as the parent.
+
+            Format is:
+            ``projects/{project_id}/locations/{location}/backups/{backup}``
+    """
+
+    parent: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+    database_id: str = proto.Field(
+        proto.STRING,
+        number=2,
+    )
+    backup: str = proto.Field(
+        proto.STRING,
+        number=3,
     )
 
 

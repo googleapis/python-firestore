@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2023 Google LLC
+# Copyright 2024 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,6 +28,7 @@ from typing import (
     Union,
     cast,
 )
+import warnings
 
 from google.cloud.firestore_admin_v1 import gapic_version as package_version
 
@@ -42,13 +43,14 @@ from google.auth.exceptions import MutualTLSChannelError  # type: ignore
 from google.oauth2 import service_account  # type: ignore
 
 try:
-    OptionalRetry = Union[retries.Retry, gapic_v1.method._MethodDefault]
+    OptionalRetry = Union[retries.Retry, gapic_v1.method._MethodDefault, None]
 except AttributeError:  # pragma: NO COVER
-    OptionalRetry = Union[retries.Retry, object]  # type: ignore
+    OptionalRetry = Union[retries.Retry, object, None]  # type: ignore
 
 from google.api_core import operation as gac_operation  # type: ignore
 from google.api_core import operation_async  # type: ignore
 from google.cloud.firestore_admin_v1.services.firestore_admin import pagers
+from google.cloud.firestore_admin_v1.types import backup
 from google.cloud.firestore_admin_v1.types import database
 from google.cloud.firestore_admin_v1.types import database as gfa_database
 from google.cloud.firestore_admin_v1.types import field
@@ -57,6 +59,7 @@ from google.cloud.firestore_admin_v1.types import firestore_admin
 from google.cloud.firestore_admin_v1.types import index
 from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.cloud.firestore_admin_v1.types import operation as gfa_operation
+from google.cloud.firestore_admin_v1.types import schedule
 from google.cloud.location import locations_pb2  # type: ignore
 from google.longrunning import operations_pb2  # type: ignore
 from google.protobuf import duration_pb2  # type: ignore
@@ -170,10 +173,14 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         return api_endpoint.replace(".googleapis.com", ".mtls.googleapis.com")
 
+    # Note: DEFAULT_ENDPOINT is deprecated. Use _DEFAULT_ENDPOINT_TEMPLATE instead.
     DEFAULT_ENDPOINT = "firestore.googleapis.com"
     DEFAULT_MTLS_ENDPOINT = _get_default_mtls_endpoint.__func__(  # type: ignore
         DEFAULT_ENDPOINT
     )
+
+    _DEFAULT_ENDPOINT_TEMPLATE = "firestore.{UNIVERSE_DOMAIN}"
+    _DEFAULT_UNIVERSE = "googleapis.com"
 
     @classmethod
     def from_service_account_info(cls, info: dict, *args, **kwargs):
@@ -221,6 +228,50 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 instance.
         """
         return self._transport
+
+    @staticmethod
+    def backup_path(
+        project: str,
+        location: str,
+        backup: str,
+    ) -> str:
+        """Returns a fully-qualified backup string."""
+        return "projects/{project}/locations/{location}/backups/{backup}".format(
+            project=project,
+            location=location,
+            backup=backup,
+        )
+
+    @staticmethod
+    def parse_backup_path(path: str) -> Dict[str, str]:
+        """Parses a backup path into its component segments."""
+        m = re.match(
+            r"^projects/(?P<project>.+?)/locations/(?P<location>.+?)/backups/(?P<backup>.+?)$",
+            path,
+        )
+        return m.groupdict() if m else {}
+
+    @staticmethod
+    def backup_schedule_path(
+        project: str,
+        database: str,
+        backup_schedule: str,
+    ) -> str:
+        """Returns a fully-qualified backup_schedule string."""
+        return "projects/{project}/databases/{database}/backupSchedules/{backup_schedule}".format(
+            project=project,
+            database=database,
+            backup_schedule=backup_schedule,
+        )
+
+    @staticmethod
+    def parse_backup_schedule_path(path: str) -> Dict[str, str]:
+        """Parses a backup_schedule path into its component segments."""
+        m = re.match(
+            r"^projects/(?P<project>.+?)/databases/(?P<database>.+?)/backupSchedules/(?P<backup_schedule>.+?)$",
+            path,
+        )
+        return m.groupdict() if m else {}
 
     @staticmethod
     def collection_group_path(
@@ -310,6 +361,23 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         return m.groupdict() if m else {}
 
     @staticmethod
+    def location_path(
+        project: str,
+        location: str,
+    ) -> str:
+        """Returns a fully-qualified location string."""
+        return "projects/{project}/locations/{location}".format(
+            project=project,
+            location=location,
+        )
+
+    @staticmethod
+    def parse_location_path(path: str) -> Dict[str, str]:
+        """Parses a location path into its component segments."""
+        m = re.match(r"^projects/(?P<project>.+?)/locations/(?P<location>.+?)$", path)
+        return m.groupdict() if m else {}
+
+    @staticmethod
     def common_billing_account_path(
         billing_account: str,
     ) -> str:
@@ -390,7 +458,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
     def get_mtls_endpoint_and_cert_source(
         cls, client_options: Optional[client_options_lib.ClientOptions] = None
     ):
-        """Return the API endpoint and client cert source for mutual TLS.
+        """Deprecated. Return the API endpoint and client cert source for mutual TLS.
 
         The client cert source is determined in the following order:
         (1) if `GOOGLE_API_USE_CLIENT_CERTIFICATE` environment variable is not "true", the
@@ -420,6 +488,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Raises:
             google.auth.exceptions.MutualTLSChannelError: If any errors happen.
         """
+
+        warnings.warn(
+            "get_mtls_endpoint_and_cert_source is deprecated. Use the api_endpoint property instead.",
+            DeprecationWarning,
+        )
         if client_options is None:
             client_options = client_options_lib.ClientOptions()
         use_client_cert = os.getenv("GOOGLE_API_USE_CLIENT_CERTIFICATE", "false")
@@ -453,6 +526,178 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         return api_endpoint, client_cert_source
 
+    @staticmethod
+    def _read_environment_variables():
+        """Returns the environment variables used by the client.
+
+        Returns:
+            Tuple[bool, str, str]: returns the GOOGLE_API_USE_CLIENT_CERTIFICATE,
+            GOOGLE_API_USE_MTLS_ENDPOINT, and GOOGLE_CLOUD_UNIVERSE_DOMAIN environment variables.
+
+        Raises:
+            ValueError: If GOOGLE_API_USE_CLIENT_CERTIFICATE is not
+                any of ["true", "false"].
+            google.auth.exceptions.MutualTLSChannelError: If GOOGLE_API_USE_MTLS_ENDPOINT
+                is not any of ["auto", "never", "always"].
+        """
+        use_client_cert = os.getenv(
+            "GOOGLE_API_USE_CLIENT_CERTIFICATE", "false"
+        ).lower()
+        use_mtls_endpoint = os.getenv("GOOGLE_API_USE_MTLS_ENDPOINT", "auto").lower()
+        universe_domain_env = os.getenv("GOOGLE_CLOUD_UNIVERSE_DOMAIN")
+        if use_client_cert not in ("true", "false"):
+            raise ValueError(
+                "Environment variable `GOOGLE_API_USE_CLIENT_CERTIFICATE` must be either `true` or `false`"
+            )
+        if use_mtls_endpoint not in ("auto", "never", "always"):
+            raise MutualTLSChannelError(
+                "Environment variable `GOOGLE_API_USE_MTLS_ENDPOINT` must be `never`, `auto` or `always`"
+            )
+        return use_client_cert == "true", use_mtls_endpoint, universe_domain_env
+
+    @staticmethod
+    def _get_client_cert_source(provided_cert_source, use_cert_flag):
+        """Return the client cert source to be used by the client.
+
+        Args:
+            provided_cert_source (bytes): The client certificate source provided.
+            use_cert_flag (bool): A flag indicating whether to use the client certificate.
+
+        Returns:
+            bytes or None: The client cert source to be used by the client.
+        """
+        client_cert_source = None
+        if use_cert_flag:
+            if provided_cert_source:
+                client_cert_source = provided_cert_source
+            elif mtls.has_default_client_cert_source():
+                client_cert_source = mtls.default_client_cert_source()
+        return client_cert_source
+
+    @staticmethod
+    def _get_api_endpoint(
+        api_override, client_cert_source, universe_domain, use_mtls_endpoint
+    ):
+        """Return the API endpoint used by the client.
+
+        Args:
+            api_override (str): The API endpoint override. If specified, this is always
+                the return value of this function and the other arguments are not used.
+            client_cert_source (bytes): The client certificate source used by the client.
+            universe_domain (str): The universe domain used by the client.
+            use_mtls_endpoint (str): How to use the mTLS endpoint, which depends also on the other parameters.
+                Possible values are "always", "auto", or "never".
+
+        Returns:
+            str: The API endpoint to be used by the client.
+        """
+        if api_override is not None:
+            api_endpoint = api_override
+        elif use_mtls_endpoint == "always" or (
+            use_mtls_endpoint == "auto" and client_cert_source
+        ):
+            _default_universe = FirestoreAdminClient._DEFAULT_UNIVERSE
+            if universe_domain != _default_universe:
+                raise MutualTLSChannelError(
+                    f"mTLS is not supported in any universe other than {_default_universe}."
+                )
+            api_endpoint = FirestoreAdminClient.DEFAULT_MTLS_ENDPOINT
+        else:
+            api_endpoint = FirestoreAdminClient._DEFAULT_ENDPOINT_TEMPLATE.format(
+                UNIVERSE_DOMAIN=universe_domain
+            )
+        return api_endpoint
+
+    @staticmethod
+    def _get_universe_domain(
+        client_universe_domain: Optional[str], universe_domain_env: Optional[str]
+    ) -> str:
+        """Return the universe domain used by the client.
+
+        Args:
+            client_universe_domain (Optional[str]): The universe domain configured via the client options.
+            universe_domain_env (Optional[str]): The universe domain configured via the "GOOGLE_CLOUD_UNIVERSE_DOMAIN" environment variable.
+
+        Returns:
+            str: The universe domain to be used by the client.
+
+        Raises:
+            ValueError: If the universe domain is an empty string.
+        """
+        universe_domain = FirestoreAdminClient._DEFAULT_UNIVERSE
+        if client_universe_domain is not None:
+            universe_domain = client_universe_domain
+        elif universe_domain_env is not None:
+            universe_domain = universe_domain_env
+        if len(universe_domain.strip()) == 0:
+            raise ValueError("Universe Domain cannot be an empty string.")
+        return universe_domain
+
+    @staticmethod
+    def _compare_universes(
+        client_universe: str, credentials: ga_credentials.Credentials
+    ) -> bool:
+        """Returns True iff the universe domains used by the client and credentials match.
+
+        Args:
+            client_universe (str): The universe domain configured via the client options.
+            credentials (ga_credentials.Credentials): The credentials being used in the client.
+
+        Returns:
+            bool: True iff client_universe matches the universe in credentials.
+
+        Raises:
+            ValueError: when client_universe does not match the universe in credentials.
+        """
+
+        default_universe = FirestoreAdminClient._DEFAULT_UNIVERSE
+        credentials_universe = getattr(credentials, "universe_domain", default_universe)
+
+        if client_universe != credentials_universe:
+            raise ValueError(
+                "The configured universe domain "
+                f"({client_universe}) does not match the universe domain "
+                f"found in the credentials ({credentials_universe}). "
+                "If you haven't configured the universe domain explicitly, "
+                f"`{default_universe}` is the default."
+            )
+        return True
+
+    def _validate_universe_domain(self):
+        """Validates client's and credentials' universe domains are consistent.
+
+        Returns:
+            bool: True iff the configured universe domain is valid.
+
+        Raises:
+            ValueError: If the configured universe domain is not valid.
+        """
+        self._is_universe_domain_valid = (
+            self._is_universe_domain_valid
+            or FirestoreAdminClient._compare_universes(
+                self.universe_domain, self.transport._credentials
+            )
+        )
+        return self._is_universe_domain_valid
+
+    @property
+    def api_endpoint(self):
+        """Return the API endpoint used by the client instance.
+
+        Returns:
+            str: The API endpoint used by the client instance.
+        """
+        return self._api_endpoint
+
+    @property
+    def universe_domain(self) -> str:
+        """Return the universe domain used by the client instance.
+
+        Returns:
+            str: The universe domain used by the client instance.
+        """
+        return self._universe_domain
+
     def __init__(
         self,
         *,
@@ -472,22 +717,32 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             transport (Union[str, FirestoreAdminTransport]): The
                 transport to use. If set to None, a transport is chosen
                 automatically.
-            client_options (Optional[Union[google.api_core.client_options.ClientOptions, dict]]): Custom options for the
-                client. It won't take effect if a ``transport`` instance is provided.
-                (1) The ``api_endpoint`` property can be used to override the
-                default endpoint provided by the client. GOOGLE_API_USE_MTLS_ENDPOINT
-                environment variable can also be used to override the endpoint:
+            client_options (Optional[Union[google.api_core.client_options.ClientOptions, dict]]):
+                Custom options for the client.
+
+                1. The ``api_endpoint`` property can be used to override the
+                default endpoint provided by the client when ``transport`` is
+                not explicitly provided. Only if this property is not set and
+                ``transport`` was not explicitly provided, the endpoint is
+                determined by the GOOGLE_API_USE_MTLS_ENDPOINT environment
+                variable, which have one of the following values:
                 "always" (always use the default mTLS endpoint), "never" (always
-                use the default regular endpoint) and "auto" (auto switch to the
-                default mTLS endpoint if client certificate is present, this is
-                the default value). However, the ``api_endpoint`` property takes
-                precedence if provided.
-                (2) If GOOGLE_API_USE_CLIENT_CERTIFICATE environment variable
+                use the default regular endpoint) and "auto" (auto-switch to the
+                default mTLS endpoint if client certificate is present; this is
+                the default value).
+
+                2. If the GOOGLE_API_USE_CLIENT_CERTIFICATE environment variable
                 is "true", then the ``client_cert_source`` property can be used
-                to provide client certificate for mutual TLS transport. If
+                to provide a client certificate for mTLS transport. If
                 not provided, the default SSL client certificate will be used if
                 present. If GOOGLE_API_USE_CLIENT_CERTIFICATE is "false" or not
                 set, no client certificate will be used.
+
+                3. The ``universe_domain`` property can be used to override the
+                default "googleapis.com" universe. Note that the ``api_endpoint``
+                property still takes precedence; and ``universe_domain`` is
+                currently not supported for mTLS.
+
             client_info (google.api_core.gapic_v1.client_info.ClientInfo):
                 The client info used to send a user-agent string along with
                 API requests. If ``None``, then default info will be used.
@@ -498,17 +753,34 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             google.auth.exceptions.MutualTLSChannelError: If mutual TLS transport
                 creation failed for any reason.
         """
-        if isinstance(client_options, dict):
-            client_options = client_options_lib.from_dict(client_options)
-        if client_options is None:
-            client_options = client_options_lib.ClientOptions()
-        client_options = cast(client_options_lib.ClientOptions, client_options)
-
-        api_endpoint, client_cert_source_func = self.get_mtls_endpoint_and_cert_source(
-            client_options
+        self._client_options = client_options
+        if isinstance(self._client_options, dict):
+            self._client_options = client_options_lib.from_dict(self._client_options)
+        if self._client_options is None:
+            self._client_options = client_options_lib.ClientOptions()
+        self._client_options = cast(
+            client_options_lib.ClientOptions, self._client_options
         )
 
-        api_key_value = getattr(client_options, "api_key", None)
+        universe_domain_opt = getattr(self._client_options, "universe_domain", None)
+
+        (
+            self._use_client_cert,
+            self._use_mtls_endpoint,
+            self._universe_domain_env,
+        ) = FirestoreAdminClient._read_environment_variables()
+        self._client_cert_source = FirestoreAdminClient._get_client_cert_source(
+            self._client_options.client_cert_source, self._use_client_cert
+        )
+        self._universe_domain = FirestoreAdminClient._get_universe_domain(
+            universe_domain_opt, self._universe_domain_env
+        )
+        self._api_endpoint = None  # updated below, depending on `transport`
+
+        # Initialize the universe domain validation.
+        self._is_universe_domain_valid = False
+
+        api_key_value = getattr(self._client_options, "api_key", None)
         if api_key_value and credentials:
             raise ValueError(
                 "client_options.api_key and credentials are mutually exclusive"
@@ -517,20 +789,33 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Save or instantiate the transport.
         # Ordinarily, we provide the transport, but allowing a custom transport
         # instance provides an extensibility point for unusual situations.
-        if isinstance(transport, FirestoreAdminTransport):
+        transport_provided = isinstance(transport, FirestoreAdminTransport)
+        if transport_provided:
             # transport is a FirestoreAdminTransport instance.
-            if credentials or client_options.credentials_file or api_key_value:
+            if credentials or self._client_options.credentials_file or api_key_value:
                 raise ValueError(
                     "When providing a transport instance, "
                     "provide its credentials directly."
                 )
-            if client_options.scopes:
+            if self._client_options.scopes:
                 raise ValueError(
                     "When providing a transport instance, provide its scopes "
                     "directly."
                 )
-            self._transport = transport
-        else:
+            self._transport = cast(FirestoreAdminTransport, transport)
+            self._api_endpoint = self._transport.host
+
+        self._api_endpoint = (
+            self._api_endpoint
+            or FirestoreAdminClient._get_api_endpoint(
+                self._client_options.api_endpoint,
+                self._client_cert_source,
+                self._universe_domain,
+                self._use_mtls_endpoint,
+            )
+        )
+
+        if not transport_provided:
             import google.auth._default  # type: ignore
 
             if api_key_value and hasattr(
@@ -540,17 +825,17 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                     api_key_value
                 )
 
-            Transport = type(self).get_transport_class(transport)
+            Transport = type(self).get_transport_class(cast(str, transport))
             self._transport = Transport(
                 credentials=credentials,
-                credentials_file=client_options.credentials_file,
-                host=api_endpoint,
-                scopes=client_options.scopes,
-                client_cert_source_for_mtls=client_cert_source_func,
-                quota_project_id=client_options.quota_project_id,
+                credentials_file=self._client_options.credentials_file,
+                host=self._api_endpoint,
+                scopes=self._client_options.scopes,
+                client_cert_source_for_mtls=self._client_cert_source,
+                quota_project_id=self._client_options.quota_project_id,
                 client_info=client_info,
                 always_use_jwt_access=True,
-                api_audience=client_options.api_audience,
+                api_audience=self._client_options.api_audience,
             )
 
     def create_index(
@@ -663,6 +948,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         metadata = tuple(metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
         )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
 
         # Send the request.
         response = rpc(
@@ -778,6 +1066,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         response = rpc(
             request,
@@ -890,6 +1181,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         response = rpc(
             request,
@@ -982,6 +1276,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         metadata = tuple(metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
 
         # Send the request.
         rpc(
@@ -1084,6 +1381,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         metadata = tuple(metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
 
         # Send the request.
         response = rpc(
@@ -1216,6 +1516,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             ),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         response = rpc(
             request,
@@ -1252,7 +1555,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         overridden. To issue this query, call
         [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
         with the filter set to ``indexConfig.usesAncestorConfig:false``
-        .
+        or ``ttlConfig:*``.
 
         .. code-block:: python
 
@@ -1337,6 +1640,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         metadata = tuple(metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
         )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
 
         # Send the request.
         response = rpc(
@@ -1469,6 +1775,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         response = rpc(
             request,
@@ -1599,6 +1908,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         response = rpc(
             request,
@@ -1679,12 +1991,16 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 on the ``request`` instance; if ``request`` is provided, this
                 should not be set.
             database_id (str):
-                Required. The ID to use for the
-                database, which will become the final
-                component of the database's resource
+                Required. The ID to use for the database, which will
+                become the final component of the database's resource
                 name.
 
-                The value must be set to "(default)".
+                This value should be 4-63 characters. Valid characters
+                are /[a-z][0-9]-/ with first character a letter and the
+                last a letter or a number. Must not be UUID-like
+                /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+
+                "(default)" database id is also valid.
 
                 This corresponds to the ``database_id`` field
                 on the ``request`` instance; if ``request`` is provided, this
@@ -1699,10 +2015,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             google.api_core.operation.Operation:
                 An object representing a long-running operation.
 
-                The result type for the operation will be :class:`google.cloud.firestore_admin_v1.types.Database` A Cloud Firestore Database.
-                   Currently only one database is allowed per cloud
-                   project; this database must have a database_id of
-                   '(default)'.
+                The result type for the operation will be
+                :class:`google.cloud.firestore_admin_v1.types.Database`
+                A Cloud Firestore Database.
 
         """
         # Create or coerce a protobuf request object.
@@ -1739,6 +2054,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         metadata = tuple(metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
         )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
 
         # Send the request.
         response = rpc(
@@ -1816,10 +2134,6 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         Returns:
             google.cloud.firestore_admin_v1.types.Database:
                 A Cloud Firestore Database.
-                   Currently only one database is allowed per cloud
-                   project; this database must have a database_id of
-                   '(default)'.
-
         """
         # Create or coerce a protobuf request object.
         # Quick check: If we got a request object, we should *not* have
@@ -1851,6 +2165,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         metadata = tuple(metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
 
         # Send the request.
         response = rpc(
@@ -1953,6 +2270,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         response = rpc(
             request,
@@ -2029,10 +2349,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             google.api_core.operation.Operation:
                 An object representing a long-running operation.
 
-                The result type for the operation will be :class:`google.cloud.firestore_admin_v1.types.Database` A Cloud Firestore Database.
-                   Currently only one database is allowed per cloud
-                   project; this database must have a database_id of
-                   '(default)'.
+                The result type for the operation will be
+                :class:`google.cloud.firestore_admin_v1.types.Database`
+                A Cloud Firestore Database.
 
         """
         # Create or coerce a protobuf request object.
@@ -2070,6 +2389,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             ),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         response = rpc(
             request,
@@ -2088,6 +2410,1121 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         # Done; return the response.
         return response
+
+    def delete_database(
+        self,
+        request: Optional[Union[firestore_admin.DeleteDatabaseRequest, dict]] = None,
+        *,
+        name: Optional[str] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> gac_operation.Operation:
+        r"""Deletes a database.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_delete_database():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.DeleteDatabaseRequest(
+                    name="name_value",
+                )
+
+                # Make the request
+                operation = client.delete_database(request=request)
+
+                print("Waiting for operation to complete...")
+
+                response = operation.result()
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.DeleteDatabaseRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.DeleteDatabase][google.firestore.admin.v1.FirestoreAdmin.DeleteDatabase].
+            name (str):
+                Required. A name of the form
+                ``projects/{project_id}/databases/{database_id}``
+
+                This corresponds to the ``name`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.api_core.operation.Operation:
+                An object representing a long-running operation.
+
+                The result type for the operation will be
+                :class:`google.cloud.firestore_admin_v1.types.Database`
+                A Cloud Firestore Database.
+
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.DeleteDatabaseRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.DeleteDatabaseRequest):
+            request = firestore_admin.DeleteDatabaseRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if name is not None:
+                request.name = name
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.delete_database]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Wrap the response in an operation future.
+        response = gac_operation.from_gapic(
+            response,
+            self._transport.operations_client,
+            database.Database,
+            metadata_type=firestore_admin.DeleteDatabaseMetadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def get_backup(
+        self,
+        request: Optional[Union[firestore_admin.GetBackupRequest, dict]] = None,
+        *,
+        name: Optional[str] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> backup.Backup:
+        r"""Gets information about a backup.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_get_backup():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.GetBackupRequest(
+                    name="name_value",
+                )
+
+                # Make the request
+                response = client.get_backup(request=request)
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.GetBackupRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.GetBackup][google.firestore.admin.v1.FirestoreAdmin.GetBackup].
+            name (str):
+                Required. Name of the backup to fetch.
+
+                Format is
+                ``projects/{project}/locations/{location}/backups/{backup}``.
+
+                This corresponds to the ``name`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.cloud.firestore_admin_v1.types.Backup:
+                A Backup of a Cloud Firestore
+                Database.
+                The backup contains all documents and
+                index configurations for the given
+                database at a specific point in time.
+
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.GetBackupRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.GetBackupRequest):
+            request = firestore_admin.GetBackupRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if name is not None:
+                request.name = name
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.get_backup]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def list_backups(
+        self,
+        request: Optional[Union[firestore_admin.ListBackupsRequest, dict]] = None,
+        *,
+        parent: Optional[str] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> firestore_admin.ListBackupsResponse:
+        r"""Lists all the backups.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_list_backups():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.ListBackupsRequest(
+                    parent="parent_value",
+                )
+
+                # Make the request
+                response = client.list_backups(request=request)
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.ListBackupsRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.ListBackups][google.firestore.admin.v1.FirestoreAdmin.ListBackups].
+            parent (str):
+                Required. The location to list backups from.
+
+                Format is ``projects/{project}/locations/{location}``.
+                Use ``{location} = '-'`` to list backups from all
+                locations for the given project. This allows listing
+                backups from a single location or from all locations.
+
+                This corresponds to the ``parent`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.cloud.firestore_admin_v1.types.ListBackupsResponse:
+                The response for
+                   [FirestoreAdmin.ListBackups][google.firestore.admin.v1.FirestoreAdmin.ListBackups].
+
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([parent])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.ListBackupsRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.ListBackupsRequest):
+            request = firestore_admin.ListBackupsRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if parent is not None:
+                request.parent = parent
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.list_backups]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def delete_backup(
+        self,
+        request: Optional[Union[firestore_admin.DeleteBackupRequest, dict]] = None,
+        *,
+        name: Optional[str] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> None:
+        r"""Deletes a backup.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_delete_backup():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.DeleteBackupRequest(
+                    name="name_value",
+                )
+
+                # Make the request
+                client.delete_backup(request=request)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.DeleteBackupRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.DeleteBackup][google.firestore.admin.v1.FirestoreAdmin.DeleteBackup].
+            name (str):
+                Required. Name of the backup to delete.
+
+                format is
+                ``projects/{project}/locations/{location}/backups/{backup}``.
+
+                This corresponds to the ``name`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.DeleteBackupRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.DeleteBackupRequest):
+            request = firestore_admin.DeleteBackupRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if name is not None:
+                request.name = name
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.delete_backup]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+    def restore_database(
+        self,
+        request: Optional[Union[firestore_admin.RestoreDatabaseRequest, dict]] = None,
+        *,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> gac_operation.Operation:
+        r"""Creates a new database by restoring from an existing backup.
+
+        The new database must be in the same cloud region or
+        multi-region location as the existing backup. This behaves
+        similar to
+        [FirestoreAdmin.CreateDatabase][google.firestore.admin.v1.CreateDatabase]
+        except instead of creating a new empty database, a new database
+        is created with the database type, index configuration, and
+        documents from an existing backup.
+
+        The [long-running operation][google.longrunning.Operation] can
+        be used to track the progress of the restore, with the
+        Operation's [metadata][google.longrunning.Operation.metadata]
+        field type being the
+        [RestoreDatabaseMetadata][google.firestore.admin.v1.RestoreDatabaseMetadata].
+        The [response][google.longrunning.Operation.response] type is
+        the [Database][google.firestore.admin.v1.Database] if the
+        restore was successful. The new database is not readable or
+        writeable until the LRO has completed.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_restore_database():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.RestoreDatabaseRequest(
+                    parent="parent_value",
+                    database_id="database_id_value",
+                    backup="backup_value",
+                )
+
+                # Make the request
+                operation = client.restore_database(request=request)
+
+                print("Waiting for operation to complete...")
+
+                response = operation.result()
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.RestoreDatabaseRequest, dict]):
+                The request object. The request message for
+                [FirestoreAdmin.RestoreDatabase][google.firestore.admin.v1.RestoreDatabase].
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.api_core.operation.Operation:
+                An object representing a long-running operation.
+
+                The result type for the operation will be
+                :class:`google.cloud.firestore_admin_v1.types.Database`
+                A Cloud Firestore Database.
+
+        """
+        # Create or coerce a protobuf request object.
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.RestoreDatabaseRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.RestoreDatabaseRequest):
+            request = firestore_admin.RestoreDatabaseRequest(request)
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.restore_database]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Wrap the response in an operation future.
+        response = gac_operation.from_gapic(
+            response,
+            self._transport.operations_client,
+            database.Database,
+            metadata_type=gfa_operation.RestoreDatabaseMetadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def create_backup_schedule(
+        self,
+        request: Optional[
+            Union[firestore_admin.CreateBackupScheduleRequest, dict]
+        ] = None,
+        *,
+        parent: Optional[str] = None,
+        backup_schedule: Optional[schedule.BackupSchedule] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> schedule.BackupSchedule:
+        r"""Creates a backup schedule on a database.
+        At most two backup schedules can be configured on a
+        database, one daily backup schedule with retention up to
+        7 days and one weekly backup schedule with retention up
+        to 14 weeks.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_create_backup_schedule():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.CreateBackupScheduleRequest(
+                    parent="parent_value",
+                )
+
+                # Make the request
+                response = client.create_backup_schedule(request=request)
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.CreateBackupScheduleRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.CreateBackupSchedule][google.firestore.admin.v1.FirestoreAdmin.CreateBackupSchedule].
+            parent (str):
+                Required. The parent database.
+
+                Format ``projects/{project}/databases/{database}``
+
+                This corresponds to the ``parent`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            backup_schedule (google.cloud.firestore_admin_v1.types.BackupSchedule):
+                Required. The backup schedule to
+                create.
+
+                This corresponds to the ``backup_schedule`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.cloud.firestore_admin_v1.types.BackupSchedule:
+                A backup schedule for a Cloud
+                Firestore Database.
+                This resource is owned by the database
+                it is backing up, and is deleted along
+                with the database. The actual backups
+                are not though.
+
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([parent, backup_schedule])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.CreateBackupScheduleRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.CreateBackupScheduleRequest):
+            request = firestore_admin.CreateBackupScheduleRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if parent is not None:
+                request.parent = parent
+            if backup_schedule is not None:
+                request.backup_schedule = backup_schedule
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.create_backup_schedule]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def get_backup_schedule(
+        self,
+        request: Optional[Union[firestore_admin.GetBackupScheduleRequest, dict]] = None,
+        *,
+        name: Optional[str] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> schedule.BackupSchedule:
+        r"""Gets information about a backup schedule.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_get_backup_schedule():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.GetBackupScheduleRequest(
+                    name="name_value",
+                )
+
+                # Make the request
+                response = client.get_backup_schedule(request=request)
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.GetBackupScheduleRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.GetBackupSchedule][google.firestore.admin.v1.FirestoreAdmin.GetBackupSchedule].
+            name (str):
+                Required. The name of the backup schedule.
+
+                Format
+                ``projects/{project}/databases/{database}/backupSchedules/{backup_schedule}``
+
+                This corresponds to the ``name`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.cloud.firestore_admin_v1.types.BackupSchedule:
+                A backup schedule for a Cloud
+                Firestore Database.
+                This resource is owned by the database
+                it is backing up, and is deleted along
+                with the database. The actual backups
+                are not though.
+
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.GetBackupScheduleRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.GetBackupScheduleRequest):
+            request = firestore_admin.GetBackupScheduleRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if name is not None:
+                request.name = name
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.get_backup_schedule]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def list_backup_schedules(
+        self,
+        request: Optional[
+            Union[firestore_admin.ListBackupSchedulesRequest, dict]
+        ] = None,
+        *,
+        parent: Optional[str] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> firestore_admin.ListBackupSchedulesResponse:
+        r"""List backup schedules.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_list_backup_schedules():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.ListBackupSchedulesRequest(
+                    parent="parent_value",
+                )
+
+                # Make the request
+                response = client.list_backup_schedules(request=request)
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.ListBackupSchedulesRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.ListBackupSchedules][google.firestore.admin.v1.FirestoreAdmin.ListBackupSchedules].
+            parent (str):
+                Required. The parent database.
+
+                Format is ``projects/{project}/databases/{database}``.
+
+                This corresponds to the ``parent`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.cloud.firestore_admin_v1.types.ListBackupSchedulesResponse:
+                The response for
+                   [FirestoreAdmin.ListBackupSchedules][google.firestore.admin.v1.FirestoreAdmin.ListBackupSchedules].
+
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([parent])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.ListBackupSchedulesRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.ListBackupSchedulesRequest):
+            request = firestore_admin.ListBackupSchedulesRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if parent is not None:
+                request.parent = parent
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.list_backup_schedules]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("parent", request.parent),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def update_backup_schedule(
+        self,
+        request: Optional[
+            Union[firestore_admin.UpdateBackupScheduleRequest, dict]
+        ] = None,
+        *,
+        backup_schedule: Optional[schedule.BackupSchedule] = None,
+        update_mask: Optional[field_mask_pb2.FieldMask] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> schedule.BackupSchedule:
+        r"""Updates a backup schedule.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_update_backup_schedule():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.UpdateBackupScheduleRequest(
+                )
+
+                # Make the request
+                response = client.update_backup_schedule(request=request)
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.UpdateBackupScheduleRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.UpdateBackupSchedule][google.firestore.admin.v1.FirestoreAdmin.UpdateBackupSchedule].
+            backup_schedule (google.cloud.firestore_admin_v1.types.BackupSchedule):
+                Required. The backup schedule to
+                update.
+
+                This corresponds to the ``backup_schedule`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            update_mask (google.protobuf.field_mask_pb2.FieldMask):
+                The list of fields to be updated.
+                This corresponds to the ``update_mask`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.cloud.firestore_admin_v1.types.BackupSchedule:
+                A backup schedule for a Cloud
+                Firestore Database.
+                This resource is owned by the database
+                it is backing up, and is deleted along
+                with the database. The actual backups
+                are not though.
+
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([backup_schedule, update_mask])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.UpdateBackupScheduleRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.UpdateBackupScheduleRequest):
+            request = firestore_admin.UpdateBackupScheduleRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if backup_schedule is not None:
+                request.backup_schedule = backup_schedule
+            if update_mask is not None:
+                request.update_mask = update_mask
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.update_backup_schedule]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata(
+                (("backup_schedule.name", request.backup_schedule.name),)
+            ),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def delete_backup_schedule(
+        self,
+        request: Optional[
+            Union[firestore_admin.DeleteBackupScheduleRequest, dict]
+        ] = None,
+        *,
+        name: Optional[str] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> None:
+        r"""Deletes a backup schedule.
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_delete_backup_schedule():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.DeleteBackupScheduleRequest(
+                    name="name_value",
+                )
+
+                # Make the request
+                client.delete_backup_schedule(request=request)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.DeleteBackupScheduleRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.DeleteBackupSchedules][].
+            name (str):
+                Required. The name of backup schedule.
+
+                Format
+                ``projects/{project}/databases/{database}/backupSchedules/{backup_schedule}``
+
+                This corresponds to the ``name`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+        """
+        # Create or coerce a protobuf request object.
+        # Quick check: If we got a request object, we should *not* have
+        # gotten any keyword arguments that map to the request.
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore_admin.DeleteBackupScheduleRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore_admin.DeleteBackupScheduleRequest):
+            request = firestore_admin.DeleteBackupScheduleRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if name is not None:
+                request.name = name
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.delete_backup_schedule]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
 
     def __enter__(self) -> "FirestoreAdminClient":
         return self
@@ -2145,6 +3582,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         response = rpc(
             request,
@@ -2198,6 +3638,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         metadata = tuple(metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
 
         # Send the request.
         response = rpc(
@@ -2257,6 +3700,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
 
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
         # Send the request.
         rpc(
             request,
@@ -2310,6 +3756,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         metadata = tuple(metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
         )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
 
         # Send the request.
         rpc(
