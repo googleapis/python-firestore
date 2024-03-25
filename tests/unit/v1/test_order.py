@@ -124,9 +124,9 @@ def test_order_compare_across_heterogenous_values():
     groups[59] = [_array_value(["foo", "0"])]
 
     # vectors
-    groups[60] = [_object_value({"__type__": "vector", "value": [3.0, 2.0]})]
-    groups[61] = [_object_value({"__type__": "vector", "value": [1.0, 2.0, 5.0]})]
-    groups[62] = [_object_value({"__type__": "vector", "value": [2.0, 2.0, 5.0]})]
+    groups[60] = [_object_value({"__type__": "__vector__", "value": [3.0, 2.0]})]
+    groups[61] = [_object_value({"__type__": "__vector__", "value": [1.0, 2.0, 5.0]})]
+    groups[62] = [_object_value({"__type__": "__vector__", "value": [2.0, 2.0, 5.0]})]
 
     # objects
     groups[63] = [_object_value({"bar": 0})]
