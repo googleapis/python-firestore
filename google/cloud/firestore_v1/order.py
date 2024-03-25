@@ -97,6 +97,7 @@ class Order(object):
         elif value_type == "array_value":
             return cls.compare_arrays(left, right)
         elif value_type == "map_value":
+            # ARRAYs < VECTORs < MAPs
             return cls.compare_objects(left, right)
         else:
             raise ValueError(f"Unknown ``value_type`` {value_type}")

@@ -41,9 +41,7 @@ class VectorQuery(BaseVectorQuery):
     def get(
         self,
         transaction=None,
-        retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
-        ] = gapic_v1.method.DEFAULT,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
     ) -> Iterable[DocumentSnapshot]:
         """Runs the vector query.
@@ -84,6 +82,17 @@ class VectorQuery(BaseVectorQuery):
         )
         
         return response_iterator, expected_prefix
+
+    def _retry_query_after_exception(self, exc, retry, transaction):
+        """Helper method for :meth:`stream`."""
+        if transaction is None:  # no snapshot-based retry inside transaction
+            if retry is gapic_v1.method.DEFAULT:
+                transport = self._client._firestore_api._transport
+                gapic_callable = transport.run_query
+                retry = gapic_callable._retry
+            return retry._predicate(exc)
+
+        return False
 
     def stream(
         self,

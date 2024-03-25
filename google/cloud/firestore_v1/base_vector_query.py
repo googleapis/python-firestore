@@ -19,7 +19,7 @@ import abc
 
 from abc import ABC
 from enum import Enum
-from typing import Iterable, Union, Tuple
+from typing import Iterable, Optional, Tuple, Union
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -39,10 +39,10 @@ class BaseVectorQuery(ABC):
     def __init__(self, nested_query) -> None:
         self._nested_query = nested_query
         self._collection_ref = nested_query._parent
-        self._vector_field = None
-        self._query_vector = None
-        self._limit = None
-        self._distance_measure = None
+        self._vector_field : Optional[str] = None
+        self._query_vector : Optional[Vector] = None
+        self._limit : Optional[int] = None
+        self._distance_measure : Optional[DistanceMeasure] = None
 
     @property
     def _client(self):
@@ -74,7 +74,7 @@ class BaseVectorQuery(ABC):
         transaction=None,
         retry: Union[retries.Retry, None, gapic_v1.method._MethodDefault] = None,
         timeout: float | None = None,
-    ) -> Tuple[dict, dict]:
+    ) -> Tuple[dict, str, dict]:
         parent_path, expected_prefix = self._collection_ref._parent_info()
         request = {
             "parent": parent_path,
@@ -89,9 +89,7 @@ class BaseVectorQuery(ABC):
     def get(
         self, 
         transaction=None,
-        retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
-        ] = gapic_v1.method.DEFAULT,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float | None = None,) -> Iterable[DocumentSnapshot]:
         """Runs the vector query.
         """

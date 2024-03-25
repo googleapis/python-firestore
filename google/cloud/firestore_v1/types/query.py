@@ -24,11 +24,11 @@ from google.protobuf import wrappers_pb2  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.firestore.v1',
+    package="google.firestore.v1",
     manifest={
-        'StructuredQuery',
-        'StructuredAggregationQuery',
-        'Cursor',
+        "StructuredQuery",
+        "StructuredAggregationQuery",
+        "Cursor",
     },
 )
 
@@ -156,9 +156,11 @@ class StructuredQuery(proto.Message):
             Optional. A potential Nearest Neighbors
             Search.
             Applies after all other filters and ordering.
+
             Finds the closest vector embeddings to the given
             query vector.
     """
+
     class Direction(proto.Enum):
         r"""A sort direction.
 
@@ -222,23 +224,23 @@ class StructuredQuery(proto.Message):
                 This field is a member of `oneof`_ ``filter_type``.
         """
 
-        composite_filter: 'StructuredQuery.CompositeFilter' = proto.Field(
+        composite_filter: "StructuredQuery.CompositeFilter" = proto.Field(
             proto.MESSAGE,
             number=1,
-            oneof='filter_type',
-            message='StructuredQuery.CompositeFilter',
+            oneof="filter_type",
+            message="StructuredQuery.CompositeFilter",
         )
-        field_filter: 'StructuredQuery.FieldFilter' = proto.Field(
+        field_filter: "StructuredQuery.FieldFilter" = proto.Field(
             proto.MESSAGE,
             number=2,
-            oneof='filter_type',
-            message='StructuredQuery.FieldFilter',
+            oneof="filter_type",
+            message="StructuredQuery.FieldFilter",
         )
-        unary_filter: 'StructuredQuery.UnaryFilter' = proto.Field(
+        unary_filter: "StructuredQuery.UnaryFilter" = proto.Field(
             proto.MESSAGE,
             number=3,
-            oneof='filter_type',
-            message='StructuredQuery.UnaryFilter',
+            oneof="filter_type",
+            message="StructuredQuery.UnaryFilter",
         )
 
     class CompositeFilter(proto.Message):
@@ -255,6 +257,7 @@ class StructuredQuery(proto.Message):
 
                 -  At least one filter is present.
         """
+
         class Operator(proto.Enum):
             r"""A composite filter operator.
 
@@ -272,15 +275,15 @@ class StructuredQuery(proto.Message):
             AND = 1
             OR = 2
 
-        op: 'StructuredQuery.CompositeFilter.Operator' = proto.Field(
+        op: "StructuredQuery.CompositeFilter.Operator" = proto.Field(
             proto.ENUM,
             number=1,
-            enum='StructuredQuery.CompositeFilter.Operator',
+            enum="StructuredQuery.CompositeFilter.Operator",
         )
-        filters: MutableSequence['StructuredQuery.Filter'] = proto.RepeatedField(
+        filters: MutableSequence["StructuredQuery.Filter"] = proto.RepeatedField(
             proto.MESSAGE,
             number=2,
-            message='StructuredQuery.Filter',
+            message="StructuredQuery.Filter",
         )
 
     class FieldFilter(proto.Message):
@@ -294,6 +297,7 @@ class StructuredQuery(proto.Message):
             value (google.cloud.firestore_v1.types.Value):
                 The value to compare to.
         """
+
         class Operator(proto.Enum):
             r"""A field filter operator.
 
@@ -383,15 +387,15 @@ class StructuredQuery(proto.Message):
             ARRAY_CONTAINS_ANY = 9
             NOT_IN = 10
 
-        field: 'StructuredQuery.FieldReference' = proto.Field(
+        field: "StructuredQuery.FieldReference" = proto.Field(
             proto.MESSAGE,
             number=1,
-            message='StructuredQuery.FieldReference',
+            message="StructuredQuery.FieldReference",
         )
-        op: 'StructuredQuery.FieldFilter.Operator' = proto.Field(
+        op: "StructuredQuery.FieldFilter.Operator" = proto.Field(
             proto.ENUM,
             number=2,
-            enum='StructuredQuery.FieldFilter.Operator',
+            enum="StructuredQuery.FieldFilter.Operator",
         )
         value: document.Value = proto.Field(
             proto.MESSAGE,
@@ -412,6 +416,7 @@ class StructuredQuery(proto.Message):
 
                 This field is a member of `oneof`_ ``operand_type``.
         """
+
         class Operator(proto.Enum):
             r"""A unary operator.
 
@@ -445,16 +450,16 @@ class StructuredQuery(proto.Message):
             IS_NOT_NAN = 4
             IS_NOT_NULL = 5
 
-        op: 'StructuredQuery.UnaryFilter.Operator' = proto.Field(
+        op: "StructuredQuery.UnaryFilter.Operator" = proto.Field(
             proto.ENUM,
             number=1,
-            enum='StructuredQuery.UnaryFilter.Operator',
+            enum="StructuredQuery.UnaryFilter.Operator",
         )
-        field: 'StructuredQuery.FieldReference' = proto.Field(
+        field: "StructuredQuery.FieldReference" = proto.Field(
             proto.MESSAGE,
             number=2,
-            oneof='operand_type',
-            message='StructuredQuery.FieldReference',
+            oneof="operand_type",
+            message="StructuredQuery.FieldReference",
         )
 
     class Order(proto.Message):
@@ -467,15 +472,15 @@ class StructuredQuery(proto.Message):
                 The direction to order by. Defaults to ``ASCENDING``.
         """
 
-        field: 'StructuredQuery.FieldReference' = proto.Field(
+        field: "StructuredQuery.FieldReference" = proto.Field(
             proto.MESSAGE,
             number=1,
-            message='StructuredQuery.FieldReference',
+            message="StructuredQuery.FieldReference",
         )
-        direction: 'StructuredQuery.Direction' = proto.Field(
+        direction: "StructuredQuery.Direction" = proto.Field(
             proto.ENUM,
             number=2,
-            enum='StructuredQuery.Direction',
+            enum="StructuredQuery.Direction",
         )
 
     class FieldReference(proto.Message):
@@ -508,81 +513,10 @@ class StructuredQuery(proto.Message):
                 of the document, use ``['__name__']``.
         """
 
-        fields: MutableSequence['StructuredQuery.FieldReference'] = proto.RepeatedField(
+        fields: MutableSequence["StructuredQuery.FieldReference"] = proto.RepeatedField(
             proto.MESSAGE,
             number=2,
-            message='StructuredQuery.FieldReference',
-        )
-
-    class FindNearest(proto.Message):
-        r"""Nearest Neighbors search config.
-
-        Attributes:
-            vector_field (google.cloud.firestore_v1.types.StructuredQuery.FieldReference):
-                Required. An indexed vector field to search upon. Only
-                documents which contain vectors whose dimensionality match
-                the query_vector can be returned.
-            query_vector (google.cloud.firestore_v1.types.Value):
-                Required. The query vector that we are
-                searching on. Must be a vector of no more than
-                2048 dimensions.
-            distance_measure (google.cloud.firestore_v1.types.StructuredQuery.FindNearest.DistanceMeasure):
-                Required. The Distance Measure to use,
-                required.
-            limit (google.protobuf.wrappers_pb2.Int32Value):
-                Required. The number of nearest neighbors to
-                return. Must be a positive integer of no more
-                than 1000.
-        """
-        class DistanceMeasure(proto.Enum):
-            r"""The distance measure to use when comparing vectors.
-
-            Values:
-                DISTANCE_MEASURE_UNSPECIFIED (0):
-                    Should not be set.
-                EUCLIDEAN (1):
-                    Measures the EUCLIDEAN distance between the vectors. See
-                    `Euclidean <https://en.wikipedia.org/wiki/Euclidean_distance>`__
-                    to learn more
-                COSINE (2):
-                    Compares vectors based on the angle between them, which
-                    allows you to measure similarity that isn't based on the
-                    vectors magnitude. We recommend using DOT_PRODUCT with unit
-                    normalized vectors instead of COSINE distance, which is
-                    mathematically equivalent with better performance. See
-                    `Cosine
-                    Similarity <https://en.wikipedia.org/wiki/Cosine_similarity>`__
-                    to learn more.
-                DOT_PRODUCT (3):
-                    Similar to cosine but is affected by the magnitude of the
-                    vectors. See `Dot
-                    Product <https://en.wikipedia.org/wiki/Dot_product>`__ to
-                    learn more.
-            """
-            DISTANCE_MEASURE_UNSPECIFIED = 0
-            EUCLIDEAN = 1
-            COSINE = 2
-            DOT_PRODUCT = 3
-
-        vector_field: 'StructuredQuery.FieldReference' = proto.Field(
-            proto.MESSAGE,
-            number=1,
-            message='StructuredQuery.FieldReference',
-        )
-        query_vector: document.Value = proto.Field(
-            proto.MESSAGE,
-            number=2,
-            message=document.Value,
-        )
-        distance_measure: 'StructuredQuery.FindNearest.DistanceMeasure' = proto.Field(
-            proto.ENUM,
-            number=3,
-            enum='StructuredQuery.FindNearest.DistanceMeasure',
-        )
-        limit: wrappers_pb2.Int32Value = proto.Field(
-            proto.MESSAGE,
-            number=4,
-            message=wrappers_pb2.Int32Value,
+            message="StructuredQuery.FieldReference",
         )
 
     class FindNearest(proto.Message):
@@ -677,15 +611,15 @@ class StructuredQuery(proto.Message):
         number=4,
         message=Order,
     )
-    start_at: 'Cursor' = proto.Field(
+    start_at: "Cursor" = proto.Field(
         proto.MESSAGE,
         number=7,
-        message='Cursor',
+        message="Cursor",
     )
-    end_at: 'Cursor' = proto.Field(
+    end_at: "Cursor" = proto.Field(
         proto.MESSAGE,
         number=8,
-        message='Cursor',
+        message="Cursor",
     )
     offset: int = proto.Field(
         proto.INT32,
@@ -849,10 +783,10 @@ class StructuredAggregationQuery(proto.Message):
                     The field to aggregate on.
             """
 
-            field: 'StructuredQuery.FieldReference' = proto.Field(
+            field: "StructuredQuery.FieldReference" = proto.Field(
                 proto.MESSAGE,
                 number=1,
-                message='StructuredQuery.FieldReference',
+                message="StructuredQuery.FieldReference",
             )
 
         class Avg(proto.Message):
@@ -873,40 +807,40 @@ class StructuredAggregationQuery(proto.Message):
                     The field to aggregate on.
             """
 
-            field: 'StructuredQuery.FieldReference' = proto.Field(
+            field: "StructuredQuery.FieldReference" = proto.Field(
                 proto.MESSAGE,
                 number=1,
-                message='StructuredQuery.FieldReference',
+                message="StructuredQuery.FieldReference",
             )
 
-        count: 'StructuredAggregationQuery.Aggregation.Count' = proto.Field(
+        count: "StructuredAggregationQuery.Aggregation.Count" = proto.Field(
             proto.MESSAGE,
             number=1,
-            oneof='operator',
-            message='StructuredAggregationQuery.Aggregation.Count',
+            oneof="operator",
+            message="StructuredAggregationQuery.Aggregation.Count",
         )
-        sum: 'StructuredAggregationQuery.Aggregation.Sum' = proto.Field(
+        sum: "StructuredAggregationQuery.Aggregation.Sum" = proto.Field(
             proto.MESSAGE,
             number=2,
-            oneof='operator',
-            message='StructuredAggregationQuery.Aggregation.Sum',
+            oneof="operator",
+            message="StructuredAggregationQuery.Aggregation.Sum",
         )
-        avg: 'StructuredAggregationQuery.Aggregation.Avg' = proto.Field(
+        avg: "StructuredAggregationQuery.Aggregation.Avg" = proto.Field(
             proto.MESSAGE,
             number=3,
-            oneof='operator',
-            message='StructuredAggregationQuery.Aggregation.Avg',
+            oneof="operator",
+            message="StructuredAggregationQuery.Aggregation.Avg",
         )
         alias: str = proto.Field(
             proto.STRING,
             number=7,
         )
 
-    structured_query: 'StructuredQuery' = proto.Field(
+    structured_query: "StructuredQuery" = proto.Field(
         proto.MESSAGE,
         number=1,
-        oneof='query_type',
-        message='StructuredQuery',
+        oneof="query_type",
+        message="StructuredQuery",
     )
     aggregations: MutableSequence[Aggregation] = proto.RepeatedField(
         proto.MESSAGE,

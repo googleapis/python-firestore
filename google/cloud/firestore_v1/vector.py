@@ -20,12 +20,12 @@ class Vector():
     Underline it'll be converted to a map representation in Firestore API.
     """
 
-    value: list[float] = None
+    value: list[float] = []
 
-    def __init__(self, value: list[float]):
-        self.value = value
+    def __init__(self, value: list[float | int]):
+        self.value = [float(v) for v in value]
 
-    def __eq__(self, other: 'Vector') -> bool:
+    def __eq__(self, other: object) -> bool:
         if not isinstance(other, Vector):
             # don't attempt to compare against unrelated types
             return NotImplemented
