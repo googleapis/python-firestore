@@ -8071,7 +8071,14 @@ def test_create_index_rest(request_type):
         "name": "name_value",
         "query_scope": 1,
         "api_scope": 1,
-        "fields": [{"field_path": "field_path_value", "order": 1, "array_config": 1}],
+        "fields": [
+            {
+                "field_path": "field_path_value",
+                "order": 1,
+                "array_config": 1,
+                "vector_config": {"dimension": 966, "flat": {}},
+            }
+        ],
         "state": 1,
     }
     # The version of a generated dependency at test runtime may differ from the version used during generation.
@@ -9580,6 +9587,7 @@ def test_update_field_rest(request_type):
                             "field_path": "field_path_value",
                             "order": 1,
                             "array_config": 1,
+                            "vector_config": {"dimension": 966, "flat": {}},
                         }
                     ],
                     "state": 1,
