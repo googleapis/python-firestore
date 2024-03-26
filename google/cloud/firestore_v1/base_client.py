@@ -265,6 +265,7 @@ class BaseClient(ClientWithProject):
                 # The emulator requires additional metadata to be set.
                 self._rpc_metadata_internal.append(("authorization", "Bearer owner"))
 
+        self._rpc_metadata_internal.append(("X-Return-Encrypted-Headers", "gfe_response_only"))
         return self._rpc_metadata_internal
 
     def collection(self, *collection_path) -> BaseCollectionReference[BaseQuery]:
