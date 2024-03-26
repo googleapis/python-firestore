@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List
+from typing import List, Union
 
 
 class Vector():
@@ -24,7 +24,7 @@ class Vector():
 
     value: List[float] = []
 
-    def __init__(self, value: List[float | int]):
+    def __init__(self, value: List[Union[float, int]]):
         self.value = [float(v) for v in value]
 
     def __eq__(self, other: object) -> bool:
