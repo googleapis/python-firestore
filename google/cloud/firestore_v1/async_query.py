@@ -40,7 +40,7 @@ from typing import AsyncGenerator, List, Optional, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: NO COVER
     # Types needed only for Type Hints
-    from google.cloud.firestore_v1.transaction import Transaction
+    from google.cloud.firestore_v1.async_transaction import AsyncTransaction
     from google.cloud.firestore_v1.field_path import FieldPath
 
 
@@ -171,9 +171,9 @@ class AsyncQuery(BaseQuery):
 
     async def get(
         self,
-        transaction: Transaction = None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> list:
         """Read the documents in the collection that match this query.
 
@@ -266,9 +266,9 @@ class AsyncQuery(BaseQuery):
 
     async def stream(
         self,
-        transaction=None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
         """Read the documents in the collection that match this query.
 
@@ -379,9 +379,9 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
 
     async def get_partitions(
         self,
-        partition_count,
+        partition_count: int,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> AsyncGenerator[QueryPartition, None]:
         """Partition a query for parallelization.
 
