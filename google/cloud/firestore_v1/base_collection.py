@@ -21,6 +21,7 @@ from google.api_core import retry as retries
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
+from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
 from google.cloud.firestore_v1.base_query import QueryType
 
 
@@ -118,6 +119,9 @@ class BaseCollectionReference(Generic[QueryType]):
         raise NotImplementedError
 
     def _aggregation_query(self) -> BaseAggregationQuery:
+        raise NotImplementedError
+
+    def _vector_query(self) -> BaseVectorQuery:
         raise NotImplementedError
 
     def document(self, document_id: Optional[str] = None) -> DocumentReference:
@@ -538,6 +542,14 @@ class BaseCollectionReference(Generic[QueryType]):
             If not provided, Firestore will pick a default name following the format field_<incremental_id++>.
         """
         return self._aggregation_query().avg(field_ref, alias=alias)
+
+    def find_nearest(
+        self,
+        vector_field: str,
+        query_vector: Vector,
+        limit: int,
+        distance_measure: DistanceMeasure): 
+        return self._vector_query().find_nearest(vector_field, query_vector, limit, distance_measure)
 
 
 def _auto_id() -> str:

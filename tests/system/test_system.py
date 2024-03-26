@@ -28,6 +28,7 @@ from google.api_core.exceptions import NotFound
 from google.cloud._helpers import _datetime_to_pb_timestamp
 from google.cloud import firestore_v1 as firestore
 from google.cloud.firestore_v1.base_query import FieldFilter, And, Or
+from google.cloud.firestore_v1.vector import Vector
 
 
 from time import sleep
@@ -141,6 +142,40 @@ def test_create_document(client, cleanup, database):
         "also": {"nestednow": server_now, "quarter": data["also"]["quarter"]},
     }
     assert stored_data == expected_data
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_create_document_w_vector(client, cleanup, database):
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    document1 = client.document(collection_id, "doc1")
+    document2 = client.document(collection_id, "doc2")
+    document3 = client.document(collection_id, "doc3")
+    data1 = {
+        "embedding": Vector([1.0, 2.0, 3.0])
+    }
+    data2 = {
+        "embedding": Vector([2, 2, 3.0])
+    }
+    data3 = {
+        "embedding": Vector([2.0, 2.0])
+    }
+
+    document1.create(data1)
+    document2.create(data2)
+    document3.create(data3)
+
+    assert [v.to_dict() for v in client.collection(collection_id).order_by("embedding").get()] == [data3, data1, data2]
+
+    def on_snapshot(docs, changes, read_time):
+        on_snapshot.results += docs
+
+    on_snapshot.results = []
+    client.collection(collection_id).order_by("embedding").on_snapshot(on_snapshot)
+
+    # delay here so initial on_snapshot occurs and isn't combined with set
+    sleep(1)
+    assert [v.to_dict() for v in on_snapshot.results] == [data3, data1, data2]
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
