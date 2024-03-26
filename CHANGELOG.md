@@ -5,6 +5,56 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.16.0](https://github.com/googleapis/python-firestore/compare/v2.15.0...v2.16.0) (2024-03-26)
+
+
+### Features
+
+* A new message `Backup` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `BackupSchedule` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `CreateBackupScheduleRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `DailyRecurrence` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `DeleteBackupRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `DeleteBackupScheduleRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `GetBackupRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `GetBackupScheduleRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `ListBackupSchedulesRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `ListBackupSchedulesResponse` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `ListBackupsRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `ListBackupsResponse` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `RestoreDatabaseMetadata` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `RestoreDatabaseRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `UpdateBackupScheduleRequest` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new message `WeeklyRecurrence` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `CreateBackupSchedule` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `DeleteBackup` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `DeleteBackupSchedule` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `GetBackup` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `GetBackupSchedule` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `ListBackups` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `ListBackupSchedules` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `RestoreDatabase` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new method `UpdateBackupSchedule` is added to service `FirestoreAdmin` ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new resource_definition `firestore.googleapis.com/Backup` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* A new resource_definition `firestore.googleapis.com/BackupSchedule` is added ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* Add ExplainMetrics field to RunAggregationQueryResponse ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* Add ExplainMetrics field to RunQueryResponse ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* Add ExplainOptions field to RunAggregationQueryRequest ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* Add ExplainOptions field to RunQueryRequest ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* Add new types ExplainOptions, ExplainMetrics, PlanSummary, ExecutionStats ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+* Add Vector Index API ([#894](https://github.com/googleapis/python-firestore/issues/894)) ([c76f087](https://github.com/googleapis/python-firestore/commit/c76f087624619cc752be856df2c64510913d0a79))
+* Add VectorSearch API  ([fc7b906](https://github.com/googleapis/python-firestore/commit/fc7b906fc0a759df7c5b626474f132099117b6ae))
+
+
+### Bug Fixes
+
+* Add google-auth as a direct dependency ([#875](https://github.com/googleapis/python-firestore/issues/875)) ([ae5ba71](https://github.com/googleapis/python-firestore/commit/ae5ba715e603652b94b2e7baaa21c5543d4e1e93))
+
+
+### Documentation
+
+* Fix docs structure for Firestore ([#868](https://github.com/googleapis/python-firestore/issues/868)) ([8ddb859](https://github.com/googleapis/python-firestore/commit/8ddb859c8178043c0dcd09c85d68ba5d311563bf))
+
 ## [2.15.0](https://github.com/googleapis/python-firestore/compare/v2.14.0...v2.15.0) (2024-02-20)
 
 
