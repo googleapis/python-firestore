@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from typing import List
+
 
 class Vector():
     r""" A class to represent Firestore Vector in python.
@@ -20,9 +22,9 @@ class Vector():
     Underline it'll be converted to a map representation in Firestore API.
     """
 
-    value: list[float] = []
+    value: List[float] = []
 
-    def __init__(self, value: list[float | int]):
+    def __init__(self, value: List[float | int]):
         self.value = [float(v) for v in value]
 
     def __eq__(self, other: object) -> bool:
