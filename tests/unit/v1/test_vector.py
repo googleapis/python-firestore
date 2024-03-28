@@ -49,11 +49,10 @@ def _make_client(firestore_api):
 
 
 def test_compare_vector():
-    vector = Vector([1.0, 2.0, 3.0])
-    try:
-        vector > 3
-    except TypeError as e:
-        assert "not supported between instances of 'Vector' and 'int'" in e.args[0]
+    vector1 = Vector([1.0, 2.0, 3.0])
+    vector2 = Vector([1, 2, 3.0])
+
+    assert vector1 == vector2
 
 
 def test_decode_vector_type():

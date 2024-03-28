@@ -28,14 +28,7 @@ class Vector:
         self.value = [float(v) for v in value]
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Vector):
-            # don't attempt to compare against unrelated types
-            return NotImplemented
-
         return self.value == other.value
-
-    def __str__(self):
-        return "Vector<" + ",".join([str(i) for i in self.value]) + ">"
 
     def __repr__(self):
         return "Vector<" + ",".join([str(i) for i in self.value]) + ">"
