@@ -89,7 +89,7 @@ class BaseVectorQuery(ABC):
         self, 
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: Optional[float]) -> Iterable[DocumentSnapshot]:
+        timeout: Optional[float] = None) -> Iterable[DocumentSnapshot]:
         """Runs the vector query.
         """
 
