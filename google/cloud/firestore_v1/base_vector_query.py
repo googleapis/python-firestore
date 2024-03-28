@@ -52,13 +52,12 @@ class BaseVectorQuery(ABC):
         pb = query.StructuredQuery()
 
         distance_measure_proto = None
-        match self._distance_measure:
-            case DistanceMeasure.EUCLIDEAN:
-                distance_measure_proto = query.StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN
-            case DistanceMeasure.COSINE:
-                distance_measure_proto = query.StructuredQuery.FindNearest.DistanceMeasure.COSINE
-            case DistanceMeasure.DOT_PRODUCT:
-                distance_measure_proto = query.StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT
+        if self._distance_measure == DistanceMeasure.EUCLIDEAN:
+            distance_measure_proto = query.StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN
+        elif self._distance_measure == DistanceMeasure.COSINE:
+            distance_measure_proto = query.StructuredQuery.FindNearest.DistanceMeasure.COSINE
+        elif self._distance_measure == DistanceMeasure.DOT_PRODUCT:
+            distance_measure_proto = query.StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT
 
         pb = self._nested_query._to_protobuf()
         pb.find_nearest = query.StructuredQuery.FindNearest(
