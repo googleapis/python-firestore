@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import types
 import mock
 import pytest
 
@@ -318,4 +319,54 @@ def test_vector_query_collection_group(distance_measure, expected_distance):
         },
         metadata=client._rpc_metadata,
         **kwargs,
+    )
+
+
+def test_vector_query_stream_with_transaction():
+    # Create a minimal fake GAPIC.
+    firestore_api = mock.Mock(spec=["run_query"])
+    client = make_client()
+    client._firestore_api_internal = firestore_api
+
+    # Create a real-ish transaction for this client.
+    transaction = client.transaction()
+    txn_id = b"\x00\x00\x01-work-\xf2"
+    transaction._id = txn_id
+
+    # Make a **real** collection reference as parent.
+    parent = client.collection("declaration")
+
+    # Add a dummy response to the minimal fake GAPIC.
+    parent_path, expected_prefix = parent._parent_info()
+    name = "{}/burger".format(expected_prefix)
+    data = {"lettuce": b"\xee\x87"}
+    response_pb = _make_query_response(name=name, data=data)
+    firestore_api.run_query.return_value = iter([response_pb])
+
+    # Execute the query and check the response.
+    query = make_query(parent)
+
+    vector_query = query.where("snooze", "==", 10).find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=5,
+    )
+
+    get_response = vector_query.stream(transaction=transaction)
+    assert isinstance(get_response, types.GeneratorType)
+    returned = list(get_response)
+    assert len(returned) == 1
+    snapshot = returned[0]
+    assert snapshot.reference._path == ("declaration", "burger")
+    assert snapshot.to_dict() == data
+
+    # Verify the mock call.
+    firestore_api.run_query.assert_called_once_with(
+        request={
+            "parent": parent_path,
+            "structured_query": vector_query._to_protobuf(),
+            "transaction": txn_id,
+        },
+        metadata=client._rpc_metadata,
     )
