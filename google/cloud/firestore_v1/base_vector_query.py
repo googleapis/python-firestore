@@ -65,6 +65,8 @@ class BaseVectorQuery(ABC):
             distance_measure_proto = (
                 query.StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT
             )
+        else:
+            raise ValueError("Invalid distance_measure")
 
         pb = self._nested_query._to_protobuf()
         pb.find_nearest = query.StructuredQuery.FindNearest(

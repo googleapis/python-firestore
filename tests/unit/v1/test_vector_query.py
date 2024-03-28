@@ -31,7 +31,21 @@ _PROJECT = "PROJECT"
 _TXN_ID = b"\x00\x00\x01-work-\xf2"
 
 
-def test_vector_query_constructor_to_pb():
+@pytest.mark.parametrize(
+    "distance_measure, expected_distance",
+    [
+        (
+            DistanceMeasure.EUCLIDEAN,
+            StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
+        ),
+        (DistanceMeasure.COSINE, StructuredQuery.FindNearest.DistanceMeasure.COSINE),
+        (
+            DistanceMeasure.DOT_PRODUCT,
+            StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT,
+        ),
+    ],
+)
+def test_vector_query_constructor_to_pb(distance_measure, expected_distance):
     client = make_client()
     parent = client.collection("dee")
     query = make_query(parent)
@@ -43,7 +57,7 @@ def test_vector_query_constructor_to_pb():
     vector_query.find_nearest(
         vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
-        distance_measure=DistanceMeasure.EUCLIDEAN,
+        distance_measure=distance_measure,
         limit=5,
     )
 
@@ -51,10 +65,29 @@ def test_vector_query_constructor_to_pb():
     expected_pb.find_nearest = StructuredQuery.FindNearest(
         vector_field=StructuredQuery.FieldReference(field_path="embedding"),
         query_vector=encode_value(Vector([1.0, 2.0, 3.0]).to_map_value()),
-        distance_measure=StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
+        distance_measure=expected_distance,
         limit=5,
     )
     assert vector_query._to_protobuf() == expected_pb
+
+
+def test_vector_query_invalid_distance():
+    client = make_client()
+    parent = client.collection("dee")
+    query = make_query(parent)
+    vector_query = make_vector_query(query)
+
+    vector_query.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure="random",
+        limit=5,
+    )
+
+    try:
+        vector_query._to_protobuf()
+    except ValueError as e:
+        assert e.args[0] == "Invalid distance_measure"
 
 
 def _transaction(client):
