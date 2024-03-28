@@ -82,17 +82,6 @@ class VectorQuery(BaseVectorQuery):
 
         return response_iterator, expected_prefix
 
-    def _retry_query_after_exception(self, exc, retry, transaction):
-        """Helper method for :meth:`stream`."""
-        if transaction is None:  # no snapshot-based retry inside transaction
-            if retry is gapic_v1.method.DEFAULT:
-                transport = self._client._firestore_api._transport
-                gapic_callable = transport.run_query
-                retry = gapic_callable._retry
-            return retry._predicate(exc)
-
-        return False
-
     def stream(
         self,
         transaction=None,
@@ -105,22 +94,8 @@ class VectorQuery(BaseVectorQuery):
             timeout,
         )
 
-        last_snapshot = None
-
         while True:
-            try:
-                response = next(response_iterator, None)
-            except exceptions.GoogleAPICallError as exc:
-                if self._retry_query_after_exception(exc, retry, transaction):
-                    new_query = self.start_after(last_snapshot)
-                    response_iterator = new_query._get_stream_iterator(
-                        transaction,
-                        retry,
-                        timeout,
-                    )
-                    continue
-                else:
-                    raise
+            response = next(response_iterator, None)
 
             if response is None:  # EOI
                 break
@@ -134,5 +109,4 @@ class VectorQuery(BaseVectorQuery):
                     response, self._nested_query._parent, expected_prefix
                 )
             if snapshot is not None:
-                last_snapshot = snapshot
                 yield snapshot
