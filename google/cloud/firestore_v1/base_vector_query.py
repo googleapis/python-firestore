@@ -99,7 +99,7 @@ class BaseVectorQuery(ABC):
         query_vector: Vector, 
         limit: int,
         distance_measure: DistanceMeasure
-    ) -> BaseVectorQuery:
+    ) -> self:
         """Finds the closest vector embeddings to the given query vector.
         """
         self._vector_field = vector_field
