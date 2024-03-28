@@ -552,6 +552,7 @@ class BaseCollectionReference(Generic[QueryType]):
         limit: int,
         distance_measure: DistanceMeasure,
     ):
+        """Finds the closest vector embeddings to the given query vector."""
         return self._vector_query().find_nearest(
             vector_field, query_vector, limit, distance_measure
         )

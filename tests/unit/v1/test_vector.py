@@ -48,6 +48,52 @@ def _make_client(firestore_api):
     return client
 
 
+def test_compare_vector():
+    vector = Vector([1.0, 2.0, 3.0])
+    try:
+        vector > 3
+    except TypeError as e:
+        assert "not supported between instances of 'Vector' and 'int'" in e.args[0]
+
+
+def test_decode_vector_type():
+    firestore_api = _make_firestore_api()
+    client = _make_client(firestore_api)
+    val = _helpers.decode_dict(
+        {
+            "value": document.Value(
+                array_value=document.ArrayValue(
+                    values=[
+                        document.Value(double_value=1.0),
+                        document.Value(double_value=2.0),
+                        document.Value(double_value=3.0),
+                    ]
+                )
+            ),
+            "__type__": document.Value(string_value="__vector__"),
+        },
+        client,
+    )
+    assert isinstance(val, Vector)
+
+    val = _helpers.decode_dict(
+        {
+            "value": document.Value(
+                array_value=document.ArrayValue(
+                    values=[
+                        document.Value(double_value=1.0),
+                        document.Value(double_value=2.0),
+                        document.Value(double_value=3.0),
+                    ]
+                )
+            ),
+            "__type__": document.Value(string_value="__not_vector__"),
+        },
+        client,
+    )
+    assert not (isinstance(val, Vector))
+
+
 def test_vector():
     vector = Vector([1.0, 2.0, 3.0])
     # Create a minimal fake GAPIC with a dummy response.

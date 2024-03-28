@@ -98,7 +98,6 @@ def test_vector_query(distance_measure, expected_distance):
 
     # Make a **real** collection reference as parent.
     parent = client.collection("dee")
-    query = make_query(parent)
     parent_path, expected_prefix = parent._parent_info()
 
     data = {"snooze": 10, "embedding": Vector([1.0, 2.0, 3.0])}
@@ -111,7 +110,7 @@ def test_vector_query(distance_measure, expected_distance):
     # Execute the vector query and check the response.
     firestore_api.run_query.return_value = iter([response_pb])
 
-    vector_query = query.find_nearest(
+    vector_query = parent.find_nearest(
         vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
         distance_measure=distance_measure,
