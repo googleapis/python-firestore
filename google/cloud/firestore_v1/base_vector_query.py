@@ -72,7 +72,7 @@ class BaseVectorQuery(ABC):
         self,
         transaction=None,
         retry: Union[retries.Retry, None, gapic_v1.method._MethodDefault] = None,
-        timeout: float | None = None,
+        timeout: Optional[float] = None,
     ) -> Tuple[dict, str, dict]:
         parent_path, expected_prefix = self._collection_ref._parent_info()
         request = {
@@ -89,7 +89,7 @@ class BaseVectorQuery(ABC):
         self, 
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float | None = None,) -> Iterable[DocumentSnapshot]:
+        timeout: Optional[float]) -> Iterable[DocumentSnapshot]:
         """Runs the vector query.
         """
 
