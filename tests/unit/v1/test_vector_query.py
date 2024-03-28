@@ -320,4 +320,3 @@ def test_vector_query_collection_group(distance_measure, expected_distance):
         metadata=client._rpc_metadata,
         **kwargs,
     )
-
