@@ -14,6 +14,7 @@
 
 import mock
 import pytest
+import types
 
 from google.cloud.firestore_v1.types.query import StructuredQuery
 from google.cloud.firestore_v1.vector import Vector
@@ -199,14 +200,17 @@ def test_vector_query_with_filter(distance_measure, expected_distance):
     parent_path, expected_prefix = parent._parent_info()
 
     data = {"snooze": 10, "embedding": Vector([1.0, 2.0, 3.0])}
-    response_pb = _make_query_response(
+    response_pb1 = _make_query_response(
+        name="{}/test_doc".format(expected_prefix), data=data
+    )
+    response_pb2 = _make_query_response(
         name="{}/test_doc".format(expected_prefix), data=data
     )
 
     kwargs = make_retry_timeout_kwargs(retry=None, timeout=None)
 
     # Execute the vector query and check the response.
-    firestore_api.run_query.return_value = iter([response_pb])
+    firestore_api.run_query.return_value = iter([response_pb1, response_pb2])
 
     vector_query = query.where("snooze", "==", 10).find_nearest(
         vector_field="embedding",
@@ -217,7 +221,7 @@ def test_vector_query_with_filter(distance_measure, expected_distance):
 
     returned = vector_query.get(transaction=_transaction(client), **kwargs)
     assert isinstance(returned, list)
-    assert len(returned) == 1
+    assert len(returned) == 2
     assert returned[0].to_dict() == data
 
     expected_pb = _expected_pb(
@@ -318,4 +322,41 @@ def test_vector_query_collection_group(distance_measure, expected_distance):
         },
         metadata=client._rpc_metadata,
         **kwargs,
+    )
+
+
+def test_query_stream_multiple_empty_response_in_stream():
+    # Create a minimal fake GAPIC with a dummy response.
+    firestore_api = mock.Mock(spec=["run_query"])
+    empty_response1 = _make_query_response()
+    empty_response2 = _make_query_response()
+    run_query_response = iter([empty_response1, empty_response2])
+    firestore_api.run_query.return_value = run_query_response
+
+    # Attach the fake GAPIC to a real client.
+    client = make_client()
+    client._firestore_api_internal = firestore_api
+
+    # Make a **real** collection reference as parent.
+    parent = client.collection("dah", "dah", "dum")
+    vector_query = parent.where("snooze", "==", 10).find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=5,
+    )
+
+    get_response = vector_query.stream()
+    assert isinstance(get_response, types.GeneratorType)
+    assert list(get_response) == []
+
+    # Verify the mock call.
+    parent_path, _ = parent._parent_info()
+    firestore_api.run_query.assert_called_once_with(
+        request={
+            "parent": parent_path,
+            "structured_query": vector_query._to_protobuf(),
+            "transaction": None,
+        },
+        metadata=client._rpc_metadata,
     )
