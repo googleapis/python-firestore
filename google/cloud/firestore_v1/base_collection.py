@@ -548,8 +548,11 @@ class BaseCollectionReference(Generic[QueryType]):
         vector_field: str,
         query_vector: Vector,
         limit: int,
-        distance_measure: DistanceMeasure): 
-        return self._vector_query().find_nearest(vector_field, query_vector, limit, distance_measure)
+        distance_measure: DistanceMeasure,
+    ):
+        return self._vector_query().find_nearest(
+            vector_field, query_vector, limit, distance_measure
+        )
 
 
 def _auto_id() -> str:

@@ -29,9 +29,10 @@ from google.cloud.firestore_v1.base_query import (
     _collection_group_query_response_to_snapshot,
 )
 
+
 class VectorQuery(BaseVectorQuery):
     """Represents a vector query to the Firestore API."""
-    
+
     def __init__(
         self,
         nested_query,
@@ -66,7 +67,7 @@ class VectorQuery(BaseVectorQuery):
         result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
 
         return list(result)
-    
+
     def _get_stream_iterator(self, transaction, retry, timeout):
         """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
@@ -80,7 +81,7 @@ class VectorQuery(BaseVectorQuery):
             metadata=self._client._rpc_metadata,
             **kwargs,
         )
-        
+
         return response_iterator, expected_prefix
 
     def _retry_query_after_exception(self, exc, retry, transaction):
@@ -105,7 +106,7 @@ class VectorQuery(BaseVectorQuery):
             retry,
             timeout,
         )
-    
+
         while True:
             try:
                 response = next(response_iterator, None)
@@ -135,4 +136,3 @@ class VectorQuery(BaseVectorQuery):
             if snapshot is not None:
                 last_snapshot = snapshot
                 yield snapshot
-

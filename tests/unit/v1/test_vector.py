@@ -31,16 +31,23 @@ def _make_commit_repsonse():
     response.commit_time = mock.sentinel.commit_time
     return response
 
+
 def _make_firestore_api():
     firestore_api = mock.Mock()
     firestore_api.commit.mock_add_spec(spec=["commit"])
     firestore_api.commit.return_value = _make_commit_repsonse()
     return firestore_api
 
+
 def _make_client(firestore_api):
-    client = Client(project="dignity", credentials=mock.Mock(spec=google.auth.credentials.Credentials), database=None)
+    client = Client(
+        project="dignity",
+        credentials=mock.Mock(spec=google.auth.credentials.Credentials),
+        database=None,
+    )
     client._firestore_api_internal = firestore_api
     return client
+
 
 def test_vector():
     vector = Vector([1.0, 2.0, 3.0])
@@ -55,16 +62,26 @@ def test_vector():
 
     write_pb = write.Write(
         update=document.Document(
-            name=mocked_document._document_path, fields={
-                "hello": document.Value(string_value="goodbye"), 
-                "embedding": document.Value(map_value=
-                    document.MapValue(
-                        fields={"value": document.Value(
-                            array_value=document.ArrayValue(
-                                values=[document.Value(double_value=1.0),document.Value(double_value=2.0), document.Value(double_value=3.0)])
+            name=mocked_document._document_path,
+            fields={
+                "hello": document.Value(string_value="goodbye"),
+                "embedding": document.Value(
+                    map_value=document.MapValue(
+                        fields={
+                            "value": document.Value(
+                                array_value=document.ArrayValue(
+                                    values=[
+                                        document.Value(double_value=1.0),
+                                        document.Value(double_value=2.0),
+                                        document.Value(double_value=3.0),
+                                    ]
+                                )
                             ),
-                            "__type__": document.Value(string_value="__vector__")}))
-            }
+                            "__type__": document.Value(string_value="__vector__"),
+                        }
+                    )
+                ),
+            },
         ),
         current_document=common.Precondition(exists=False),
     )
@@ -95,16 +112,26 @@ def test_vector_convert_to_double():
 
     write_pb = write.Write(
         update=document.Document(
-            name=mocked_document._document_path, fields={
+            name=mocked_document._document_path,
+            fields={
                 "hello": document.Value(string_value="goodbye"),
-                "embedding": document.Value(map_value=
-                    document.MapValue(
-                        fields={"value": document.Value(
-                            array_value=document.ArrayValue(
-                                values=[document.Value(double_value=4.0),document.Value(double_value=5.0), document.Value(double_value=6.0)])
+                "embedding": document.Value(
+                    map_value=document.MapValue(
+                        fields={
+                            "value": document.Value(
+                                array_value=document.ArrayValue(
+                                    values=[
+                                        document.Value(double_value=4.0),
+                                        document.Value(double_value=5.0),
+                                        document.Value(double_value=6.0),
+                                    ]
+                                )
                             ),
-                            "__type__": document.Value(string_value="__vector__")}))
-            }
+                            "__type__": document.Value(string_value="__vector__"),
+                        }
+                    )
+                ),
+            },
         ),
         current_document=common.Precondition(exists=False),
     )

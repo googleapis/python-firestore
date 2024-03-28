@@ -151,21 +151,18 @@ def test_create_document_w_vector(client, cleanup, database):
     document1 = client.document(collection_id, "doc1")
     document2 = client.document(collection_id, "doc2")
     document3 = client.document(collection_id, "doc3")
-    data1 = {
-        "embedding": Vector([1.0, 2.0, 3.0])
-    }
-    data2 = {
-        "embedding": Vector([2, 2, 3.0])
-    }
-    data3 = {
-        "embedding": Vector([2.0, 2.0])
-    }
+    data1 = {"embedding": Vector([1.0, 2.0, 3.0])}
+    data2 = {"embedding": Vector([2, 2, 3.0])}
+    data3 = {"embedding": Vector([2.0, 2.0])}
 
     document1.create(data1)
     document2.create(data2)
     document3.create(data3)
 
-    assert [v.to_dict() for v in client.collection(collection_id).order_by("embedding").get()] == [data3, data1, data2]
+    assert [
+        v.to_dict()
+        for v in client.collection(collection_id).order_by("embedding").get()
+    ] == [data3, data1, data2]
 
     def on_snapshot(docs, changes, read_time):
         on_snapshot.results += docs

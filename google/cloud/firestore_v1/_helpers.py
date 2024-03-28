@@ -406,9 +406,9 @@ def decode_dict(value_fields, client) -> Union[dict, Vector]:
     for key, value in value_fields_pb.items():
         res[key] = decode_value(value, client)
 
-    if len(res) == 2 and '__type__' in res:
-        if res['__type__'] == '__vector__':
-            return Vector(res['value'])
+    if len(res) == 2 and "__type__" in res:
+        if res["__type__"] == "__vector__":
+            return Vector(res["value"])
 
     return res
 

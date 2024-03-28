@@ -39,6 +39,7 @@ from google.cloud.firestore_v1._helpers import encode_value, make_retry_timeout_
 _PROJECT = "PROJECT"
 _TXN_ID = b"\x00\x00\x01-work-\xf2"
 
+
 def test_vector_query_constructor_to_pb():
     client = make_client()
     parent = client.collection("dee")
@@ -49,19 +50,21 @@ def test_vector_query_constructor_to_pb():
     assert vector_query._client == query._parent._client
 
     vector_query.find_nearest(
-        vector_field="embedding", 
+        vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
         distance_measure=DistanceMeasure.EUCLIDEAN,
-        limit=5)
+        limit=5,
+    )
 
     expected_pb = query._to_protobuf()
     expected_pb.find_nearest = StructuredQuery.FindNearest(
-        vector_field = StructuredQuery.FieldReference(field_path = "embedding"),
-        query_vector = encode_value(Vector([1.0, 2.0, 3.0]).to_map_value()),
-        distance_measure = StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
-        limit = 5
+        vector_field=StructuredQuery.FieldReference(field_path="embedding"),
+        query_vector=encode_value(Vector([1.0, 2.0, 3.0]).to_map_value()),
+        distance_measure=StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
+        limit=5,
     )
     assert vector_query._to_protobuf() == expected_pb
+
 
 def _transaction(client):
     transaction = client.transaction()
@@ -69,22 +72,33 @@ def _transaction(client):
     transaction._id = txn_id
     return transaction
 
+
 def _expected_pb(parent, vector_field, vector, distance_type, limit):
     query = make_query(parent)
     expected_pb = query._to_protobuf()
     expected_pb.find_nearest = StructuredQuery.FindNearest(
-        vector_field = StructuredQuery.FieldReference(field_path = vector_field),
-        query_vector = encode_value(vector.to_map_value()),
-        distance_measure = distance_type,
-        limit = limit
+        vector_field=StructuredQuery.FieldReference(field_path=vector_field),
+        query_vector=encode_value(vector.to_map_value()),
+        distance_measure=distance_type,
+        limit=limit,
     )
     return expected_pb
 
+
 @pytest.mark.parametrize(
     "distance_measure, expected_distance",
-    [(DistanceMeasure.EUCLIDEAN,StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN),
-     (DistanceMeasure.COSINE, StructuredQuery.FindNearest.DistanceMeasure.COSINE),
-     (DistanceMeasure.DOT_PRODUCT, StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT)])
+    [
+        (
+            DistanceMeasure.EUCLIDEAN,
+            StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
+        ),
+        (DistanceMeasure.COSINE, StructuredQuery.FindNearest.DistanceMeasure.COSINE),
+        (
+            DistanceMeasure.DOT_PRODUCT,
+            StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT,
+        ),
+    ],
+)
 def test_vector_query(distance_measure, expected_distance):
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -97,7 +111,9 @@ def test_vector_query(distance_measure, expected_distance):
     parent_path, expected_prefix = parent._parent_info()
 
     data = {"snooze": 10, "embedding": Vector([1.0, 2.0, 3.0])}
-    response_pb = _make_query_response(name="{}/test_doc".format(expected_prefix), data=data)
+    response_pb = _make_query_response(
+        name="{}/test_doc".format(expected_prefix), data=data
+    )
 
     kwargs = make_retry_timeout_kwargs(retry=None, timeout=None)
 
@@ -105,10 +121,11 @@ def test_vector_query(distance_measure, expected_distance):
     firestore_api.run_query.return_value = iter([response_pb])
 
     vector_query = query.find_nearest(
-        vector_field="embedding", 
+        vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
         distance_measure=distance_measure,
-        limit=5)
+        limit=5,
+    )
 
     returned = vector_query.get(transaction=_transaction(client), **kwargs)
     assert isinstance(returned, list)
@@ -120,7 +137,8 @@ def test_vector_query(distance_measure, expected_distance):
         vector_field="embedding",
         vector=Vector([1.0, 2.0, 3.0]),
         distance_type=expected_distance,
-        limit=5)
+        limit=5,
+    )
     firestore_api.run_query.assert_called_once_with(
         request={
             "parent": parent_path,
@@ -131,11 +149,21 @@ def test_vector_query(distance_measure, expected_distance):
         **kwargs,
     )
 
+
 @pytest.mark.parametrize(
-    "distance_measure, expected_distance", 
-    [(DistanceMeasure.EUCLIDEAN,StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN),
-     (DistanceMeasure.COSINE, StructuredQuery.FindNearest.DistanceMeasure.COSINE),
-     (DistanceMeasure.DOT_PRODUCT, StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT)])
+    "distance_measure, expected_distance",
+    [
+        (
+            DistanceMeasure.EUCLIDEAN,
+            StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
+        ),
+        (DistanceMeasure.COSINE, StructuredQuery.FindNearest.DistanceMeasure.COSINE),
+        (
+            DistanceMeasure.DOT_PRODUCT,
+            StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT,
+        ),
+    ],
+)
 def test_vector_query_with_filter(distance_measure, expected_distance):
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -148,7 +176,9 @@ def test_vector_query_with_filter(distance_measure, expected_distance):
     parent_path, expected_prefix = parent._parent_info()
 
     data = {"snooze": 10, "embedding": Vector([1.0, 2.0, 3.0])}
-    response_pb = _make_query_response(name="{}/test_doc".format(expected_prefix), data=data)
+    response_pb = _make_query_response(
+        name="{}/test_doc".format(expected_prefix), data=data
+    )
 
     kwargs = make_retry_timeout_kwargs(retry=None, timeout=None)
 
@@ -156,10 +186,11 @@ def test_vector_query_with_filter(distance_measure, expected_distance):
     firestore_api.run_query.return_value = iter([response_pb])
 
     vector_query = query.where("snooze", "==", 10).find_nearest(
-        vector_field="embedding", 
+        vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
         distance_measure=distance_measure,
-        limit=5)
+        limit=5,
+    )
 
     returned = vector_query.get(transaction=_transaction(client), **kwargs)
     assert isinstance(returned, list)
@@ -171,12 +202,13 @@ def test_vector_query_with_filter(distance_measure, expected_distance):
         vector_field="embedding",
         vector=Vector([1.0, 2.0, 3.0]),
         distance_type=expected_distance,
-        limit=5)
+        limit=5,
+    )
     expected_pb.where = StructuredQuery.Filter(
-        field_filter = StructuredQuery.FieldFilter(
-            field = StructuredQuery.FieldReference(field_path = "snooze"), 
-            op = StructuredQuery.FieldFilter.Operator.EQUAL,
-            value = encode_value(10)
+        field_filter=StructuredQuery.FieldFilter(
+            field=StructuredQuery.FieldReference(field_path="snooze"),
+            op=StructuredQuery.FieldFilter.Operator.EQUAL,
+            value=encode_value(10),
         )
     )
 
@@ -190,11 +222,21 @@ def test_vector_query_with_filter(distance_measure, expected_distance):
         **kwargs,
     )
 
+
 @pytest.mark.parametrize(
-    "distance_measure, expected_distance", 
-    [(DistanceMeasure.EUCLIDEAN,StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN),
-     (DistanceMeasure.COSINE, StructuredQuery.FindNearest.DistanceMeasure.COSINE),
-     (DistanceMeasure.DOT_PRODUCT, StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT)])
+    "distance_measure, expected_distance",
+    [
+        (
+            DistanceMeasure.EUCLIDEAN,
+            StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
+        ),
+        (DistanceMeasure.COSINE, StructuredQuery.FindNearest.DistanceMeasure.COSINE),
+        (
+            DistanceMeasure.DOT_PRODUCT,
+            StructuredQuery.FindNearest.DistanceMeasure.DOT_PRODUCT,
+        ),
+    ],
+)
 def test_vector_query_collection_group(distance_measure, expected_distance):
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -216,7 +258,8 @@ def test_vector_query_collection_group(distance_measure, expected_distance):
         vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
         distance_measure=distance_measure,
-        limit=5)
+        limit=5,
+    )
 
     returned = vector_query.get(transaction=_transaction(client), **kwargs)
     assert isinstance(returned, list)
@@ -231,18 +274,18 @@ def test_vector_query_collection_group(distance_measure, expected_distance):
         vector_field="embedding",
         vector=Vector([1.0, 2.0, 3.0]),
         distance_type=expected_distance,
-        limit=5)
+        limit=5,
+    )
     expected_pb.where = StructuredQuery.Filter(
-        field_filter = StructuredQuery.FieldFilter(
-            field = StructuredQuery.FieldReference(field_path = "snooze"), 
-            op = StructuredQuery.FieldFilter.Operator.EQUAL,
-            value = encode_value(10)
+        field_filter=StructuredQuery.FieldFilter(
+            field=StructuredQuery.FieldReference(field_path="snooze"),
+            op=StructuredQuery.FieldFilter.Operator.EQUAL,
+            value=encode_value(10),
         )
     )
-    expected_pb.from_ = [StructuredQuery.CollectionSelector(
-        collection_id = "dee",
-        all_descendants = True
-    )]
+    expected_pb.from_ = [
+        StructuredQuery.CollectionSelector(collection_id="dee", all_descendants=True)
+    ]
 
     firestore_api.run_query.assert_called_once_with(
         request={

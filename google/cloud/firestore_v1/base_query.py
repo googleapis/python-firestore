@@ -974,11 +974,11 @@ class BaseQuery(object):
         return query.StructuredQuery(**query_kwargs)
 
     def find_nearest(
-        self, 
-        vector_field: str, 
-        queryVector: Vector, 
+        self,
+        vector_field: str,
+        queryVector: Vector,
         limit: int,
-        distance_measure: DistanceMeasure
+        distance_measure: DistanceMeasure,
     ) -> Type["firestore_v1.base_vector_query.BaseVectorQuery"]:
         raise NotImplementedError
 

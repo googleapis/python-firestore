@@ -243,19 +243,19 @@ class Query(BaseQuery):
         return False
 
     def find_nearest(
-        self, 
-        vector_field: str, 
-        query_vector: Vector, 
+        self,
+        vector_field: str,
+        query_vector: Vector,
         limit: int,
-        distance_measure: DistanceMeasure
+        distance_measure: DistanceMeasure,
     ) -> Type["firestore_v1.vector_query.VectorQuery"]:
-        """Finds the closest vector embeddings to the given query vector.
-        """
+        """Finds the closest vector embeddings to the given query vector."""
         return VectorQuery(self).find_nearest(
-            vector_field=vector_field, 
-            query_vector=query_vector, 
-            limit=limit, 
-            distance_measure=distance_measure)
+            vector_field=vector_field,
+            query_vector=query_vector,
+            limit=limit,
+            distance_measure=distance_measure,
+        )
 
     def count(
         self, alias: str | None = None

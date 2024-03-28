@@ -54,7 +54,10 @@ class TypeOrder(Enum):
             raise ValueError(f"Could not detect value type for {v}")
 
         if v == "map_value":
-            if "__type__" in value.map_value.fields and value.map_value.fields["__type__"].string_value == "__vector__":
+            if (
+                "__type__" in value.map_value.fields
+                and value.map_value.fields["__type__"].string_value == "__vector__"
+            ):
                 return TypeOrder.VECTOR
         return lut[v]
 

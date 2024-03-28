@@ -16,8 +16,8 @@
 from typing import List, Union
 
 
-class Vector():
-    r""" A class to represent Firestore Vector in python.
+class Vector:
+    r"""A class to represent Firestore Vector in python.
 
     Underline it'll be converted to a map representation in Firestore API.
     """
@@ -33,15 +33,12 @@ class Vector():
             return NotImplemented
 
         return self.value == other.value
-    
+
     def __str__(self):
-        return 'Vector<' + ','.join([str(i) for i in self.value]) + '>'
+        return "Vector<" + ",".join([str(i) for i in self.value]) + ">"
 
     def __repr__(self):
-        return 'Vector<' + ','.join([str(i) for i in self.value]) + '>'
+        return "Vector<" + ",".join([str(i) for i in self.value]) + ">"
 
     def to_map_value(self):
-        return {
-            "__type__": "__vector__",
-            "value": self.value
-        }
+        return {"__type__": "__vector__", "value": self.value}
