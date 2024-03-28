@@ -146,7 +146,6 @@ def test_create_document(client, cleanup, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_create_document_w_vector(client, cleanup, database):
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     document1 = client.document(collection_id, "doc1")
     document2 = client.document(collection_id, "doc2")

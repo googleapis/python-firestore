@@ -16,10 +16,8 @@
 """
 
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from google.cloud.firestore_v1.vector import Vector
-from google.cloud.firestore_v1.types.query import StructuredQuery
 from google.api_core import exceptions
-from typing import Any, Generator, Iterable, Optional, Union
+from typing import Any, Generator, Iterable, Optional
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -106,6 +104,8 @@ class VectorQuery(BaseVectorQuery):
             retry,
             timeout,
         )
+
+        last_snapshot = None
 
         while True:
             try:

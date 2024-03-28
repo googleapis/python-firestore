@@ -12,24 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import types
 import mock
 import pytest
 
-from datetime import datetime, timezone, timedelta
 from google.cloud.firestore_v1.types.query import StructuredQuery
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 
-from google.cloud.firestore_v1.base_aggregation import (
-    CountAggregation,
-    SumAggregation,
-    AvgAggregation,
-    AggregationResult,
-)
 from tests.unit.v1._test_helpers import (
     make_vector_query,
-    make_aggregation_query_response,
     make_client,
     make_query,
 )

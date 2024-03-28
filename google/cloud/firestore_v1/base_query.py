@@ -52,6 +52,7 @@ from typing import (
     Union,
     TYPE_CHECKING,
 )
+from google.cloud.firestore_v1.vector import Vector
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot

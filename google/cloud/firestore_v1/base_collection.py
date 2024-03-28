@@ -19,10 +19,12 @@ import random
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
 from google.cloud.firestore_v1.base_query import QueryType
+from google.cloud.firestore_v1.vector import Vector
 
 
 from typing import (

@@ -22,7 +22,6 @@ from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.types import common, document, firestore, write
 from google.cloud.firestore_v1 import _helpers
-from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT
 
 
 def _make_commit_repsonse():
@@ -58,7 +57,7 @@ def test_vector():
     # Actually make a document and call create().
     mocked_document = DocumentReference("foo", "twelve", client=client)
     document_data = {"hello": "goodbye", "embedding": vector}
-    write_result = mocked_document.create(document_data)
+    mocked_document.create(document_data)
 
     write_pb = write.Write(
         update=document.Document(
@@ -108,7 +107,7 @@ def test_vector_convert_to_double():
     # Actually make a document and call create().
     mocked_document = DocumentReference("foo", "twelve", client=client)
     document_data = {"hello": "goodbye", "embedding": vector}
-    write_result = mocked_document.create(document_data)
+    mocked_document.create(document_data)
 
     write_pb = write.Write(
         update=document.Document(
