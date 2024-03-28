@@ -386,7 +386,7 @@ def decode_value(
         raise ValueError("Unknown ``value_type``", value_type)
 
 
-def decode_dict(value_fields, client) -> dict | Vector:
+def decode_dict(value_fields, client) -> Union[dict, Vector]:
     """Converts a protobuf map of Firestore ``Value``-s.
 
     Args:

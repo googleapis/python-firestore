@@ -249,7 +249,7 @@ class Query(BaseQuery):
         limit: int,
         distance_measure: DistanceMeasure
     ) -> Type["firestore_v1.vector_query.VectorQuery"]:
-        """
+        """Finds the closest vector embeddings to the given query vector.
         """
         return VectorQuery(self).find_nearest(
             vector_field=vector_field, 
