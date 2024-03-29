@@ -249,7 +249,20 @@ class Query(BaseQuery):
         limit: int,
         distance_measure: DistanceMeasure,
     ) -> Type["firestore_v1.vector_query.VectorQuery"]:
-        """Finds the closest vector embeddings to the given query vector."""
+        """
+        Finds the closest vector embeddings to the given query vector.
+
+        Args:
+            vector_field(str): An indexed vector field to search upon. Only documents which contain
+                vectors whose dimensionality match the query_vector can be returned.
+            query_vector(Vector): The query vector that we are searching on. Must be a vector of no more
+                than 2048 dimensions.
+            limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
+            distance_measure(:class:`DistanceMeasure`): The Distance Measure to use.
+
+        Yields:
+            :class`~firestore_v1.vector_query.VectorQuery`: the vector query.
+        """
         return VectorQuery(self).find_nearest(
             vector_field=vector_field,
             query_vector=query_vector,

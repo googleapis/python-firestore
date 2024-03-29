@@ -87,6 +87,29 @@ class VectorQuery(BaseVectorQuery):
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
     ) -> Generator[document.DocumentSnapshot, Any, None]:
+        """Read the documents in the collection that match this query.
+
+        This sends a ``RunQuery`` RPC and then returns an iterator which
+        consumes each document returned in the stream of ``RunQueryResponse``
+        messages.
+
+        If a ``transaction`` is used and it already has write operations
+        added, this method cannot be used (i.e. read-after-write is not
+        allowed).
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
+
+        Yields:
+            :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
+            The next document that fulfills the query.
+        """
         response_iterator, expected_prefix = self._get_stream_iterator(
             transaction,
             retry,
