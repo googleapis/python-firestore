@@ -28,6 +28,7 @@ from google.api_core.exceptions import NotFound
 from google.cloud._helpers import _datetime_to_pb_timestamp
 from google.cloud import firestore_v1 as firestore
 from google.cloud.firestore_v1.base_query import FieldFilter, And, Or
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.vector import Vector
 
 
@@ -172,6 +173,46 @@ def test_create_document_w_vector(client, cleanup, database):
     # delay here so initial on_snapshot occurs and isn't combined with set
     sleep(1)
     assert [v.to_dict() for v in on_snapshot.results] == [data3, data1, data2]
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_vector_search_collection(client, database):
+    collection_id = "vector_search"
+    collection = client.collection(collection_id)
+
+    vector_query = collection.where("color", "==", "red").find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=1,
+    )
+    returned = vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 1
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+    }
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_vector_search_collection_group(client, database):
+    collection_id = "vector_search"
+    collection_group = client.collection_group(collection_id)
+
+    vector_query = collection_group.where("color", "==", "red").find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=1,
+    )
+    returned = vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 1
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+    }
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
