@@ -175,6 +175,7 @@ def test_create_document_w_vector(client, cleanup, database):
     assert [v.to_dict() for v in on_snapshot.results] == [data3, data1, data2]
 
 
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_vector_search_collection(client, database):
     collection_id = "vector_search"
@@ -195,6 +196,7 @@ def test_vector_search_collection(client, database):
     }
 
 
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_vector_search_collection_group(client, database):
     collection_id = "vector_search"
