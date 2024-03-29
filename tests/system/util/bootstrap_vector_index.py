@@ -24,7 +24,7 @@ from google.cloud.firestore_admin_v1.services.firestore_admin.transports import 
 from google.cloud.firestore_admin_v1.types import Index
 from google.cloud.firestore_v1.vector import Vector
 
-# PROJECT_ID = "{project-id}"
+PROJECT_ID = "{project-id}"
 DATABASE_ID = "(default)"
 COLLECTION_ID = "vector_search"
 TARGET_HOSTNAME = "firestore.googleapis.com"
