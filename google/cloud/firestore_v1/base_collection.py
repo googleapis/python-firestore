@@ -51,6 +51,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.field_path import FieldPath
+    from firestore_v1.vector_query import VectorQuery
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -553,7 +554,7 @@ class BaseCollectionReference(Generic[QueryType]):
         query_vector: Vector,
         limit: int,
         distance_measure: DistanceMeasure,
-    ) -> Type["firestore_v1.vector_query.VectorQuery"]:
+    ) -> VectorQuery:
         """
         Finds the closest vector embeddings to the given query vector.
 
