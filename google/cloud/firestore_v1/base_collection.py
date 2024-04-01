@@ -565,7 +565,7 @@ class BaseCollectionReference(Generic[QueryType]):
             limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
             distance_measure(:class:`DistanceMeasure`): The Distance Measure to use.
 
-        Yields:
+        Returns:
             :class`~firestore_v1.vector_query.VectorQuery`: the vector query.
         """
         return self._vector_query().find_nearest(

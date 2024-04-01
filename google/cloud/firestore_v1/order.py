@@ -35,7 +35,6 @@ class TypeOrder(Enum):
     @staticmethod
     def from_value(value) -> Any:
         v = value._pb.WhichOneof("value_type")
-
         lut = {
             "null_value": TypeOrder.NULL,
             "boolean_value": TypeOrder.BOOLEAN,
@@ -82,35 +81,31 @@ class Order(object):
                 return -1
             return 1
 
-        value_type = left._pb.WhichOneof("value_type")
-
-        if value_type == "null_value":
+        if leftType == TypeOrder.NULL.value:
             return 0  # nulls are all equal
-        elif value_type == "boolean_value":
+        elif leftType == TypeOrder.BOOLEAN.value:
             return cls._compare_to(left.boolean_value, right.boolean_value)
-        elif value_type == "integer_value":
+        elif leftType == TypeOrder.NUMBER.value:
             return cls.compare_numbers(left, right)
-        elif value_type == "double_value":
-            return cls.compare_numbers(left, right)
-        elif value_type == "timestamp_value":
+        elif leftType == TypeOrder.TIMESTAMP.value:
             return cls.compare_timestamps(left, right)
-        elif value_type == "string_value":
+        elif leftType == TypeOrder.STRING.value:
             return cls._compare_to(left.string_value, right.string_value)
-        elif value_type == "bytes_value":
+        elif leftType == TypeOrder.BLOB.value:
             return cls.compare_blobs(left, right)
-        elif value_type == "reference_value":
+        elif leftType == TypeOrder.REF.value:
             return cls.compare_resource_paths(left, right)
-        elif value_type == "geo_point_value":
+        elif leftType == TypeOrder.GEO_POINT.value:
             return cls.compare_geo_points(left, right)
-        elif value_type == "array_value":
+        elif leftType == TypeOrder.ARRAY.value:
             return cls.compare_arrays(left, right)
         elif leftType == TypeOrder.VECTOR.value:
             # ARRAYs < VECTORs < MAPs
             return cls.compare_vectors(left, right)
-        elif value_type == "map_value":
+        elif leftType == TypeOrder.OBJECT.value:
             return cls.compare_objects(left, right)
         else:
-            raise ValueError(f"Unknown ``value_type`` {value_type}")
+            raise ValueError(f"Unknown ``left_type`` {leftType}")
 
     @staticmethod
     def compare_blobs(left, right) -> int:

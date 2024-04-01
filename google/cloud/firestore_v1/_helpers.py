@@ -161,7 +161,8 @@ def encode_value(value) -> types.document.Value:
 
     Args:
         value (Union[NoneType, bool, int, float, datetime.datetime, \
-            str, bytes, dict, ~google.cloud.Firestore.GeoPoint]): A native
+            str, bytes, dict, ~google.cloud.Firestore.GeoPoint, \
+            ~google.cloud.firestore_v1.vector.Vector]): A native
             Python value to convert to a protobuf field.
 
     Returns:
@@ -335,7 +336,7 @@ def reference_value_to_document(reference_value, client) -> Any:
 
 def decode_value(
     value, client
-) -> Union[None, bool, int, float, list, datetime.datetime, str, bytes, dict, GeoPoint]:
+) -> Union[None, bool, int, float, list, datetime.datetime, str, bytes, dict, GeoPoint, Vector]:
     """Converts a Firestore protobuf ``Value`` to a native Python value.
 
     Args:
@@ -401,14 +402,10 @@ def decode_dict(value_fields, client) -> Union[dict, Vector]:
         of native Python values converted from the ``value_fields``.
     """
     value_fields_pb = getattr(value_fields, "_pb", value_fields)
-    res = {}
+    res = {key: decode_value(value, client) for key, value in value_fields_pb.items()}
 
-    for key, value in value_fields_pb.items():
-        res[key] = decode_value(value, client)
-
-    if len(res) == 2 and "__type__" in res:
-        if res["__type__"] == "__vector__":
-            return Vector(res["value"])
+    if res.get("__type__", None) == "__vector__":
+        return Vector(res["value"])
 
     return res
 

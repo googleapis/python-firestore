@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Union
+from collections.abc import Sequence
+from typing import List
 
 
 class Vector:
@@ -22,16 +23,16 @@ class Vector:
     Underline it'll be converted to a map representation in Firestore API.
     """
 
-    value: List[float] = []
+    _value: List[float] = []
 
-    def __init__(self, value: List[Union[float, int]]):
-        self.value = [float(v) for v in value]
+    def __init__(self, value: Sequence[float]):
+        self._value = [float(v) for v in value]
 
     def __eq__(self, other: object) -> bool:
-        return self.value == other.value
+        return self._value == other._value
 
     def __repr__(self):
-        return "Vector<" + ",".join([str(i) for i in self.value]) + ">"
+        return f"Vector<{str(self.value)[1:-1]}>"
 
     def to_map_value(self):
-        return {"__type__": "__vector__", "value": self.value}
+        return {"__type__": "__vector__", "value": self._value}
