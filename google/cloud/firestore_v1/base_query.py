@@ -58,7 +58,7 @@ from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 if TYPE_CHECKING:  # pragma: NO COVER
-from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
+    from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
     from google.cloud.firestore_v1.field_path import FieldPath
 
 _BAD_DIR_STRING: str
