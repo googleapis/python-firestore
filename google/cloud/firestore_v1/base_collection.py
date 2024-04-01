@@ -18,7 +18,6 @@ import random
 
 from google.api_core import retry as retries
 
-from google.cloud import firestore_v1
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.document import DocumentReference
@@ -41,7 +40,6 @@ from typing import (
     NoReturn,
     Tuple,
     Union,
-    Type,
     TYPE_CHECKING,
 )
 
