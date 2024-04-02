@@ -29,14 +29,8 @@ class Vector(collections.abc.Sequence):
     def __init__(self, value: Sequence[float]):
         self._value = tuple([float(v) for v in value])
 
-    def __getitem__(self, index: int):
-        size = len(self._value)
-        index_id = index
-        if index < 0:
-            index_id += size
-        if index_id < 0 or index_id >= size:
-            raise IndexError(f"index {index} out of range")
-        return self._value[index_id]
+    def __getitem__(self, arg: int):
+        return self._value[arg]
 
     def __len__(self):
         return len(self._value)

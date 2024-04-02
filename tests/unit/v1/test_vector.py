@@ -62,16 +62,6 @@ def test_vector_get_items():
     assert vector[1] == 2.0
     assert vector[-1] == 3.0
 
-    try:
-        assert vector[3] == 1
-    except IndexError as e:
-        assert e.args[0] == "index 3 out of range"
-
-    try:
-        assert vector[-6] == 1
-    except IndexError as e:
-        assert e.args[0] == "index -6 out of range"
-
 
 def test_vector_len():
     vector = Vector([1.0, 2.0, 3.0])

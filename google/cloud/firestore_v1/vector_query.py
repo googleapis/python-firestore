@@ -16,7 +16,7 @@
 """
 
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from typing import Iterable, Optional
+from typing import Iterable, Optional, Self, Union
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -33,11 +33,11 @@ class VectorQuery(BaseVectorQuery):
 
     def __init__(
         self,
-        nested_query: BaseQuery,
+        nested_query: Union[BaseQuery, Self],
     ) -> None:
         """Presents the vector query.
         Args:
-            nested_query (VectorQuery): the base query to apply as the prefilter.
+            nested_query (BaseQuery | VectorQuery): the base query to apply as the prefilter.
         """
         super(VectorQuery, self).__init__(nested_query)
 
