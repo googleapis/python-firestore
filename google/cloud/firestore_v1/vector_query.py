@@ -16,7 +16,7 @@
 """
 
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from typing import Generator, Iterable, Optional
+from typing import Iterable, Optional
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
