@@ -33,8 +33,8 @@ class TypeOrder(Enum):
     REF = 6
     GEO_POINT = 7
     ARRAY = 8
-    VECTOR = 9
-    OBJECT = 10
+    OBJECT = 9
+    VECTOR = 10
 
     @staticmethod
     def from_value(value) -> Any:
