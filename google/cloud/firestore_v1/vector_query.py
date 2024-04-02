@@ -16,8 +16,7 @@
 """
 
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from typing import Iterable, Optional, Union
-from typing_extensions import Self
+from typing import Iterable, Optional, TypeVar, Union
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -28,13 +27,15 @@ from google.cloud.firestore_v1.base_query import (
     _collection_group_query_response_to_snapshot,
 )
 
+TVectorQuery = TypeVar("TVectorQuery", bound="VectorQuery")
+
 
 class VectorQuery(BaseVectorQuery):
     """Represents a vector query to the Firestore API."""
 
     def __init__(
         self,
-        nested_query: Union[BaseQuery, Self],
+        nested_query: Union[BaseQuery, TVectorQuery],
     ) -> None:
         """Presents the vector query.
         Args:
