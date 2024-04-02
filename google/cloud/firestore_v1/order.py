@@ -66,7 +66,7 @@ class TypeOrder(Enum):
 
 
 # NOTE: This order is defined by the backend and cannot be changed.
-_TYPE_ORDER = {
+_TYPE_ORDER_MAP = {
     TypeOrder.NULL: 0,
     TypeOrder.BOOLEAN: 1,
     TypeOrder.NUMBER: 2,
@@ -96,13 +96,10 @@ class Order(object):
         leftType = TypeOrder.from_value(left)
         rightType = TypeOrder.from_value(right)
         if leftType != rightType:
-            try:
-                if _TYPE_ORDER[leftType] < _TYPE_ORDER[rightType]:
-                    return -1
-                else:
-                    return 1
-            except KeyError as exc:
-                raise ValueError(f"Unknown TypeOrder") from exc
+            if _TYPE_ORDER_MAP[leftType] < _TYPE_ORDER_MAP[rightType]:
+                return -1
+            else:
+                return 1
 
         if leftType == TypeOrder.NULL:
             return 0  # nulls are all equal
