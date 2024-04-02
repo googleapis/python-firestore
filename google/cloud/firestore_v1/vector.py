@@ -17,7 +17,8 @@ import collections
 
 from typing import Tuple, Sequence
 
-class Vector (collections.abc.Sequence):
+
+class Vector(collections.abc.Sequence):
     r"""A class to represent Firestore Vector in python.
 
     Underline it'll be converted to a map representation in Firestore API.

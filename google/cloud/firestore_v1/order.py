@@ -105,7 +105,7 @@ class Order(object):
         elif leftType == TypeOrder.OBJECT.value:
             return cls.compare_objects(left, right)
         else:
-            raise ValueError(f"Unknown ``left_type`` {leftType}")
+            raise ValueError(f"Unknown TypeOrder {leftType}")
 
     @staticmethod
     def compare_blobs(left, right) -> int:

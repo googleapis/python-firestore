@@ -407,6 +407,8 @@ def decode_dict(value_fields, client) -> Union[dict, Vector]:
     res = {key: decode_value(value, client) for key, value in value_fields_pb.items()}
 
     if res.get("__type__", None) == "__vector__":
+        # Vector data type is represented as mapping.
+        # {"__type__":"__vector__", "value": [1.0, 2.0, 3.0]}.
         return Vector(res["value"])
 
     return res

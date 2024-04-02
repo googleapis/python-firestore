@@ -175,7 +175,7 @@ def test_order_compare_w_failure_to_find_type():
             target.compare(left, right)
 
     (message,) = exc_info.value.args
-    assert message.startswith("Unknown ``left_type``")
+    assert message.startswith("Unknown TypeOrder")
 
 
 def test_order_compare_w_objects_different_keys():
