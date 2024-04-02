@@ -180,6 +180,7 @@ def test_order_compare_w_failure_to_find_type():
 
 def test_order_all_value_present():
     from google.cloud.firestore_v1.order import TypeOrder, _TYPE_ORDER_MAP
+
     for type_order in TypeOrder:
         assert type_order in _TYPE_ORDER_MAP
 
