@@ -173,6 +173,7 @@ class Order(object):
 
     @staticmethod
     def compare_vectors(left, right) -> int:
+        # First compare the size of vector.
         l_values = left.map_value.fields["value"]
         r_values = right.map_value.fields["value"]
 
@@ -182,6 +183,7 @@ class Order(object):
         if left_length != right_length:
             return Order._compare_to(left_length, right_length)
 
+        # Compare element if the size matches.
         return Order.compare_arrays(l_values, r_values)
 
     @staticmethod

@@ -22,6 +22,7 @@ from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.base_query import (
+    BaseQuery,
     _query_response_to_snapshot,
     _collection_group_query_response_to_snapshot,
 )
@@ -32,7 +33,7 @@ class VectorQuery(BaseVectorQuery):
 
     def __init__(
         self,
-        nested_query,
+        nested_query: BaseQuery,
     ) -> None:
         """Presents the vector query.
         Args:

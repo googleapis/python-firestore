@@ -13,19 +13,32 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import List, Sequence
+import collections
 
+from typing import Tuple, Sequence
 
-class Vector:
+class Vector (collections.abc.Sequence):
     r"""A class to represent Firestore Vector in python.
 
     Underline it'll be converted to a map representation in Firestore API.
     """
 
-    _value: List[float] = []
+    _value: Tuple[float] = ()
 
     def __init__(self, value: Sequence[float]):
-        self._value = [float(v) for v in value]
+        self._value = tuple([float(v) for v in value])
+
+    def __getitem__(self, index: int):
+        size = len(self._value)
+        index_id = index
+        if index < 0:
+            index_id += size
+        if index_id < 0 or index_id >= size:
+            raise IndexError(f"index {index} out of range")
+        return self._value[index_id]
+
+    def __len__(self):
+        return len(self._value)
 
     def __eq__(self, other: object) -> bool:
         return self._value == other._value

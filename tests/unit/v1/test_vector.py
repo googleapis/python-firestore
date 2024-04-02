@@ -55,6 +55,30 @@ def test_compare_vector():
     assert vector1 == vector2
 
 
+def test_vector_get_items():
+    vector = Vector([1.0, 2.0, 3.0])
+
+    assert vector[0] == 1.0
+    assert vector[1] == 2.0
+    assert vector[-1] == 3.0
+    
+    try:
+        assert vector[3] == 1
+    except IndexError as e:
+        assert e.args[0] == "index 3 out of range"
+
+    try:
+        assert vector[-6] == 1
+    except IndexError as e:
+        assert e.args[0] == "index -6 out of range"
+
+
+def test_vector_len():
+    vector = Vector([1.0, 2.0, 3.0])
+
+    assert len(vector) == 3
+
+
 def test_decode_vector_type():
     firestore_api = _make_firestore_api()
     client = _make_client(firestore_api)
