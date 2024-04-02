@@ -19,7 +19,11 @@ from typing import Any
 
 
 class TypeOrder(Enum):
-    # NOTE: This order is defined by the backend and cannot be changed.
+    """The supported Data Type.
+
+    Note: The Enum value does not imply the sort order.
+    """
+
     NULL = 0
     BOOLEAN = 1
     NUMBER = 2
@@ -61,6 +65,22 @@ class TypeOrder(Enum):
         return lut[v]
 
 
+# NOTE: This order is defined by the backend and cannot be changed.
+_TYPE_ORDER = {
+    TypeOrder.NULL: 0,
+    TypeOrder.BOOLEAN: 1,
+    TypeOrder.NUMBER: 2,
+    TypeOrder.TIMESTAMP: 3,
+    TypeOrder.STRING: 4,
+    TypeOrder.BLOB: 5,
+    TypeOrder.REF: 6,
+    TypeOrder.GEO_POINT: 7,
+    TypeOrder.ARRAY: 8,
+    TypeOrder.VECTOR: 9,
+    TypeOrder.OBJECT: 10,
+}
+
+
 class Order(object):
     """
     Order implements the ordering semantics of the backend.
@@ -73,36 +93,38 @@ class Order(object):
         @return -1 is left < right, 0 if left == right, otherwise 1
         """
         # First compare the types.
-        leftType = TypeOrder.from_value(left).value
-        rightType = TypeOrder.from_value(right).value
+        leftType = TypeOrder.from_value(left)
+        rightType = TypeOrder.from_value(right)
+        leftTypeOrder = _TYPE_ORDER.get(leftType, None)
+        rightTypeOrder = _TYPE_ORDER.get(rightType, None)
 
-        if leftType != rightType:
-            if leftType < rightType:
+        if leftTypeOrder != rightTypeOrder:
+            if leftTypeOrder < rightTypeOrder:
                 return -1
             return 1
 
-        if leftType == TypeOrder.NULL.value:
+        if leftType == TypeOrder.NULL:
             return 0  # nulls are all equal
-        elif leftType == TypeOrder.BOOLEAN.value:
+        elif leftType == TypeOrder.BOOLEAN:
             return cls._compare_to(left.boolean_value, right.boolean_value)
-        elif leftType == TypeOrder.NUMBER.value:
+        elif leftType == TypeOrder.NUMBER:
             return cls.compare_numbers(left, right)
-        elif leftType == TypeOrder.TIMESTAMP.value:
+        elif leftType == TypeOrder.TIMESTAMP:
             return cls.compare_timestamps(left, right)
-        elif leftType == TypeOrder.STRING.value:
+        elif leftType == TypeOrder.STRING:
             return cls._compare_to(left.string_value, right.string_value)
-        elif leftType == TypeOrder.BLOB.value:
+        elif leftType == TypeOrder.BLOB:
             return cls.compare_blobs(left, right)
-        elif leftType == TypeOrder.REF.value:
+        elif leftType == TypeOrder.REF:
             return cls.compare_resource_paths(left, right)
-        elif leftType == TypeOrder.GEO_POINT.value:
+        elif leftType == TypeOrder.GEO_POINT:
             return cls.compare_geo_points(left, right)
-        elif leftType == TypeOrder.ARRAY.value:
+        elif leftType == TypeOrder.ARRAY:
             return cls.compare_arrays(left, right)
-        elif leftType == TypeOrder.VECTOR.value:
+        elif leftType == TypeOrder.VECTOR:
             # ARRAYs < VECTORs < MAPs
             return cls.compare_vectors(left, right)
-        elif leftType == TypeOrder.OBJECT.value:
+        elif leftType == TypeOrder.OBJECT:
             return cls.compare_objects(left, right)
         else:
             raise ValueError(f"Unknown TypeOrder {leftType}")
