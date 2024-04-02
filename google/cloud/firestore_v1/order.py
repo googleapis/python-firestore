@@ -95,13 +95,14 @@ class Order(object):
         # First compare the types.
         leftType = TypeOrder.from_value(left)
         rightType = TypeOrder.from_value(right)
-        leftTypeOrder = _TYPE_ORDER.get(leftType, None)
-        rightTypeOrder = _TYPE_ORDER.get(rightType, None)
-
-        if leftTypeOrder != rightTypeOrder:
-            if leftTypeOrder < rightTypeOrder:
-                return -1
-            return 1
+        if leftType != rightType:
+            try:
+                if _TYPE_ORDER[leftType] < _TYPE_ORDER[rightType]:
+                    return -1
+                else:
+                    return 1
+            except KeyError as exc:
+                raise ValueError(f"Unknown TypeOrder") from exc
 
         if leftType == TypeOrder.NULL:
             return 0  # nulls are all equal
