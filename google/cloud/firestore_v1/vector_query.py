@@ -16,7 +16,7 @@
 """
 
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from typing import Any, Generator, Iterable, Optional
+from typing import Generator, Iterable, Optional
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -34,6 +34,10 @@ class VectorQuery(BaseVectorQuery):
         self,
         nested_query,
     ) -> None:
+        """Presents the vector query.
+        Args:
+            nested_query (VectorQuery): the base query to apply as the prefilter.
+        """
         super(VectorQuery, self).__init__(nested_query)
 
     def get(
@@ -86,8 +90,8 @@ class VectorQuery(BaseVectorQuery):
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
-        """Read the documents in the collection that match this query.
+    ) -> Iterable[document.DocumentSnapshot]:
+        """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
         consumes each document returned in the stream of ``RunQueryResponse``
