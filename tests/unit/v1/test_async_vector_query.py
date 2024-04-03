@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
 import pytest
-import types
 
 from google.cloud.firestore_v1.types.query import StructuredQuery
 from google.cloud.firestore_v1.vector import Vector

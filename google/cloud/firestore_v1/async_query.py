@@ -36,6 +36,7 @@ from google.cloud.firestore_v1.base_query import (
 from google.cloud.firestore_v1 import async_document
 from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.async_vector_query import AsyncVectorQuery
 from google.cloud.firestore_v1.vector import Vector
 from typing import AsyncGenerator, List, Optional, Type, TYPE_CHECKING

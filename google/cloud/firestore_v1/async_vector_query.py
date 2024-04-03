@@ -20,20 +20,17 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
 from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
+from google.cloud.firestore_v1 import async_document
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
-from typing import AsyncGenerator, List, Union, Optional, TypeVar
-
-
-from google.cloud.firestore_v1.base_vector_query import (
-    BaseVectorQuery,
-)
 from google.cloud.firestore_v1.base_query import (
+    BaseQuery,
     _query_response_to_snapshot,
     _collection_group_query_response_to_snapshot,
 )
+from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
+from typing import AsyncGenerator, List, Union, Optional, TypeVar
 
 TAsyncVectorQuery = TypeVar("TAsyncVectorQuery", bound="AsyncVectorQuery")
 
