@@ -12,12 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Classes for representing Async aggregation queries for the Google Cloud Firestore API.
-
-A :class:`~google.cloud.firestore_v1.async_aggregation.AsyncAggregationQuery` can be created directly from
-a :class:`~google.cloud.firestore_v1.async_collection.AsyncCollection` and that can be
-a more common way to create an aggregation query than direct usage of the constructor.
-"""
 from __future__ import annotations
 
 from google.api_core import gapic_v1
