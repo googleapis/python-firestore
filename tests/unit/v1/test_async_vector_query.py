@@ -201,3 +201,41 @@ async def test_vector_query_collection_group(distance_measure, expected_distance
         metadata=client._rpc_metadata,
         **kwargs,
     )
+
+
+@pytest.mark.asyncio
+async def test_async_query_stream_multiple_empty_response_in_stream():
+    # Create a minimal fake GAPIC with a dummy response.
+    firestore_api = AsyncMock(spec=["run_query"])
+    empty_response1 = _make_query_response()
+    empty_response2 = _make_query_response()
+    run_query_response = AsyncIter([empty_response1, empty_response2])
+    firestore_api.run_query.return_value = run_query_response
+
+    # Attach the fake GAPIC to a real client.
+    client = make_async_client()
+    client._firestore_api_internal = firestore_api
+
+    # Make a **real** collection reference as parent.
+    parent = client.collection("dah", "dah", "dum")
+    async_vector_query = parent.where("snooze", "==", 10).find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=5,
+    )
+
+    result = [snapshot async for snapshot in async_vector_query.stream()]
+
+    assert list(result) == []
+
+    # Verify the mock call.
+    parent_path, _ = parent._parent_info()
+    firestore_api.run_query.assert_called_once_with(
+        request={
+            "parent": parent_path,
+            "structured_query": async_vector_query._to_protobuf(),
+            "transaction": None,
+        },
+        metadata=client._rpc_metadata,
+    )

@@ -76,7 +76,7 @@ class AsyncVectorQuery(BaseVectorQuery):
         stream_result = self.stream(
             transaction=transaction, retry=retry, timeout=timeout
         )
-        result = [aggregation async for aggregation in stream_result]
+        result = [snapshot async for snapshot in stream_result]
         return result  # type: ignore
 
     async def stream(
