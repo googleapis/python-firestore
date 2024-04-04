@@ -381,6 +381,7 @@ async def test_vector_search_collection_group(client, database):
         "color": "red",
     }
 
+
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Internal Issue b/137867104")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_update_document(client, cleanup, database):
