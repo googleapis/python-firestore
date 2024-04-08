@@ -324,6 +324,42 @@ def test_vector_query_collection_group(distance_measure, expected_distance):
         **kwargs,
     )
 
+def test_vector_query_list_as_query_vector():
+    # Create a minimal fake GAPIC with a dummy response.
+    firestore_api = mock.Mock(spec=["run_query"])
+    response_pb = _make_query_response(name="xxx/test_doc", data=data)
+    run_query_response = iter([response_pb])
+    firestore_api.run_query.return_value = run_query_response
+
+    # Attach the fake GAPIC to a real client.
+    client = make_client()
+    client._firestore_api_internal = firestore_api
+
+    # Make a **real** collection reference as parent.
+    parent = client.collection("dah", "dah", "dum")
+    vector_query = parent.where("snooze", "==", 10).find_nearest(
+        vector_field="embedding",
+        query_vector=[1.0, 2.0, 3.0],
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=5,
+    )
+
+    get_response = vector_query.stream()
+    assert isinstance(get_response, types.GeneratorType)
+    assert list(get_response) == []
+
+    # Verify the mock call.
+    parent_path, _ = parent._parent_info()
+    firestore_api.run_query.assert_called_once_with(
+        request={
+            "parent": parent_path,
+            "structured_query": vector_query._to_protobuf(),
+            "transaction": None,
+        },
+        metadata=client._rpc_metadata,
+    )
+
+
 
 def test_query_stream_multiple_empty_response_in_stream():
     # Create a minimal fake GAPIC with a dummy response.

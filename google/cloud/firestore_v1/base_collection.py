@@ -38,6 +38,7 @@ from typing import (
     Iterator,
     Iterable,
     NoReturn,
+    Sequence,
     Tuple,
     Union,
     TYPE_CHECKING,
@@ -549,7 +550,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def find_nearest(
         self,
         vector_field: str,
-        query_vector: Vector,
+        query_vector: Union[Vector, Sequence[float]],
         limit: int,
         distance_measure: DistanceMeasure,
     ) -> VectorQuery:

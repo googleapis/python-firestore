@@ -19,7 +19,7 @@ import abc
 
 from abc import ABC
 from enum import Enum
-from typing import Iterable, Optional, Tuple, Union
+from typing import Iterable, Optional, Sequence, Tuple, Union
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -107,11 +107,13 @@ class BaseVectorQuery(ABC):
     def find_nearest(
         self,
         vector_field: str,
-        query_vector: Vector,
+        query_vector: Union[Vector, Sequence[float]],
         limit: int,
         distance_measure: DistanceMeasure,
     ):
         """Finds the closest vector embeddings to the given query vector."""
+        if not isinstance (query_vector, Vector):
+            self._query_vector = Vector(query_vector)
         self._vector_field = vector_field
         self._query_vector = query_vector
         self._limit = limit
