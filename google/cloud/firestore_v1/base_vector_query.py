@@ -112,7 +112,7 @@ class BaseVectorQuery(ABC):
         distance_measure: DistanceMeasure,
     ):
         """Finds the closest vector embeddings to the given query vector."""
-        if not isinstance (query_vector, Vector):
+        if not isinstance(query_vector, Vector):
             self._query_vector = Vector(query_vector)
         self._vector_field = vector_field
         self._query_vector = query_vector

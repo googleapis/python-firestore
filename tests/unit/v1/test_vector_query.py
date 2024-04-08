@@ -324,6 +324,7 @@ def test_vector_query_collection_group(distance_measure, expected_distance):
         **kwargs,
     )
 
+
 def test_vector_query_list_as_query_vector():
     # Create a minimal fake GAPIC with a dummy response.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -358,7 +359,6 @@ def test_vector_query_list_as_query_vector():
         },
         metadata=client._rpc_metadata,
     )
-
 
 
 def test_query_stream_multiple_empty_response_in_stream():
