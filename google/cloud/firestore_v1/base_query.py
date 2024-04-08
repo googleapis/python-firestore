@@ -46,6 +46,7 @@ from typing import (
     Iterable,
     NoReturn,
     Optional,
+    Sequence,
     Tuple,
     Type,
     TypeVar,
@@ -978,7 +979,7 @@ class BaseQuery(object):
     def find_nearest(
         self,
         vector_field: str,
-        queryVector: Vector,
+        query_vector: Union[Vector, Sequence[float]],
         limit: int,
         distance_measure: DistanceMeasure,
     ) -> BaseVectorQuery:

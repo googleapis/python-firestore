@@ -41,7 +41,7 @@ from google.cloud.firestore_v1 import aggregation
 
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.watch import Watch
-from typing import Any, Callable, Generator, List, Optional, Type, TYPE_CHECKING
+from typing import Any, Callable, Generator, List, Optional, Sequence, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.field_path import FieldPath
@@ -245,7 +245,7 @@ class Query(BaseQuery):
     def find_nearest(
         self,
         vector_field: str,
-        query_vector: Vector,
+        query_vector: Union[Vector, Sequence[float]],
         limit: int,
         distance_measure: DistanceMeasure,
     ) -> Type["firestore_v1.vector_query.VectorQuery"]:
@@ -255,7 +255,7 @@ class Query(BaseQuery):
         Args:
             vector_field(str): An indexed vector field to search upon. Only documents which contain
                 vectors whose dimensionality match the query_vector can be returned.
-            query_vector(Vector): The query vector that we are searching on. Must be a vector of no more
+            query_vector(Vector | Sequence[float]): The query vector that we are searching on. Must be a vector of no more
                 than 2048 dimensions.
             limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
             distance_measure(:class:`DistanceMeasure`): The Distance Measure to use.
