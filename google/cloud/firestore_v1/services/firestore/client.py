@@ -1565,8 +1565,11 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
             timeout=timeout,
             metadata=metadata,
         )
+        # Print encrypted headers for debugging
         encrypted_headers = list(filter(lambda metadatum: metadatum.key == 'x-encrypted-debug-headers', response.initial_metadata()))
-        print(encrypted_headers)
+        dict_headers = {header.key: header.value for header in encrypted_headers}
+        dict_headers["severity"] = "INFO"
+        print(dict_headers)
         # Done; return the response.
         return response
 
