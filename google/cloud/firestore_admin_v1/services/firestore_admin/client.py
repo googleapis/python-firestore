@@ -18,6 +18,7 @@ import os
 import re
 from typing import (
     Dict,
+    Callable,
     Mapping,
     MutableMapping,
     MutableSequence,
@@ -702,7 +703,9 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         self,
         *,
         credentials: Optional[ga_credentials.Credentials] = None,
-        transport: Optional[Union[str, FirestoreAdminTransport]] = None,
+        transport: Optional[
+            Union[str, FirestoreAdminTransport, Callable[..., FirestoreAdminTransport]]
+        ] = None,
         client_options: Optional[Union[client_options_lib.ClientOptions, dict]] = None,
         client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
     ) -> None:
@@ -714,9 +717,11 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 credentials identify the application to the service; if none
                 are specified, the client will attempt to ascertain the
                 credentials from the environment.
-            transport (Union[str, FirestoreAdminTransport]): The
-                transport to use. If set to None, a transport is chosen
-                automatically.
+            transport (Optional[Union[str,FirestoreAdminTransport,Callable[..., FirestoreAdminTransport]]]):
+                The transport to use, or a Callable that constructs and returns a new transport.
+                If a Callable is given, it will be called with the same set of initialization
+                arguments as used in the FirestoreAdminTransport constructor.
+                If set to None, a transport is chosen automatically.
             client_options (Optional[Union[google.api_core.client_options.ClientOptions, dict]]):
                 Custom options for the client.
 
@@ -825,8 +830,15 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                     api_key_value
                 )
 
-            Transport = type(self).get_transport_class(cast(str, transport))
-            self._transport = Transport(
+            transport_init: Union[
+                Type[FirestoreAdminTransport], Callable[..., FirestoreAdminTransport]
+            ] = (
+                type(self).get_transport_class(transport)
+                if isinstance(transport, str) or transport is None
+                else cast(Callable[..., FirestoreAdminTransport], transport)
+            )
+            # initialize with the provided callable or the passed in class
+            self._transport = transport_init(
                 credentials=credentials,
                 credentials_file=self._client_options.credentials_file,
                 host=self._api_endpoint,
@@ -917,8 +929,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent, index])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -926,10 +938,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.CreateIndexRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.CreateIndexRequest):
             request = firestore_admin.CreateIndexRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -1036,8 +1046,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1045,10 +1055,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.ListIndexesRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.ListIndexesRequest):
             request = firestore_admin.ListIndexesRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -1151,8 +1159,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1160,10 +1168,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.GetIndexRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.GetIndexRequest):
             request = firestore_admin.GetIndexRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -1247,8 +1253,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1256,10 +1262,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.DeleteIndexRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.DeleteIndexRequest):
             request = firestore_admin.DeleteIndexRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -1352,8 +1356,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1361,10 +1365,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.GetFieldRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.GetFieldRequest):
             request = firestore_admin.GetFieldRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -1484,8 +1486,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([field])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1493,10 +1495,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.UpdateFieldRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.UpdateFieldRequest):
             request = firestore_admin.UpdateFieldRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -1611,8 +1611,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1620,10 +1620,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.ListFieldsRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.ListFieldsRequest):
             request = firestore_admin.ListFieldsRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -1745,8 +1743,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1754,10 +1752,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.ExportDocumentsRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.ExportDocumentsRequest):
             request = firestore_admin.ExportDocumentsRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -1878,8 +1874,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1887,10 +1883,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.ImportDocumentsRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.ImportDocumentsRequest):
             request = firestore_admin.ImportDocumentsRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2021,8 +2015,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent, database, database_id])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2030,10 +2024,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.CreateDatabaseRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.CreateDatabaseRequest):
             request = firestore_admin.CreateDatabaseRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2136,8 +2128,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 A Cloud Firestore Database.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2145,10 +2137,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.GetDatabaseRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.GetDatabaseRequest):
             request = firestore_admin.GetDatabaseRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2240,8 +2230,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 The list of databases for a project.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2249,10 +2239,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.ListDatabasesRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.ListDatabasesRequest):
             request = firestore_admin.ListDatabasesRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2355,8 +2343,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([database, update_mask])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2364,10 +2352,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.UpdateDatabaseRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.UpdateDatabaseRequest):
             request = firestore_admin.UpdateDatabaseRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2479,8 +2465,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2488,10 +2474,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.DeleteDatabaseRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.DeleteDatabaseRequest):
             request = firestore_admin.DeleteDatabaseRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2597,8 +2581,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2606,10 +2590,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.GetBackupRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.GetBackupRequest):
             request = firestore_admin.GetBackupRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2706,8 +2688,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2715,10 +2697,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.ListBackupsRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.ListBackupsRequest):
             request = firestore_admin.ListBackupsRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2804,8 +2784,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2813,10 +2793,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.DeleteBackupRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.DeleteBackupRequest):
             request = firestore_admin.DeleteBackupRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -2925,10 +2903,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.RestoreDatabaseRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.RestoreDatabaseRequest):
             request = firestore_admin.RestoreDatabaseRequest(request)
 
@@ -3043,8 +3019,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent, backup_schedule])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -3052,10 +3028,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.CreateBackupScheduleRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.CreateBackupScheduleRequest):
             request = firestore_admin.CreateBackupScheduleRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -3156,8 +3130,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -3165,10 +3139,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.GetBackupScheduleRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.GetBackupScheduleRequest):
             request = firestore_admin.GetBackupScheduleRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -3264,8 +3236,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -3273,10 +3245,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.ListBackupSchedulesRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.ListBackupSchedulesRequest):
             request = firestore_admin.ListBackupSchedulesRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -3380,8 +3350,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([backup_schedule, update_mask])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -3389,10 +3359,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.UpdateBackupScheduleRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.UpdateBackupScheduleRequest):
             request = firestore_admin.UpdateBackupScheduleRequest(request)
             # If we have keyword arguments corresponding to fields on the
@@ -3484,8 +3452,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 sent along with the request as metadata.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -3493,10 +3461,8 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 "the individual field arguments should be set."
             )
 
-        # Minor optimization to avoid making a copy if the user passes
-        # in a firestore_admin.DeleteBackupScheduleRequest.
-        # There's no risk of modifying the input as we've already verified
-        # there are no flattened fields.
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
         if not isinstance(request, firestore_admin.DeleteBackupScheduleRequest):
             request = firestore_admin.DeleteBackupScheduleRequest(request)
             # If we have keyword arguments corresponding to fields on the

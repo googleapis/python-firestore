@@ -18,6 +18,8 @@ from typing import Awaitable, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from google.api_core import gapic_v1
 from google.api_core import grpc_helpers_async
+from google.api_core import exceptions as core_exceptions
+from google.api_core import retry_async as retries
 from google.api_core import operations_v1
 from google.auth import credentials as ga_credentials  # type: ignore
 from google.auth.transport.grpc import SslCredentials  # type: ignore
@@ -104,7 +106,6 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 the credentials from the environment.
             credentials_file (Optional[str]): A file with credentials that can
                 be loaded with :func:`google.auth.load_credentials_from_file`.
-                This argument is ignored if ``channel`` is provided.
             scopes (Optional[Sequence[str]]): A optional list of scopes needed for this
                 service. These are only used when credentials are not specified and
                 are passed to :func:`google.auth.default`.
@@ -134,7 +135,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         credentials: Optional[ga_credentials.Credentials] = None,
         credentials_file: Optional[str] = None,
         scopes: Optional[Sequence[str]] = None,
-        channel: Optional[aio.Channel] = None,
+        channel: Optional[Union[aio.Channel, Callable[..., aio.Channel]]] = None,
         api_mtls_endpoint: Optional[str] = None,
         client_cert_source: Optional[Callable[[], Tuple[bytes, bytes]]] = None,
         ssl_channel_credentials: Optional[grpc.ChannelCredentials] = None,
@@ -154,15 +155,18 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 credentials identify the application to the service; if none
                 are specified, the client will attempt to ascertain the
                 credentials from the environment.
-                This argument is ignored if ``channel`` is provided.
+                This argument is ignored if a ``channel`` instance is provided.
             credentials_file (Optional[str]): A file with credentials that can
                 be loaded with :func:`google.auth.load_credentials_from_file`.
-                This argument is ignored if ``channel`` is provided.
+                This argument is ignored if a ``channel`` instance is provided.
             scopes (Optional[Sequence[str]]): A optional list of scopes needed for this
                 service. These are only used when credentials are not specified and
                 are passed to :func:`google.auth.default`.
-            channel (Optional[aio.Channel]): A ``Channel`` instance through
-                which to make calls.
+            channel (Optional[Union[aio.Channel, Callable[..., aio.Channel]]]):
+                A ``Channel`` instance through which to make calls, or a Callable
+                that constructs and returns one. If set to None, ``self.create_channel``
+                is used to create the channel. If a Callable is given, it will be called
+                with the same arguments as used in ``self.create_channel``.
             api_mtls_endpoint (Optional[str]): Deprecated. The mutual TLS endpoint.
                 If provided, it overrides the ``host`` argument and tries to create
                 a mutual TLS channel with client SSL credentials from
@@ -172,11 +176,11 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 private key bytes, both in PEM format. It is ignored if
                 ``api_mtls_endpoint`` is None.
             ssl_channel_credentials (grpc.ChannelCredentials): SSL credentials
-                for the grpc channel. It is ignored if ``channel`` is provided.
+                for the grpc channel. It is ignored if a ``channel`` instance is provided.
             client_cert_source_for_mtls (Optional[Callable[[], Tuple[bytes, bytes]]]):
                 A callback to provide client certificate bytes and private key bytes,
                 both in PEM format. It is used to configure a mutual TLS channel. It is
-                ignored if ``channel`` or ``ssl_channel_credentials`` is provided.
+                ignored if a ``channel`` instance or ``ssl_channel_credentials`` is provided.
             quota_project_id (Optional[str]): An optional project to use for billing
                 and quota.
             client_info (google.api_core.gapic_v1.client_info.ClientInfo):
@@ -203,7 +207,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         if client_cert_source:
             warnings.warn("client_cert_source is deprecated", DeprecationWarning)
 
-        if channel:
+        if isinstance(channel, aio.Channel):
             # Ignore credentials if a channel was passed.
             credentials = False
             # If a channel was explicitly provided, set it.
@@ -243,7 +247,9 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
         )
 
         if not self._grpc_channel:
-            self._grpc_channel = type(self).create_channel(
+            # initialize with the provided callable or the default channel
+            channel_init = channel or type(self).create_channel
+            self._grpc_channel = channel_init(
                 self._host,
                 # use the credentials which are saved
                 credentials=self._credentials,
@@ -994,6 +1000,181 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 response_deserializer=empty_pb2.Empty.FromString,
             )
         return self._stubs["delete_backup_schedule"]
+
+    def _prep_wrapped_messages(self, client_info):
+        """Precompute the wrapped methods, overriding the base class method to use async wrappers."""
+        self._wrapped_methods = {
+            self.create_index: gapic_v1.method_async.wrap_method(
+                self.create_index,
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.list_indexes: gapic_v1.method_async.wrap_method(
+                self.list_indexes,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.get_index: gapic_v1.method_async.wrap_method(
+                self.get_index,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.delete_index: gapic_v1.method_async.wrap_method(
+                self.delete_index,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.get_field: gapic_v1.method_async.wrap_method(
+                self.get_field,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.update_field: gapic_v1.method_async.wrap_method(
+                self.update_field,
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.list_fields: gapic_v1.method_async.wrap_method(
+                self.list_fields,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.export_documents: gapic_v1.method_async.wrap_method(
+                self.export_documents,
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.import_documents: gapic_v1.method_async.wrap_method(
+                self.import_documents,
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.create_database: gapic_v1.method_async.wrap_method(
+                self.create_database,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.get_database: gapic_v1.method_async.wrap_method(
+                self.get_database,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.list_databases: gapic_v1.method_async.wrap_method(
+                self.list_databases,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.update_database: gapic_v1.method_async.wrap_method(
+                self.update_database,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.delete_database: gapic_v1.method_async.wrap_method(
+                self.delete_database,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.get_backup: gapic_v1.method_async.wrap_method(
+                self.get_backup,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.list_backups: gapic_v1.method_async.wrap_method(
+                self.list_backups,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.delete_backup: gapic_v1.method_async.wrap_method(
+                self.delete_backup,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.restore_database: gapic_v1.method_async.wrap_method(
+                self.restore_database,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.create_backup_schedule: gapic_v1.method_async.wrap_method(
+                self.create_backup_schedule,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.get_backup_schedule: gapic_v1.method_async.wrap_method(
+                self.get_backup_schedule,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.list_backup_schedules: gapic_v1.method_async.wrap_method(
+                self.list_backup_schedules,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.update_backup_schedule: gapic_v1.method_async.wrap_method(
+                self.update_backup_schedule,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.delete_backup_schedule: gapic_v1.method_async.wrap_method(
+                self.delete_backup_schedule,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+        }
 
     def close(self):
         return self.grpc_channel.close()

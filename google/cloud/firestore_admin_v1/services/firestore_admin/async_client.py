@@ -18,6 +18,7 @@ import functools
 import re
 from typing import (
     Dict,
+    Callable,
     Mapping,
     MutableMapping,
     MutableSequence,
@@ -257,7 +258,9 @@ class FirestoreAdminAsyncClient:
         self,
         *,
         credentials: Optional[ga_credentials.Credentials] = None,
-        transport: Union[str, FirestoreAdminTransport] = "grpc_asyncio",
+        transport: Optional[
+            Union[str, FirestoreAdminTransport, Callable[..., FirestoreAdminTransport]]
+        ] = "grpc_asyncio",
         client_options: Optional[ClientOptions] = None,
         client_info: gapic_v1.client_info.ClientInfo = DEFAULT_CLIENT_INFO,
     ) -> None:
@@ -269,9 +272,11 @@ class FirestoreAdminAsyncClient:
                 credentials identify the application to the service; if none
                 are specified, the client will attempt to ascertain the
                 credentials from the environment.
-            transport (Union[str, ~.FirestoreAdminTransport]): The
-                transport to use. If set to None, a transport is chosen
-                automatically.
+            transport (Optional[Union[str,FirestoreAdminTransport,Callable[..., FirestoreAdminTransport]]]):
+                The transport to use, or a Callable that constructs and returns a new transport to use.
+                If a Callable is given, it will be called with the same set of initialization
+                arguments as used in the FirestoreAdminTransport constructor.
+                If set to None, a transport is chosen automatically.
             client_options (Optional[Union[google.api_core.client_options.ClientOptions, dict]]):
                 Custom options for the client.
 
@@ -394,8 +399,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent, index])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -403,7 +408,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.CreateIndexRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.CreateIndexRequest):
+            request = firestore_admin.CreateIndexRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -414,11 +422,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.create_index,
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.create_index
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -513,8 +519,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -522,7 +528,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ListIndexesRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.ListIndexesRequest):
+            request = firestore_admin.ListIndexesRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -531,22 +540,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.list_indexes,
-            default_retry=retries.AsyncRetry(
-                initial=0.1,
-                maximum=60.0,
-                multiplier=1.3,
-                predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
-                ),
-                deadline=60.0,
-            ),
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.list_indexes
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -639,8 +635,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -648,7 +644,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.GetIndexRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.GetIndexRequest):
+            request = firestore_admin.GetIndexRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -657,22 +656,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.get_index,
-            default_retry=retries.AsyncRetry(
-                initial=0.1,
-                maximum=60.0,
-                multiplier=1.3,
-                predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
-                ),
-                deadline=60.0,
-            ),
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.get_index
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -746,8 +732,8 @@ class FirestoreAdminAsyncClient:
                 sent along with the request as metadata.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -755,7 +741,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.DeleteIndexRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.DeleteIndexRequest):
+            request = firestore_admin.DeleteIndexRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -764,22 +753,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.delete_index,
-            default_retry=retries.AsyncRetry(
-                initial=0.1,
-                maximum=60.0,
-                multiplier=1.3,
-                predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
-                ),
-                deadline=60.0,
-            ),
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.delete_index
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -862,8 +838,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -871,7 +847,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.GetFieldRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.GetFieldRequest):
+            request = firestore_admin.GetFieldRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -880,22 +859,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.get_field,
-            default_retry=retries.AsyncRetry(
-                initial=0.1,
-                maximum=60.0,
-                multiplier=1.3,
-                predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
-                ),
-                deadline=60.0,
-            ),
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.get_field
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1005,8 +971,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([field])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1014,7 +980,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.UpdateFieldRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.UpdateFieldRequest):
+            request = firestore_admin.UpdateFieldRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -1023,11 +992,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.update_field,
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.update_field
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1132,8 +1099,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1141,7 +1108,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ListFieldsRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.ListFieldsRequest):
+            request = firestore_admin.ListFieldsRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -1150,22 +1120,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.list_fields,
-            default_retry=retries.AsyncRetry(
-                initial=0.1,
-                maximum=60.0,
-                multiplier=1.3,
-                predicate=retries.if_exception_type(
-                    core_exceptions.DeadlineExceeded,
-                    core_exceptions.InternalServerError,
-                    core_exceptions.ServiceUnavailable,
-                ),
-                deadline=60.0,
-            ),
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.list_fields
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1277,8 +1234,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1286,7 +1243,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ExportDocumentsRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.ExportDocumentsRequest):
+            request = firestore_admin.ExportDocumentsRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -1295,11 +1255,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.export_documents,
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.export_documents
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1410,8 +1368,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1419,7 +1377,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ImportDocumentsRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.ImportDocumentsRequest):
+            request = firestore_admin.ImportDocumentsRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -1428,11 +1389,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.import_documents,
-            default_timeout=60.0,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.import_documents
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1553,8 +1512,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent, database, database_id])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1562,7 +1521,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.CreateDatabaseRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.CreateDatabaseRequest):
+            request = firestore_admin.CreateDatabaseRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -1575,11 +1537,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.create_database,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.create_database
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1668,8 +1628,8 @@ class FirestoreAdminAsyncClient:
                 A Cloud Firestore Database.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1677,7 +1637,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.GetDatabaseRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.GetDatabaseRequest):
+            request = firestore_admin.GetDatabaseRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -1686,11 +1649,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.get_database,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.get_database
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1772,8 +1733,8 @@ class FirestoreAdminAsyncClient:
                 The list of databases for a project.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1781,7 +1742,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ListDatabasesRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.ListDatabasesRequest):
+            request = firestore_admin.ListDatabasesRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -1790,11 +1754,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.list_databases,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.list_databases
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -1887,8 +1849,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([database, update_mask])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -1896,7 +1858,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.UpdateDatabaseRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.UpdateDatabaseRequest):
+            request = firestore_admin.UpdateDatabaseRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -1907,11 +1872,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.update_database,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.update_database
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2011,8 +1974,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2020,7 +1983,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.DeleteDatabaseRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.DeleteDatabaseRequest):
+            request = firestore_admin.DeleteDatabaseRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -2029,11 +1995,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.delete_database,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.delete_database
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2129,8 +2093,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2138,7 +2102,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.GetBackupRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.GetBackupRequest):
+            request = firestore_admin.GetBackupRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -2147,11 +2114,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.get_backup,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.get_backup
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2238,8 +2203,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2247,7 +2212,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ListBackupsRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.ListBackupsRequest):
+            request = firestore_admin.ListBackupsRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -2256,11 +2224,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.list_backups,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.list_backups
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2336,8 +2302,8 @@ class FirestoreAdminAsyncClient:
                 sent along with the request as metadata.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2345,7 +2311,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.DeleteBackupRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.DeleteBackupRequest):
+            request = firestore_admin.DeleteBackupRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -2354,11 +2323,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.delete_backup,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.delete_backup
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2457,15 +2424,16 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        request = firestore_admin.RestoreDatabaseRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.RestoreDatabaseRequest):
+            request = firestore_admin.RestoreDatabaseRequest(request)
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.restore_database,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.restore_database
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2574,8 +2542,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent, backup_schedule])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2583,7 +2551,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.CreateBackupScheduleRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.CreateBackupScheduleRequest):
+            request = firestore_admin.CreateBackupScheduleRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -2594,11 +2565,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.create_backup_schedule,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.create_backup_schedule
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2687,8 +2656,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2696,7 +2665,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.GetBackupScheduleRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.GetBackupScheduleRequest):
+            request = firestore_admin.GetBackupScheduleRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -2705,11 +2677,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.get_backup_schedule,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.get_backup_schedule
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2795,8 +2765,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([parent])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2804,7 +2774,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.ListBackupSchedulesRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.ListBackupSchedulesRequest):
+            request = firestore_admin.ListBackupSchedulesRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -2813,11 +2786,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.list_backup_schedules,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.list_backup_schedules
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -2911,8 +2882,8 @@ class FirestoreAdminAsyncClient:
 
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([backup_schedule, update_mask])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -2920,7 +2891,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.UpdateBackupScheduleRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.UpdateBackupScheduleRequest):
+            request = firestore_admin.UpdateBackupScheduleRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -2931,11 +2905,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.update_backup_schedule,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.update_backup_schedule
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
@@ -3015,8 +2987,8 @@ class FirestoreAdminAsyncClient:
                 sent along with the request as metadata.
         """
         # Create or coerce a protobuf request object.
-        # Quick check: If we got a request object, we should *not* have
-        # gotten any keyword arguments that map to the request.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
         has_flattened_params = any([name])
         if request is not None and has_flattened_params:
             raise ValueError(
@@ -3024,7 +2996,10 @@ class FirestoreAdminAsyncClient:
                 "the individual field arguments should be set."
             )
 
-        request = firestore_admin.DeleteBackupScheduleRequest(request)
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.DeleteBackupScheduleRequest):
+            request = firestore_admin.DeleteBackupScheduleRequest(request)
 
         # If we have keyword arguments corresponding to fields on the
         # request, apply these.
@@ -3033,11 +3008,9 @@ class FirestoreAdminAsyncClient:
 
         # Wrap the RPC method; this adds retry and timeout information,
         # and friendly error handling.
-        rpc = gapic_v1.method_async.wrap_method(
-            self._client._transport.delete_backup_schedule,
-            default_timeout=None,
-            client_info=DEFAULT_CLIENT_INFO,
-        )
+        rpc = self._client._transport._wrapped_methods[
+            self._client._transport.delete_backup_schedule
+        ]
 
         # Certain fields should be provided within the metadata header;
         # add these here.
