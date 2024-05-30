@@ -1708,8 +1708,8 @@ def test_list_documents_pager(transport_name: str = "grpc"):
             RuntimeError,
         )
 
-        metadata = ()
-        metadata = tuple(metadata) + (
+        expected_metadata = ()
+        expected_metadata = tuple(expected_metadata) + (
             gapic_v1.routing_header.to_grpc_metadata(
                 (
                     ("parent", ""),
@@ -1719,7 +1719,7 @@ def test_list_documents_pager(transport_name: str = "grpc"):
         )
         pager = client.list_documents(request={})
 
-        assert pager._metadata == metadata
+        assert pager._metadata == expected_metadata
 
         results = list(pager)
         assert len(results) == 6
@@ -4926,13 +4926,13 @@ def test_partition_query_pager(transport_name: str = "grpc"):
             RuntimeError,
         )
 
-        metadata = ()
-        metadata = tuple(metadata) + (
+        expected_metadata = ()
+        expected_metadata = tuple(expected_metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("parent", ""),)),
         )
         pager = client.partition_query(request={})
 
-        assert pager._metadata == metadata
+        assert pager._metadata == expected_metadata
 
         results = list(pager)
         assert len(results) == 6
@@ -5816,13 +5816,13 @@ def test_list_collection_ids_pager(transport_name: str = "grpc"):
             RuntimeError,
         )
 
-        metadata = ()
-        metadata = tuple(metadata) + (
+        expected_metadata = ()
+        expected_metadata = tuple(expected_metadata) + (
             gapic_v1.routing_header.to_grpc_metadata((("parent", ""),)),
         )
         pager = client.list_collection_ids(request={})
 
-        assert pager._metadata == metadata
+        assert pager._metadata == expected_metadata
 
         results = list(pager)
         assert len(results) == 6
