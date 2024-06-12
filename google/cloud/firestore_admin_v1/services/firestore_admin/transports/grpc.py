@@ -570,6 +570,43 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         return self._stubs["import_documents"]
 
     @property
+    def bulk_delete_documents(
+        self,
+    ) -> Callable[
+        [firestore_admin.BulkDeleteDocumentsRequest], operations_pb2.Operation
+    ]:
+        r"""Return a callable for the bulk delete documents method over gRPC.
+
+        Bulk deletes a subset of documents from Google Cloud
+        Firestore. Documents created or updated after the
+        underlying system starts to process the request will not
+        be deleted. The bulk delete occurs in the background and
+        its progress can be monitored and managed via the
+        Operation resource that is created.
+
+        For more details on bulk delete behavior, refer to:
+
+        https://cloud.google.com/firestore/docs/manage-data/bulk-delete
+
+        Returns:
+            Callable[[~.BulkDeleteDocumentsRequest],
+                    ~.Operation]:
+                A function that, when called, will call the underlying RPC
+                on the server.
+        """
+        # Generate a "stub function" on-the-fly which will actually make
+        # the request.
+        # gRPC handles serialization and deserialization, so we just need
+        # to pass in the functions for each.
+        if "bulk_delete_documents" not in self._stubs:
+            self._stubs["bulk_delete_documents"] = self.grpc_channel.unary_unary(
+                "/google.firestore.admin.v1.FirestoreAdmin/BulkDeleteDocuments",
+                request_serializer=firestore_admin.BulkDeleteDocumentsRequest.serialize,
+                response_deserializer=operations_pb2.Operation.FromString,
+            )
+        return self._stubs["bulk_delete_documents"]
+
+    @property
     def create_database(
         self,
     ) -> Callable[[firestore_admin.CreateDatabaseRequest], operations_pb2.Operation]:
@@ -790,7 +827,7 @@ class FirestoreAdminGrpcTransport(FirestoreAdminTransport):
         The new database must be in the same cloud region or
         multi-region location as the existing backup. This behaves
         similar to
-        [FirestoreAdmin.CreateDatabase][google.firestore.admin.v1.CreateDatabase]
+        [FirestoreAdmin.CreateDatabase][google.firestore.admin.v1.FirestoreAdmin.CreateDatabase]
         except instead of creating a new empty database, a new database
         is created with the database type, index configuration, and
         documents from an existing backup.

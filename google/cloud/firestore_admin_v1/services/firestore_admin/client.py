@@ -1924,6 +1924,142 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         # Done; return the response.
         return response
 
+    def bulk_delete_documents(
+        self,
+        request: Optional[
+            Union[firestore_admin.BulkDeleteDocumentsRequest, dict]
+        ] = None,
+        *,
+        name: Optional[str] = None,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> gac_operation.Operation:
+        r"""Bulk deletes a subset of documents from Google Cloud
+        Firestore. Documents created or updated after the
+        underlying system starts to process the request will not
+        be deleted. The bulk delete occurs in the background and
+        its progress can be monitored and managed via the
+        Operation resource that is created.
+
+        For more details on bulk delete behavior, refer to:
+
+        https://cloud.google.com/firestore/docs/manage-data/bulk-delete
+
+        .. code-block:: python
+
+            # This snippet has been automatically generated and should be regarded as a
+            # code template only.
+            # It will require modifications to work:
+            # - It may require correct/in-range values for request initialization.
+            # - It may require specifying regional endpoints when creating the service
+            #   client as shown in:
+            #   https://googleapis.dev/python/google-api-core/latest/client_options.html
+            from google.cloud import firestore_admin_v1
+
+            def sample_bulk_delete_documents():
+                # Create a client
+                client = firestore_admin_v1.FirestoreAdminClient()
+
+                # Initialize request argument(s)
+                request = firestore_admin_v1.BulkDeleteDocumentsRequest(
+                    name="name_value",
+                )
+
+                # Make the request
+                operation = client.bulk_delete_documents(request=request)
+
+                print("Waiting for operation to complete...")
+
+                response = operation.result()
+
+                # Handle the response
+                print(response)
+
+        Args:
+            request (Union[google.cloud.firestore_admin_v1.types.BulkDeleteDocumentsRequest, dict]):
+                The request object. The request for
+                [FirestoreAdmin.BulkDeleteDocuments][google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocuments].
+
+                When both collection_ids and namespace_ids are set, only
+                documents satisfying both conditions will be deleted.
+
+                Requests with namespace_ids and collection_ids both
+                empty will be rejected. Please use
+                [FirestoreAdmin.DeleteDatabase][google.firestore.admin.v1.FirestoreAdmin.DeleteDatabase]
+                instead.
+            name (str):
+                Required. Database to operate. Should be of the form:
+                ``projects/{project_id}/databases/{database_id}``.
+
+                This corresponds to the ``name`` field
+                on the ``request`` instance; if ``request`` is provided, this
+                should not be set.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            google.api_core.operation.Operation:
+                An object representing a long-running operation.
+
+                The result type for the operation will be :class:`google.cloud.firestore_admin_v1.types.BulkDeleteDocumentsResponse` The response for
+                   [FirestoreAdmin.BulkDeleteDocuments][google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocuments].
+
+        """
+        # Create or coerce a protobuf request object.
+        # - Quick check: If we got a request object, we should *not* have
+        #   gotten any keyword arguments that map to the request.
+        has_flattened_params = any([name])
+        if request is not None and has_flattened_params:
+            raise ValueError(
+                "If the `request` argument is set, then none of "
+                "the individual field arguments should be set."
+            )
+
+        # - Use the request object if provided (there's no risk of modifying the input as
+        #   there are no flattened fields), or create one.
+        if not isinstance(request, firestore_admin.BulkDeleteDocumentsRequest):
+            request = firestore_admin.BulkDeleteDocumentsRequest(request)
+            # If we have keyword arguments corresponding to fields on the
+            # request, apply these.
+            if name is not None:
+                request.name = name
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.bulk_delete_documents]
+
+        # Certain fields should be provided within the metadata header;
+        # add these here.
+        metadata = tuple(metadata) + (
+            gapic_v1.routing_header.to_grpc_metadata((("name", request.name),)),
+        )
+
+        # Validate the universe domain.
+        self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Wrap the response in an operation future.
+        response = gac_operation.from_gapic(
+            response,
+            self._transport.operations_client,
+            firestore_admin.BulkDeleteDocumentsResponse,
+            metadata_type=gfa_operation.BulkDeleteDocumentsMetadata,
+        )
+
+        # Done; return the response.
+        return response
+
     def create_database(
         self,
         request: Optional[Union[firestore_admin.CreateDatabaseRequest, dict]] = None,
@@ -2836,7 +2972,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
         The new database must be in the same cloud region or
         multi-region location as the existing backup. This behaves
         similar to
-        [FirestoreAdmin.CreateDatabase][google.firestore.admin.v1.CreateDatabase]
+        [FirestoreAdmin.CreateDatabase][google.firestore.admin.v1.FirestoreAdmin.CreateDatabase]
         except instead of creating a new empty database, a new database
         is created with the database type, index configuration, and
         documents from an existing backup.

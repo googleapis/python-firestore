@@ -1,2 +1,0 @@
-recursive-include google/cloud/firestore *.py
-recursive-include google/cloud/firestore_v1 *.py

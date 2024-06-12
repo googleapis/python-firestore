@@ -239,6 +239,11 @@ class FirestoreAdminTransport(abc.ABC):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
+            self.bulk_delete_documents: gapic_v1.method.wrap_method(
+                self.bulk_delete_documents,
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
             self.create_database: gapic_v1.method.wrap_method(
                 self.create_database,
                 default_timeout=None,
@@ -406,6 +411,15 @@ class FirestoreAdminTransport(abc.ABC):
         self,
     ) -> Callable[
         [firestore_admin.ImportDocumentsRequest],
+        Union[operations_pb2.Operation, Awaitable[operations_pb2.Operation]],
+    ]:
+        raise NotImplementedError()
+
+    @property
+    def bulk_delete_documents(
+        self,
+    ) -> Callable[
+        [firestore_admin.BulkDeleteDocumentsRequest],
         Union[operations_pb2.Operation, Awaitable[operations_pb2.Operation]],
     ]:
         raise NotImplementedError()
