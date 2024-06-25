@@ -24,6 +24,7 @@ from google.cloud import firestore_v1
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.api_core import exceptions
 from google.api_core import gapic_v1
+from google.api_core import page_iterator
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1.base_query import (
@@ -171,7 +172,11 @@ class Query(BaseQuery):
                 )
             self._limit_to_last = False
 
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
+        result = self.stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+        )
         if is_limited_to_last:
             result = reversed(list(result))
 
@@ -216,7 +221,7 @@ class Query(BaseQuery):
                 return
 
     def _get_stream_iterator(self, transaction, retry, timeout):
-        """Helper method for :meth:`stream`."""
+        """"Deprecated. Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
             retry,
@@ -232,7 +237,7 @@ class Query(BaseQuery):
         return response_iterator, expected_prefix
 
     def _retry_query_after_exception(self, exc, retry, transaction):
-        """Helper method for :meth:`stream`."""
+        """"Deprecated. Helper method for :meth:`stream`."""
         if transaction is None:  # no snapshot-based retry inside transaction
             if retry is gapic_v1.method.DEFAULT:
                 transport = self._client._firestore_api._transport
@@ -312,7 +317,7 @@ class Query(BaseQuery):
         """
         return aggregation.AggregationQuery(self).avg(field_ref, alias=alias)
 
-    def stream(
+    def stream_old(
         self,
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -385,6 +390,61 @@ class Query(BaseQuery):
             if snapshot is not None:
                 last_snapshot = snapshot
                 yield snapshot
+
+    def stream(
+        self,
+        client=None,
+        transaction=None,
+        limit=None,
+        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
+    ) -> Type["firestore_v1.query.Iterator"]:
+        """Read the documents in the collection that match this query.
+
+        This sends a ``RunQuery`` RPC and then returns an iterator which
+        consumes each document returned in the stream of ``RunQueryResponse``
+        messages.
+
+        .. note::
+
+           The underlying stream of responses will time out after
+           the ``max_rpc_timeout_millis`` value set in the GAPIC
+           client configuration for the ``RunQuery`` API.  Snapshots
+           not consumed from the iterator before that point will be lost.
+
+        If a ``transaction`` is used and it already has write operations
+        added, this method cannot be used (i.e. read-after-write is not
+        allowed).
+
+        Args:
+            client
+                (Optional[:class:`~google.cloud.firestore_v1.client.Client`]):
+                The client used to make this query. If unset, use the client
+                that created this query.
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+            limit (Optional[int]):
+                The maximum number of documents the query is allowed to return.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
+        """
+    
+        if client is None:
+            client = self._client
+
+        return Iterator(
+            self,
+            self._parent,
+            client,
+            transaction=transaction,
+            limit=limit,
+            retry=retry,
+            timeout=timeout,
+            all_descendants=self._all_descendants,
+        )
 
     def on_snapshot(self, callback: Callable) -> Watch:
         """Monitor the documents in this collection that match this query.
@@ -506,3 +566,122 @@ class CollectionGroup(Query, BaseCollectionGroup):
             start_at = cursor
 
         yield QueryPartition(self, start_at, None)
+
+
+class Iterator(page_iterator.Iterator):
+
+
+    def __init__(
+        self,
+        query,
+        parent,
+        client,
+        transaction=None,
+        limit=None,
+        offset=None,
+        retry=None,
+        timeout=None,
+        all_descendants=False,
+    ):
+        super(Iterator, self).__init__(
+            client=client,
+            page_token=offset,
+            max_results=limit,
+        )
+        self._query = query
+        self._transaction = transaction
+        self._parent = parent
+        self._retry = retry
+        self._timeout = timeout
+        self._all_descendants = all_descendants,
+        self._skipped_results = 0
+        self._response_iterator = None
+        self._last_snapshot = None
+        self._expected_prefix = None
+        self._offset = offset
+
+    def _get_stream_iterator(self):
+        """Helper method for :meth:`stream`."""
+        request, expected_prefix, kwargs = self._query._prep_stream(
+            self._transaction,
+            self._retry,
+            self._timeout,
+        )
+
+        response_iterator = self.client._firestore_api.run_query(
+            request=request,
+            metadata=self.client._rpc_metadata,
+            **kwargs,
+        )
+
+        return response_iterator, expected_prefix
+
+    def _retry_query_after_exception(self, exc):
+        """Helper method for :meth:`stream`."""
+        if self._transaction is None:  # no snapshot-based retry inside transaction
+            if self._retry is gapic_v1.method.DEFAULT:
+                transport = self.client._firestore_api._transport
+                gapic_callable = transport.run_query
+                retry = gapic_callable._retry
+            else:
+                retry = self._retry
+            return retry._predicate(exc)
+
+        return False
+    
+    def _next_response(self):
+        while True:
+            try:
+                response = next(self._response_iterator, None)
+                return response
+            except exceptions.GoogleAPICallError as exc:
+                if self._retry_query_after_exception(exc):
+                    new_query = self._query.start_after(self._last_snapshot)
+                    self._response_iterator, _ = new_query._get_stream_iterator(
+                        self._transaction,
+                        self._retry,
+                        self._timeout,
+                    )
+                else:
+                    raise
+
+    def _next_page(self):
+        """Get the next page in the iterator.
+
+        :rtype: List[:class:`~google.cloud.firestore_v1.base_document.DocumentSnapshot`]
+        :returns: The next page in the iterator (or :data:`None` if
+                  there are no pages left). Since there's no pagination, just
+                  returns the next item in a list.
+        """
+        
+        # Ensures internal iterator
+        if self._response_iterator is None:
+            self._response_iterator, self._expected_prefix = self._get_stream_iterator()
+
+        # Get next response
+        while True:
+            response = self._next_response()
+
+            # EOI
+            if response is None:
+                return None
+            
+            # Convert response to snapshot
+            if self._all_descendants:
+                snapshot = _collection_group_query_response_to_snapshot(
+                    response, self._parent
+                )
+            else:
+                snapshot = _query_response_to_snapshot(
+                    response, self._parent, self._expected_prefix
+                )
+            
+            if snapshot is not None:
+                # Save current snapshot as cursor for new query if the next
+                # iteration fails and needs retry.
+                self._last_snapshot = snapshot
+
+                # Some responses don't contain data, leading to an empty
+                # snapshot, but the stream hasn't ended. In this case, do not
+                # return and repeat the loop till the next response with data.
+                return [snapshot]
