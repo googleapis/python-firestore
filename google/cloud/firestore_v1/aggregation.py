@@ -30,6 +30,7 @@ from google.cloud.firestore_v1.base_aggregation import (
     BaseAggregationQuery,
     _query_response_to_result,
 )
+from google.cloud.firestore_v1 import stream_iterator
 
 from typing import Generator, Union, List, Any
 
@@ -99,7 +100,7 @@ class AggregationQuery(BaseAggregationQuery):
 
         return False
 
-    def stream(
+    def _stream(
         self,
         transaction=None,
         retry: Union[
@@ -154,3 +155,19 @@ class AggregationQuery(BaseAggregationQuery):
                 break
             result = _query_response_to_result(response)
             yield result
+
+    def stream(
+        self,
+        transaction=None,
+        retry: Union[
+            retries.Retry, None, gapic_v1.method._MethodDefault
+        ] = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
+    ) -> stream_iterator.StreamIterator:
+
+        inner_generator = self._stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+        )
+        return stream_iterator.StreamIterator(inner_generator)

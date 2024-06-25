@@ -23,6 +23,7 @@ from google.cloud.firestore_v1.base_collection import (
 )
 from google.cloud.firestore_v1 import query as query_mod
 from google.cloud.firestore_v1 import aggregation
+from google.cloud.firestore_v1 import stream_iterator
 from google.cloud.firestore_v1 import vector_query
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import document
@@ -199,7 +200,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         transaction: Union[Transaction, None] = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: Union[float, None] = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
+    ) -> stream_iterator.StreamIterator:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -225,10 +226,6 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
-
-        Yields:
-            :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
-            The next document that fulfills the query.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
 

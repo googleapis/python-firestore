@@ -495,6 +495,7 @@ def _aggregation_query_stream_w_retriable_exc_helper(
     from google.api_core import exceptions
     from google.api_core import gapic_v1
     from google.cloud.firestore_v1 import _helpers
+    from google.cloud.firestore_v1 import stream_iterator
 
     if retry is _not_passed:
         retry = gapic_v1.method.DEFAULT
@@ -536,7 +537,7 @@ def _aggregation_query_stream_w_retriable_exc_helper(
 
     get_response = aggregation_query.stream(transaction=transaction, **kwargs)
 
-    assert isinstance(get_response, types.GeneratorType)
+    assert isinstance(get_response, stream_iterator.StreamIterator)
     if expect_retry:
         returned = list(get_response)
     else:

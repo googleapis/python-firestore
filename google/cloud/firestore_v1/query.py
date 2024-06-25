@@ -20,8 +20,6 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from collections import abc
-
 from google.cloud import firestore_v1
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.api_core import exceptions
@@ -43,6 +41,7 @@ from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1 import aggregation
 
 from google.cloud.firestore_v1 import document
+from google.cloud.firestore_v1 import stream_iterator
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Callable, Generator, List, Optional, Type, TYPE_CHECKING
 
@@ -399,7 +398,7 @@ class Query(BaseQuery):
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
-    ) -> StreamIterator:
+    ) -> stream_iterator.StreamIterator:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -431,7 +430,7 @@ class Query(BaseQuery):
             retry=retry,
             timeout=timeout,
         )
-        return StreamIterator(inner_generator)
+        return stream_iterator.StreamIterator(inner_generator)
 
     def on_snapshot(self, callback: Callable) -> Watch:
         """Monitor the documents in this collection that match this query.
@@ -553,18 +552,3 @@ class CollectionGroup(Query, BaseCollectionGroup):
             start_at = cursor
 
         yield QueryPartition(self, start_at, None)
-
-
-class StreamIterator(abc.Iterator):
-
-    def __init__(self, response_generator):
-        self._generator = response_generator
-
-    def __iter__(self):
-        return self._generator
-    
-    def __next__(self):
-        try:
-            return next(self._generator)
-        except StopIteration:
-            return None

@@ -306,7 +306,7 @@ def test_query_chunkify_w_chunksize_gt_limit(database, expected):
 
 def _query_stream_helper(retry=None, timeout=None, database=None):
     from google.cloud.firestore_v1 import _helpers
-    from google.cloud.firestore_v1.query import StreamIterator
+    from google.cloud.firestore_v1.stream_iterator import StreamIterator
 
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -381,7 +381,7 @@ def test_query_stream_with_limit_to_last(database):
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 def test_query_stream_with_transaction(database):
-    from google.cloud.firestore_v1.query import StreamIterator
+    from google.cloud.firestore_v1.stream_iterator import StreamIterator
 
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -428,7 +428,7 @@ def test_query_stream_with_transaction(database):
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 def test_query_stream_no_results(database):
-    from google.cloud.firestore_v1.query import StreamIterator
+    from google.cloud.firestore_v1.stream_iterator import StreamIterator
 
     # Create a minimal fake GAPIC with a dummy response.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -463,7 +463,7 @@ def test_query_stream_no_results(database):
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 def test_query_stream_second_response_in_empty_stream(database):
-    from google.cloud.firestore_v1.query import StreamIterator
+    from google.cloud.firestore_v1.stream_iterator import StreamIterator
 
     # Create a minimal fake GAPIC with a dummy response.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -498,7 +498,7 @@ def test_query_stream_second_response_in_empty_stream(database):
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 def test_query_stream_with_skipped_results(database):
-    from google.cloud.firestore_v1.query import StreamIterator
+    from google.cloud.firestore_v1.stream_iterator import StreamIterator
 
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -542,7 +542,7 @@ def test_query_stream_with_skipped_results(database):
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 def test_query_stream_empty_after_first_response(database):
-    from google.cloud.firestore_v1.query import StreamIterator
+    from google.cloud.firestore_v1.stream_iterator import StreamIterator
 
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -586,7 +586,7 @@ def test_query_stream_empty_after_first_response(database):
 
 @pytest.mark.parametrize("database", [None, "somedb"])
 def test_query_stream_w_collection_group(database):
-    from google.cloud.firestore_v1.query import StreamIterator
+    from google.cloud.firestore_v1.stream_iterator import StreamIterator
 
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])
@@ -641,7 +641,7 @@ def _query_stream_w_retriable_exc_helper(
     from google.api_core import exceptions
     from google.api_core import gapic_v1
     from google.cloud.firestore_v1 import _helpers
-    from google.cloud.firestore_v1.query import StreamIterator
+    from google.cloud.firestore_v1.stream_iterator import StreamIterator
 
     if retry is _not_passed:
         retry = gapic_v1.method.DEFAULT

@@ -38,6 +38,7 @@ from google.cloud.firestore_v1.base_query import (
 from google.cloud.firestore_v1 import async_document
 from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1 import async_stream_iterator
 from typing import AsyncGenerator, List, Optional, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -334,7 +335,7 @@ class AsyncQuery(BaseQuery):
         transaction=None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
-    ) -> AsyncStreamIterator:
+    ) -> async_stream_iterator.AsyncStreamIterator:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -370,7 +371,7 @@ class AsyncQuery(BaseQuery):
             retry=retry,
             timeout=timeout,
         )
-        return AsyncStreamIterator(inner_generator)
+        return async_stream_iterator.AsyncStreamIterator(inner_generator)
 
     @staticmethod
     def _get_collection_reference_class() -> (
@@ -460,18 +461,3 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
             start_at = cursor
 
         yield QueryPartition(self, start_at, None)
-
-
-class AsyncStreamIterator(abc.AsyncIterator):
-
-    def __init__(self, response_generator):
-        self._generator = response_generator
-
-    def __aiter__(self):
-        return self._generator
-    
-    def __anext__(self):
-        try:
-            return next(self._generator)
-        except StopIteration:
-            return None
