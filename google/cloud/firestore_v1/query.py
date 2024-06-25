@@ -20,6 +20,8 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
+from collections import abc
+
 from google.cloud import firestore_v1
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.api_core import exceptions
@@ -317,7 +319,7 @@ class Query(BaseQuery):
         """
         return aggregation.AggregationQuery(self).avg(field_ref, alias=alias)
 
-    def stream_old(
+    def _stream(
         self,
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -325,7 +327,8 @@ class Query(BaseQuery):
     ) -> Generator[document.DocumentSnapshot, Any, None]:
         """Read the documents in the collection that match this query.
 
-        This sends a ``RunQuery`` RPC and then returns an iterator which
+        Internal method for stream().
+        This sends a ``RunQuery`` RPC and then returns a generator which
         consumes each document returned in the stream of ``RunQueryResponse``
         messages.
 
@@ -393,12 +396,10 @@ class Query(BaseQuery):
 
     def stream(
         self,
-        client=None,
         transaction=None,
-        limit=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
-    ) -> Type["firestore_v1.query.Iterator"]:
+    ) -> StreamIterator:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -417,34 +418,20 @@ class Query(BaseQuery):
         allowed).
 
         Args:
-            client
-                (Optional[:class:`~google.cloud.firestore_v1.client.Client`]):
-                The client used to make this query. If unset, use the client
-                that created this query.
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
-            limit (Optional[int]):
-                The maximum number of documents the query is allowed to return.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
         """
-    
-        if client is None:
-            client = self._client
-
-        return Iterator(
-            self,
-            self._parent,
-            client,
+        inner_generator = self._stream(
             transaction=transaction,
-            limit=limit,
             retry=retry,
             timeout=timeout,
-            all_descendants=self._all_descendants,
         )
+        return StreamIterator(inner_generator)
 
     def on_snapshot(self, callback: Callable) -> Watch:
         """Monitor the documents in this collection that match this query.
@@ -685,3 +672,18 @@ class Iterator(page_iterator.Iterator):
                 # snapshot, but the stream hasn't ended. In this case, do not
                 # return and repeat the loop till the next response with data.
                 return [snapshot]
+
+
+class StreamIterator(abc.Iterator):
+
+    def __init__(self, response_generator):
+        self._generator = response_generator
+
+    def __iter__(self):
+        return self._generator
+    
+    def __next__(self):
+        try:
+            return next(self._generator)
+        except StopIteration:
+            return None

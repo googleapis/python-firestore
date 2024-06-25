@@ -20,6 +20,8 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
+from collections import abc
+
 from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
 
@@ -209,8 +211,11 @@ class AsyncQuery(BaseQuery):
                     else self.ASCENDING
                 )
             self._limit_to_last = False
-
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
+        result = await self.stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+        )
         result = [d async for d in result]
         if is_limited_to_last:
             result = list(reversed(result))
@@ -264,7 +269,7 @@ class AsyncQuery(BaseQuery):
         """
         return AsyncAggregationQuery(self).avg(field_ref, alias=alias)
 
-    async def stream(
+    async def _stream(
         self,
         transaction=None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
@@ -323,6 +328,49 @@ class AsyncQuery(BaseQuery):
                 )
             if snapshot is not None:
                 yield snapshot
+
+    async def stream(
+        self,
+        transaction=None,
+        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
+        timeout: float = None,
+    ) -> AsyncStreamIterator:
+        """Read the documents in the collection that match this query.
+
+        This sends a ``RunQuery`` RPC and then returns an iterator which
+        consumes each document returned in the stream of ``RunQueryResponse``
+        messages.
+
+        .. note::
+
+           The underlying stream of responses will time out after
+           the ``max_rpc_timeout_millis`` value set in the GAPIC
+           client configuration for the ``RunQuery`` API.  Snapshots
+           not consumed from the iterator before that point will be lost.
+
+        If a ``transaction`` is used and it already has write operations
+        added, this method cannot be used (i.e. read-after-write is not
+        allowed).
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.  Defaults to a system-specified policy.
+            timeout (float): The timeout for this request.  Defaults to a
+                system-specified value.
+
+        Yields:
+            :class:`~google.cloud.firestore_v1.async_document.DocumentSnapshot`:
+            The next document that fulfills the query.
+        """
+        inner_generator = self._stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+        )
+        return AsyncStreamIterator(inner_generator)
 
     @staticmethod
     def _get_collection_reference_class() -> (
@@ -412,3 +460,18 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
             start_at = cursor
 
         yield QueryPartition(self, start_at, None)
+
+
+class AsyncStreamIterator(abc.AsyncIterator):
+
+    def __init__(self, response_generator):
+        self._generator = response_generator
+
+    def __aiter__(self):
+        return self._generator
+    
+    def __anext__(self):
+        try:
+            return next(self._generator)
+        except StopIteration:
+            return None
