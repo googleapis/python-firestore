@@ -243,7 +243,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
 
-        docs = await query.stream(transaction=transaction, **kwargs)
+        docs = query.stream(transaction=transaction, **kwargs)
 
         async for d in docs:
             yield d  # pytype: disable=name-error

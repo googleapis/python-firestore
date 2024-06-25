@@ -222,7 +222,7 @@ class FirestoreBundle:
     ) -> datetime.datetime:
         doc: DocumentSnapshot
         _read_time = datetime.datetime.min.replace(tzinfo=UTC)
-        docs = await snapshot.stream()
+        docs = snapshot.stream()
         async for doc in docs:
             self.add_document(doc)
             bundled_document = self.documents.get(doc.reference._document_path)

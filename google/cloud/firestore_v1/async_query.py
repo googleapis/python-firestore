@@ -212,7 +212,7 @@ class AsyncQuery(BaseQuery):
                     else self.ASCENDING
                 )
             self._limit_to_last = False
-        result = await self.stream(
+        result = self.stream(
             transaction=transaction,
             retry=retry,
             timeout=timeout,
@@ -330,7 +330,7 @@ class AsyncQuery(BaseQuery):
             if snapshot is not None:
                 yield snapshot
 
-    async def stream(
+    def stream(
         self,
         transaction=None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,

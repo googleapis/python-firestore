@@ -339,7 +339,7 @@ async def _stream_helper(retry=None, timeout=None):
     # Execute the query and check the response.
     query = make_async_query(parent)
 
-    get_response = await query.stream(**kwargs)
+    get_response = query.stream(**kwargs)
 
     assert isinstance(get_response, AsyncStreamIterator)
     returned = [x async for x in get_response]
@@ -385,7 +385,7 @@ async def test_asyncquery_stream_with_limit_to_last():
     query = make_async_query(parent)
     query = query.limit_to_last(2)
 
-    stream_response = await query.stream()
+    stream_response = query.stream()
 
     with pytest.raises(ValueError):
         [d async for d in stream_response]
@@ -419,7 +419,7 @@ async def test_asyncquery_stream_with_transaction():
 
     # Execute the query and check the response.
     query = make_async_query(parent)
-    get_response = await query.stream(transaction=transaction)
+    get_response = query.stream(transaction=transaction)
     assert isinstance(get_response, AsyncStreamIterator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
@@ -456,7 +456,7 @@ async def test_asyncquery_stream_no_results():
     parent = client.collection("dah", "dah", "dum")
     query = make_async_query(parent)
 
-    get_response = await query.stream()
+    get_response = query.stream()
     assert isinstance(get_response, AsyncStreamIterator)
     assert [x async for x in get_response] == []
 
@@ -491,7 +491,7 @@ async def test_asyncquery_stream_second_response_in_empty_stream():
     parent = client.collection("dah", "dah", "dum")
     query = make_async_query(parent)
 
-    get_response = await query.stream()
+    get_response = query.stream()
     assert isinstance(get_response, AsyncStreamIterator)
     assert [x async for x in get_response] == []
 
@@ -531,7 +531,7 @@ async def test_asyncquery_stream_with_skipped_results():
 
     # Execute the query and check the response.
     query = make_async_query(parent)
-    get_response = await query.stream()
+    get_response = query.stream()
     assert isinstance(get_response, AsyncStreamIterator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
@@ -575,7 +575,7 @@ async def test_asyncquery_stream_empty_after_first_response():
 
     # Execute the query and check the response.
     query = make_async_query(parent)
-    get_response = await query.stream()
+    get_response = query.stream()
     assert isinstance(get_response, AsyncStreamIterator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
@@ -621,7 +621,7 @@ async def test_asyncquery_stream_w_collection_group():
     # Execute the query and check the response.
     query = make_async_query(parent)
     query._all_descendants = True
-    get_response = await query.stream()
+    get_response = query.stream()
     assert isinstance(get_response, AsyncStreamIterator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
