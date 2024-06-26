@@ -106,7 +106,7 @@ class AggregationQuery(BaseAggregationQuery):
     def _make_stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
     ) -> Union[Generator[List[AggregationResult], Any, None]]:
         """Internal method for stream(). Runs the aggregation query.
@@ -160,7 +160,7 @@ class AggregationQuery(BaseAggregationQuery):
     def stream(
         self,
         transaction: Optional["transaction.Transaction"] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
     ) -> stream_iterator.StreamIterator:
         """Runs the aggregation query.

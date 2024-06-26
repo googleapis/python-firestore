@@ -96,7 +96,7 @@ class VectorQuery(BaseVectorQuery):
     def _make_stream(
         self,
         transaction: Optional["transaction.Transaction"] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
     ) -> Iterable[document.DocumentSnapshot]:
         """Reads the documents in the collection that match this query.
@@ -149,7 +149,7 @@ class VectorQuery(BaseVectorQuery):
     def stream(
         self,
         transaction: Optional["transaction.Transaction"] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
     ) -> stream_iterator.StreamIterator:
         """Reads the documents in the collection that match this query.

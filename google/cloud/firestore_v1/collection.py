@@ -196,7 +196,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
     def stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
     ) -> stream_iterator.StreamIterator:
         """Read the documents in this collection.

@@ -258,7 +258,7 @@ class BaseAggregationQuery(ABC):
     def stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
     ) -> (
         Generator[List[AggregationResult], Any, None]
