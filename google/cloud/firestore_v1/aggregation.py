@@ -100,7 +100,7 @@ class AggregationQuery(BaseAggregationQuery):
 
         return False
 
-    def _stream(
+    def _make_stream(
         self,
         transaction=None,
         retry: Union[
@@ -165,7 +165,7 @@ class AggregationQuery(BaseAggregationQuery):
         timeout: float | None = None,
     ) -> stream_iterator.StreamIterator:
 
-        inner_generator = self._stream(
+        inner_generator = self._make_stream(
             transaction=transaction,
             retry=retry,
             timeout=timeout,

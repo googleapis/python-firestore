@@ -270,7 +270,7 @@ class AsyncQuery(BaseQuery):
         """
         return AsyncAggregationQuery(self).avg(field_ref, alias=alias)
 
-    async def _stream(
+    async def _make_stream(
         self,
         transaction=None,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
@@ -366,7 +366,7 @@ class AsyncQuery(BaseQuery):
             :class:`~google.cloud.firestore_v1.async_document.DocumentSnapshot`:
             The next document that fulfills the query.
         """
-        inner_generator = self._stream(
+        inner_generator = self._make_stream(
             transaction=transaction,
             retry=retry,
             timeout=timeout,

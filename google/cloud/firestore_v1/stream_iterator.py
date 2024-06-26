@@ -27,7 +27,10 @@ class StreamIterator(abc.Iterator):
         return self._generator
     
     def __next__(self):
-        try:
-            return next(self._generator)
-        except StopIteration:
-            return None
+        return self._generator.__next__()
+
+    def send(self, value=None):
+        return self._generator.send(value)
+
+    def throw(self, exp=None):
+        return self._generator.throw(exp)

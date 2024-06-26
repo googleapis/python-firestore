@@ -222,7 +222,7 @@ class Query(BaseQuery):
                 return
 
     def _get_stream_iterator(self, transaction, retry, timeout):
-        """"Deprecated. Helper method for :meth:`stream`."""
+        """"Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
             retry,
@@ -238,7 +238,7 @@ class Query(BaseQuery):
         return response_iterator, expected_prefix
 
     def _retry_query_after_exception(self, exc, retry, transaction):
-        """"Deprecated. Helper method for :meth:`stream`."""
+        """"Helper method for :meth:`stream`."""
         if transaction is None:  # no snapshot-based retry inside transaction
             if retry is gapic_v1.method.DEFAULT:
                 transport = self._client._firestore_api._transport
@@ -318,7 +318,7 @@ class Query(BaseQuery):
         """
         return aggregation.AggregationQuery(self).avg(field_ref, alias=alias)
 
-    def _stream(
+    def _make_stream(
         self,
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
@@ -425,7 +425,7 @@ class Query(BaseQuery):
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
         """
-        inner_generator = self._stream(
+        inner_generator = self._make_stream(
             transaction=transaction,
             retry=retry,
             timeout=timeout,
