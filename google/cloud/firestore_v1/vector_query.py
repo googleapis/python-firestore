@@ -15,17 +15,22 @@
 """Classes for representing vector queries for the Google Cloud Firestore API.
 """
 
-from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from typing import Iterable, Optional, TypeVar, Union
+from typing import Iterable, Optional, TypeVar, TYPE_CHECKING, Union
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.base_query import (
     BaseQuery,
     _query_response_to_snapshot,
     _collection_group_query_response_to_snapshot,
 )
+from google.cloud.firestore_v1 import stream_iterator
+
+# Types needed only for Type Hints
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1 import transaction
 
 TVectorQuery = TypeVar("TVectorQuery", bound="VectorQuery")
 
@@ -88,15 +93,15 @@ class VectorQuery(BaseVectorQuery):
 
         return response_iterator, expected_prefix
 
-    def stream(
+    def _make_stream(
         self,
-        transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        transaction: Optional["transaction.Transaction"] = None,
+        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
     ) -> Iterable[document.DocumentSnapshot]:
         """Reads the documents in the collection that match this query.
 
-        This sends a ``RunQuery`` RPC and then returns an iterator which
+        This sends a ``RunQuery`` RPC and then returns a generator which
         consumes each document returned in the stream of ``RunQueryResponse``
         messages.
 
@@ -108,10 +113,11 @@ class VectorQuery(BaseVectorQuery):
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optional[float]): The timeout for this request.  Defaults
+            to a system-specified value.
 
         Yields:
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
@@ -139,3 +145,39 @@ class VectorQuery(BaseVectorQuery):
                 )
             if snapshot is not None:
                 yield snapshot
+
+    def stream(
+        self,
+        transaction: Optional["transaction.Transaction"] = None,
+        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
+    ) -> stream_iterator.StreamIterator:
+        """Reads the documents in the collection that match this query.
+
+        This sends a ``RunQuery`` RPC and then returns a generator which
+        consumes each document returned in the stream of ``RunQueryResponse``
+        messages.
+
+        If a ``transaction`` is used and it already has write operations
+        added, this method cannot be used (i.e. read-after-write is not
+        allowed).
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optinal[float]): The timeout for this request.  Defaults
+            to a system-specified value.
+
+        Returns:
+            stream_iterator.StreamIterator: A generator of the query results.
+        """
+        inner_generator = self._make_stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+        )
+        return stream_iterator.StreamIterator(inner_generator)

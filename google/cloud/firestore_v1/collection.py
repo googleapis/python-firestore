@@ -27,10 +27,8 @@ from google.cloud.firestore_v1 import stream_iterator
 from google.cloud.firestore_v1 import vector_query
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import document
-from typing import Any, Callable, Generator, Tuple, Union
-
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.transaction import Transaction
+from google.cloud.firestore_v1 import transaction
+from typing import Any, Callable, Generator, Optional, Tuple, Union
 
 
 class CollectionReference(BaseCollectionReference[query_mod.Query]):
@@ -166,7 +164,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
     def get(
         self,
-        transaction: Union[Transaction, None] = None,
+        transaction: Union[transaction.Transaction, None] = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: Union[float, None] = None,
     ) -> list:
@@ -177,7 +175,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
         Args:
             transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.transaction.Transaction`]):
                 An existing transaction that this query will run in.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.  Defaults to a system-specified policy.
@@ -197,9 +195,9 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
     def stream(
         self,
-        transaction: Union[Transaction, None] = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: Union[float, None] = None,
+        transaction: Optional[transaction.Transaction] = None,
+        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
     ) -> stream_iterator.StreamIterator:
         """Read the documents in this collection.
 
@@ -220,12 +218,16 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
         Args:
             transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.\
-                Transaction`]):
+                transaction.Transaction`]):
                 An existing transaction that the query will run in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optional[float]): The timeout for this request. Defaults
+                to a system-specified value.
+        
+        Returns:
+            stream_iterator.StreamIterator: A generator of the query results.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
 

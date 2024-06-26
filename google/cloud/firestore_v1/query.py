@@ -24,7 +24,6 @@ from google.cloud import firestore_v1
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.api_core import exceptions
 from google.api_core import gapic_v1
-from google.api_core import page_iterator
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1.base_query import (
@@ -42,6 +41,8 @@ from google.cloud.firestore_v1 import aggregation
 
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1 import stream_iterator
+from google.cloud.firestore_v1 import transaction
+
 from google.cloud.firestore_v1.watch import Watch
 from typing import Any, Callable, Generator, List, Optional, Type, TYPE_CHECKING
 
@@ -222,7 +223,7 @@ class Query(BaseQuery):
                 return
 
     def _get_stream_iterator(self, transaction, retry, timeout):
-        """"Helper method for :meth:`stream`."""
+        """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
             retry,
@@ -238,7 +239,7 @@ class Query(BaseQuery):
         return response_iterator, expected_prefix
 
     def _retry_query_after_exception(self, exc, retry, transaction):
-        """"Helper method for :meth:`stream`."""
+        """Helper method for :meth:`stream`."""
         if transaction is None:  # no snapshot-based retry inside transaction
             if retry is gapic_v1.method.DEFAULT:
                 transport = self._client._firestore_api._transport
@@ -320,11 +321,12 @@ class Query(BaseQuery):
 
     def _make_stream(
         self,
-        transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        transaction: Optional[transaction.Transaction] = None,
+        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
     ) -> Generator[document.DocumentSnapshot, Any, None]:
-        """Read the documents in the collection that match this query.
+        """Internal method for stream(). Read the documents in the collection
+        that match this query.
 
         Internal method for stream().
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -343,13 +345,14 @@ class Query(BaseQuery):
         allowed).
 
         Args:
-            transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
-                An existing transaction that this query will run in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
+            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.\
+                Transaction`]):
+                An existing transaction that the query will run in.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optional[float]): The timeout for this request. Defaults
+                to a system-specified value.
 
         Yields:
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
@@ -395,13 +398,13 @@ class Query(BaseQuery):
 
     def stream(
         self,
-        transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        transaction: Optional[transaction.Transaction] = None,
+        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
     ) -> stream_iterator.StreamIterator:
         """Read the documents in the collection that match this query.
 
-        This sends a ``RunQuery`` RPC and then returns an iterator which
+        This sends a ``RunQuery`` RPC and then returns a generator which
         consumes each document returned in the stream of ``RunQueryResponse``
         messages.
 
@@ -420,10 +423,14 @@ class Query(BaseQuery):
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optinal[float]): The timeout for this request.  Defaults
+            to a system-specified value.
+        
+        Returns:
+            stream_iterator.StreamIterator: A generator of the query results.
         """
         inner_generator = self._make_stream(
             transaction=transaction,
