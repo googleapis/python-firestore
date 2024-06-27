@@ -24,7 +24,7 @@ from google.cloud.firestore_v1 import _helpers
 from unittest import mock
 
 
-def _make_commit_repsonse():
+def _make_commit_response():
     response = mock.create_autospec(firestore.CommitResponse)
     response.write_results = [mock.sentinel.write_result]
     response.commit_time = mock.sentinel.commit_time
@@ -34,7 +34,7 @@ def _make_commit_repsonse():
 def _make_firestore_api():
     firestore_api = mock.Mock()
     firestore_api.commit.mock_add_spec(spec=["commit"])
-    firestore_api.commit.return_value = _make_commit_repsonse()
+    firestore_api.commit.return_value = _make_commit_response()
     return firestore_api
 
 
