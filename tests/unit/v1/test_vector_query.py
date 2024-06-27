@@ -14,7 +14,6 @@
 
 import mock
 import pytest
-import types
 
 from google.cloud.firestore_v1.types.query import StructuredQuery
 from google.cloud.firestore_v1.vector import Vector

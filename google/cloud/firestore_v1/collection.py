@@ -225,7 +225,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 system-specified policy.
             timeout (Optional[float]): The timeout for this request. Defaults
                 to a system-specified value.
-        
+
         Returns:
             stream_iterator.StreamIterator: A generator of the query results.
         """

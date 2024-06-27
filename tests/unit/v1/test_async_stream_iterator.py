@@ -48,11 +48,11 @@ async def test_async_stream_iterator_next():
     inst = _make_async_stream_iterator(expected_results)
 
     actual_results = []
-    actual_results.append(await anext(inst))
-    actual_results.append(await anext(inst))
+    actual_results.append(await anext(inst))  # noqa: F821
+    actual_results.append(await anext(inst))  # noqa: F821
 
     with pytest.raises(StopAsyncIteration):
-        await anext(inst)
+        await anext(inst)  # noqa: F821
 
     assert expected_results == actual_results
 
@@ -64,12 +64,12 @@ async def test_async_stream_iterator_send():
     inst = _make_async_stream_iterator(expected_results)
 
     actual_results = []
-    actual_results.append(await anext(inst))
+    actual_results.append(await anext(inst))  # noqa: F821
     assert await inst.asend(2) == 2
-    actual_results.append(await anext(inst))
+    actual_results.append(await anext(inst))  # noqa: F821
 
     with pytest.raises(StopAsyncIteration):
-        await anext(inst)
+        await anext(inst)  # noqa: F821
 
     assert expected_results == actual_results
 

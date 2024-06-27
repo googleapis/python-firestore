@@ -239,7 +239,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
                 system-specified policy.
             timeout (Optional[float]): The timeout for this request. Defaults
                 to a system-specified value.
-        
+
         Returns:
             async_stream_iterator.AsyncStreamIterator: A generator of the query
             results.
