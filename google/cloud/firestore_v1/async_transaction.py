@@ -43,7 +43,7 @@ from google.cloud.firestore_v1 import types
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_document import DocumentSnapshot
 from google.cloud.firestore_v1.async_query import AsyncQuery
-from typing import Any, AsyncGenerator, Callable, Coroutine
+from typing import Any, AsyncGenerator, Callable, Coroutine, Optional, Union
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.client import Client
@@ -82,7 +82,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
         super(AsyncTransaction, self)._add_write_pbs(write_pbs)
 
-    async def _begin(self, retry_id: bytes = None) -> None:
+    async def _begin(self, retry_id: Optional[bytes] = None) -> None:
         """Begin the transaction.
 
         Args:
@@ -152,9 +152,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
     async def get_all(
         self,
-        references: list,
+        references: list[AsyncDocumentReference],
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> AsyncGenerator[DocumentSnapshot, Any]:
         """Retrieves multiple documents from Firestore.
 
@@ -175,9 +175,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
     async def get(
         self,
-        ref_or_query,
+        ref_or_query: Union[AsyncDocumentReference, AsyncQuery],
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
     ) -> AsyncGenerator[DocumentSnapshot, Any]:
         """
         Retrieve a document or a query result from the database.
