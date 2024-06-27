@@ -30,7 +30,7 @@ from google.cloud.firestore_v1 import stream_iterator
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:
-    from google.cloud.firestore_v1 import transaction
+    from google.cloud.firestore_v1 import transaction  # pragma: NO COVER
 
 TVectorQuery = TypeVar("TVectorQuery", bound="VectorQuery")
 

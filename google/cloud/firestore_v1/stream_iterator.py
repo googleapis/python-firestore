@@ -19,6 +19,7 @@ from collections import abc
 
 
 class StreamIterator(abc.Iterator):
+    """Iterator for the streamed results."""
 
     def __init__(self, response_generator):
         self._generator = response_generator

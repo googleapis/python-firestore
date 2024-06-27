@@ -50,7 +50,7 @@ from google.cloud.firestore_v1 import _helpers
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:
-    from google.cloud.firestore_v1 import transaction
+    from google.cloud.firestore_v1 import transaction  # pragma: NO COVER
 
 
 class AggregationResult(object):
