@@ -428,7 +428,7 @@ class Query(BaseQuery):
                 system-specified policy.
             timeout (Optinal[float]): The timeout for this request.  Defaults
             to a system-specified value.
-        
+
         Returns:
             stream_iterator.StreamIterator: A generator of the query results.
         """

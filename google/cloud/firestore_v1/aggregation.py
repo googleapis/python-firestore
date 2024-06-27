@@ -38,6 +38,7 @@ from typing import Any, Generator, List, Optional, TYPE_CHECKING, Union
 if TYPE_CHECKING:
     from google.cloud.firestore_v1 import transaction  # pragma: NO COVER
 
+
 class AggregationQuery(BaseAggregationQuery):
     """Represents an aggregation query to the Firestore API."""
 
@@ -181,7 +182,7 @@ class AggregationQuery(BaseAggregationQuery):
                 system-specified policy.
             timeout (Optinal[float]): The timeout for this request.  Defaults
             to a system-specified value.
-        
+
         Returns:
             stream_iterator.StreamIterator: A generator of the query results.
         """

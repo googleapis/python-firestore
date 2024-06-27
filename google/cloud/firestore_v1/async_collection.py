@@ -197,7 +197,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
             timeout (Otional[float]): The timeout for this request.  Defaults
                 to a system-specified value.
 
-        If a ``transaction`` is used and it already has write operations added, 
+        If a ``transaction`` is used and it already has write operations added,
         this method cannot be used (i.e. read-after-write is not allowed).
 
         Returns:
@@ -246,4 +246,4 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
 
-        return  query.stream(transaction=transaction, **kwargs)
+        return query.stream(transaction=transaction, **kwargs)

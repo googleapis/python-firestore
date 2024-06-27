@@ -26,7 +26,7 @@ class StreamIterator(abc.Iterator):
 
     def __iter__(self):
         return self._generator
-    
+
     def __next__(self):
         return self._generator.__next__()
 

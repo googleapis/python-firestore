@@ -27,7 +27,7 @@ class AsyncStreamIterator(abc.AsyncIterator):
 
     def __aiter__(self):
         return self._generator
-    
+
     def __anext__(self):
         return self._generator.__anext__()
 

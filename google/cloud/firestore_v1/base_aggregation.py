@@ -277,7 +277,7 @@ class BaseAggregationQuery(ABC):
                 system-specified policy.
             timeout (Optinal[float]): The timeout for this request.  Defaults
             to a system-specified value.
-        
+
         Returns:
             A generator of the query results.
         """
