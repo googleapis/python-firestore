@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import pytest
+import sys
 
 
 def _make_async_stream_iterator(iterable):
@@ -27,6 +28,7 @@ def _make_async_stream_iterator(iterable):
     return AsyncStreamIterator(_inner_generator())
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.asyncio
 async def test_async_stream_iterator_iter():
     expected_results = [0, 1, 2]
@@ -39,6 +41,7 @@ async def test_async_stream_iterator_iter():
     assert expected_results == actual_results
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.asyncio
 async def test_async_stream_iterator_next():
     expected_results = [0, 1]
@@ -54,6 +57,7 @@ async def test_async_stream_iterator_next():
     assert expected_results == actual_results
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.asyncio
 async def test_async_stream_iterator_send():
     expected_results = [0, 1]
@@ -70,6 +74,7 @@ async def test_async_stream_iterator_send():
     assert expected_results == actual_results
 
 
+@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.asyncio
 async def test_async_stream_iterator_throw():
     inst = _make_async_stream_iterator([])
