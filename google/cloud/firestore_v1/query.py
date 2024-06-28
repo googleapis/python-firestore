@@ -39,8 +39,7 @@ from google.cloud.firestore_v1.vector_query import VectorQuery
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1 import aggregation
 
-from google.cloud.firestore_v1 import document
-from google.cloud.firestore_v1 import stream_iterator
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
 from google.cloud.firestore_v1 import transaction
 
 from google.cloud.firestore_v1.watch import Watch
@@ -324,7 +323,7 @@ class Query(BaseQuery):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
+    ) -> Generator[DocumentSnapshot, Any, None]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -401,7 +400,7 @@ class Query(BaseQuery):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> stream_iterator.StreamIterator:
+    ) -> StreamGenerator[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -430,14 +429,14 @@ class Query(BaseQuery):
             to a system-specified value.
 
         Returns:
-            stream_iterator.StreamIterator: A generator of the query results.
+            StreamGenerator[DocumentSnapshot]: A generator of the query results.
         """
         inner_generator = self._make_stream(
             transaction=transaction,
             retry=retry,
             timeout=timeout,
         )
-        return stream_iterator.StreamIterator(inner_generator)
+        return StreamGenerator(inner_generator)
 
     def on_snapshot(self, callback: Callable) -> Watch:
         """Monitor the documents in this collection that match this query.
@@ -468,7 +467,7 @@ class Query(BaseQuery):
             # Terminate this watch
             query_watch.unsubscribe()
         """
-        return Watch.for_query(self, callback, document.DocumentSnapshot)
+        return Watch.for_query(self, callback, DocumentSnapshot)
 
     @staticmethod
     def _get_collection_reference_class() -> (

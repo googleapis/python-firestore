@@ -35,8 +35,9 @@ from google.cloud.firestore_v1.base_query import (
 
 from google.cloud.firestore_v1 import async_document
 from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
+from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
-from google.cloud.firestore_v1 import async_stream_iterator, transaction
+from google.cloud.firestore_v1 import transaction
 from typing import AsyncGenerator, List, Optional, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -335,7 +336,7 @@ class AsyncQuery(BaseQuery):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> async_stream_iterator.AsyncStreamIterator:
+    ) ->AsyncStreamGenerator[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -364,7 +365,7 @@ class AsyncQuery(BaseQuery):
                 to a system-specified value.
 
         Returns:
-            async_stream_iterator.AsyncStreamIterator: A generator of the query
+            AsyncStreamGenerator[DocumentSnapshot]: A generator of the query
             results.
         """
         inner_generator = self._make_stream(
@@ -372,7 +373,7 @@ class AsyncQuery(BaseQuery):
             retry=retry,
             timeout=timeout,
         )
-        return async_stream_iterator.AsyncStreamIterator(inner_generator)
+        return AsyncStreamGenerator(inner_generator)
 
     @staticmethod
     def _get_collection_reference_class() -> (

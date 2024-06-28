@@ -15,8 +15,8 @@
 import pytest
 
 
-def _make_stream_iterator(iterable):
-    from google.cloud.firestore_v1.stream_iterator import StreamIterator
+def _make_stream_generator(iterable):
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
     def _inner_generator():
         for i in iterable:
@@ -24,12 +24,12 @@ def _make_stream_iterator(iterable):
             if X:
                 yield X
 
-    return StreamIterator(_inner_generator())
+    return StreamGenerator(_inner_generator())
 
 
-def test_stream_iterator_iter():
+def test_stream_generator_iter():
     expected_results = [0, 1, 2]
-    inst = _make_stream_iterator(expected_results)
+    inst = _make_stream_generator(expected_results)
 
     actual_results = []
     for result in inst:
@@ -38,9 +38,9 @@ def test_stream_iterator_iter():
     assert expected_results == actual_results
 
 
-def test_stream_iterator_next():
+def test_stream_generator_next():
     expected_results = [0, 1]
-    inst = _make_stream_iterator(expected_results)
+    inst = _make_stream_generator(expected_results)
 
     actual_results = []
     actual_results.append(next(inst))
@@ -52,9 +52,9 @@ def test_stream_iterator_next():
     assert expected_results == actual_results
 
 
-def test_stream_iterator_send():
+def test_stream_generator_send():
     expected_results = [0, 1]
-    inst = _make_stream_iterator(expected_results)
+    inst = _make_stream_generator(expected_results)
 
     actual_results = []
     actual_results.append(next(inst))
@@ -67,7 +67,18 @@ def test_stream_iterator_send():
     assert expected_results == actual_results
 
 
-def test_stream_iterator_throw():
-    inst = _make_stream_iterator([])
+def test_stream_generator_throw():
+    inst = _make_stream_generator([])
     with pytest.raises(ValueError):
         inst.throw(ValueError)
+
+
+def test_stream_generator_close():
+    expected_results = [0, 1]
+    inst = _make_stream_generator(expected_results)
+
+    inst.close()
+
+    # Verifies that generator is closed.
+    with pytest.raises(StopIteration):
+        next(inst)

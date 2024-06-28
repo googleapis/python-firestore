@@ -30,7 +30,8 @@ from google.cloud.firestore_v1.base_aggregation import (
     BaseAggregationQuery,
     _query_response_to_result,
 )
-from google.cloud.firestore_v1 import stream_iterator
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 from typing import Any, Generator, List, Optional, TYPE_CHECKING, Union
 
@@ -163,7 +164,7 @@ class AggregationQuery(BaseAggregationQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> stream_iterator.StreamIterator:
+    ) -> StreamGenerator[DocumentSnapshot]:
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -184,11 +185,11 @@ class AggregationQuery(BaseAggregationQuery):
             to a system-specified value.
 
         Returns:
-            stream_iterator.StreamIterator: A generator of the query results.
+            StreamGenerator[DocumentSnapshot]: A generator of the query results.
         """
         inner_generator = self._make_stream(
             transaction=transaction,
             retry=retry,
             timeout=timeout,
         )
-        return stream_iterator.StreamIterator(inner_generator)
+        return StreamGenerator(inner_generator)

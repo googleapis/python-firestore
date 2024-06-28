@@ -15,18 +15,17 @@
 """Classes for representing vector queries for the Google Cloud Firestore API.
 """
 
-from typing import Iterable, Optional, TypeVar, TYPE_CHECKING, Union
+from typing import Any, Iterable, Optional, TypeVar, TYPE_CHECKING, Union, Generator
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1.base_query import (
     BaseQuery,
     _query_response_to_snapshot,
     _collection_group_query_response_to_snapshot,
 )
-from google.cloud.firestore_v1 import stream_iterator
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:
@@ -98,7 +97,7 @@ class VectorQuery(BaseVectorQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> Iterable[document.DocumentSnapshot]:
+    ) -> Generator[DocumentSnapshot, Any, None]:
         """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -151,7 +150,7 @@ class VectorQuery(BaseVectorQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> stream_iterator.StreamIterator:
+    ) -> "StreamGenerator[DocumentSnapshot]":
         """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -173,11 +172,11 @@ class VectorQuery(BaseVectorQuery):
             to a system-specified value.
 
         Returns:
-            stream_iterator.StreamIterator: A generator of the query results.
+            StreamGenerator[DocumentSnapshot]: A generator of the query results.
         """
         inner_generator = self._make_stream(
             transaction=transaction,
             retry=retry,
             timeout=timeout,
         )
-        return stream_iterator.StreamIterator(inner_generator)
+        return StreamGenerator(inner_generator)

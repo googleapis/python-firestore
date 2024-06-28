@@ -12,26 +12,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Classes for iterating over stream results for the Google Cloud Firestore API.
+"""Classes for iterating over stream results async for the Google Cloud
+Firestore API.
 """
 
 from collections import abc
 
 
-class StreamIterator(abc.Iterator):
-    """Iterator for the streamed results."""
+class AsyncStreamGenerator(abc.AsyncGenerator):
+    """Asynchronous generator for the streamed results."""
 
     def __init__(self, response_generator):
         self._generator = response_generator
 
-    def __iter__(self):
+    def __aiter__(self):
         return self._generator
 
-    def __next__(self):
-        return self._generator.__next__()
+    def __anext__(self):
+        return self._generator.__anext__()
 
-    def send(self, value=None):
-        return self._generator.send(value)
+    def asend(self, value=None):
+        return self._generator.asend(value)
 
-    def throw(self, exp=None):
-        return self._generator.throw(exp)
+    def athrow(self, exp=None):
+        return self._generator.athrow(exp)
+
+    def aclose(self):
+        return self._generator.aclose()

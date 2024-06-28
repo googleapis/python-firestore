@@ -13,11 +13,10 @@
 # limitations under the License.
 
 import pytest
-import sys
 
 
-def _make_async_stream_iterator(iterable):
-    from google.cloud.firestore_v1.async_stream_iterator import AsyncStreamIterator
+def _make_async_stream_generator(iterable):
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     async def _inner_generator():
         for i in iterable:
@@ -25,14 +24,13 @@ def _make_async_stream_iterator(iterable):
             if X:
                 yield X
 
-    return AsyncStreamIterator(_inner_generator())
+    return AsyncStreamGenerator(_inner_generator())
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.asyncio
-async def test_async_stream_iterator_iter():
+async def test_async_stream_generator_aiter():
     expected_results = [0, 1, 2]
-    inst = _make_async_stream_iterator(expected_results)
+    inst = _make_async_stream_generator(expected_results)
 
     actual_results = []
     async for result in inst:
@@ -41,42 +39,58 @@ async def test_async_stream_iterator_iter():
     assert expected_results == actual_results
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.asyncio
-async def test_async_stream_iterator_next():
+async def test_async_stream_generator_anext():
     expected_results = [0, 1]
-    inst = _make_async_stream_iterator(expected_results)
+    inst = _make_async_stream_generator(expected_results)
 
     actual_results = []
-    actual_results.append(await anext(inst))  # noqa: F821
-    actual_results.append(await anext(inst))  # noqa: F821
+
+    # Use inst.__anext__() instead of anext(inst), because built-in anext()
+    # was introduced in Python 3.10.
+    actual_results.append(await inst.__anext__())
+    actual_results.append(await inst.__anext__())
 
     with pytest.raises(StopAsyncIteration):
-        await anext(inst)  # noqa: F821
+        await inst.__anext__()
 
     assert expected_results == actual_results
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.asyncio
-async def test_async_stream_iterator_send():
+async def test_async_stream_generator_asend():
     expected_results = [0, 1]
-    inst = _make_async_stream_iterator(expected_results)
+    inst = _make_async_stream_generator(expected_results)
 
     actual_results = []
-    actual_results.append(await anext(inst))  # noqa: F821
+
+    # Use inst.__anext__() instead of anext(inst), because built-in anext()
+    # was introduced in Python 3.10.
+    actual_results.append(await inst.__anext__())
     assert await inst.asend(2) == 2
-    actual_results.append(await anext(inst))  # noqa: F821
+    actual_results.append(await inst.__anext__())
 
     with pytest.raises(StopAsyncIteration):
-        await anext(inst)  # noqa: F821
+        await inst.__anext__()
 
     assert expected_results == actual_results
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="requires python3.10 or higher")
 @pytest.mark.asyncio
-async def test_async_stream_iterator_throw():
-    inst = _make_async_stream_iterator([])
+async def test_async_stream_generator_athrow():
+    inst = _make_async_stream_generator([])
     with pytest.raises(ValueError):
         await inst.athrow(ValueError)
+
+
+@pytest.mark.asyncio
+async def test_stream_generator_aclose():
+    expected_results = [0, 1]
+    inst = _make_async_stream_generator(expected_results)
+
+    await inst.aclose()
+
+    # Verifies that generator is closed.
+    with pytest.raises(StopAsyncIteration):
+        await inst.__anext__()
+

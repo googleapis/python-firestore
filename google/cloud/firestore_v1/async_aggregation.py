@@ -25,14 +25,14 @@ from google.api_core import retry_async as retries
 
 from typing import AsyncGenerator, List, Optional, Union
 
-
+from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.base_aggregation import (
     AggregationResult,
     _query_response_to_result,
     BaseAggregationQuery,
 )
-
-from google.cloud.firestore_v1 import async_stream_iterator, transaction
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1 import transaction
 
 
 class AsyncAggregationQuery(BaseAggregationQuery):
@@ -129,7 +129,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> async_stream_iterator.AsyncStreamIterator:
+    ) -> AsyncStreamGenerator[DocumentSnapshot]:
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -150,8 +150,8 @@ class AsyncAggregationQuery(BaseAggregationQuery):
                 to a system-specified value.
 
         Returns:
-            async_stream_iterator.AsyncStreamIterator: A generator of the query
-            results.
+            `AsyncStreamGenerator[DocumentSnapshot]`: 
+                A generator of the query results.
         """
 
         inner_generator = self._make_stream(
@@ -159,4 +159,4 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             retry=retry,
             timeout=timeout,
         )
-        return async_stream_iterator.AsyncStreamIterator(inner_generator)
+        return AsyncStreamGenerator(inner_generator)

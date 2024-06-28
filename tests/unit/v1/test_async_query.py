@@ -316,7 +316,7 @@ async def test_asyncquery_chunkify_w_chunksize_gt_limit():
 
 async def _stream_helper(retry=None, timeout=None):
     from google.cloud.firestore_v1 import _helpers
-    from google.cloud.firestore_v1.async_stream_iterator import AsyncStreamIterator
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
@@ -341,7 +341,7 @@ async def _stream_helper(retry=None, timeout=None):
 
     get_response = query.stream(**kwargs)
 
-    assert isinstance(get_response, AsyncStreamIterator)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]
@@ -393,7 +393,7 @@ async def test_asyncquery_stream_with_limit_to_last():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_with_transaction():
-    from google.cloud.firestore_v1.async_stream_iterator import AsyncStreamIterator
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
@@ -420,7 +420,7 @@ async def test_asyncquery_stream_with_transaction():
     # Execute the query and check the response.
     query = make_async_query(parent)
     get_response = query.stream(transaction=transaction)
-    assert isinstance(get_response, AsyncStreamIterator)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]
@@ -440,7 +440,7 @@ async def test_asyncquery_stream_with_transaction():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_no_results():
-    from google.cloud.firestore_v1.async_stream_iterator import AsyncStreamIterator
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     # Create a minimal fake GAPIC with a dummy response.
     firestore_api = AsyncMock(spec=["run_query"])
@@ -457,7 +457,7 @@ async def test_asyncquery_stream_no_results():
     query = make_async_query(parent)
 
     get_response = query.stream()
-    assert isinstance(get_response, AsyncStreamIterator)
+    assert isinstance(get_response, AsyncStreamGenerator)
     assert [x async for x in get_response] == []
 
     # Verify the mock call.
@@ -474,7 +474,7 @@ async def test_asyncquery_stream_no_results():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_second_response_in_empty_stream():
-    from google.cloud.firestore_v1.async_stream_iterator import AsyncStreamIterator
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     # Create a minimal fake GAPIC with a dummy response.
     firestore_api = AsyncMock(spec=["run_query"])
@@ -492,7 +492,7 @@ async def test_asyncquery_stream_second_response_in_empty_stream():
     query = make_async_query(parent)
 
     get_response = query.stream()
-    assert isinstance(get_response, AsyncStreamIterator)
+    assert isinstance(get_response, AsyncStreamGenerator)
     assert [x async for x in get_response] == []
 
     # Verify the mock call.
@@ -509,7 +509,7 @@ async def test_asyncquery_stream_second_response_in_empty_stream():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_with_skipped_results():
-    from google.cloud.firestore_v1.async_stream_iterator import AsyncStreamIterator
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
@@ -532,7 +532,7 @@ async def test_asyncquery_stream_with_skipped_results():
     # Execute the query and check the response.
     query = make_async_query(parent)
     get_response = query.stream()
-    assert isinstance(get_response, AsyncStreamIterator)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]
@@ -553,7 +553,7 @@ async def test_asyncquery_stream_with_skipped_results():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_empty_after_first_response():
-    from google.cloud.firestore_v1.async_stream_iterator import AsyncStreamIterator
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
@@ -576,7 +576,7 @@ async def test_asyncquery_stream_empty_after_first_response():
     # Execute the query and check the response.
     query = make_async_query(parent)
     get_response = query.stream()
-    assert isinstance(get_response, AsyncStreamIterator)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]
@@ -597,7 +597,7 @@ async def test_asyncquery_stream_empty_after_first_response():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_w_collection_group():
-    from google.cloud.firestore_v1.async_stream_iterator import AsyncStreamIterator
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
@@ -622,7 +622,7 @@ async def test_asyncquery_stream_w_collection_group():
     query = make_async_query(parent)
     query._all_descendants = True
     get_response = query.stream()
-    assert isinstance(get_response, AsyncStreamIterator)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]

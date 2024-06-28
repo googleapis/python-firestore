@@ -21,14 +21,15 @@ from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _item_to_document_ref,
 )
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1 import (
     async_aggregation,
     async_document,
     async_query,
-    async_stream_iterator,
     transaction,
 )
 
+from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.document import DocumentReference
 
 from typing import Any, AsyncGenerator, Optional, Tuple
@@ -212,7 +213,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> async_stream_iterator.AsyncStreamIterator:
+    ) -> AsyncStreamGenerator[DocumentSnapshot]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -241,7 +242,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
                 to a system-specified value.
 
         Returns:
-            async_stream_iterator.AsyncStreamIterator: A generator of the query
+            AsyncStreamGenerator[DocumentSnapshot]: A generator of the query
             results.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)

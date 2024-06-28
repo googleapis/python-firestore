@@ -23,11 +23,12 @@ from google.cloud.firestore_v1.base_collection import (
 )
 from google.cloud.firestore_v1 import query as query_mod
 from google.cloud.firestore_v1 import aggregation
-from google.cloud.firestore_v1 import stream_iterator
 from google.cloud.firestore_v1 import vector_query
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1 import transaction
+from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
 from typing import Any, Callable, Generator, Optional, Tuple, Union
 
 
@@ -198,7 +199,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> stream_iterator.StreamIterator:
+    ) -> StreamGenerator[DocumentSnapshot]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -227,7 +228,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 to a system-specified value.
 
         Returns:
-            stream_iterator.StreamIterator: A generator of the query results.
+            StreamGenerator[DocumentSnapshot]: A generator of the query results.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
 
