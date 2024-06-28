@@ -150,7 +150,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
                 to a system-specified value.
 
         Returns:
-            `AsyncStreamGenerator[DocumentSnapshot]`: 
+            `AsyncStreamGenerator[DocumentSnapshot]`:
                 A generator of the query results.
         """
 

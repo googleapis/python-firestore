@@ -93,4 +93,3 @@ async def test_stream_generator_aclose():
     # Verifies that generator is closed.
     with pytest.raises(StopAsyncIteration):
         await inst.__anext__()
-
