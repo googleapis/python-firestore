@@ -228,7 +228,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 to a system-specified value.
 
         Returns:
-            "StreamGenerator[DocumentSnapshot]": A generator of the query results.
+            `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
 

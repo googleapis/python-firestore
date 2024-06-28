@@ -172,7 +172,7 @@ class VectorQuery(BaseVectorQuery):
             to a system-specified value.
 
         Returns:
-            "StreamGenerator[DocumentSnapshot]": A generator of the query results.
+            `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
         """
         inner_generator = self._make_stream(
             transaction=transaction,
