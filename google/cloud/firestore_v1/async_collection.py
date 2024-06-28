@@ -213,7 +213,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> AsyncStreamGenerator[DocumentSnapshot]:
+    ) -> "AsyncStreamGenerator[DocumentSnapshot]":
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -242,7 +242,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
                 to a system-specified value.
 
         Returns:
-            AsyncStreamGenerator[DocumentSnapshot]: A generator of the query
+            `AsyncStreamGenerator[DocumentSnapshot]`: A generator of the query
             results.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)

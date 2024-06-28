@@ -129,7 +129,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> AsyncStreamGenerator[DocumentSnapshot]:
+    ) -> "AsyncStreamGenerator[DocumentSnapshot]":
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator

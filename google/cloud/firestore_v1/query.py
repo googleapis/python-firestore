@@ -400,7 +400,7 @@ class Query(BaseQuery):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> StreamGenerator[DocumentSnapshot]:
+    ) -> "StreamGenerator[DocumentSnapshot]":
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -429,7 +429,7 @@ class Query(BaseQuery):
             to a system-specified value.
 
         Returns:
-            StreamGenerator[DocumentSnapshot]: A generator of the query results.
+            "StreamGenerator[DocumentSnapshot]": A generator of the query results.
         """
         inner_generator = self._make_stream(
             transaction=transaction,

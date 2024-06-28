@@ -164,7 +164,7 @@ class AggregationQuery(BaseAggregationQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> StreamGenerator[DocumentSnapshot]:
+    ) -> "StreamGenerator[DocumentSnapshot]":
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -185,7 +185,7 @@ class AggregationQuery(BaseAggregationQuery):
             to a system-specified value.
 
         Returns:
-            StreamGenerator[DocumentSnapshot]: A generator of the query results.
+            "StreamGenerator[DocumentSnapshot]": A generator of the query results.
         """
         inner_generator = self._make_stream(
             transaction=transaction,
