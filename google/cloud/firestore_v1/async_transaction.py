@@ -142,7 +142,11 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         )
 
         self._clean_up()
-        return list(commit_response.write_results)
+
+        self.commit_time = commit_response.commit_time
+        self.write_results = results = list(commit_response.write_results)
+
+        return results
 
     async def get_all(
         self,
