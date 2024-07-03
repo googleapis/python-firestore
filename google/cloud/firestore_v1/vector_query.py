@@ -18,7 +18,6 @@
 from typing import Any, Iterable, Optional, TypeVar, TYPE_CHECKING, Union, Generator
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
 from google.cloud.firestore_v1.base_query import (
     BaseQuery,
@@ -28,8 +27,10 @@ from google.cloud.firestore_v1.base_query import (
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 # Types needed only for Type Hints
-if TYPE_CHECKING:
-    from google.cloud.firestore_v1 import transaction  # pragma: NO COVER
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1 import transaction
+
 
 TVectorQuery = TypeVar("TVectorQuery", bound="VectorQuery")
 
@@ -52,7 +53,7 @@ class VectorQuery(BaseVectorQuery):
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> Iterable[DocumentSnapshot]:
+    ) -> Iterable["DocumentSnapshot"]:
         """Runs the vector query.
 
         This sends a ``RunQuery`` RPC and returns a list of document messages.
@@ -97,7 +98,7 @@ class VectorQuery(BaseVectorQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> Generator[DocumentSnapshot, Any, None]:
+    ) -> Generator["DocumentSnapshot", Any, None]:
         """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which

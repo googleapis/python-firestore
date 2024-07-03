@@ -21,7 +21,6 @@ from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1 import (
     async_aggregation,
     async_document,
@@ -29,10 +28,13 @@ from google.cloud.firestore_v1 import (
     transaction,
 )
 
-from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.document import DocumentReference
 
-from typing import Any, AsyncGenerator, Optional, Tuple
+from typing import Any, AsyncGenerator, Optional, Tuple, TYPE_CHECKING
+
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
 
 
 class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):

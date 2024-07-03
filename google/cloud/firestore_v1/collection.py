@@ -27,9 +27,11 @@ from google.cloud.firestore_v1 import vector_query
 from google.cloud.firestore_v1.watch import Watch
 from google.cloud.firestore_v1 import document
 from google.cloud.firestore_v1 import transaction
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
-from google.cloud.firestore_v1.stream_generator import StreamGenerator
-from typing import Any, Callable, Generator, Optional, Tuple, Union
+from typing import Any, Callable, Generator, Optional, Tuple, Union, TYPE_CHECKING
+
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 
 class CollectionReference(BaseCollectionReference[query_mod.Query]):
