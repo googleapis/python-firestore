@@ -1366,6 +1366,8 @@ def test_watch_query(client, cleanup, database):
     doc_ref.set({"first": "Ada", "last": "Lovelace", "born": 1815})
 
     for _ in range(10):
+        doc = doc_ref.get().to_dict()
+        print(doc)
         if on_snapshot.called_count == 1:
             return
         sleep(1)
