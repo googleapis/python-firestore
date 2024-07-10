@@ -265,25 +265,6 @@ pylintrc.test
 )
 
 s.replace(
-    "setup.cfg",
-    """\
-universal = 1
-""",
-    """\
-universal = 1
-[pytype]
-python_version = 3.8
-inputs =
-    google/cloud/
-exclude =
-    tests/
-output = .pytype/
-# Workaround for https://github.com/google/pytype/issues/150
-disable = pyi-error
-""",
-)
-
-s.replace(
     "noxfile.py",
     """\
 BLACK_VERSION = "black==22.3.0"
