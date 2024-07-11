@@ -35,7 +35,7 @@ from google.cloud.firestore_v1.vector import Vector
 from time import sleep
 from typing import Callable, Dict, List, Optional
 
-from tests.system.test__helpers import (
+from test__helpers import (
     FIRESTORE_CREDS,
     FIRESTORE_PROJECT,
     RANDOM_ID_REGEX,
