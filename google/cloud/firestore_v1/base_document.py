@@ -503,7 +503,7 @@ class DocumentSnapshot(object):
         return _helpers.document_snapshot_to_protobuf(self)
 
 
-class DocumentSnapshots(list):
+class DocumentSnapshotList(list):
     def __init__(self, docs, explain_metrics=None):
         super().__init__(docs)
         self._explain_metrics = explain_metrics

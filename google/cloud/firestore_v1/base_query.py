@@ -50,6 +50,7 @@ from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.order import Order
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.types import (
     Cursor,
     RunQueryResponse,
@@ -1013,7 +1014,7 @@ class BaseQuery(object):
         transaction=None,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
-        explain_options = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Tuple[dict, str, dict]:
         """Shared setup for async / sync :meth:`stream`"""
         if self._limit_to_last:

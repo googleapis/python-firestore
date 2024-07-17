@@ -26,6 +26,8 @@ from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _item_to_document_ref,
 )
+from google.cloud.firestore_v1.base_document import DocumentSnapshotList
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.watch import Watch
 
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -169,7 +171,8 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         transaction: Union[transaction.Transaction, None] = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: Union[float, None] = None,
-    ) -> list:
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> DocumentSnapshotList:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -183,23 +186,32 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
         allowed).
 
         Returns:
-            list: The documents in this collection that match the query.
+            DocumentSnapshotList: The documents in this collection that match the query.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
 
-        return query.get(transaction=transaction, **kwargs)
+        return query.get(
+            transaction=transaction,
+            **kwargs,
+            explain_options=explain_options,
+        )
 
     def stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> "StreamGenerator[DocumentSnapshot]":
         """Read the documents in this collection.
 
@@ -227,13 +239,21 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 system-specified policy.
             timeout (Optional[float]): The timeout for this request. Defaults
                 to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
             `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
 
-        return query.stream(transaction=transaction, **kwargs)
+        return query.stream(
+            transaction=transaction,
+            **kwargs,
+            explain_options=explain_options,
+        )
 
     def on_snapshot(self, callback: Callable) -> Watch:
         """Monitor the documents in this collection.

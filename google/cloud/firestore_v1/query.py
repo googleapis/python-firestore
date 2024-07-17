@@ -27,7 +27,7 @@ from google.api_core import retry as retries
 
 from google.cloud import firestore_v1
 from google.cloud.firestore_v1 import aggregation, transaction
-from google.cloud.firestore_v1.base_document import DocumentSnapshot, DocumentSnapshots
+from google.cloud.firestore_v1.base_document import DocumentSnapshot, DocumentSnapshotList
 from google.cloud.firestore_v1.base_query import (
     BaseCollectionGroup,
     BaseQuery,
@@ -137,7 +137,7 @@ class Query(BaseQuery):
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> DocumentSnapshots:
+    ) -> DocumentSnapshotList:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -154,9 +154,13 @@ class Query(BaseQuery):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
-            list: The documents in the collection that match this query.
+            DocumentSnapshotList: The documents in the collection that match this query.
         """
         is_limited_to_last = self._limit_to_last
 
@@ -184,7 +188,7 @@ class Query(BaseQuery):
 
         explain_metrics = result.explain_metrics or None
 
-        return DocumentSnapshots(result_list, explain_metrics)
+        return DocumentSnapshotList(result_list, explain_metrics)
 
     def _chunkify(
         self, chunk_size: int
