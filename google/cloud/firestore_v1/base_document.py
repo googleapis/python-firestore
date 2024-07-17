@@ -503,6 +503,20 @@ class DocumentSnapshot(object):
         return _helpers.document_snapshot_to_protobuf(self)
 
 
+class DocumentSnapshots(list):
+    def __init__(self, docs, explain_metrics=None):
+        super().__init__(docs)
+        self._explain_metrics = explain_metrics
+
+    @property
+    def explain_metrics(self):
+        return self._explain_metrics
+    
+    @explain_metrics.setter
+    def explain_metrics(self, explain_metrics):
+        self._explain_metrics = explain_metrics
+
+
 def _get_document_path(client, path: Tuple[str]) -> str:
     """Convert a path tuple into a full path string.
 

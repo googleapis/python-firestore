@@ -1013,6 +1013,7 @@ class BaseQuery(object):
         transaction=None,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
+        explain_options = None,
     ) -> Tuple[dict, str, dict]:
         """Shared setup for async / sync :meth:`stream`"""
         if self._limit_to_last:
@@ -1022,10 +1023,12 @@ class BaseQuery(object):
             )
 
         parent_path, expected_prefix = self._parent._parent_info()
+        explain_options = explain_options._to_dict() if explain_options else None
         request = {
             "parent": parent_path,
             "structured_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
+            "explain_options": explain_options,
         }
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 

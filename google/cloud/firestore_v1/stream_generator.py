@@ -17,18 +17,27 @@
 
 from collections import abc
 
+from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
+import google.cloud.firestore_v1.types.query_profile as query_profile_proto
 
 class StreamGenerator(abc.Generator):
     """Generator for the streamed results."""
 
-    def __init__(self, response_generator):
+    def __init__(self, response_generator=None, explain_options=None):
         self._generator = response_generator
+        self._explain_options = explain_options
+        self._explain_metrics = None
 
     def __iter__(self):
-        return self._generator
+        return self
 
     def __next__(self):
-        return self._generator.__next__()
+        next_value = self._generator.__next__()
+        if type(next_value) is query_profile_proto.ExplainMetrics:
+            self._explain_metrics = ExplainMetrics._from_pb(next_value)
+            return self._generator.__next__()
+        else:
+            return next_value
 
     def send(self, value=None):
         return self._generator.send(value)
@@ -38,3 +47,27 @@ class StreamGenerator(abc.Generator):
 
     def close(self):
         return self._generator.close()
+
+    @property
+    def explain_metrics(self) -> ExplainMetrics:
+        """
+        Get the metrics associated with the query execution.
+        Metrics are only available when explain_options is set on the query. If
+        ExplainOptions.analyze is False, only plan_summary is available. If it is
+        True, execution_stats is also available.
+        :rtype: :class:`~google.cloud.datastore.query_profile.ExplainMetrics`
+        :returns: The metrics associated with the query execution.
+        :raises: :class:`~google.cloud.datastore.query_profile.QueryExplainError`
+            if explain_metrics is not available on the query.
+        """
+        if self._explain_metrics is not None:
+            return self._explain_metrics
+        elif self._explain_options is None:
+            raise QueryExplainError("explain_options not set on query.")
+        elif self._explain_options.analyze is False:
+            # we need to run the query to get the explain_metrics
+            next(self)
+            return self._explain_metrics
+        raise QueryExplainError(
+            "explain_metrics not available until query is complete."
+        )
