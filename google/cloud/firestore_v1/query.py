@@ -186,7 +186,10 @@ class Query(BaseQuery):
         if is_limited_to_last:
             result_list = reversed(result_list)
 
-        explain_metrics = result.explain_metrics or None
+        if explain_options is None:
+            explain_metrics = None
+        else:
+            explain_metrics = result.explain_metrics
 
         return DocumentSnapshotList(result_list, explain_metrics)
 
@@ -228,7 +231,7 @@ class Query(BaseQuery):
             ):
                 return
 
-    def _get_stream_iterator(self, transaction, retry, timeout, explain_options):
+    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
         """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,

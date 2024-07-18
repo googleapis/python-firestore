@@ -747,6 +747,10 @@ def test_query_stream_w_retriable_exc_w_transaction():
     _query_stream_w_retriable_exc_helper(transaction=txn)
 
 
+def test_query_stream_w_explain_options():
+    pass
+
+
 @mock.patch("google.cloud.firestore_v1.query.Watch", autospec=True)
 def test_query_on_snapshot(watch):
     query = make_query(mock.sentinel.parent)

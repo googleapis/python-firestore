@@ -1024,13 +1024,13 @@ class BaseQuery(object):
             )
 
         parent_path, expected_prefix = self._parent._parent_info()
-        explain_options = explain_options._to_dict() if explain_options else None
         request = {
             "parent": parent_path,
             "structured_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
-            "explain_options": explain_options,
         }
+        if explain_options:
+            request["explain_options"] = explain_options._to_dict()
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, expected_prefix, kwargs

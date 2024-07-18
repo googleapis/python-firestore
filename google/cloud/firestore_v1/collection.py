@@ -199,12 +199,10 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
             DocumentSnapshotList: The documents in this collection that match the query.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
+        if explain_options:
+            kwargs["explain_options"] = explain_options
 
-        return query.get(
-            transaction=transaction,
-            **kwargs,
-            explain_options=explain_options,
-        )
+        return query.get(transaction=transaction, **kwargs)
 
     def stream(
         self,
@@ -248,12 +246,10 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
             `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
+        if explain_options:
+            kwargs["explain_options"] = explain_options
 
-        return query.stream(
-            transaction=transaction,
-            **kwargs,
-            explain_options=explain_options,
-        )
+        return query.stream(transaction=transaction, **kwargs)
 
     def on_snapshot(self, callback: Callable) -> Watch:
         """Monitor the documents in this collection.
