@@ -41,6 +41,7 @@ from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import FieldPath
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.types import (
     RunAggregationQueryResponse,
     StructuredAggregationQuery,
@@ -211,6 +212,7 @@ class BaseAggregationQuery(ABC):
         transaction=None,
         retry: Union[retries.Retry, None, gapic_v1.method._MethodDefault] = None,
         timeout: float | None = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Tuple[dict, dict]:
         parent_path, expected_prefix = self._collection_ref._parent_info()
         request = {
@@ -218,6 +220,8 @@ class BaseAggregationQuery(ABC):
             "structured_aggregation_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
         }
+        if explain_options:
+            request["explain_options"] = explain_options._to_dict()
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs

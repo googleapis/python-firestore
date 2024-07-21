@@ -364,6 +364,10 @@ class Query(BaseQuery):
                 system-specified policy.
             timeout (Optional[float]): The timeout for this request. Defaults
                 to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Yields:
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
@@ -443,7 +447,7 @@ class Query(BaseQuery):
                 errors, if any, should be retried.  Defaults to a
                 system-specified policy.
             timeout (Optinal[float]): The timeout for this request.  Defaults
-            to a system-specified value.
+                to a system-specified value.
             explain_options
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
