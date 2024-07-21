@@ -330,7 +330,6 @@ def _query_stream_helper(
     ):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
-    from google.cloud.firestore_v1.types.query_profile import ExplainMetrics
 
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_query"])

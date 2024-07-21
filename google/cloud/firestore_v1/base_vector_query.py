@@ -25,6 +25,7 @@ from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers, document
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.vector import Vector
 
@@ -85,6 +86,7 @@ class BaseVectorQuery(ABC):
         transaction=None,
         retry: Union[retries.Retry, None, gapic_v1.method._MethodDefault] = None,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Tuple[dict, str, dict]:
         parent_path, expected_prefix = self._collection_ref._parent_info()
         request = {
@@ -93,6 +95,9 @@ class BaseVectorQuery(ABC):
             "transaction": _helpers.get_transaction_id(transaction),
         }
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+
+        if explain_options is not None:
+            request["explain_options"] = explain_options._to_dict()
 
         return request, expected_prefix, kwargs
 

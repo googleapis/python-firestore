@@ -20,12 +20,14 @@ from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, TypeVar, U
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
+from google.cloud.firestore_v1.base_document import DocumentSnapshotList
 from google.cloud.firestore_v1.base_query import (
     BaseQuery,
     _collection_group_query_response_to_snapshot,
     _query_response_to_snapshot,
 )
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 # Types needed only for Type Hints
@@ -55,6 +57,7 @@ class VectorQuery(BaseVectorQuery):
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Iterable["DocumentSnapshot"]:
         """Runs the vector query.
 
@@ -71,20 +74,36 @@ class VectorQuery(BaseVectorQuery):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
             list: The vector query results.
         """
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
+        result = self.stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+            explain_options=explain_options,
+        )
+        result_list = list(result)
 
-        return list(result)
+        if explain_options is None:
+            explain_metrics = None
+        else:
+            explain_metrics = result.explain_metrics
 
-    def _get_stream_iterator(self, transaction, retry, timeout):
+        return DocumentSnapshotList(result_list, explain_metrics)
+
+    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
         """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
             retry,
             timeout,
+            explain_options,
         )
 
         response_iterator = self._client._firestore_api.run_query(
@@ -100,6 +119,7 @@ class VectorQuery(BaseVectorQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Generator["DocumentSnapshot", Any, None]:
         """Reads the documents in the collection that match this query.
 
@@ -120,6 +140,10 @@ class VectorQuery(BaseVectorQuery):
                 system-specified policy.
             timeout (Optional[float]): The timeout for this request.  Defaults
             to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Yields:
             :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
@@ -129,6 +153,7 @@ class VectorQuery(BaseVectorQuery):
             transaction,
             retry,
             timeout,
+            explain_options,
         )
 
         while True:
@@ -136,6 +161,9 @@ class VectorQuery(BaseVectorQuery):
 
             if response is None:  # EOI
                 break
+
+            if response.explain_metrics:
+                yield response.explain_metrics
 
             if self._nested_query._all_descendants:
                 snapshot = _collection_group_query_response_to_snapshot(
@@ -153,6 +181,7 @@ class VectorQuery(BaseVectorQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> "StreamGenerator[DocumentSnapshot]":
         """Reads the documents in the collection that match this query.
 
@@ -173,6 +202,10 @@ class VectorQuery(BaseVectorQuery):
                 system-specified policy.
             timeout (Optinal[float]): The timeout for this request.  Defaults
             to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
             `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
@@ -181,5 +214,6 @@ class VectorQuery(BaseVectorQuery):
             transaction=transaction,
             retry=retry,
             timeout=timeout,
+            explain_options=explain_options,
         )
-        return StreamGenerator(inner_generator)
+        return StreamGenerator(inner_generator, explain_options)
