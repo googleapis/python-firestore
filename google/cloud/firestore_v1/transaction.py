@@ -141,7 +141,11 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         commit_response = _commit_with_retry(self._client, self._write_pbs, self._id)
 
         self._clean_up()
-        return list(commit_response.write_results)
+
+        self.commit_time = commit_response.commit_time
+        self.write_results = results = list(commit_response.write_results)
+
+        return results
 
     def get_all(
         self,
