@@ -23,6 +23,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
 
 # Types needed only for Type Hints
+from google.cloud.firestore_v1 import query_profile
 from google.cloud.firestore_v1.types import Document, common, firestore, write
 
 
@@ -504,7 +505,25 @@ class DocumentSnapshot(object):
 
 
 class DocumentSnapshotList(list):
-    def __init__(self, docs, explain_metrics=None):
+    """A list of DocumentSnapshot.
+
+    This is a subclass of the built-in list. A new property `explain_metrics`
+    is added to return the query profile results.
+
+    Args:
+        reference (:class:`~google.cloud.firestore_v1.document.DocumentReference`):
+            A document reference corresponding to the document that contains
+            the data in this snapshot.
+        docs (list[DocumentSnapshot]):
+            The list of DocumentSnapshot.
+        explain_metrics (Optional[query_profile.ExplainMetrics]):
+            Query profile results.
+    """
+    def __init__(
+        self,
+        docs: list,
+        explain_metrics: Optional[query_profile.ExplainMetrics]=None,
+    ):
         super().__init__(docs)
         self._explain_metrics = explain_metrics
 
@@ -513,7 +532,7 @@ class DocumentSnapshotList(list):
         return self._explain_metrics
     
     @explain_metrics.setter
-    def explain_metrics(self, explain_metrics):
+    def explain_metrics(self, explain_metrics: query_profile.ExplainMetrics):
         self._explain_metrics = explain_metrics
 
 
