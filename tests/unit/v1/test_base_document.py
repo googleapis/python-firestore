@@ -362,6 +362,60 @@ def test_documentsnapshot_non_existent():
     assert as_dict is None
 
 
+def _make_document_snapshotlist(*args, **kwargs):
+    from google.cloud.firestore_v1.base_document import DocumentSnapshotList
+
+    return DocumentSnapshotList(*args, **kwargs)
+
+
+def _make_explain_metrics():
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics, PlanSummary
+
+    plan_summary = PlanSummary(
+        indexes_used=[{'properties': '(__name__ ASC)', 'query_scope': 'Collection'}],
+    )
+    return ExplainMetrics(plan_summary=plan_summary)
+
+
+def test_documentsnapshotlist_constructor():
+    client = mock.sentinel.client
+    reference = _make_base_document_reference("hi", "bye", client=client)
+    data_1 = {"zoop": 83}
+    data_2 = {"zoop": 30}
+    snapshot_1 = _make_document_snapshot(
+        reference,
+        data_1,
+        True,
+        mock.sentinel.read_time,
+        mock.sentinel.create_time,
+        mock.sentinel.update_time,
+    )
+    snapshot_2 = _make_document_snapshot(
+        reference,
+        data_2,
+        True,
+        mock.sentinel.read_time,
+        mock.sentinel.create_time,
+        mock.sentinel.update_time,
+    )
+    explain_metrics = _make_explain_metrics()
+    snapshot_list = _make_document_snapshotlist(
+        [snapshot_1, snapshot_2],
+        explain_metrics=explain_metrics,
+    )
+    assert len(snapshot_list) == 2
+    assert snapshot_list[0] == snapshot_1
+    assert snapshot_list[1] == snapshot_2
+    assert snapshot_list.explain_metrics == explain_metrics
+
+
+def test_documentsnapshotlist_explain_metrics():
+    snapshot_list = _make_document_snapshotlist([])
+    explain_metrics = _make_explain_metrics()
+    snapshot_list.explain_metrics = explain_metrics
+    assert snapshot_list.explain_metrics == explain_metrics
+
+
 def test__get_document_path():
     from google.cloud.firestore_v1.base_document import _get_document_path
 
