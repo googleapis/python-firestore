@@ -1040,6 +1040,7 @@ class BaseQuery(object):
         transaction=None,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Generator[document.DocumentSnapshot, Any, None]:
         raise NotImplementedError
 

@@ -39,6 +39,7 @@ from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
 from google.cloud.firestore_v1.base_query import QueryType
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery, DistanceMeasure
 from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.vector import Vector
 
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -502,6 +503,7 @@ class BaseCollectionReference(Generic[QueryType]):
         transaction: Optional[Transaction] = None,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Union[Iterator[DocumentSnapshot], AsyncIterator[DocumentSnapshot]]:
         raise NotImplementedError
 

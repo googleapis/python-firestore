@@ -129,5 +129,6 @@ class BaseVectorQuery(ABC):
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Iterable[document.DocumentSnapshot]:
         """Reads the documents in the collection that match this query."""

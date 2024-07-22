@@ -262,6 +262,7 @@ class BaseAggregationQuery(ABC):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> (
         Generator[List[AggregationResult], Any, None]
         | AsyncGenerator[List[AggregationResult], None]
@@ -278,7 +279,11 @@ class BaseAggregationQuery(ABC):
                 errors, if any, should be retried.  Defaults to a
                 system-specified policy.
             timeout (Optinal[float]): The timeout for this request.  Defaults
-            to a system-specified value.
+                to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
             A generator of the query results.
