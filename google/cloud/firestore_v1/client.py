@@ -43,7 +43,6 @@ from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.query import CollectionGroup
-from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.services.firestore import client as firestore_client
 from google.cloud.firestore_v1.services.firestore.transports import (
     grpc as firestore_grpc_transport,
@@ -215,7 +214,6 @@ class Client(BaseClient):
         transaction: Transaction = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
-        explain_options: Optional[ExplainOptions] = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieve a batch of documents.
 
@@ -256,10 +254,9 @@ class Client(BaseClient):
             query, or :data:`None` if the document does not exist.
         """
         request, reference_map, kwargs = self._prep_get_all(
-            references, field_paths, transaction, retry, timeout,
+            references, field_paths, transaction, retry, timeout
         )
 
-        # breakpoint()
         response_iterator = self._firestore_api.batch_get_documents(
             request=request,
             metadata=self._rpc_metadata,
@@ -267,11 +264,7 @@ class Client(BaseClient):
         )
 
         for get_doc_response in response_iterator:
-            yield get_doc_response
-            # from google.cloud.firestore_v1.types.query_profile import ExplainMetrics
-            # if isinstance(get_doc_response, ExplainMetrics):
-            #     yield get_doc_response
-            # yield _parse_batch_get(get_doc_response, reference_map, self)
+            yield _parse_batch_get(get_doc_response, reference_map, self)
 
     def collections(
         self,
