@@ -57,6 +57,7 @@ from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.base_transaction import BaseTransaction
 from google.cloud.firestore_v1.bulk_writer import BulkWriter, BulkWriterOptions
 from google.cloud.firestore_v1.field_path import render_field_path
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 DEFAULT_DATABASE = "(default)"
 """str: The default database used in a :class:`~google.cloud.firestore_v1.client.Client`."""
@@ -422,6 +423,7 @@ class BaseClient(ClientWithProject):
         transaction: BaseTransaction = None,
         retry: retries.Retry = None,
         timeout: float = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Tuple[dict, dict, dict]:
         """Shared setup for async/sync :meth:`get_all`."""
         document_paths, reference_map = _reference_info(references)
@@ -432,6 +434,8 @@ class BaseClient(ClientWithProject):
             "mask": mask,
             "transaction": _helpers.get_transaction_id(transaction),
         }
+        if explain_options is not None:
+            request["explain_options"] = explain_options._to_dict()
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, reference_map, kwargs

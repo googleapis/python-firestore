@@ -15,7 +15,7 @@
 """Classes for representing documents for the Google Cloud Firestore API."""
 import datetime
 import logging
-from typing import Any, Callable, Generator, Iterable
+from typing import Any, Callable, Generator, Iterable, Optional
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
@@ -28,6 +28,7 @@ from google.cloud.firestore_v1.base_document import (
     DocumentSnapshot,
     _first_write_result,
 )
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.types import write
 from google.cloud.firestore_v1.watch import Watch
 
@@ -364,6 +365,7 @@ class DocumentReference(BaseDocumentReference):
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 

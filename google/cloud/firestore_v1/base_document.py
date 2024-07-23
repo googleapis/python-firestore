@@ -24,6 +24,7 @@ from google.cloud.firestore_v1 import field_path as field_path_module
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1 import query_profile
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.types import Document, common, firestore, write
 
 
@@ -305,6 +306,7 @@ class BaseDocumentReference(object):
         transaction=None,
         retry: retries.Retry = None,
         timeout: float = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> "DocumentSnapshot":
         raise NotImplementedError
 

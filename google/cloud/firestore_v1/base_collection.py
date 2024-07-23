@@ -493,6 +493,7 @@ class BaseCollectionReference(Generic[QueryType]):
         transaction: Optional[Transaction] = None,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Union[
         Generator[DocumentSnapshot, Any, Any], AsyncGenerator[DocumentSnapshot, Any]
     ]:

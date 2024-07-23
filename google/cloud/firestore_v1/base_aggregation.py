@@ -234,6 +234,7 @@ class BaseAggregationQuery(ABC):
             retries.Retry, None, gapic_v1.method._MethodDefault
         ] = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> List[AggregationResult] | Coroutine[Any, Any, List[AggregationResult]]:
         """Runs the aggregation query.
 
@@ -250,6 +251,10 @@ class BaseAggregationQuery(ABC):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
             list: The aggregation query results
