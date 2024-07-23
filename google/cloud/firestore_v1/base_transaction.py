@@ -20,6 +20,9 @@ from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import types
 
+# Types needed only for Type Hints
+from google.cloud.firestore_v1.query_profile import ExplainOptions
+
 _CANT_BEGIN: str
 _CANT_COMMIT: str
 _CANT_RETRY_READ_ONLY: str
@@ -156,6 +159,7 @@ class BaseTransaction(object):
         ref_or_query,
         retry: retries.Retry = None,
         timeout: float = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> NoReturn:
         raise NotImplementedError
 

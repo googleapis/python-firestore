@@ -17,7 +17,8 @@
 
 import random
 import time
-from typing import Any, Callable, Generator
+from typing import Any, Callable, Generator, Optional
+import warnings
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
@@ -41,6 +42,7 @@ from google.cloud.firestore_v1.base_transaction import (
 )
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
+from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.types import CommitResponse
 
 
@@ -171,6 +173,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         ref_or_query,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieve a document or a query result from the database.
 
@@ -180,6 +183,11 @@ class Transaction(batch.WriteBatch, BaseTransaction):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
+                Can only be used when running a query.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
@@ -187,8 +195,16 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         """
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         if isinstance(ref_or_query, DocumentReference):
+            if explain_options is not None:
+                warnings.warn(
+                    "explain_options not supported in transanction with "
+                    "document references and will be ignored. To use "
+                    "explain_options, use transaction with query instead."
+                )
             return self._client.get_all([ref_or_query], transaction=self, **kwargs)
         elif isinstance(ref_or_query, Query):
+            if explain_options is not None:
+                kwargs["explain_options"] = explain_options
             return ref_or_query.stream(transaction=self, **kwargs)
         else:
             raise ValueError(
