@@ -859,6 +859,25 @@ def test_query_stream_w_offset(query_docs, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_query_stream_w_explain_options(query_docs, database):
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions, QueryExplainError
+
+    collection, stored, allowed_vals = query_docs
+    num_vals = len(allowed_vals)
+    query = collection.where(filter=FieldFilter("a", "in", [1, num_vals + 100]))
+    results = query.stream(ExplainOptions(analyze=True))
+
+    # An exception should be raised when accessing explain_metrics before query
+    # finishes.
+    with pytest.raises(QueryExplainError) as exc_info:
+        results.explain_metrics
+    assert "explain_metrics not available until query is complete" in exc_info.value.message
+
+    [results]
+    assert type(results.explain_metrics) is ExplainMetrics
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_query_with_order_dot_key(client, cleanup, database):
     db = client
     collection_id = "collek" + UNIQUE_RESOURCE_ID
