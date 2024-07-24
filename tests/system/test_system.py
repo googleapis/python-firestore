@@ -865,16 +865,22 @@ def test_query_stream_w_explain_options(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = collection.where(filter=FieldFilter("a", "in", [1, num_vals + 100]))
-    results = query.stream(ExplainOptions(analyze=True))
+    results_1 = query.stream(ExplainOptions(analyze=True))
 
     # An exception should be raised when accessing explain_metrics before query
     # finishes.
     with pytest.raises(QueryExplainError) as exc_info:
-        results.explain_metrics
-    assert "explain_metrics not available until query is complete" in exc_info.value.message
+        results_1.explain_metrics
+    assert "explain_metrics not available until query is complete" in str(exc_info.value)
 
-    [results]
-    assert type(results.explain_metrics) is ExplainMetrics
+    # Finish iterating results, and explain_metrics should be available
+    list(results_1)
+    assert type(results_1.explain_metrics) is ExplainMetrics
+
+    # If no explain_option is passed, raise an exception if explain_metrics is called
+    results_2 = query.stream()
+    with pytest.raised(QueryExplainError, match="explain_options not set on query"):
+        results_2.explain_metrics
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -2383,6 +2389,7 @@ def test_or_query_in_transaction(client, cleanup, database):
     """
     Test running or query inside a transaction. Should pass transaction id along with request
     """
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
     doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
@@ -2408,6 +2415,12 @@ def test_or_query_in_transaction(client, cleanup, database):
         def in_transaction(transaction):
             global inner_fn_ran
             result = query.get(transaction=transaction)
+
+            with pytest.raises(
+                QueryExplainError, match="explain_options not set on query."
+            ):
+                result.explain_metrics
+
             assert len(result) == 2
             # both documents should have a == 1
             assert result[0].get("a") == 1
