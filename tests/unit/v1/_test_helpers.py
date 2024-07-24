@@ -77,15 +77,19 @@ def make_async_aggregation_query(*args, **kw):
 
 
 def make_aggregation_query_response(
-        aggregations,
-        read_time=None,
-        transaction=None,
-        explain_metrics=None,
-    ):
+    aggregations,
+    read_time=None,
+    transaction=None,
+    explain_metrics=None,
+):
     from google.cloud._helpers import _datetime_to_pb_timestamp
 
     from google.cloud.firestore_v1 import _helpers
-    from google.cloud.firestore_v1.types import aggregation_result, firestore, query_profile
+    from google.cloud.firestore_v1.types import (
+        aggregation_result,
+        firestore,
+        query_profile,
+    )
 
     if read_time is None:
         now = datetime.datetime.now(tz=datetime.timezone.utc)

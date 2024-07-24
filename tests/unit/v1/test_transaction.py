@@ -329,10 +329,10 @@ def test_transaction_get_all_w_retry_timeout():
 
 
 def _transaction_get_w_document_ref_helper(
-        retry=None,
-        timeout=None,
-        explain_options=None,
-    ):
+    retry=None,
+    timeout=None,
+    explain_options=None,
+):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.document import DocumentReference
 
@@ -367,6 +367,7 @@ def test_transaction_get_w_document_ref_w_retry_timeout():
 
 def test_transaction_get_w_document_ref_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+
     with pytest.warns(UserWarning) as warned:
         _transaction_get_w_document_ref_helper(
             explain_options=ExplainOptions(analyze=True),
@@ -376,10 +377,10 @@ def test_transaction_get_w_document_ref_w_explain_options():
 
 
 def _transaction_get_w_query_helper(
-        retry=None,
-        timeout=None,
-        explain_options=None,
-    ):
+    retry=None,
+    timeout=None,
+    explain_options=None,
+):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.query import Query
 
@@ -411,6 +412,7 @@ def test_transaction_get_w_query_w_retry_timeout():
 
 def test_transaction_get_w_query_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+
     _transaction_get_w_query_helper(explain_options=ExplainOptions(analyze=True))
 
 

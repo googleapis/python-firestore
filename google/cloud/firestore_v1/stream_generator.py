@@ -20,6 +20,7 @@ from collections import abc
 from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
 import google.cloud.firestore_v1.types.query_profile as query_profile_proto
 
+
 class StreamGenerator(abc.Generator):
     """Generator for the streamed results."""
 

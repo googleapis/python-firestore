@@ -27,7 +27,10 @@ from google.api_core import retry as retries
 
 from google.cloud import firestore_v1
 from google.cloud.firestore_v1 import aggregation, transaction
-from google.cloud.firestore_v1.base_document import DocumentSnapshot, DocumentSnapshotList
+from google.cloud.firestore_v1.base_document import (
+    DocumentSnapshot,
+    DocumentSnapshotList,
+)
 from google.cloud.firestore_v1.base_query import (
     BaseCollectionGroup,
     BaseQuery,

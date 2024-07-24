@@ -357,6 +357,7 @@ def test_aggregation_query_prep_stream_with_transaction():
 
 def test_aggregation_query_prep_stream_with_explain_options():
     from google.cloud.firestore_v1 import query_profile
+
     client = make_client()
     parent = client.collection("dee")
     query = make_query(parent)
@@ -374,7 +375,7 @@ def test_aggregation_query_prep_stream_with_explain_options():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
-        "explain_options": explain_options._to_dict()
+        "explain_options": explain_options._to_dict(),
     }
     assert request == expected_request
     assert kwargs == {"retry": None}

@@ -372,7 +372,7 @@ def _make_explain_metrics():
     from google.cloud.firestore_v1.query_profile import ExplainMetrics, PlanSummary
 
     plan_summary = PlanSummary(
-        indexes_used=[{'properties': '(__name__ ASC)', 'query_scope': 'Collection'}],
+        indexes_used=[{"properties": "(__name__ ASC)", "query_scope": "Collection"}],
     )
     return ExplainMetrics(plan_summary=plan_summary)
 

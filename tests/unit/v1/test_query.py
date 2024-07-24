@@ -36,11 +36,11 @@ def test_query_constructor():
 
 
 def _query_get_helper(
-        retry=None,
-        timeout=None,
-        database=None,
-        explain_options=None,
-    ):
+    retry=None,
+    timeout=None,
+    database=None,
+    explain_options=None,
+):
     from google.cloud.firestore_v1 import _helpers
 
     # Create a minimal fake GAPIC.
@@ -60,7 +60,7 @@ def _query_get_helper(
     explain_metrics = {"execution_stats": {"results_returned": 1}}
 
     response_pb = _make_query_response(
-        name=name, 
+        name=name,
         data=data,
         explain_metrics=explain_metrics,
     )
@@ -80,7 +80,7 @@ def _query_get_helper(
 
     # Create expected request body.
     parent_path, _ = parent._parent_info()
-    request={
+    request = {
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": None,
@@ -166,6 +166,7 @@ def test_query_get_limit_to_last(database):
 
 def test_query_get_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+
     explain_options = ExplainOptions(analyze=True)
     _query_get_helper(explain_options=explain_options)
 
@@ -323,11 +324,11 @@ def test_query_chunkify_w_chunksize_gt_limit(database, expected):
 
 
 def _query_stream_helper(
-        retry=None,
-        timeout=None,
-        database=None,
-        explain_options=None,
-    ):
+    retry=None,
+    timeout=None,
+    database=None,
+    explain_options=None,
+):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
@@ -346,7 +347,9 @@ def _query_stream_helper(
     name = "{}/sleep".format(expected_prefix)
     data = {"snooze": 10}
     explain_metrics = {"execution_stats": {"results_returned": 1}}
-    response_pb = _make_query_response(name=name, data=data, explain_metrics=explain_metrics)
+    response_pb = _make_query_response(
+        name=name, data=data, explain_metrics=explain_metrics
+    )
     firestore_api.run_query.return_value = iter([response_pb])
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
@@ -364,7 +367,7 @@ def _query_stream_helper(
 
     # Create expected request body.
     parent_path, _ = parent._parent_info()
-    request={
+    request = {
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": None,
@@ -781,6 +784,7 @@ def test_query_stream_w_retriable_exc_w_transaction():
 
 def test_query_stream_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+
     explain_options = ExplainOptions(analyze=True)
     _query_stream_helper(explain_options=explain_options)
 

@@ -521,10 +521,11 @@ class DocumentSnapshotList(list):
         explain_metrics (Optional[query_profile.ExplainMetrics]):
             Query profile results.
     """
+
     def __init__(
         self,
         docs: list,
-        explain_metrics: Optional[query_profile.ExplainMetrics]=None,
+        explain_metrics: Optional[query_profile.ExplainMetrics] = None,
     ):
         super().__init__(docs)
         self._explain_metrics = explain_metrics
@@ -532,7 +533,7 @@ class DocumentSnapshotList(list):
     @property
     def explain_metrics(self):
         return self._explain_metrics
-    
+
     @explain_metrics.setter
     def explain_metrics(self, explain_metrics: query_profile.ExplainMetrics):
         self._explain_metrics = explain_metrics
