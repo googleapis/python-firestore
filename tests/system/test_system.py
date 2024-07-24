@@ -865,21 +865,26 @@ def test_query_stream_w_explain_options(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = collection.where(filter=FieldFilter("a", "in", [1, num_vals + 100]))
-    results_1 = query.stream(ExplainOptions(analyze=True))
+    results_1 = query.stream(explain_options=ExplainOptions(analyze=True))
 
     # An exception should be raised when accessing explain_metrics before query
     # finishes.
-    with pytest.raises(QueryExplainError) as exc_info:
+    with pytest.raises(
+        QueryExplainError,
+        match="explain_metrics not available until query is complete",
+    ):
         results_1.explain_metrics
-    assert "explain_metrics not available until query is complete" in str(exc_info.value)
 
     # Finish iterating results, and explain_metrics should be available
     list(results_1)
-    assert type(results_1.explain_metrics) is ExplainMetrics
+    assert isinstance(results_1.explain_metrics, ExplainMetrics)
 
-    # If no explain_option is passed, raise an exception if explain_metrics is called
+    # If no explain_option is passed, raise an exception if explain_metrics
+    # is called
     results_2 = query.stream()
-    with pytest.raised(QueryExplainError, match="explain_options not set on query"):
+    with pytest.raises(
+        QueryExplainError, match="explain_options not set on query"
+    ):
         results_2.explain_metrics
 
 
