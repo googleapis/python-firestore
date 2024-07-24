@@ -2394,7 +2394,6 @@ def test_or_query_in_transaction(client, cleanup, database):
     """
     Test running or query inside a transaction. Should pass transaction id along with request
     """
-    from google.cloud.firestore_v1.query_profile import QueryExplainError
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
     doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
@@ -2421,11 +2420,7 @@ def test_or_query_in_transaction(client, cleanup, database):
             global inner_fn_ran
             result = query.get(transaction=transaction)
 
-            with pytest.raises(
-                QueryExplainError, match="explain_options not set on query."
-            ):
-                result.explain_metrics
-
+            assert result.explain_metrics is None
             assert len(result) == 2
             # both documents should have a == 1
             assert result[0].get("a") == 1
