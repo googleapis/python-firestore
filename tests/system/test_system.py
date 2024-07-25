@@ -858,9 +858,16 @@ def test_query_stream_w_offset(query_docs, database):
         assert value["b"] == 2
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_query_stream_w_explain_options(query_docs, database):
-    from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions, QueryExplainError
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainMetrics,
+        ExplainOptions,
+        QueryExplainError,
+    )
 
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -882,9 +889,7 @@ def test_query_stream_w_explain_options(query_docs, database):
     # If no explain_option is passed, raise an exception if explain_metrics
     # is called
     results_2 = query.stream()
-    with pytest.raises(
-        QueryExplainError, match="explain_options not set on query"
-    ):
+    with pytest.raises(QueryExplainError, match="explain_options not set on query"):
         results_2.explain_metrics
 
 
@@ -2435,10 +2440,13 @@ def test_or_query_in_transaction(client, cleanup, database):
         assert inner_fn_ran is True
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_query_in_transaction_with_explain_options(client, cleanup, database):
     """
-    Test query profiling in transactions. 
+    Test query profiling in transactions.
     """
     from google.cloud.firestore_v1.query_profile import ExplainOptions, ExplainMetrics
 
@@ -2452,9 +2460,8 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
 
     collection = client.collection(collection_id)
     query = collection.where(filter=FieldFilter("a", "==", 1))
-    
-    with client.transaction() as transaction:
 
+    with client.transaction() as transaction:
         # should work when transaction is initiated through transactional decorator
         @firestore.transactional
         def in_transaction(transaction):
