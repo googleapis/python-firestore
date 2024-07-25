@@ -15,7 +15,7 @@
 import pytest
 
 
-def _make_stream_generator(iterable):
+def _make_stream_generator(iterable, explain_options=None):
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
     def _inner_generator():
@@ -24,7 +24,20 @@ def _make_stream_generator(iterable):
             if X:
                 yield X
 
-    return StreamGenerator(_inner_generator())
+    return StreamGenerator(_inner_generator(), explain_options)
+
+
+def test_stream_generator_constructor():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
+
+    explain_options = ExplainOptions(analyze=True)
+    inner_generator = object()
+    inst = StreamGenerator(inner_generator, explain_options)
+
+    assert inst._generator == inner_generator
+    assert inst._explain_options == explain_options
+    assert inst._explain_metrics is None
 
 
 def test_stream_generator_iter():
@@ -82,3 +95,24 @@ def test_stream_generator_close():
     # Verifies that generator is closed.
     with pytest.raises(StopIteration):
         next(inst)
+
+
+def test_stream_generator_explain_metrics():
+    import google.cloud.firestore_v1.query_profile as query_profile
+    import google.cloud.firestore_v1.types.query_profile as query_profile_pb2
+
+    iterator = [
+        1,
+        query_profile_pb2.ExplainMetrics(plan_summary=query_profile_pb2.PlanSummary()),
+        2,
+    ]
+
+    explain_options = query_profile.ExplainOptions(analyze=True)
+    inst = _make_stream_generator(iterator, explain_options)
+
+    with pytest.raises(query_profile.QueryExplainError):
+        inst.explain_metrics
+
+    list(inst)
+
+    assert isinstance(inst.explain_metrics, query_profile.ExplainMetrics)
