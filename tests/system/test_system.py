@@ -2420,7 +2420,6 @@ def test_or_query_in_transaction(client, cleanup, database):
             global inner_fn_ran
             result = query.get(transaction=transaction)
 
-            assert result.explain_metrics is None
             assert len(result) == 2
             # both documents should have a == 1
             assert result[0].get("a") == 1
@@ -2429,6 +2428,51 @@ def test_or_query_in_transaction(client, cleanup, database):
             assert (result[0].get("b") == 1 and result[1].get("b") == 2) or (
                 result[0].get("b") == 2 and result[1].get("b") == 1
             )
+            inner_fn_ran = True
+
+        in_transaction(transaction)
+        # make sure we didn't skip assertions in inner function
+        assert inner_fn_ran is True
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_query_in_transaction_with_explain_options(client, cleanup, database):
+    """
+    Test query profiling in transactions. 
+    """
+    from google.cloud.firestore_v1.query_profile import ExplainOptions, ExplainMetrics
+
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
+    doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
+    for doc_ref in doc_refs:
+        cleanup(doc_ref.delete)
+    doc_refs[0].create({"a": 1, "b": 2})
+    doc_refs[1].create({"a": 1, "b": 1})
+
+    collection = client.collection(collection_id)
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    
+    with client.transaction() as transaction:
+
+        # should work when transaction is initiated through transactional decorator
+        @firestore.transactional
+        def in_transaction(transaction):
+            global inner_fn_ran
+
+            # When no explain_options value is passed, explain_metrics should
+            # be empty
+            result_1 = query.get(transaction=transaction)
+            assert result_1.explain_metrics is None
+
+            result_2 = query.get(
+                transaction=transaction,
+                explain_options=ExplainOptions(analyze=True),
+            )
+            assert isinstance(result_2.explain_metrics, ExplainMetrics)
+            assert result_2.explain_metrics.plan_summary is not None
+            assert result_2.explain_metrics.execution_stats is not None
+
             inner_fn_ran = True
 
         in_transaction(transaction)
