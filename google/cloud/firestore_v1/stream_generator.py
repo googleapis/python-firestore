@@ -56,9 +56,9 @@ class StreamGenerator(abc.Generator):
         Metrics are only available when explain_options is set on the query. If
         ExplainOptions.analyze is False, only plan_summary is available. If it is
         True, execution_stats is also available.
-        :rtype: :class:`~google.cloud.datastore.query_profile.ExplainMetrics`
+        :rtype: :class:`~google.cloud.firestore_v1.query_profile.ExplainMetrics`
         :returns: The metrics associated with the query execution.
-        :raises: :class:`~google.cloud.datastore.query_profile.QueryExplainError`
+        :raises: :class:`~google.cloud.firestore_v1.query_profile.QueryExplainError`
             if explain_metrics is not available on the query.
         """
         if self._explain_metrics is not None:
