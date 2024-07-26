@@ -718,6 +718,18 @@ def _aggregation_query_stream_helper(
     )
 
 
+def test_aggregation_query_stream():
+    _aggregation_query_stream_helper()
+
+
+def test_aggregation_query_stream_with_readtime():
+    from google.cloud._helpers import _datetime_to_pb_timestamp
+
+    one_hour_ago = datetime.now(tz=timezone.utc) - timedelta(hours=1)
+    read_time = _datetime_to_pb_timestamp(one_hour_ago)
+    _aggregation_query_stream_helper(read_time=read_time)
+
+
 def test_aggregation_query_stream_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 

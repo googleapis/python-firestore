@@ -14,6 +14,8 @@
 
 import pytest
 
+from google.protobuf import struct_pb2
+
 
 def _make_stream_generator(iterable, explain_options=None):
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
@@ -97,7 +99,7 @@ def test_stream_generator_close():
         next(inst)
 
 
-def test_stream_generator_explain_metrics():
+def test_stream_generator_explain_metrics_explain_options_analyze_true():
     import google.cloud.firestore_v1.query_profile as query_profile
     import google.cloud.firestore_v1.types.query_profile as query_profile_pb2
 
@@ -110,9 +112,50 @@ def test_stream_generator_explain_metrics():
     explain_options = query_profile.ExplainOptions(analyze=True)
     inst = _make_stream_generator(iterator, explain_options)
 
-    with pytest.raises(query_profile.QueryExplainError):
+    # Raise an exception if query isn't complete when explain_metrics is called.
+    with pytest.raises(
+        query_profile.QueryExplainError,
+        match="explain_metrics not available until query is complete.",
+    ):
         inst.explain_metrics
 
     list(inst)
 
     assert isinstance(inst.explain_metrics, query_profile.ExplainMetrics)
+
+
+def test_stream_generator_explain_metrics_explain_options_analyze_false():
+    import google.cloud.firestore_v1.query_profile as query_profile
+    import google.cloud.firestore_v1.types.query_profile as query_profile_pb2
+
+    plan_summary = query_profile_pb2.PlanSummary(
+        indexes_used=struct_pb2.ListValue(values=[])
+    )
+    (
+        {
+            "indexes_used": {
+                "query_scope": "Collection",
+                "properties": "(foo ASC, **name** ASC)",
+            }
+        }
+    )
+
+    iterator = [
+        query_profile_pb2.ExplainMetrics(plan_summary=plan_summary),
+    ]
+
+    explain_options = query_profile.ExplainOptions(analyze=False)
+    inst = _make_stream_generator(iterator, explain_options)
+    assert isinstance(inst.explain_metrics, query_profile.ExplainMetrics)
+
+
+def test_stream_generator_explain_metrics_no_explain_options():
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
+
+    inst = _make_stream_generator([])
+
+    with pytest.raises(
+        QueryExplainError,
+        match="explain_options not set on query.",
+    ):
+        inst.explain_metrics

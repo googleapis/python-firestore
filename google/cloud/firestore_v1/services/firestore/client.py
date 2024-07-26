@@ -1154,8 +1154,6 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
             metadata=metadata,
         )
 
-        # breakpoint()
-
         # Done; return the response.
         return response
 

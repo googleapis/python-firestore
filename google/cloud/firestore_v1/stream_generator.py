@@ -67,7 +67,10 @@ class StreamGenerator(abc.Generator):
             raise QueryExplainError("explain_options not set on query.")
         elif self._explain_options.analyze is False:
             # we need to run the query to get the explain_metrics
-            next(self)
+            try:
+                next(self)
+            except StopIteration:
+                pass
             return self._explain_metrics
         raise QueryExplainError(
             "explain_metrics not available until query is complete."
