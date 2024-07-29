@@ -97,7 +97,7 @@ class AggregationQuery(BaseAggregationQuery):
         else:
             explain_metrics = result.explain_metrics
 
-        return DocumentSnapshotList(result_list, explain_metrics)
+        return DocumentSnapshotList(result_list, explain_options, explain_metrics)
 
     def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
         """Helper method for :meth:`stream`."""

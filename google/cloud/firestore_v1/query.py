@@ -194,7 +194,7 @@ class Query(BaseQuery):
         else:
             explain_metrics = result.explain_metrics
 
-        return DocumentSnapshotList(result_list, explain_metrics)
+        return DocumentSnapshotList(result_list, explain_options, explain_metrics)
 
     def _chunkify(
         self, chunk_size: int

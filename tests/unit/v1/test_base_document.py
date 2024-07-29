@@ -378,6 +378,8 @@ def _make_explain_metrics():
 
 
 def test_documentsnapshotlist_constructor():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
     client = mock.sentinel.client
     reference = _make_base_document_reference("hi", "bye", client=client)
     data_1 = {"zoop": 83}
@@ -399,21 +401,48 @@ def test_documentsnapshotlist_constructor():
         mock.sentinel.update_time,
     )
     explain_metrics = _make_explain_metrics()
+    explain_options = ExplainOptions(analyze=True)
     snapshot_list = _make_document_snapshotlist(
         [snapshot_1, snapshot_2],
+        explain_options=explain_options,
         explain_metrics=explain_metrics,
     )
     assert len(snapshot_list) == 2
     assert snapshot_list[0] == snapshot_1
     assert snapshot_list[1] == snapshot_2
-    assert snapshot_list.explain_metrics == explain_metrics
+    assert snapshot_list._explain_options == explain_options
+    assert snapshot_list._explain_metrics == explain_metrics
 
 
-def test_documentsnapshotlist_explain_metrics():
-    snapshot_list = _make_document_snapshotlist([])
+def test_documentsnapshotlist_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    explain_options = ExplainOptions(analyze=True)
+    snapshot_list = _make_document_snapshotlist([], explain_options=explain_options)
+
+    assert snapshot_list.explain_options == explain_options
+
+
+def test_documentsnapshotlist_explain_metrics_w_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
     explain_metrics = _make_explain_metrics()
-    snapshot_list.explain_metrics = explain_metrics
+    snapshot_list = _make_document_snapshotlist(
+        [],
+        explain_options=ExplainOptions(analyze=True),
+        explain_metrics=explain_metrics,
+    )
+
     assert snapshot_list.explain_metrics == explain_metrics
+
+
+def test_documentsnapshotlist_explain_metrics_wo_explain_options():
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
+
+    snapshot_list = _make_document_snapshotlist([])
+
+    with pytest.raises(QueryExplainError):
+        snapshot_list.explain_metrics
 
 
 def test__get_document_path():

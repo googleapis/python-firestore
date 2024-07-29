@@ -17,7 +17,7 @@ import pytest
 
 from google.cloud.firestore_v1._helpers import encode_value, make_retry_timeout_kwargs
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
-from google.cloud.firestore_v1.query_profile import ExplainOptions
+from google.cloud.firestore_v1.query_profile import ExplainOptions, QueryExplainError
 from google.cloud.firestore_v1.types.query import StructuredQuery
 from google.cloud.firestore_v1.vector import Vector
 from tests.unit.v1._test_helpers import make_client, make_query, make_vector_query
@@ -150,7 +150,11 @@ def test_vector_query(distance_measure, expected_distance):
     assert isinstance(returned, list)
     assert len(returned) == 1
     assert returned[0].to_dict() == data
-    assert returned.explain_metrics is None
+    with pytest.raises(
+        QueryExplainError,
+        match="explain_options not set on query",
+    ):
+        returned.explain_metrics
 
     expected_pb = _expected_pb(
         parent=parent,

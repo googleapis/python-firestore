@@ -390,6 +390,10 @@ def _aggregation_query_get_helper(
     from google.cloud._helpers import _datetime_to_pb_timestamp
 
     from google.cloud.firestore_v1 import _helpers
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainMetrics,
+        QueryExplainError,
+    )
 
     # Create a minimal fake GAPIC.
     firestore_api = mock.Mock(spec=["run_aggregation_query"])
@@ -430,6 +434,15 @@ def _aggregation_query_get_helper(
             if read_time is not None:
                 result_datetime = _datetime_to_pb_timestamp(r.read_time)
                 assert result_datetime == read_time
+
+    assert returned._explain_options == explain_options
+    assert returned.explain_options == explain_options
+
+    if explain_options is not None:
+        assert isinstance(returned.explain_metrics, ExplainMetrics)
+    else:
+        with pytest.raises(QueryExplainError, match="explain_options not set on query"):
+            returned.explain_metrics
 
     parent_path, _ = parent._parent_info()
     expected_request = {

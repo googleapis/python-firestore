@@ -516,6 +516,10 @@ class DocumentSnapshotList(list):
             the data in this snapshot.
         docs (list[DocumentSnapshot]):
             The list of DocumentSnapshot.
+        explain_options
+            (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+            Options to enable query profiling for this query. When set,
+            explain_metrics will be available on the returned generator.
         explain_metrics (Optional[query_profile.ExplainMetrics]):
             Query profile results.
     """
@@ -523,18 +527,23 @@ class DocumentSnapshotList(list):
     def __init__(
         self,
         docs: list,
+        explain_options: Optional[query_profile.ExplainOptions] = None,
         explain_metrics: Optional[query_profile.ExplainMetrics] = None,
     ):
         super().__init__(docs)
+        self._explain_options = explain_options
         self._explain_metrics = explain_metrics
 
     @property
-    def explain_metrics(self):
-        return self._explain_metrics
+    def explain_options(self):
+        return self._explain_options
 
-    @explain_metrics.setter
-    def explain_metrics(self, explain_metrics: query_profile.ExplainMetrics):
-        self._explain_metrics = explain_metrics
+    @property
+    def explain_metrics(self):
+        if self._explain_options is None:
+            raise query_profile.QueryExplainError("explain_options not set on query.")
+        else:
+            return self._explain_metrics
 
 
 def _get_document_path(client, path: Tuple[str]) -> str:
