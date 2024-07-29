@@ -2614,6 +2614,139 @@ def test_avg_query_with_start_at(query, database):
     assert avg_result[0].value == expected_avg
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_aggregation_query_stream_or_get_w_no_explain_options(query, database, method):
+    # Because all aggregation methods end up calling AggregationQuery.get() or
+    # AggregationQuery.stream(), only use count() for testing here.
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
+
+    result = query.get()
+    start_doc = result[1]
+
+    # start new query that starts at the second result
+    count_query = query.start_at(start_doc).count("a")
+
+    # Tests either `stream()` or `get()`.
+    method_under_test = getattr(count_query, method)
+    results = method_under_test()
+
+    # If no explain_option is passed, raise an exception if explain_metrics
+    # is called
+    with pytest.raises(QueryExplainError, match="explain_options not set on query"):
+        results.explain_metrics
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_aggregation_query_stream_or_get_w_explain_options_analyze_true(
+    query, database, method
+):
+    # Because all aggregation methods end up calling AggregationQuery.get() or
+    # AggregationQuery.stream(), only use count() for testing here.
+    from google.cloud.firestore_v1.query_profile import (
+        ExecutionStats,
+        ExplainMetrics,
+        ExplainOptions,
+        PlanSummary,
+        QueryExplainError,
+    )
+
+    result = query.get()
+    start_doc = result[1]
+
+    # start new query that starts at the second result
+    count_query = query.start_at(start_doc).count("a")
+
+    # Tests either `stream()` or `get()`.
+    method_under_test = getattr(count_query, method)
+    results = method_under_test(explain_options=ExplainOptions(analyze=True))
+
+    # With `stream()`, an exception should be raised when accessing
+    # explain_metrics before query finishes.
+    if method == "stream":
+        with pytest.raises(
+            QueryExplainError,
+            match="explain_metrics not available until query is complete",
+        ):
+            results.explain_metrics
+
+    # Finish iterating results, and explain_metrics should be available.
+    num_results = len(list(results))
+    assert isinstance(results.explain_metrics, ExplainMetrics)
+
+    # Verify plan_summary.
+    plan_summary = results.explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats.
+    execution_stats = results.explain_metrics.execution_stats
+    assert isinstance(execution_stats, ExecutionStats)
+    assert execution_stats.results_returned == num_results
+    assert execution_stats.read_operations == num_results
+    duration = execution_stats.execution_duration.total_seconds()
+    assert duration > 0
+    assert duration < 1  # we expect a number closer to 0.05
+    assert isinstance(execution_stats.debug_stats, dict)
+    assert "billing_details" in execution_stats.debug_stats
+    assert "documents_scanned" in execution_stats.debug_stats
+    assert "index_entries_scanned" in execution_stats.debug_stats
+    assert len(execution_stats.debug_stats) > 0
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_aggregation_query_stream_or_get_w_explain_options_analyze_false(
+    query, database, method
+):
+    # Because all aggregation methods end up calling AggregationQuery.get() or
+    # AggregationQuery.stream(), only use count() for testing here.
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainMetrics,
+        ExplainOptions,
+        PlanSummary,
+        QueryExplainError,
+    )
+
+    result = query.get()
+    start_doc = result[1]
+
+    # start new query that starts at the second result
+    count_query = query.start_at(start_doc).count("a")
+
+    # Tests either `stream()` or `get()`.
+    method_under_test = getattr(count_query, method)
+    results = method_under_test(explain_options=ExplainOptions(analyze=False))
+
+    assert isinstance(results.explain_metrics, ExplainMetrics)
+
+    # Verify plan_summary.
+    plan_summary = results.explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats isn't available.
+    with pytest.raises(
+        QueryExplainError,
+        match="execution_stats not available when explain_options.analyze=False",
+    ):
+        results.explain_metrics.execution_stats
+
+
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_query_with_and_composite_filter(collection, database):
     and_filter = And(
