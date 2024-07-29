@@ -214,12 +214,6 @@ def test_collection_stream_or_get_w_explain_options_analyze_true(
     assert "documents_scanned" in execution_stats.debug_stats
     assert "index_entries_scanned" in execution_stats.debug_stats
     assert len(execution_stats.debug_stats) > 0
-    # # verify execution_stats isn't available
-    # with pytest.raises(
-    #     QueryExplainError,
-    #     match="execution_stats not available when explain_options.analyze=False",
-    # ):
-    #     results.explain_metrics.execution_stats
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -337,6 +331,152 @@ def test_vector_search_collection_group(client, database):
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_vector_query_stream_or_get_w_no_explain_options(client, database, method):
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
+
+    collection_id = "vector_search"
+    collection_group = client.collection_group(collection_id)
+
+    vector_query = collection_group.where("color", "==", "red").find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=1,
+    )
+
+    # Tests either `stream()` or `get()`
+    method_under_test = getattr(vector_query, method)
+    results = method_under_test()
+
+    # verify explain_metrics isn't available
+    with pytest.raises(
+        QueryExplainError,
+        match="explain_options not set on query.",
+    ):
+        results.explain_metrics
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_vector_query_stream_or_get_w_explain_options_analyze_true(
+    client, database, method
+):
+    from google.cloud.firestore_v1.query_profile import (
+        ExecutionStats,
+        ExplainMetrics,
+        ExplainOptions,
+        PlanSummary,
+        QueryExplainError,
+    )
+
+    collection_id = "vector_search"
+    collection_group = client.collection_group(collection_id)
+
+    vector_query = collection_group.where("color", "==", "red").find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=1,
+    )
+
+    # Tests either `stream()` or `get()`
+    method_under_test = getattr(vector_query, method)
+    results = method_under_test(explain_options=ExplainOptions(analyze=True))
+
+    # With `stream()`, an exception should be raised when accessing explain_metrics before query
+    # finishes.
+    if method == "stream":
+        with pytest.raises(
+            QueryExplainError,
+            match="explain_metrics not available until query is complete",
+        ):
+            results.explain_metrics
+
+    # Finish iterating results, and explain_metrics should be available.
+    num_results = len(list(results))
+    assert isinstance(results.explain_metrics, ExplainMetrics)
+
+    # verify plan_summary
+    plan_summary = results.explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert (
+        plan_summary.indexes_used[0]["properties"]
+        == "(color ASC, __name__ ASC, embedding VECTOR<3>)"
+    )
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection group"
+
+    # verify execution_stats
+    execution_stats = results.explain_metrics.execution_stats
+    assert isinstance(execution_stats, ExecutionStats)
+    assert execution_stats.results_returned == num_results
+    assert execution_stats.read_operations > 0
+    duration = execution_stats.execution_duration.total_seconds()
+    assert duration > 0
+    assert duration < 1  # we expect a number closer to 0.05
+    assert isinstance(execution_stats.debug_stats, dict)
+    assert "billing_details" in execution_stats.debug_stats
+    assert "documents_scanned" in execution_stats.debug_stats
+    assert "index_entries_scanned" in execution_stats.debug_stats
+    assert len(execution_stats.debug_stats) > 0
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_vector_query_stream_or_get_w_explain_options_analyze_false(
+    client, database, method
+):
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainMetrics,
+        ExplainOptions,
+        PlanSummary,
+        QueryExplainError,
+    )
+
+    collection_id = "vector_search"
+    collection_group = client.collection_group(collection_id)
+
+    vector_query = collection_group.where("color", "==", "red").find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=1,
+    )
+    # Tests either `stream()` or `get()`
+    method_under_test = getattr(vector_query, method)
+    results = method_under_test(explain_options=ExplainOptions(analyze=False))
+
+    assert isinstance(results.explain_metrics, ExplainMetrics)
+
+    # verify plan_summary
+    plan_summary = results.explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert (
+        plan_summary.indexes_used[0]["properties"]
+        == "(color ASC, __name__ ASC, embedding VECTOR<3>)"
+    )
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection group"
+
+    # verify execution_stats isn't available
+    with pytest.raises(
+        QueryExplainError,
+        match="execution_stats not available when explain_options.analyze=False",
+    ):
+        results.explain_metrics.execution_stats
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
