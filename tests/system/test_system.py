@@ -109,7 +109,7 @@ def test_collection_stream_or_get_w_no_explain_options(database, query_docs, met
 
     collection, _, _ = query_docs
 
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(collection, method)
     results = method_under_test()
 
@@ -138,20 +138,20 @@ def test_collection_stream_or_get_w_explain_options_analyze_false(
 
     collection, _, _ = query_docs
 
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(collection, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
     assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # verify plan_summary
+    # Verify plan_summary.
     plan_summary = results.explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(__name__ ASC)"
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
 
-    # verify execution_stats isn't available
+    # Verify execution_stats isn't available.
     with pytest.raises(
         QueryExplainError,
         match="execution_stats not available when explain_options.analyze=False",
@@ -177,7 +177,7 @@ def test_collection_stream_or_get_w_explain_options_analyze_true(
 
     collection, _, _ = query_docs
 
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(collection, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=True))
 
@@ -194,14 +194,14 @@ def test_collection_stream_or_get_w_explain_options_analyze_true(
     num_results = len(list(results))
     assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # verify plan_summary
+    # Verify plan_summary.
     plan_summary = results.explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(__name__ ASC)"
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
 
-    # verify execution_stats
+    # Verify execution_stats.
     execution_stats = results.explain_metrics.execution_stats
     assert isinstance(execution_stats, ExecutionStats)
     assert execution_stats.results_returned == num_results
@@ -351,7 +351,7 @@ def test_vector_query_stream_or_get_w_no_explain_options(client, database, metho
         limit=1,
     )
 
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(vector_query, method)
     results = method_under_test()
 
@@ -389,12 +389,12 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_true(
         limit=1,
     )
 
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(vector_query, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=True))
 
-    # With `stream()`, an exception should be raised when accessing explain_metrics before query
-    # finishes.
+    # With `stream()`, an exception should be raised when accessing
+    # explain_metrics before query finishes.
     if method == "stream":
         with pytest.raises(
             QueryExplainError,
@@ -406,7 +406,7 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_true(
     num_results = len(list(results))
     assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # verify plan_summary
+    # Verify plan_summary.
     plan_summary = results.explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
@@ -416,7 +416,7 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_true(
     )
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection group"
 
-    # verify execution_stats
+    # Verify execution_stats.
     execution_stats = results.explain_metrics.execution_stats
     assert isinstance(execution_stats, ExecutionStats)
     assert execution_stats.results_returned == num_results
@@ -455,13 +455,13 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_false(
         distance_measure=DistanceMeasure.EUCLIDEAN,
         limit=1,
     )
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(vector_query, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
     assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # verify plan_summary
+    # Verify plan_summary.
     plan_summary = results.explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
@@ -471,7 +471,7 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_false(
     )
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection group"
 
-    # verify execution_stats isn't available
+    # Verify execution_stats isn't available.
     with pytest.raises(
         QueryExplainError,
         match="execution_stats not available when explain_options.analyze=False",
@@ -1133,7 +1133,7 @@ def test_query_stream_or_get_w_no_explain_options(query_docs, database, method):
     num_vals = len(allowed_vals)
     query = collection.where(filter=FieldFilter("a", "in", [1, num_vals + 100]))
 
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(query, method)
     results = method_under_test()
 
@@ -1163,12 +1163,12 @@ def test_query_stream_or_get_w_explain_options_analyze_true(
     num_vals = len(allowed_vals)
     query = collection.where(filter=FieldFilter("a", "in", [1, num_vals + 100]))
 
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(query, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=True))
 
-    # With `stream()`, an exception should be raised when accessing explain_metrics before query
-    # finishes.
+    # With `stream()`, an exception should be raised when accessing
+    # explain_metrics before query finishes.
     if method == "stream":
         with pytest.raises(
             QueryExplainError,
@@ -1180,14 +1180,14 @@ def test_query_stream_or_get_w_explain_options_analyze_true(
     num_results = len(list(results))
     assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # verify plan_summary
+    # Verify plan_summary.
     plan_summary = results.explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
 
-    # verify execution_stats
+    # Verify execution_stats.
     execution_stats = results.explain_metrics.execution_stats
     assert isinstance(execution_stats, ExecutionStats)
     assert execution_stats.results_returned == num_results
@@ -1221,20 +1221,20 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
     num_vals = len(allowed_vals)
     query = collection.where(filter=FieldFilter("a", "in", [1, num_vals + 100]))
 
-    # Tests either `stream()` or `get()`
+    # Tests either `stream()` or `get()`.
     method_under_test = getattr(query, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
     assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # verify plan_summary
+    # Verify plan_summary.
     plan_summary = results.explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
 
-    # verify execution_stats isn't available
+    # Verify execution_stats isn't available.
     with pytest.raises(
         QueryExplainError,
         match="execution_stats not available when explain_options.analyze=False",
