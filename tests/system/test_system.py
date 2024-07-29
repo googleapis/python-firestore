@@ -2819,8 +2819,8 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
         def in_transaction(transaction):
             global inner_fn_ran
 
-            # When no explain_options value is passed, explain_metrics should
-            # be empty
+            # When no explain_options value is passed,  an exception shoud be
+            # raised when accessing explain_metrics.
             result_1 = query.get(transaction=transaction)
             with pytest.raises(
                 QueryExplainError, match="explain_options not set on query."
