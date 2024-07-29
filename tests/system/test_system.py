@@ -2796,7 +2796,11 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
     """
     Test query profiling in transactions.
     """
-    from google.cloud.firestore_v1.query_profile import ExplainOptions, ExplainMetrics
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainMetrics,
+        ExplainOptions,
+        QueryExplainError,
+    )
 
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
@@ -2818,7 +2822,10 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
             # When no explain_options value is passed, explain_metrics should
             # be empty
             result_1 = query.get(transaction=transaction)
-            assert result_1.explain_metrics is None
+            with pytest.raises(
+                QueryExplainError, match="explain_options not set on query."
+            ):
+                result_1.explain_metrics
 
             result_2 = query.get(
                 transaction=transaction,
