@@ -16,15 +16,32 @@
 """
 
 from collections import abc
+from typing import Generator, Optional
 
-from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
+from google.cloud.firestore_v1.query_profile import (
+    ExplainMetrics,
+    ExplainOptions,
+    QueryExplainError,
+)
 import google.cloud.firestore_v1.types.query_profile as query_profile_proto
 
 
 class StreamGenerator(abc.Generator):
-    """Generator for the streamed results."""
+    """Generator for the streamed results.
 
-    def __init__(self, response_generator=None, explain_options=None):
+    Args:
+        response_generator (Generator):
+            The inner generator that yields the returned document in the stream.
+        explain_options
+            (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+            Query profiling options set for this query.
+    """
+
+    def __init__(
+        self,
+        response_generator: Generator,
+        explain_options: Optional[ExplainOptions] = None,
+    ):
         self._generator = response_generator
         self._explain_options = explain_options
         self._explain_metrics = None
