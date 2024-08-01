@@ -56,6 +56,7 @@ class AggregationQuery(BaseAggregationQuery):
             retries.Retry, None, gapic_v1.method._MethodDefault
         ] = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> List[AggregationResult]:
         """Runs the aggregation query.
@@ -192,6 +193,7 @@ class AggregationQuery(BaseAggregationQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> "StreamGenerator[DocumentSnapshot]":
         """Runs the aggregation query.

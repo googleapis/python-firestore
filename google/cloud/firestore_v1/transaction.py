@@ -174,6 +174,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         ref_or_query,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: float = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieve a document or a query result from the database.

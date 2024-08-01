@@ -234,6 +234,7 @@ class BaseAggregationQuery(ABC):
             retries.Retry, None, gapic_v1.method._MethodDefault
         ] = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> List[AggregationResult] | Coroutine[Any, Any, List[AggregationResult]]:
         """Runs the aggregation query.
@@ -267,6 +268,7 @@ class BaseAggregationQuery(ABC):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> (
         Generator[List[AggregationResult], Any, None]

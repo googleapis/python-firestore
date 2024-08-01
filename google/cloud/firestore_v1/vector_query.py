@@ -57,6 +57,7 @@ class VectorQuery(BaseVectorQuery):
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> Iterable["DocumentSnapshot"]:
         """Runs the vector query.
@@ -181,6 +182,7 @@ class VectorQuery(BaseVectorQuery):
         transaction: Optional["transaction.Transaction"] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> "StreamGenerator[DocumentSnapshot]":
         """Reads the documents in the collection that match this query.

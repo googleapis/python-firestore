@@ -172,6 +172,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         transaction: Union[transaction.Transaction, None] = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: Union[float, None] = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> DocumentSnapshotList:
         """Read the documents in this collection.
@@ -210,6 +211,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         transaction: Optional[transaction.Transaction] = None,
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> "StreamGenerator[DocumentSnapshot]":
         """Read the documents in this collection.

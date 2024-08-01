@@ -161,6 +161,7 @@ class BaseTransaction(object):
         ref_or_query,
         retry: retries.Retry = None,
         timeout: float = None,
+        *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> NoReturn:
         raise NotImplementedError
