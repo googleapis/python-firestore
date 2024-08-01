@@ -99,6 +99,14 @@ def test_stream_generator_close():
         next(inst)
 
 
+def test_stream_generator_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    explain_options = ExplainOptions(analyze=True)
+    inst = _make_stream_generator([], explain_options)
+    assert inst.explain_options == explain_options
+
+
 def test_stream_generator_explain_metrics_explain_options_analyze_true():
     import google.cloud.firestore_v1.query_profile as query_profile
     import google.cloud.firestore_v1.types.query_profile as query_profile_pb2

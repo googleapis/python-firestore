@@ -34,7 +34,7 @@ class StreamGenerator(abc.Generator):
             The inner generator that yields the returned document in the stream.
         explain_options
             (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
-            Query profiling options set for this query.
+            Query profiling options for this stream request.
     """
 
     def __init__(
@@ -65,6 +65,11 @@ class StreamGenerator(abc.Generator):
 
     def close(self):
         return self._generator.close()
+    
+    @property
+    def explain_options(self) -> ExplainOptions:
+        """Query profiling options for this stream request."""
+        return self._explain_options
 
     @property
     def explain_metrics(self) -> ExplainMetrics:
