@@ -35,20 +35,23 @@ from typing import (
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
 from google.cloud.firestore_v1.base_query import QueryType
-from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery, DistanceMeasure
-from google.cloud.firestore_v1.document import DocumentReference
-from google.cloud.firestore_v1.query_profile import ExplainOptions
-from google.cloud.firestore_v1.vector import Vector
 
 if TYPE_CHECKING:  # pragma: NO COVER
     # Types needed only for Type Hints
     from firestore_v1.vector_query import VectorQuery
 
+    from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.base_vector_query import (
+        BaseVectorQuery,
+        DistanceMeasure,
+    )
+    from google.cloud.firestore_v1.document import DocumentReference
     from google.cloud.firestore_v1.field_path import FieldPath
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.transaction import Transaction
+    from google.cloud.firestore_v1.vector import Vector
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 

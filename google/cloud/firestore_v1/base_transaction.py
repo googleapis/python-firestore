@@ -13,15 +13,17 @@
 # limitations under the License.
 
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
+from __future__ import annotations
 
-from typing import Any, Coroutine, NoReturn, Optional, Union
+from typing import TYPE_CHECKING, Any, Coroutine, NoReturn, Optional, Union
 
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import types
 
 # Types needed only for Type Hints
-from google.cloud.firestore_v1.query_profile import ExplainOptions
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 _CANT_BEGIN: str
 _CANT_COMMIT: str

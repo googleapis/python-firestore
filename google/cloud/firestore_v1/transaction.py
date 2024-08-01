@@ -13,20 +13,17 @@
 # limitations under the License.
 
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
-
+from __future__ import annotations
 
 import random
 import time
-from typing import Any, Callable, Generator, Optional
+from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
 import warnings
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers, batch
-
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_transaction import (
     _CANT_BEGIN,
     _CANT_COMMIT,
@@ -42,8 +39,12 @@ from google.cloud.firestore_v1.base_transaction import (
 )
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
-from google.cloud.firestore_v1.query_profile import ExplainOptions
-from google.cloud.firestore_v1.types import CommitResponse
+
+# Types needed only for Type Hints
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.types import CommitResponse
 
 
 class Transaction(batch.WriteBatch, BaseTransaction):

@@ -39,15 +39,15 @@ from google.cloud.firestore_v1.base_query import (
     _enum_from_direction,
     _query_response_to_snapshot,
 )
-from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
-from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.vector_query import VectorQuery
 from google.cloud.firestore_v1.watch import Watch
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
     from google.cloud.firestore_v1.field_path import FieldPath
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class Query(BaseQuery):

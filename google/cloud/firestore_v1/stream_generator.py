@@ -14,16 +14,16 @@
 
 """Classes for iterating over stream results for the Google Cloud Firestore API.
 """
+from __future__ import annotations
 
 from collections import abc
-from typing import Generator, Optional
+from typing import TYPE_CHECKING, Generator, Optional
 
-from google.cloud.firestore_v1.query_profile import (
-    ExplainMetrics,
-    ExplainOptions,
-    QueryExplainError,
-)
+from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
 import google.cloud.firestore_v1.types.query_profile as query_profile_proto
+
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class StreamGenerator(abc.Generator):

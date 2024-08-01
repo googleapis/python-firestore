@@ -13,18 +13,22 @@
 # limitations under the License.
 
 """Classes for representing documents for the Google Cloud Firestore API."""
+from __future__ import annotations
 
 import copy
-from typing import Any, Dict, Iterable, NoReturn, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, Iterable, NoReturn, Optional, Tuple, Union
 
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1 import field_path as field_path_module
+from google.cloud.firestore_v1.query_profile import QueryExplainError
+from google.cloud.firestore_v1.types import common
 
 # Types needed only for Type Hints
-from google.cloud.firestore_v1 import query_profile
-from google.cloud.firestore_v1.types import Document, common, firestore, write
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
+    from google.cloud.firestore_v1.types import Document, firestore, write
 
 
 class BaseDocumentReference(object):
@@ -520,15 +524,15 @@ class DocumentSnapshotList(list):
             (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
             Options to enable query profiling for this query. When set,
             explain_metrics will be available on the returned generator.
-        explain_metrics (Optional[query_profile.ExplainMetrics]):
+        explain_metrics (Optional[ExplainMetrics]):
             Query profile results.
     """
 
     def __init__(
         self,
         docs: list,
-        explain_options: Optional[query_profile.ExplainOptions] = None,
-        explain_metrics: Optional[query_profile.ExplainMetrics] = None,
+        explain_options: Optional[ExplainOptions] = None,
+        explain_metrics: Optional[ExplainMetrics] = None,
     ):
         super().__init__(docs)
         self._explain_options = explain_options
@@ -541,7 +545,7 @@ class DocumentSnapshotList(list):
     @property
     def explain_metrics(self):
         if self._explain_options is None:
-            raise query_profile.QueryExplainError("explain_options not set on query.")
+            raise QueryExplainError("explain_options not set on query.")
         else:
             return self._explain_metrics
 

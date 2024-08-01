@@ -50,7 +50,6 @@ from google.cloud.firestore_v1 import transforms
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.order import Order
-from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.types import (
     Cursor,
     RunQueryResponse,
@@ -62,6 +61,7 @@ from google.cloud.firestore_v1.vector import Vector
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
     from google.cloud.firestore_v1.field_path import FieldPath
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 _BAD_DIR_STRING: str
 _BAD_OP_NAN_NULL: str
@@ -1030,7 +1030,7 @@ class BaseQuery(object):
             "structured_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
         }
-        if explain_options:
+        if explain_options is not None:
             request["explain_options"] = explain_options._to_dict()
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 

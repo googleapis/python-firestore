@@ -13,6 +13,7 @@
 # limitations under the License.
 
 """Classes for representing collections for the Google Cloud Firestore API."""
+from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Callable, Generator, Optional, Tuple, Union
 
@@ -27,11 +28,11 @@ from google.cloud.firestore_v1.base_collection import (
     _item_to_document_ref,
 )
 from google.cloud.firestore_v1.base_document import DocumentSnapshotList
-from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.watch import Watch
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 
@@ -199,7 +200,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
             DocumentSnapshotList: The documents in this collection that match the query.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
-        if explain_options:
+        if explain_options is not None:
             kwargs["explain_options"] = explain_options
 
         return query.get(transaction=transaction, **kwargs)

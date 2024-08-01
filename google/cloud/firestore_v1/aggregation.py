@@ -30,16 +30,14 @@ from google.cloud.firestore_v1.base_aggregation import (
     BaseAggregationQuery,
     _query_response_to_result,
 )
-from google.cloud.firestore_v1.base_document import (
-    DocumentSnapshot,
-    DocumentSnapshotList,
-)
-from google.cloud.firestore_v1.query_profile import ExplainOptions
+from google.cloud.firestore_v1.base_document import DocumentSnapshotList
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:
     from google.cloud.firestore_v1 import transaction  # pragma: NO COVER
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class AggregationQuery(BaseAggregationQuery):
