@@ -34,8 +34,8 @@ from google.cloud.firestore_v1.base_document import DocumentSnapshotList
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 # Types needed only for Type Hints
-if TYPE_CHECKING:
-    from google.cloud.firestore_v1 import transaction  # pragma: NO COVER
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1 import transaction
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 

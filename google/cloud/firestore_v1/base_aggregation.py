@@ -47,8 +47,8 @@ from google.cloud.firestore_v1.types import (
 )
 
 # Types needed only for Type Hints
-if TYPE_CHECKING:
-    from google.cloud.firestore_v1 import transaction  # pragma: NO COVER
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1 import transaction
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 

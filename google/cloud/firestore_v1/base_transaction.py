@@ -22,7 +22,7 @@ from google.api_core import retry as retries
 from google.cloud.firestore_v1 import types
 
 # Types needed only for Type Hints
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 _CANT_BEGIN: str

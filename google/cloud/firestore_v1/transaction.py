@@ -41,7 +41,7 @@ from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
 
 # Types needed only for Type Hints
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.types import CommitResponse

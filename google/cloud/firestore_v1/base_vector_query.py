@@ -27,7 +27,7 @@ from google.api_core import retry as retries
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import query
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.vector import Vector

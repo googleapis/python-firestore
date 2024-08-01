@@ -26,7 +26,7 @@ from google.cloud.firestore_v1.query_profile import QueryExplainError
 from google.cloud.firestore_v1.types import common
 
 # Types needed only for Type Hints
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
     from google.cloud.firestore_v1.types import Document, firestore, write
 

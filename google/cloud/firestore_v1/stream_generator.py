@@ -22,7 +22,7 @@ from typing import TYPE_CHECKING, Generator, Optional
 from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
 import google.cloud.firestore_v1.types.query_profile as query_profile_proto
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
