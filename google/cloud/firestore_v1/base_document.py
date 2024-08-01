@@ -515,9 +515,6 @@ class DocumentSnapshotList(list):
     is added to return the query profile results.
 
     Args:
-        reference (:class:`~google.cloud.firestore_v1.document.DocumentReference`):
-            A document reference corresponding to the document that contains
-            the data in this snapshot.
         docs (list[DocumentSnapshot]):
             The list of DocumentSnapshot.
         explain_options
