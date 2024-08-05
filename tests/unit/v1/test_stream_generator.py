@@ -43,9 +43,9 @@ def test_stream_generator_constructor():
 
 
 def test_stream_generator_iter():
+    iterable = [(0, None), (1, None), (2, None)]
     expected_results = [0, 1, 2]
-    inst = _make_stream_generator(expected_results)
-
+    inst = _make_stream_generator(iterable)
     actual_results = []
     for result in inst:
         actual_results.append(result)
@@ -54,8 +54,9 @@ def test_stream_generator_iter():
 
 
 def test_stream_generator_next():
+    iterable = [(0, None), (1, None)]
     expected_results = [0, 1]
-    inst = _make_stream_generator(expected_results)
+    inst = _make_stream_generator(iterable)
 
     actual_results = []
     actual_results.append(next(inst))
@@ -68,8 +69,9 @@ def test_stream_generator_next():
 
 
 def test_stream_generator_send():
+    iterable = [(0, None), (1, None)]
     expected_results = [0, 1]
-    inst = _make_stream_generator(expected_results)
+    inst = _make_stream_generator(iterable)
 
     actual_results = []
     actual_results.append(next(inst))
@@ -112,9 +114,14 @@ def test_stream_generator_explain_metrics_explain_options_analyze_true():
     import google.cloud.firestore_v1.types.query_profile as query_profile_pb2
 
     iterator = [
-        1,
-        query_profile_pb2.ExplainMetrics(plan_summary=query_profile_pb2.PlanSummary()),
-        2,
+        (1, None),
+        (
+            None,
+            query_profile_pb2.ExplainMetrics(
+                plan_summary=query_profile_pb2.PlanSummary()
+            ),
+        ),
+        (2, None),
     ]
 
     explain_options = query_profile.ExplainOptions(analyze=True)
@@ -149,7 +156,7 @@ def test_stream_generator_explain_metrics_explain_options_analyze_false():
     )
 
     iterator = [
-        query_profile_pb2.ExplainMetrics(plan_summary=plan_summary),
+        (None, query_profile_pb2.ExplainMetrics(plan_summary=plan_summary)),
     ]
 
     explain_options = query_profile.ExplainOptions(analyze=False)

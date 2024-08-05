@@ -14,8 +14,9 @@
 
 """Classes for representing vector queries for the Google Cloud Firestore API.
 """
+from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Generator, Iterable, Optional, Tuple, TypeVar, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
@@ -27,13 +28,14 @@ from google.cloud.firestore_v1.base_query import (
     _query_response_to_snapshot,
 )
 from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from google.cloud.firestore_v1.query_profile import ExplainOptions
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1 import transaction
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 TVectorQuery = TypeVar("TVectorQuery", bound="VectorQuery")
@@ -121,7 +123,7 @@ class VectorQuery(BaseVectorQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator["DocumentSnapshot", Any, None]:
+    ) -> Generator[Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]]:
         """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -147,7 +149,7 @@ class VectorQuery(BaseVectorQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
+            Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]:
             The next document that fulfills the query.
         """
         response_iterator, expected_prefix = self._get_stream_iterator(
@@ -164,7 +166,7 @@ class VectorQuery(BaseVectorQuery):
                 break
 
             if response.explain_metrics:
-                yield response.explain_metrics
+                yield None, response.explain_metrics
 
             if self._nested_query._all_descendants:
                 snapshot = _collection_group_query_response_to_snapshot(
@@ -175,7 +177,7 @@ class VectorQuery(BaseVectorQuery):
                     response, self._nested_query._parent, expected_prefix
                 )
             if snapshot is not None:
-                yield snapshot
+                yield snapshot, None
 
     def stream(
         self,

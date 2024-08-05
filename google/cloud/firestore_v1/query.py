@@ -20,7 +20,7 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Type
+from typing import TYPE_CHECKING, Callable, Generator, List, Optional, Tuple, Type
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
@@ -47,7 +47,7 @@ from google.cloud.firestore_v1.watch import Watch
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
     from google.cloud.firestore_v1.field_path import FieldPath
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
 
 
 class Query(BaseQuery):
@@ -339,7 +339,7 @@ class Query(BaseQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[DocumentSnapshot, Any, None]:
+    ) -> Generator[Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -374,7 +374,7 @@ class Query(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
+            Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]:
             The next document that fulfills the query.
         """
         response_iterator, expected_prefix = self._get_stream_iterator(
@@ -405,7 +405,7 @@ class Query(BaseQuery):
                 break
 
             if response.explain_metrics:
-                yield response.explain_metrics
+                yield None, response.explain_metrics
 
             if self._all_descendants:
                 snapshot = _collection_group_query_response_to_snapshot(
@@ -417,7 +417,7 @@ class Query(BaseQuery):
                 )
             if snapshot is not None:
                 last_snapshot = snapshot
-                yield snapshot
+                yield snapshot, None
 
     def stream(
         self,

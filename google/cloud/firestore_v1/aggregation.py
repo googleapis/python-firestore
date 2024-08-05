@@ -20,7 +20,7 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
+from typing import TYPE_CHECKING, Generator, List, Optional, Tuple, Union
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
@@ -37,6 +37,7 @@ from google.cloud.firestore_v1.stream_generator import StreamGenerator
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1 import transaction
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
@@ -130,7 +131,7 @@ class AggregationQuery(BaseAggregationQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Union[Generator[List[AggregationResult], Any, None]]:
+    ) -> Generator[Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]]:
         """Internal method for stream(). Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -155,7 +156,7 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            :class:`~google.cloud.firestore_v1.base_aggregation.AggregationResult`:
+            Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]:
             The result of aggregations of this query.
         """
 
@@ -183,10 +184,10 @@ class AggregationQuery(BaseAggregationQuery):
                 break
 
             if response.explain_metrics:
-                yield response.explain_metrics
+                yield None, response.explain_metrics
 
             result = _query_response_to_result(response)
-            yield result
+            yield result, None
 
     def stream(
         self,

@@ -20,7 +20,6 @@ from collections import abc
 from typing import TYPE_CHECKING, Generator, Optional
 
 from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
-import google.cloud.firestore_v1.types.query_profile as query_profile_proto
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
@@ -50,10 +49,14 @@ class StreamGenerator(abc.Generator):
         return self
 
     def __next__(self):
-        next_value = self._generator.__next__()
-        if type(next_value) is query_profile_proto.ExplainMetrics:
-            self._explain_metrics = ExplainMetrics._from_pb(next_value)
-            return self._generator.__next__()
+        next_value, explain_metrics = self._generator.__next__()
+
+        if explain_metrics is not None:
+            self._explain_metrics = ExplainMetrics._from_pb(explain_metrics)
+
+            # Need to run the following iteration too, to ensure the length of
+            # the iteration isn't increased due to yielding explain_metrics.
+            return next(self)
         else:
             return next_value
 
@@ -65,7 +68,7 @@ class StreamGenerator(abc.Generator):
 
     def close(self):
         return self._generator.close()
-    
+
     @property
     def explain_options(self) -> ExplainOptions:
         """Query profiling options for this stream request."""
