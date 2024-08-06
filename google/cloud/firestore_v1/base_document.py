@@ -16,7 +16,17 @@
 from __future__ import annotations
 
 import copy
-from typing import TYPE_CHECKING, Any, Dict, Iterable, NoReturn, Optional, Tuple, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    Iterable,
+    NoReturn,
+    Optional,
+    Tuple,
+    TypeVar,
+    Union,
+)
 
 from google.api_core import retry as retries
 
@@ -29,6 +39,9 @@ from google.cloud.firestore_v1.types import common
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
     from google.cloud.firestore_v1.types import Document, firestore, write
+
+
+T = TypeVar("T")
 
 
 class BaseDocumentReference(object):
@@ -508,15 +521,15 @@ class DocumentSnapshot(object):
         return _helpers.document_snapshot_to_protobuf(self)
 
 
-class DocumentSnapshotList(list):
-    """A list of DocumentSnapshot.
+class QueryResultsList(list[T]):
+    """A list of received query results from the query call.
 
     This is a subclass of the built-in list. A new property `explain_metrics`
     is added to return the query profile results.
 
     Args:
-        docs (list[DocumentSnapshot]):
-            The list of DocumentSnapshot.
+        docs (list[T]):
+            The list of query results.
         explain_options
             (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
             Options to enable query profiling for this query. When set,
@@ -527,7 +540,7 @@ class DocumentSnapshotList(list):
 
     def __init__(
         self,
-        docs: list,
+        docs: list[T],
         explain_options: Optional[ExplainOptions] = None,
         explain_metrics: Optional[ExplainMetrics] = None,
     ):

@@ -20,17 +20,16 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Generator, Optional, Tuple, Union
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1.base_aggregation import (
-    AggregationResult,
     BaseAggregationQuery,
     _query_response_to_result,
 )
-from google.cloud.firestore_v1.base_document import DocumentSnapshotList
+from google.cloud.firestore_v1.base_document import QueryResultsList
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 # Types needed only for Type Hints
@@ -59,10 +58,12 @@ class AggregationQuery(BaseAggregationQuery):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> List[AggregationResult]:
+    ) -> QueryResultsList:
         """Runs the aggregation query.
 
-        This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
+        This sends a ``RunAggregationQuery`` RPC and returns a list of
+        aggregation results in the stream of ``RunAggregationQueryResponse``
+        messages.
 
         Args:
             transaction
@@ -81,7 +82,7 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            list: The aggregation query results
+            QueryResultsList: The aggregation query results.
 
         """
         result = self.stream(
@@ -97,7 +98,7 @@ class AggregationQuery(BaseAggregationQuery):
         else:
             explain_metrics = result.explain_metrics
 
-        return DocumentSnapshotList(result_list, explain_options, explain_metrics)
+        return QueryResultsList(result_list, explain_options, explain_metrics)
 
     def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
         """Helper method for :meth:`stream`."""

@@ -27,7 +27,7 @@ from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1.base_document import DocumentSnapshotList
+from google.cloud.firestore_v1.base_document import QueryResultsList
 from google.cloud.firestore_v1.watch import Watch
 
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -174,7 +174,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         timeout: Union[float, None] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> DocumentSnapshotList:
+    ) -> QueryResultsList:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -198,7 +198,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         allowed).
 
         Returns:
-            DocumentSnapshotList: The documents in this collection that match the query.
+            QueryResultsList: The documents in this collection that match the query.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
         if explain_options is not None:

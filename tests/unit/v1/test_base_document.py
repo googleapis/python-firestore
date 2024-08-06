@@ -362,10 +362,10 @@ def test_documentsnapshot_non_existent():
     assert as_dict is None
 
 
-def _make_document_snapshotlist(*args, **kwargs):
-    from google.cloud.firestore_v1.base_document import DocumentSnapshotList
+def _make_query_results_list(*args, **kwargs):
+    from google.cloud.firestore_v1.base_document import QueryResultsList
 
-    return DocumentSnapshotList(*args, **kwargs)
+    return QueryResultsList(*args, **kwargs)
 
 
 def _make_explain_metrics():
@@ -377,7 +377,7 @@ def _make_explain_metrics():
     return ExplainMetrics(plan_summary=plan_summary)
 
 
-def test_documentsnapshotlist_constructor():
+def test_query_results_list_constructor():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     client = mock.sentinel.client
@@ -402,7 +402,7 @@ def test_documentsnapshotlist_constructor():
     )
     explain_metrics = _make_explain_metrics()
     explain_options = ExplainOptions(analyze=True)
-    snapshot_list = _make_document_snapshotlist(
+    snapshot_list = _make_query_results_list(
         [snapshot_1, snapshot_2],
         explain_options=explain_options,
         explain_metrics=explain_metrics,
@@ -414,20 +414,20 @@ def test_documentsnapshotlist_constructor():
     assert snapshot_list._explain_metrics == explain_metrics
 
 
-def test_documentsnapshotlist_explain_options():
+def test_query_results_list_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     explain_options = ExplainOptions(analyze=True)
-    snapshot_list = _make_document_snapshotlist([], explain_options=explain_options)
+    snapshot_list = _make_query_results_list([], explain_options=explain_options)
 
     assert snapshot_list.explain_options == explain_options
 
 
-def test_documentsnapshotlist_explain_metrics_w_explain_options():
+def test_query_results_list_explain_metrics_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     explain_metrics = _make_explain_metrics()
-    snapshot_list = _make_document_snapshotlist(
+    snapshot_list = _make_query_results_list(
         [],
         explain_options=ExplainOptions(analyze=True),
         explain_metrics=explain_metrics,
@@ -436,10 +436,10 @@ def test_documentsnapshotlist_explain_metrics_w_explain_options():
     assert snapshot_list.explain_metrics == explain_metrics
 
 
-def test_documentsnapshotlist_explain_metrics_wo_explain_options():
+def test_query_results_list_explain_metrics_wo_explain_options():
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
-    snapshot_list = _make_document_snapshotlist([])
+    snapshot_list = _make_query_results_list([])
 
     with pytest.raises(QueryExplainError):
         snapshot_list.explain_metrics

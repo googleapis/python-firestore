@@ -29,7 +29,7 @@ from google.cloud import firestore_v1
 from google.cloud.firestore_v1 import aggregation, transaction
 from google.cloud.firestore_v1.base_document import (
     DocumentSnapshot,
-    DocumentSnapshotList,
+    QueryResultsList,
 )
 from google.cloud.firestore_v1.base_query import (
     BaseCollectionGroup,
@@ -141,7 +141,7 @@ class Query(BaseQuery):
         timeout: float = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> DocumentSnapshotList:
+    ) -> QueryResultsList:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -164,7 +164,7 @@ class Query(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            DocumentSnapshotList: The documents in the collection that match this query.
+            QueryResultsList: The documents in the collection that match this query.
         """
         is_limited_to_last = self._limit_to_last
 
@@ -195,7 +195,7 @@ class Query(BaseQuery):
         else:
             explain_metrics = result.explain_metrics
 
-        return DocumentSnapshotList(result_list, explain_options, explain_metrics)
+        return QueryResultsList(result_list, explain_options, explain_metrics)
 
     def _chunkify(
         self, chunk_size: int

@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Generator, Iterable, Optional, Tuple, TypeVar,
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
-from google.cloud.firestore_v1.base_document import DocumentSnapshotList
+from google.cloud.firestore_v1.base_document import QueryResultsList
 from google.cloud.firestore_v1.base_query import (
     BaseQuery,
     _collection_group_query_response_to_snapshot,
@@ -98,7 +98,7 @@ class VectorQuery(BaseVectorQuery):
         else:
             explain_metrics = result.explain_metrics
 
-        return DocumentSnapshotList(result_list, explain_options, explain_metrics)
+        return QueryResultsList(result_list, explain_options, explain_metrics)
 
     def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
         """Helper method for :meth:`stream`."""
