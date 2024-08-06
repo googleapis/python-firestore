@@ -20,7 +20,7 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Generator, List, Optional, Tuple, Union
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
@@ -133,7 +133,7 @@ class AggregationQuery(BaseAggregationQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]]:
+    ) -> Generator[Tuple[Optional[List[AggregationResult]], Optional[ExplainMetrics]]]:
         """Internal method for stream(). Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -158,7 +158,7 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]:
+            Tuple[Optional[List[AggregationResult]], Optional[ExplainMetrics]]:
             The result of aggregations of this query.
         """
 

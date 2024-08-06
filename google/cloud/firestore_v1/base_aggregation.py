@@ -27,9 +27,7 @@ from abc import ABC
 from typing import (
     TYPE_CHECKING,
     Any,
-    AsyncGenerator,
     Coroutine,
-    Generator,
     List,
     Optional,
     Tuple,
@@ -49,7 +47,12 @@ from google.cloud.firestore_v1.types import (
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1 import transaction
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.stream_generator import (
+        QueryResultsList,
+        StreamGenerator,
+    )
 
 
 class AggregationResult(object):
@@ -236,7 +239,10 @@ class BaseAggregationQuery(ABC):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> List[AggregationResult] | Coroutine[Any, Any, List[AggregationResult]]:
+    ) -> (
+        QueryResultsList[AggregationResult]
+        | Coroutine[Any, Any, List[AggregationResult]]
+    ):
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
@@ -258,7 +264,8 @@ class BaseAggregationQuery(ABC):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            list: The aggregation query results
+            QueryResultsList[AggregationResult] | Coroutine[Any, Any, List[AggregationResult]]:
+                The aggregation query results.
 
         """
 
@@ -271,8 +278,8 @@ class BaseAggregationQuery(ABC):
         *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> (
-        Generator[List[AggregationResult], Any, None]
-        | AsyncGenerator[List[AggregationResult], None]
+        StreamGenerator[List[AggregationResult], Any, None]
+        | AsyncStreamGenerator[List[AggregationResult], Any, None]
     ):
         """Runs the aggregation query.
 
