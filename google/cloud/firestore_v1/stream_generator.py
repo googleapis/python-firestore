@@ -96,7 +96,14 @@ class StreamGenerator(abc.Generator):
                 next(self)
             except StopIteration:
                 pass
-            return self._explain_metrics
+
+            if self._explain_metrics is None:
+                raise QueryExplainError(
+                    "Did not receive explain_metrics for this query, despite "
+                    "explain_options is set and analyze = False."
+                )
+            else:
+                return self._explain_metrics
         raise QueryExplainError(
             "explain_metrics not available until query is complete."
         )

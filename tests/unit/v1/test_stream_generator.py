@@ -164,6 +164,17 @@ def test_stream_generator_explain_metrics_explain_options_analyze_false():
     assert isinstance(inst.explain_metrics, query_profile.ExplainMetrics)
 
 
+def test_stream_generator_explain_metrics_missing_explain_options_analyze_false():
+    import google.cloud.firestore_v1.query_profile as query_profile
+
+    explain_options = query_profile.ExplainOptions(analyze=False)
+    inst = _make_stream_generator([("1", None)], explain_options)
+    with pytest.raises(
+        query_profile.QueryExplainError, match="Did not receive explain_metrics"
+    ):
+        inst.explain_metrics
+
+
 def test_stream_generator_explain_metrics_no_explain_options():
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
