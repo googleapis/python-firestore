@@ -17,12 +17,15 @@
 from __future__ import annotations
 
 from collections import abc
-from typing import TYPE_CHECKING, Generator, Optional
+from typing import TYPE_CHECKING, Generator, Optional, TypeVar
 
 from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+
+T = TypeVar("T")
 
 
 class StreamGenerator(abc.Generator):
@@ -38,7 +41,7 @@ class StreamGenerator(abc.Generator):
 
     def __init__(
         self,
-        response_generator: Generator,
+        response_generator: Generator[T],
         explain_options: Optional[ExplainOptions] = None,
     ):
         self._generator = response_generator

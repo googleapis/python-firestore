@@ -21,6 +21,7 @@ from typing import (
     Any,
     Dict,
     Iterable,
+    List,
     NoReturn,
     Optional,
     Tuple,
@@ -521,7 +522,7 @@ class DocumentSnapshot(object):
         return _helpers.document_snapshot_to_protobuf(self)
 
 
-class QueryResultsList(list[T]):
+class QueryResultsList(list):
     """A list of received query results from the query call.
 
     This is a subclass of the built-in list. A new property `explain_metrics`
@@ -540,7 +541,7 @@ class QueryResultsList(list[T]):
 
     def __init__(
         self,
-        docs: list[T],
+        docs: List[T],
         explain_options: Optional[ExplainOptions] = None,
         explain_metrics: Optional[ExplainMetrics] = None,
     ):

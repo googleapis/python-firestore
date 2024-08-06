@@ -26,6 +26,7 @@ from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1.base_aggregation import (
+    AggregationResult,
     BaseAggregationQuery,
     _query_response_to_result,
 )
@@ -58,7 +59,7 @@ class AggregationQuery(BaseAggregationQuery):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> QueryResultsList:
+    ) -> QueryResultsList[AggregationResult]:
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and returns a list of
@@ -82,7 +83,7 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            QueryResultsList: The aggregation query results.
+            QueryResultsList[AggregationResult]: The aggregation query results.
 
         """
         result = self.stream(

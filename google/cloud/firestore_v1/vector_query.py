@@ -61,7 +61,7 @@ class VectorQuery(BaseVectorQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Iterable["DocumentSnapshot"]:
+    ) -> QueryResultsList[DocumentSnapshot]:
         """Runs the vector query.
 
         This sends a ``RunQuery`` RPC and returns a list of document messages.
@@ -83,7 +83,7 @@ class VectorQuery(BaseVectorQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            list: The vector query results.
+            QueryResultsList[DocumentSnapshot]: The vector query results.
         """
         result = self.stream(
             transaction=transaction,

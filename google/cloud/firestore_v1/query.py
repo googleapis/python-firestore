@@ -141,7 +141,7 @@ class Query(BaseQuery):
         timeout: float = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> QueryResultsList:
+    ) -> QueryResultsList[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -164,7 +164,8 @@ class Query(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            QueryResultsList: The documents in the collection that match this query.
+            QueryResultsList[DocumentSnapshot]: The documents in the collection
+            that match this query.
         """
         is_limited_to_last = self._limit_to_last
 

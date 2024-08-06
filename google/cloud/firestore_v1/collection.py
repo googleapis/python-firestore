@@ -174,7 +174,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         timeout: Union[float, None] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> QueryResultsList:
+    ) -> QueryResultsList[DocumentSnapshot]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -198,7 +198,8 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         allowed).
 
         Returns:
-            QueryResultsList: The documents in this collection that match the query.
+            QueryResultsList[DocumentSnapshot]: The documents in this collection
+            that match the query.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
         if explain_options is not None:
