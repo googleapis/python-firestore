@@ -363,7 +363,7 @@ def test_documentsnapshot_non_existent():
 
 
 def _make_query_results_list(*args, **kwargs):
-    from google.cloud.firestore_v1.base_document import QueryResultsList
+    from google.cloud.firestore_v1.stream_generator import QueryResultsList
 
     return QueryResultsList(*args, **kwargs)
 
