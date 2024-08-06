@@ -91,7 +91,8 @@ class StreamGenerator(abc.Generator):
         elif self._explain_options is None:
             raise QueryExplainError("explain_options not set on query.")
         elif self._explain_options.analyze is False:
-            # we need to run the query to get the explain_metrics
+            # We need to run the query to get the explain_metrics. Since no
+            # query results are returned, it's ok to discard the returned value.
             try:
                 next(self)
             except StopIteration:
