@@ -16,7 +16,7 @@
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator, Iterable, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Generator, Optional, Tuple, TypeVar, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
