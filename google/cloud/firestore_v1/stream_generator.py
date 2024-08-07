@@ -14,21 +14,57 @@
 
 """Classes for iterating over stream results for the Google Cloud Firestore API.
 """
+from __future__ import annotations
 
 from collections import abc
+from typing import TYPE_CHECKING, Generator, Optional, TypeVar
+
+from google.cloud.firestore_v1.query_profile import (
+    ExplainMetrics,
+    QueryExplainError,
+)
+
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+
+T = TypeVar("T")
 
 
 class StreamGenerator(abc.Generator):
-    """Generator for the streamed results."""
+    """Generator for the streamed results.
 
-    def __init__(self, response_generator):
+    Args:
+        response_generator (Generator):
+            The inner generator that yields the returned document in the stream.
+        explain_options
+            (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+            Query profiling options for this stream request.
+    """
+
+    def __init__(
+        self,
+        response_generator: Generator[T],
+        explain_options: Optional[ExplainOptions] = None,
+    ):
         self._generator = response_generator
+        self._explain_options = explain_options
+        self._explain_metrics = None
 
     def __iter__(self):
-        return self._generator
+        return self
 
     def __next__(self):
-        return self._generator.__next__()
+        next_value, explain_metrics = self._generator.__next__()
+
+        if explain_metrics is not None:
+            self._explain_metrics = ExplainMetrics._from_pb(explain_metrics)
+
+            # Need to run the following iteration too, to ensure the length of
+            # the iteration isn't increased due to yielding explain_metrics.
+            return next(self)
+        else:
+            return next_value
 
     def send(self, value=None):
         return self._generator.send(value)
@@ -38,3 +74,43 @@ class StreamGenerator(abc.Generator):
 
     def close(self):
         return self._generator.close()
+
+    @property
+    def explain_options(self) -> ExplainOptions:
+        """Query profiling options for this stream request."""
+        return self._explain_options
+
+    @property
+    def explain_metrics(self) -> ExplainMetrics:
+        """
+        Get the metrics associated with the query execution.
+        Metrics are only available when explain_options is set on the query. If
+        ExplainOptions.analyze is False, only plan_summary is available. If it is
+        True, execution_stats is also available.
+        :rtype: :class:`~google.cloud.firestore_v1.query_profile.ExplainMetrics`
+        :returns: The metrics associated with the query execution.
+        :raises: :class:`~google.cloud.firestore_v1.query_profile.QueryExplainError`
+            if explain_metrics is not available on the query.
+        """
+        if self._explain_metrics is not None:
+            return self._explain_metrics
+        elif self._explain_options is None:
+            raise QueryExplainError("explain_options not set on query.")
+        elif self._explain_options.analyze is False:
+            # We need to run the query to get the explain_metrics. Since no
+            # query results are returned, it's ok to discard the returned value.
+            try:
+                next(self)
+            except StopIteration:
+                pass
+
+            if self._explain_metrics is None:
+                raise QueryExplainError(
+                    "Did not receive explain_metrics for this query, despite "
+                    "explain_options is set and analyze = False."
+                )
+            else:
+                return self._explain_metrics
+        raise QueryExplainError(
+            "explain_metrics not available until query is complete."
+        )

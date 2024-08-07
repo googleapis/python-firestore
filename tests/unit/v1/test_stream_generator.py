@@ -14,8 +14,10 @@
 
 import pytest
 
+from google.protobuf import struct_pb2
 
-def _make_stream_generator(iterable):
+
+def _make_stream_generator(iterable, explain_options=None):
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
     def _inner_generator():
@@ -24,13 +26,26 @@ def _make_stream_generator(iterable):
             if X:
                 yield X
 
-    return StreamGenerator(_inner_generator())
+    return StreamGenerator(_inner_generator(), explain_options)
+
+
+def test_stream_generator_constructor():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
+
+    explain_options = ExplainOptions(analyze=True)
+    inner_generator = object()
+    inst = StreamGenerator(inner_generator, explain_options)
+
+    assert inst._generator == inner_generator
+    assert inst._explain_options == explain_options
+    assert inst._explain_metrics is None
 
 
 def test_stream_generator_iter():
+    iterable = [(0, None), (1, None), (2, None)]
     expected_results = [0, 1, 2]
-    inst = _make_stream_generator(expected_results)
-
+    inst = _make_stream_generator(iterable)
     actual_results = []
     for result in inst:
         actual_results.append(result)
@@ -39,8 +54,9 @@ def test_stream_generator_iter():
 
 
 def test_stream_generator_next():
+    iterable = [(0, None), (1, None)]
     expected_results = [0, 1]
-    inst = _make_stream_generator(expected_results)
+    inst = _make_stream_generator(iterable)
 
     actual_results = []
     actual_results.append(next(inst))
@@ -53,8 +69,9 @@ def test_stream_generator_next():
 
 
 def test_stream_generator_send():
+    iterable = [(0, None), (1, None)]
     expected_results = [0, 1]
-    inst = _make_stream_generator(expected_results)
+    inst = _make_stream_generator(iterable)
 
     actual_results = []
     actual_results.append(next(inst))
@@ -82,3 +99,89 @@ def test_stream_generator_close():
     # Verifies that generator is closed.
     with pytest.raises(StopIteration):
         next(inst)
+
+
+def test_stream_generator_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    explain_options = ExplainOptions(analyze=True)
+    inst = _make_stream_generator([], explain_options)
+    assert inst.explain_options == explain_options
+
+
+def test_stream_generator_explain_metrics_explain_options_analyze_true():
+    import google.cloud.firestore_v1.query_profile as query_profile
+    import google.cloud.firestore_v1.types.query_profile as query_profile_pb2
+
+    iterator = [
+        (1, None),
+        (
+            None,
+            query_profile_pb2.ExplainMetrics(
+                plan_summary=query_profile_pb2.PlanSummary()
+            ),
+        ),
+        (2, None),
+    ]
+
+    explain_options = query_profile.ExplainOptions(analyze=True)
+    inst = _make_stream_generator(iterator, explain_options)
+
+    # Raise an exception if query isn't complete when explain_metrics is called.
+    with pytest.raises(
+        query_profile.QueryExplainError,
+        match="explain_metrics not available until query is complete.",
+    ):
+        inst.explain_metrics
+
+    list(inst)
+
+    assert isinstance(inst.explain_metrics, query_profile.ExplainMetrics)
+
+
+def test_stream_generator_explain_metrics_explain_options_analyze_false():
+    import google.cloud.firestore_v1.query_profile as query_profile
+    import google.cloud.firestore_v1.types.query_profile as query_profile_pb2
+
+    plan_summary = query_profile_pb2.PlanSummary(
+        indexes_used=struct_pb2.ListValue(values=[])
+    )
+    (
+        {
+            "indexes_used": {
+                "query_scope": "Collection",
+                "properties": "(foo ASC, **name** ASC)",
+            }
+        }
+    )
+
+    iterator = [
+        (None, query_profile_pb2.ExplainMetrics(plan_summary=plan_summary)),
+    ]
+
+    explain_options = query_profile.ExplainOptions(analyze=False)
+    inst = _make_stream_generator(iterator, explain_options)
+    assert isinstance(inst.explain_metrics, query_profile.ExplainMetrics)
+
+
+def test_stream_generator_explain_metrics_missing_explain_options_analyze_false():
+    import google.cloud.firestore_v1.query_profile as query_profile
+
+    explain_options = query_profile.ExplainOptions(analyze=False)
+    inst = _make_stream_generator([("1", None)], explain_options)
+    with pytest.raises(
+        query_profile.QueryExplainError, match="Did not receive explain_metrics"
+    ):
+        inst.explain_metrics
+
+
+def test_stream_generator_explain_metrics_no_explain_options():
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
+
+    inst = _make_stream_generator([])
+
+    with pytest.raises(
+        QueryExplainError,
+        match="explain_options not set on query.",
+    ):
+        inst.explain_metrics
