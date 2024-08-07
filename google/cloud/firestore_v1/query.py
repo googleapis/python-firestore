@@ -27,6 +27,7 @@ from google.api_core import retry as retries
 
 from google.cloud import firestore_v1
 from google.cloud.firestore_v1 import aggregation, transaction
+from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.base_document import (
     DocumentSnapshot,
 )
@@ -38,7 +39,7 @@ from google.cloud.firestore_v1.base_query import (
     _enum_from_direction,
     _query_response_to_snapshot,
 )
-from google.cloud.firestore_v1.stream_generator import QueryResultsList, StreamGenerator
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.vector_query import VectorQuery
 from google.cloud.firestore_v1.watch import Watch

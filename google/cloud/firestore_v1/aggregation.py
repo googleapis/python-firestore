@@ -30,7 +30,7 @@ from google.cloud.firestore_v1.base_aggregation import (
     BaseAggregationQuery,
     _query_response_to_result,
 )
-from google.cloud.firestore_v1.stream_generator import QueryResultsList
+from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 # Types needed only for Type Hints

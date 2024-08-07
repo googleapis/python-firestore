@@ -38,6 +38,7 @@ from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.types import (
     RunAggregationQueryResponse,
@@ -50,7 +51,6 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.stream_generator import (
-        QueryResultsList,
         StreamGenerator,
     )
 

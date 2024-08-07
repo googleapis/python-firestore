@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Generator, Optional, Tuple, TypeVar, Union
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
-from google.cloud.firestore_v1.stream_generator import QueryResultsList
+from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.base_query import (
     BaseQuery,
     _collection_group_query_response_to_snapshot,

@@ -27,7 +27,7 @@ from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1.stream_generator import QueryResultsList
+from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.watch import Watch
 
 if TYPE_CHECKING:  # pragma: NO COVER
