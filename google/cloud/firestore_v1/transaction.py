@@ -44,6 +44,7 @@ from google.cloud.firestore_v1.query import Query
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
     from google.cloud.firestore_v1.types import CommitResponse
 
 
@@ -176,7 +177,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         timeout: float = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[DocumentSnapshot, Any, None]:
+    ) -> StreamGenerator[DocumentSnapshot]:
         """Retrieve a document or a query result from the database.
 
         Args:
