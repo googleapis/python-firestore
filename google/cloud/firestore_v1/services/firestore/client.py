@@ -654,7 +654,7 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
             transport_init: Union[
                 Type[FirestoreTransport], Callable[..., FirestoreTransport]
             ] = (
-                type(self).get_transport_class(transport)
+                FirestoreClient.get_transport_class(transport)
                 if isinstance(transport, str) or transport is None
                 else cast(Callable[..., FirestoreTransport], transport)
             )
