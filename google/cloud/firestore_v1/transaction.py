@@ -15,8 +15,6 @@
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
 
 
-import random
-import time
 from typing import Any, Callable, Generator
 
 from google.api_core import exceptions, gapic_v1
@@ -31,9 +29,6 @@ from google.cloud.firestore_v1.base_transaction import (
     _CANT_COMMIT,
     _CANT_ROLLBACK,
     _EXCEED_ATTEMPTS_TEMPLATE,
-    _INITIAL_SLEEP,
-    _MAX_SLEEP,
-    _MULTIPLIER,
     _WRITE_READ_ONLY,
     MAX_ATTEMPTS,
     BaseTransaction,
@@ -41,7 +36,6 @@ from google.cloud.firestore_v1.base_transaction import (
 )
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.query import Query
-from google.cloud.firestore_v1.types import CommitResponse
 
 
 class Transaction(batch.WriteBatch, BaseTransaction):

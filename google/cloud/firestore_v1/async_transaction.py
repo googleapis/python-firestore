@@ -15,14 +15,12 @@
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
 
 
-import asyncio
-import random
 from typing import Any, AsyncGenerator, Callable, Coroutine
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry_async as retries
 
-from google.cloud.firestore_v1 import _helpers, async_batch, types
+from google.cloud.firestore_v1 import _helpers, async_batch
 from google.cloud.firestore_v1.async_document import (
     AsyncDocumentReference,
     DocumentSnapshot,
@@ -33,17 +31,11 @@ from google.cloud.firestore_v1.base_transaction import (
     _CANT_COMMIT,
     _CANT_ROLLBACK,
     _EXCEED_ATTEMPTS_TEMPLATE,
-    _INITIAL_SLEEP,
-    _MAX_SLEEP,
-    _MULTIPLIER,
     _WRITE_READ_ONLY,
     MAX_ATTEMPTS,
     BaseTransaction,
     _BaseTransactional,
 )
-
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.client import Client
 
 
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
