@@ -220,6 +220,33 @@ def test_vector_search_collection_with_filter(client, database):
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_vector_search_with_distance_parameters(client, database):
+    collection_id = "vector_search"
+    collection = client.collection(collection_id)
+
+    vector_query = collection.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=3,
+        distance_result_field="vector_distance",
+        distance_threshold=1.0,
+    )
+    returned = vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 2
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+    }
+    assert returned[1].to_dict() == {
+        "embedding": Vector([2.0, 2.0, 3.0]),
+        "color": "red",
+    }
+
+
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_vector_search_collection_group(client, database):
     # Documents and Indexs are a manual step from util/boostrap_vector_index.py
     collection_id = "vector_search"
