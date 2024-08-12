@@ -55,16 +55,13 @@ class StreamGenerator(abc.Generator):
         return self
 
     def __next__(self):
-        next_value, explain_metrics = self._generator.__next__()
-
-        if explain_metrics is not None:
-            self._explain_metrics = ExplainMetrics._from_pb(explain_metrics)
-
-            # Need to run the following iteration too, to ensure the length of
-            # the iteration isn't increased due to yielding explain_metrics.
-            return next(self)
-        else:
-            return next_value
+        try:
+            return self._generator.__next__()
+        except StopIteration as e:
+            # If explain_metrics is available, it would be returned.
+            if e.value:
+                self._explain_metrics = ExplainMetrics._from_pb(e.value)
+            raise
 
     def send(self, value=None):
         return self._generator.send(value)
