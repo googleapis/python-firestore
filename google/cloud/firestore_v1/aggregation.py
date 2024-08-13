@@ -162,7 +162,7 @@ class AggregationQuery(BaseAggregationQuery):
         Yields:
             Tuple[Optional[List[AggregationResult]], Optional[ExplainMetrics]]:
             The result of aggregations of this query.
-        
+
         Returns:
             ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
             The results of query profiling, if received from the service.

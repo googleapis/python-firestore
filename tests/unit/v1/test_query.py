@@ -20,7 +20,6 @@ import pytest
 from google.cloud.firestore_v1.base_client import DEFAULT_DATABASE
 from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
 from google.cloud.firestore_v1.query_results import QueryResultsList
-from google.cloud.firestore_v1.stream_generator import StreamGenerator
 from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT, make_client, make_query
 from tests.unit.v1.test_base_query import _make_cursor_pb, _make_query_response
 

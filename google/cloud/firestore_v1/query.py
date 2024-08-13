@@ -379,7 +379,7 @@ class Query(BaseQuery):
         Yields:
             Optional[DocumentSnapshot]:
             The next document that fulfills the query.
-        
+
         Returns:
             ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
             The results of query profiling, if received from the service.
@@ -427,7 +427,7 @@ class Query(BaseQuery):
             if snapshot is not None:
                 last_snapshot = snapshot
                 yield snapshot
-        
+
         return metrics
 
     def stream(
