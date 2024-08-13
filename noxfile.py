@@ -28,6 +28,7 @@ import warnings
 import nox
 
 FLAKE8_VERSION = "flake8==6.1.0"
+PYTYPE_VERSION = "pytype==2020.7.24"
 BLACK_VERSION = "black[jupyter]==23.7.0"
 ISORT_VERSION = "isort==5.11.0"
 LINT_PATHS = ["docs", "google", "tests", "noxfile.py", "setup.py"]
@@ -40,7 +41,7 @@ UNIT_TEST_STANDARD_DEPENDENCIES = [
     "asyncmock",
     "pytest",
     "pytest-cov",
-    "pytest-asyncio",
+    "pytest-asyncio==0.21.2",
 ]
 UNIT_TEST_EXTERNAL_DEPENDENCIES: List[str] = [
     "aiounittest",
@@ -59,7 +60,7 @@ SYSTEM_TEST_STANDARD_DEPENDENCIES: List[str] = [
     "google-cloud-testutils",
 ]
 SYSTEM_TEST_EXTERNAL_DEPENDENCIES: List[str] = [
-    "pytest-asyncio",
+    "pytest-asyncio==0.21.2",
     "six",
 ]
 SYSTEM_TEST_LOCAL_DEPENDENCIES: List[str] = []
