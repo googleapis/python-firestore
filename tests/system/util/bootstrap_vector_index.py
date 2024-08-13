@@ -126,7 +126,9 @@ def create_vector_documents(client, collection_id):
 
 def main():
     client_options = ClientOptions(api_endpoint=TARGET_HOSTNAME)
-    client = Client(project=PROJECT_ID, database=DATABASE_ID, client_options=client_options)
+    client = Client(
+        project=PROJECT_ID, database=DATABASE_ID, client_options=client_options
+    )
     create_vector_documents(client=client, collection_id=COLLECTION_ID)
     admin_client = FirestoreAdminClient(project=PROJECT_ID)
     admin_client.create_vector_index(
