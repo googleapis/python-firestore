@@ -86,6 +86,8 @@ class AggregationQuery(BaseAggregationQuery):
             QueryResultsList[AggregationResult]: The aggregation query results.
 
         """
+        explain_metrics: ExplainMetrics | None = None
+
         result = self.stream(
             transaction=transaction,
             retry=retry,
@@ -160,7 +162,13 @@ class AggregationQuery(BaseAggregationQuery):
         Yields:
             Tuple[Optional[List[AggregationResult]], Optional[ExplainMetrics]]:
             The result of aggregations of this query.
+        
+        Returns:
+            ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
+            The results of query profiling, if received from the service.
+
         """
+        metrics: ExplainMetrics | None = None
 
         response_iterator = self._get_stream_iterator(
             transaction,
@@ -185,11 +193,13 @@ class AggregationQuery(BaseAggregationQuery):
             if response is None:  # EOI
                 break
 
-            if response.explain_metrics:
-                yield None, response.explain_metrics
+            if metrics is None and response.explain_metrics:
+                metrics = response.explain_metrics
 
             result = _query_response_to_result(response)
-            yield result, None
+            yield result
+
+        return metrics
 
     def stream(
         self,

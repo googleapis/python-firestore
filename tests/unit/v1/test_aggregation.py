@@ -23,6 +23,9 @@ from google.cloud.firestore_v1.base_aggregation import (
     CountAggregation,
     SumAggregation,
 )
+from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
+from google.cloud.firestore_v1.query_results import QueryResultsList
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
 from tests.unit.v1._test_helpers import (
     make_aggregation_query,
     make_aggregation_query_response,
@@ -424,7 +427,7 @@ def _aggregation_query_get_helper(
 
     # Execute the query and check the response.
     returned = aggregation_query.get(**kwargs, explain_options=explain_options)
-    assert isinstance(returned, list)
+    assert isinstance(returned, QueryResultsList)
     assert len(returned) == 1
 
     for result in returned:
@@ -438,11 +441,12 @@ def _aggregation_query_get_helper(
     assert returned._explain_options == explain_options
     assert returned.explain_options == explain_options
 
-    if explain_options is not None:
-        assert isinstance(returned.explain_metrics, ExplainMetrics)
-    else:
-        with pytest.raises(QueryExplainError, match="explain_options not set on query"):
+    if explain_options is None:
+        with pytest.raises(QueryExplainError, match="explain_options not set"):
             returned.explain_metrics
+    else:
+        assert isinstance(returned.explain_metrics, ExplainMetrics)
+        assert returned.explain_metrics.execution_stats.results_returned == 1
 
     parent_path, _ = parent._parent_info()
     expected_request = {
@@ -536,7 +540,7 @@ def test_aggregation_query_get_transaction():
     )
 
 
-def test_aggregation_query_get_explain_options():
+def test_aggregation_query_get_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     _aggregation_query_get_helper(explain_options=ExplainOptions(analyze=True))
@@ -702,10 +706,10 @@ def _aggregation_query_stream_helper(
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     # Execute the query and check the response.
-    returned = aggregation_query.get(**kwargs, explain_options=explain_options)
-    assert isinstance(returned, list)
-    assert len(returned) == 1
+    returned = aggregation_query.stream(**kwargs, explain_options=explain_options)
+    assert isinstance(returned, StreamGenerator)
 
+    results = []
     for result in returned:
         for r in result:
             assert r.alias == aggregation_result.alias
@@ -713,6 +717,15 @@ def _aggregation_query_stream_helper(
             if read_time is not None:
                 result_datetime = _datetime_to_pb_timestamp(r.read_time)
                 assert result_datetime == read_time
+        results.append(result)
+    assert len(results) == 1
+
+    if explain_options is None:
+        with pytest.raises(QueryExplainError, match="explain_options not set"):
+            returned.explain_metrics
+    else:
+        assert isinstance(returned.explain_metrics, ExplainMetrics)
+        assert returned.explain_metrics.execution_stats.results_returned == 1
 
     parent_path, _ = parent._parent_info()
     expected_request = {
