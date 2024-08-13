@@ -18,6 +18,9 @@ import mock
 import pytest
 
 from google.cloud.firestore_v1.base_client import DEFAULT_DATABASE
+from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
+from google.cloud.firestore_v1.query_results import QueryResultsList
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
 from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT, make_client, make_query
 from tests.unit.v1.test_base_query import _make_cursor_pb, _make_query_response
 
@@ -71,12 +74,19 @@ def _query_get_helper(
     query = make_query(parent)
     returned = query.get(**kwargs, explain_options=explain_options)
 
-    assert isinstance(returned, list)
+    assert isinstance(returned, QueryResultsList)
     assert len(returned) == 1
 
     snapshot = returned[0]
     assert snapshot.reference._path, "dee" == "sleep"
     assert snapshot.to_dict() == data
+
+    if explain_options is None:
+        with pytest.raises(QueryExplainError, match="explain_options not set"):
+            returned.explain_metrics
+    else:
+        assert isinstance(returned.explain_metrics, ExplainMetrics)
+        assert returned.explain_metrics.execution_stats.results_returned == 1
 
     # Create expected request body.
     parent_path, _ = parent._parent_info()
@@ -346,7 +356,10 @@ def _query_stream_helper(
     _, expected_prefix = parent._parent_info()
     name = "{}/sleep".format(expected_prefix)
     data = {"snooze": 10}
-    explain_metrics = {"execution_stats": {"results_returned": 1}}
+    if explain_options is not None:
+        explain_metrics = {"execution_stats": {"results_returned": 1}}
+    else:
+        explain_metrics = None
     response_pb = _make_query_response(
         name=name, data=data, explain_metrics=explain_metrics
     )
@@ -364,6 +377,13 @@ def _query_stream_helper(
     snapshot = returned[0]
     assert snapshot.reference._path == ("dee", "sleep")
     assert snapshot.to_dict() == data
+
+    if explain_options is None:
+        with pytest.raises(QueryExplainError, match="explain_options not set"):
+            get_response.explain_metrics
+    else:
+        assert isinstance(get_response.explain_metrics, ExplainMetrics)
+        assert get_response.explain_metrics.execution_stats.results_returned == 1
 
     # Create expected request body.
     parent_path, _ = parent._parent_info()

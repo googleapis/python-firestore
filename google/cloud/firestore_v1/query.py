@@ -167,6 +167,8 @@ class Query(BaseQuery):
             QueryResultsList[DocumentSnapshot]: The documents in the collection
             that match this query.
         """
+        explain_metrics: ExplainMetrics | None = None
+
         is_limited_to_last = self._limit_to_last
 
         if self._limit_to_last:
@@ -375,9 +377,15 @@ class Query(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]:
+            Optional[DocumentSnapshot]:
             The next document that fulfills the query.
+        
+        Returns:
+            ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
+            The results of query profiling, if received from the service.
         """
+        metrics: ExplainMetrics | None = None
+
         response_iterator, expected_prefix = self._get_stream_iterator(
             transaction,
             retry,
@@ -405,8 +413,8 @@ class Query(BaseQuery):
             if response is None:  # EOI
                 break
 
-            if response.explain_metrics:
-                yield None, response.explain_metrics
+            if metrics is None and response.explain_metrics:
+                metrics = response.explain_metrics
 
             if self._all_descendants:
                 snapshot = _collection_group_query_response_to_snapshot(
@@ -418,7 +426,9 @@ class Query(BaseQuery):
                 )
             if snapshot is not None:
                 last_snapshot = snapshot
-                yield snapshot, None
+                yield snapshot
+        
+        return metrics
 
     def stream(
         self,
