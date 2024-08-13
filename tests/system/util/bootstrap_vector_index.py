@@ -14,6 +14,7 @@
 """A script to bootstrap vector data and vector index for system tests."""
 from google.cloud.client import ClientWithProject  # type: ignore
 
+from google.api_core.client_options import ClientOptions
 from google.cloud.firestore import Client
 from google.cloud.firestore_admin_v1.services.firestore_admin import (
     client as firestore_admin_client,
@@ -66,6 +67,21 @@ class FirestoreAdminClient(ClientWithProject):
                 query_scope=Index.QueryScope.COLLECTION,
                 fields=[
                     Index.IndexField(
+                        field_path="embedding",
+                        vector_config=Index.IndexField.VectorConfig(
+                            dimension=3, flat=Index.IndexField.VectorConfig.FlatIndex()
+                        ),
+                    ),
+                ],
+            ),
+        )
+
+        self._firestore_admin_api.create_index(
+            parent=parent,
+            index=Index(
+                query_scope=Index.QueryScope.COLLECTION,
+                fields=[
+                    Index.IndexField(
                         field_path="color",
                         order=Index.IndexField.Order.ASCENDING,
                     ),
@@ -103,13 +119,14 @@ def create_vector_documents(client, collection_id):
     document1 = client.document(collection_id, "doc1")
     document2 = client.document(collection_id, "doc2")
     document3 = client.document(collection_id, "doc3")
-    document1.create({"embedding": Vector([1.0, 2.0, 3.0]), "color": "red"})
-    document2.create({"embedding": Vector([2.0, 2.0, 3.0]), "color": "red"})
-    document3.create({"embedding": Vector([3.0, 4.0, 5.0]), "color": "yellow"})
+    document1.set({"embedding": Vector([1.0, 2.0, 3.0]), "color": "red"})
+    document2.set({"embedding": Vector([2.0, 2.0, 3.0]), "color": "red"})
+    document3.set({"embedding": Vector([3.0, 4.0, 5.0]), "color": "yellow"})
 
 
 def main():
-    client = Client(project=PROJECT_ID, database=DATABASE_ID)
+    client_options = ClientOptions(api_endpoint=TARGET_HOSTNAME)
+    client = Client(project=PROJECT_ID, database=DATABASE_ID, client_options=client_options)
     create_vector_documents(client=client, collection_id=COLLECTION_ID)
     admin_client = FirestoreAdminClient(project=PROJECT_ID)
     admin_client.create_vector_index(
