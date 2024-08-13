@@ -221,7 +221,7 @@ def test_vector_search_collection_with_filter(client, database):
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_vector_search_with_distance_parameters(client, database):
-    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
+    # Documents and Indexes are a manual step from util/boostrap_vector_index.py
     collection_id = "vector_search"
     collection = client.collection(collection_id)
 
@@ -251,7 +251,7 @@ def test_vector_search_with_distance_parameters(client, database):
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_vector_search_collection_group(client, database):
-    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
     collection_id = "vector_search"
     collection_group = client.collection_group(collection_id)
 
