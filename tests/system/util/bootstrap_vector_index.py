@@ -15,7 +15,6 @@
 from google.api_core.client_options import ClientOptions
 from google.cloud.client import ClientWithProject  # type: ignore
 
-from google.api_core.client_options import ClientOptions
 from google.cloud.firestore import Client
 from google.cloud.firestore_admin_v1.services.firestore_admin import (
     client as firestore_admin_client,
