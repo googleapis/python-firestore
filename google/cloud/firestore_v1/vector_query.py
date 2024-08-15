@@ -16,7 +16,7 @@
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator, Optional, Tuple, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generator, Optional, TypeVar, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
@@ -125,7 +125,7 @@ class VectorQuery(BaseVectorQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]]:
+    ) -> Generator[Optional[DocumentSnapshot], Any, Optional[ExplainMetrics]]:
         """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -196,7 +196,7 @@ class VectorQuery(BaseVectorQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> "StreamGenerator[DocumentSnapshot]":
+    ) -> StreamGenerator[DocumentSnapshot]:
         """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which

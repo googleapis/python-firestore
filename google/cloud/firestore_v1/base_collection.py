@@ -39,8 +39,6 @@ from google.cloud.firestore_v1.base_query import QueryType
 
 if TYPE_CHECKING:  # pragma: NO COVER
     # Types needed only for Type Hints
-    from firestore_v1.vector_query import VectorQuery
-
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.base_vector_query import (
@@ -52,6 +50,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.vector import Vector
+    from google.cloud.firestore_v1.vector_query import VectorQuery
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 

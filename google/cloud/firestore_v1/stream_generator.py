@@ -16,8 +16,8 @@
 """
 from __future__ import annotations
 
-from collections import abc
-from typing import TYPE_CHECKING, Generator, Optional, TypeVar
+from collections.abc import Generator
+from typing import TYPE_CHECKING, Any, List, Optional, TypeVar
 
 from google.cloud.firestore_v1.query_profile import (
     ExplainMetrics,
@@ -31,7 +31,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
 T = TypeVar("T")
 
 
-class StreamGenerator(abc.Generator):
+class StreamGenerator(Generator[T | List[T], Any, Optional[ExplainMetrics]]):
     """Generator for the streamed results.
 
     Args:
@@ -44,7 +44,9 @@ class StreamGenerator(abc.Generator):
 
     def __init__(
         self,
-        response_generator: Generator[T],
+        response_generator: Generator[
+            Optional[T | List[T]], Any, Optional[ExplainMetrics]
+        ],
         explain_options: Optional[ExplainOptions] = None,
     ):
         self._generator = response_generator
@@ -73,7 +75,7 @@ class StreamGenerator(abc.Generator):
         return self._generator.close()
 
     @property
-    def explain_options(self) -> ExplainOptions:
+    def explain_options(self) -> ExplainOptions | None:
         """Query profiling options for this stream request."""
         return self._explain_options
 

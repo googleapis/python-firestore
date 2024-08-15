@@ -11,7 +11,7 @@ from typing import List, Optional, TypeVar
 T = TypeVar("T")
 
 
-class QueryResultsList(list):
+class QueryResultsList(list[T]):
     """A list of received query results from the query call.
 
     This is a subclass of the built-in list. A new property `explain_metrics`
@@ -30,7 +30,7 @@ class QueryResultsList(list):
 
     def __init__(
         self,
-        docs: List[T],
+        docs: List[T | List[T] | None],
         explain_options: Optional[ExplainOptions] = None,
         explain_metrics: Optional[ExplainMetrics] = None,
     ):

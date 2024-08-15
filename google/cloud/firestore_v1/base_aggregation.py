@@ -66,7 +66,7 @@ class AggregationResult(object):
     :param value: The resulting read_time
     """
 
-    def __init__(self, alias: str, value: int, read_time=None):
+    def __init__(self, alias: str, value: int | float, read_time=None):
         self.alias = alias
         self.value = value
         self.read_time = read_time
@@ -273,12 +273,14 @@ class BaseAggregationQuery(ABC):
     def stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
+        retry: Union[
+            retries.Retry, None, gapic_v1.method._MethodDefault
+        ] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> (
-        StreamGenerator[List[AggregationResult], Any, None]
+        StreamGenerator[Optional[List[AggregationResult]]]
         | AsyncStreamGenerator[List[AggregationResult], Any, None]
     ):
         """Runs the aggregation query.

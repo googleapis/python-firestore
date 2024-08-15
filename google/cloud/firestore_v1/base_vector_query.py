@@ -19,7 +19,7 @@ from __future__ import annotations
 import abc
 from abc import ABC
 from enum import Enum
-from typing import TYPE_CHECKING, Iterable, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Generator, Iterable, Optional, Tuple, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
@@ -29,7 +29,7 @@ from google.cloud.firestore_v1.types import query
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
     from google.cloud.firestore_v1.vector import Vector
 
 
@@ -136,5 +136,5 @@ class BaseVectorQuery(ABC):
         timeout: float = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Iterable[DocumentSnapshot]:
+    ) -> Generator[Optional[DocumentSnapshot], Any, Optional[ExplainMetrics]]:
         """Reads the documents in the collection that match this query."""

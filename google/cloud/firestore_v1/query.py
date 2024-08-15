@@ -20,7 +20,7 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Callable, Generator, List, Optional, Tuple, Type
+from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Type
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
@@ -191,7 +191,7 @@ class Query(BaseQuery):
         )
         result_list = list(result)
         if is_limited_to_last:
-            result_list = reversed(result_list)
+            result_list = list(reversed(result_list))
 
         if explain_options is None:
             explain_metrics = None
@@ -223,7 +223,7 @@ class Query(BaseQuery):
             snapshots = _q.get()
 
             if snapshots:
-                last_document = snapshots[-1]
+                last_document = snapshots[-1]  # type: ignore
 
             num_returned += len(snapshots)
 
@@ -342,7 +342,7 @@ class Query(BaseQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Tuple[Optional[DocumentSnapshot], Optional[ExplainMetrics]]]:
+    ) -> Generator[Optional[DocumentSnapshot], Any, Optional[ExplainMetrics]]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -437,7 +437,7 @@ class Query(BaseQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> "StreamGenerator[DocumentSnapshot]":
+    ) -> StreamGenerator[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which

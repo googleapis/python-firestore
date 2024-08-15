@@ -20,7 +20,7 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Generator, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
@@ -36,7 +36,6 @@ from google.cloud.firestore_v1.stream_generator import StreamGenerator
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1 import transaction
-    from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainMetrics
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
@@ -132,10 +131,12 @@ class AggregationQuery(BaseAggregationQuery):
     def _make_stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
+        retry: Union[
+            retries.Retry, None, gapic_v1.method._MethodDefault
+        ] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Tuple[Optional[List[AggregationResult]], Optional[ExplainMetrics]]]:
+    ) -> Generator[Optional[List[AggregationResult]], Any, Optional[ExplainMetrics]]:
         """Internal method for stream(). Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -160,11 +161,11 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            Tuple[Optional[List[AggregationResult]], Optional[ExplainMetrics]]:
+            Optional[List[AggregationResult]]:
             The result of aggregations of this query.
 
         Returns:
-            ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
+            (Optional[google.cloud.firestore_v1.types.query_profile.ExplainMetrtics]):
             The results of query profiling, if received from the service.
 
         """
@@ -204,11 +205,13 @@ class AggregationQuery(BaseAggregationQuery):
     def stream(
         self,
         transaction: Optional["transaction.Transaction"] = None,
-        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
+        retry: Union[
+            retries.Retry, None, gapic_v1.method._MethodDefault
+        ] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> "StreamGenerator[DocumentSnapshot]":
+    ) -> StreamGenerator[Optional[List[AggregationResult]]]:
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -233,7 +236,8 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
+            `StreamGenerator[Optional[List[AggregationResult]]]`:
+            A generator of the query results.
         """
         inner_generator = self._make_stream(
             transaction=transaction,
