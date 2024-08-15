@@ -34,7 +34,7 @@ from google.cloud import firestore_v1 as firestore
 from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.vector import Vector
-from tests.system.test__helpers import (
+from test__helpers import (
     EMULATOR_CREDS,
     FIRESTORE_CREDS,
     FIRESTORE_EMULATOR,
@@ -294,6 +294,29 @@ def test_create_document_w_vector(client, cleanup, database):
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_vector_search_collection(client, database):
+    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
+    collection_id = "vector_search"
+    collection = client.collection(collection_id)
+
+    vector_query = collection.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=1,
+    )
+    returned = vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 1
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+    }
+
+
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_vector_search_collection_with_filter(client, database):
+    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
     collection_id = "vector_search"
     collection = client.collection(collection_id)
 
@@ -315,6 +338,29 @@ def test_vector_search_collection(client, database):
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_vector_search_collection_group(client, database):
+    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
+    collection_id = "vector_search"
+    collection_group = client.collection_group(collection_id)
+
+    vector_query = collection_group.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=1,
+    )
+    returned = vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 1
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+    }
+
+
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_vector_search_collection_group_with_filter(client, database):
+    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
     collection_id = "vector_search"
     collection_group = client.collection_group(collection_id)
 

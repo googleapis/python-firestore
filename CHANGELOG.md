@@ -5,6 +5,21 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.17.2](https://github.com/googleapis/python-firestore/compare/v2.17.1...v2.17.2) (2024-08-13)
+
+
+### Bug Fixes
+
+* Allow protobuf 5.x; require protobuf &gt;=3.20.2 ([#950](https://github.com/googleapis/python-firestore/issues/950)) ([6f86506](https://github.com/googleapis/python-firestore/commit/6f86506030ba02b8d9b3699cf9d66d6fa7df1e91))
+* Support async vector search from a collection ([#949](https://github.com/googleapis/python-firestore/issues/949)) ([6446e29](https://github.com/googleapis/python-firestore/commit/6446e294b83fe202c83e3da1a66b9981f8bbe66a))
+
+## [2.17.1](https://github.com/googleapis/python-firestore/compare/v2.17.0...v2.17.1) (2024-08-09)
+
+
+### Bug Fixes
+
+* Allow protobuf 5.x ([#919](https://github.com/googleapis/python-firestore/issues/919)) ([3a13bf9](https://github.com/googleapis/python-firestore/commit/3a13bf960cc1f463843b6372d2e5eb0ab4c2e75f))
+
 ## [2.17.0](https://github.com/googleapis/python-firestore/compare/v2.16.1...v2.17.0) (2024-07-12)
 
 
