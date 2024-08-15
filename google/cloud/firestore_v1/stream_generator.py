@@ -17,7 +17,7 @@
 from __future__ import annotations
 
 from collections.abc import Generator
-from typing import TYPE_CHECKING, Any, List, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, List, Optional, TypeVar, Union
 
 from google.cloud.firestore_v1.query_profile import (
     ExplainMetrics,
@@ -31,7 +31,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
 T = TypeVar("T")
 
 
-class StreamGenerator(Generator[T | List[T], Any, Optional[ExplainMetrics]]):
+class StreamGenerator(Generator[Union[T, List[T]], Any, Optional[ExplainMetrics]]):
     """Generator for the streamed results.
 
     Args:

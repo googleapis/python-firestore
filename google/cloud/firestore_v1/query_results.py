@@ -5,7 +5,7 @@ from google.cloud.firestore_v1.query_profile import (
 )
 
 
-from typing import List, Optional, TypeVar
+from typing import List, Optional, TypeVar, Union
 
 
 T = TypeVar("T")
@@ -30,7 +30,7 @@ class QueryResultsList(list[T]):
 
     def __init__(
         self,
-        docs: List[T | List[T] | None],
+        docs: List[Union[T, List[T], None]],
         explain_options: Optional[ExplainOptions] = None,
         explain_metrics: Optional[ExplainMetrics] = None,
     ):
