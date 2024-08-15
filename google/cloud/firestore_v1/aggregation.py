@@ -198,7 +198,11 @@ class AggregationQuery(BaseAggregationQuery):
                 metrics = response.explain_metrics
 
             result = _query_response_to_result(response)
-            yield result
+            if len(result) > 0 or metrics is None:
+                # When explain_options.analyze == False, the query isn't run
+                # but query profiling results are returned. In this case we
+                # do not yield an empty result.
+                yield result
 
         return metrics
 
