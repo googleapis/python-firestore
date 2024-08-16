@@ -506,6 +506,8 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_false(
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
     assert isinstance(results.explain_metrics, ExplainMetrics)
+    results_list = list(results)
+    assert len(results_list) == 0
 
     # Verify plan_summary.
     plan_summary = results.explain_metrics.plan_summary
@@ -1272,6 +1274,9 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
     assert isinstance(results.explain_metrics, ExplainMetrics)
+
+    results_list = list(results)
+    assert len(results_list) == 0
 
     # Verify plan_summary.
     plan_summary = results.explain_metrics.plan_summary

@@ -691,14 +691,20 @@ def _aggregation_query_stream_helper(
     aggregation_query = make_aggregation_query(query)
     aggregation_query.count(alias="all")
 
-    aggregation_result = AggregationResult(alias="total", value=5, read_time=read_time)
+    if explain_options is not None and explain_options.analyze is False:
+        results_list = []
+    else:
+        aggregation_result = AggregationResult(
+            alias="total", value=5, read_time=read_time
+        )
+        results_list = [aggregation_result]
 
     if explain_options is not None:
         explain_metrics = {"execution_stats": {"results_returned": 1}}
     else:
         explain_metrics = None
     response_pb = make_aggregation_query_response(
-        [aggregation_result],
+        results_list,
         read_time=read_time,
         explain_metrics=explain_metrics,
     )
@@ -718,7 +724,7 @@ def _aggregation_query_stream_helper(
                 result_datetime = _datetime_to_pb_timestamp(r.read_time)
                 assert result_datetime == read_time
         results.append(result)
-    assert len(results) == 1
+    assert len(results) == len(results_list)
 
     if explain_options is None:
         with pytest.raises(QueryExplainError, match="explain_options not set"):
@@ -756,10 +762,16 @@ def test_aggregation_query_stream_with_readtime():
     _aggregation_query_stream_helper(read_time=read_time)
 
 
-def test_aggregation_query_stream_w_explain_options():
+def test_aggregation_query_stream_w_explain_options_analyze_true():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     _aggregation_query_stream_helper(explain_options=ExplainOptions(analyze=True))
+
+
+def test_aggregation_query_stream_w_explain_options_analyze_false():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    _aggregation_query_stream_helper(explain_options=ExplainOptions(analyze=False))
 
 
 def test_aggregation_from_query():
