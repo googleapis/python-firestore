@@ -82,10 +82,11 @@ def _query_get_helper(
 
     if explain_options is None:
         with pytest.raises(QueryExplainError, match="explain_options not set"):
-            returned.explain_metrics
+            returned.get_explain_metrics()
     else:
-        assert isinstance(returned.explain_metrics, ExplainMetrics)
-        assert returned.explain_metrics.execution_stats.results_returned == 1
+        actual_explain_metrics = returned.get_explain_metrics()
+        assert isinstance(actual_explain_metrics, ExplainMetrics)
+        assert actual_explain_metrics.execution_stats.results_returned == 1
 
     # Create expected request body.
     parent_path, _ = parent._parent_info()
@@ -379,10 +380,11 @@ def _query_stream_helper(
 
     if explain_options is None:
         with pytest.raises(QueryExplainError, match="explain_options not set"):
-            get_response.explain_metrics
+            get_response.get_explain_metrics()
     else:
-        assert isinstance(get_response.explain_metrics, ExplainMetrics)
-        assert get_response.explain_metrics.execution_stats.results_returned == 1
+        explain_metrics = get_response.get_explain_metrics()
+        assert isinstance(explain_metrics, ExplainMetrics)
+        assert explain_metrics.execution_stats.results_returned == 1
 
     # Create expected request body.
     parent_path, _ = parent._parent_info()

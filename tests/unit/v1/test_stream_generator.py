@@ -152,27 +152,28 @@ def test_stream_generator_explain_metrics_explain_options_analyze_true():
     )
 
     explain_options = query_profile.ExplainOptions(analyze=True)
-    explain_metrics = query_profile_pb2.ExplainMetrics(
+    expected_explain_metrics = query_profile_pb2.ExplainMetrics(
         plan_summary=plan_summary,
         execution_stats=execution_stats,
     )
 
-    inst = _make_stream_generator(iterator, explain_options, explain_metrics)
+    inst = _make_stream_generator(iterator, explain_options, expected_explain_metrics)
 
     # Raise an exception if query isn't complete when explain_metrics is called.
     with pytest.raises(
         query_profile.QueryExplainError,
         match="explain_metrics not available until query is complete.",
     ):
-        inst.explain_metrics
+        inst.get_explain_metrics()
 
     list(inst)
 
-    assert isinstance(inst.explain_metrics, query_profile._ExplainAnalyzeMetrics)
-    assert inst.explain_metrics == query_profile.ExplainMetrics._from_pb(
-        explain_metrics
+    actual_explain_metrics = inst.get_explain_metrics()
+    assert isinstance(actual_explain_metrics, query_profile._ExplainAnalyzeMetrics)
+    assert actual_explain_metrics == query_profile.ExplainMetrics._from_pb(
+        expected_explain_metrics
     )
-    assert inst.explain_metrics.plan_summary.indexes_used == [
+    assert actual_explain_metrics.plan_summary.indexes_used == [
         {
             "indexes_used": {
                 "query_scope": "Collection",
@@ -180,17 +181,17 @@ def test_stream_generator_explain_metrics_explain_options_analyze_true():
             }
         }
     ]
-    assert inst.explain_metrics.execution_stats.results_returned == 1
-    duration = inst.explain_metrics.execution_stats.execution_duration.total_seconds()
+    assert actual_explain_metrics.execution_stats.results_returned == 1
+    duration = actual_explain_metrics.execution_stats.execution_duration.total_seconds()
     assert duration == 2
-    assert inst.explain_metrics.execution_stats.read_operations == 3
+    assert actual_explain_metrics.execution_stats.read_operations == 3
 
     expected_debug_stats = {
         "billing_details": "billing_details_results",
         "documents_scanned": "documents_scanned_results",
         "index_entries_scanned": "index_entries_scanned",
     }
-    assert inst.explain_metrics.execution_stats.debug_stats == expected_debug_stats
+    assert actual_explain_metrics.execution_stats.debug_stats == expected_debug_stats
 
 
 def test_stream_generator_explain_metrics_explain_options_analyze_false():
@@ -214,11 +215,14 @@ def test_stream_generator_explain_metrics_explain_options_analyze_false():
     }
     plan_summary = query_profile_pb2.PlanSummary()
     plan_summary.indexes_used.append(indexes_used_dict)
-    explain_metrics = query_profile_pb2.ExplainMetrics(plan_summary=plan_summary)
+    expected_explain_metrics = query_profile_pb2.ExplainMetrics(
+        plan_summary=plan_summary
+    )
 
-    inst = _make_stream_generator(iterator, explain_options, explain_metrics)
-    assert isinstance(inst.explain_metrics, query_profile.ExplainMetrics)
-    assert inst.explain_metrics.plan_summary.indexes_used == [
+    inst = _make_stream_generator(iterator, explain_options, expected_explain_metrics)
+    actual_explain_metrics = inst.get_explain_metrics()
+    assert isinstance(actual_explain_metrics, query_profile.ExplainMetrics)
+    assert actual_explain_metrics.plan_summary.indexes_used == [
         {
             "indexes_used": {
                 "query_scope": "Collection",
@@ -236,7 +240,7 @@ def test_stream_generator_explain_metrics_missing_explain_options_analyze_false(
     with pytest.raises(
         query_profile.QueryExplainError, match="Did not receive explain_metrics"
     ):
-        inst.explain_metrics
+        inst.get_explain_metrics()
 
 
 def test_stream_generator_explain_metrics_no_explain_options():
@@ -248,4 +252,4 @@ def test_stream_generator_explain_metrics_no_explain_options():
         QueryExplainError,
         match="explain_options not set on query.",
     ):
-        inst.explain_metrics
+        inst.get_explain_metrics()

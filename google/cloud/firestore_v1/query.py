@@ -196,7 +196,7 @@ class Query(BaseQuery):
         if explain_options is None:
             explain_metrics = None
         else:
-            explain_metrics = result.explain_metrics
+            explain_metrics = result.get_explain_metrics()
 
         return QueryResultsList(result_list, explain_options, explain_metrics)
 

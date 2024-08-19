@@ -53,11 +53,21 @@ class QueryResultsList(list):
         self._explain_metrics = explain_metrics
 
     @property
-    def explain_options(self):
+    def explain_options(self) -> Optional[ExplainOptions]:
+        """Query profiling options for getting these query results."""
         return self._explain_options
 
-    @property
-    def explain_metrics(self):
+    def get_explain_metrics(self) -> ExplainMetrics:
+        """
+        Get the metrics associated with the query execution.
+        Metrics are only available when explain_options is set on the query. If
+        ExplainOptions.analyze is False, only plan_summary is available. If it is
+        True, execution_stats is also available.
+        :rtype: :class:`~google.cloud.firestore_v1.query_profile.ExplainMetrics`
+        :returns: The metrics associated with the query execution.
+        :raises: :class:`~google.cloud.firestore_v1.query_profile.QueryExplainError`
+            if explain_metrics is not available on the query.
+        """
         if self._explain_options is None:
             raise QueryExplainError("explain_options not set on query.")
         else:

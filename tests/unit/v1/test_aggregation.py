@@ -443,10 +443,11 @@ def _aggregation_query_get_helper(
 
     if explain_options is None:
         with pytest.raises(QueryExplainError, match="explain_options not set"):
-            returned.explain_metrics
+            returned.get_explain_metrics()
     else:
-        assert isinstance(returned.explain_metrics, ExplainMetrics)
-        assert returned.explain_metrics.execution_stats.results_returned == 1
+        actual_explain_metrics = returned.get_explain_metrics()
+        assert isinstance(actual_explain_metrics, ExplainMetrics)
+        assert actual_explain_metrics.execution_stats.results_returned == 1
 
     parent_path, _ = parent._parent_info()
     expected_request = {
@@ -728,10 +729,11 @@ def _aggregation_query_stream_helper(
 
     if explain_options is None:
         with pytest.raises(QueryExplainError, match="explain_options not set"):
-            returned.explain_metrics
+            returned.get_explain_metrics()
     else:
-        assert isinstance(returned.explain_metrics, ExplainMetrics)
-        assert returned.explain_metrics.execution_stats.results_returned == 1
+        explain_metrics = returned.get_explain_metrics()
+        assert isinstance(explain_metrics, ExplainMetrics)
+        assert explain_metrics.execution_stats.results_returned == 1
 
     parent_path, _ = parent._parent_info()
     expected_request = {

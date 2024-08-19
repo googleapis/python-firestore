@@ -99,4 +99,4 @@ def test_query_results_list_explain_metrics_w_explain_options():
         explain_metrics=explain_metrics,
     )
 
-    assert snapshot_list.explain_metrics == explain_metrics
+    assert snapshot_list.get_explain_metrics() == explain_metrics

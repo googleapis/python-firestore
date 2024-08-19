@@ -433,7 +433,7 @@ def test_query_results_list_explain_metrics_w_explain_options():
         explain_metrics=explain_metrics,
     )
 
-    assert snapshot_list.explain_metrics == explain_metrics
+    assert snapshot_list.get_explain_metrics() == explain_metrics
 
 
 def test_query_results_list_explain_metrics_wo_explain_options():
@@ -442,7 +442,7 @@ def test_query_results_list_explain_metrics_wo_explain_options():
     snapshot_list = _make_query_results_list([])
 
     with pytest.raises(QueryExplainError):
-        snapshot_list.explain_metrics
+        snapshot_list.get_explain_metrics()
 
 
 def test__get_document_path():

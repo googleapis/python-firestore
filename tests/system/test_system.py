@@ -118,7 +118,7 @@ def test_collection_stream_or_get_w_no_explain_options(database, query_docs, met
         QueryExplainError,
         match="explain_options not set on query.",
     ):
-        results.explain_metrics
+        results.get_explain_metrics()
 
 
 @pytest.mark.skipif(
@@ -142,10 +142,10 @@ def test_collection_stream_or_get_w_explain_options_analyze_false(
     method_under_test = getattr(collection, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
-    assert isinstance(results.explain_metrics, ExplainMetrics)
-
-    # Verify plan_summary.
-    plan_summary = results.explain_metrics.plan_summary
+    # Verify explain_metrics and plan_summary.
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(__name__ ASC)"
@@ -156,7 +156,7 @@ def test_collection_stream_or_get_w_explain_options_analyze_false(
         QueryExplainError,
         match="execution_stats not available when explain_options.analyze=False",
     ):
-        results.explain_metrics.execution_stats
+        explain_metrics.execution_stats
 
 
 @pytest.mark.skipif(
@@ -188,21 +188,22 @@ def test_collection_stream_or_get_w_explain_options_analyze_true(
             QueryExplainError,
             match="explain_metrics not available until query is complete",
         ):
-            results.explain_metrics
+            results.get_explain_metrics()
 
     # Finish iterating results, and explain_metrics should be available.
     num_results = len(list(results))
-    assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # Verify plan_summary.
-    plan_summary = results.explain_metrics.plan_summary
+    # Verify explain_metrics and plan_summary.
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(__name__ ASC)"
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
 
     # Verify execution_stats.
-    execution_stats = results.explain_metrics.execution_stats
+    execution_stats = explain_metrics.execution_stats
     assert isinstance(execution_stats, ExecutionStats)
     assert execution_stats.results_returned == num_results
     assert execution_stats.read_operations == num_results
@@ -406,7 +407,7 @@ def test_vector_query_stream_or_get_w_no_explain_options(client, database, metho
         QueryExplainError,
         match="explain_options not set on query.",
     ):
-        results.explain_metrics
+        results.get_explain_metrics()
 
 
 @pytest.mark.skipif(
@@ -446,14 +447,15 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_true(
             QueryExplainError,
             match="explain_metrics not available until query is complete",
         ):
-            results.explain_metrics
+            results.get_explain_metrics()
 
     # Finish iterating results, and explain_metrics should be available.
     num_results = len(list(results))
-    assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # Verify plan_summary.
-    plan_summary = results.explain_metrics.plan_summary
+    # Verify explain_metrics and plan_summary.
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert (
@@ -463,7 +465,7 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_true(
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection group"
 
     # Verify execution_stats.
-    execution_stats = results.explain_metrics.execution_stats
+    execution_stats = explain_metrics.execution_stats
     assert isinstance(execution_stats, ExecutionStats)
     assert execution_stats.results_returned == num_results
     assert execution_stats.read_operations > 0
@@ -505,12 +507,13 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_false(
     method_under_test = getattr(vector_query, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
-    assert isinstance(results.explain_metrics, ExplainMetrics)
     results_list = list(results)
     assert len(results_list) == 0
 
-    # Verify plan_summary.
-    plan_summary = results.explain_metrics.plan_summary
+    # Verify explain_metrics and plan_summary.
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert (
@@ -524,7 +527,7 @@ def test_vector_query_stream_or_get_w_explain_options_analyze_false(
         QueryExplainError,
         match="execution_stats not available when explain_options.analyze=False",
     ):
-        results.explain_metrics.execution_stats
+        explain_metrics.execution_stats
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -1188,7 +1191,7 @@ def test_query_stream_or_get_w_no_explain_options(query_docs, database, method):
     # If no explain_option is passed, raise an exception if explain_metrics
     # is called
     with pytest.raises(QueryExplainError, match="explain_options not set on query"):
-        results.explain_metrics
+        results.get_explain_metrics()
 
 
 @pytest.mark.skipif(
@@ -1222,21 +1225,22 @@ def test_query_stream_or_get_w_explain_options_analyze_true(
             QueryExplainError,
             match="explain_metrics not available until query is complete",
         ):
-            results.explain_metrics
+            results.get_explain_metrics()
 
     # Finish iterating results, and explain_metrics should be available.
     num_results = len(list(results))
-    assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # Verify plan_summary.
-    plan_summary = results.explain_metrics.plan_summary
+    # Verify explain_metrics and plan_summary.
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
 
     # Verify execution_stats.
-    execution_stats = results.explain_metrics.execution_stats
+    execution_stats = explain_metrics.execution_stats
     assert isinstance(execution_stats, ExecutionStats)
     assert execution_stats.results_returned == num_results
     assert execution_stats.read_operations == num_results
@@ -1273,13 +1277,13 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
     method_under_test = getattr(query, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
-    assert isinstance(results.explain_metrics, ExplainMetrics)
-
     results_list = list(results)
     assert len(results_list) == 0
 
-    # Verify plan_summary.
-    plan_summary = results.explain_metrics.plan_summary
+    # Verify explain_metrics and plan_summary.
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
@@ -1290,7 +1294,7 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
         QueryExplainError,
         match="execution_stats not available when explain_options.analyze=False",
     ):
-        results.explain_metrics.execution_stats
+        explain_metrics.execution_stats
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -2688,7 +2692,7 @@ def test_aggregation_query_stream_or_get_w_no_explain_options(query, database, m
     # If no explain_option is passed, raise an exception if explain_metrics
     # is called
     with pytest.raises(QueryExplainError, match="explain_options not set on query"):
-        results.explain_metrics
+        results.get_explain_metrics()
 
 
 @pytest.mark.skipif(
@@ -2726,21 +2730,22 @@ def test_aggregation_query_stream_or_get_w_explain_options_analyze_true(
             QueryExplainError,
             match="explain_metrics not available until query is complete",
         ):
-            results.explain_metrics
+            results.get_explain_metrics()
 
     # Finish iterating results, and explain_metrics should be available.
     num_results = len(list(results))
-    assert isinstance(results.explain_metrics, ExplainMetrics)
 
-    # Verify plan_summary.
-    plan_summary = results.explain_metrics.plan_summary
+    # Verify explain_metrics and plan_summary.
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
     assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
 
     # Verify execution_stats.
-    execution_stats = results.explain_metrics.execution_stats
+    execution_stats = explain_metrics.execution_stats
     assert isinstance(execution_stats, ExecutionStats)
     assert execution_stats.results_returned == num_results
     assert execution_stats.read_operations == num_results
@@ -2781,10 +2786,10 @@ def test_aggregation_query_stream_or_get_w_explain_options_analyze_false(
     method_under_test = getattr(count_query, method)
     results = method_under_test(explain_options=ExplainOptions(analyze=False))
 
-    assert isinstance(results.explain_metrics, ExplainMetrics)
-
-    # Verify plan_summary.
-    plan_summary = results.explain_metrics.plan_summary
+    # Verify explain_metrics and plan_summary.
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
     assert len(plan_summary.indexes_used) > 0
     assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
@@ -2795,7 +2800,7 @@ def test_aggregation_query_stream_or_get_w_explain_options_analyze_false(
         QueryExplainError,
         match="execution_stats not available when explain_options.analyze=False",
     ):
-        results.explain_metrics.execution_stats
+        explain_metrics.execution_stats
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -3009,15 +3014,16 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
             with pytest.raises(
                 QueryExplainError, match="explain_options not set on query."
             ):
-                result_1.explain_metrics
+                result_1.get_explain_metrics()
 
             result_2 = query.get(
                 transaction=transaction,
                 explain_options=ExplainOptions(analyze=True),
             )
-            assert isinstance(result_2.explain_metrics, ExplainMetrics)
-            assert result_2.explain_metrics.plan_summary is not None
-            assert result_2.explain_metrics.execution_stats is not None
+            explain_metrics = result_2.get_explain_metrics()
+            assert isinstance(explain_metrics, ExplainMetrics)
+            assert explain_metrics.plan_summary is not None
+            assert explain_metrics.execution_stats is not None
 
             inner_fn_ran = True
 

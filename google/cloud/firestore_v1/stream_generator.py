@@ -73,8 +73,7 @@ class StreamGenerator(Generator[Any, Any, Optional[ExplainMetrics]]):
         """Query profiling options for this stream request."""
         return self._explain_options
 
-    @property
-    def explain_metrics(self) -> ExplainMetrics:
+    def get_explain_metrics(self) -> ExplainMetrics:
         """
         Get the metrics associated with the query execution.
         Metrics are only available when explain_options is set on the query. If
