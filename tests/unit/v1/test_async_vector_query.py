@@ -18,7 +18,12 @@ from google.cloud.firestore_v1._helpers import encode_value, make_retry_timeout_
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.types.query import StructuredQuery
 from google.cloud.firestore_v1.vector import Vector
-from tests.unit.v1._test_helpers import make_async_client, make_async_query, make_query
+from tests.unit.v1._test_helpers import (
+    make_async_client,
+    make_async_query,
+    make_async_vector_query,
+    make_query,
+)
 from tests.unit.v1.test__helpers import AsyncIter, AsyncMock
 from tests.unit.v1.test_base_query import _make_query_response
 
@@ -53,6 +58,34 @@ def _expected_pb(
         distance_threshold=distance_threshold,
     )
     return expected_pb
+
+
+def test_async_vector_query_int_threshold_constructor_to_pb():
+    client = make_async_client()
+    parent = client.collection("dee")
+    query = make_async_query(parent)
+    vector_query = make_async_vector_query(query)
+
+    assert vector_query._nested_query == query
+    assert vector_query._client == query._parent._client
+
+    vector_query.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=5,
+        distance_threshold=5,
+    )
+
+    expected_pb = query._to_protobuf()
+    expected_pb.find_nearest = StructuredQuery.FindNearest(
+        vector_field=StructuredQuery.FieldReference(field_path="embedding"),
+        query_vector=encode_value(Vector([1.0, 2.0, 3.0]).to_map_value()),
+        distance_measure=StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
+        limit=5,
+        distance_threshold=5.0,
+    )
+    assert vector_query._to_protobuf() == expected_pb
 
 
 @pytest.mark.parametrize(

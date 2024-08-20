@@ -252,7 +252,7 @@ class Query(BaseQuery):
         limit: int,
         distance_measure: DistanceMeasure,
         distance_result_field: Optional[str] = None,
-        distance_threshold: Optional[float] = None,
+        distance_threshold: Optional[Union[int, float]] = None,
     ) -> Type["firestore_v1.vector_query.VectorQuery"]:
         """
         Finds the closest vector embeddings to the given query vector.
@@ -266,7 +266,7 @@ class Query(BaseQuery):
             distance_measure (:class:`DistanceMeasure`): The Distance Measure to use.
             distance_result_field (Optional[str]):
                 Name of the field to output the result of the vector distance calculation
-            distance_threshold (Optional[float]):
+            distance_threshold (Optional[Union[int, float]]):
                 A threshold for which no less similar documents will be returned.
 
 

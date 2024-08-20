@@ -70,6 +70,34 @@ def test_vector_query_constructor_to_pb(distance_measure, expected_distance):
     assert vector_query._to_protobuf() == expected_pb
 
 
+def test_vector_query_int_threshold_constructor_to_pb():
+    client = make_client()
+    parent = client.collection("dee")
+    query = make_query(parent)
+    vector_query = make_vector_query(query)
+
+    assert vector_query._nested_query == query
+    assert vector_query._client == query._parent._client
+
+    vector_query.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=5,
+        distance_threshold=5,
+    )
+
+    expected_pb = query._to_protobuf()
+    expected_pb.find_nearest = StructuredQuery.FindNearest(
+        vector_field=StructuredQuery.FieldReference(field_path="embedding"),
+        query_vector=encode_value(Vector([1.0, 2.0, 3.0]).to_map_value()),
+        distance_measure=StructuredQuery.FindNearest.DistanceMeasure.EUCLIDEAN,
+        limit=5,
+        distance_threshold=5.0,
+    )
+    assert vector_query._to_protobuf() == expected_pb
+
+
 def test_vector_query_invalid_distance():
     client = make_client()
     parent = client.collection("dee")
