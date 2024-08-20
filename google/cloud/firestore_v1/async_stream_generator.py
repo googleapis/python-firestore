@@ -15,21 +15,53 @@
 """Classes for iterating over stream results async for the Google Cloud
 Firestore API.
 """
+from __future__ import annotations
 
-from collections import abc
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Optional
+
+from google.cloud.firestore_v1.query_profile import (
+    ExplainMetrics,
+    QueryExplainError,
+)
+import google.cloud.firestore_v1.types.query_profile as query_profile_pb
+
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
-class AsyncStreamGenerator(abc.AsyncGenerator):
-    """Asynchronous generator for the streamed results."""
+class AsyncStreamGenerator(AsyncGenerator[Any, Any]):
+    """Asynchronous Generator for the streamed results.
 
-    def __init__(self, response_generator):
+    Args:
+        response_generator (AsyncGenerator):
+            The inner generator that yields the returned results in the stream.
+        explain_options
+            (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+            Query profiling options for this stream request.
+    """
+
+    def __init__(
+        self,
+        response_generator: AsyncGenerator[Any, Any],
+        explain_options: Optional[ExplainOptions] = None,
+    ):
         self._generator = response_generator
+        self._explain_options = explain_options
+        self._explain_metrics = None
 
     def __aiter__(self):
-        return self._generator
+        return self
 
-    def __anext__(self):
-        return self._generator.__anext__()
+    async def __anext__(self):
+        try:
+            next_value = await self._generator.__anext__()
+            if type(next_value) is query_profile_pb.ExplainMetrics:
+                self._explain_metrics = ExplainMetrics._from_pb(next_value)
+                raise StopAsyncIteration
+            else:
+                return next_value
+        except StopAsyncIteration:
+            raise
 
     def asend(self, value=None):
         return self._generator.asend(value)
@@ -39,3 +71,42 @@ class AsyncStreamGenerator(abc.AsyncGenerator):
 
     def aclose(self):
         return self._generator.aclose()
+
+    @property
+    def explain_options(self) -> ExplainOptions | None:
+        """Query profiling options for this stream request."""
+        return self._explain_options
+
+    async def get_explain_metrics(self) -> ExplainMetrics:
+        """
+        Get the metrics associated with the query execution.
+        Metrics are only available when explain_options is set on the query. If
+        ExplainOptions.analyze is False, only plan_summary is available. If it is
+        True, execution_stats is also available.
+        :rtype: :class:`~google.cloud.firestore_v1.query_profile.ExplainMetrics`
+        :returns: The metrics associated with the query execution.
+        :raises: :class:`~google.cloud.firestore_v1.query_profile.QueryExplainError`
+            if explain_metrics is not available on the query.
+        """
+        if self._explain_metrics is not None:
+            return self._explain_metrics
+        elif self._explain_options is None:
+            raise QueryExplainError("explain_options not set on query.")
+        elif self._explain_options.analyze is False:
+            # We need to run the query to get the explain_metrics. Since no
+            # query results are returned, it's ok to discard the returned value.
+            try:
+                await self.__anext__()
+            except StopAsyncIteration:
+                pass
+
+            if self._explain_metrics is None:
+                raise QueryExplainError(
+                    "Did not receive explain_metrics for this query, despite "
+                    "explain_options is set and analyze = False."
+                )
+            else:
+                return self._explain_metrics
+        raise QueryExplainError(
+            "explain_metrics not available until query is complete."
+        )
