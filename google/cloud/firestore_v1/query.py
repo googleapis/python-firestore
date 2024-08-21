@@ -48,6 +48,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
+    import google.cloud.firestore_v1.types.query_profile as query_profile_pb
 
 
 class Query(BaseQuery):
@@ -342,7 +343,9 @@ class Query(BaseQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Optional[DocumentSnapshot], Any, Optional[ExplainMetrics]]:
+    ) -> Generator[
+        Optional[DocumentSnapshot], Any, Optional[query_profile_pb.ExplainMetrics]
+    ]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -384,7 +387,7 @@ class Query(BaseQuery):
             ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
             The results of query profiling, if received from the service.
         """
-        metrics: ExplainMetrics | None = None
+        metrics: query_profile_pb.ExplainMetrics | None = None
 
         response_iterator, expected_prefix = self._get_stream_iterator(
             transaction,
