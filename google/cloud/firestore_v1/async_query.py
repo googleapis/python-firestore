@@ -20,7 +20,7 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, AsyncGenerator, List, Optional, Type
+from typing import TYPE_CHECKING, AsyncGenerator, List, Optional, Type, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
