@@ -437,7 +437,7 @@ class AsyncQuery(BaseQuery):
 
         Returns:
             `AsyncGenerator[[async_document.DocumentSnapshot | query_profile_pb.ExplainMetrics], Any]`:
-            A generator of the queryresults.
+            An asynchronous generator of the queryresults.
         """
         inner_generator = self._make_stream(
             transaction=transaction,
