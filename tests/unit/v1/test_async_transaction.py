@@ -314,7 +314,7 @@ async def test_asynctransaction_get_all_w_retry_timeout():
     await _get_all_helper(retry=retry, timeout=timeout)
 
 
-async def _get_w_document_ref_helper(retry=None, timeout=None):
+async def _get_w_document_ref_helper(retry=None, timeout=None, explain_options=None):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
@@ -323,7 +323,7 @@ async def _get_w_document_ref_helper(retry=None, timeout=None):
     ref = AsyncDocumentReference("documents", "doc-id")
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
-    result = await transaction.get(ref, **kwargs)
+    result = await transaction.get(ref, **kwargs, explain_options=explain_options)
 
     client.get_all.assert_called_once_with([ref], transaction=transaction, **kwargs)
     assert result is client.get_all.return_value
@@ -343,7 +343,19 @@ async def test_asynctransaction_get_w_document_ref_w_retry_timeout():
     await _get_w_document_ref_helper(retry=retry, timeout=timeout)
 
 
-async def _get_w_query_helper(retry=None, timeout=None):
+@pytest.mark.asyncio
+async def test_transaction_get_w_document_ref_w_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    with pytest.warns(UserWarning) as warned:
+        await _get_w_document_ref_helper(
+            explain_options=ExplainOptions(analyze=True),
+        )
+    assert len(warned) == 1
+    assert "not supported in transanction with document" in str(warned[0])
+
+
+async def _get_w_query_helper(retry=None, timeout=None, explain_options=None):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.async_query import AsyncQuery
 
@@ -356,8 +368,11 @@ async def _get_w_query_helper(retry=None, timeout=None):
     result = await transaction.get(
         query,
         **kwargs,
+        explain_options=explain_options,
     )
 
+    if explain_options:
+        kwargs["explain_options"] = explain_options
     query.stream.assert_called_once_with(
         transaction=transaction,
         **kwargs,
@@ -373,6 +388,13 @@ async def test_asynctransaction_get_w_query():
 @pytest.mark.asyncio
 async def test_asynctransaction_get_w_query_w_retry_timeout():
     await _get_w_query_helper()
+
+
+@pytest.mark.asyncio
+async def test_transaction_get_w_query_w_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    await _get_w_query_helper(explain_options=ExplainOptions(analyze=True))
 
 
 @pytest.mark.asyncio

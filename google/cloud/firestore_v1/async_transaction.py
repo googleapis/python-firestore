@@ -13,9 +13,10 @@
 # limitations under the License.
 
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
+from __future__ import annotations
 
-
-from typing import Any, AsyncGenerator, Callable, Coroutine
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Callable, Coroutine, Optional
+import warnings
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry_async as retries
@@ -36,6 +37,10 @@ from google.cloud.firestore_v1.base_transaction import (
     BaseTransaction,
     _BaseTransactional,
 )
+
+# Types needed only for Type Hints
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
@@ -172,6 +177,8 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         ref_or_query,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
         timeout: float = None,
+        *,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> AsyncGenerator[DocumentSnapshot, Any]:
         """
         Retrieve a document or a query result from the database.
@@ -182,6 +189,10 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
@@ -189,10 +200,18 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         """
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         if isinstance(ref_or_query, AsyncDocumentReference):
+            if explain_options is not None:
+                warnings.warn(
+                    "explain_options not supported in transanction with "
+                    "document references and will be ignored. To use "
+                    "explain_options, use transaction with query instead."
+                )
             return await self._client.get_all(
                 [ref_or_query], transaction=self, **kwargs
             )
         elif isinstance(ref_or_query, AsyncQuery):
+            if explain_options is not None:
+                kwargs["explain_options"] = explain_options
             return await ref_or_query.stream(transaction=self, **kwargs)
         else:
             raise ValueError(
