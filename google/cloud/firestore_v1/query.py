@@ -20,7 +20,7 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Type, Union
+from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Type
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
@@ -251,8 +251,9 @@ class Query(BaseQuery):
         query_vector: Vector,
         limit: int,
         distance_measure: DistanceMeasure,
+        *,
         distance_result_field: Optional[str] = None,
-        distance_threshold: Optional[Union[int, float]] = None,
+        distance_threshold: Optional[float] = None,
     ) -> Type["firestore_v1.vector_query.VectorQuery"]:
         """
         Finds the closest vector embeddings to the given query vector.
@@ -265,8 +266,9 @@ class Query(BaseQuery):
             limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
             distance_measure (:class:`DistanceMeasure`): The Distance Measure to use.
             distance_result_field (Optional[str]):
-                Name of the field to output the result of the vector distance calculation
-            distance_threshold (Optional[Union[int, float]]):
+                Name of the field to output the result of the vector distance
+                calculation. If unset then the distance will not be returned.
+            distance_threshold (Optional[float]):
                 A threshold for which no less similar documents will be returned.
 
 

@@ -982,8 +982,9 @@ class BaseQuery(object):
         query_vector: Vector,
         limit: int,
         distance_measure: DistanceMeasure,
+        *,
         distance_result_field: Optional[str] = None,
-        distance_threshold: Optional[Union[int, float]] = None,
+        distance_threshold: Optional[float] = None,
     ) -> BaseVectorQuery:
         raise NotImplementedError
 

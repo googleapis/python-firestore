@@ -46,7 +46,7 @@ class BaseVectorQuery(ABC):
         self._limit: Optional[int] = None
         self._distance_measure: Optional[DistanceMeasure] = None
         self._distance_result_field: Optional[str] = None
-        self._distance_threshold: Optional[Union[int, float]] = None
+        self._distance_threshold: Optional[float] = None
 
     @property
     def _client(self):
@@ -73,7 +73,7 @@ class BaseVectorQuery(ABC):
 
         # Coerce ints to floats as required by the protobuf.
         distance_threshold_proto = None
-        if self._distance_threshold:
+        if self._distance_threshold is not None:
             distance_threshold_proto = float(self._distance_threshold)
 
         pb = self._nested_query._to_protobuf()
@@ -120,8 +120,9 @@ class BaseVectorQuery(ABC):
         query_vector: Vector,
         limit: int,
         distance_measure: DistanceMeasure,
+        *,
         distance_result_field: Optional[str] = None,
-        distance_threshold: Optional[Union[int, float]] = None,
+        distance_threshold: Optional[float] = None,
     ):
         """Finds the closest vector embeddings to the given query vector."""
         self._vector_field = vector_field
