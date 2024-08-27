@@ -223,7 +223,7 @@ class Query(BaseQuery):
             snapshots = _q.get()
 
             if snapshots:
-                last_document = snapshots[-1]  # type: ignore
+                last_document = snapshots[-1]
 
             num_returned += len(snapshots)
 
@@ -353,7 +353,7 @@ class Query(BaseQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Optional[DocumentSnapshot], Any, Optional[ExplainMetrics]]:
+    ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -388,7 +388,7 @@ class Query(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            Optional[DocumentSnapshot]:
+            DocumentSnapshot:
             The next document that fulfills the query.
 
         Returns:

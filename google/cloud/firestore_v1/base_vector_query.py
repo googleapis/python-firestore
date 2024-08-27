@@ -150,5 +150,5 @@ class BaseVectorQuery(ABC):
         timeout: float = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Optional[DocumentSnapshot], Any, Optional[ExplainMetrics]]:
+    ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
         """Reads the documents in the collection that match this query."""

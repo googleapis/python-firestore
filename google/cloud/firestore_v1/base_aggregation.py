@@ -27,7 +27,7 @@ from abc import ABC
 from typing import (
     TYPE_CHECKING,
     Any,
-    Coroutine,
+    Awaitable,
     List,
     Optional,
     Tuple,
@@ -66,7 +66,7 @@ class AggregationResult(object):
     :param value: The resulting read_time
     """
 
-    def __init__(self, alias: str, value: int | float, read_time=None):
+    def __init__(self, alias: str, value: float, read_time=None):
         self.alias = alias
         self.value = value
         self.read_time = read_time
@@ -241,7 +241,7 @@ class BaseAggregationQuery(ABC):
         explain_options: Optional[ExplainOptions] = None,
     ) -> (
         QueryResultsList[AggregationResult]
-        | Coroutine[Any, Any, List[AggregationResult]]
+        | Awaitable[Any, Any, List[AggregationResult]]
     ):
         """Runs the aggregation query.
 
@@ -264,7 +264,7 @@ class BaseAggregationQuery(ABC):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            QueryResultsList[AggregationResult] | Coroutine[Any, Any, List[AggregationResult]]:
+            QueryResultsList[AggregationResult] | Awaitable[Any, Any, List[AggregationResult]]:
                 The aggregation query results.
 
         """
@@ -281,7 +281,7 @@ class BaseAggregationQuery(ABC):
         explain_options: Optional[ExplainOptions] = None,
     ) -> (
         StreamGenerator[Optional[List[AggregationResult]]]
-        | AsyncStreamGenerator[List[AggregationResult], Any, None]
+        | AsyncStreamGenerator[List[AggregationResult], Any]
     ):
         """Runs the aggregation query.
 

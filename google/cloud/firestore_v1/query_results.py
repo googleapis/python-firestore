@@ -19,10 +19,7 @@ from google.cloud.firestore_v1.query_profile import (
 )
 
 
-from typing import List, Optional, TypeVar
-
-
-T = TypeVar("T")
+from typing import List, Optional
 
 
 class QueryResultsList(list):
@@ -32,7 +29,7 @@ class QueryResultsList(list):
     is added to return the query profile results.
 
     Args:
-        docs (list[T]):
+        docs (list):
             The list of query results.
         explain_options
             (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):

@@ -24,7 +24,6 @@ from typing import (
     NoReturn,
     Optional,
     Tuple,
-    TypeVar,
     Union,
 )
 
@@ -37,9 +36,6 @@ from google.cloud.firestore_v1.types import common
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.types import Document, firestore, write
-
-
-T = TypeVar("T")
 
 
 class BaseDocumentReference(object):
