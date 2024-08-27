@@ -217,7 +217,7 @@ class AggregationQuery(BaseAggregationQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> StreamGenerator[Optional[List[AggregationResult]]]:
+    ) -> StreamGenerator[List[AggregationResult]]:
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -242,7 +242,7 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            `StreamGenerator[Optional[List[AggregationResult]]]`:
+            `StreamGenerator[List[AggregationResult]]`:
             A generator of the query results.
         """
         inner_generator = self._make_stream(

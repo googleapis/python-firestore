@@ -280,7 +280,7 @@ class BaseAggregationQuery(ABC):
         *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> (
-        StreamGenerator[Optional[List[AggregationResult]]]
+        StreamGenerator[List[AggregationResult]]
         | AsyncStreamGenerator[List[AggregationResult], Any]
     ):
         """Runs the aggregation query.
