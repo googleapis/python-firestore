@@ -79,6 +79,58 @@ def _get_credentials_and_project():
     return credentials, project
 
 
+def _verify_explain_metrics_analyze_true(explain_metrics, num_results):
+    from google.cloud.firestore_v1.query_profile import (
+        ExecutionStats,
+        ExplainMetrics,
+        PlanSummary,
+    )
+
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats.
+    execution_stats = explain_metrics.execution_stats
+    assert isinstance(execution_stats, ExecutionStats)
+    assert execution_stats.results_returned == num_results
+    assert execution_stats.read_operations == num_results
+    duration = execution_stats.execution_duration.total_seconds()
+    assert duration > 0
+    assert duration < 1  # we expect a number closer to 0.05
+    assert isinstance(execution_stats.debug_stats, dict)
+    assert "billing_details" in execution_stats.debug_stats
+    assert "documents_scanned" in execution_stats.debug_stats
+    assert "index_entries_scanned" in execution_stats.debug_stats
+    assert len(execution_stats.debug_stats) > 0
+
+
+def _verify_explain_metrics_analyze_false(explain_metrics):
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainMetrics,
+        PlanSummary,
+        QueryExplainError,
+    )
+
+    # Verify explain_metrics and plan_summary.
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats isn't available.
+    with pytest.raises(
+        QueryExplainError,
+        match="execution_stats not available when explain_options.analyze=False",
+    ):
+        explain_metrics.execution_stats
+
+
 @pytest.fixture(scope="session")
 def database(request):
     return request.param
@@ -588,7 +640,6 @@ async def test_vector_query_stream_or_get_w_explain_options_analyze_false(
         explain_metrics = results.get_explain_metrics()
 
     # Verify explain_metrics and plan_summary.
-    # explain_metrics = results.get_explain_metrics()
     assert isinstance(explain_metrics, ExplainMetrics)
     plan_summary = explain_metrics.plan_summary
     assert isinstance(plan_summary, PlanSummary)
@@ -1098,10 +1149,7 @@ async def test_query_stream_or_get_w_explain_options_analyze_true(
     query_docs, database, method
 ):
     from google.cloud.firestore_v1.query_profile import (
-        ExecutionStats,
-        ExplainMetrics,
         ExplainOptions,
-        PlanSummary,
         QueryExplainError,
     )
 
@@ -1133,28 +1181,8 @@ async def test_query_stream_or_get_w_explain_options_analyze_true(
         results_list = list(results)
         explain_metrics = results.get_explain_metrics()
 
-    # Verify explain_metrics and plan_summary.
     num_results = len(results_list)
-    assert isinstance(explain_metrics, ExplainMetrics)
-    plan_summary = explain_metrics.plan_summary
-    assert isinstance(plan_summary, PlanSummary)
-    assert len(plan_summary.indexes_used) > 0
-    assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
-    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
-
-    # Verify execution_stats.
-    execution_stats = explain_metrics.execution_stats
-    assert isinstance(execution_stats, ExecutionStats)
-    assert execution_stats.results_returned == num_results
-    assert execution_stats.read_operations == num_results
-    duration = execution_stats.execution_duration.total_seconds()
-    assert duration > 0
-    assert duration < 1  # we expect a number closer to 0.05
-    assert isinstance(execution_stats.debug_stats, dict)
-    assert "billing_details" in execution_stats.debug_stats
-    assert "documents_scanned" in execution_stats.debug_stats
-    assert "index_entries_scanned" in execution_stats.debug_stats
-    assert len(execution_stats.debug_stats) > 0
+    _verify_explain_metrics_analyze_true(explain_metrics, num_results)
 
 
 @pytest.mark.skipif(
@@ -1165,12 +1193,7 @@ async def test_query_stream_or_get_w_explain_options_analyze_true(
 async def test_query_stream_or_get_w_explain_options_analyze_false(
     query_docs, database, method
 ):
-    from google.cloud.firestore_v1.query_profile import (
-        ExplainMetrics,
-        ExplainOptions,
-        PlanSummary,
-        QueryExplainError,
-    )
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     collection, _, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1198,21 +1221,7 @@ async def test_query_stream_or_get_w_explain_options_analyze_false(
     else:
         explain_metrics = results.get_explain_metrics()
 
-    # Verify explain_metrics and plan_summary.
-    # explain_metrics = results.get_explain_metrics()
-    assert isinstance(explain_metrics, ExplainMetrics)
-    plan_summary = explain_metrics.plan_summary
-    assert isinstance(plan_summary, PlanSummary)
-    assert len(plan_summary.indexes_used) > 0
-    assert plan_summary.indexes_used[0]["properties"] == "(a ASC, __name__ ASC)"
-    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
-
-    # Verify execution_stats isn't available.
-    with pytest.raises(
-        QueryExplainError,
-        match="execution_stats not available when explain_options.analyze=False",
-    ):
-        explain_metrics.execution_stats
+    _verify_explain_metrics_analyze_false(explain_metrics)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -2440,3 +2449,115 @@ async def test_or_query_in_transaction(client, cleanup, database):
     assert (
         count == 2
     )  # assert only 2 results, the third one was rolledback and not created
+
+
+async def _make_transaction_query(client, cleanup):
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
+    doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
+    for doc_ref in doc_refs:
+        cleanup(doc_ref.delete)
+    await doc_refs[0].create({"a": 1, "b": 2})
+    await doc_refs[1].create({"a": 1, "b": 1})
+
+    collection = client.collection(collection_id)
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    return query
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_query_in_transaction_with_no_explain_options(client, cleanup, database):
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
+
+    query = await _make_transaction_query(client, cleanup)
+
+    transaction = client.transaction()
+
+    # should work when transaction is initiated through transactional decorator
+    @firestore.async_transactional
+    async def in_transaction(transaction):
+        global inner_fn_ran
+
+        # When no explain_options value is passed,  an exception shoud be
+        # raised when accessing explain_metrics.
+        result = await query.get(transaction=transaction)
+        with pytest.raises(
+            QueryExplainError, match="explain_options not set on query."
+        ):
+            result.get_explain_metrics()
+
+        inner_fn_ran = True
+
+    await in_transaction(transaction)
+
+    # make sure we didn't skip assertions in inner function
+    assert inner_fn_ran is True
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_query_in_transaction_with_explain_options_analyze_true(
+    client, cleanup, database
+):
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    query = await _make_transaction_query(client, cleanup)
+
+    transaction = client.transaction()
+
+    # should work when transaction is initiated through transactional decorator
+    @firestore.async_transactional
+    async def in_transaction(transaction):
+        global inner_fn_ran
+
+        result = await query.get(
+            transaction=transaction,
+            explain_options=ExplainOptions(analyze=True),
+        )
+        explain_metrics = result.get_explain_metrics()
+        _verify_explain_metrics_analyze_true(explain_metrics, len(result))
+
+        inner_fn_ran = True
+
+    await in_transaction(transaction)
+
+    # make sure we didn't skip assertions in inner function
+    assert inner_fn_ran is True
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_query_in_transaction_with_explain_options_analyze_false(
+    client, cleanup, database
+):
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    query = await _make_transaction_query(client, cleanup)
+
+    transaction = client.transaction()
+
+    # should work when transaction is initiated through transactional decorator
+    @firestore.async_transactional
+    async def in_transaction(transaction):
+        global inner_fn_ran
+
+        result = await query.get(
+            transaction=transaction,
+            explain_options=ExplainOptions(analyze=False),
+        )
+        explain_metrics = result.get_explain_metrics()
+        _verify_explain_metrics_analyze_false(explain_metrics)
+
+        inner_fn_ran = True
+
+    await in_transaction(transaction)
+
+    # make sure we didn't skip assertions in inner function
+    assert inner_fn_ran is True
