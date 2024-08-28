@@ -22,7 +22,7 @@ from collections import abc
 class AsyncStreamGenerator(abc.AsyncGenerator):
     """Asynchronous generator for the streamed results."""
 
-    def __init__(self, response_generator):
+    def __init__(self, response_generator: abc.AsyncGenerator):
         self._generator = response_generator
 
     def __aiter__(self):
