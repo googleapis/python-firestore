@@ -2157,7 +2157,7 @@ class FirestoreAdminRestTransport(FirestoreAdminTransport):
                 database.
                 Fields are grouped by their "Collection
                 Group", which represent all collections
-                in the database with the same id.
+                in the database with the same ID.
 
             """
 

@@ -1354,7 +1354,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
                 database.
                 Fields are grouped by their "Collection
                 Group", which represent all collections
-                in the database with the same id.
+                in the database with the same ID.
 
         """
         # Create or coerce a protobuf request object.
@@ -1484,7 +1484,7 @@ class FirestoreAdminClient(metaclass=FirestoreAdminClientMeta):
 
                    Fields are grouped by their "Collection Group", which
                    represent all collections in the database with the
-                   same id.
+                   same ID.
 
         """
         # Create or coerce a protobuf request object.
