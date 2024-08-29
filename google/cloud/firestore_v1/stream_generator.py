@@ -50,10 +50,10 @@ class StreamGenerator(Generator[T, Any, None]):
         self._explain_options = explain_options
         self._explain_metrics = None
 
-    def __iter__(self):
+    def __iter__(self) -> StreamGenerator:
         return self
 
-    def __next__(self):
+    def __next__(self) -> T:
         try:
             return self._generator.__next__()
         except StopIteration as e:
@@ -62,10 +62,10 @@ class StreamGenerator(Generator[T, Any, None]):
                 self._explain_metrics = ExplainMetrics._from_pb(e.value)
             raise
 
-    def send(self, value=None):
+    def send(self, value: Any = None) -> Any:
         return self._generator.send(value)
 
-    def throw(self, exp=None):
+    def throw(self, exp: Any = None) -> Any:
         return self._generator.throw(exp)
 
     def close(self):
