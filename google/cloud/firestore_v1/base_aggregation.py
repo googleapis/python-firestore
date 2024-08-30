@@ -24,15 +24,7 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Awaitable,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, List, Optional, Tuple, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
@@ -239,10 +231,7 @@ class BaseAggregationQuery(ABC):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> (
-        QueryResultsList[AggregationResult]
-        | Awaitable[Any, Any, List[AggregationResult]]
-    ):
+    ) -> QueryResultsList[List[AggregationResult]] | List[List[AggregationResult]]:
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
@@ -264,9 +253,8 @@ class BaseAggregationQuery(ABC):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            QueryResultsList[AggregationResult] | Awaitable[Any, Any, List[AggregationResult]]:
+            (QueryResultsList[List[AggregationResult]] | List[List[AggregationResult]]):
                 The aggregation query results.
-
         """
 
     @abc.abstractmethod
@@ -279,10 +267,7 @@ class BaseAggregationQuery(ABC):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> (
-        StreamGenerator[List[AggregationResult]]
-        | AsyncStreamGenerator[List[AggregationResult], Any]
-    ):
+    ) -> StreamGenerator[List[AggregationResult]] | AsyncStreamGenerator:
         """Runs the aggregation query.
 
         This sends a``RunAggregationQuery`` RPC and returns a generator in the stream of ``RunAggregationQueryResponse`` messages.
@@ -302,5 +287,6 @@ class BaseAggregationQuery(ABC):
                 explain_metrics will be available on the returned generator.
 
         Returns:
+            StreamGenerator[List[AggregationResult]] | AsyncStreamGenerator:
             A generator of the query results.
         """

@@ -30,7 +30,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
 T = TypeVar("T")
 
 
-class StreamGenerator(Generator[T, Any, None]):
+class StreamGenerator(Generator[T, Any, Optional[ExplainMetrics]]):
     """Generator for the streamed results.
 
     Args:

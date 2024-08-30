@@ -48,6 +48,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.document import DocumentReference
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_results import QueryResultsList
     from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.vector import Vector
     from google.cloud.firestore_v1.vector_query import VectorQuery
@@ -497,9 +498,7 @@ class BaseCollectionReference(Generic[QueryType]):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Union[
-        Generator[DocumentSnapshot, Any, Any], AsyncGenerator[DocumentSnapshot, Any]
-    ]:
+    ) -> QueryResultsList[DocumentSnapshot]:
         raise NotImplementedError
 
     def stream(

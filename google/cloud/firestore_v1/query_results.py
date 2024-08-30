@@ -18,11 +18,12 @@ from google.cloud.firestore_v1.query_profile import (
     QueryExplainError,
 )
 
+from typing import List, Optional, TypeVar
 
-from typing import List, Optional
+T = TypeVar("T")
 
 
-class QueryResultsList(list):
+class QueryResultsList(List[T]):
     """A list of received query results from the query call.
 
     This is a subclass of the built-in list. A new property `explain_metrics`
@@ -68,4 +69,4 @@ class QueryResultsList(list):
         if self._explain_options is None:
             raise QueryExplainError("explain_options not set on query.")
         else:
-            return self._explain_metrics
+            return self._explain_metrics  # type: ignore
