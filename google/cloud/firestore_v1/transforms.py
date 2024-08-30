@@ -116,7 +116,7 @@ class _NumericValue(object):
         """Value used by the transform.
 
         Returns:
-            (Integer | Float) value passed in the constructor.
+            (Lloat) value passed in the constructor.
         """
         return self._value
 
