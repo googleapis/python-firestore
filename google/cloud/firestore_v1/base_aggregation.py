@@ -254,7 +254,7 @@ class BaseAggregationQuery(ABC):
 
         Returns:
             (QueryResultsList[List[AggregationResult]] | List[List[AggregationResult]]):
-                The aggregation query results.
+            The aggregation query results.
         """
 
     @abc.abstractmethod
