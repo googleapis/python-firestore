@@ -401,9 +401,7 @@ class AsyncQuery(BaseQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncGenerator[
-        [async_document.DocumentSnapshot | query_profile_pb.ExplainMetrics], Any
-    ]:
+    ) -> AsyncGenerator[async_document.DocumentSnapshot, Any]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -436,7 +434,7 @@ class AsyncQuery(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            `AsyncGenerator[[async_document.DocumentSnapshot | query_profile_pb.ExplainMetrics], Any]`:
+            `AsyncGenerator[async_document.DocumentSnapshot, Any]`:
             An asynchronous generator of the queryresults.
         """
         inner_generator = self._make_stream(

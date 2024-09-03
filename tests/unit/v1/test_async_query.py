@@ -367,10 +367,10 @@ async def _stream_helper(retry=None, timeout=None, explain_options=None):
     # Execute the query and check the response.
     query = make_async_query(parent)
 
-    get_response = query.stream(**kwargs, explain_options=explain_options)
-    assert isinstance(get_response, AsyncStreamGenerator)
+    stream_response = query.stream(**kwargs, explain_options=explain_options)
+    assert isinstance(stream_response, AsyncStreamGenerator)
 
-    returned = [x async for x in get_response]
+    returned = [x async for x in stream_response]
     assert len(returned) == 1
     snapshot = returned[0]
     assert snapshot.reference._path == ("dee", "sleep")
@@ -379,9 +379,9 @@ async def _stream_helper(retry=None, timeout=None, explain_options=None):
     # Verify explain_metrics.
     if explain_options is None:
         with pytest.raises(QueryExplainError, match="explain_options not set"):
-            await get_response.get_explain_metrics()
+            await stream_response.get_explain_metrics()
     else:
-        explain_metrics = await get_response.get_explain_metrics()
+        explain_metrics = await stream_response.get_explain_metrics()
         assert isinstance(explain_metrics, ExplainMetrics)
         assert explain_metrics.execution_stats.results_returned == 1
 
@@ -685,7 +685,7 @@ async def test_asyncquery_stream_w_collection_group():
 
 
 @pytest.mark.asyncio
-async def test_query_stream_w_explain_options():
+async def test_asyncquery_stream_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     explain_options = ExplainOptions(analyze=True)
