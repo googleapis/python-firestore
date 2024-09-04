@@ -62,11 +62,11 @@ class StreamGenerator(Generator[T, Any, Optional[ExplainMetrics]]):
                 self._explain_metrics = ExplainMetrics._from_pb(e.value)
             raise
 
-    def send(self, value: Any = None) -> Any:
+    def send(self, value: Any = None) -> T:
         return self._generator.send(value)
 
-    def throw(self, exp: Any = None) -> Any:
-        return self._generator.throw(exp)
+    def throw(self, *args, **kwargs) -> T:
+        return self._generator.throw(*args, **kwargs)
 
     def close(self):
         return self._generator.close()

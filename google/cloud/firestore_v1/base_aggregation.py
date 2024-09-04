@@ -24,13 +24,12 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
-from typing import TYPE_CHECKING, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Coroutine, List, Optional, Tuple, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.types import (
     RunAggregationQueryResponse,
@@ -42,6 +41,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1 import transaction
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_results import QueryResultsList
     from google.cloud.firestore_v1.stream_generator import (
         StreamGenerator,
     )
@@ -231,10 +231,15 @@ class BaseAggregationQuery(ABC):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> QueryResultsList[List[AggregationResult]] | List[List[AggregationResult]]:
+    ) -> (
+        QueryResultsList[AggregationResult]
+        | Coroutine[Any, Any, List[List[AggregationResult]]]
+    ):
         """Runs the aggregation query.
 
-        This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
+        This sends a ``RunAggregationQuery`` RPC and returns a list of
+        aggregation results in the stream of ``RunAggregationQueryResponse``
+        messages.
 
         Args:
             transaction
@@ -253,7 +258,7 @@ class BaseAggregationQuery(ABC):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            (QueryResultsList[List[AggregationResult]] | List[List[AggregationResult]]):
+            (QueryResultsList[List[AggregationResult]] | Coroutine[Any, Any, List[List[AggregationResult]]]):
             The aggregation query results.
         """
 
