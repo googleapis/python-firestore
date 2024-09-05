@@ -47,6 +47,17 @@ class QueryResultsList(List[T]):
         explain_metrics: Optional[ExplainMetrics] = None,
     ):
         super().__init__(docs)
+
+        # When explain_options is set, explain_metrics should be non-empty too.
+        if explain_options is not None and explain_metrics is None:
+            raise ValueError(
+                "If explain_options is set, explain_metrics must be non-empty."
+            )
+        elif explain_options is None and explain_metrics is not None:
+            raise ValueError(
+                "If explain_options is empty, explain_metrics must be empty."
+            )
+
         self._explain_options = explain_options
         self._explain_metrics = explain_metrics
 
@@ -68,5 +79,9 @@ class QueryResultsList(List[T]):
         """
         if self._explain_options is None:
             raise QueryExplainError("explain_options not set on query.")
+        elif self._explain_metrics is None:
+            raise QueryExplainError(
+                "explain_metrics is empty despite explain_options is set."
+            )
         else:
-            return self._explain_metrics  # type: ignore
+            return self._explain_metrics

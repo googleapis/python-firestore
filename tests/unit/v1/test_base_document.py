@@ -418,7 +418,10 @@ def test_query_results_list_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     explain_options = ExplainOptions(analyze=True)
-    snapshot_list = _make_query_results_list([], explain_options=explain_options)
+    explain_metrics = _make_explain_metrics()
+    snapshot_list = _make_query_results_list(
+        [], explain_options=explain_options, explain_metrics=explain_metrics
+    )
 
     assert snapshot_list.explain_options == explain_options
 
