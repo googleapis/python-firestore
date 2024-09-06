@@ -1547,10 +1547,9 @@ async def test_collection_group_queries_filters(client, cleanup, database):
     ]
 
     batch = client.batch()
-
-    for index, doc_path in enumerate(doc_paths):
+    for doc_path in doc_paths:
         doc_ref = client.document(doc_path)
-        batch.set(doc_ref, {"x": index})
+        batch.set(doc_ref, {"x": doc_path})
         cleanup(doc_ref.delete)
 
     await batch.commit()
@@ -1596,6 +1595,154 @@ async def test_collection_group_queries_filters(client, cleanup, database):
     snapshots = [i async for i in query.stream()]
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2"])
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_collection_stream_or_get_w_no_explain_options(
+    query_docs, database, method
+):
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
+
+    collection, _, _ = query_docs
+
+    # Tests either `stream()` or `get()`.
+    method_under_test = getattr(collection, method)
+    if method == "get":
+        results = await method_under_test()
+    else:
+        results = method_under_test()
+
+    # If no explain_option is passed, raise an exception if explain_metrics
+    # is called
+    with pytest.raises(QueryExplainError, match="explain_options not set on query"):
+        await results.get_explain_metrics()
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_collection_stream_or_get_w_explain_options_analyze_true(
+    query_docs, database, method
+):
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainOptions,
+        QueryExplainError,
+    )
+
+    collection, _, _ = query_docs
+
+    # Tests either `stream()` or `get()`.
+    method_under_test = getattr(collection, method)
+    if method == "get":
+        results = await method_under_test(explain_options=ExplainOptions(analyze=True))
+    else:
+        results = method_under_test(explain_options=ExplainOptions(analyze=True))
+
+    # With `stream()`, an exception should be raised when accessing
+    # explain_metrics before query finishes.
+    if method == "stream":
+        with pytest.raises(
+            QueryExplainError,
+            match="explain_metrics not available until query is complete",
+        ):
+            await results.get_explain_metrics()
+
+    # Finish iterating results, and explain_metrics should be available.
+    if method == "stream":
+        results_list = [item async for item in results]
+        explain_metrics = await results.get_explain_metrics()
+    else:
+        results_list = list(results)
+        explain_metrics = results.get_explain_metrics()
+
+    num_results = len(results_list)
+    from google.cloud.firestore_v1.query_profile import (
+        ExecutionStats,
+        ExplainMetrics,
+        PlanSummary,
+    )
+
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert plan_summary.indexes_used[0]["properties"] == "(__name__ ASC)"
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats.
+    execution_stats = explain_metrics.execution_stats
+    assert isinstance(execution_stats, ExecutionStats)
+    assert execution_stats.results_returned == num_results
+    assert execution_stats.read_operations == num_results
+    duration = execution_stats.execution_duration.total_seconds()
+    assert duration > 0
+    assert duration < 1  # we expect a number closer to 0.05
+    assert isinstance(execution_stats.debug_stats, dict)
+    assert "billing_details" in execution_stats.debug_stats
+    assert "documents_scanned" in execution_stats.debug_stats
+    assert "index_entries_scanned" in execution_stats.debug_stats
+    assert len(execution_stats.debug_stats) > 0
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["stream", "get"])
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_collection_stream_or_get_w_explain_options_analyze_false(
+    query_docs, database, method
+):
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainMetrics,
+        ExplainOptions,
+        PlanSummary,
+        QueryExplainError,
+    )
+
+    collection, _, _ = query_docs
+
+    # Tests either `stream()` or `get()`.
+    method_under_test = getattr(collection, method)
+    if method == "get":
+        results = await method_under_test(explain_options=ExplainOptions(analyze=False))
+    else:
+        results = method_under_test(explain_options=ExplainOptions(analyze=False))
+
+    # Verify that no results are returned.
+    if method == "stream":
+        results_list = [item async for item in results]
+        explain_metrics = await results.get_explain_metrics()
+    else:
+        results_list = list(results)
+        explain_metrics = results.get_explain_metrics()
+    assert len(results_list) == 0
+
+    # Finish iterating results, and explain_metrics should be available.
+    if method == "stream":
+        explain_metrics = await results.get_explain_metrics()
+    else:
+        explain_metrics = results.get_explain_metrics()
+
+    # Verify explain_metrics and plan_summary.
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert plan_summary.indexes_used[0]["properties"] == "(__name__ ASC)"
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats isn't available.
+    with pytest.raises(
+        QueryExplainError,
+        match="execution_stats not available when explain_options.analyze=False",
+    ):
+        explain_metrics.execution_stats
 
 
 @pytest.mark.skipif(
