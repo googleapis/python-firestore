@@ -436,22 +436,9 @@ async def test_asynccollectionreference_get_with_transaction(query_class):
 @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
 @pytest.mark.asyncio
 async def test_asynccollectionreference_get_w_explain_options(query_class):
-    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.query_profile import ExplainOptions
-    import google.cloud.firestore_v1.types.query_profile as query_profile_pb2
 
     explain_options = ExplainOptions(analyze=True)
-    explain_metrics = query_profile_pb2.ExplainMetrics(
-        {"execution_stats": {"results_returned": 1}}
-    )
-
-    async def response_generator():
-        for item in [1, 2, 3, explain_metrics]:
-            yield item
-
-    query_class.return_value.stream.return_value = AsyncStreamGenerator(
-        response_generator(), explain_options
-    )
 
     collection = _make_async_collection_reference("collection")
     await collection.get(explain_options=ExplainOptions(analyze=True))
@@ -537,8 +524,8 @@ async def test_asynccollectionreference_stream_w_explain_options(query_class):
     )
 
     async def response_generator():
-        for item in [1, 2, 3, explain_metrics]:
-            yield item
+        yield 1
+        yield explain_metrics
 
     query_class.return_value.stream.return_value = AsyncStreamGenerator(
         response_generator(), explain_options
