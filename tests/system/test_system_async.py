@@ -591,7 +591,7 @@ async def test_vector_search_collection_group_with_distance_parameters_euclid(
     )
     returned = await vector_query.get()
     assert isinstance(returned, QueryResultsList)
-    assert len(returned) == 1
+    assert len(returned) == 2
     assert returned[0].to_dict() == {
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
@@ -623,7 +623,7 @@ async def test_vector_search_collection_group_with_distance_parameters_cosine(
     )
     returned = await vector_query.get()
     assert isinstance(returned, QueryResultsList)
-    assert len(returned) == 1
+    assert len(returned) == 2
     assert returned[0].to_dict() == {
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
