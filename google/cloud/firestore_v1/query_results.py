@@ -18,21 +18,19 @@ from google.cloud.firestore_v1.query_profile import (
     QueryExplainError,
 )
 
-
 from typing import List, Optional, TypeVar
-
 
 T = TypeVar("T")
 
 
-class QueryResultsList(list):
+class QueryResultsList(List[T]):
     """A list of received query results from the query call.
 
     This is a subclass of the built-in list. A new property `explain_metrics`
     is added to return the query profile results.
 
     Args:
-        docs (list[T]):
+        docs (list):
             The list of query results.
         explain_options
             (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
@@ -49,6 +47,17 @@ class QueryResultsList(list):
         explain_metrics: Optional[ExplainMetrics] = None,
     ):
         super().__init__(docs)
+
+        # When explain_options is set, explain_metrics should be non-empty too.
+        if explain_options is not None and explain_metrics is None:
+            raise ValueError(
+                "If explain_options is set, explain_metrics must be non-empty."
+            )
+        elif explain_options is None and explain_metrics is not None:
+            raise ValueError(
+                "If explain_options is empty, explain_metrics must be empty."
+            )
+
         self._explain_options = explain_options
         self._explain_metrics = explain_metrics
 
@@ -70,5 +79,9 @@ class QueryResultsList(list):
         """
         if self._explain_options is None:
             raise QueryExplainError("explain_options not set on query.")
+        elif self._explain_metrics is None:
+            raise QueryExplainError(
+                "explain_metrics is empty despite explain_options is set."
+            )
         else:
             return self._explain_metrics

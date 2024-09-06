@@ -24,21 +24,12 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Coroutine,
-    List,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Coroutine, List, Optional, Tuple, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.types import (
     RunAggregationQueryResponse,
@@ -50,6 +41,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1 import transaction
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_results import QueryResultsList
     from google.cloud.firestore_v1.stream_generator import (
         StreamGenerator,
     )
@@ -66,7 +58,7 @@ class AggregationResult(object):
     :param value: The resulting read_time
     """
 
-    def __init__(self, alias: str, value: int | float, read_time=None):
+    def __init__(self, alias: str, value: float, read_time=None):
         self.alias = alias
         self.value = value
         self.read_time = read_time
@@ -241,11 +233,13 @@ class BaseAggregationQuery(ABC):
         explain_options: Optional[ExplainOptions] = None,
     ) -> (
         QueryResultsList[AggregationResult]
-        | Coroutine[Any, Any, List[AggregationResult]]
+        | Coroutine[Any, Any, List[List[AggregationResult]]]
     ):
         """Runs the aggregation query.
 
-        This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
+        This sends a ``RunAggregationQuery`` RPC and returns a list of
+        aggregation results in the stream of ``RunAggregationQueryResponse``
+        messages.
 
         Args:
             transaction
@@ -264,9 +258,8 @@ class BaseAggregationQuery(ABC):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            QueryResultsList[AggregationResult] | Coroutine[Any, Any, List[AggregationResult]]:
-                The aggregation query results.
-
+            (QueryResultsList[List[AggregationResult]] | Coroutine[Any, Any, List[List[AggregationResult]]]):
+            The aggregation query results.
         """
 
     @abc.abstractmethod
@@ -279,10 +272,7 @@ class BaseAggregationQuery(ABC):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> (
-        StreamGenerator[Optional[List[AggregationResult]]]
-        | AsyncStreamGenerator[List[AggregationResult], Any, None]
-    ):
+    ) -> StreamGenerator[List[AggregationResult]] | AsyncStreamGenerator:
         """Runs the aggregation query.
 
         This sends a``RunAggregationQuery`` RPC and returns a generator in the stream of ``RunAggregationQueryResponse`` messages.
@@ -302,5 +292,6 @@ class BaseAggregationQuery(ABC):
                 explain_metrics will be available on the returned generator.
 
         Returns:
+            StreamGenerator[List[AggregationResult]] | AsyncStreamGenerator:
             A generator of the query results.
         """

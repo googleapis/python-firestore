@@ -136,7 +136,7 @@ class AggregationQuery(BaseAggregationQuery):
         ] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Optional[List[AggregationResult]], Any, Optional[ExplainMetrics]]:
+    ) -> Generator[List[AggregationResult], Any, Optional[ExplainMetrics]]:
         """Internal method for stream(). Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -161,7 +161,7 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            Optional[List[AggregationResult]]:
+            List[AggregationResult]:
             The result of aggregations of this query.
 
         Returns:
@@ -198,10 +198,7 @@ class AggregationQuery(BaseAggregationQuery):
                 metrics = response.explain_metrics
 
             result = _query_response_to_result(response)
-            if len(result) > 0 or metrics is None:
-                # When explain_options.analyze == False, the query isn't run
-                # but query profiling results are returned. In this case we
-                # do not yield an empty result.
+            if result:
                 yield result
 
         return metrics
@@ -215,7 +212,7 @@ class AggregationQuery(BaseAggregationQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> StreamGenerator[Optional[List[AggregationResult]]]:
+    ) -> StreamGenerator[List[AggregationResult]]:
         """Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator
@@ -240,7 +237,7 @@ class AggregationQuery(BaseAggregationQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            `StreamGenerator[Optional[List[AggregationResult]]]`:
+            `StreamGenerator[List[AggregationResult]]`:
             A generator of the query results.
         """
         inner_generator = self._make_stream(

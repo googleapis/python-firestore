@@ -48,7 +48,6 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
-    import google.cloud.firestore_v1.types.query_profile as query_profile_pb
 
 
 class Query(BaseQuery):
@@ -273,17 +272,26 @@ class Query(BaseQuery):
         query_vector: Vector,
         limit: int,
         distance_measure: DistanceMeasure,
+        *,
+        distance_result_field: Optional[str] = None,
+        distance_threshold: Optional[float] = None,
     ) -> Type["firestore_v1.vector_query.VectorQuery"]:
         """
         Finds the closest vector embeddings to the given query vector.
 
         Args:
-            vector_field(str): An indexed vector field to search upon. Only documents which contain
+            vector_field (str): An indexed vector field to search upon. Only documents which contain
                 vectors whose dimensionality match the query_vector can be returned.
-            query_vector(Vector): The query vector that we are searching on. Must be a vector of no more
+            query_vector (Vector): The query vector that we are searching on. Must be a vector of no more
                 than 2048 dimensions.
             limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
-            distance_measure(:class:`DistanceMeasure`): The Distance Measure to use.
+            distance_measure (:class:`DistanceMeasure`): The Distance Measure to use.
+            distance_result_field (Optional[str]):
+                Name of the field to output the result of the vector distance
+                calculation. If unset then the distance will not be returned.
+            distance_threshold (Optional[float]):
+                A threshold for which no less similar documents will be returned.
+
 
         Returns:
             :class`~firestore_v1.vector_query.VectorQuery`: the vector query.
@@ -293,6 +301,8 @@ class Query(BaseQuery):
             query_vector=query_vector,
             limit=limit,
             distance_measure=distance_measure,
+            distance_result_field=distance_result_field,
+            distance_threshold=distance_threshold,
         )
 
     def count(
@@ -343,9 +353,7 @@ class Query(BaseQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[
-        Optional[DocumentSnapshot], Any, Optional[query_profile_pb.ExplainMetrics]
-    ]:
+    ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -380,14 +388,14 @@ class Query(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            Optional[DocumentSnapshot]:
+            DocumentSnapshot:
             The next document that fulfills the query.
 
         Returns:
             ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
             The results of query profiling, if received from the service.
         """
-        metrics: query_profile_pb.ExplainMetrics | None = None
+        metrics: ExplainMetrics | None = None
 
         response_iterator, expected_prefix = self._get_stream_iterator(
             transaction,

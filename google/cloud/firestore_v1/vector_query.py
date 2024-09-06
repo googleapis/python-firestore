@@ -125,7 +125,7 @@ class VectorQuery(BaseVectorQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Optional[DocumentSnapshot], Any, Optional[ExplainMetrics]]:
+    ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
         """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -151,7 +151,7 @@ class VectorQuery(BaseVectorQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            Optional[DocumentSnapshot]:
+            DocumentSnapshot:
             The next document that fulfills the query.
 
         Returns:

@@ -394,15 +394,22 @@ async def test_document_update_w_int_field(client, cleanup, database):
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_vector_search_collection(client, database):
-    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
+@pytest.mark.parametrize(
+    "distance_measure",
+    [
+        DistanceMeasure.EUCLIDEAN,
+        DistanceMeasure.COSINE,
+    ],
+)
+async def test_vector_search_collection(client, database, distance_measure):
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
     collection_id = "vector_search"
     collection = client.collection(collection_id)
     vector_query = collection.find_nearest(
         vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
         limit=1,
-        distance_measure=DistanceMeasure.EUCLIDEAN,
+        distance_measure=distance_measure,
     )
     returned = await vector_query.get()
     assert isinstance(returned, QueryResultsList)
@@ -415,15 +422,22 @@ async def test_vector_search_collection(client, database):
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_vector_search_collection_with_filter(client, database):
-    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
+@pytest.mark.parametrize(
+    "distance_measure",
+    [
+        DistanceMeasure.EUCLIDEAN,
+        DistanceMeasure.COSINE,
+    ],
+)
+async def test_vector_search_collection_with_filter(client, database, distance_measure):
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
     collection_id = "vector_search"
     collection = client.collection(collection_id)
     vector_query = collection.where("color", "==", "red").find_nearest(
         vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
         limit=1,
-        distance_measure=DistanceMeasure.EUCLIDEAN,
+        distance_measure=distance_measure,
     )
     returned = await vector_query.get()
     assert isinstance(returned, QueryResultsList)
@@ -436,8 +450,134 @@ async def test_vector_search_collection_with_filter(client, database):
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_vector_search_collection_group(client, database):
-    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
+async def test_vector_search_collection_with_distance_parameters_euclid(
+    client, database
+):
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
+    collection_id = "vector_search"
+    collection = client.collection(collection_id)
+
+    vector_query = collection.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=3,
+        distance_result_field="vector_distance",
+        distance_threshold=1.0,
+    )
+    returned = await vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 2
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+        "vector_distance": 0.0,
+    }
+    assert returned[1].to_dict() == {
+        "embedding": Vector([2.0, 2.0, 3.0]),
+        "color": "red",
+        "vector_distance": 1.0,
+    }
+
+
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_vector_search_collection_with_distance_parameters_cosine(
+    client, database
+):
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
+    collection_id = "vector_search"
+    collection = client.collection(collection_id)
+
+    vector_query = collection.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.COSINE,
+        limit=3,
+        distance_result_field="vector_distance",
+        distance_threshold=0.02,
+    )
+    returned = await vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 2
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+        "vector_distance": 0.0,
+    }
+    assert returned[1].to_dict() == {
+        "embedding": Vector([3.0, 4.0, 5.0]),
+        "color": "yellow",
+        "vector_distance": 0.017292370176009153,
+    }
+
+
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize(
+    "distance_measure",
+    [
+        DistanceMeasure.EUCLIDEAN,
+        DistanceMeasure.COSINE,
+    ],
+)
+async def test_vector_search_collection_group(client, database, distance_measure):
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
+    collection_id = "vector_search"
+    collection_group = client.collection_group(collection_id)
+
+    vector_query = collection_group.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=distance_measure,
+        limit=1,
+    )
+    returned = await vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 1
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+    }
+
+
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize(
+    "distance_measure",
+    [
+        DistanceMeasure.EUCLIDEAN,
+        DistanceMeasure.COSINE,
+    ],
+)
+async def test_vector_search_collection_group_with_filter(
+    client, database, distance_measure
+):
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
+    collection_id = "vector_search"
+    collection_group = client.collection_group(collection_id)
+
+    vector_query = collection_group.where("color", "==", "red").find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=distance_measure,
+        limit=1,
+    )
+    returned = await vector_query.get()
+    assert isinstance(returned, list)
+    assert len(returned) == 1
+    assert returned[0].to_dict() == {
+        "embedding": Vector([1.0, 2.0, 3.0]),
+        "color": "red",
+    }
+
+
+@pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_vector_search_collection_group_with_distance_parameters_euclid(
+    client, database
+):
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
     collection_id = "vector_search"
     collection_group = client.collection_group(collection_id)
 
@@ -445,7 +585,9 @@ async def test_vector_search_collection_group(client, database):
         vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
         distance_measure=DistanceMeasure.EUCLIDEAN,
-        limit=1,
+        limit=3,
+        distance_result_field="vector_distance",
+        distance_threshold=1.0,
     )
     returned = await vector_query.get()
     assert isinstance(returned, QueryResultsList)
@@ -453,21 +595,31 @@ async def test_vector_search_collection_group(client, database):
     assert returned[0].to_dict() == {
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
+        "vector_distance": 0.0,
+    }
+    assert returned[1].to_dict() == {
+        "embedding": Vector([2.0, 2.0, 3.0]),
+        "color": "red",
+        "vector_distance": 1.0,
     }
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_vector_search_collection_group_with_filter(client, database):
-    # Documents and Indexs are a manual step from util/boostrap_vector_index.py
+async def test_vector_search_collection_group_with_distance_parameters_cosine(
+    client, database
+):
+    # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
     collection_id = "vector_search"
     collection_group = client.collection_group(collection_id)
 
-    vector_query = collection_group.where("color", "==", "red").find_nearest(
+    vector_query = collection_group.find_nearest(
         vector_field="embedding",
         query_vector=Vector([1.0, 2.0, 3.0]),
-        distance_measure=DistanceMeasure.EUCLIDEAN,
-        limit=1,
+        distance_measure=DistanceMeasure.COSINE,
+        limit=3,
+        distance_result_field="vector_distance",
+        distance_threshold=0.02,
     )
     returned = await vector_query.get()
     assert isinstance(returned, QueryResultsList)
@@ -475,6 +627,12 @@ async def test_vector_search_collection_group_with_filter(client, database):
     assert returned[0].to_dict() == {
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
+        "vector_distance": 0.0,
+    }
+    assert returned[1].to_dict() == {
+        "embedding": Vector([3.0, 4.0, 5.0]),
+        "color": "yellow",
+        "vector_distance": 0.017292370176009153,
     }
 
 

@@ -14,6 +14,9 @@
 
 
 import mock
+import pytest
+
+from google.cloud.firestore_v1.query_profile import QueryExplainError
 
 
 def _make_base_document_reference(*args, **kwargs):
@@ -80,11 +83,39 @@ def test_query_results_list_constructor():
     assert snapshot_list._explain_metrics == explain_metrics
 
 
+def test_query_results_list_constructor_w_explain_options_and_wo_explain_metrics():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    with pytest.raises(
+        ValueError,
+        match="If explain_options is set, explain_metrics must be non-empty.",
+    ):
+        _make_query_results_list(
+            [],
+            explain_options=ExplainOptions(analyze=True),
+            explain_metrics=None,
+        )
+
+
+def test_query_results_list_constructor_wo_explain_options_and_w_explain_metrics():
+    with pytest.raises(
+        ValueError, match="If explain_options is empty, explain_metrics must be empty."
+    ):
+        _make_query_results_list(
+            [],
+            explain_options=None,
+            explain_metrics=_make_explain_metrics(),
+        )
+
+
 def test_query_results_list_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     explain_options = ExplainOptions(analyze=True)
-    snapshot_list = _make_query_results_list([], explain_options=explain_options)
+    explain_metrics = _make_explain_metrics()
+    snapshot_list = _make_query_results_list(
+        [], explain_options=explain_options, explain_metrics=explain_metrics
+    )
 
     assert snapshot_list.explain_options == explain_options
 
@@ -100,3 +131,28 @@ def test_query_results_list_explain_metrics_w_explain_options():
     )
 
     assert snapshot_list.get_explain_metrics() == explain_metrics
+
+
+def test_query_results_list_explain_metrics_wo_explain_options():
+    snapshot_list = _make_query_results_list([])
+
+    with pytest.raises(QueryExplainError, match="explain_options not set on query."):
+        snapshot_list.get_explain_metrics()
+
+
+def test_query_results_list_explain_metrics_empty():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    explain_metrics = _make_explain_metrics()
+    snapshot_list = _make_query_results_list(
+        [],
+        explain_options=ExplainOptions(analyze=True),
+        explain_metrics=explain_metrics,
+    )
+    snapshot_list._explain_metrics = None
+
+    with pytest.raises(
+        QueryExplainError,
+        match="explain_metrics is empty despite explain_options is set.",
+    ):
+        snapshot_list.get_explain_metrics()

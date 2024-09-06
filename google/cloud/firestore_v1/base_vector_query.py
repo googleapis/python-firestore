@@ -49,6 +49,8 @@ class BaseVectorQuery(ABC):
         self._query_vector: Optional[Vector] = None
         self._limit: Optional[int] = None
         self._distance_measure: Optional[DistanceMeasure] = None
+        self._distance_result_field: Optional[str] = None
+        self._distance_threshold: Optional[float] = None
 
     @property
     def _client(self):
@@ -73,6 +75,11 @@ class BaseVectorQuery(ABC):
         else:
             raise ValueError("Invalid distance_measure")
 
+        # Coerce ints to floats as required by the protobuf.
+        distance_threshold_proto = None
+        if self._distance_threshold is not None:
+            distance_threshold_proto = float(self._distance_threshold)
+
         pb = self._nested_query._to_protobuf()
         pb.find_nearest = query.StructuredQuery.FindNearest(
             vector_field=query.StructuredQuery.FieldReference(
@@ -81,6 +88,8 @@ class BaseVectorQuery(ABC):
             query_vector=_helpers.encode_value(self._query_vector),
             distance_measure=distance_measure_proto,
             limit=self._limit,
+            distance_result_field=self._distance_result_field,
+            distance_threshold=distance_threshold_proto,
         )
         return pb
 
@@ -121,12 +130,17 @@ class BaseVectorQuery(ABC):
         query_vector: Vector,
         limit: int,
         distance_measure: DistanceMeasure,
+        *,
+        distance_result_field: Optional[str] = None,
+        distance_threshold: Optional[float] = None,
     ):
         """Finds the closest vector embeddings to the given query vector."""
         self._vector_field = vector_field
         self._query_vector = query_vector
         self._limit = limit
         self._distance_measure = distance_measure
+        self._distance_result_field = distance_result_field
+        self._distance_threshold = distance_threshold
         return self
 
     def stream(
@@ -136,5 +150,5 @@ class BaseVectorQuery(ABC):
         timeout: float = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> Generator[Optional[DocumentSnapshot], Any, Optional[ExplainMetrics]]:
+    ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
         """Reads the documents in the collection that match this query."""

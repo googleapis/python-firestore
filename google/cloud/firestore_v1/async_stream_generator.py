@@ -17,7 +17,14 @@ Firestore API.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, AsyncGenerator, Optional
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AsyncGenerator,
+    Coroutine,
+    Optional,
+    TypeVar,
+)
 
 from google.cloud.firestore_v1.query_profile import (
     ExplainMetrics,
@@ -29,7 +36,10 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
-class AsyncStreamGenerator(AsyncGenerator[Any, Any]):
+T = TypeVar("T")
+
+
+class AsyncStreamGenerator(AsyncGenerator[T, Any]):
     """Asynchronous Generator for the streamed results.
 
     Args:
@@ -49,10 +59,10 @@ class AsyncStreamGenerator(AsyncGenerator[Any, Any]):
         self._explain_options = explain_options
         self._explain_metrics = None
 
-    def __aiter__(self):
+    def __aiter__(self) -> AsyncGenerator[T, Any]:
         return self
 
-    async def __anext__(self):
+    async def __anext__(self) -> T:
         try:
             next_value = await self._generator.__anext__()
             if type(next_value) is query_profile_pb.ExplainMetrics:
@@ -63,11 +73,11 @@ class AsyncStreamGenerator(AsyncGenerator[Any, Any]):
         except StopAsyncIteration:
             raise
 
-    def asend(self, value=None):
+    def asend(self, value: Any = None) -> Coroutine[Any, Any, T]:
         return self._generator.asend(value)
 
-    def athrow(self, exp=None):
-        return self._generator.athrow(exp)
+    def athrow(self, *args, **kwargs) -> Coroutine[Any, Any, T]:
+        return self._generator.athrow(*args, **kwargs)
 
     def aclose(self):
         return self._generator.aclose()
