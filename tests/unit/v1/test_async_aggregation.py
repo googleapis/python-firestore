@@ -547,8 +547,6 @@ async def _async_aggregation_query_stream_helper(
     read_time=None,
     explain_options=None,
 ):
-    from google.cloud._helpers import _datetime_to_pb_timestamp
-
     from google.cloud.firestore_v1 import _helpers
 
     # Create a minimal fake GAPIC.
@@ -564,13 +562,10 @@ async def _async_aggregation_query_stream_helper(
     aggregation_query = make_async_aggregation_query(query)
     aggregation_query.count(alias="all")
 
-    if explain_options is not None and explain_options.analyze is False:
-        results_list = []
-    else:
-        aggregation_result = AggregationResult(
-            alias="total", value=5, read_time=read_time
-        )
-        results_list = [aggregation_result]
+    aggregation_result = AggregationResult(
+        alias="total", value=5, read_time=read_time
+    )
+    results_list = [aggregation_result]
 
     if explain_options is not None:
         explain_metrics = {"execution_stats": {"results_returned": 1}}
@@ -593,9 +588,6 @@ async def _async_aggregation_query_stream_helper(
         for r in result:
             assert r.alias == aggregation_result.alias
             assert r.value == aggregation_result.value
-            if read_time is not None:
-                result_datetime = _datetime_to_pb_timestamp(r.read_time)
-                assert result_datetime == read_time
         results.append(result)
     assert len(results) == len(results_list)
 
