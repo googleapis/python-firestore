@@ -28,7 +28,6 @@ from google.api_core import retry_async as retries
 from google.cloud.firestore_v1 import transaction
 from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.base_aggregation import (
-    AggregationResult,
     BaseAggregationQuery,
     _query_response_to_result,
 )
