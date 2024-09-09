@@ -562,9 +562,7 @@ async def _async_aggregation_query_stream_helper(
     aggregation_query = make_async_aggregation_query(query)
     aggregation_query.count(alias="all")
 
-    aggregation_result = AggregationResult(
-        alias="total", value=5, read_time=read_time
-    )
+    aggregation_result = AggregationResult(alias="total", value=5, read_time=read_time)
     results_list = [aggregation_result]
 
     if explain_options is not None:
