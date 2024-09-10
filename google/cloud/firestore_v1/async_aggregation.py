@@ -153,7 +153,8 @@ class AsyncAggregationQuery(BaseAggregationQuery):
 
         async for response in response_iterator:
             result = _query_response_to_result(response)
-            yield result
+            if result:
+                yield result
 
             if metrics is None and response.explain_metrics:
                 metrics = response.explain_metrics
@@ -201,4 +202,4 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             timeout=timeout,
             explain_options=explain_options,
         )
-        return AsyncStreamGenerator(inner_generator)
+        return AsyncStreamGenerator(inner_generator, explain_options)

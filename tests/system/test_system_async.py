@@ -36,6 +36,13 @@ from google.oauth2 import service_account
 from google.cloud import firestore_v1 as firestore
 from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+from google.cloud.firestore_v1.query_profile import (
+    ExecutionStats,
+    ExplainMetrics,
+    ExplainOptions,
+    PlanSummary,
+    QueryExplainError,
+)
 from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.vector import Vector
 from test__helpers import (
@@ -2526,6 +2533,77 @@ async def test_async_avg_query_get_multiple_aggregations(collection, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_async_avg_query_get_w_no_explain_options(collection, database):
+    avg_query = collection.avg("stats.product", alias="total")
+    results = await avg_query.get()
+    with pytest.raises(QueryExplainError, match="explain_options not set"):
+        results.get_explain_metrics()
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_async_avg_query_get_w_explain_options_analyze_true(collection, database):
+    avg_query = collection.avg("stats.product", alias="total")
+    results = await avg_query.get(explain_options=ExplainOptions(analyze=True))
+
+    num_results = len(results)
+    explain_metrics = results.get_explain_metrics()
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert (
+        plan_summary.indexes_used[0]["properties"]
+        == "(stats.product ASC, __name__ ASC)"
+    )
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats.
+    execution_stats = explain_metrics.execution_stats
+    assert isinstance(execution_stats, ExecutionStats)
+    assert execution_stats.results_returned == num_results
+    assert execution_stats.read_operations == num_results
+    duration = execution_stats.execution_duration.total_seconds()
+    assert duration > 0
+    assert duration < 1  # we expect a number closer to 0.05
+    assert isinstance(execution_stats.debug_stats, dict)
+    assert "billing_details" in execution_stats.debug_stats
+    assert "documents_scanned" in execution_stats.debug_stats
+    assert "index_entries_scanned" in execution_stats.debug_stats
+    assert len(execution_stats.debug_stats) > 0
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_async_avg_query_get_w_explain_options_analyze_false(
+    collection, database
+):
+    avg_query = collection.avg("stats.product", alias="total")
+    results = await avg_query.get(explain_options=ExplainOptions(analyze=False))
+
+    # Verify that no results are returned.
+    assert len(results) == 0
+
+    explain_metrics = results.get_explain_metrics()
+
+    # Verify explain_metrics and plan_summary.
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert (
+        plan_summary.indexes_used[0]["properties"]
+        == "(stats.product ASC, __name__ ASC)"
+    )
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats isn't available.
+    with pytest.raises(
+        QueryExplainError,
+        match="execution_stats not available when explain_options.analyze=False",
+    ):
+        explain_metrics.execution_stats
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_avg_query_stream_default_alias(collection, database):
     avg_query = collection.avg("stats.product")
 
@@ -2570,6 +2648,88 @@ async def test_async_avg_query_stream_multiple_aggregations(collection, database
         assert len(result) == 2
         for aggregation_result in result:
             assert aggregation_result.alias in ["total", "all"]
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_async_avg_query_stream_w_no_explain_options(collection, database):
+    avg_query = collection.avg("stats.product", alias="total")
+    results = avg_query.stream()
+    with pytest.raises(QueryExplainError, match="explain_options not set"):
+        await results.get_explain_metrics()
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_async_avg_query_stream_w_explain_options_analyze_true(
+    collection, database
+):
+    avg_query = collection.avg("stats.product", alias="total")
+    results = avg_query.stream(explain_options=ExplainOptions(analyze=True))
+    with pytest.raises(
+        QueryExplainError,
+        match="explain_metrics not available until query is complete",
+    ):
+        await results.get_explain_metrics()
+
+    results_list = [item async for item in results]
+    num_results = len(results_list)
+
+    explain_metrics = await results.get_explain_metrics()
+
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert (
+        plan_summary.indexes_used[0]["properties"]
+        == "(stats.product ASC, __name__ ASC)"
+    )
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats.
+    execution_stats = explain_metrics.execution_stats
+    assert isinstance(execution_stats, ExecutionStats)
+    assert execution_stats.results_returned == num_results
+    assert execution_stats.read_operations == num_results
+    duration = execution_stats.execution_duration.total_seconds()
+    assert duration > 0
+    assert duration < 1  # we expect a number closer to 0.05
+    assert isinstance(execution_stats.debug_stats, dict)
+    assert "billing_details" in execution_stats.debug_stats
+    assert "documents_scanned" in execution_stats.debug_stats
+    assert "index_entries_scanned" in execution_stats.debug_stats
+    assert len(execution_stats.debug_stats) > 0
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_async_avg_query_stream_w_explain_options_analyze_false(
+    collection, database
+):
+    avg_query = collection.avg("stats.product", alias="total")
+    results = avg_query.stream(explain_options=ExplainOptions(analyze=False))
+
+    # Verify that no results are returned.
+    results_list = [item async for item in results]
+    assert len(results_list) == 0
+
+    explain_metrics = await results.get_explain_metrics()
+
+    # Verify explain_metrics and plan_summary.
+    assert isinstance(explain_metrics, ExplainMetrics)
+    plan_summary = explain_metrics.plan_summary
+    assert isinstance(plan_summary, PlanSummary)
+    assert len(plan_summary.indexes_used) > 0
+    assert (
+        plan_summary.indexes_used[0]["properties"]
+        == "(stats.product ASC, __name__ ASC)"
+    )
+    assert plan_summary.indexes_used[0]["query_scope"] == "Collection"
+
+    # Verify execution_stats isn't available.
+    with pytest.raises(
+        QueryExplainError,
+        match="execution_stats not available when explain_options.analyze=False",
+    ):
+        explain_metrics.execution_stats
 
 
 @firestore.async_transactional
