@@ -223,7 +223,7 @@ class Query(BaseQuery):
             snapshots = _q.get()
 
             if snapshots:
-                last_document = snapshots[-1]  # type: ignore
+                last_document = snapshots[-1]
 
             num_returned += len(snapshots)
 
