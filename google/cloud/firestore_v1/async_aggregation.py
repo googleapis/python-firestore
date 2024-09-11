@@ -20,7 +20,7 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, List, Optional, Union
+from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
@@ -105,8 +105,8 @@ class AsyncAggregationQuery(BaseAggregationQuery):
         retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncStreamGenerator[
-        List[AggregationResult] | query_profile_pb.ExplainMetrics
+    ) -> AsyncGenerator[
+        [List[AggregationResult] | query_profile_pb.ExplainMetrics], Any
     ]:
         """Internal method for stream(). Runs the aggregation query.
 
@@ -134,7 +134,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
 
         Yields:
             List[AggregationResult] | query_profile_pb.ExplainMetrics:
-            The result of aggregations of this query
+            The result of aggregations of this query.
         """
         metrics: query_profile_pb.ExplainMetrics | None = None
 

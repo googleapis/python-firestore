@@ -52,7 +52,7 @@ class AsyncStreamGenerator(AsyncGenerator[T, Any]):
 
     def __init__(
         self,
-        response_generator: AsyncGenerator[Any, Any],
+        response_generator: AsyncGenerator[T, Any],
         explain_options: Optional[ExplainOptions] = None,
     ):
         self._generator = response_generator

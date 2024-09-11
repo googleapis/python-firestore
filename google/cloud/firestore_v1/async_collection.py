@@ -237,7 +237,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> "AsyncStreamGenerator[DocumentSnapshot]":
+    ) -> AsyncStreamGenerator[DocumentSnapshot]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns a generator which

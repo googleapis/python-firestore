@@ -37,6 +37,7 @@ from google.cloud.firestore_v1.base_transaction import (
     BaseTransaction,
     _BaseTransactional,
 )
+from google.cloud.firestore_v1.query_results import QueryResultsList
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -179,7 +180,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         timeout: float = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncGenerator[DocumentSnapshot, Any]:
+    ) -> QueryResultsList[DocumentSnapshot]:
         """
         Retrieve a document or a query result from the database.
 
@@ -194,9 +195,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
 
-        Yields:
-            .DocumentSnapshot: The next document snapshot that fulfills the
-            query, or :data:`None` if the document does not exist.
+        Returns:
+            QueryResultsList[DocumentSnapshot]: The next document snapshot that
+            fulfills the query, or :data:`None` if the document does not exist.
         """
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         if isinstance(ref_or_query, AsyncDocumentReference):
