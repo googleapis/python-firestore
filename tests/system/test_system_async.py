@@ -2540,6 +2540,9 @@ async def test_async_avg_query_get_w_no_explain_options(collection, database):
         results.get_explain_metrics()
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_avg_query_get_w_explain_options_analyze_true(collection, database):
     avg_query = collection.avg("stats.product", alias="total")
@@ -2572,6 +2575,9 @@ async def test_async_avg_query_get_w_explain_options_analyze_true(collection, da
     assert len(execution_stats.debug_stats) > 0
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_avg_query_get_w_explain_options_analyze_false(
     collection, database
@@ -2658,6 +2664,9 @@ async def test_async_avg_query_stream_w_no_explain_options(collection, database)
         await results.get_explain_metrics()
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_avg_query_stream_w_explain_options_analyze_true(
     collection, database
@@ -2700,6 +2709,9 @@ async def test_async_avg_query_stream_w_explain_options_analyze_true(
     assert len(execution_stats.debug_stats) > 0
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 async def test_async_avg_query_stream_w_explain_options_analyze_false(
     collection, database

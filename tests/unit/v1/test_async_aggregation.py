@@ -562,8 +562,13 @@ async def _async_aggregation_query_stream_helper(
     aggregation_query = make_async_aggregation_query(query)
     aggregation_query.count(alias="all")
 
-    aggregation_result = AggregationResult(alias="total", value=5, read_time=read_time)
-    results_list = [aggregation_result]
+    if explain_options and explain_options.analyze is True:
+        aggregation_result = AggregationResult(
+            alias="total", value=5, read_time=read_time
+        )
+        results_list = [aggregation_result]
+    else:
+        results_list = []
 
     if explain_options is not None:
         explain_metrics = {"execution_stats": {"results_returned": 1}}
@@ -620,8 +625,16 @@ async def test_aggregation_query_stream():
 
 
 @pytest.mark.asyncio
-async def test_aggregation_query_stream_w_explain_options():
+async def test_aggregation_query_stream_w_explain_options_analyze_true():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     explain_options = ExplainOptions(analyze=True)
+    await _async_aggregation_query_stream_helper(explain_options=explain_options)
+
+
+@pytest.mark.asyncio
+async def test_aggregation_query_stream_w_explain_options_analyze_false():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    explain_options = ExplainOptions(analyze=False)
     await _async_aggregation_query_stream_helper(explain_options=explain_options)
