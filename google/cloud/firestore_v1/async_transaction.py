@@ -22,10 +22,7 @@ from google.api_core import exceptions, gapic_v1
 from google.api_core import retry_async as retries
 
 from google.cloud.firestore_v1 import _helpers, async_batch
-from google.cloud.firestore_v1.async_document import (
-    AsyncDocumentReference,
-    DocumentSnapshot,
-)
+from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.base_transaction import (
     _CANT_BEGIN,
@@ -37,10 +34,11 @@ from google.cloud.firestore_v1.base_transaction import (
     BaseTransaction,
     _BaseTransactional,
 )
-from google.cloud.firestore_v1.query_results import QueryResultsList
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
@@ -177,10 +175,10 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         self,
         ref_or_query,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> QueryResultsList[DocumentSnapshot]:
+    ) -> AsyncGenerator[DocumentSnapshot, Any] | AsyncStreamGenerator[DocumentSnapshot]:
         """
         Retrieve a document or a query result from the database.
 
@@ -195,9 +193,9 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
 
-        Returns:
-            QueryResultsList[DocumentSnapshot]: The next document snapshot that
-            fulfills the query, or :data:`None` if the document does not exist.
+        Yields:
+            DocumentSnapshot: The next document snapshot that fulfills the query,
+            or :data:`None` if the document does not exist.
         """
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         if isinstance(ref_or_query, AsyncDocumentReference):
@@ -213,7 +211,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         elif isinstance(ref_or_query, AsyncQuery):
             if explain_options is not None:
                 kwargs["explain_options"] = explain_options
-            return await ref_or_query.stream(transaction=self, **kwargs)
+            return ref_or_query.stream(transaction=self, **kwargs)
         else:
             raise ValueError(
                 'Value for argument "ref_or_query" must be a AsyncDocumentReference or a AsyncQuery.'

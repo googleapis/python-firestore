@@ -105,9 +105,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
         retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncGenerator[
-        [List[AggregationResult] | query_profile_pb.ExplainMetrics], Any
-    ]:
+    ) -> AsyncGenerator[List[AggregationResult] | query_profile_pb.ExplainMetrics, Any]:
         """Internal method for stream(). Runs the aggregation query.
 
         This sends a ``RunAggregationQuery`` RPC and then returns a generator which

@@ -178,7 +178,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         timeout: float = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> StreamGenerator[DocumentSnapshot]:
+    ) -> StreamGenerator[DocumentSnapshot] | Generator[DocumentSnapshot, Any, None]:
         """Retrieve a document or a query result from the database.
 
         Args:

@@ -19,7 +19,6 @@ from typing import TYPE_CHECKING, Any, AsyncGenerator, Optional, TypeVar, Union
 from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
 
-from google.cloud.firestore_v1 import async_document
 from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.base_query import (
     BaseQuery,
@@ -31,9 +30,9 @@ from google.cloud.firestore_v1.query_results import QueryResultsList
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
-    from google.cloud.firestore_v1 import transaction
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
+    from google.cloud.firestore_v1 import transaction
     import google.cloud.firestore_v1.types.query_profile as query_profile_pb
 
 TAsyncVectorQuery = TypeVar("TAsyncVectorQuery", bound="AsyncVectorQuery")
@@ -107,9 +106,7 @@ class AsyncVectorQuery(BaseVectorQuery):
         retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncGenerator[
-        [async_document.DocumentSnapshot | query_profile_pb.ExplainMetrics], Any
-    ]:
+    ) -> AsyncGenerator[[DocumentSnapshot | query_profile_pb.ExplainMetrics], Any]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -143,7 +140,7 @@ class AsyncVectorQuery(BaseVectorQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            [:class:`~google.cloud.firestore_v1.async_document.DocumentSnapshot` \
+            [:class:`~google.cloud.firestore_v1.base_document.DocumentSnapshot` \
                 | google.cloud.firestore_v1.types.query_profile.ExplainMetrtics]:
             The next document that fulfills the query.
         """
@@ -185,7 +182,7 @@ class AsyncVectorQuery(BaseVectorQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncGenerator[async_document.DocumentSnapshot, None]:
+    ) -> AsyncStreamGenerator[DocumentSnapshot]:
         """Reads the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -210,7 +207,7 @@ class AsyncVectorQuery(BaseVectorQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            `AsyncGenerator[[async_document.DocumentSnapshot | query_profile_pb.ExplainMetrics], Any]`:
+            `AsyncStreamGenerator[DocumentSnapshot]`:
             An asynchronous generator of the queryresults.
         """
 

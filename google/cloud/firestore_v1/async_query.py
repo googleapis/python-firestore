@@ -26,7 +26,7 @@ from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
 
 from google.cloud import firestore_v1
-from google.cloud.firestore_v1 import async_document, transaction
+from google.cloud.firestore_v1 import transaction
 from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.async_vector_query import AsyncVectorQuery
@@ -333,9 +333,7 @@ class AsyncQuery(BaseQuery):
         retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncGenerator[
-        [async_document.DocumentSnapshot | query_profile_pb.ExplainMetrics], Any
-    ]:
+    ) -> AsyncGenerator[DocumentSnapshot | query_profile_pb.ExplainMetrics, Any]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -369,7 +367,7 @@ class AsyncQuery(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Yields:
-            [:class:`~google.cloud.firestore_v1.async_document.DocumentSnapshot` \
+            [:class:`~google.cloud.firestore_v1.base_document.DocumentSnapshot` \
                 | google.cloud.firestore_v1.types.query_profile.ExplainMetrtics]:
             The next document that fulfills the query.
         """
@@ -411,7 +409,7 @@ class AsyncQuery(BaseQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncStreamGenerator[async_document.DocumentSnapshot]:
+    ) -> AsyncStreamGenerator[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and then returns a generator which
@@ -444,7 +442,7 @@ class AsyncQuery(BaseQuery):
                 explain_metrics will be available on the returned generator.
 
         Returns:
-            `AsyncStreamGenerator[async_document.DocumentSnapshot]`:
+            `AsyncStreamGenerator[DocumentSnapshot]`:
             An asynchronous generator of the queryresults.
         """
         inner_generator = self._make_stream(
