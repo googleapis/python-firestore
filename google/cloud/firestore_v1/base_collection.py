@@ -25,7 +25,6 @@ from typing import (
     Generator,
     Generic,
     Iterable,
-    Iterator,
     NoReturn,
     Optional,
     Tuple,
