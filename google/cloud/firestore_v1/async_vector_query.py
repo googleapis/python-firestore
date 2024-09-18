@@ -114,13 +114,6 @@ class AsyncVectorQuery(BaseVectorQuery):
         consumes each document returned in the stream of ``RunQueryResponse``
         messages.
 
-        .. note::
-
-           The underlying stream of responses will time out after
-           the ``max_rpc_timeout_millis`` value set in the GAPIC
-           client configuration for the ``RunQuery`` API.  Snapshots
-           not consumed from the iterator before that point will be lost.
-
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
         allowed).
