@@ -173,16 +173,17 @@ class Transaction(batch.WriteBatch, BaseTransaction):
 
     def get(
         self,
-        ref_or_query,
+        ref_or_query: DocumentReference | Query,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> StreamGenerator[DocumentSnapshot] | Generator[DocumentSnapshot, Any, None]:
         """Retrieve a document or a query result from the database.
 
         Args:
-            ref_or_query: The document references or query object to return.
+            ref_or_query (DocumentReference | Query):
+                The document references or query object to return.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
@@ -191,7 +192,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
-                Can only be used when running a query.
+                Can only be used when running a query, not a document reference.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the

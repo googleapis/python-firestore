@@ -173,7 +173,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
     async def get(
         self,
-        ref_or_query,
+        ref_or_query: AsyncDocumentReference | AsyncQuery,
         retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
@@ -183,7 +183,8 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         Retrieve a document or a query result from the database.
 
         Args:
-            ref_or_query The document references or query object to return.
+            ref_or_query (AsyncDocumentReference | AsyncQuery):
+                The document references or query object to return.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
@@ -192,6 +193,8 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+                Can only be used when running a query, not a document reference.
+
 
         Yields:
             DocumentSnapshot: The next document snapshot that fulfills the query,
@@ -211,7 +214,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         elif isinstance(ref_or_query, AsyncQuery):
             if explain_options is not None:
                 kwargs["explain_options"] = explain_options
-            return ref_or_query.stream(transaction=self, **kwargs)
+            return await ref_or_query.stream(transaction=self, **kwargs)
         else:
             raise ValueError(
                 'Value for argument "ref_or_query" must be a AsyncDocumentReference or a AsyncQuery.'

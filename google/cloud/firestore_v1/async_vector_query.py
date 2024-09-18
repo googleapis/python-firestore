@@ -142,7 +142,9 @@ class AsyncVectorQuery(BaseVectorQuery):
         Yields:
             [:class:`~google.cloud.firestore_v1.base_document.DocumentSnapshot` \
                 | google.cloud.firestore_v1.types.query_profile.ExplainMetrtics]:
-            The next document that fulfills the query.
+            The next document that fulfills the query. Query results will be
+            yielded as `DocumentSnapshot`. When the result contains returned
+            explain metrics, yield `query_profile_pb.ExplainMetrics` individually.
         """
         metrics: query_profile_pb.ExplainMetrics | None = None
 

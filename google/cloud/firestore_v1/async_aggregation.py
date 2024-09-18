@@ -132,7 +132,10 @@ class AsyncAggregationQuery(BaseAggregationQuery):
 
         Yields:
             List[AggregationResult] | query_profile_pb.ExplainMetrics:
-            The result of aggregations of this query.
+            The result of aggregations of this query. Query results will be
+            yielded as `List[AggregationResult]`. When the result contains
+            returned explain metrics, yield `query_profile_pb.ExplainMetrics`
+            individually.
         """
         metrics: query_profile_pb.ExplainMetrics | None = None
 

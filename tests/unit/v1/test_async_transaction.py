@@ -362,7 +362,7 @@ async def _get_w_query_helper(retry=None, timeout=None, explain_options=None):
     client = AsyncMock(spec=[])
     transaction = _make_async_transaction(client)
     query = AsyncQuery(parent=AsyncMock(spec=[]))
-    query.stream = mock.Mock()
+    query.stream = AsyncMock()
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     result = await transaction.get(
