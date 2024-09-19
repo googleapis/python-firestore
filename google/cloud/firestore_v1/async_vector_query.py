@@ -139,8 +139,6 @@ class AsyncVectorQuery(BaseVectorQuery):
             yielded as `DocumentSnapshot`. When the result contains returned
             explain metrics, yield `query_profile_pb.ExplainMetrics` individually.
         """
-        metrics: query_profile_pb.ExplainMetrics | None = None
-
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
             retry,
@@ -166,7 +164,7 @@ class AsyncVectorQuery(BaseVectorQuery):
             if snapshot is not None:
                 yield snapshot
 
-            if metrics is None and response.explain_metrics:
+            if response.explain_metrics:
                 metrics = response.explain_metrics
                 yield metrics
 

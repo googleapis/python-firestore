@@ -2946,21 +2946,134 @@ async def _make_transaction_query(client, cleanup):
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_query_in_transaction_with_no_explain_options(client, cleanup, database):
+async def test_transaction_w_query_w_no_explain_options(client, cleanup, database):
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
+    inner_fn_ran = False
     query = await _make_transaction_query(client, cleanup)
-
     transaction = client.transaction()
 
     # should work when transaction is initiated through transactional decorator
     @firestore.async_transactional
     async def in_transaction(transaction):
-        global inner_fn_ran
+        nonlocal inner_fn_ran
 
-        # When no explain_options value is passed,  an exception shoud be
-        # raised when accessing explain_metrics.
+        # When no explain_options value is passed, an exception shoud be raised
+        # when accessing explain_metrics.
+        returned_generator = await transaction.get(query)
+
+        with pytest.raises(
+            QueryExplainError, match="explain_options not set on query."
+        ):
+            await returned_generator.get_explain_metrics()
+
+        inner_fn_ran = True
+
+    await in_transaction(transaction)
+
+    # make sure we didn't skip assertions in inner function
+    assert inner_fn_ran is True
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_transaction_w_query_w_explain_options_analyze_true(
+    client, cleanup, database
+):
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    inner_fn_ran = False
+    query = await _make_transaction_query(client, cleanup)
+    transaction = client.transaction()
+
+    # should work when transaction is initiated through transactional decorator
+    @firestore.async_transactional
+    async def in_transaction(transaction):
+        nonlocal inner_fn_ran
+
+        returned_generator = await transaction.get(
+            query,
+            explain_options=ExplainOptions(analyze=True),
+        )
+
+        # explain_metrics should not be available before reading all results.
+        with pytest.raises(
+            QueryExplainError,
+            match="explain_metrics not available until query is complete",
+        ):
+            await returned_generator.get_explain_metrics()
+
+        result = [x async for x in returned_generator]
+        explain_metrics = await returned_generator.get_explain_metrics()
+        _verify_explain_metrics_analyze_true(explain_metrics, len(result))
+
+        inner_fn_ran = True
+
+    await in_transaction(transaction)
+
+    # make sure we didn't skip assertions in inner function
+    assert inner_fn_ran is True
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_transaction_w_query_w_explain_options_analyze_false(
+    client, cleanup, database
+):
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    inner_fn_ran = False
+    query = await _make_transaction_query(client, cleanup)
+    transaction = client.transaction()
+
+    # should work when transaction is initiated through transactional decorator
+    @firestore.async_transactional
+    async def in_transaction(transaction):
+        nonlocal inner_fn_ran
+
+        returned_generator = await transaction.get(
+            query,
+            explain_options=ExplainOptions(analyze=False),
+        )
+        explain_metrics = await returned_generator.get_explain_metrics()
+        _verify_explain_metrics_analyze_false(explain_metrics)
+
+        # When analyze == False, result should be empty.
+        result = [x async for x in returned_generator]
+        assert not result
+
+        inner_fn_ran = True
+
+    await in_transaction(transaction)
+
+    # make sure we didn't skip assertions in inner function
+    assert inner_fn_ran is True
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+async def test_query_in_transaction_w_no_explain_options(client, cleanup, database):
+    from google.cloud.firestore_v1.query_profile import QueryExplainError
+
+    inner_fn_ran = False
+    query = await _make_transaction_query(client, cleanup)
+    transaction = client.transaction()
+
+    # should work when transaction is initiated through transactional decorator
+    @firestore.async_transactional
+    async def in_transaction(transaction):
+        nonlocal inner_fn_ran
+
+        # When no explain_options value is passed, an exception shoud be raised
+        # when accessing explain_metrics.
         result = await query.get(transaction=transaction)
+
         with pytest.raises(
             QueryExplainError, match="explain_options not set on query."
         ):
@@ -2978,24 +3091,25 @@ async def test_query_in_transaction_with_no_explain_options(client, cleanup, dat
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_query_in_transaction_with_explain_options_analyze_true(
+async def test_query_in_transaction_w_explain_options_analyze_true(
     client, cleanup, database
 ):
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
+    inner_fn_ran = False
     query = await _make_transaction_query(client, cleanup)
-
     transaction = client.transaction()
 
     # should work when transaction is initiated through transactional decorator
     @firestore.async_transactional
     async def in_transaction(transaction):
-        global inner_fn_ran
+        nonlocal inner_fn_ran
 
         result = await query.get(
             transaction=transaction,
             explain_options=ExplainOptions(analyze=True),
         )
+
         explain_metrics = result.get_explain_metrics()
         _verify_explain_metrics_analyze_true(explain_metrics, len(result))
 
@@ -3011,19 +3125,19 @@ async def test_query_in_transaction_with_explain_options_analyze_true(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-async def test_query_in_transaction_with_explain_options_analyze_false(
+async def test_query_in_transaction_w_explain_options_analyze_false(
     client, cleanup, database
 ):
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
+    inner_fn_ran = False
     query = await _make_transaction_query(client, cleanup)
-
     transaction = client.transaction()
 
     # should work when transaction is initiated through transactional decorator
     @firestore.async_transactional
     async def in_transaction(transaction):
-        global inner_fn_ran
+        nonlocal inner_fn_ran
 
         result = await query.get(
             transaction=transaction,
@@ -3031,6 +3145,9 @@ async def test_query_in_transaction_with_explain_options_analyze_false(
         )
         explain_metrics = result.get_explain_metrics()
         _verify_explain_metrics_analyze_false(explain_metrics)
+
+        # When analyze == False, result should be empty.
+        assert not result
 
         inner_fn_ran = True
 

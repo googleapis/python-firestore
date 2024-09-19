@@ -137,8 +137,6 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             returned explain metrics, yield `query_profile_pb.ExplainMetrics`
             individually.
         """
-        metrics: query_profile_pb.ExplainMetrics | None = None
-
         request, kwargs = self._prep_stream(
             transaction,
             retry,
@@ -157,7 +155,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             if result:
                 yield result
 
-            if metrics is None and response.explain_metrics:
+            if response.explain_metrics:
                 metrics = response.explain_metrics
                 yield metrics
 

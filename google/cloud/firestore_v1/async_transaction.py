@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Callable, Coroutine, Optional
-import warnings
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry_async as retries
@@ -195,18 +194,21 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
                 explain_metrics will be available on the returned generator.
                 Can only be used when running a query, not a document reference.
 
-
         Yields:
             DocumentSnapshot: The next document snapshot that fulfills the query,
             or :data:`None` if the document does not exist.
+
+        Raises:
+            ValueError: if `ref_or_query` is not one of the supported types, or
+            explain_options is provided when `ref_or_query` is a document
+            reference.
         """
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
         if isinstance(ref_or_query, AsyncDocumentReference):
             if explain_options is not None:
-                warnings.warn(
-                    "explain_options not supported in transanction with "
-                    "document references and will be ignored. To use "
-                    "explain_options, use transaction with query instead."
+                raise ValueError(
+                    "When type of `ref_or_query` is `AsyncDocumentReference`, "
+                    "`explain_options` cannot be provided."
                 )
             return await self._client.get_all(
                 [ref_or_query], transaction=self, **kwargs
@@ -214,7 +216,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
         elif isinstance(ref_or_query, AsyncQuery):
             if explain_options is not None:
                 kwargs["explain_options"] = explain_options
-            return await ref_or_query.stream(transaction=self, **kwargs)
+            return ref_or_query.stream(transaction=self, **kwargs)
         else:
             raise ValueError(
                 'Value for argument "ref_or_query" must be a AsyncDocumentReference or a AsyncQuery.'
