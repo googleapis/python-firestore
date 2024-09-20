@@ -308,12 +308,26 @@ def test_basequery_where_eq_null(unary_helper_function):
         (_where_unary_helper_field_filter),
     ],
 )
+def test_basequery_where_neq_null(unary_helper_function):
+    from google.cloud.firestore_v1.types import StructuredQuery
+
+    op_enum = StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL
+    unary_helper_function(None, op_enum, op_string="!=")
+
+
+@pytest.mark.parametrize(
+    "unary_helper_function",
+    [
+        (_where_unary_helper),
+        (_where_unary_helper_field_filter),
+    ],
+)
 def test_basequery_where_gt_null(unary_helper_function):
-    from google.cloud.firestore_v1.base_query import _BAD_OP_NAN_NULL
+    from google.cloud.firestore_v1.base_query import _BAD_OP_NULL
 
     with pytest.raises(ValueError) as exc:
         unary_helper_function(None, 0, op_string=">")
-    assert str(exc.value) == _BAD_OP_NAN_NULL
+    assert str(exc.value) == _BAD_OP_NULL
 
 
 @pytest.mark.parametrize(
@@ -338,11 +352,11 @@ def test_basequery_where_eq_nan(unary_helper_function):
     ],
 )
 def test_basequery_where_le_nan(unary_helper_function):
-    from google.cloud.firestore_v1.base_query import _BAD_OP_NAN_NULL
+    from google.cloud.firestore_v1.base_query import _BAD_OP_NAN
 
     with pytest.raises(ValueError) as exc:
         unary_helper_function(float("nan"), 0, op_string="<=")
-    assert str(exc.value) == _BAD_OP_NAN_NULL
+    assert str(exc.value) == _BAD_OP_NAN
 
 
 @pytest.mark.parametrize(

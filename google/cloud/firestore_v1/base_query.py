@@ -67,10 +67,12 @@ if TYPE_CHECKING:  # pragma: NO COVER
 
 
 _BAD_DIR_STRING: str
-_BAD_OP_NAN_NULL: str
+_BAD_OP_NAN: str
+_BAD_OP_NULL: str
 _BAD_OP_STRING: str
 _COMPARISON_OPERATORS: Dict[str, Any]
 _EQ_OP: str
+_NEQ_OP: str
 _INVALID_CURSOR_TRANSFORM: str
 _INVALID_WHERE_TRANSFORM: str
 _MISMATCH_CURSOR_W_ORDER_BY: str
@@ -80,12 +82,13 @@ _operator_enum: Any
 
 
 _EQ_OP = "=="
+_NEQ_OP = "!="
 _operator_enum = StructuredQuery.FieldFilter.Operator
 _COMPARISON_OPERATORS = {
     "<": _operator_enum.LESS_THAN,
     "<=": _operator_enum.LESS_THAN_OR_EQUAL,
     _EQ_OP: _operator_enum.EQUAL,
-    "!=": _operator_enum.NOT_EQUAL,
+    _NEQ_OP: _operator_enum.NOT_EQUAL,
     ">=": _operator_enum.GREATER_THAN_OR_EQUAL,
     ">": _operator_enum.GREATER_THAN,
     "array_contains": _operator_enum.ARRAY_CONTAINS,
@@ -104,7 +107,8 @@ _INEQUALITY_OPERATORS = (
     _operator_enum.NOT_IN,
 )
 _BAD_OP_STRING = "Operator string {!r} is invalid. Valid choices are: {}."
-_BAD_OP_NAN_NULL = 'Only an equality filter ("==") can be used with None or NaN values'
+_BAD_OP_NAN = 'Only an equality filter ("==") can be used with NaN values'
+_BAD_OP_NULL = 'Only equality ("==") or not-equal ("!=") filters can be used with None values'
 _INVALID_WHERE_TRANSFORM = "Transforms cannot be used as where values."
 _BAD_DIR_STRING = "Invalid direction {!r}. Must be one of {!r} or {!r}."
 _INVALID_CURSOR_TRANSFORM = "Transforms cannot be used as cursor values."
@@ -144,13 +148,16 @@ class FieldFilter(BaseFilter):
         self.value = value
 
         if value is None:
-            if op_string != _EQ_OP:
-                raise ValueError(_BAD_OP_NAN_NULL)
-            self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NULL
+            if op_string == _EQ_OP:
+                self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NULL
+            elif op_string == _NEQ_OP:
+                self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL
+            else:
+                raise ValueError(_BAD_OP_NULL)
 
         elif _isnan(value):
             if op_string != _EQ_OP:
-                raise ValueError(_BAD_OP_NAN_NULL)
+                raise ValueError(_BAD_OP_NAN)
             self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NAN
         elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
             raise ValueError(_INVALID_WHERE_TRANSFORM)
@@ -479,15 +486,20 @@ class BaseQuery(object):
                 stacklevel=2,
             )
             if value is None:
-                if op_string != _EQ_OP:
-                    raise ValueError(_BAD_OP_NAN_NULL)
+                if op_string == _EQ_OP:
+                    op = StructuredQuery.UnaryFilter.Operator.IS_NULL
+                elif op_string == _NEQ_OP:
+                    op = StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL
+                else:
+                    raise ValueError(_BAD_OP_NULL)
+
                 filter_pb = query.StructuredQuery.UnaryFilter(
                     field=query.StructuredQuery.FieldReference(field_path=field_path),
-                    op=StructuredQuery.UnaryFilter.Operator.IS_NULL,
+                    op=op
                 )
             elif _isnan(value):
                 if op_string != _EQ_OP:
-                    raise ValueError(_BAD_OP_NAN_NULL)
+                    raise ValueError(_BAD_OP_NAN)
                 filter_pb = query.StructuredQuery.UnaryFilter(
                     field=query.StructuredQuery.FieldReference(field_path=field_path),
                     op=StructuredQuery.UnaryFilter.Operator.IS_NAN,
