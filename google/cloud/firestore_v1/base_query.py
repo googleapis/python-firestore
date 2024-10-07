@@ -24,24 +24,11 @@ import abc
 import copy
 import math
 import warnings
-
-from google.api_core import retry as retries
-from google.protobuf import wrappers_pb2
-
-from google.cloud import firestore_v1
-from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1 import document
-from google.cloud.firestore_v1 import field_path as field_path_module
-from google.cloud.firestore_v1 import transforms
-from google.cloud.firestore_v1.types import StructuredQuery
-from google.cloud.firestore_v1.types import query
-from google.cloud.firestore_v1.types import Cursor
-from google.cloud.firestore_v1.types import RunQueryResponse
-from google.cloud.firestore_v1.order import Order
 from typing import (
+    TYPE_CHECKING,
     Any,
+    Coroutine,
     Dict,
-    Generator,
     Iterable,
     NoReturn,
     Optional,
@@ -49,14 +36,36 @@ from typing import (
     Type,
     TypeVar,
     Union,
-    TYPE_CHECKING,
 )
+
+from google.api_core import retry as retries
+from google.protobuf import wrappers_pb2
+
+from google.cloud import firestore_v1
+from google.cloud.firestore_v1 import _helpers, document
+from google.cloud.firestore_v1 import field_path as field_path_module
+from google.cloud.firestore_v1 import transforms
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+from google.cloud.firestore_v1.order import Order
+from google.cloud.firestore_v1.types import (
+    Cursor,
+    RunQueryResponse,
+    StructuredQuery,
+    query,
+)
+from google.cloud.firestore_v1.vector import Vector
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+    from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
     from google.cloud.firestore_v1.field_path import FieldPath
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_results import QueryResultsList
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
+
 
 _BAD_DIR_STRING: str
 _BAD_OP_NAN_NULL: str
@@ -972,6 +981,18 @@ class BaseQuery(object):
             query_kwargs["limit"] = wrappers_pb2.Int32Value(value=self._limit)
         return query.StructuredQuery(**query_kwargs)
 
+    def find_nearest(
+        self,
+        vector_field: str,
+        query_vector: Vector,
+        limit: int,
+        distance_measure: DistanceMeasure,
+        *,
+        distance_result_field: Optional[str] = None,
+        distance_threshold: Optional[float] = None,
+    ) -> BaseVectorQuery:
+        raise NotImplementedError
+
     def count(
         self, alias: str | None = None
     ) -> Type["firestore_v1.base_aggregation.BaseAggregationQuery"]:
@@ -992,7 +1013,12 @@ class BaseQuery(object):
         transaction=None,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
-    ) -> Iterable[DocumentSnapshot]:
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> (
+        QueryResultsList[DocumentSnapshot]
+        | Coroutine[Any, Any, QueryResultsList[DocumentSnapshot]]
+    ):
         raise NotImplementedError
 
     def _prep_stream(
@@ -1000,6 +1026,7 @@ class BaseQuery(object):
         transaction=None,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
     ) -> Tuple[dict, str, dict]:
         """Shared setup for async / sync :meth:`stream`"""
         if self._limit_to_last:
@@ -1014,6 +1041,8 @@ class BaseQuery(object):
             "structured_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
         }
+        if explain_options is not None:
+            request["explain_options"] = explain_options._to_dict()
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, expected_prefix, kwargs
@@ -1023,7 +1052,12 @@ class BaseQuery(object):
         transaction=None,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> (
+        StreamGenerator[document.DocumentSnapshot]
+        | AsyncStreamGenerator[DocumentSnapshot]
+    ):
         raise NotImplementedError
 
     def on_snapshot(self, callback) -> NoReturn:

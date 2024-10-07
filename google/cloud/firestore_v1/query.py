@@ -20,28 +20,34 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from google.cloud import firestore_v1
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
-from google.api_core import exceptions
-from google.api_core import gapic_v1
+from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Type
+
+from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
 
+from google.cloud import firestore_v1
+from google.cloud.firestore_v1 import aggregation, transaction
+from google.cloud.firestore_v1.query_results import QueryResultsList
+from google.cloud.firestore_v1.base_document import (
+    DocumentSnapshot,
+)
 from google.cloud.firestore_v1.base_query import (
     BaseCollectionGroup,
     BaseQuery,
     QueryPartition,
-    _query_response_to_snapshot,
     _collection_group_query_response_to_snapshot,
     _enum_from_direction,
+    _query_response_to_snapshot,
 )
-from google.cloud.firestore_v1 import aggregation
-
-from google.cloud.firestore_v1 import document
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
+from google.cloud.firestore_v1.vector import Vector
+from google.cloud.firestore_v1.vector_query import VectorQuery
 from google.cloud.firestore_v1.watch import Watch
-from typing import Any, Callable, Generator, List, Optional, Type, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
     from google.cloud.firestore_v1.field_path import FieldPath
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
 
 
 class Query(BaseQuery):
@@ -132,8 +138,10 @@ class Query(BaseQuery):
         self,
         transaction=None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> List[DocumentSnapshot]:
+        timeout: Optional[float] = None,
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> QueryResultsList[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -150,10 +158,17 @@ class Query(BaseQuery):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
-            list: The documents in the collection that match this query.
+            QueryResultsList[DocumentSnapshot]: The documents in the collection
+            that match this query.
         """
+        explain_metrics: ExplainMetrics | None = None
+
         is_limited_to_last = self._limit_to_last
 
         if self._limit_to_last:
@@ -168,11 +183,22 @@ class Query(BaseQuery):
                 )
             self._limit_to_last = False
 
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
+        result = self.stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+            explain_options=explain_options,
+        )
+        result_list = list(result)
         if is_limited_to_last:
-            result = reversed(list(result))
+            result_list = list(reversed(result_list))
 
-        return list(result)
+        if explain_options is None:
+            explain_metrics = None
+        else:
+            explain_metrics = result.get_explain_metrics()
+
+        return QueryResultsList(result_list, explain_options, explain_metrics)
 
     def _chunkify(
         self, chunk_size: int
@@ -212,12 +238,13 @@ class Query(BaseQuery):
             ):
                 return
 
-    def _get_stream_iterator(self, transaction, retry, timeout):
+    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
         """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
             retry,
             timeout,
+            explain_options,
         )
 
         response_iterator = self._client._firestore_api.run_query(
@@ -238,6 +265,45 @@ class Query(BaseQuery):
             return retry._predicate(exc)
 
         return False
+
+    def find_nearest(
+        self,
+        vector_field: str,
+        query_vector: Vector,
+        limit: int,
+        distance_measure: DistanceMeasure,
+        *,
+        distance_result_field: Optional[str] = None,
+        distance_threshold: Optional[float] = None,
+    ) -> Type["firestore_v1.vector_query.VectorQuery"]:
+        """
+        Finds the closest vector embeddings to the given query vector.
+
+        Args:
+            vector_field (str): An indexed vector field to search upon. Only documents which contain
+                vectors whose dimensionality match the query_vector can be returned.
+            query_vector (Vector): The query vector that we are searching on. Must be a vector of no more
+                than 2048 dimensions.
+            limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
+            distance_measure (:class:`DistanceMeasure`): The Distance Measure to use.
+            distance_result_field (Optional[str]):
+                Name of the field to output the result of the vector distance
+                calculation. If unset then the distance will not be returned.
+            distance_threshold (Optional[float]):
+                A threshold for which no less similar documents will be returned.
+
+
+        Returns:
+            :class`~firestore_v1.vector_query.VectorQuery`: the vector query.
+        """
+        return VectorQuery(self).find_nearest(
+            vector_field=vector_field,
+            query_vector=query_vector,
+            limit=limit,
+            distance_measure=distance_measure,
+            distance_result_field=distance_result_field,
+            distance_threshold=distance_threshold,
+        )
 
     def count(
         self, alias: str | None = None
@@ -281,15 +347,18 @@ class Query(BaseQuery):
         """
         return aggregation.AggregationQuery(self).avg(field_ref, alias=alias)
 
-    def stream(
+    def _make_stream(
         self,
-        transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
-        """Read the documents in the collection that match this query.
+        transaction: Optional[transaction.Transaction] = None,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
+        """Internal method for stream(). Read the documents in the collection
+        that match this query.
 
-        This sends a ``RunQuery`` RPC and then returns an iterator which
+        Internal method for stream().
+        This sends a ``RunQuery`` RPC and then returns a generator which
         consumes each document returned in the stream of ``RunQueryResponse``
         messages.
 
@@ -305,22 +374,34 @@ class Query(BaseQuery):
         allowed).
 
         Args:
-            transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
-                An existing transaction that this query will run in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
+            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.\
+                Transaction`]):
+                An existing transaction that the query will run in.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optional[float]): The timeout for this request. Defaults
+                to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Yields:
-            :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
+            DocumentSnapshot:
             The next document that fulfills the query.
+
+        Returns:
+            ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
+            The results of query profiling, if received from the service.
         """
+        metrics: ExplainMetrics | None = None
+
         response_iterator, expected_prefix = self._get_stream_iterator(
             transaction,
             retry,
             timeout,
+            explain_options,
         )
 
         last_snapshot = None
@@ -343,6 +424,9 @@ class Query(BaseQuery):
             if response is None:  # EOI
                 break
 
+            if metrics is None and response.explain_metrics:
+                metrics = response.explain_metrics
+
             if self._all_descendants:
                 snapshot = _collection_group_query_response_to_snapshot(
                     response, self._parent
@@ -354,6 +438,58 @@ class Query(BaseQuery):
             if snapshot is not None:
                 last_snapshot = snapshot
                 yield snapshot
+
+        return metrics
+
+    def stream(
+        self,
+        transaction: Optional[transaction.Transaction] = None,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> StreamGenerator[DocumentSnapshot]:
+        """Read the documents in the collection that match this query.
+
+        This sends a ``RunQuery`` RPC and then returns a generator which
+        consumes each document returned in the stream of ``RunQueryResponse``
+        messages.
+
+        .. note::
+
+           The underlying stream of responses will time out after
+           the ``max_rpc_timeout_millis`` value set in the GAPIC
+           client configuration for the ``RunQuery`` API.  Snapshots
+           not consumed from the iterator before that point will be lost.
+
+        If a ``transaction`` is used and it already has write operations
+        added, this method cannot be used (i.e. read-after-write is not
+        allowed).
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optinal[float]): The timeout for this request.  Defaults
+                to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
+
+        Returns:
+            `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
+        """
+        inner_generator = self._make_stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+            explain_options=explain_options,
+        )
+        return StreamGenerator(inner_generator, explain_options)
 
     def on_snapshot(self, callback: Callable) -> Watch:
         """Monitor the documents in this collection that match this query.
@@ -384,7 +520,7 @@ class Query(BaseQuery):
             # Terminate this watch
             query_watch.unsubscribe()
         """
-        return Watch.for_query(self, callback, document.DocumentSnapshot)
+        return Watch.for_query(self, callback, DocumentSnapshot)
 
     @staticmethod
     def _get_collection_reference_class() -> (

@@ -33,7 +33,7 @@ def test_order_compare_across_heterogenous_values():
     float_nan = float("nan")
     inf = float("inf")
 
-    groups = [None] * 65
+    groups = [None] * 68
 
     groups[0] = [nullValue()]
 
@@ -123,12 +123,17 @@ def test_order_compare_across_heterogenous_values():
     groups[58] = [_array_value(["foo", 1])]
     groups[59] = [_array_value(["foo", "0"])]
 
+    # vectors
+    groups[60] = [_object_value({"__type__": "__vector__", "value": [3.0, 2.0]})]
+    groups[61] = [_object_value({"__type__": "__vector__", "value": [1.0, 2.0, 5.0]})]
+    groups[62] = [_object_value({"__type__": "__vector__", "value": [2.0, 2.0, 5.0]})]
+
     # objects
-    groups[60] = [_object_value({"bar": 0})]
-    groups[61] = [_object_value({"bar": 0, "foo": 1})]
-    groups[62] = [_object_value({"bar": 1})]
-    groups[63] = [_object_value({"bar": 2})]
-    groups[64] = [_object_value({"bar": "0"})]
+    groups[63] = [_object_value({"bar": 0})]
+    groups[64] = [_object_value({"bar": 0, "foo": 1})]
+    groups[65] = [_object_value({"bar": 1})]
+    groups[66] = [_object_value({"bar": 2})]
+    groups[67] = [_object_value({"bar": "0"})]
 
     target = _make_order()
 
@@ -170,7 +175,14 @@ def test_order_compare_w_failure_to_find_type():
             target.compare(left, right)
 
     (message,) = exc_info.value.args
-    assert message.startswith("Unknown ``value_type``")
+    assert message.startswith("Unknown TypeOrder")
+
+
+def test_order_all_value_present():
+    from google.cloud.firestore_v1.order import _TYPE_ORDER_MAP, TypeOrder
+
+    for type_order in TypeOrder:
+        assert type_order in _TYPE_ORDER_MAP
 
 
 def test_order_compare_w_objects_different_keys():
@@ -224,8 +236,9 @@ def nullValue():
 
 
 def _timestamp_value(seconds, nanos):
-    from google.cloud.firestore_v1.types import document
     from google.protobuf import timestamp_pb2
+
+    from google.cloud.firestore_v1.types import document
 
     return document.Value(
         timestamp_value=timestamp_pb2.Timestamp(seconds=seconds, nanos=nanos)
@@ -233,8 +246,7 @@ def _timestamp_value(seconds, nanos):
 
 
 def _geoPoint_value(latitude, longitude):
-    from google.cloud.firestore_v1._helpers import encode_value
-    from google.cloud.firestore_v1._helpers import GeoPoint
+    from google.cloud.firestore_v1._helpers import GeoPoint, encode_value
 
     return encode_value(GeoPoint(latitude, longitude))
 

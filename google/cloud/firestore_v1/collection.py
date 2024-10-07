@@ -13,22 +13,27 @@
 # limitations under the License.
 
 """Classes for representing collections for the Google Cloud Firestore API."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any, Callable, Generator, Optional, Tuple, Union
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
 
+from google.cloud.firestore_v1 import aggregation, document
+from google.cloud.firestore_v1 import query as query_mod
+from google.cloud.firestore_v1 import transaction, vector_query
 from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1 import query as query_mod
-from google.cloud.firestore_v1 import aggregation
+from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.watch import Watch
-from google.cloud.firestore_v1 import document
-from typing import Any, Callable, Generator, Tuple, Union
 
-# Types needed only for Type Hints
-from google.cloud.firestore_v1.transaction import Transaction
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
 
 class CollectionReference(BaseCollectionReference[query_mod.Query]):
@@ -75,6 +80,14 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
             :class:`~google.cloud.firestore_v1.aggregation_query.AggregationQuery`
         """
         return aggregation.AggregationQuery(self._query())
+
+    def _vector_query(self) -> vector_query.VectorQuery:
+        """VectorQuery factory.
+
+        Returns:
+            :class:`~google.cloud.firestore_v1.vector_query.VectorQuery`
+        """
+        return vector_query.VectorQuery(self._query())
 
     def add(
         self,
@@ -156,10 +169,12 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
     def get(
         self,
-        transaction: Union[Transaction, None] = None,
+        transaction: Union[transaction.Transaction, None] = None,
         retry: retries.Retry = gapic_v1.method.DEFAULT,
         timeout: Union[float, None] = None,
-    ) -> list:
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> QueryResultsList[DocumentSnapshot]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and returns a list of documents
@@ -167,30 +182,39 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
         Args:
             transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.transaction.Transaction`]):
                 An existing transaction that this query will run in.
             retry (google.api_core.retry.Retry): Designation of what errors, if any,
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
         allowed).
 
         Returns:
-            list: The documents in this collection that match the query.
+            QueryResultsList[DocumentSnapshot]: The documents in this collection
+            that match the query.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
+        if explain_options is not None:
+            kwargs["explain_options"] = explain_options
 
         return query.get(transaction=transaction, **kwargs)
 
     def stream(
         self,
-        transaction: Union[Transaction, None] = None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: Union[float, None] = None,
-    ) -> Generator[document.DocumentSnapshot, Any, None]:
+        transaction: Optional[transaction.Transaction] = None,
+        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> StreamGenerator[DocumentSnapshot]:
         """Read the documents in this collection.
 
         This sends a ``RunQuery`` RPC and then returns an iterator which
@@ -210,18 +234,24 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
 
         Args:
             transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.\
-                Transaction`]):
+                transaction.Transaction`]):
                 An existing transaction that the query will run in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optional[float]): The timeout for this request. Defaults
+                to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
-        Yields:
-            :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
-            The next document that fulfills the query.
+        Returns:
+            `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
         """
         query, kwargs = self._prep_get_or_stream(retry, timeout)
+        if explain_options:
+            kwargs["explain_options"] = explain_options
 
         return query.stream(transaction=transaction, **kwargs)
 

@@ -15,7 +15,9 @@
 import mock
 import pytest
 
-from tests.unit.v1.test__helpers import AsyncMock
+from tests.unit.v1._test_helpers import make_async_client
+from tests.unit.v1.test__helpers import AsyncIter, AsyncMock
+from tests.unit.v1.test_base_query import _make_query_response
 
 
 def _make_async_transaction(*args, **kwargs):
@@ -195,8 +197,7 @@ async def test_asynctransaction__rollback_failure():
 
 @pytest.mark.asyncio
 async def test_asynctransaction__commit():
-    from google.cloud.firestore_v1.types import firestore
-    from google.cloud.firestore_v1.types import write
+    from google.cloud.firestore_v1.types import firestore, write
 
     # Create a minimal fake GAPIC with a dummy result.
     firestore_api = AsyncMock()
@@ -315,16 +316,16 @@ async def test_asynctransaction_get_all_w_retry_timeout():
     await _get_all_helper(retry=retry, timeout=timeout)
 
 
-async def _get_w_document_ref_helper(retry=None, timeout=None):
-    from google.cloud.firestore_v1.async_document import AsyncDocumentReference
+async def _get_w_document_ref_helper(retry=None, timeout=None, explain_options=None):
     from google.cloud.firestore_v1 import _helpers
+    from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
     client = AsyncMock(spec=["get_all"])
     transaction = _make_async_transaction(client)
     ref = AsyncDocumentReference("documents", "doc-id")
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
-    result = await transaction.get(ref, **kwargs)
+    result = await transaction.get(ref, **kwargs, explain_options=explain_options)
 
     client.get_all.assert_called_once_with([ref], transaction=transaction, **kwargs)
     assert result is client.get_all.return_value
@@ -344,26 +345,93 @@ async def test_asynctransaction_get_w_document_ref_w_retry_timeout():
     await _get_w_document_ref_helper(retry=retry, timeout=timeout)
 
 
-async def _get_w_query_helper(retry=None, timeout=None):
-    from google.cloud.firestore_v1.async_query import AsyncQuery
-    from google.cloud.firestore_v1 import _helpers
+@pytest.mark.asyncio
+async def test_transaction_get_w_document_ref_w_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
-    client = AsyncMock(spec=[])
-    transaction = _make_async_transaction(client)
-    query = AsyncQuery(parent=AsyncMock(spec=[]))
-    query.stream = AsyncMock()
+    with pytest.raises(ValueError, match="`explain_options` cannot be provided."):
+        await _get_w_document_ref_helper(
+            explain_options=ExplainOptions(analyze=True),
+        )
+
+
+async def _get_w_query_helper(retry=None, timeout=None, explain_options=None):
+    from google.cloud.firestore_v1 import _helpers
+    from google.cloud.firestore_v1.async_query import AsyncQuery
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainMetrics,
+        QueryExplainError,
+    )
+
+    # Create a minimal fake GAPIC.
+    firestore_api = AsyncMock(spec=["run_query"])
+
+    # Attach the fake GAPIC to a real client.
+    client = make_async_client()
+    client._firestore_api_internal = firestore_api
+
+    # Make a **real** collection reference as parent.
+    parent = client.collection("dee")
+
+    # Add a dummy response to the minimal fake GAPIC.
+    _, expected_prefix = parent._parent_info()
+    name = "{}/sleep".format(expected_prefix)
+    data = {"snooze": 10}
+    if explain_options is not None:
+        explain_metrics = {"execution_stats": {"results_returned": 1}}
+    else:
+        explain_metrics = None
+    response_pb = _make_query_response(
+        name=name, data=data, explain_metrics=explain_metrics
+    )
+    firestore_api.run_query.return_value = AsyncIter([response_pb])
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
-    result = await transaction.get(
+    # Run the transaction with query.
+    transaction = _make_async_transaction(client)
+    txn_id = b"beep-fail-commit"
+    transaction._id = txn_id
+    query = AsyncQuery(parent)
+    returned_generator = await transaction.get(
         query,
         **kwargs,
+        explain_options=explain_options,
     )
 
-    query.stream.assert_called_once_with(
-        transaction=transaction,
+    # Verify the response.
+    assert isinstance(returned_generator, AsyncStreamGenerator)
+    results = [x async for x in returned_generator]
+    assert len(results) == 1
+    snapshot = results[0]
+    assert snapshot.reference._path == ("dee", "sleep")
+    assert snapshot.to_dict() == data
+
+    # Verify explain_metrics.
+    if explain_options is None:
+        with pytest.raises(QueryExplainError, match="explain_options not set"):
+            await returned_generator.get_explain_metrics()
+    else:
+        explain_metrics = await returned_generator.get_explain_metrics()
+        assert isinstance(explain_metrics, ExplainMetrics)
+        assert explain_metrics.execution_stats.results_returned == 1
+
+    # Create expected request body.
+    parent_path, _ = parent._parent_info()
+    request = {
+        "parent": parent_path,
+        "structured_query": query._to_protobuf(),
+        "transaction": b"beep-fail-commit",
+    }
+    if explain_options is not None:
+        request["explain_options"] = explain_options._to_dict()
+
+    # Verify the mock call.
+    firestore_api.run_query.assert_called_once_with(
+        request=request,
+        metadata=client._rpc_metadata,
         **kwargs,
     )
-    assert result is query.stream.return_value
 
 
 @pytest.mark.asyncio
@@ -374,6 +442,13 @@ async def test_asynctransaction_get_w_query():
 @pytest.mark.asyncio
 async def test_asynctransaction_get_w_query_w_retry_timeout():
     await _get_w_query_helper()
+
+
+@pytest.mark.asyncio
+async def test_transaction_get_w_query_w_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    await _get_w_query_helper(explain_options=ExplainOptions(analyze=True))
 
 
 @pytest.mark.asyncio
@@ -493,9 +568,8 @@ async def test_asynctransactional___call__success_first_attempt():
 @pytest.mark.asyncio
 async def test_asynctransactional___call__success_second_attempt():
     from google.api_core import exceptions
-    from google.cloud.firestore_v1.types import common
-    from google.cloud.firestore_v1.types import firestore
-    from google.cloud.firestore_v1.types import write
+
+    from google.cloud.firestore_v1.types import common, firestore, write
 
     to_wrap = AsyncMock(return_value=mock.sentinel.result, spec=[])
     wrapped = _make_async_transactional(to_wrap)
@@ -553,8 +627,9 @@ async def test_asynctransactional___call__failure_max_attempts(max_attempts):
     rasie retryable error and exhause max_attempts
     """
     from google.api_core import exceptions
-    from google.cloud.firestore_v1.types import common
+
     from google.cloud.firestore_v1.async_transaction import _EXCEED_ATTEMPTS_TEMPLATE
+    from google.cloud.firestore_v1.types import common
 
     to_wrap = AsyncMock(return_value=mock.sentinel.result, spec=[])
     wrapped = _make_async_transactional(to_wrap)
@@ -623,6 +698,7 @@ async def test_asynctransactional___call__failure_readonly(max_attempts):
     readonly transaction should never retry
     """
     from google.api_core import exceptions
+
     from google.cloud.firestore_v1.types import common
 
     to_wrap = AsyncMock(return_value=mock.sentinel.result, spec=[])
@@ -789,211 +865,14 @@ async def test_asynctransactional___call__failure_with_rollback_failure():
 
 
 def test_async_transactional_factory():
-    from google.cloud.firestore_v1.async_transaction import _AsyncTransactional
-    from google.cloud.firestore_v1.async_transaction import async_transactional
+    from google.cloud.firestore_v1.async_transaction import (
+        _AsyncTransactional,
+        async_transactional,
+    )
 
     wrapped = async_transactional(mock.sentinel.callable_)
     assert isinstance(wrapped, _AsyncTransactional)
     assert wrapped.to_wrap is mock.sentinel.callable_
-
-
-@mock.patch("google.cloud.firestore_v1.async_transaction._sleep")
-@pytest.mark.asyncio
-async def test__commit_with_retry_success_first_attempt(_sleep):
-    from google.cloud.firestore_v1.async_transaction import _commit_with_retry
-
-    # Create a minimal fake GAPIC with a dummy result.
-    firestore_api = AsyncMock()
-
-    # Attach the fake GAPIC to a real client.
-    client = _make_client("summer")
-    client._firestore_api_internal = firestore_api
-
-    # Call function and check result.
-    txn_id = b"cheeeeeez"
-    commit_response = await _commit_with_retry(client, mock.sentinel.write_pbs, txn_id)
-    assert commit_response is firestore_api.commit.return_value
-
-    # Verify mocks used.
-    _sleep.assert_not_called()
-    firestore_api.commit.assert_called_once_with(
-        request={
-            "database": client._database_string,
-            "writes": mock.sentinel.write_pbs,
-            "transaction": txn_id,
-        },
-        metadata=client._rpc_metadata,
-    )
-
-
-@mock.patch(
-    "google.cloud.firestore_v1.async_transaction._sleep", side_effect=[2.0, 4.0]
-)
-@pytest.mark.asyncio
-async def test__commit_with_retry_success_third_attempt(_sleep):
-    from google.api_core import exceptions
-    from google.cloud.firestore_v1.async_transaction import _commit_with_retry
-
-    # Create a minimal fake GAPIC with a dummy result.
-    firestore_api = AsyncMock()
-
-    # Make sure the first two requests fail and the third succeeds.
-    firestore_api.commit.side_effect = [
-        exceptions.ServiceUnavailable("Server sleepy."),
-        exceptions.ServiceUnavailable("Server groggy."),
-        mock.sentinel.commit_response,
-    ]
-
-    # Attach the fake GAPIC to a real client.
-    client = _make_client("outside")
-    client._firestore_api_internal = firestore_api
-
-    # Call function and check result.
-    txn_id = b"the-world\x00"
-    commit_response = await _commit_with_retry(client, mock.sentinel.write_pbs, txn_id)
-    assert commit_response is mock.sentinel.commit_response
-
-    # Verify mocks used.
-    # Ensure _sleep is called after commit failures, with intervals of 1 and 2 seconds
-    assert _sleep.call_count == 2
-    _sleep.assert_any_call(1.0)
-    _sleep.assert_any_call(2.0)
-    # commit() called same way 3 times.
-    commit_call = mock.call(
-        request={
-            "database": client._database_string,
-            "writes": mock.sentinel.write_pbs,
-            "transaction": txn_id,
-        },
-        metadata=client._rpc_metadata,
-    )
-    assert firestore_api.commit.mock_calls == [commit_call, commit_call, commit_call]
-
-
-@mock.patch("google.cloud.firestore_v1.async_transaction._sleep")
-@pytest.mark.asyncio
-async def test__commit_with_retry_failure_first_attempt(_sleep):
-    from google.api_core import exceptions
-    from google.cloud.firestore_v1.async_transaction import _commit_with_retry
-
-    # Create a minimal fake GAPIC with a dummy result.
-    firestore_api = AsyncMock()
-
-    # Make sure the first request fails with an un-retryable error.
-    exc = exceptions.ResourceExhausted("We ran out of fries.")
-    firestore_api.commit.side_effect = exc
-
-    # Attach the fake GAPIC to a real client.
-    client = _make_client("peanut-butter")
-    client._firestore_api_internal = firestore_api
-
-    # Call function and check result.
-    txn_id = b"\x08\x06\x07\x05\x03\x00\x09-jenny"
-    with pytest.raises(exceptions.ResourceExhausted) as exc_info:
-        await _commit_with_retry(client, mock.sentinel.write_pbs, txn_id)
-
-    assert exc_info.value is exc
-
-    # Verify mocks used.
-    _sleep.assert_not_called()
-    firestore_api.commit.assert_called_once_with(
-        request={
-            "database": client._database_string,
-            "writes": mock.sentinel.write_pbs,
-            "transaction": txn_id,
-        },
-        metadata=client._rpc_metadata,
-    )
-
-
-@mock.patch("google.cloud.firestore_v1.async_transaction._sleep", return_value=2.0)
-@pytest.mark.asyncio
-async def test__commit_with_retry_failure_second_attempt(_sleep):
-    from google.api_core import exceptions
-    from google.cloud.firestore_v1.async_transaction import _commit_with_retry
-
-    # Create a minimal fake GAPIC with a dummy result.
-    firestore_api = AsyncMock()
-
-    # Make sure the first request fails retry-able and second
-    # fails non-retryable.
-    exc1 = exceptions.ServiceUnavailable("Come back next time.")
-    exc2 = exceptions.InternalServerError("Server on fritz.")
-    firestore_api.commit.side_effect = [exc1, exc2]
-
-    # Attach the fake GAPIC to a real client.
-    client = _make_client("peanut-butter")
-    client._firestore_api_internal = firestore_api
-
-    # Call function and check result.
-    txn_id = b"the-journey-when-and-where-well-go"
-    with pytest.raises(exceptions.InternalServerError) as exc_info:
-        await _commit_with_retry(client, mock.sentinel.write_pbs, txn_id)
-
-    assert exc_info.value is exc2
-
-    # Verify mocks used.
-    _sleep.assert_called_once_with(1.0)
-    # commit() called same way 2 times.
-    commit_call = mock.call(
-        request={
-            "database": client._database_string,
-            "writes": mock.sentinel.write_pbs,
-            "transaction": txn_id,
-        },
-        metadata=client._rpc_metadata,
-    )
-    assert firestore_api.commit.mock_calls == [commit_call, commit_call]
-
-
-@mock.patch("random.uniform", return_value=5.5)
-@mock.patch("asyncio.sleep", return_value=None)
-@pytest.mark.asyncio
-async def test_sleep_defaults(sleep, uniform):
-    from google.cloud.firestore_v1.async_transaction import _sleep
-
-    curr_sleep = 10.0
-    assert uniform.return_value <= curr_sleep
-
-    new_sleep = await _sleep(curr_sleep)
-    assert new_sleep == 2.0 * curr_sleep
-
-    uniform.assert_called_once_with(0.0, curr_sleep)
-    sleep.assert_called_once_with(uniform.return_value)
-
-
-@mock.patch("random.uniform", return_value=10.5)
-@mock.patch("asyncio.sleep", return_value=None)
-@pytest.mark.asyncio
-async def test_sleep_explicit(sleep, uniform):
-    from google.cloud.firestore_v1.async_transaction import _sleep
-
-    curr_sleep = 12.25
-    assert uniform.return_value <= curr_sleep
-
-    multiplier = 1.5
-    new_sleep = await _sleep(curr_sleep, max_sleep=100.0, multiplier=multiplier)
-    assert new_sleep == multiplier * curr_sleep
-
-    uniform.assert_called_once_with(0.0, curr_sleep)
-    sleep.assert_called_once_with(uniform.return_value)
-
-
-@mock.patch("random.uniform", return_value=6.75)
-@mock.patch("asyncio.sleep", return_value=None)
-@pytest.mark.asyncio
-async def test_sleep_exceeds_max(sleep, uniform):
-    from google.cloud.firestore_v1.async_transaction import _sleep
-
-    curr_sleep = 20.0
-    assert uniform.return_value <= curr_sleep
-
-    max_sleep = 38.5
-    new_sleep = await _sleep(curr_sleep, max_sleep=max_sleep, multiplier=2.0)
-    assert new_sleep == max_sleep
-
-    uniform.assert_called_once_with(0.0, curr_sleep)
-    sleep.assert_called_once_with(uniform.return_value)
 
 
 def _make_credentials():
@@ -1011,9 +890,9 @@ def _make_client(project="feral-tom-cat"):
 
 def _make_transaction(txn_id, **txn_kwargs):
     from google.protobuf import empty_pb2
-    from google.cloud.firestore_v1.types import firestore
-    from google.cloud.firestore_v1.types import write
+
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+    from google.cloud.firestore_v1.types import firestore, write
 
     # Create a fake GAPIC ...
     firestore_api = AsyncMock()

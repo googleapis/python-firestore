@@ -20,18 +20,24 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-from google.api_core import exceptions
-from google.api_core import gapic_v1
-from google.api_core import retry as retries
+from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
 
+from google.api_core import exceptions, gapic_v1
+from google.api_core import retry as retries
 
 from google.cloud.firestore_v1.base_aggregation import (
     AggregationResult,
     BaseAggregationQuery,
     _query_response_to_result,
 )
+from google.cloud.firestore_v1.query_results import QueryResultsList
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
 
-from typing import Generator, Union, List, Any
+# Types needed only for Type Hints
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1 import transaction
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class AggregationQuery(BaseAggregationQuery):
@@ -50,10 +56,14 @@ class AggregationQuery(BaseAggregationQuery):
             retries.Retry, None, gapic_v1.method._MethodDefault
         ] = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
-    ) -> List[AggregationResult]:
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> QueryResultsList[AggregationResult]:
         """Runs the aggregation query.
 
-        This sends a ``RunAggregationQuery`` RPC and returns a list of aggregation results in the stream of ``RunAggregationQueryResponse`` messages.
+        This sends a ``RunAggregationQuery`` RPC and returns a list of
+        aggregation results in the stream of ``RunAggregationQueryResponse``
+        messages.
 
         Args:
             transaction
@@ -66,20 +76,39 @@ class AggregationQuery(BaseAggregationQuery):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
-            list: The aggregation query results
+            QueryResultsList[AggregationResult]: The aggregation query results.
 
         """
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
-        return list(result)  # type: ignore
+        explain_metrics: ExplainMetrics | None = None
 
-    def _get_stream_iterator(self, transaction, retry, timeout):
+        result = self.stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+            explain_options=explain_options,
+        )
+        result_list = list(result)
+
+        if explain_options is None:
+            explain_metrics = None
+        else:
+            explain_metrics = result.get_explain_metrics()
+
+        return QueryResultsList(result_list, explain_options, explain_metrics)
+
+    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
         """Helper method for :meth:`stream`."""
         request, kwargs = self._prep_stream(
             transaction,
             retry,
             timeout,
+            explain_options,
         )
 
         return self._client._firestore_api.run_aggregation_query(
@@ -99,42 +128,54 @@ class AggregationQuery(BaseAggregationQuery):
 
         return False
 
-    def stream(
+    def _make_stream(
         self,
-        transaction=None,
+        transaction: Optional[transaction.Transaction] = None,
         retry: Union[
             retries.Retry, None, gapic_v1.method._MethodDefault
         ] = gapic_v1.method.DEFAULT,
-        timeout: float | None = None,
-    ) -> Union[Generator[List[AggregationResult], Any, None]]:
-        """Runs the aggregation query.
+        timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> Generator[List[AggregationResult], Any, Optional[ExplainMetrics]]:
+        """Internal method for stream(). Runs the aggregation query.
 
-        This sends a ``RunAggregationQuery`` RPC and then returns an iterator which
-        consumes each document returned in the stream of ``RunAggregationQueryResponse``
-        messages.
+        This sends a ``RunAggregationQuery`` RPC and then returns a generator
+        which consumes each document returned in the stream of
+        ``RunAggregationQueryResponse`` messages.
 
-        If a ``transaction`` is used and it already has write operations
-        added, this method cannot be used (i.e. read-after-write is not
-        allowed).
+        If a ``transaction`` is used and it already has write operations added,
+        this method cannot be used (i.e. read-after-write is not allowed).
 
         Args:
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optional[float]): The timeout for this request.  Defaults
+                to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Yields:
-            :class:`~google.cloud.firestore_v1.base_aggregation.AggregationResult`:
-            The result of aggregations of this query
+            List[AggregationResult]:
+            The result of aggregations of this query.
+
+        Returns:
+            (Optional[google.cloud.firestore_v1.types.query_profile.ExplainMetrtics]):
+            The results of query profiling, if received from the service.
+
         """
+        metrics: ExplainMetrics | None = None
 
         response_iterator = self._get_stream_iterator(
             transaction,
             retry,
             timeout,
+            explain_options,
         )
         while True:
             try:
@@ -152,5 +193,57 @@ class AggregationQuery(BaseAggregationQuery):
 
             if response is None:  # EOI
                 break
+
+            if metrics is None and response.explain_metrics:
+                metrics = response.explain_metrics
+
             result = _query_response_to_result(response)
-            yield result
+            if result:
+                yield result
+
+        return metrics
+
+    def stream(
+        self,
+        transaction: Optional["transaction.Transaction"] = None,
+        retry: Union[
+            retries.Retry, None, gapic_v1.method._MethodDefault
+        ] = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> StreamGenerator[List[AggregationResult]]:
+        """Runs the aggregation query.
+
+        This sends a ``RunAggregationQuery`` RPC and then returns a generator
+        which consumes each document returned in the stream of
+        ``RunAggregationQueryResponse`` messages.
+
+        If a ``transaction`` is used and it already has write operations added,
+        this method cannot be used (i.e. read-after-write is not allowed).
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optinal[float]): The timeout for this request.  Defaults
+            to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
+
+        Returns:
+            `StreamGenerator[List[AggregationResult]]`:
+            A generator of the query results.
+        """
+        inner_generator = self._make_stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+            explain_options=explain_options,
+        )
+        return StreamGenerator(inner_generator, explain_options)

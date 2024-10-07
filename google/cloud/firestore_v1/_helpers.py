@@ -16,25 +16,6 @@
 
 import datetime
 import json
-
-import google
-from google.api_core.datetime_helpers import DatetimeWithNanoseconds
-from google.api_core import gapic_v1
-from google.protobuf import struct_pb2
-from google.type import latlng_pb2  # type: ignore
-import grpc  # type: ignore
-
-from google.cloud import exceptions  # type: ignore
-from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
-from google.cloud.firestore_v1.types.write import DocumentTransform
-from google.cloud.firestore_v1 import transforms
-from google.cloud.firestore_v1 import types
-from google.cloud.firestore_v1.field_path import FieldPath
-from google.cloud.firestore_v1.field_path import parse_field_path
-from google.cloud.firestore_v1.types import common
-from google.cloud.firestore_v1.types import document
-from google.cloud.firestore_v1.types import write
-from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 from typing import (
     Any,
     Dict,
@@ -46,6 +27,22 @@ from typing import (
     Tuple,
     Union,
 )
+
+import grpc  # type: ignore
+from google.api_core import gapic_v1
+from google.api_core.datetime_helpers import DatetimeWithNanoseconds
+from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
+from google.protobuf import struct_pb2
+from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
+from google.type import latlng_pb2  # type: ignore
+
+import google
+from google.cloud import exceptions  # type: ignore
+from google.cloud.firestore_v1 import transforms, types
+from google.cloud.firestore_v1.field_path import FieldPath, parse_field_path
+from google.cloud.firestore_v1.types import common, document, write
+from google.cloud.firestore_v1.types.write import DocumentTransform
+from google.cloud.firestore_v1.vector import Vector
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
@@ -160,7 +157,8 @@ def encode_value(value) -> types.document.Value:
 
     Args:
         value (Union[NoneType, bool, int, float, datetime.datetime, \
-            str, bytes, dict, ~google.cloud.Firestore.GeoPoint]): A native
+            str, bytes, dict, ~google.cloud.Firestore.GeoPoint, \
+            ~google.cloud.firestore_v1.vector.Vector]): A native
             Python value to convert to a protobuf field.
 
     Returns:
@@ -208,6 +206,9 @@ def encode_value(value) -> types.document.Value:
         value_list = tuple(encode_value(element) for element in value)
         value_pb = document.ArrayValue(values=value_list)
         return document.Value(array_value=value_pb)
+
+    if isinstance(value, Vector):
+        return encode_value(value.to_map_value())
 
     if isinstance(value, dict):
         value_dict = encode_dict(value)
@@ -331,7 +332,9 @@ def reference_value_to_document(reference_value, client) -> Any:
 
 def decode_value(
     value, client
-) -> Union[None, bool, int, float, list, datetime.datetime, str, bytes, dict, GeoPoint]:
+) -> Union[
+    None, bool, int, float, list, datetime.datetime, str, bytes, dict, GeoPoint, Vector
+]:
     """Converts a Firestore protobuf ``Value`` to a native Python value.
 
     Args:
@@ -382,7 +385,7 @@ def decode_value(
         raise ValueError("Unknown ``value_type``", value_type)
 
 
-def decode_dict(value_fields, client) -> dict:
+def decode_dict(value_fields, client) -> Union[dict, Vector]:
     """Converts a protobuf map of Firestore ``Value``-s.
 
     Args:
@@ -397,8 +400,14 @@ def decode_dict(value_fields, client) -> dict:
         of native Python values converted from the ``value_fields``.
     """
     value_fields_pb = getattr(value_fields, "_pb", value_fields)
+    res = {key: decode_value(value, client) for key, value in value_fields_pb.items()}
 
-    return {key: decode_value(value, client) for key, value in value_fields_pb.items()}
+    if res.get("__type__", None) == "__vector__":
+        # Vector data type is represented as mapping.
+        # {"__type__":"__vector__", "value": [1.0, 2.0, 3.0]}.
+        return Vector(res["value"])
+
+    return res
 
 
 def get_doc_id(document_pb, expected_prefix) -> str:
