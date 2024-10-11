@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import inspect
 import warnings
 from typing import Awaitable, Callable, Dict, Optional, Sequence, Tuple, Union
 
@@ -267,6 +268,9 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
             )
 
         # Wrap messages. This must be done after self._grpc_channel exists
+        self._wrap_with_kind = (
+            "kind" in inspect.signature(gapic_v1.method_async.wrap_method).parameters
+        )
         self._prep_wrapped_messages(client_info)
 
     @property
@@ -1043,12 +1047,12 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
     def _prep_wrapped_messages(self, client_info):
         """Precompute the wrapped methods, overriding the base class method to use async wrappers."""
         self._wrapped_methods = {
-            self.create_index: gapic_v1.method_async.wrap_method(
+            self.create_index: self._wrap_method(
                 self.create_index,
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.list_indexes: gapic_v1.method_async.wrap_method(
+            self.list_indexes: self._wrap_method(
                 self.list_indexes,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -1064,7 +1068,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.get_index: gapic_v1.method_async.wrap_method(
+            self.get_index: self._wrap_method(
                 self.get_index,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -1080,7 +1084,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.delete_index: gapic_v1.method_async.wrap_method(
+            self.delete_index: self._wrap_method(
                 self.delete_index,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -1096,7 +1100,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.get_field: gapic_v1.method_async.wrap_method(
+            self.get_field: self._wrap_method(
                 self.get_field,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -1112,12 +1116,12 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.update_field: gapic_v1.method_async.wrap_method(
+            self.update_field: self._wrap_method(
                 self.update_field,
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.list_fields: gapic_v1.method_async.wrap_method(
+            self.list_fields: self._wrap_method(
                 self.list_fields,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -1133,95 +1137,124 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.export_documents: gapic_v1.method_async.wrap_method(
+            self.export_documents: self._wrap_method(
                 self.export_documents,
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.import_documents: gapic_v1.method_async.wrap_method(
+            self.import_documents: self._wrap_method(
                 self.import_documents,
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.bulk_delete_documents: gapic_v1.method_async.wrap_method(
+            self.bulk_delete_documents: self._wrap_method(
                 self.bulk_delete_documents,
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.create_database: gapic_v1.method_async.wrap_method(
+            self.create_database: self._wrap_method(
                 self.create_database,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.get_database: gapic_v1.method_async.wrap_method(
+            self.get_database: self._wrap_method(
                 self.get_database,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.list_databases: gapic_v1.method_async.wrap_method(
+            self.list_databases: self._wrap_method(
                 self.list_databases,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.update_database: gapic_v1.method_async.wrap_method(
+            self.update_database: self._wrap_method(
                 self.update_database,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.delete_database: gapic_v1.method_async.wrap_method(
+            self.delete_database: self._wrap_method(
                 self.delete_database,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.get_backup: gapic_v1.method_async.wrap_method(
+            self.get_backup: self._wrap_method(
                 self.get_backup,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.list_backups: gapic_v1.method_async.wrap_method(
+            self.list_backups: self._wrap_method(
                 self.list_backups,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.delete_backup: gapic_v1.method_async.wrap_method(
+            self.delete_backup: self._wrap_method(
                 self.delete_backup,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.restore_database: gapic_v1.method_async.wrap_method(
+            self.restore_database: self._wrap_method(
                 self.restore_database,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.create_backup_schedule: gapic_v1.method_async.wrap_method(
+            self.create_backup_schedule: self._wrap_method(
                 self.create_backup_schedule,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.get_backup_schedule: gapic_v1.method_async.wrap_method(
+            self.get_backup_schedule: self._wrap_method(
                 self.get_backup_schedule,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.list_backup_schedules: gapic_v1.method_async.wrap_method(
+            self.list_backup_schedules: self._wrap_method(
                 self.list_backup_schedules,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.update_backup_schedule: gapic_v1.method_async.wrap_method(
+            self.update_backup_schedule: self._wrap_method(
                 self.update_backup_schedule,
                 default_timeout=None,
                 client_info=client_info,
             ),
-            self.delete_backup_schedule: gapic_v1.method_async.wrap_method(
+            self.delete_backup_schedule: self._wrap_method(
                 self.delete_backup_schedule,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.cancel_operation: self._wrap_method(
+                self.cancel_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.delete_operation: self._wrap_method(
+                self.delete_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.get_operation: self._wrap_method(
+                self.get_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.list_operations: self._wrap_method(
+                self.list_operations,
                 default_timeout=None,
                 client_info=client_info,
             ),
         }
 
+    def _wrap_method(self, func, *args, **kwargs):
+        if self._wrap_with_kind:  # pragma: NO COVER
+            kwargs["kind"] = self.kind
+        return gapic_v1.method_async.wrap_method(func, *args, **kwargs)
+
     def close(self):
         return self.grpc_channel.close()
+
+    @property
+    def kind(self) -> str:
+        return "grpc_asyncio"
 
     @property
     def delete_operation(
