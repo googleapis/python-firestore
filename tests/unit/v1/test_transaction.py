@@ -221,7 +221,9 @@ def test_transaction__commit(database):
     commit_time = Timestamp()
     commit_time.FromDatetime(datetime.datetime.now())
     results = [write.WriteResult(update_time=commit_time)]
-    commit_response = firestore.CommitResponse(write_results=results, commit_time=commit_time)
+    commit_response = firestore.CommitResponse(
+        write_results=results, commit_time=commit_time
+    )
     firestore_api.commit.return_value = commit_response
 
     # Attach the fake GAPIC to a real client.
