@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import inspect
 import warnings
 from typing import Awaitable, Callable, Dict, Optional, Sequence, Tuple, Union
 
@@ -240,6 +241,9 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
             )
 
         # Wrap messages. This must be done after self._grpc_channel exists
+        self._wrap_with_kind = (
+            "kind" in inspect.signature(gapic_v1.method_async.wrap_method).parameters
+        )
         self._prep_wrapped_messages(client_info)
 
     @property
@@ -724,7 +728,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
     def _prep_wrapped_messages(self, client_info):
         """Precompute the wrapped methods, overriding the base class method to use async wrappers."""
         self._wrapped_methods = {
-            self.get_document: gapic_v1.method_async.wrap_method(
+            self.get_document: self._wrap_method(
                 self.get_document,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -741,7 +745,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.list_documents: gapic_v1.method_async.wrap_method(
+            self.list_documents: self._wrap_method(
                 self.list_documents,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -758,7 +762,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.update_document: gapic_v1.method_async.wrap_method(
+            self.update_document: self._wrap_method(
                 self.update_document,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -773,7 +777,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.delete_document: gapic_v1.method_async.wrap_method(
+            self.delete_document: self._wrap_method(
                 self.delete_document,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -790,7 +794,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.batch_get_documents: gapic_v1.method_async.wrap_method(
+            self.batch_get_documents: self._wrap_method(
                 self.batch_get_documents,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -807,7 +811,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=300.0,
                 client_info=client_info,
             ),
-            self.begin_transaction: gapic_v1.method_async.wrap_method(
+            self.begin_transaction: self._wrap_method(
                 self.begin_transaction,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -824,7 +828,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.commit: gapic_v1.method_async.wrap_method(
+            self.commit: self._wrap_method(
                 self.commit,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -839,7 +843,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.rollback: gapic_v1.method_async.wrap_method(
+            self.rollback: self._wrap_method(
                 self.rollback,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -856,7 +860,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.run_query: gapic_v1.method_async.wrap_method(
+            self.run_query: self._wrap_method(
                 self.run_query,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -873,7 +877,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=300.0,
                 client_info=client_info,
             ),
-            self.run_aggregation_query: gapic_v1.method_async.wrap_method(
+            self.run_aggregation_query: self._wrap_method(
                 self.run_aggregation_query,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -890,7 +894,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=300.0,
                 client_info=client_info,
             ),
-            self.partition_query: gapic_v1.method_async.wrap_method(
+            self.partition_query: self._wrap_method(
                 self.partition_query,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -907,12 +911,12 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=300.0,
                 client_info=client_info,
             ),
-            self.write: gapic_v1.method_async.wrap_method(
+            self.write: self._wrap_method(
                 self.write,
                 default_timeout=86400.0,
                 client_info=client_info,
             ),
-            self.listen: gapic_v1.method_async.wrap_method(
+            self.listen: self._wrap_method(
                 self.listen,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -929,7 +933,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=86400.0,
                 client_info=client_info,
             ),
-            self.list_collection_ids: gapic_v1.method_async.wrap_method(
+            self.list_collection_ids: self._wrap_method(
                 self.list_collection_ids,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -946,7 +950,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.batch_write: gapic_v1.method_async.wrap_method(
+            self.batch_write: self._wrap_method(
                 self.batch_write,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -962,7 +966,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
-            self.create_document: gapic_v1.method_async.wrap_method(
+            self.create_document: self._wrap_method(
                 self.create_document,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
@@ -977,10 +981,39 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
+            self.cancel_operation: self._wrap_method(
+                self.cancel_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.delete_operation: self._wrap_method(
+                self.delete_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.get_operation: self._wrap_method(
+                self.get_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.list_operations: self._wrap_method(
+                self.list_operations,
+                default_timeout=None,
+                client_info=client_info,
+            ),
         }
+
+    def _wrap_method(self, func, *args, **kwargs):
+        if self._wrap_with_kind:  # pragma: NO COVER
+            kwargs["kind"] = self.kind
+        return gapic_v1.method_async.wrap_method(func, *args, **kwargs)
 
     def close(self):
         return self.grpc_channel.close()
+
+    @property
+    def kind(self) -> str:
+        return "grpc_asyncio"
 
     @property
     def delete_operation(
