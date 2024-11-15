@@ -74,7 +74,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
 
         super(AsyncTransaction, self)._add_write_pbs(write_pbs)
 
-    async def _begin(self, retry_id: bytes = None) -> None:
+    async def _begin(self, retry_id: bytes | None = None) -> None:
         """Begin the transaction.
 
         Args:
@@ -152,8 +152,8 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
     async def get_all(
         self,
         references: list,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> AsyncGenerator[DocumentSnapshot, Any]:
         """Retrieves multiple documents from Firestore.
 
@@ -175,7 +175,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
     async def get(
         self,
         ref_or_query: AsyncDocumentReference | AsyncQuery,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
