@@ -53,7 +53,7 @@ class AggregationQuery(BaseAggregationQuery):
         self,
         transaction=None,
         retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
+            retries.Retry, None, object
         ] = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
@@ -132,7 +132,7 @@ class AggregationQuery(BaseAggregationQuery):
         self,
         transaction: Optional[transaction.Transaction] = None,
         retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
+            retries.Retry, None, object
         ] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
@@ -207,7 +207,7 @@ class AggregationQuery(BaseAggregationQuery):
         self,
         transaction: Optional["transaction.Transaction"] = None,
         retry: Union[
-            retries.Retry, None, gapic_v1.method._MethodDefault
+            retries.Retry, None, object
         ] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
