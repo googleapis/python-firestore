@@ -24,17 +24,17 @@ import abc
 import copy
 import math
 import warnings
+from typing_extensions import Self
 from typing import (
     TYPE_CHECKING,
     Any,
     Coroutine,
     Dict,
     Iterable,
-    NoReturn,
+    List,
     Optional,
     Tuple,
     Type,
-    TypeVar,
     Union,
 )
 
@@ -125,8 +125,6 @@ _NO_ORDERS_FOR_CURSOR = (
 _MISMATCH_CURSOR_W_ORDER_BY = "The cursor {!r} does not match the order fields {!r}."
 
 _not_passed = object()
-
-QueryType = TypeVar("QueryType", bound="BaseQuery")
 
 
 class BaseFilter(abc.ABC):
@@ -345,7 +343,7 @@ class BaseQuery(object):
         """
         return self._parent._client
 
-    def select(self: QueryType, field_paths: Iterable[str]) -> QueryType:
+    def select(self, field_paths: Iterable[str]) -> Self:
         """Project documents matching query to a limited set of fields.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -380,19 +378,19 @@ class BaseQuery(object):
         return self._copy(projection=new_projection)
 
     def _copy(
-        self: QueryType,
+        self,
         *,
-        projection: Optional[query.StructuredQuery.Projection] = _not_passed,
-        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]] = _not_passed,
-        orders: Optional[Tuple[query.StructuredQuery.Order]] = _not_passed,
-        limit: Optional[int] = _not_passed,
-        limit_to_last: Optional[bool] = _not_passed,
-        offset: Optional[int] = _not_passed,
-        start_at: Optional[Tuple[dict, bool]] = _not_passed,
-        end_at: Optional[Tuple[dict, bool]] = _not_passed,
-        all_descendants: Optional[bool] = _not_passed,
-        recursive: Optional[bool] = _not_passed,
-    ) -> QueryType:
+        projection: Optional[query.StructuredQuery.Projection] | object = _not_passed,
+        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]] | object = _not_passed,
+        orders: Optional[Tuple[query.StructuredQuery.Order]] | object = _not_passed,
+        limit: Optional[int] | object = _not_passed,
+        limit_to_last: Optional[bool] | object = _not_passed,
+        offset: Optional[int] | object = _not_passed,
+        start_at: Optional[Tuple[dict, bool]] | object = _not_passed,
+        end_at: Optional[Tuple[dict, bool]] | object = _not_passed,
+        all_descendants: Optional[bool] | object = _not_passed,
+        recursive: Optional[bool] | object = _not_passed,
+    ) -> Self:
         return self.__class__(
             self._parent,
             projection=self._evaluate_param(projection, self._projection),
@@ -415,13 +413,13 @@ class BaseQuery(object):
         return value if value is not _not_passed else fallback_value
 
     def where(
-        self: QueryType,
+        self,
         field_path: Optional[str] = None,
         op_string: Optional[str] = None,
         value=None,
         *,
         filter=None,
-    ) -> QueryType:
+    ) -> Self:
         """Filter the query on a field.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -519,8 +517,8 @@ class BaseQuery(object):
         )
 
     def order_by(
-        self: QueryType, field_path: str, direction: str = ASCENDING
-    ) -> QueryType:
+        self, field_path: str, direction: str = ASCENDING
+    ) -> Self:
         """Modify the query to add an order clause on a specific field.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
@@ -554,7 +552,7 @@ class BaseQuery(object):
         new_orders = self._orders + (order_pb,)
         return self._copy(orders=new_orders)
 
-    def limit(self: QueryType, count: int) -> QueryType:
+    def limit(self, count: int) -> Self:
         """Limit a query to return at most `count` matching results.
 
         If the current query already has a `limit` set, this will override it.
@@ -573,7 +571,7 @@ class BaseQuery(object):
         """
         return self._copy(limit=count, limit_to_last=False)
 
-    def limit_to_last(self: QueryType, count: int) -> QueryType:
+    def limit_to_last(self, count: int) -> Self:
         """Limit a query to return the last `count` matching results.
         If the current query already has a `limit_to_last`
         set, this will override it.
@@ -598,7 +596,7 @@ class BaseQuery(object):
             return max(self._limit - num_loaded, 0)
         return chunk_size
 
-    def offset(self: QueryType, num_to_skip: int) -> QueryType:
+    def offset(self, num_to_skip: int) -> Self:
         """Skip to an offset in a query.
 
         If the current query already has specified an offset, this will
@@ -629,11 +627,11 @@ class BaseQuery(object):
             raise ValueError("Cannot use snapshot from another collection as a cursor.")
 
     def _cursor_helper(
-        self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
+        self,
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
         before: bool,
         start: bool,
-    ) -> QueryType:
+    ) -> Self:
         """Set values to be used for a ``start_at`` or ``end_at`` cursor.
 
         The values will later be used in a query protobuf.
@@ -686,9 +684,9 @@ class BaseQuery(object):
         return self._copy(**query_kwargs)
 
     def start_at(
-        self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
-    ) -> QueryType:
+        self,
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
+    ) -> Self:
         """Start query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -719,9 +717,9 @@ class BaseQuery(object):
         return self._cursor_helper(document_fields_or_snapshot, before=True, start=True)
 
     def start_after(
-        self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
-    ) -> QueryType:
+        self,
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
+    ) -> Self:
         """Start query results after a particular document value.
 
         The result set will **exclude** the document specified by
@@ -753,9 +751,9 @@ class BaseQuery(object):
         )
 
     def end_before(
-        self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
-    ) -> QueryType:
+        self,
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
+    ) -> Self:
         """End query results before a particular document value.
 
         The result set will **exclude** the document specified by
@@ -787,9 +785,9 @@ class BaseQuery(object):
         )
 
     def end_at(
-        self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
-    ) -> QueryType:
+        self,
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
+    ) -> Self:
         """End query results at a particular document value.
 
         The result set will **include** the document specified by
@@ -895,7 +893,7 @@ class BaseQuery(object):
 
         return orders
 
-    def _normalize_cursor(self, cursor, orders) -> Optional[Tuple[Any, Any]]:
+    def _normalize_cursor(self, cursor, orders) -> Tuple[List, bool] | None:
         """Helper: convert cursor to a list of values based on orders."""
         if cursor is None:
             return None
@@ -990,7 +988,7 @@ class BaseQuery(object):
         *,
         distance_result_field: Optional[str] = None,
         distance_threshold: Optional[float] = None,
-    ) -> BaseVectorQuery:
+    ):
         raise NotImplementedError
 
     def count(
@@ -1024,7 +1022,7 @@ class BaseQuery(object):
     def _prep_stream(
         self,
         transaction=None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
     ) -> Tuple[dict, str, dict]:
@@ -1060,10 +1058,10 @@ class BaseQuery(object):
     ):
         raise NotImplementedError
 
-    def on_snapshot(self, callback) -> NoReturn:
+    def on_snapshot(self, callback):
         raise NotImplementedError
 
-    def recursive(self: QueryType) -> QueryType:
+    def recursive(self: Self) -> Self:
         """Returns a copy of this query whose iterator will yield all matching
         documents as well as each of their descendent subcollections and documents.
 
@@ -1148,6 +1146,10 @@ class BaseQuery(object):
                 return orderBy.direction * comp
 
         return 0
+
+    @staticmethod
+    def _get_collection_reference_class():
+        raise NotImplementedError
 
 
 def _enum_from_op_string(op_string: str) -> int:
@@ -1245,7 +1247,7 @@ def _filter_pb(field_or_unary) -> StructuredQuery.Filter:
         raise ValueError("Unexpected filter type", type(field_or_unary), field_or_unary)
 
 
-def _cursor_pb(cursor_pair: Tuple[list, bool]) -> Optional[Cursor]:
+def _cursor_pb(cursor_pair: Optional[Tuple[list, bool]]) -> Optional[Cursor]:
     """Convert a cursor pair to a protobuf.
 
     If ``cursor_pair`` is :data:`None`, just returns :data:`None`.
@@ -1264,6 +1266,8 @@ def _cursor_pb(cursor_pair: Tuple[list, bool]) -> Optional[Cursor]:
         data, before = cursor_pair
         value_pbs = [_helpers.encode_value(value) for value in data]
         return query.Cursor(values=value_pbs, before=before)
+    else:
+        return None
 
 
 def _query_response_to_snapshot(
@@ -1402,8 +1406,8 @@ class BaseCollectionGroup(BaseQuery):
     def _prep_get_partitions(
         self,
         partition_count,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
+        retry: retries.Retry | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict]:
         self._validate_partition_query()
         parent_path, expected_prefix = self._parent._parent_info()
@@ -1429,11 +1433,7 @@ class BaseCollectionGroup(BaseQuery):
         partition_count,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
-    @staticmethod
-    def _get_collection_reference_class() -> Type["BaseCollectionGroup"]:
+    ):
         raise NotImplementedError
 
 

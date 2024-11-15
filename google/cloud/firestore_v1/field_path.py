@@ -62,7 +62,7 @@ def _tokenize_field_path(path: str):
         raise ValueError("Path {} not consumed, residue: {}".format(path, path[pos:]))
 
 
-def split_field_path(path: str):
+def split_field_path(path: str | None):
     """Split a field path into valid elements (without dots).
 
     Args:

@@ -178,7 +178,7 @@ class AsyncQuery(BaseQuery):
     async def get(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
@@ -330,7 +330,7 @@ class AsyncQuery(BaseQuery):
     async def _make_stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
     ) -> AsyncGenerator[DocumentSnapshot | query_profile_pb.ExplainMetrics, Any]:
@@ -405,7 +405,7 @@ class AsyncQuery(BaseQuery):
     def stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
@@ -509,8 +509,8 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
     async def get_partitions(
         self,
         partition_count,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> AsyncGenerator[QueryPartition, None]:
         """Partition a query for parallelization.
 
