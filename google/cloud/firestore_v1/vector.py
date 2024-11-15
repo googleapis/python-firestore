@@ -23,7 +23,7 @@ class Vector(collections.abc.Sequence):
     Underlying object will be converted to a map representation in Firestore API.
     """
 
-    _value: Tuple[float] = ()
+    _value: Sequence[float] = ()
 
     def __init__(self, value: Sequence[float]):
         self._value = tuple([float(v) for v in value])
