@@ -199,7 +199,7 @@ class BaseDocumentReference(object):
         self,
         document_data: dict,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
         batch.create(self, document_data)
@@ -211,7 +211,7 @@ class BaseDocumentReference(object):
         self,
         document_data: dict,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> write.WriteResult | Awaitable[write.WriteResult]:
         raise NotImplementedError
 
@@ -220,7 +220,7 @@ class BaseDocumentReference(object):
         document_data: dict,
         merge: bool = False,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
         batch.set(self, document_data, merge=merge)
@@ -233,7 +233,7 @@ class BaseDocumentReference(object):
         document_data: dict,
         merge: bool = False,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ):
         raise NotImplementedError
 
@@ -242,7 +242,7 @@ class BaseDocumentReference(object):
         field_updates: dict,
         option: _helpers.WriteOption | None = None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
         batch.update(self, field_updates, option=option)
@@ -255,7 +255,7 @@ class BaseDocumentReference(object):
         field_updates: dict,
         option: _helpers.WriteOption | None = None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ):
         raise NotImplementedError
 
@@ -263,7 +263,7 @@ class BaseDocumentReference(object):
         self,
         option: _helpers.WriteOption | None = None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`delete`."""
         write_pb = _helpers.pb_for_delete(self._document_path, option)
@@ -280,7 +280,7 @@ class BaseDocumentReference(object):
         self,
         option: _helpers.WriteOption | None = None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ):
         raise NotImplementedError
 
@@ -289,7 +289,7 @@ class BaseDocumentReference(object):
         field_paths: Iterable[str] | None = None,
         transaction=None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`get`."""
         if isinstance(field_paths, str):
@@ -315,7 +315,7 @@ class BaseDocumentReference(object):
         field_paths: Iterable[str] | None = None,
         transaction=None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> "DocumentSnapshot" | Awaitable["DocumentSnapshot"]:
         raise NotImplementedError
 
@@ -323,7 +323,7 @@ class BaseDocumentReference(object):
         self,
         page_size: int | None = None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {"parent": self._document_path, "page_size": page_size}
@@ -335,7 +335,7 @@ class BaseDocumentReference(object):
         self,
         page_size: int | None = None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ):
         raise NotImplementedError
 
