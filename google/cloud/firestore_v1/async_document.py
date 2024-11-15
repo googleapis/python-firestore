@@ -66,7 +66,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         self,
         document_data: dict,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Create the current document in the Firestore database.
 
@@ -96,7 +96,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         document_data: dict,
         merge: bool = False,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Replace the current document in the Firestore database.
 
@@ -136,7 +136,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         field_updates: dict,
         option: _helpers.WriteOption | None = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Update an existing document in the Firestore database.
 
@@ -293,7 +293,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         self,
         option: _helpers.WriteOption | None = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Timestamp:
         """Delete the current document in the Firestore database.
 
@@ -328,7 +328,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         field_paths: Iterable[str] | None = None,
         transaction=None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
@@ -396,7 +396,7 @@ class AsyncDocumentReference(BaseDocumentReference):
         self,
         page_size: int | None = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> AsyncGenerator:
         """List subcollections of the current document.
 

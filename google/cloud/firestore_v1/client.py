@@ -214,7 +214,7 @@ class Client(BaseClient):
         field_paths: Iterable[str] | None = None,
         transaction: Transaction | None = None,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieve a batch of documents.
 
@@ -270,7 +270,7 @@ class Client(BaseClient):
     def collections(
         self,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Generator[Any, Any, None]:
         """List top-level collections of the client's database.
 

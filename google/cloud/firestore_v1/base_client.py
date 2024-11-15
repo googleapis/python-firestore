@@ -41,7 +41,7 @@ from typing import (
 import google.api_core.client_options
 import google.api_core.path_template
 import grpc  # type: ignore
-from google.api_core.retry.retry_base import _BaseRetry
+from google.api_core import retry as retries
 from google.api_core.gapic_v1 import client_info
 from google.auth.credentials import AnonymousCredentials
 from google.cloud.client import ClientWithProject  # type: ignore
@@ -434,8 +434,8 @@ class BaseClient(ClientWithProject):
         references: list,
         field_paths: Iterable[str] | None = None,
         transaction: BaseTransaction | None = None,
-        retry: _BaseRetry | object | None = None,
-        timeout: float | object | None = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict, dict]:
         """Shared setup for async/sync :meth:`get_all`."""
         document_paths, reference_map = _reference_info(references)
@@ -455,8 +455,8 @@ class BaseClient(ClientWithProject):
         references: list,
         field_paths: Iterable[str] | None = None,
         transaction=None,
-        retry: _BaseRetry | object | None = None,
-        timeout: float | object | None = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
     ) -> Union[
         AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
     ]:
@@ -464,8 +464,8 @@ class BaseClient(ClientWithProject):
 
     def _prep_collections(
         self,
-        retry: _BaseRetry | object | None = None,
-        timeout: float | object | None = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {"parent": "{}/documents".format(self._database_string)}
@@ -475,8 +475,8 @@ class BaseClient(ClientWithProject):
 
     def collections(
         self,
-        retry: _BaseRetry | object | None = None,
-        timeout: float | object | None = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
     ):
         raise NotImplementedError
 

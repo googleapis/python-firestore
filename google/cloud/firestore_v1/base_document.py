@@ -36,7 +36,6 @@ from google.cloud.firestore_v1.types import common
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.types import Document, firestore, write
-    from google.api_core.retry.retry_base import _BaseRetry
 
 
 class BaseDocumentReference(object):
@@ -199,7 +198,7 @@ class BaseDocumentReference(object):
     def _prep_create(
         self,
         document_data: dict,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
@@ -211,7 +210,7 @@ class BaseDocumentReference(object):
     def create(
         self,
         document_data: dict,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ) -> write.WriteResult | Awaitable[write.WriteResult]:
         raise NotImplementedError
@@ -220,7 +219,7 @@ class BaseDocumentReference(object):
         self,
         document_data: dict,
         merge: bool = False,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
@@ -233,7 +232,7 @@ class BaseDocumentReference(object):
         self,
         document_data: dict,
         merge: bool = False,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ):
         raise NotImplementedError
@@ -242,7 +241,7 @@ class BaseDocumentReference(object):
         self,
         field_updates: dict,
         option: _helpers.WriteOption | None = None,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ) -> Tuple[Any, dict]:
         batch = self._client.batch()
@@ -255,7 +254,7 @@ class BaseDocumentReference(object):
         self,
         field_updates: dict,
         option: _helpers.WriteOption | None = None,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ):
         raise NotImplementedError
@@ -263,7 +262,7 @@ class BaseDocumentReference(object):
     def _prep_delete(
         self,
         option: _helpers.WriteOption | None = None,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`delete`."""
@@ -280,7 +279,7 @@ class BaseDocumentReference(object):
     def delete(
         self,
         option: _helpers.WriteOption | None = None,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ):
         raise NotImplementedError
@@ -289,7 +288,7 @@ class BaseDocumentReference(object):
         self,
         field_paths: Iterable[str] | None = None,
         transaction=None,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`get`."""
@@ -315,7 +314,7 @@ class BaseDocumentReference(object):
         self,
         field_paths: Iterable[str] | None = None,
         transaction=None,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ) -> "DocumentSnapshot" | Awaitable["DocumentSnapshot"]:
         raise NotImplementedError
@@ -323,7 +322,7 @@ class BaseDocumentReference(object):
     def _prep_collections(
         self,
         page_size: int | None = None,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
@@ -335,7 +334,7 @@ class BaseDocumentReference(object):
     def collections(
         self,
         page_size: int | None = None,
-        retry: _BaseRetry | None | object = None,
+        retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | object | None = None,
     ):
         raise NotImplementedError

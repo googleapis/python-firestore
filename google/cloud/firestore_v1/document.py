@@ -67,7 +67,7 @@ class DocumentReference(BaseDocumentReference):
         self,
         document_data: dict,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Create a document in the Firestore database.
 
@@ -104,7 +104,7 @@ class DocumentReference(BaseDocumentReference):
         document_data: dict,
         merge: bool = False,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Create / replace / merge a document in the Firestore database.
 
@@ -172,7 +172,7 @@ class DocumentReference(BaseDocumentReference):
         field_updates: dict,
         option: _helpers.WriteOption | None = None,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Update an existing document in the Firestore database.
 
@@ -329,7 +329,7 @@ class DocumentReference(BaseDocumentReference):
         self,
         option: _helpers.WriteOption | None = None,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Timestamp:
         """Delete the current document in the Firestore database.
 
@@ -364,7 +364,7 @@ class DocumentReference(BaseDocumentReference):
         field_paths: Iterable[str] | None = None,
         transaction=None,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
@@ -433,7 +433,7 @@ class DocumentReference(BaseDocumentReference):
         self,
         page_size: int | None = None,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> Generator[Any, Any, None]:
         """List subcollections of the current document.
 

@@ -226,7 +226,7 @@ class AsyncClient(BaseClient):
         field_paths: Iterable[str] | None = None,
         transaction: AsyncTransaction | None = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> AsyncGenerator[DocumentSnapshot, Any]:
         """Retrieve a batch of documents.
 
@@ -282,7 +282,7 @@ class AsyncClient(BaseClient):
     async def collections(
         self,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | object | None = None,
+        timeout: float | None = None,
     ) -> AsyncGenerator[AsyncCollectionReference, Any]:
         """List top-level collections of the client's database.
 
