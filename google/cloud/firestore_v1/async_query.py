@@ -26,7 +26,7 @@ from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
 
 from google.cloud import firestore_v1
-from google.cloud.firestore_v1 import transaction
+from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.async_vector_query import AsyncVectorQuery
@@ -177,7 +177,7 @@ class AsyncQuery(BaseQuery):
 
     async def get(
         self,
-        transaction: Optional[transaction.Transaction] = None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
@@ -329,7 +329,7 @@ class AsyncQuery(BaseQuery):
 
     async def _make_stream(
         self,
-        transaction: Optional[transaction.Transaction] = None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
@@ -404,7 +404,7 @@ class AsyncQuery(BaseQuery):
 
     def stream(
         self,
-        transaction: Optional[transaction.Transaction] = None,
+        transaction: Optional[AsyncTransaction] = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
