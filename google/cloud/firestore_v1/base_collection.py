@@ -129,7 +129,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def _vector_query(self) -> BaseVectorQuery:
         raise NotImplementedError
 
-    def document(self, document_id: Optional[str] = None) -> DocumentReference:
+    def document(self, document_id: Optional[str] = None):
         """Create a sub-document underneath the current collection.
 
         Args:
@@ -177,7 +177,7 @@ class BaseCollectionReference(Generic[QueryType]):
         self,
         document_data: dict,
         document_id: Optional[str] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Tuple[DocumentReference, dict]:
         """Shared setup for async / sync :method:`add`"""
@@ -193,7 +193,7 @@ class BaseCollectionReference(Generic[QueryType]):
         self,
         document_data: dict,
         document_id: Optional[str] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Union[Tuple[Any, Any], Coroutine[Any, Any, Tuple[Any, Any]]]:
         raise NotImplementedError
@@ -201,7 +201,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def _prep_list_documents(
         self,
         page_size: Optional[int] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async / sync :method:`list_documents`"""
@@ -223,7 +223,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def list_documents(
         self,
         page_size: Optional[int] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Union[
         Generator[DocumentReference, Any, Any], AsyncGenerator[DocumentReference, Any]
@@ -482,7 +482,7 @@ class BaseCollectionReference(Generic[QueryType]):
 
     def _prep_get_or_stream(
         self,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Tuple[Any, dict]:
         """Shared setup for async / sync :meth:`get` / :meth:`stream`"""
@@ -494,7 +494,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def get(
         self,
         transaction: Optional[Transaction] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
@@ -507,14 +507,14 @@ class BaseCollectionReference(Generic[QueryType]):
     def stream(
         self,
         transaction: Optional[Transaction] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
     ) -> StreamGenerator[DocumentSnapshot] | AsyncIterator[DocumentSnapshot]:
         raise NotImplementedError
 
-    def on_snapshot(self, callback) -> NoReturn:
+    def on_snapshot(self, callback):
         raise NotImplementedError
 
     def count(self, alias=None):

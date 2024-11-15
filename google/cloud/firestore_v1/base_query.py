@@ -36,6 +36,7 @@ from typing import (
     Tuple,
     Type,
     Union,
+    TypeVar
 )
 
 from google.api_core import retry as retries
@@ -125,6 +126,8 @@ _NO_ORDERS_FOR_CURSOR = (
 _MISMATCH_CURSOR_W_ORDER_BY = "The cursor {!r} does not match the order fields {!r}."
 
 _not_passed = object()
+
+QueryType = TypeVar("QueryType", bound="BaseQuery")
 
 
 class BaseFilter(abc.ABC):
