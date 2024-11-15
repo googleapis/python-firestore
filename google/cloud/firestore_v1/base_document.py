@@ -182,7 +182,7 @@ class BaseDocumentReference(object):
         parent_path = self._path[:-1]
         return self._client.collection(*parent_path)
 
-    def collection(self, collection_id: str) -> Any:
+    def collection(self, collection_id: str):
         """Create a sub-collection underneath the current document.
 
         Args:
