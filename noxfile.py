@@ -147,7 +147,7 @@ def pytype(session):
 def mypy(session):
     """Verify type hints are mypy compatible."""
     session.install("-e", ".")
-    session.install("mypy", "types-setuptools", "types-protobuf")
+    session.install("mypy", "types-setuptools", "types-protobuf", "types-requests")
     # TODO: also verify types on tests, all of google package
     session.run("mypy", "-p", "google.cloud.firestore_v1", "--no-incremental")
 
