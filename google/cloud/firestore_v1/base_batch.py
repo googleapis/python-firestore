@@ -147,7 +147,9 @@ class BaseBatch(metaclass=abc.ABCMeta):
         self._add_write_pbs(write_pbs)
 
     def delete(
-        self, reference: BaseDocumentReference, option: _helpers.WriteOption | None = None
+        self,
+        reference: BaseDocumentReference,
+        option: _helpers.WriteOption | None = None,
     ) -> None:
         """Add a "change" to delete a document.
 
@@ -172,7 +174,11 @@ class BaseWriteBatch(BaseBatch):
     """Base class for a/sync implementations of the `commit` RPC. `commit` is useful
     for lower volumes or when the order of write operations is important."""
 
-    def _prep_commit(self, retry: retries.Retry | retries.AsyncRetry | object | None, timeout: float | None):
+    def _prep_commit(
+        self,
+        retry: retries.Retry | retries.AsyncRetry | object | None,
+        timeout: float | None,
+    ):
         """Shared setup for async/sync :meth:`commit`."""
         request = {
             "database": self._client._database_string,

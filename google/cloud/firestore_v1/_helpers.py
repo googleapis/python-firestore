@@ -27,7 +27,7 @@ from typing import (
     Tuple,
     Union,
     cast,
-    TYPE_CHECKING
+    TYPE_CHECKING,
 )
 
 import grpc  # type: ignore
@@ -48,7 +48,7 @@ from google.cloud.firestore_v1.types.write import DocumentTransform
 from google.cloud.firestore_v1.vector import Vector
 
 if TYPE_CHECKING:
-    from google.cloud.firestore import DocumentSnapshot
+    from google.cloud.firestore_v1 import DocumentSnapshot
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
@@ -240,7 +240,9 @@ def encode_dict(values_dict) -> dict:
     return {key: encode_value(value) for key, value in values_dict.items()}
 
 
-def document_snapshot_to_protobuf(snapshot: "google.cloud.firestore_v1.base_document.DocumentSnapshot") -> Optional["google.cloud.firestore_v1.types.Document"]:
+def document_snapshot_to_protobuf(
+    snapshot: "DocumentSnapshot",
+) -> Optional["google.cloud.firestore_v1.types.Document"]:
     from google.cloud.firestore_v1.types import Document
 
     if not snapshot.exists:
@@ -573,7 +575,9 @@ class DocumentExtractor(object):
             + list(self.minimums)
         )
 
-    def _get_update_mask(self, allow_empty_mask=False) -> Optional[types.common.DocumentMask]:
+    def _get_update_mask(
+        self, allow_empty_mask=False
+    ) -> Optional[types.common.DocumentMask]:
         return None
 
     def get_update_pb(
@@ -1122,7 +1126,9 @@ class ExistsOption(WriteOption):
         write._pb.current_document.CopyFrom(current_doc._pb)
 
 
-def make_retry_timeout_kwargs(retry: retries.Retry | retries.AsyncRetry | object | None, timeout: float | None) -> dict:
+def make_retry_timeout_kwargs(
+    retry: retries.Retry | retries.AsyncRetry | object | None, timeout: float | None
+) -> dict:
     """Helper fo API methods which take optional 'retry' / 'timeout' args."""
     kwargs = {}
 
@@ -1254,7 +1260,9 @@ def deserialize_bundle(
     return bundle
 
 
-def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict, None, None]:
+def _parse_bundle_elements_data(
+    serialized: Union[str, bytes]
+) -> Generator[Dict, None, None]:
     """Reads through a serialized FirestoreBundle and yields JSON chunks that
     were created via `BundleElement.to_json(bundle_element)`.
 
@@ -1298,7 +1306,7 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
 
 def _get_documents_from_bundle(
     bundle, *, query_name: Optional[str] = None
-) -> Generator["google.cloud.firestore.DocumentSnapshot", None, None]:
+) -> Generator["DocumentSnapshot", None, None]:
     from google.cloud.firestore_bundle.bundle import _BundledDocument
 
     bundled_doc: _BundledDocument
@@ -1312,7 +1320,7 @@ def _get_document_from_bundle(
     bundle,
     *,
     document_id: str,
-) -> Optional["google.cloud.firestore.DocumentSnapshot"]:
+) -> Optional["DocumentSnapshot"]:
     bundled_doc = bundle.documents.get(document_id)
     if bundled_doc:
         return bundled_doc.snapshot

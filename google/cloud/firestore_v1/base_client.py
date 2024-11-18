@@ -345,7 +345,7 @@ class BaseClient(ClientWithProject):
         reference,
         *,
         bulk_writer: Optional["BulkWriter"] = None,
-        chunk_size: int = 5000
+        chunk_size: int = 5000,
     ) -> int | Awaitable[int]:
         raise NotImplementedError
 
@@ -594,7 +594,9 @@ def _parse_batch_get(
     return snapshot
 
 
-def _get_doc_mask(field_paths: Iterable[str] | None) -> Optional[types.common.DocumentMask]:
+def _get_doc_mask(
+    field_paths: Iterable[str] | None,
+) -> Optional[types.common.DocumentMask]:
     """Get a document mask if field paths are provided.
 
     Args:

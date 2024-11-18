@@ -263,7 +263,10 @@ class BaseAggregationQuery(ABC):
     def stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: retries.Retry | retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        retry: retries.Retry
+        | retries.AsyncRetry
+        | object
+        | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,

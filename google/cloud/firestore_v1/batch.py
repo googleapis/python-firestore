@@ -38,7 +38,9 @@ class WriteBatch(BaseWriteBatch):
         super(WriteBatch, self).__init__(client=client)
 
     def commit(
-        self, retry: retries.Retry | object | None = gapic_v1.method.DEFAULT, timeout: float | None = None
+        self,
+        retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> list:
         """Commit the changes accumulated in this batch.
 

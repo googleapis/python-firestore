@@ -118,7 +118,9 @@ class AsyncBulkWriterMixin:
 
     @_with_send_mode
     def _send_batch(  # type: ignore
-        self: "BulkWriter", batch: BulkWriteBatch, operations: List["BulkWriterOperation"]
+        self: "BulkWriter",
+        batch: BulkWriteBatch,
+        operations: List["BulkWriterOperation"],
     ):
         """Sends a batch without regard to rate limits, meaning limits must have
         already been checked. To that end, do not call this directly; instead,
@@ -522,8 +524,8 @@ class BulkWriter(AsyncBulkWriterMixin):
             )
             # Ask for tokens each pass through this loop until they are granted,
             # and then stop.
-            have_received_tokens = (
-                have_received_tokens or bool(self._rate_limiter.take_tokens(batch_size))
+            have_received_tokens = have_received_tokens or bool(
+                self._rate_limiter.take_tokens(batch_size)
             )
             if not under_threshold or not have_received_tokens:
                 # Try again until both checks are true.
@@ -708,14 +710,18 @@ class BulkWriter(AsyncBulkWriterMixin):
 
     def on_write_result(
         self,
-        callback: Optional[Callable[[BaseDocumentReference, WriteResult, "BulkWriter"], None]],
+        callback: Optional[
+            Callable[[BaseDocumentReference, WriteResult, "BulkWriter"], None]
+        ],
     ) -> None:
         """Sets a callback that will be invoked once for every successful operation."""
         self._success_callback = callback or BulkWriter._default_on_success
 
     def on_batch_result(
         self,
-        callback: Optional[Callable[[BulkWriteBatch, BatchWriteResponse, "BulkWriter"], None]],
+        callback: Optional[
+            Callable[[BulkWriteBatch, BatchWriteResponse, "BulkWriter"], None]
+        ],
     ) -> None:
         """Sets a callback that will be invoked once for every successful batch."""
         self._batch_callback = callback or BulkWriter._default_on_batch
@@ -747,7 +753,7 @@ class BulkWriterOperation:
         raise NotImplementedError
 
     @attempts.setter
-    def attempts(self, value:int):
+    def attempts(self, value: int):
         raise NotImplementedError
 
     @property

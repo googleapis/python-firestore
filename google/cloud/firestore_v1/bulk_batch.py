@@ -47,7 +47,9 @@ class BulkWriteBatch(BaseBatch):
         super(BulkWriteBatch, self).__init__(client=client)
 
     def commit(
-        self, retry: retries.Retry | object | None = gapic_v1.method.DEFAULT, timeout: float | None = None
+        self,
+        retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> BatchWriteResponse:
         """Writes the changes accumulated in this batch.
 

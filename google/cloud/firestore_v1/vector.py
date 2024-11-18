@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import collections
-from typing import Sequence, Tuple
+from typing import Sequence
 
 
 class Vector(collections.abc.Sequence):

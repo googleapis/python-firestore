@@ -51,9 +51,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
     async def get(
         self,
         transaction=None,
-        retry: Union[
-            retries.AsyncRetry, None, object
-        ] = gapic_v1.method.DEFAULT,
+        retry: Union[retries.AsyncRetry, None, object] = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,

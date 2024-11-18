@@ -36,7 +36,7 @@ from typing import (
     Tuple,
     Type,
     Union,
-    TypeVar
+    TypeVar,
 )
 
 from google.api_core import retry as retries
@@ -61,7 +61,6 @@ from google.cloud.firestore_v1.vector import Vector
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
-    from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.query_results import QueryResultsList
@@ -384,7 +383,8 @@ class BaseQuery(object):
         self,
         *,
         projection: Optional[query.StructuredQuery.Projection] | object = _not_passed,
-        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]] | object = _not_passed,
+        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]]
+        | object = _not_passed,
         orders: Optional[Tuple[query.StructuredQuery.Order]] | object = _not_passed,
         limit: Optional[int] | object = _not_passed,
         limit_to_last: Optional[bool] | object = _not_passed,
@@ -519,9 +519,7 @@ class BaseQuery(object):
             direction=_enum_from_direction(direction),
         )
 
-    def order_by(
-        self, field_path: str, direction: str = ASCENDING
-    ) -> Self:
+    def order_by(self, field_path: str, direction: str = ASCENDING) -> Self:
         """Modify the query to add an order clause on a specific field.
 
         See :meth:`~google.cloud.firestore_v1.client.Client.field_path` for
