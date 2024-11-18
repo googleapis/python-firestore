@@ -82,7 +82,8 @@ class AsyncBulkWriterMixin:
     wrapped in a decorator which ensures that the `SendMode` is honored.
     """
 
-    def _with_send_mode(fn: Callable):  # type: ignore
+    @staticmethod
+    def _with_send_mode(fn: Callable):
         """Decorates a method to ensure it is only called via the executor
         (IFF the SendMode value is SendMode.parallel!).
 
