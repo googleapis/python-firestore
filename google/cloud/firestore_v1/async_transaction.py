@@ -22,7 +22,6 @@ from google.api_core import retry_async as retries
 
 from google.cloud.firestore_v1 import _helpers, async_batch
 from google.cloud.firestore_v1.async_document import AsyncDocumentReference
-from google.cloud.firestore_v1.async_query import AsyncQuery
 from google.cloud.firestore_v1.base_transaction import (
     _CANT_BEGIN,
     _CANT_COMMIT,
@@ -39,6 +38,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.async_query import AsyncQuery
 
 
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
