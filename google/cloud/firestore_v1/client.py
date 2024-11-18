@@ -110,16 +110,6 @@ class Client(BaseClient):
             firestore_client,
         )
 
-    @property
-    def _target(self):
-        """Return the target (where the API is).
-        Eg. "firestore.googleapis.com"
-
-        Returns:
-            str: The location of the API.
-        """
-        return self._target_helper(firestore_client.FirestoreClient)
-
     def collection(self, *collection_path: str) -> CollectionReference:
         """Get a reference to a collection.
 

@@ -59,6 +59,7 @@ from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.base_transaction import BaseTransaction
 from google.cloud.firestore_v1.bulk_writer import BulkWriter, BulkWriterOptions
 from google.cloud.firestore_v1.field_path import render_field_path
+from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
 DEFAULT_DATABASE = "(default)"
 """str: The default database used in a :class:`~google.cloud.firestore_v1.client.Client`."""
@@ -229,7 +230,7 @@ class BaseClient(ClientWithProject):
         Returns:
             str: The location of the API.
         """
-        return self._target_helper()
+        return self._target_helper(firestore_client.FirestoreClient)
 
     @property
     def _database_string(self):
