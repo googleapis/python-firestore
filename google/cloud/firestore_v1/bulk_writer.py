@@ -865,6 +865,7 @@ class BulkWriteFailure:
 class OperationRetry(BaseOperationRetry):
     """Container for an additional attempt at an operation, scheduled for
     the future."""
+
     operation: BulkWriterOperation
     run_at: datetime.datetime
 
