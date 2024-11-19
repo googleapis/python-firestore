@@ -135,7 +135,7 @@ class RateLimiter:
         start was crossed since it was last called.
         """
         if self._start is None:
-            raise ValueError("RateLimiter error: unset _start value")
+            raise TypeError("RateLimiter error: unset _start value")
         age: datetime.timedelta = (
             datetime.datetime.now(datetime.timezone.utc) - self._start
         )
@@ -168,7 +168,7 @@ class RateLimiter:
         """Replenishes any tokens that should have regenerated since the last
         operation."""
         if self._last_refill is None:
-            raise ValueError("RateLimiter error: unset _last_refill value")
+            raise TypeError("RateLimiter error: unset _last_refill value")
         now: datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
         time_since_last_refill: datetime.timedelta = now - self._last_refill
 
