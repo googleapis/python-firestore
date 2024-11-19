@@ -748,17 +748,8 @@ class BulkWriterOperation:
     similar writes to the same document.
     """
 
-    @property
-    def attempts(self) -> int:
-        raise NotImplementedError
-
-    @attempts.setter
-    def attempts(self, value: int):
-        raise NotImplementedError
-
-    @property
-    def run_at(self) -> datetime.datetime:
-        raise NotImplementedError
+    def __init__(self, attempts: int = 0):
+        self.attempts = attempts
 
     def add_to_batch(self, batch: BulkWriteBatch):
         """Adds `self` to the supplied batch."""
