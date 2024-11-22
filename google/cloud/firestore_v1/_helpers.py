@@ -1248,8 +1248,9 @@ def deserialize_bundle(
 
     if "__end__" not in allowed_next_element_types:
         raise ValueError("Unexpected end to serialized FirestoreBundle")
-    if bundle is None or metadata_bundle_element is None:
-        raise ValueError("No bundle data found")
+    # state machine guarantees bundle and metadata have been populated
+    bundle = cast(FirestoreBundle, bundle)
+    metadata_bundle_element = cast(BundleElement, metadata_bundle_element)
     # Now, finally add the metadata element
     bundle._add_bundle_element(
         metadata_bundle_element,
