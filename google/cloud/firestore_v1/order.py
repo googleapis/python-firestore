@@ -154,7 +154,7 @@ class Order(object):
         if not isinstance(left_value, GeoPoint) or not isinstance(
             right_value, GeoPoint
         ):
-            raise TypeError("invalid geopoint encountered")
+            raise AttributeError("invalid geopoint encountered")
         cmp = (left_value.latitude > right_value.latitude) - (
             left_value.latitude < right_value.latitude
         )
