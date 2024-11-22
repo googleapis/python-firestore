@@ -138,6 +138,7 @@ class _BaseBulkWriterTests:
 
     def test_bulkwriteroperation_ctor(self):
         from google.cloud.firestore_v1.bulk_writer import BulkWriterOperation
+
         op = BulkWriterOperation()
         assert op.attempts == 0
         attempts = 9
