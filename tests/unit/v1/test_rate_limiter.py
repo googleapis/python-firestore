@@ -244,3 +244,14 @@ def test_rate_limiter_check_phase_error():
     )
     with pytest.raises(TypeError):
         ramp._check_phase()
+
+
+def test_rate_limiter_refill_error():
+    """
+    calling _refill with no _last_refill raises TypeError
+    """
+    ramp = rate_limiter.RateLimiter(
+        global_max_tokens=499,
+    )
+    with pytest.raises(TypeError):
+        ramp._last_refill()

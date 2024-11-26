@@ -184,12 +184,12 @@ def test_order_compare_invalid_geo_points(invalid_point_is_left):
     comparing invalid geopoints should raise exception
     """
     target = _make_order()
-    points = [None, _geoPoint_value(10, 10)]
+    points = [_array_value(), _geoPoint_value(10, 10)]
     if not invalid_point_is_left:
         # reverse points
         points = points[::-1]
     with pytest.raises(AttributeError):
-        target.compare(*points)
+        target.compare_geo_points(*points)
 
 
 def test_order_all_value_present():

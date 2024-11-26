@@ -48,7 +48,7 @@ from google.cloud.firestore_v1.types.write import DocumentTransform
 from google.cloud.firestore_v1.vector import Vector
 
 if TYPE_CHECKING:
-    from google.cloud.firestore_v1 import DocumentSnapshot  # pragma : no cover
+    from google.cloud.firestore_v1 import DocumentSnapshot  # pragma: no cover
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
