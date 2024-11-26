@@ -254,4 +254,4 @@ def test_rate_limiter_refill_error():
         global_max_tokens=499,
     )
     with pytest.raises(TypeError):
-        ramp._last_refill()
+        ramp._refill()
