@@ -45,7 +45,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
     """Accumulate read-and-write operations to be sent in a transaction.
 
     Args:
-        client (:class:`~google.cloud.firestore_v1.client.Client`):
+        client (:class:`~google.cloud.firestore_v1.async_client.AsyncClient`):
             The client that created this transaction.
         max_attempts (Optional[int]): The maximum number of attempts for
             the transaction (i.e. allowing retries). Defaults to
