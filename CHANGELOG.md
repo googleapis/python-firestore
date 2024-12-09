@@ -5,6 +5,13 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.19.1](https://github.com/googleapis/python-firestore/compare/v2.19.0...v2.19.1) (2024-12-09)
+
+
+### Bug Fixes
+
+* Populate transaction attributes after commit ([#977](https://github.com/googleapis/python-firestore/issues/977)) ([aa3c0a3](https://github.com/googleapis/python-firestore/commit/aa3c0a384efceed6bb4b368559bd8875593bccc1))
+
 ## [2.19.0](https://github.com/googleapis/python-firestore/compare/v2.18.0...v2.19.0) (2024-09-20)
 
 
