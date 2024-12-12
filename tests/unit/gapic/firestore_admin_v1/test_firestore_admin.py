@@ -9497,6 +9497,7 @@ def test_create_index_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.create_index(request)
 
@@ -9551,6 +9552,7 @@ def test_create_index_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.create_index(**mock_args)
 
@@ -9691,6 +9693,7 @@ def test_list_indexes_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_indexes(request)
 
@@ -9747,6 +9750,7 @@ def test_list_indexes_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_indexes(**mock_args)
 
@@ -9941,6 +9945,7 @@ def test_get_index_rest_required_fields(request_type=firestore_admin.GetIndexReq
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_index(request)
 
@@ -9988,6 +9993,7 @@ def test_get_index_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_index(**mock_args)
 
@@ -10116,6 +10122,7 @@ def test_delete_index_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.delete_index(request)
 
@@ -10161,6 +10168,7 @@ def test_delete_index_rest_flattened():
         json_return_value = ""
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.delete_index(**mock_args)
 
@@ -10290,6 +10298,7 @@ def test_get_field_rest_required_fields(request_type=firestore_admin.GetFieldReq
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_field(request)
 
@@ -10337,6 +10346,7 @@ def test_get_field_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_field(**mock_args)
 
@@ -10467,6 +10477,7 @@ def test_update_field_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.update_field(request)
 
@@ -10514,6 +10525,7 @@ def test_update_field_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.update_field(**mock_args)
 
@@ -10653,6 +10665,7 @@ def test_list_fields_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_fields(request)
 
@@ -10709,6 +10722,7 @@ def test_list_fields_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_fields(**mock_args)
 
@@ -10909,6 +10923,7 @@ def test_export_documents_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.export_documents(request)
 
@@ -10952,6 +10967,7 @@ def test_export_documents_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.export_documents(**mock_args)
 
@@ -11087,6 +11103,7 @@ def test_import_documents_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.import_documents(request)
 
@@ -11130,6 +11147,7 @@ def test_import_documents_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.import_documents(**mock_args)
 
@@ -11268,6 +11286,7 @@ def test_bulk_delete_documents_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.bulk_delete_documents(request)
 
@@ -11311,6 +11330,7 @@ def test_bulk_delete_documents_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.bulk_delete_documents(**mock_args)
 
@@ -11453,6 +11473,7 @@ def test_create_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.create_database(request)
 
@@ -11513,6 +11534,7 @@ def test_create_database_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.create_database(**mock_args)
 
@@ -11644,6 +11666,7 @@ def test_get_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_database(request)
 
@@ -11689,6 +11712,7 @@ def test_get_database_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_database(**mock_args)
 
@@ -11820,6 +11844,7 @@ def test_list_databases_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_databases(request)
 
@@ -11865,6 +11890,7 @@ def test_list_databases_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_databases(**mock_args)
 
@@ -11993,6 +12019,7 @@ def test_update_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.update_database(request)
 
@@ -12037,6 +12064,7 @@ def test_update_database_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.update_database(**mock_args)
 
@@ -12171,6 +12199,7 @@ def test_delete_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.delete_database(request)
 
@@ -12214,6 +12243,7 @@ def test_delete_database_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.delete_database(**mock_args)
 
@@ -12341,6 +12371,7 @@ def test_get_backup_rest_required_fields(request_type=firestore_admin.GetBackupR
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_backup(request)
 
@@ -12386,6 +12417,7 @@ def test_get_backup_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_backup(**mock_args)
 
@@ -12516,6 +12548,7 @@ def test_list_backups_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_backups(request)
 
@@ -12561,6 +12594,7 @@ def test_list_backups_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_backups(**mock_args)
 
@@ -12688,6 +12722,7 @@ def test_delete_backup_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.delete_backup(request)
 
@@ -12731,6 +12766,7 @@ def test_delete_backup_rest_flattened():
         json_return_value = ""
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.delete_backup(**mock_args)
 
@@ -12873,6 +12909,7 @@ def test_restore_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.restore_database(request)
 
@@ -13007,6 +13044,7 @@ def test_create_backup_schedule_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.create_backup_schedule(request)
 
@@ -13061,6 +13099,7 @@ def test_create_backup_schedule_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.create_backup_schedule(**mock_args)
 
@@ -13197,6 +13236,7 @@ def test_get_backup_schedule_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_backup_schedule(request)
 
@@ -13244,6 +13284,7 @@ def test_get_backup_schedule_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_backup_schedule(**mock_args)
 
@@ -13380,6 +13421,7 @@ def test_list_backup_schedules_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_backup_schedules(request)
 
@@ -13425,6 +13467,7 @@ def test_list_backup_schedules_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_backup_schedules(**mock_args)
 
@@ -13559,6 +13602,7 @@ def test_update_backup_schedule_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.update_backup_schedule(request)
 
@@ -13609,6 +13653,7 @@ def test_update_backup_schedule_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.update_backup_schedule(**mock_args)
 
@@ -13743,6 +13788,7 @@ def test_delete_backup_schedule_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.delete_backup_schedule(request)
 
@@ -13788,6 +13834,7 @@ def test_delete_backup_schedule_rest_flattened():
         json_return_value = ""
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.delete_backup_schedule(**mock_args)
 
@@ -15125,6 +15172,7 @@ def test_create_index_rest_bad_request(request_type=firestore_admin.CreateIndexR
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.create_index(request)
 
 
@@ -15238,6 +15286,7 @@ def test_create_index_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.create_index(request)
 
     # Establish that the response is the type that we expect.
@@ -15279,6 +15328,7 @@ def test_create_index_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -15323,6 +15373,7 @@ def test_list_indexes_rest_bad_request(request_type=firestore_admin.ListIndexesR
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.list_indexes(request)
 
 
@@ -15360,6 +15411,7 @@ def test_list_indexes_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.list_indexes(request)
 
     # Establish that the response is the type that we expect.
@@ -15400,6 +15452,7 @@ def test_list_indexes_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = firestore_admin.ListIndexesResponse.to_json(
             firestore_admin.ListIndexesResponse()
         )
@@ -15446,6 +15499,7 @@ def test_get_index_rest_bad_request(request_type=firestore_admin.GetIndexRequest
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.get_index(request)
 
 
@@ -15486,6 +15540,7 @@ def test_get_index_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.get_index(request)
 
     # Establish that the response is the type that we expect.
@@ -15529,6 +15584,7 @@ def test_get_index_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = index.Index.to_json(index.Index())
         req.return_value.content = return_value
 
@@ -15573,6 +15629,7 @@ def test_delete_index_rest_bad_request(request_type=firestore_admin.DeleteIndexR
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.delete_index(request)
 
 
@@ -15605,6 +15662,7 @@ def test_delete_index_rest_call_success(request_type):
         json_return_value = ""
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.delete_index(request)
 
     # Establish that the response is the type that we expect.
@@ -15641,6 +15699,7 @@ def test_delete_index_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         request = firestore_admin.DeleteIndexRequest()
         metadata = [
@@ -15681,6 +15740,7 @@ def test_get_field_rest_bad_request(request_type=firestore_admin.GetFieldRequest
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.get_field(request)
 
 
@@ -15718,6 +15778,7 @@ def test_get_field_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.get_field(request)
 
     # Establish that the response is the type that we expect.
@@ -15758,6 +15819,7 @@ def test_get_field_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = field.Field.to_json(field.Field())
         req.return_value.content = return_value
 
@@ -15804,6 +15866,7 @@ def test_update_field_rest_bad_request(request_type=firestore_admin.UpdateFieldR
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.update_field(request)
 
 
@@ -15930,6 +15993,7 @@ def test_update_field_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.update_field(request)
 
     # Establish that the response is the type that we expect.
@@ -15971,6 +16035,7 @@ def test_update_field_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -16015,6 +16080,7 @@ def test_list_fields_rest_bad_request(request_type=firestore_admin.ListFieldsReq
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.list_fields(request)
 
 
@@ -16052,6 +16118,7 @@ def test_list_fields_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.list_fields(request)
 
     # Establish that the response is the type that we expect.
@@ -16092,6 +16159,7 @@ def test_list_fields_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = firestore_admin.ListFieldsResponse.to_json(
             firestore_admin.ListFieldsResponse()
         )
@@ -16138,6 +16206,7 @@ def test_export_documents_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.export_documents(request)
 
 
@@ -16168,6 +16237,7 @@ def test_export_documents_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.export_documents(request)
 
     # Establish that the response is the type that we expect.
@@ -16209,6 +16279,7 @@ def test_export_documents_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -16253,6 +16324,7 @@ def test_import_documents_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.import_documents(request)
 
 
@@ -16283,6 +16355,7 @@ def test_import_documents_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.import_documents(request)
 
     # Establish that the response is the type that we expect.
@@ -16324,6 +16397,7 @@ def test_import_documents_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -16368,6 +16442,7 @@ def test_bulk_delete_documents_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.bulk_delete_documents(request)
 
 
@@ -16398,6 +16473,7 @@ def test_bulk_delete_documents_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.bulk_delete_documents(request)
 
     # Establish that the response is the type that we expect.
@@ -16439,6 +16515,7 @@ def test_bulk_delete_documents_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -16483,6 +16560,7 @@ def test_create_database_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.create_database(request)
 
 
@@ -16609,6 +16687,7 @@ def test_create_database_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.create_database(request)
 
     # Establish that the response is the type that we expect.
@@ -16650,6 +16729,7 @@ def test_create_database_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -16692,6 +16772,7 @@ def test_get_database_rest_bad_request(request_type=firestore_admin.GetDatabaseR
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.get_database(request)
 
 
@@ -16737,6 +16818,7 @@ def test_get_database_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.get_database(request)
 
     # Establish that the response is the type that we expect.
@@ -16796,6 +16878,7 @@ def test_get_database_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = database.Database.to_json(database.Database())
         req.return_value.content = return_value
 
@@ -16840,6 +16923,7 @@ def test_list_databases_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.list_databases(request)
 
 
@@ -16875,6 +16959,7 @@ def test_list_databases_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.list_databases(request)
 
     # Establish that the response is the type that we expect.
@@ -16915,6 +17000,7 @@ def test_list_databases_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = firestore_admin.ListDatabasesResponse.to_json(
             firestore_admin.ListDatabasesResponse()
         )
@@ -16961,6 +17047,7 @@ def test_update_database_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.update_database(request)
 
 
@@ -17087,6 +17174,7 @@ def test_update_database_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.update_database(request)
 
     # Establish that the response is the type that we expect.
@@ -17128,6 +17216,7 @@ def test_update_database_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -17172,6 +17261,7 @@ def test_delete_database_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.delete_database(request)
 
 
@@ -17202,6 +17292,7 @@ def test_delete_database_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.delete_database(request)
 
     # Establish that the response is the type that we expect.
@@ -17243,6 +17334,7 @@ def test_delete_database_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -17285,6 +17377,7 @@ def test_get_backup_rest_bad_request(request_type=firestore_admin.GetBackupReque
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.get_backup(request)
 
 
@@ -17323,6 +17416,7 @@ def test_get_backup_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.get_backup(request)
 
     # Establish that the response is the type that we expect.
@@ -17366,6 +17460,7 @@ def test_get_backup_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = backup.Backup.to_json(backup.Backup())
         req.return_value.content = return_value
 
@@ -17408,6 +17503,7 @@ def test_list_backups_rest_bad_request(request_type=firestore_admin.ListBackupsR
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.list_backups(request)
 
 
@@ -17443,6 +17539,7 @@ def test_list_backups_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.list_backups(request)
 
     # Establish that the response is the type that we expect.
@@ -17483,6 +17580,7 @@ def test_list_backups_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = firestore_admin.ListBackupsResponse.to_json(
             firestore_admin.ListBackupsResponse()
         )
@@ -17529,6 +17627,7 @@ def test_delete_backup_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.delete_backup(request)
 
 
@@ -17559,6 +17658,7 @@ def test_delete_backup_rest_call_success(request_type):
         json_return_value = ""
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.delete_backup(request)
 
     # Establish that the response is the type that we expect.
@@ -17595,6 +17695,7 @@ def test_delete_backup_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         request = firestore_admin.DeleteBackupRequest()
         metadata = [
@@ -17635,6 +17736,7 @@ def test_restore_database_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.restore_database(request)
 
 
@@ -17665,6 +17767,7 @@ def test_restore_database_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.restore_database(request)
 
     # Establish that the response is the type that we expect.
@@ -17706,6 +17809,7 @@ def test_restore_database_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = json_format.MessageToJson(operations_pb2.Operation())
         req.return_value.content = return_value
 
@@ -17750,6 +17854,7 @@ def test_create_backup_schedule_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.create_backup_schedule(request)
 
 
@@ -17862,6 +17967,7 @@ def test_create_backup_schedule_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.create_backup_schedule(request)
 
     # Establish that the response is the type that we expect.
@@ -17902,6 +18008,7 @@ def test_create_backup_schedule_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = schedule.BackupSchedule.to_json(schedule.BackupSchedule())
         req.return_value.content = return_value
 
@@ -17948,6 +18055,7 @@ def test_get_backup_schedule_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.get_backup_schedule(request)
 
 
@@ -17985,6 +18093,7 @@ def test_get_backup_schedule_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.get_backup_schedule(request)
 
     # Establish that the response is the type that we expect.
@@ -18025,6 +18134,7 @@ def test_get_backup_schedule_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = schedule.BackupSchedule.to_json(schedule.BackupSchedule())
         req.return_value.content = return_value
 
@@ -18069,6 +18179,7 @@ def test_list_backup_schedules_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.list_backup_schedules(request)
 
 
@@ -18102,6 +18213,7 @@ def test_list_backup_schedules_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.list_backup_schedules(request)
 
     # Establish that the response is the type that we expect.
@@ -18141,6 +18253,7 @@ def test_list_backup_schedules_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = firestore_admin.ListBackupSchedulesResponse.to_json(
             firestore_admin.ListBackupSchedulesResponse()
         )
@@ -18191,6 +18304,7 @@ def test_update_backup_schedule_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.update_backup_schedule(request)
 
 
@@ -18307,6 +18421,7 @@ def test_update_backup_schedule_rest_call_success(request_type):
         json_return_value = json_format.MessageToJson(return_value)
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.update_backup_schedule(request)
 
     # Establish that the response is the type that we expect.
@@ -18347,6 +18462,7 @@ def test_update_backup_schedule_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         return_value = schedule.BackupSchedule.to_json(schedule.BackupSchedule())
         req.return_value.content = return_value
 
@@ -18393,6 +18509,7 @@ def test_delete_backup_schedule_rest_bad_request(
         response_value.status_code = 400
         response_value.request = mock.Mock()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.delete_backup_schedule(request)
 
 
@@ -18425,6 +18542,7 @@ def test_delete_backup_schedule_rest_call_success(request_type):
         json_return_value = ""
         response_value.content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         response = client.delete_backup_schedule(request)
 
     # Establish that the response is the type that we expect.
@@ -18461,6 +18579,7 @@ def test_delete_backup_schedule_rest_interceptors(null_interceptor):
 
         req.return_value = mock.Mock()
         req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         request = firestore_admin.DeleteBackupScheduleRequest()
         metadata = [
@@ -18503,6 +18622,7 @@ def test_cancel_operation_rest_bad_request(
         response_value.status_code = 400
         response_value.request = Request()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.cancel_operation(request)
 
 
@@ -18533,6 +18653,7 @@ def test_cancel_operation_rest(request_type):
         response_value.content = json_return_value.encode("UTF-8")
 
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         response = client.cancel_operation(request)
 
@@ -18563,6 +18684,7 @@ def test_delete_operation_rest_bad_request(
         response_value.status_code = 400
         response_value.request = Request()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.delete_operation(request)
 
 
@@ -18593,6 +18715,7 @@ def test_delete_operation_rest(request_type):
         response_value.content = json_return_value.encode("UTF-8")
 
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         response = client.delete_operation(request)
 
@@ -18623,6 +18746,7 @@ def test_get_operation_rest_bad_request(
         response_value.status_code = 400
         response_value.request = Request()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.get_operation(request)
 
 
@@ -18653,6 +18777,7 @@ def test_get_operation_rest(request_type):
         response_value.content = json_return_value.encode("UTF-8")
 
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         response = client.get_operation(request)
 
@@ -18683,6 +18808,7 @@ def test_list_operations_rest_bad_request(
         response_value.status_code = 400
         response_value.request = Request()
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
         client.list_operations(request)
 
 
@@ -18713,6 +18839,7 @@ def test_list_operations_rest(request_type):
         response_value.content = json_return_value.encode("UTF-8")
 
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         response = client.list_operations(request)
 

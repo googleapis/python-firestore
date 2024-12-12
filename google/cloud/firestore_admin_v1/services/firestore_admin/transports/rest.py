@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import logging
+import json  # type: ignore
 
 from google.auth.transport.requests import AuthorizedSession  # type: ignore
-import json  # type: ignore
 from google.auth import credentials as ga_credentials  # type: ignore
 from google.api_core import exceptions as core_exceptions
 from google.api_core import retry as retries
@@ -51,6 +52,14 @@ try:
 except AttributeError:  # pragma: NO COVER
     OptionalRetry = Union[retries.Retry, object, None]  # type: ignore
 
+try:
+    from google.api_core import client_logging  # type: ignore
+
+    CLIENT_LOGGING_SUPPORTED = True  # pragma: NO COVER
+except ImportError:  # pragma: NO COVER
+    CLIENT_LOGGING_SUPPORTED = False
+
+_LOGGER = logging.getLogger(__name__)
 
 DEFAULT_CLIENT_INFO = gapic_v1.client_info.ClientInfo(
     gapic_version=BASE_DEFAULT_CLIENT_INFO.gapic_version,
@@ -263,8 +272,11 @@ class FirestoreAdminRestInterceptor:
     def pre_bulk_delete_documents(
         self,
         request: firestore_admin.BulkDeleteDocumentsRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.BulkDeleteDocumentsRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.BulkDeleteDocumentsRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for bulk_delete_documents
 
         Override in a subclass to manipulate the request or metadata
@@ -286,8 +298,11 @@ class FirestoreAdminRestInterceptor:
     def pre_create_backup_schedule(
         self,
         request: firestore_admin.CreateBackupScheduleRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.CreateBackupScheduleRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.CreateBackupScheduleRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for create_backup_schedule
 
         Override in a subclass to manipulate the request or metadata
@@ -309,8 +324,10 @@ class FirestoreAdminRestInterceptor:
     def pre_create_database(
         self,
         request: firestore_admin.CreateDatabaseRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.CreateDatabaseRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.CreateDatabaseRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for create_database
 
         Override in a subclass to manipulate the request or metadata
@@ -332,8 +349,10 @@ class FirestoreAdminRestInterceptor:
     def pre_create_index(
         self,
         request: firestore_admin.CreateIndexRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.CreateIndexRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.CreateIndexRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for create_index
 
         Override in a subclass to manipulate the request or metadata
@@ -355,8 +374,10 @@ class FirestoreAdminRestInterceptor:
     def pre_delete_backup(
         self,
         request: firestore_admin.DeleteBackupRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.DeleteBackupRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.DeleteBackupRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for delete_backup
 
         Override in a subclass to manipulate the request or metadata
@@ -367,8 +388,11 @@ class FirestoreAdminRestInterceptor:
     def pre_delete_backup_schedule(
         self,
         request: firestore_admin.DeleteBackupScheduleRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.DeleteBackupScheduleRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.DeleteBackupScheduleRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for delete_backup_schedule
 
         Override in a subclass to manipulate the request or metadata
@@ -379,8 +403,10 @@ class FirestoreAdminRestInterceptor:
     def pre_delete_database(
         self,
         request: firestore_admin.DeleteDatabaseRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.DeleteDatabaseRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.DeleteDatabaseRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for delete_database
 
         Override in a subclass to manipulate the request or metadata
@@ -402,8 +428,10 @@ class FirestoreAdminRestInterceptor:
     def pre_delete_index(
         self,
         request: firestore_admin.DeleteIndexRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.DeleteIndexRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.DeleteIndexRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for delete_index
 
         Override in a subclass to manipulate the request or metadata
@@ -414,8 +442,10 @@ class FirestoreAdminRestInterceptor:
     def pre_export_documents(
         self,
         request: firestore_admin.ExportDocumentsRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.ExportDocumentsRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.ExportDocumentsRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for export_documents
 
         Override in a subclass to manipulate the request or metadata
@@ -437,8 +467,10 @@ class FirestoreAdminRestInterceptor:
     def pre_get_backup(
         self,
         request: firestore_admin.GetBackupRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.GetBackupRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.GetBackupRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for get_backup
 
         Override in a subclass to manipulate the request or metadata
@@ -458,8 +490,11 @@ class FirestoreAdminRestInterceptor:
     def pre_get_backup_schedule(
         self,
         request: firestore_admin.GetBackupScheduleRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.GetBackupScheduleRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.GetBackupScheduleRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for get_backup_schedule
 
         Override in a subclass to manipulate the request or metadata
@@ -481,8 +516,10 @@ class FirestoreAdminRestInterceptor:
     def pre_get_database(
         self,
         request: firestore_admin.GetDatabaseRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.GetDatabaseRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.GetDatabaseRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for get_database
 
         Override in a subclass to manipulate the request or metadata
@@ -502,8 +539,10 @@ class FirestoreAdminRestInterceptor:
     def pre_get_field(
         self,
         request: firestore_admin.GetFieldRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.GetFieldRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.GetFieldRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for get_field
 
         Override in a subclass to manipulate the request or metadata
@@ -523,8 +562,10 @@ class FirestoreAdminRestInterceptor:
     def pre_get_index(
         self,
         request: firestore_admin.GetIndexRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.GetIndexRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.GetIndexRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for get_index
 
         Override in a subclass to manipulate the request or metadata
@@ -544,8 +585,10 @@ class FirestoreAdminRestInterceptor:
     def pre_import_documents(
         self,
         request: firestore_admin.ImportDocumentsRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.ImportDocumentsRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.ImportDocumentsRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for import_documents
 
         Override in a subclass to manipulate the request or metadata
@@ -567,8 +610,10 @@ class FirestoreAdminRestInterceptor:
     def pre_list_backups(
         self,
         request: firestore_admin.ListBackupsRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.ListBackupsRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.ListBackupsRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for list_backups
 
         Override in a subclass to manipulate the request or metadata
@@ -590,8 +635,11 @@ class FirestoreAdminRestInterceptor:
     def pre_list_backup_schedules(
         self,
         request: firestore_admin.ListBackupSchedulesRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.ListBackupSchedulesRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.ListBackupSchedulesRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for list_backup_schedules
 
         Override in a subclass to manipulate the request or metadata
@@ -613,8 +661,10 @@ class FirestoreAdminRestInterceptor:
     def pre_list_databases(
         self,
         request: firestore_admin.ListDatabasesRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.ListDatabasesRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.ListDatabasesRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for list_databases
 
         Override in a subclass to manipulate the request or metadata
@@ -636,8 +686,10 @@ class FirestoreAdminRestInterceptor:
     def pre_list_fields(
         self,
         request: firestore_admin.ListFieldsRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.ListFieldsRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.ListFieldsRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for list_fields
 
         Override in a subclass to manipulate the request or metadata
@@ -659,8 +711,10 @@ class FirestoreAdminRestInterceptor:
     def pre_list_indexes(
         self,
         request: firestore_admin.ListIndexesRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.ListIndexesRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.ListIndexesRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for list_indexes
 
         Override in a subclass to manipulate the request or metadata
@@ -682,8 +736,10 @@ class FirestoreAdminRestInterceptor:
     def pre_restore_database(
         self,
         request: firestore_admin.RestoreDatabaseRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.RestoreDatabaseRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.RestoreDatabaseRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for restore_database
 
         Override in a subclass to manipulate the request or metadata
@@ -705,8 +761,11 @@ class FirestoreAdminRestInterceptor:
     def pre_update_backup_schedule(
         self,
         request: firestore_admin.UpdateBackupScheduleRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.UpdateBackupScheduleRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.UpdateBackupScheduleRequest,
+        Sequence[Tuple[str, Union[str, bytes]]],
+    ]:
         """Pre-rpc interceptor for update_backup_schedule
 
         Override in a subclass to manipulate the request or metadata
@@ -728,8 +787,10 @@ class FirestoreAdminRestInterceptor:
     def pre_update_database(
         self,
         request: firestore_admin.UpdateDatabaseRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.UpdateDatabaseRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.UpdateDatabaseRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for update_database
 
         Override in a subclass to manipulate the request or metadata
@@ -751,8 +812,10 @@ class FirestoreAdminRestInterceptor:
     def pre_update_field(
         self,
         request: firestore_admin.UpdateFieldRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[firestore_admin.UpdateFieldRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore_admin.UpdateFieldRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for update_field
 
         Override in a subclass to manipulate the request or metadata
@@ -774,8 +837,10 @@ class FirestoreAdminRestInterceptor:
     def pre_cancel_operation(
         self,
         request: operations_pb2.CancelOperationRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[operations_pb2.CancelOperationRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        operations_pb2.CancelOperationRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for cancel_operation
 
         Override in a subclass to manipulate the request or metadata
@@ -795,8 +860,10 @@ class FirestoreAdminRestInterceptor:
     def pre_delete_operation(
         self,
         request: operations_pb2.DeleteOperationRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[operations_pb2.DeleteOperationRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        operations_pb2.DeleteOperationRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for delete_operation
 
         Override in a subclass to manipulate the request or metadata
@@ -816,8 +883,10 @@ class FirestoreAdminRestInterceptor:
     def pre_get_operation(
         self,
         request: operations_pb2.GetOperationRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[operations_pb2.GetOperationRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        operations_pb2.GetOperationRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for get_operation
 
         Override in a subclass to manipulate the request or metadata
@@ -839,8 +908,10 @@ class FirestoreAdminRestInterceptor:
     def pre_list_operations(
         self,
         request: operations_pb2.ListOperationsRequest,
-        metadata: Sequence[Tuple[str, str]],
-    ) -> Tuple[operations_pb2.ListOperationsRequest, Sequence[Tuple[str, str]]]:
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        operations_pb2.ListOperationsRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
         """Pre-rpc interceptor for list_operations
 
         Override in a subclass to manipulate the request or metadata
@@ -1066,7 +1137,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the bulk delete documents method over HTTP.
 
@@ -1085,8 +1156,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -1099,6 +1172,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseBulkDeleteDocuments._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_bulk_delete_documents(
                 request, metadata
             )
@@ -1114,6 +1188,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseBulkDeleteDocuments._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.BulkDeleteDocuments",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "BulkDeleteDocuments",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._BulkDeleteDocuments._get_response(
@@ -1134,7 +1235,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_bulk_delete_documents(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.bulk_delete_documents",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "BulkDeleteDocuments",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _CreateBackupSchedule(
@@ -1173,7 +1296,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> schedule.BackupSchedule:
             r"""Call the create backup schedule method over HTTP.
 
@@ -1184,8 +1307,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.schedule.BackupSchedule:
@@ -1201,6 +1326,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseCreateBackupSchedule._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_create_backup_schedule(
                 request, metadata
             )
@@ -1216,6 +1342,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseCreateBackupSchedule._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.CreateBackupSchedule",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "CreateBackupSchedule",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._CreateBackupSchedule._get_response(
@@ -1238,7 +1391,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = schedule.BackupSchedule.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_create_backup_schedule(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = schedule.BackupSchedule.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.create_backup_schedule",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "CreateBackupSchedule",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _CreateDatabase(
@@ -1276,7 +1451,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the create database method over HTTP.
 
@@ -1287,8 +1462,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -1301,6 +1478,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseCreateDatabase._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_create_database(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseCreateDatabase._get_transcoded_request(
                 http_options, request
@@ -1314,6 +1492,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseCreateDatabase._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.CreateDatabase",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "CreateDatabase",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._CreateDatabase._get_response(
@@ -1334,7 +1539,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_create_database(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.create_database",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "CreateDatabase",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _CreateIndex(
@@ -1372,7 +1599,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the create index method over HTTP.
 
@@ -1383,8 +1610,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -1397,6 +1626,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseCreateIndex._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_create_index(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseCreateIndex._get_transcoded_request(
                 http_options, request
@@ -1410,6 +1640,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseCreateIndex._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.CreateIndex",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "CreateIndex",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._CreateIndex._get_response(
@@ -1430,7 +1687,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_create_index(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.create_index",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "CreateIndex",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _DeleteBackup(
@@ -1467,7 +1746,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ):
             r"""Call the delete backup method over HTTP.
 
@@ -1478,13 +1757,16 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
             """
 
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseDeleteBackup._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_delete_backup(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseDeleteBackup._get_transcoded_request(
                 http_options, request
@@ -1494,6 +1776,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseDeleteBackup._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.DeleteBackup",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "DeleteBackup",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._DeleteBackup._get_response(
@@ -1545,7 +1854,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ):
             r"""Call the delete backup schedule method over HTTP.
 
@@ -1556,13 +1865,16 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
             """
 
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseDeleteBackupSchedule._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_delete_backup_schedule(
                 request, metadata
             )
@@ -1574,6 +1886,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseDeleteBackupSchedule._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.DeleteBackupSchedule",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "DeleteBackupSchedule",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._DeleteBackupSchedule._get_response(
@@ -1624,7 +1963,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the delete database method over HTTP.
 
@@ -1635,8 +1974,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -1649,6 +1990,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseDeleteDatabase._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_delete_database(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseDeleteDatabase._get_transcoded_request(
                 http_options, request
@@ -1658,6 +2000,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseDeleteDatabase._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.DeleteDatabase",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "DeleteDatabase",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._DeleteDatabase._get_response(
@@ -1677,7 +2046,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_delete_database(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.delete_database",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "DeleteDatabase",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _DeleteIndex(
@@ -1714,7 +2105,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ):
             r"""Call the delete index method over HTTP.
 
@@ -1725,13 +2116,16 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
             """
 
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseDeleteIndex._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_delete_index(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseDeleteIndex._get_transcoded_request(
                 http_options, request
@@ -1741,6 +2135,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseDeleteIndex._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.DeleteIndex",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "DeleteIndex",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._DeleteIndex._get_response(
@@ -1792,7 +2213,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the export documents method over HTTP.
 
@@ -1803,8 +2224,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -1817,6 +2240,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseExportDocuments._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_export_documents(
                 request, metadata
             )
@@ -1832,6 +2256,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseExportDocuments._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.ExportDocuments",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ExportDocuments",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._ExportDocuments._get_response(
@@ -1852,7 +2303,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_export_documents(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.export_documents",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ExportDocuments",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _GetBackup(
@@ -1889,7 +2362,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> backup.Backup:
             r"""Call the get backup method over HTTP.
 
@@ -1900,8 +2373,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.backup.Backup:
@@ -1916,6 +2391,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseGetBackup._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_get_backup(request, metadata)
             transcoded_request = (
                 _BaseFirestoreAdminRestTransport._BaseGetBackup._get_transcoded_request(
@@ -1929,6 +2405,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                     transcoded_request
                 )
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.GetBackup",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetBackup",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._GetBackup._get_response(
@@ -1950,7 +2453,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = backup.Backup.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_get_backup(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = backup.Backup.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.get_backup",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetBackup",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _GetBackupSchedule(
@@ -1987,7 +2512,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> schedule.BackupSchedule:
             r"""Call the get backup schedule method over HTTP.
 
@@ -1998,8 +2523,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.schedule.BackupSchedule:
@@ -2015,6 +2542,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseGetBackupSchedule._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_get_backup_schedule(
                 request, metadata
             )
@@ -2026,6 +2554,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseGetBackupSchedule._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.GetBackupSchedule",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetBackupSchedule",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._GetBackupSchedule._get_response(
@@ -2047,7 +2602,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = schedule.BackupSchedule.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_get_backup_schedule(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = schedule.BackupSchedule.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.get_backup_schedule",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetBackupSchedule",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _GetDatabase(
@@ -2084,7 +2661,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> database.Database:
             r"""Call the get database method over HTTP.
 
@@ -2095,8 +2672,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.database.Database:
@@ -2106,6 +2685,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseGetDatabase._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_get_database(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseGetDatabase._get_transcoded_request(
                 http_options, request
@@ -2115,6 +2695,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseGetDatabase._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.GetDatabase",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetDatabase",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._GetDatabase._get_response(
@@ -2136,7 +2743,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = database.Database.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_get_database(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = database.Database.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.get_database",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetDatabase",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _GetField(
@@ -2173,7 +2802,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> field.Field:
             r"""Call the get field method over HTTP.
 
@@ -2184,8 +2813,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.field.Field:
@@ -2200,6 +2831,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseGetField._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_get_field(request, metadata)
             transcoded_request = (
                 _BaseFirestoreAdminRestTransport._BaseGetField._get_transcoded_request(
@@ -2213,6 +2845,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                     transcoded_request
                 )
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.GetField",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetField",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._GetField._get_response(
@@ -2234,7 +2893,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = field.Field.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_get_field(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = field.Field.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.get_field",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetField",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _GetIndex(
@@ -2271,7 +2952,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> index.Index:
             r"""Call the get index method over HTTP.
 
@@ -2282,8 +2963,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.index.Index:
@@ -2296,6 +2979,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseGetIndex._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_get_index(request, metadata)
             transcoded_request = (
                 _BaseFirestoreAdminRestTransport._BaseGetIndex._get_transcoded_request(
@@ -2309,6 +2993,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                     transcoded_request
                 )
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.GetIndex",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetIndex",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._GetIndex._get_response(
@@ -2330,7 +3041,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = index.Index.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_get_index(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = index.Index.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.get_index",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetIndex",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _ImportDocuments(
@@ -2368,7 +3101,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the import documents method over HTTP.
 
@@ -2379,8 +3112,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -2393,6 +3128,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseImportDocuments._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_import_documents(
                 request, metadata
             )
@@ -2408,6 +3144,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseImportDocuments._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.ImportDocuments",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ImportDocuments",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._ImportDocuments._get_response(
@@ -2428,7 +3191,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_import_documents(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.import_documents",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ImportDocuments",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _ListBackups(
@@ -2465,7 +3250,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> firestore_admin.ListBackupsResponse:
             r"""Call the list backups method over HTTP.
 
@@ -2476,8 +3261,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.firestore_admin.ListBackupsResponse:
@@ -2489,6 +3276,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseListBackups._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_list_backups(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseListBackups._get_transcoded_request(
                 http_options, request
@@ -2498,6 +3286,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseListBackups._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.ListBackups",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListBackups",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._ListBackups._get_response(
@@ -2519,7 +3334,31 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = firestore_admin.ListBackupsResponse.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_list_backups(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = firestore_admin.ListBackupsResponse.to_json(
+                        response
+                    )
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.list_backups",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListBackups",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _ListBackupSchedules(
@@ -2557,7 +3396,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> firestore_admin.ListBackupSchedulesResponse:
             r"""Call the list backup schedules method over HTTP.
 
@@ -2568,8 +3407,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.firestore_admin.ListBackupSchedulesResponse:
@@ -2581,6 +3422,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseListBackupSchedules._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_list_backup_schedules(
                 request, metadata
             )
@@ -2592,6 +3434,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseListBackupSchedules._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.ListBackupSchedules",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListBackupSchedules",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._ListBackupSchedules._get_response(
@@ -2613,7 +3482,31 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = firestore_admin.ListBackupSchedulesResponse.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_list_backup_schedules(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = (
+                        firestore_admin.ListBackupSchedulesResponse.to_json(response)
+                    )
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.list_backup_schedules",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListBackupSchedules",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _ListDatabases(
@@ -2650,7 +3543,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> firestore_admin.ListDatabasesResponse:
             r"""Call the list databases method over HTTP.
 
@@ -2662,8 +3555,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.firestore_admin.ListDatabasesResponse:
@@ -2673,6 +3568,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseListDatabases._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_list_databases(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseListDatabases._get_transcoded_request(
                 http_options, request
@@ -2682,6 +3578,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseListDatabases._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.ListDatabases",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListDatabases",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._ListDatabases._get_response(
@@ -2703,7 +3626,31 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = firestore_admin.ListDatabasesResponse.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_list_databases(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = firestore_admin.ListDatabasesResponse.to_json(
+                        response
+                    )
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.list_databases",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListDatabases",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _ListFields(
@@ -2740,7 +3687,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> firestore_admin.ListFieldsResponse:
             r"""Call the list fields method over HTTP.
 
@@ -2751,8 +3698,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.firestore_admin.ListFieldsResponse:
@@ -2764,6 +3713,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseListFields._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_list_fields(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseListFields._get_transcoded_request(
                 http_options, request
@@ -2775,6 +3725,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                     transcoded_request
                 )
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.ListFields",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListFields",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._ListFields._get_response(
@@ -2796,7 +3773,31 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = firestore_admin.ListFieldsResponse.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_list_fields(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = firestore_admin.ListFieldsResponse.to_json(
+                        response
+                    )
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.list_fields",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListFields",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _ListIndexes(
@@ -2833,7 +3834,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> firestore_admin.ListIndexesResponse:
             r"""Call the list indexes method over HTTP.
 
@@ -2844,8 +3845,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.firestore_admin.ListIndexesResponse:
@@ -2857,6 +3860,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseListIndexes._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_list_indexes(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseListIndexes._get_transcoded_request(
                 http_options, request
@@ -2866,6 +3870,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseListIndexes._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.ListIndexes",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListIndexes",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._ListIndexes._get_response(
@@ -2887,7 +3918,31 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = firestore_admin.ListIndexesResponse.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_list_indexes(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = firestore_admin.ListIndexesResponse.to_json(
+                        response
+                    )
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.list_indexes",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListIndexes",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _RestoreDatabase(
@@ -2925,7 +3980,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the restore database method over HTTP.
 
@@ -2936,8 +3991,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -2950,6 +4007,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseRestoreDatabase._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_restore_database(
                 request, metadata
             )
@@ -2965,6 +4023,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseRestoreDatabase._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.RestoreDatabase",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "RestoreDatabase",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._RestoreDatabase._get_response(
@@ -2985,7 +4070,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_restore_database(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.restore_database",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "RestoreDatabase",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _UpdateBackupSchedule(
@@ -3024,7 +4131,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> schedule.BackupSchedule:
             r"""Call the update backup schedule method over HTTP.
 
@@ -3035,8 +4142,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.schedule.BackupSchedule:
@@ -3052,6 +4161,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseUpdateBackupSchedule._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_update_backup_schedule(
                 request, metadata
             )
@@ -3067,6 +4177,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseUpdateBackupSchedule._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.UpdateBackupSchedule",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "UpdateBackupSchedule",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._UpdateBackupSchedule._get_response(
@@ -3089,7 +4226,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             pb_resp = schedule.BackupSchedule.pb(resp)
 
             json_format.Parse(response.content, pb_resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_update_backup_schedule(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = schedule.BackupSchedule.to_json(response)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.update_backup_schedule",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "UpdateBackupSchedule",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _UpdateDatabase(
@@ -3127,7 +4286,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the update database method over HTTP.
 
@@ -3138,8 +4297,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -3152,6 +4313,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseUpdateDatabase._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_update_database(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseUpdateDatabase._get_transcoded_request(
                 http_options, request
@@ -3165,6 +4327,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseUpdateDatabase._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.UpdateDatabase",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "UpdateDatabase",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._UpdateDatabase._get_response(
@@ -3185,7 +4374,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_update_database(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.update_database",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "UpdateDatabase",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _UpdateField(
@@ -3223,7 +4434,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the update field method over HTTP.
 
@@ -3234,8 +4445,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 ~.operations_pb2.Operation:
@@ -3248,6 +4461,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseUpdateField._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_update_field(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseUpdateField._get_transcoded_request(
                 http_options, request
@@ -3261,6 +4475,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseUpdateField._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.UpdateField",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "UpdateField",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._UpdateField._get_response(
@@ -3281,7 +4522,29 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             # Return the response
             resp = operations_pb2.Operation()
             json_format.Parse(response.content, resp, ignore_unknown_fields=True)
+
             resp = self._interceptor.post_update_field(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminClient.update_field",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "UpdateField",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     @property
@@ -3526,7 +4789,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> None:
             r"""Call the cancel operation method over HTTP.
 
@@ -3536,13 +4799,16 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
             """
 
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseCancelOperation._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_cancel_operation(
                 request, metadata
             )
@@ -3558,6 +4824,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseCancelOperation._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.CancelOperation",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "CancelOperation",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._CancelOperation._get_response(
@@ -3615,7 +4908,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> None:
             r"""Call the delete operation method over HTTP.
 
@@ -3625,13 +4918,16 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
             """
 
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseDeleteOperation._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_delete_operation(
                 request, metadata
             )
@@ -3643,6 +4939,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseDeleteOperation._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.DeleteOperation",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "DeleteOperation",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._DeleteOperation._get_response(
@@ -3699,7 +5022,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.Operation:
             r"""Call the get operation method over HTTP.
 
@@ -3709,8 +5032,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 operations_pb2.Operation: Response from GetOperation method.
@@ -3719,6 +5044,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseGetOperation._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_get_operation(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseGetOperation._get_transcoded_request(
                 http_options, request
@@ -3728,6 +5054,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseGetOperation._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.GetOperation",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetOperation",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._GetOperation._get_response(
@@ -3748,6 +5101,27 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             resp = operations_pb2.Operation()
             resp = json_format.Parse(content, resp)
             resp = self._interceptor.post_get_operation(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminAsyncClient.GetOperation",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "GetOperation",
+                        "httpResponse": http_response,
+                        "metadata": http_response["headers"],
+                    },
+                )
             return resp
 
     @property
@@ -3788,7 +5162,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             *,
             retry: OptionalRetry = gapic_v1.method.DEFAULT,
             timeout: Optional[float] = None,
-            metadata: Sequence[Tuple[str, str]] = (),
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
         ) -> operations_pb2.ListOperationsResponse:
             r"""Call the list operations method over HTTP.
 
@@ -3798,8 +5172,10 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
                 retry (google.api_core.retry.Retry): Designation of what errors, if any,
                     should be retried.
                 timeout (float): The timeout for this request.
-                metadata (Sequence[Tuple[str, str]]): Strings which should be
-                    sent along with the request as metadata.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
 
             Returns:
                 operations_pb2.ListOperationsResponse: Response from ListOperations method.
@@ -3808,6 +5184,7 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             http_options = (
                 _BaseFirestoreAdminRestTransport._BaseListOperations._get_http_options()
             )
+
             request, metadata = self._interceptor.pre_list_operations(request, metadata)
             transcoded_request = _BaseFirestoreAdminRestTransport._BaseListOperations._get_transcoded_request(
                 http_options, request
@@ -3817,6 +5194,33 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             query_params = _BaseFirestoreAdminRestTransport._BaseListOperations._get_query_params_json(
                 transcoded_request
             )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = json_format.MessageToJson(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore.admin_v1.FirestoreAdminClient.ListOperations",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListOperations",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
 
             # Send the request
             response = FirestoreAdminRestTransport._ListOperations._get_response(
@@ -3837,6 +5241,27 @@ class FirestoreAdminRestTransport(_BaseFirestoreAdminRestTransport):
             resp = operations_pb2.ListOperationsResponse()
             resp = json_format.Parse(content, resp)
             resp = self._interceptor.post_list_operations(resp)
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                try:
+                    response_payload = json_format.MessageToJson(resp)
+                except:
+                    response_payload = None
+                http_response = {
+                    "payload": response_payload,
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore.admin_v1.FirestoreAdminAsyncClient.ListOperations",
+                    extra={
+                        "serviceName": "google.firestore.admin.v1.FirestoreAdmin",
+                        "rpcName": "ListOperations",
+                        "httpResponse": http_response,
+                        "metadata": http_response["headers"],
+                    },
+                )
             return resp
 
     @property
