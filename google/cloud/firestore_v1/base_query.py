@@ -142,29 +142,46 @@ class BaseFilter(abc.ABC):
         """Build the protobuf representation based on values in the filter"""
 
 
+def _validate_opation(op_string, value):
+    """
+    Given an input operator string (e.g, '!='), and a value (e.g. None),
+    ensure that the operator and value combination is valid, and return
+    an approproate new operator value. A new operator will be used if
+    the operaion is a comparison against Null or NaN
+
+    Args:
+        op_string (Optional[str]): the requested operator
+        value (Any): the value the operator is acting on
+    Returns:
+        str | StructuredQuery.UnaryFilter.Operator: operator to use in requests
+    Raises:
+        ValueError: if the operator and value combination is invalid
+    """
+    if value is None:
+        if op_string == _EQ_OP:
+            return StructuredQuery.UnaryFilter.Operator.IS_NULL
+        elif op_string == _NEQ_OP:
+            return StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL
+        else:
+            raise ValueError(_BAD_OP_NULL)
+
+    elif _isnan(value):
+        if op_string != _EQ_OP:
+            raise ValueError(_BAD_OP_NAN)
+        return StructuredQuery.UnaryFilter.Operator.IS_NAN
+    elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
+        raise ValueError(_INVALID_WHERE_TRANSFORM)
+    else:
+        return op_string
+
+
 class FieldFilter(BaseFilter):
     """Class representation of a Field Filter."""
 
     def __init__(self, field_path, op_string, value=None):
         self.field_path = field_path
         self.value = value
-
-        if value is None:
-            if op_string == _EQ_OP:
-                self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NULL
-            elif op_string == _NEQ_OP:
-                self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL
-            else:
-                raise ValueError(_BAD_OP_NULL)
-
-        elif _isnan(value):
-            if op_string != _EQ_OP:
-                raise ValueError(_BAD_OP_NAN)
-            self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NAN
-        elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
-            raise ValueError(_INVALID_WHERE_TRANSFORM)
-        else:
-            self.op_string = op_string
+        self.op_string = _validate_opation(op_string, value)
 
     def _to_pb(self):
         """Returns the protobuf representation, either a StructuredQuery.UnaryFilter or a StructuredQuery.FieldFilter"""
@@ -487,27 +504,12 @@ class BaseQuery(object):
                 UserWarning,
                 stacklevel=2,
             )
-            if value is None:
-                if op_string == _EQ_OP:
-                    op = StructuredQuery.UnaryFilter.Operator.IS_NULL
-                elif op_string == _NEQ_OP:
-                    op = StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL
-                else:
-                    raise ValueError(_BAD_OP_NULL)
-
+            op = _validate_opation(op_string, value)
+            if isinstance(op, StructuredQuery.UnaryFilter.Operator):
                 filter_pb = query.StructuredQuery.UnaryFilter(
                     field=query.StructuredQuery.FieldReference(field_path=field_path),
                     op=op,
                 )
-            elif _isnan(value):
-                if op_string != _EQ_OP:
-                    raise ValueError(_BAD_OP_NAN)
-                filter_pb = query.StructuredQuery.UnaryFilter(
-                    field=query.StructuredQuery.FieldReference(field_path=field_path),
-                    op=StructuredQuery.UnaryFilter.Operator.IS_NAN,
-                )
-            elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
-                raise ValueError(_INVALID_WHERE_TRANSFORM)
             else:
                 filter_pb = query.StructuredQuery.FieldFilter(
                     field=query.StructuredQuery.FieldReference(field_path=field_path),
