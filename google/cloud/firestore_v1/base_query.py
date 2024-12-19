@@ -108,7 +108,9 @@ _INEQUALITY_OPERATORS = (
 )
 _BAD_OP_STRING = "Operator string {!r} is invalid. Valid choices are: {}."
 _BAD_OP_NAN = 'Only an equality filter ("==") can be used with NaN values'
-_BAD_OP_NULL = 'Only equality ("==") or not-equal ("!=") filters can be used with None values'
+_BAD_OP_NULL = (
+    'Only equality ("==") or not-equal ("!=") filters can be used with None values'
+)
 _INVALID_WHERE_TRANSFORM = "Transforms cannot be used as where values."
 _BAD_DIR_STRING = "Invalid direction {!r}. Must be one of {!r} or {!r}."
 _INVALID_CURSOR_TRANSFORM = "Transforms cannot be used as cursor values."
@@ -495,7 +497,7 @@ class BaseQuery(object):
 
                 filter_pb = query.StructuredQuery.UnaryFilter(
                     field=query.StructuredQuery.FieldReference(field_path=field_path),
-                    op=op
+                    op=op,
                 )
             elif _isnan(value):
                 if op_string != _EQ_OP:
