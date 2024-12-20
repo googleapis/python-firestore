@@ -1503,6 +1503,10 @@ def test_query_unary(client, cleanup, database):
     # Add to clean-up.
     cleanup(document1.delete)
 
+    _, document2 = collection.add({field_name: 123})
+    # Add to clean-up.
+    cleanup(document2.delete)
+
     # 0. Query for null.
     query0 = collection.where(filter=FieldFilter(field_name, "==", None))
     values0 = list(query0.stream())
