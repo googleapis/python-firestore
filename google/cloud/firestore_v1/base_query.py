@@ -107,10 +107,7 @@ _INEQUALITY_OPERATORS = (
     _operator_enum.NOT_IN,
 )
 _BAD_OP_STRING = "Operator string {!r} is invalid. Valid choices are: {}."
-_BAD_OP_NAN = 'Only an equality filter ("==") can be used with NaN values'
-_BAD_OP_NULL = (
-    'Only equality ("==") or not-equal ("!=") filters can be used with None values'
-)
+_BAD_OP_NAN_NULL = 'Only equality ("==") or not-equal ("!=") filters can be used with None or NaN values'
 _INVALID_WHERE_TRANSFORM = "Transforms cannot be used as where values."
 _BAD_DIR_STRING = "Invalid direction {!r}. Must be one of {!r} or {!r}."
 _INVALID_CURSOR_TRANSFORM = "Transforms cannot be used as cursor values."
@@ -163,12 +160,15 @@ def _validate_opation(op_string, value):
         elif op_string == _NEQ_OP:
             return StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL
         else:
-            raise ValueError(_BAD_OP_NULL)
+            raise ValueError(_BAD_OP_NAN_NULL)
 
     elif _isnan(value):
-        if op_string != _EQ_OP:
-            raise ValueError(_BAD_OP_NAN)
-        return StructuredQuery.UnaryFilter.Operator.IS_NAN
+        if op_string == _EQ_OP:
+            return StructuredQuery.UnaryFilter.Operator.IS_NAN
+        elif op_string == _NEQ_OP:
+            return StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN
+        else:
+            raise ValueError(_BAD_OP_NAN_NULL)
     elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
         raise ValueError(_INVALID_WHERE_TRANSFORM)
     else:
