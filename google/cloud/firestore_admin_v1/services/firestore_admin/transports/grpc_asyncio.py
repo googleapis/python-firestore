@@ -1239,7 +1239,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
             ),
             self.create_database: self._wrap_method(
                 self.create_database,
-                default_timeout=None,
+                default_timeout=120.0,
                 client_info=client_info,
             ),
             self.get_database: self._wrap_method(
@@ -1279,7 +1279,7 @@ class FirestoreAdminGrpcAsyncIOTransport(FirestoreAdminTransport):
             ),
             self.restore_database: self._wrap_method(
                 self.restore_database,
-                default_timeout=None,
+                default_timeout=120.0,
                 client_info=client_info,
             ),
             self.create_backup_schedule: self._wrap_method(
