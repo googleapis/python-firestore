@@ -30,12 +30,12 @@ from typing import (
     Coroutine,
     Dict,
     Iterable,
-    NoReturn,
+    List,
     Optional,
     Tuple,
     Type,
-    TypeVar,
     Union,
+    TypeVar,
 )
 
 from google.api_core import retry as retries
@@ -60,7 +60,6 @@ from google.cloud.firestore_v1.vector import Vector
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
-    from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.query_results import QueryResultsList
@@ -68,10 +67,12 @@ if TYPE_CHECKING:  # pragma: NO COVER
 
 
 _BAD_DIR_STRING: str
-_BAD_OP_NAN_NULL: str
+_BAD_OP_NAN: str
+_BAD_OP_NULL: str
 _BAD_OP_STRING: str
 _COMPARISON_OPERATORS: Dict[str, Any]
 _EQ_OP: str
+_NEQ_OP: str
 _INVALID_CURSOR_TRANSFORM: str
 _INVALID_WHERE_TRANSFORM: str
 _MISMATCH_CURSOR_W_ORDER_BY: str
@@ -81,12 +82,13 @@ _operator_enum: Any
 
 
 _EQ_OP = "=="
+_NEQ_OP = "!="
 _operator_enum = StructuredQuery.FieldFilter.Operator
 _COMPARISON_OPERATORS = {
     "<": _operator_enum.LESS_THAN,
     "<=": _operator_enum.LESS_THAN_OR_EQUAL,
     _EQ_OP: _operator_enum.EQUAL,
-    "!=": _operator_enum.NOT_EQUAL,
+    _NEQ_OP: _operator_enum.NOT_EQUAL,
     ">=": _operator_enum.GREATER_THAN_OR_EQUAL,
     ">": _operator_enum.GREATER_THAN,
     "array_contains": _operator_enum.ARRAY_CONTAINS,
@@ -105,7 +107,7 @@ _INEQUALITY_OPERATORS = (
     _operator_enum.NOT_IN,
 )
 _BAD_OP_STRING = "Operator string {!r} is invalid. Valid choices are: {}."
-_BAD_OP_NAN_NULL = 'Only an equality filter ("==") can be used with None or NaN values'
+_BAD_OP_NAN_NULL = 'Only equality ("==") or not-equal ("!=") filters can be used with None or NaN values'
 _INVALID_WHERE_TRANSFORM = "Transforms cannot be used as where values."
 _BAD_DIR_STRING = "Invalid direction {!r}. Must be one of {!r} or {!r}."
 _INVALID_CURSOR_TRANSFORM = "Transforms cannot be used as cursor values."
@@ -137,26 +139,49 @@ class BaseFilter(abc.ABC):
         """Build the protobuf representation based on values in the filter"""
 
 
+def _validate_opation(op_string, value):
+    """
+    Given an input operator string (e.g, '!='), and a value (e.g. None),
+    ensure that the operator and value combination is valid, and return
+    an approproate new operator value. A new operator will be used if
+    the operaion is a comparison against Null or NaN
+
+    Args:
+        op_string (Optional[str]): the requested operator
+        value (Any): the value the operator is acting on
+    Returns:
+        str | StructuredQuery.UnaryFilter.Operator: operator to use in requests
+    Raises:
+        ValueError: if the operator and value combination is invalid
+    """
+    if value is None:
+        if op_string == _EQ_OP:
+            return StructuredQuery.UnaryFilter.Operator.IS_NULL
+        elif op_string == _NEQ_OP:
+            return StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL
+        else:
+            raise ValueError(_BAD_OP_NAN_NULL)
+
+    elif _isnan(value):
+        if op_string == _EQ_OP:
+            return StructuredQuery.UnaryFilter.Operator.IS_NAN
+        elif op_string == _NEQ_OP:
+            return StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN
+        else:
+            raise ValueError(_BAD_OP_NAN_NULL)
+    elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
+        raise ValueError(_INVALID_WHERE_TRANSFORM)
+    else:
+        return op_string
+
+
 class FieldFilter(BaseFilter):
     """Class representation of a Field Filter."""
 
     def __init__(self, field_path, op_string, value=None):
         self.field_path = field_path
         self.value = value
-
-        if value is None:
-            if op_string != _EQ_OP:
-                raise ValueError(_BAD_OP_NAN_NULL)
-            self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NULL
-
-        elif _isnan(value):
-            if op_string != _EQ_OP:
-                raise ValueError(_BAD_OP_NAN_NULL)
-            self.op_string = StructuredQuery.UnaryFilter.Operator.IS_NAN
-        elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
-            raise ValueError(_INVALID_WHERE_TRANSFORM)
-        else:
-            self.op_string = op_string
+        self.op_string = _validate_opation(op_string, value)
 
     def _to_pb(self):
         """Returns the protobuf representation, either a StructuredQuery.UnaryFilter or a StructuredQuery.FieldFilter"""
@@ -236,13 +261,13 @@ class BaseQuery(object):
     Args:
         parent (:class:`~google.cloud.firestore_v1.collection.CollectionReference`):
             The collection that this query applies to.
-        projection (Optional[:class:`google.cloud.proto.firestore.v1.\
+        projection (Optional[:class:`google.cloud.firestore_v1.\
             query.StructuredQuery.Projection`]):
             A projection of document fields to limit the query results to.
-        field_filters (Optional[Tuple[:class:`google.cloud.proto.firestore.v1.\
+        field_filters (Optional[Tuple[:class:`google.cloud.firestore_v1.\
             query.StructuredQuery.FieldFilter`, ...]]):
             The filters to be applied in the query.
-        orders (Optional[Tuple[:class:`google.cloud.proto.firestore.v1.\
+        orders (Optional[Tuple[:class:`google.cloud.firestore_v1.\
             query.StructuredQuery.Order`, ...]]):
             The "order by" entries to use in the query.
         limit (Optional[int]):
@@ -382,16 +407,17 @@ class BaseQuery(object):
     def _copy(
         self: QueryType,
         *,
-        projection: Optional[query.StructuredQuery.Projection] = _not_passed,
-        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]] = _not_passed,
-        orders: Optional[Tuple[query.StructuredQuery.Order]] = _not_passed,
-        limit: Optional[int] = _not_passed,
-        limit_to_last: Optional[bool] = _not_passed,
-        offset: Optional[int] = _not_passed,
-        start_at: Optional[Tuple[dict, bool]] = _not_passed,
-        end_at: Optional[Tuple[dict, bool]] = _not_passed,
-        all_descendants: Optional[bool] = _not_passed,
-        recursive: Optional[bool] = _not_passed,
+        projection: Optional[query.StructuredQuery.Projection] | object = _not_passed,
+        field_filters: Optional[Tuple[query.StructuredQuery.FieldFilter]]
+        | object = _not_passed,
+        orders: Optional[Tuple[query.StructuredQuery.Order]] | object = _not_passed,
+        limit: Optional[int] | object = _not_passed,
+        limit_to_last: Optional[bool] | object = _not_passed,
+        offset: Optional[int] | object = _not_passed,
+        start_at: Optional[Tuple[dict, bool]] | object = _not_passed,
+        end_at: Optional[Tuple[dict, bool]] | object = _not_passed,
+        all_descendants: Optional[bool] | object = _not_passed,
+        recursive: Optional[bool] | object = _not_passed,
     ) -> QueryType:
         return self.__class__(
             self._parent,
@@ -478,22 +504,12 @@ class BaseQuery(object):
                 UserWarning,
                 stacklevel=2,
             )
-            if value is None:
-                if op_string != _EQ_OP:
-                    raise ValueError(_BAD_OP_NAN_NULL)
+            op = _validate_opation(op_string, value)
+            if isinstance(op, StructuredQuery.UnaryFilter.Operator):
                 filter_pb = query.StructuredQuery.UnaryFilter(
                     field=query.StructuredQuery.FieldReference(field_path=field_path),
-                    op=StructuredQuery.UnaryFilter.Operator.IS_NULL,
+                    op=op,
                 )
-            elif _isnan(value):
-                if op_string != _EQ_OP:
-                    raise ValueError(_BAD_OP_NAN_NULL)
-                filter_pb = query.StructuredQuery.UnaryFilter(
-                    field=query.StructuredQuery.FieldReference(field_path=field_path),
-                    op=StructuredQuery.UnaryFilter.Operator.IS_NAN,
-                )
-            elif isinstance(value, (transforms.Sentinel, transforms._ValueList)):
-                raise ValueError(_INVALID_WHERE_TRANSFORM)
             else:
                 filter_pb = query.StructuredQuery.FieldFilter(
                     field=query.StructuredQuery.FieldReference(field_path=field_path),
@@ -630,7 +646,7 @@ class BaseQuery(object):
 
     def _cursor_helper(
         self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
         before: bool,
         start: bool,
     ) -> QueryType:
@@ -687,7 +703,7 @@ class BaseQuery(object):
 
     def start_at(
         self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
     ) -> QueryType:
         """Start query results at a particular document value.
 
@@ -720,7 +736,7 @@ class BaseQuery(object):
 
     def start_after(
         self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
     ) -> QueryType:
         """Start query results after a particular document value.
 
@@ -754,7 +770,7 @@ class BaseQuery(object):
 
     def end_before(
         self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
     ) -> QueryType:
         """End query results before a particular document value.
 
@@ -788,7 +804,7 @@ class BaseQuery(object):
 
     def end_at(
         self: QueryType,
-        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple],
+        document_fields_or_snapshot: Union[DocumentSnapshot, dict, list, tuple, None],
     ) -> QueryType:
         """End query results at a particular document value.
 
@@ -895,7 +911,7 @@ class BaseQuery(object):
 
         return orders
 
-    def _normalize_cursor(self, cursor, orders) -> Optional[Tuple[Any, Any]]:
+    def _normalize_cursor(self, cursor, orders) -> Tuple[List, bool] | None:
         """Helper: convert cursor to a list of values based on orders."""
         if cursor is None:
             return None
@@ -990,7 +1006,7 @@ class BaseQuery(object):
         *,
         distance_result_field: Optional[str] = None,
         distance_threshold: Optional[float] = None,
-    ) -> BaseVectorQuery:
+    ):
         raise NotImplementedError
 
     def count(
@@ -1024,7 +1040,7 @@ class BaseQuery(object):
     def _prep_stream(
         self,
         transaction=None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
     ) -> Tuple[dict, str, dict]:
@@ -1060,7 +1076,7 @@ class BaseQuery(object):
     ):
         raise NotImplementedError
 
-    def on_snapshot(self, callback) -> NoReturn:
+    def on_snapshot(self, callback):
         raise NotImplementedError
 
     def recursive(self: QueryType) -> QueryType:
@@ -1149,6 +1165,10 @@ class BaseQuery(object):
 
         return 0
 
+    @staticmethod
+    def _get_collection_reference_class():
+        raise NotImplementedError
+
 
 def _enum_from_op_string(op_string: str) -> int:
     """Convert a string representation of a binary operator to an enum.
@@ -1225,9 +1245,9 @@ def _filter_pb(field_or_unary) -> StructuredQuery.Filter:
     """Convert a specific protobuf filter to the generic filter type.
 
     Args:
-        field_or_unary (Union[google.cloud.proto.firestore.v1.\
-            query.StructuredQuery.FieldFilter, google.cloud.proto.\
-            firestore.v1.query.StructuredQuery.FieldFilter]): A
+        field_or_unary (Union[google.cloud.firestore_v1.\
+            query.StructuredQuery.FieldFilter, google.cloud.\
+            firestore_v1.query.StructuredQuery.FieldFilter]): A
             field or unary filter to convert to a generic filter.
 
     Returns:
@@ -1245,7 +1265,7 @@ def _filter_pb(field_or_unary) -> StructuredQuery.Filter:
         raise ValueError("Unexpected filter type", type(field_or_unary), field_or_unary)
 
 
-def _cursor_pb(cursor_pair: Tuple[list, bool]) -> Optional[Cursor]:
+def _cursor_pb(cursor_pair: Optional[Tuple[list, bool]]) -> Optional[Cursor]:
     """Convert a cursor pair to a protobuf.
 
     If ``cursor_pair`` is :data:`None`, just returns :data:`None`.
@@ -1264,6 +1284,8 @@ def _cursor_pb(cursor_pair: Tuple[list, bool]) -> Optional[Cursor]:
         data, before = cursor_pair
         value_pbs = [_helpers.encode_value(value) for value in data]
         return query.Cursor(values=value_pbs, before=before)
+    else:
+        return None
 
 
 def _query_response_to_snapshot(
@@ -1272,7 +1294,7 @@ def _query_response_to_snapshot(
     """Parse a query response protobuf to a document snapshot.
 
     Args:
-        response_pb (google.cloud.proto.firestore.v1.\
+        response_pb (google.cloud.firestore_v1.\
             firestore.RunQueryResponse): A
         collection (:class:`~google.cloud.firestore_v1.collection.CollectionReference`):
             A reference to the collection that initiated the query.
@@ -1308,7 +1330,7 @@ def _collection_group_query_response_to_snapshot(
     """Parse a query response protobuf to a document snapshot.
 
     Args:
-        response_pb (google.cloud.proto.firestore.v1.\
+        response_pb (google.cloud.firestore_v1.\
             firestore.RunQueryResponse): A
         collection (:class:`~google.cloud.firestore_v1.collection.CollectionReference`):
             A reference to the collection that initiated the query.
@@ -1402,8 +1424,8 @@ class BaseCollectionGroup(BaseQuery):
     def _prep_get_partitions(
         self,
         partition_count,
-        retry: Optional[retries.Retry] = None,
-        timeout: Optional[float] = None,
+        retry: retries.Retry | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict]:
         self._validate_partition_query()
         parent_path, expected_prefix = self._parent._parent_info()
@@ -1429,11 +1451,7 @@ class BaseCollectionGroup(BaseQuery):
         partition_count,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
-    ) -> NoReturn:
-        raise NotImplementedError
-
-    @staticmethod
-    def _get_collection_reference_class() -> Type["BaseCollectionGroup"]:
+    ):
         raise NotImplementedError
 
 

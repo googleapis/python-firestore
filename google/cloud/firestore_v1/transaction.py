@@ -63,7 +63,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         """Add `Write`` protobufs to this transaction.
 
         Args:
-            write_pbs (List[google.cloud.proto.firestore.v1.\
+            write_pbs (List[google.cloud.firestore_v1.\
                 write.Write]): A list of write protobufs to be added.
 
         Raises:
@@ -74,7 +74,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
 
         super(Transaction, self)._add_write_pbs(write_pbs)
 
-    def _begin(self, retry_id: bytes = None) -> None:
+    def _begin(self, retry_id: bytes | None = None) -> None:
         """Begin the transaction.
 
         Args:
@@ -124,7 +124,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         """Transactionally commit the changes accumulated.
 
         Returns:
-            List[:class:`google.cloud.proto.firestore.v1.write.WriteResult`, ...]:
+            List[:class:`google.cloud.firestore_v1.write.WriteResult`, ...]:
             The write results corresponding to the changes committed, returned
             in the same order as the changes were applied to this transaction.
             A write result contains an ``update_time`` field.
@@ -145,13 +145,15 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         )
 
         self._clean_up()
-        return list(commit_response.write_results)
+        self.write_results = list(commit_response.write_results)
+        self.commit_time = commit_response.commit_time
+        return self.write_results
 
     def get_all(
         self,
         references: list,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieves multiple documents from Firestore.
 
@@ -173,7 +175,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
     def get(
         self,
         ref_or_query: DocumentReference | Query,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,

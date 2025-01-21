@@ -26,7 +26,6 @@ from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
 
 from google.cloud import firestore_v1
-from google.cloud.firestore_v1 import transaction
 from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.async_vector_query import AsyncVectorQuery
@@ -42,6 +41,7 @@ from google.cloud.firestore_v1.query_results import QueryResultsList
 
 if TYPE_CHECKING:  # pragma: NO COVER
     # Types needed only for Type Hints
+    from google.cloud.firestore_v1.async_transaction import AsyncTransaction
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
     from google.cloud.firestore_v1.field_path import FieldPath
@@ -59,13 +59,13 @@ class AsyncQuery(BaseQuery):
     Args:
         parent (:class:`~google.cloud.firestore_v1.collection.CollectionReference`):
             The collection that this query applies to.
-        projection (Optional[:class:`google.cloud.proto.firestore.v1.\
+        projection (Optional[:class:`google.cloud.firestore_v1.\
             query.StructuredQuery.Projection`]):
             A projection of document fields to limit the query results to.
-        field_filters (Optional[Tuple[:class:`google.cloud.proto.firestore.v1.\
+        field_filters (Optional[Tuple[:class:`google.cloud.firestore_v1.\
             query.StructuredQuery.FieldFilter`, ...]]):
             The filters to be applied in the query.
-        orders (Optional[Tuple[:class:`google.cloud.proto.firestore.v1.\
+        orders (Optional[Tuple[:class:`google.cloud.firestore_v1.\
             query.StructuredQuery.Order`, ...]]):
             The "order by" entries to use in the query.
         limit (Optional[int]):
@@ -177,8 +177,8 @@ class AsyncQuery(BaseQuery):
 
     async def get(
         self,
-        transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        transaction: Optional[AsyncTransaction] = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
@@ -231,14 +231,17 @@ class AsyncQuery(BaseQuery):
             timeout=timeout,
             explain_options=explain_options,
         )
-        result_list = [d async for d in result]
-        if is_limited_to_last:
-            result_list = list(reversed(result_list))
+        try:
+            result_list = [d async for d in result]
+            if is_limited_to_last:
+                result_list = list(reversed(result_list))
 
-        if explain_options is None:
-            explain_metrics = None
-        else:
-            explain_metrics = await result.get_explain_metrics()
+            if explain_options is None:
+                explain_metrics = None
+            else:
+                explain_metrics = await result.get_explain_metrics()
+        finally:
+            await result.aclose()
 
         return QueryResultsList(result_list, explain_options, explain_metrics)
 
@@ -329,8 +332,8 @@ class AsyncQuery(BaseQuery):
 
     async def _make_stream(
         self,
-        transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        transaction: Optional[AsyncTransaction] = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
     ) -> AsyncGenerator[DocumentSnapshot | query_profile_pb.ExplainMetrics, Any]:
@@ -404,8 +407,8 @@ class AsyncQuery(BaseQuery):
 
     def stream(
         self,
-        transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        transaction: Optional[AsyncTransaction] = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
@@ -509,8 +512,8 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
     async def get_partitions(
         self,
         partition_count,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> AsyncGenerator[QueryPartition, None]:
         """Partition a query for parallelization.
 
