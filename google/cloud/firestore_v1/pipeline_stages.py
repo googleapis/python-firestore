@@ -11,6 +11,30 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Selectable,
 )
 
+class FindNearestOptions:
+    def __init__(
+        self,
+        limit: Optional[int] = None,
+        distance_field: Optional[Field] = None,
+    ):
+        self.limit = limit
+        self.distance_field = distance_field
+
+
+class SampleOptions:
+    class Mode(Enum):
+        DOCUMENTS = "documents"
+        PERCENT = "percent"
+
+    def __init__(self, n: int | float, mode: Mode):
+        self.n = n
+        self.mode = mode
+
+
+class UnnestOptions:
+    def __init__(self, index_field: str):
+        self.index_field = index_field
+
 
 class Stage:
     def __init__(self, custom_name: Optional[str] = None):
@@ -157,27 +181,3 @@ class Where(Stage):
         super().__init__()
         self.condition = condition
 
-
-class FindNearestOptions:
-    def __init__(
-        self,
-        limit: Optional[int] = None,
-        distance_field: Optional[Field] = None,
-    ):
-        self.limit = limit
-        self.distance_field = distance_field
-
-
-class SampleOptions:
-    class Mode(Enum):
-        DOCUMENTS = "documents"
-        PERCENT = "percent"
-
-    def __init__(self, n: int | float, mode: Mode):
-        self.n = n
-        self.mode = mode
-
-
-class UnnestOptions:
-    def __init__(self, index_field: str):
-        self.index_field = index_field
