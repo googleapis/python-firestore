@@ -11,6 +11,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Selectable,
 )
 
+
 class FindNearestOptions:
     def __init__(
         self,
@@ -180,4 +181,3 @@ class Where(Stage):
     def __init__(self, condition: FilterCondition):
         super().__init__()
         self.condition = condition
-
