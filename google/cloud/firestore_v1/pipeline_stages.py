@@ -1,27 +1,14 @@
-from typing import Any, Dict, Iterable, List, Optional, Union
+from __future__ import annotations
+from typing import Any, Dict, Iterable, List, Optional
+from enum import Enum
 
-from google.cloud.firestore_v1.types import value
-from google.cloud.firestore_v1.types.pipeline import Stage as GrpcStage
-from google.cloud.firestore_v1.types.query import StructuredQuery
-
-from google.cloud.firestore_v1.base_document import DocumentReference
-from google.cloud.firestore_v1.field_path import FieldPath
-from google.cloud.firestore_v1.pipeline import Pipeline
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
-    CompositeFilter,
-    Direction,
-    DistanceMeasure,
     Expr,
     ExprWithAlias,
     Field,
-    FieldFilter,
-    Filter,
     FilterCondition,
-    Ordering,
-    Scalar,
     Selectable,
-    UnaryFilter,
 )
 
 
@@ -78,7 +65,7 @@ class Documents(Stage):
         self.documents = documents
 
     @staticmethod
-    def of(*documents: DocumentReference) -> "Documents":
+    def of(*documents: "DocumentReference") -> "Documents":
         doc_paths = ["/" + doc.path for doc in documents]
         return Documents(doc_paths)
 
@@ -88,7 +75,7 @@ class FindNearest(Stage):
         self,
         property: Expr,
         vector: List[float],
-        distance_measure: DistanceMeasure,
+        distance_measure: "DistanceMeasure",
         options: Optional["FindNearestOptions"] = None,
     ):
         super().__init__("find_nearest")
@@ -123,10 +110,10 @@ class RemoveFields(Stage):
 
 
 class Replace(Stage):
-    class Mode:
-        FULL_REPLACE = value.Value(string_value="full_replace")
-        MERGE_PREFER_NEXT = value.Value(string_value="merge_prefer_nest")
-        MERGE_PREFER_PARENT = value.Value(string_value="merge_prefer_parent")
+    class Mode(Enum):
+        FULL_REPLACE = "full_replace"
+        MERGE_PREFER_NEXT = "merge_prefer_nest"
+        MERGE_PREFER_PARENT = "merge_prefer_parent"
 
     def __init__(self, field: Selectable, mode: Mode = Mode.FULL_REPLACE):
         super().__init__()
@@ -147,13 +134,13 @@ class Select(Stage):
 
 
 class Sort(Stage):
-    def __init__(self, orders: List[Ordering]):
+    def __init__(self, orders: List["Ordering"]):
         super().__init__()
         self.orders = orders
 
 
 class Union(Stage):
-    def __init__(self, other: Pipeline):
+    def __init__(self, other: "Pipeline"):
         super().__init__()
         self.other = other
 
@@ -182,11 +169,11 @@ class FindNearestOptions:
 
 
 class SampleOptions:
-    class Mode:
-        DOCUMENTS = value.Value(string_value="documents")
-        PERCENT = value.Value(string_value="percent")
+    class Mode(Enum):
+        DOCUMENTS = "documents"
+        PERCENT = "percent"
 
-    def __init__(self, n: Union[int, float], mode: Mode):
+    def __init__(self, n: int | float, mode: Mode):
         self.n = n
         self.mode = mode
 

@@ -229,17 +229,17 @@ class Sum(Accumulator):
         super().__init__("sum", [value])
 
 
-class Avg(Function, Accumulator):
+class Avg(Accumulator):
     def __init__(self, value: Expr, distinct: bool):
         super(Function, self).__init__("avg", [value])
 
 
-class Count(Function, Accumulator):
+class Count(Accumulator):
     def __init__(self, value: Expr = None):
         super(Function, self).__init__("count", [value] if value else [])
 
 
-class CountIf(Function, Accumulator):
+class CountIf(Function):
     def __init__(self, value: Expr, distinct: bool):
         super(Function, self).__init__("countif", [value] if value else [])
 
