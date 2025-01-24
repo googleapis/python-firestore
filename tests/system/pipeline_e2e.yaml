@@ -126,34 +126,999 @@ data:
         hugo: true
         nebula: true
 tests:
-  - description: "test accumulators"
+  - description: "testAggregates - count"
     pipeline:
-      - Collection: "books"
-      - Where:
-          condition:
-            Eq:
-              left:
-                Field: "genre"
-              right:
-                Constant: "Science Fiction"
+      - Collection: books
       - Aggregate:
           accumulators:
             - ExprWithAlias:
                 expr: CountAll
-                alias: "count"
+                alias: count
+    results:
+      - count: 10
+  - description: "testAggregates - avg, count, max"
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: genre
+              right:
+                Constant: Science Fiction
+      - Aggregate:
+          accumulators:
+            - ExprWithAlias:
+                expr: CountAll
+                alias: count
             - ExprWithAlias:
                 expr:
                   Avg:
-                    value: "rating"
-                alias: "avg_rating"
+                    value: rating
+                alias: avg_rating
             - ExprWithAlias:
                 expr:
                   Max:
-                    value: "rating"
-                alias: "max_rating"
+                    value: rating
+                alias: max_rating
+    results:
+      - count: 2
+        avg_rating: 4.4
+        max_rating: 4.6
+  - description: testGroupBysWithoutAccumulators
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Lt:
+              left:
+                Field: published
+              right:
+                Constant: 1900
+      - Aggregate:
+          groups:
+            - genre
+    error: "Cannot groupBy without accumulators"
+  - description: testDistinct
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Lt:
+              left:
+                Field: published
+              right:
+                Constant: 1900
+      - Distinct:
+        - ExprWithAlias:
+            expr:
+              ToLower:
+                value:
+                  Field: genre
+            alias: lower_genre
+    results:
+      - lower_genre: romance
+      - lower_genre: psychological thriller
+  - description: testGroupBysAndAggregate
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Lt:
+              left:
+                Field: published
+              right:
+                Constant: 1984
+      - Aggregate:
+          accumulators:
+            - ExprWithAlias:
+                expr:
+                  Avg:
+                    value: rating
+                alias: avg_rating
+          groups:
+            - genre
+      - Where:
+          condition:
+            Gt:
+              left:
+                Field: avg_rating
+              right:
+                Constant: 4.3
+    results:
+      - avg_rating: 4.7
+        genre: Fantasy
+      - avg_rating: 4.5
+        genre: Romance
+      - avg_rating: 4.4
+        genre: Science Fiction
+  - description: testMinMax
+    pipeline:
+      - Collection: books
+      - Aggregate:
+          accumulators:
+            - ExprWithAlias:
+                expr: CountAll
+                alias: count
+            - ExprWithAlias:
+                expr:
+                  Max:
+                    value: rating
+                alias: max_rating
+            - ExprWithAlias:
+                expr:
+                  Min:
+                    value: published
+                alias: min_published
     results:
       - count: 10
-        max_rating: 4.6
-        avg_rating: 4.4
-
-
+        max_rating: 4.7
+        min_published: 1813
+  - description: selectSpecificFields
+    pipeline:
+      - Collection: books
+      - Select:
+          - title
+          - author
+      - Sort:
+          - OrderBy:
+            - Field: author
+            - ASCENDING
+    results:
+      - title: "The Hitchhiker's Guide to the Galaxy"
+        author: "Douglas Adams"
+      - title: "Pride and Prejudice"
+        author: "Jane Austen"
+      - title: "The Handmaid's Tale"
+        author: "Margaret Atwood"
+      - title: "Crime and Punishment"
+        author: "Fyodor Dostoevsky"
+      - title: "The Great Gatsby"
+        author: "F. Scott Fitzgerald"
+      - title: "Dune"
+        author: "Frank Herbert"
+      - title: "To Kill a Mockingbird"
+        author: "Harper Lee"
+      - title: "One Hundred Years of Solitude"
+        author: "Gabriel García Márquez"
+      - title: "1984"
+        author: "George Orwell"
+      - title: "The Lord of the Rings"
+        author: "J.R.R. Tolkien"
+  - description: addAndRemoveFields
+    pipeline:
+      - Collection: books
+      - AddFields:
+        - ExprWithAlias:
+            expr:
+              StrConcat:
+                - Field: author
+                - Constant: _
+                - Field: title
+            alias: author_title
+        - ExprWithAlias:
+            expr:
+              StrConcat:
+                - Field: title
+                - Constant: _
+                - Field: author
+            alias: title_author
+      - RemoveFields:
+        - title_author
+        - tags
+        - awards
+        - rating
+        - title
+        - Field: published
+        - Field: genre
+        - Field: nestedField # Field does not exist, should be ignored
+      - Sort:
+        - OrderBy:
+          - Field: author_title
+          - ASCENDING
+    results:
+      - author: Douglas Adams
+        author_title: Douglas Adams_The Hitchhiker's Guide to the Galaxy
+      - author: Jane Austen
+        author_title: Jane Austen_Pride and Prejudice
+      - author: Margaret Atwood
+        author_title: Margaret Atwood_The Handmaid's Tale
+      - author: Fyodor Dostoevsky
+        author_title: Fyodor Dostoevsky_Crime and Punishment
+      - author: F. Scott Fitzgerald
+        author_title: F. Scott Fitzgerald_The Great Gatsby
+      - author: Frank Herbert
+        author_title: Frank Herbert_Dune
+      - author: Harper Lee
+        author_title: Harper Lee_To Kill a Mockingbird
+      - author: Gabriel García Márquez
+        author_title: Gabriel García Márquez_One Hundred Years of Solitude
+      - author: George Orwell
+        author_title: George Orwell_1984
+      - author: J.R.R. Tolkien
+        author_title: J.R.R. Tolkien_The Lord of the Rings
+  - description: whereByMultipleConditions
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            And:
+              - Gt:
+                  left:
+                    Field: rating
+                  right:
+                    Constant: 4.5
+              - Eq:
+                  left:
+                    Field: genre
+                  right:
+                    Constant: Science Fiction
+    results:
+      - title: Dune
+        author: Frank Herbert
+        genre: Science Fiction
+        published: 1965
+        rating: 4.6
+        tags:
+          - politics
+          - desert
+          - ecology
+        awards:
+          hugo: true
+          nebula: true
+  - description: whereByOrCondition
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Or:
+              - Eq:
+                  left:
+                    Field: genre
+                  right:
+                    Constant: Romance
+              - Eq:
+                  left:
+                    Field: genre
+                  right:
+                    Constant: Dystopian
+      - Select:
+        - title
+    results:
+      - title: Pride and Prejudice
+      - title: The Handmaid's Tale
+      - title: 1984
+  - description: testPipelineWithOffsetAndLimit
+    pipeline:
+      - Collection: books
+      - Sort:
+          - OrderBy:
+            - Field: author
+            - ASCENDING
+      - Offset: 5
+      - Limit: 3
+      - Select:
+        - title
+        - author
+    results:
+      - title: 1984
+        author: George Orwell
+      - title: To Kill a Mockingbird
+        author: Harper Lee
+      - title: The Lord of the Rings
+        author: J.R.R. Tolkien
+  - description: testArrayContains
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            ArrayContains:
+              left:
+                Field: tags
+              right:
+                Constant: comedy
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+        author: Douglas Adams
+        genre: Science Fiction
+        published: 1979
+        rating: 4.2
+        tags:
+          - comedy
+          - space
+          - adventure
+        awards:
+          hugo: true
+          nebula: false
+  - description: testArrayContainsAny
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            ArrayContainsAny:
+              left:
+                Field: tags
+              right:
+                Constant:
+                  - comedy
+                  - classic
+      - Select:
+        - title
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+      - title: Pride and Prejudice
+  - description: testArrayContainsAll
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            ArrayContainsAll:
+              left:
+                Field: tags
+              right:
+                Constant:
+                  - adventure
+                  - magic
+      - Select:
+        - title
+    results:
+      - title: The Lord of the Rings
+  - description: testArrayLength
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              ArrayLength:
+                value:
+                  Field: tags
+            alias: tagsCount
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: tagsCount
+              right:
+                Constant: 3
+    results: # All documents have 3 tags
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+  - description: testArrayConcat
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              ArrayConcat:
+                - Field: tags
+                - Constant:
+                    - newTag1
+                    - newTag2
+            alias: modifiedTags
+      - Limit: 1
+    results:
+      - modifiedTags:
+          - comedy
+          - space
+          - adventure
+          - newTag1
+          - newTag2
+  - description: testStrConcat
+    pipeline:
+      - Collection: books
+      - Select:
+          - ExprWithAlias:
+              expr:
+                StrConcat:
+                  - Field: author
+                  - Constant:  " - "
+                  - Field: title
+              alias: bookInfo
+      - Limit: 1
+    results:
+      - bookInfo: Douglas Adams - The Hitchhiker's Guide to the Galaxy
+  - description: testStartsWith
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            StartsWith:
+              left:
+                Field: title
+              right:
+                Constant: The
+      - Select:
+        - title
+      - Sort:
+        - OrderBy:
+            - Field: title
+            - ASCENDING
+    results:
+      - title: The Great Gatsby
+      - title: The Handmaid's Tale
+      - title: The Hitchhiker's Guide to the Galaxy
+      - title: The Lord of the Rings
+  - description: testEndsWith
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            EndsWith:
+              left:
+                Field: title
+              right:
+                Constant: y
+      - Select:
+        - title
+      - Sort:
+        - OrderBy:
+          - Field: title
+          - DESCENDING
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+      - title: The Great Gatsby
+  - description: testLength
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              CharLength:
+                value:
+                  Field: title
+            alias: titleLength
+        - title
+      - Where:
+          condition:
+            Gt:
+              left:
+                Field: titleLength
+              right:
+                Constant: 20
+    results:
+      - titleLength: 32
+        title: The Hitchhiker's Guide to the Galaxy
+      - titleLength: 27
+        title: One Hundred Years of Solitude
+  - description: testStringFunctions - Reverse
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              Reverse:
+                value:
+                  Field: title
+            alias: reversed_title
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: author
+              right:
+                Constant: Douglas Adams
+    results:
+      - reversed_title: yxalaG ot ediug s'reknhiHcH ehT
+  - description: testStringFunctions - ReplaceFirst
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              ReplaceFirst:
+                value:
+                  Field: title
+                pattern: The
+                replacement: A
+            alias: replaced_title
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: author
+              right:
+                Constant: Douglas Adams
+    results:
+      - replaced_title: A Hitchhiker's Guide to the Galaxy
+  - description: testStringFunctions - ReplaceAll
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              ReplaceAll:
+                value:
+                  Field: title
+                pattern: " "
+                replacement: _
+            alias: replaced_title
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: author
+              right:
+                Constant: Douglas Adams
+    results:
+      - replaced_title: The_Hitchhiker's_Guide_to_the_Galaxy
+  - description: testStringFunctions - CharLength
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              CharLength:
+                value:
+                  Field: title
+            alias: title_length
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: author
+              right:
+                Constant: Douglas Adams
+    results:
+      - title_length: 30
+  - description: testStringFunctions - ByteLength
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              ByteLength:
+                value:
+                  StrConcat:
+                    - Field: title
+                    - Constant: _银河系漫游指南
+            alias: title_byte_length
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: author
+              right:
+                Constant: Douglas Adams
+    results:
+      - title_byte_length: 42
+  - description: testToLowercase
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              ToLower:
+                value:
+                  Field: title
+            alias: lowercaseTitle
+      - Limit: 1
+    results:
+      - lowercaseTitle: the hitchhiker's guide to the galaxy
+  - description: testToUppercase
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              ToUpper:
+                value:
+                  Field: author
+            alias: uppercaseAuthor
+      - Limit: 1
+    results:
+      - uppercaseAuthor: DOUGLAS ADAMS
+  - description: testTrim
+    pipeline:
+      - Collection: books
+      - AddFields:
+        - ExprWithAlias:
+            expr:
+              StrConcat:
+                - Constant: " "
+                - Field: title
+                - Constant: " "
+            alias: spacedTitle
+      - Select:
+        - ExprWithAlias:
+            expr:
+              Trim:
+                value:
+                  Field: spacedTitle
+            alias: trimmedTitle
+        - spacedTitle
+      - Limit: 1
+    results:
+      - trimmedTitle: The Hitchhiker's Guide to the Galaxy
+        spacedTitle: " The Hitchhiker's Guide to the Galaxy "
+  - description: testLike
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Like:
+              left:
+                Field: title
+              right:
+                Constant: "%Guide%"
+      - Select:
+        - title
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+  - description: testRegexContains
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            RegexContains:
+              left:
+                Field: title
+              right:
+                Constant: "(?i)(the|of)"
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+      - title: One Hundred Years of Solitude
+      - title: The Lord of the Rings
+      - title: To Kill a Mockingbird
+      - title: The Great Gatsby
+  - description: testRegexMatches
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            RegexMatch:
+              left:
+                Field: title
+              right:
+                Constant: ".*(?i)(the|of).*"
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+      - title: One Hundred Years of Solitude
+      - title: The Lord of the Rings
+      - title: To Kill a Mockingbird
+      - title: The Great Gatsby
+  - description: testArithmeticOperations
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            expr:
+              Add:
+                - Field: rating
+                - Constant: 1
+            alias: ratingPlusOne
+        - ExprWithAlias:
+            expr:
+              Subtract:
+                - Field: published
+                - Constant: 1900
+            alias: yearsSince1900
+        - ExprWithAlias:
+            expr:
+              Multiply:
+                - Field: rating
+                - Constant: 10
+            alias: ratingTimesTen
+        - ExprWithAlias:
+            expr:
+              Divide:
+                - Field: rating
+                - Constant: 2
+            alias: ratingDividedByTwo
+      - Limit: 1
+    results:
+      - ratingPlusOne: 5.2
+        yearsSince1900: 79
+        ratingTimesTen: 42.0
+        ratingDividedByTwo: 2.1
+  - description: testComparisonOperators
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            And:
+              - Gt:
+                  left:
+                    Field: rating
+                  right:
+                    Constant: 4.2
+              - Lte:
+                  left:
+                    Field: rating
+                  right:
+                    Constant: 4.5
+              - Neq:
+                  left:
+                    Field: genre
+                  right:
+                    Constant: Science Fiction
+      - Select:
+        - rating
+        - title
+      - Sort:
+        - OrderBy:
+            expr:
+              Field: title
+            direction: ASCENDING
+    results:
+      - rating: 4.3
+        title: Crime and Punishment
+      - rating: 4.3
+        title: One Hundred Years of Solitude
+      - rating: 4.5
+        title: Pride and Prejudice
+  - description: testLogicalOperators
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Or:
+              - And:
+                  - Gt:
+                      left:
+                        Field: rating
+                      right:
+                        Constant: 4.5
+                  - Eq:
+                      left:
+                        Field: genre
+                      right:
+                        Constant: Science Fiction
+              - Lt:
+                  left:
+                    Field: published
+                  right:
+                    Constant: 1900
+      - Select:
+          - title
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    results:
+      - title: Crime and Punishment
+      - title: Dune
+      - title: Pride and Prejudice
+  - description: testChecks
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Not:
+              IsNaN:
+                Field: rating
+      - Select:
+          - ExprWithAlias:
+              expr:
+                Eq:
+                  left:
+                    Field: rating
+                  right:
+                    Constant: null
+              alias: ratingIsNull
+          - ExprWithAlias:
+              expr:
+                Not:
+                  IsNaN:
+                    Field: rating
+              alias: ratingIsNotNaN
+      - Limit: 1
+    results:
+      - ratingIsNull: false
+        ratingIsNotNaN: true
+  - description: testLogicalMinMax
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: author
+              right:
+                Constant: Douglas Adams
+      - Select:
+          - ExprWithAlias:
+              expr:
+                LogicalMax:
+                  - Field: rating
+                  - Constant: 4.5
+              alias: max_rating
+          - ExprWithAlias:
+              expr:
+                LogicalMax:
+                  - Field: published
+                  - Constant: 1900
+              alias: max_published
+    results:
+      - max_rating: 4.5
+        max_published: 1979
+  - description: testLogicalMinMax - min
+    pipeline:
+      - Collection: books
+      - Select:
+          - ExprWithAlias:
+              expr:
+                LogicalMin:
+                  - Field: rating
+                  - Constant: 4.5
+              alias: min_rating
+          - ExprWithAlias:
+              expr:
+                LogicalMin:
+                  - Field: published
+                  - Constant: 1900
+              alias: min_published
+    results:
+      - min_rating: 4.2
+        min_published: 1900
+  - description: testMapGet
+    pipeline:
+      - Collection: books
+      - Select:
+          - ExprWithAlias:
+              expr:
+                MapGet:
+                  map:
+                    Field: awards
+                  key: hugo
+              alias: hugoAward
+          - Field: title
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: hugoAward
+              right:
+                Constant: true
+    results:
+      - hugoAward: true
+        title: The Hitchhiker's Guide to the Galaxy
+      - hugoAward: true
+        title: Dune
+  - description: testDistanceFunctions
+    pipeline:
+      - Collection: books
+      - Select:
+          - ExprWithAlias:
+              expr:
+                CosineDistance:
+                  - Vector:
+                      - Constant: 0.1
+                      - Constant: 0.1
+                  - Vector:
+                      - Constant: 0.5
+                      - Constant: 0.8
+              alias: cosineDistance
+          - ExprWithAlias:
+              expr:
+                DotProduct:
+                  - Vector:
+                      - Constant: 0.1
+                      - Constant: 0.1
+                  - Vector:
+                      - Constant: 0.5
+                      - Constant: 0.8
+              alias: dotProductDistance
+          - ExprWithAlias:
+              expr:
+                EuclideanDistance:
+                  - Vector:
+                      - Constant: 0.1
+                      - Constant: 0.1
+                  - Vector:
+                      - Constant: 0.5
+                      - Constant: 0.8
+              alias: euclideanDistance
+      - Limit: 1
+    results:
+      - cosineDistance: 0.02560880430538015
+        dotProductDistance: 0.13
+        euclideanDistance: 0.806225774829855
+  - description: testNestedFields
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: awards.hugo
+              right:
+                Constant: true
+      - Select:
+          - title
+          - Field: awards.hugo
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+        awards.hugo: true
+      - title: Dune
+        awards.hugo: true
+  - description: testPipelineInTransactions
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: awards.hugo
+              right:
+                Constant: true
+      - Select:
+          - title
+          - Field: awards.hugo
+          - __name__
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+        awards.hugo: true
+      - title: Dune
+        awards.hugo: true
+#  - description: testReplace
+#    pipeline:
+#      - Collection: books
+#      - Replace: awards
+#    results:
+#      - title: The Hitchhiker's Guide to the Galaxy
+#        author: Douglas Adams
+#        genre: Science Fiction
+#        published: 1979
+#        rating: 4.2
+#        tags:
+#          - comedy
+#          - space
+#          - adventure
+#        hugo: true
+#        nebula: false
+#      # ... other results with replaced awards
+  #- description: testSampleLimit
+  #  pipeline:
+  #    - Collection: books
+  #    - Sample:
+  #        method: LIMIT
+  #        n: 3
+  #  results: # Results will vary due to randomness
+  #    - # document data
+  #    - # document data
+  #    - # document data
+  #- description: testSamplePercentage
+  #  pipeline:
+  #    - Collection: books
+  #    - Sample:
+  #        method: PERCENTAGE
+  #        n: 60
+  #  results: # Results will vary due to randomness
+  #    - # document data
+  #    - # document data
+  #    - # document data
+  #    - # document data
+  #    - # document data
+  #    - # document data
+  #- description: testUnion
+  #  pipeline:
+  #    - Union:
+  #        - Collection: books
+  #        - Collection: books
+  #  results: # Results will be duplicated
+  #    - # document data
+  #    - # document data
+  #    # ... 20 results total
+  - description: testUnnest
+    pipeline:
+      - Collection: books
+      - Where:
+          condition:
+            Eq:
+              left:
+                Field: title
+              right:
+                Constant: The Hitchhiker's Guide to the Galaxy
+      - Unnest: tags
+    results:
+      - tags: comedy
+      - tags: space
+      - tags: adventure

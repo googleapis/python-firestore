@@ -55,7 +55,7 @@ def parse_expressions(yaml_element: Any):
         return [parse_expressions(v) for v in yaml_element]
     elif isinstance(yaml_element, dict):
         return {parse_expressions(k): parse_expressions(v) for k,v in yaml_element.items()}
-    elif hasattr(pipeline_expressions, yaml_element):
+    elif isinstance(yaml_element, str) and hasattr(pipeline_expressions, yaml_element):
         return getattr(pipeline_expressions, yaml_element)
     else:
         return yaml_element
