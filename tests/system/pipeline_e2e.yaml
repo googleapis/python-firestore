@@ -130,11 +130,12 @@ tests:
     pipeline:
       - Collection: "books"
       - Where:
-        - Eq:
-            left:
-              Field: "genre"
-            right:
-              Constant: "Science Fiction"
+          condition:
+            Eq:
+              left:
+                Field: "genre"
+              right:
+                Constant: "Science Fiction"
       - Aggregate:
           accumulators:
             - ExprWithAlias:

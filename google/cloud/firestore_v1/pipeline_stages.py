@@ -11,7 +11,6 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Selectable,
 )
 
-
 class FindNearestOptions:
     def __init__(
         self,
@@ -40,7 +39,6 @@ class UnnestOptions:
 class Stage:
     def __init__(self, custom_name: Optional[str] = None):
         self.name = custom_name or type(self).__name__.lower()
-
 
 class AddFields(Stage):
     def __init__(self, fields: Dict[str, Expr]):
@@ -181,3 +179,4 @@ class Where(Stage):
     def __init__(self, condition: FilterCondition):
         super().__init__()
         self.condition = condition
+
