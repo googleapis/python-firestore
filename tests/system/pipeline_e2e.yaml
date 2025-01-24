@@ -1,0 +1,158 @@
+data:
+  books:
+    book1:
+      title: "The Hitchhiker's Guide to the Galaxy"
+      author: "Douglas Adams"
+      genre: "Science Fiction"
+      published: 1979
+      rating: 4.2
+      tags:
+        - comedy
+        - space
+        - adventure
+      awards:
+        hugo: true
+        nebula: false
+    book2:
+      title: "Pride and Prejudice"
+      author: "Jane Austen"
+      genre: "Romance"
+      published: 1813
+      rating: 4.5
+      tags:
+        - classic
+        - social commentary
+        - love
+      awards:
+        none: true
+    book3:
+      title: "One Hundred Years of Solitude"
+      author: "Gabriel García Márquez"
+      genre: "Magical Realism"
+      published: 1967
+      rating: 4.3
+      tags:
+        - family
+        - history
+        - fantasy
+      awards:
+        nobel: true
+        nebula: false
+    book4:
+      title: "The Lord of the Rings"
+      author: "J.R.R. Tolkien"
+      genre: "Fantasy"
+      published: 1954
+      rating: 4.7
+      tags:
+        - adventure
+        - magic
+        - epic
+      awards:
+        hugo: false
+        nebula: false
+    book5:
+      title: "The Handmaid's Tale"
+      author: "Margaret Atwood"
+      genre: "Dystopian"
+      published: 1985
+      rating: 4.1
+      tags:
+        - feminism
+        - totalitarianism
+        - resistance
+      awards:
+        arthur c. clarke: true
+        booker prize: false
+    book6:
+      title: "Crime and Punishment"
+      author: "Fyodor Dostoevsky"
+      genre: "Psychological Thriller"
+      published: 1866
+      rating: 4.3
+      tags:
+        - philosophy
+        - crime
+        - redemption
+      awards:
+        none: true
+    book7:
+      title: "To Kill a Mockingbird"
+      author: "Harper Lee"
+      genre: "Southern Gothic"
+      published: 1960
+      rating: 4.2
+      tags:
+        - racism
+        - injustice
+        - coming-of-age
+      awards:
+        pulitzer: true
+    book8:
+      title: "1984"
+      author: "George Orwell"
+      genre: "Dystopian"
+      published: 1949
+      rating: 4.2
+      tags:
+        - surveillance
+        - totalitarianism
+        - propaganda
+      awards:
+        prometheus: true
+    book9:
+      title: "The Great Gatsby"
+      author: "F. Scott Fitzgerald"
+      genre: "Modernist"
+      published: 1925
+      rating: 4.0
+      tags:
+        - wealth
+        - american dream
+        - love
+      awards:
+        none: true
+    book10:
+      title: "Dune"
+      author: "Frank Herbert"
+      genre: "Science Fiction"
+      published: 1965
+      rating: 4.6
+      tags:
+        - politics
+        - desert
+        - ecology
+      awards:
+        hugo: true
+        nebula: true
+tests:
+  - description: "test accumulators"
+    pipeline:
+      - Collection: "books"
+      - Where:
+        - Eq:
+            left:
+              Field: "genre"
+            right:
+              Constant: "Science Fiction"
+      - Aggregate:
+          accumulators:
+            - ExprWithAlias:
+                expr: CountAll
+                alias: "count"
+            - ExprWithAlias:
+                expr:
+                  Avg:
+                    value: "rating"
+                alias: "avg_rating"
+            - ExprWithAlias:
+                expr:
+                  Max:
+                    value: "rating"
+                alias: "max_rating"
+    results:
+      - count: 10
+        max_rating: 4.6
+        avg_rating: 4.4
+
+
