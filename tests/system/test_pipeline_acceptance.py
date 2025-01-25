@@ -1,8 +1,6 @@
 from __future__ import annotations
-import ast
 import sys
 import os
-import black
 import pytest
 import yaml
 from typing import Any
@@ -11,15 +9,43 @@ from typing import Any
 from google.cloud.firestore_v1 import pipeline_stages
 from google.cloud.firestore_v1 import pipeline_expressions
 
+from google.cloud.firestore import Client
+
+FIRESTORE_TEST_DB = os.environ.get("SYSTEM_TESTS_DATABASE", "system-tests-named-db")
+FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
+
 test_dir_name = os.path.dirname(__file__)
+
 
 
 def loader():
     # load test cases
     with open(f"{test_dir_name}/pipeline_e2e.yaml") as f:
         test_cases = yaml.safe_load(f)
+    # load data
+    data = test_cases["data"]
+    client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
+    try:
+        # setup data
+        batch = client.batch()
+        for collection_name, documents in data.items():
+            collection_ref = client.collection(collection_name)
+            for document_id, document_data in documents.items():
+                document_ref = collection_ref.document(document_id)
+                batch.set(document_ref, document_data)
+        batch.commit()
+
+        # run tests
         for test in test_cases["tests"]:
             yield test
+    finally:
+        # clear data
+        for collection_name, documents in data.items():
+            collection_ref = client.collection(collection_name)
+            for document_id in documents:
+                document_ref = collection_ref.document(document_id)
+                document_ref.delete()
+
 
 def _apply_yaml_args(cls, yaml_args):
     if isinstance(yaml_args, dict):
@@ -76,11 +102,7 @@ def parse_expressions(yaml_element: Any):
 @pytest.mark.parametrize(
     "test_dict", loader(), ids=lambda x: f"{x.get('description', '')}"
 )
-@pytest.mark.skipif(
-    sys.version_info < (3, 9), reason="ast.unparse requires python3.9 or higher"
-)
 def test_e2e_scenario(test_dict):
-
     pipeline = parse_pipeline(test_dict["pipeline"])
 
     # before_ast = ast.parse(test_dict["before"])
