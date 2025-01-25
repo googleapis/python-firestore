@@ -413,10 +413,8 @@ tests:
       - Where:
           condition:
             ArrayContains:
-              left:
-                Field: tags
-              right:
-                Constant: comedy
+              - tags
+              - comedy
     results:
       - title: The Hitchhiker's Guide to the Galaxy
         author: Douglas Adams
@@ -436,12 +434,10 @@ tests:
       - Where:
           condition:
             ArrayContainsAny:
-              left:
-                Field: tags
-              right:
-                Constant:
-                  - comedy
-                  - classic
+              array:  tags
+              elements:
+                - comedy
+                - classic
       - Select:
         - title
     results:
@@ -453,12 +449,11 @@ tests:
       - Where:
           condition:
             ArrayContainsAll:
-              left:
+              array:
                 Field: tags
-              right:
-                Constant:
-                  - adventure
-                  - magic
+              elements:
+                - adventure
+                - magic
       - Select:
         - title
     results:
@@ -470,8 +465,7 @@ tests:
         - ExprWithAlias:
             expr:
               ArrayLength:
-                value:
-                  Field: tags
+                - Field: tags
             alias: tagsCount
       - Where:
           condition:
@@ -498,10 +492,11 @@ tests:
         - ExprWithAlias:
             expr:
               ArrayConcat:
-                - Field: tags
-                - Constant:
-                    - newTag1
-                    - newTag2
+                array:
+                  Field: tags
+                rest:
+                  - newTag1
+                  - newTag2
             alias: modifiedTags
       - Limit: 1
     results:
@@ -531,10 +526,8 @@ tests:
       - Where:
           condition:
             StartsWith:
-              left:
-                Field: title
-              right:
-                Constant: The
+              - Field: title
+              - Constant: the
       - Select:
         - title
       - Sort:
@@ -552,10 +545,8 @@ tests:
       - Where:
           condition:
             EndsWith:
-              left:
-                Field: title
-              right:
-                Constant: y
+              - Field: title
+              - Constant: y
       - Select:
         - title
       - Sort:
@@ -572,8 +563,7 @@ tests:
         - ExprWithAlias:
             expr:
               CharLength:
-                value:
-                  Field: title
+                - Field: title
             alias: titleLength
         - title
       - Where:
@@ -595,8 +585,7 @@ tests:
         - ExprWithAlias:
             expr:
               Reverse:
-                value:
-                  Field: title
+                - Field: title
             alias: reversed_title
       - Where:
           condition:
@@ -656,8 +645,7 @@ tests:
         - ExprWithAlias:
             expr:
               CharLength:
-                value:
-                  Field: title
+                - Field: title
             alias: title_length
       - Where:
           condition:
@@ -675,10 +663,9 @@ tests:
         - ExprWithAlias:
             expr:
               ByteLength:
-                value:
-                  StrConcat:
-                    - Field: title
-                    - Constant: _银河系漫游指南
+                - StrConcat:
+                  - Field: title
+                  - Constant: _银河系漫游指南
             alias: title_byte_length
       - Where:
           condition:
@@ -730,8 +717,7 @@ tests:
         - ExprWithAlias:
             expr:
               Trim:
-                value:
-                  Field: spacedTitle
+                - Field: spacedTitle
             alias: trimmedTitle
         - spacedTitle
       - Limit: 1
@@ -744,10 +730,8 @@ tests:
       - Where:
           condition:
             Like:
-              left:
-                Field: title
-              right:
-                Constant: "%Guide%"
+              - Field: title
+              - Constant: "%Guide%"
       - Select:
         - title
     results:
@@ -758,10 +742,8 @@ tests:
       - Where:
           condition:
             RegexContains:
-              left:
-                Field: title
-              right:
-                Constant: "(?i)(the|of)"
+              - Field: title
+              - Constant: "(?i)(the|of)"
     results:
       - title: The Hitchhiker's Guide to the Galaxy
       - title: One Hundred Years of Solitude
@@ -774,10 +756,8 @@ tests:
       - Where:
           condition:
             RegexMatch:
-              left:
-                Field: title
-              right:
-                Constant: ".*(?i)(the|of).*"
+              - Field: title
+              - Constant: ".*(?i)(the|of).*"
     results:
       - title: The Hitchhiker's Guide to the Galaxy
       - title: One Hundred Years of Solitude
@@ -891,9 +871,9 @@ tests:
       - Collection: books
       - Where:
           condition:
-            Not:
-              IsNaN:
-                Field: rating
+            - Not:
+                - IsNaN:
+                  - Field: rating
       - Select:
           - ExprWithAlias:
               expr:
@@ -905,9 +885,9 @@ tests:
               alias: ratingIsNull
           - ExprWithAlias:
               expr:
-                Not:
-                  IsNaN:
-                    Field: rating
+                - Not:
+                  - IsNaN:
+                    - Field: rating
               alias: ratingIsNotNaN
       - Limit: 1
     results:
@@ -965,9 +945,8 @@ tests:
           - ExprWithAlias:
               expr:
                 MapGet:
-                  map:
-                    Field: awards
-                  key: hugo
+                  - Field: awards
+                  - hugo
               alias: hugoAward
           - Field: title
       - Where:

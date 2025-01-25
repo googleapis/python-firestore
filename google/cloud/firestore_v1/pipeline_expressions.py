@@ -1,6 +1,12 @@
 from typing import Any, Iterable, List, Mapping
 
 
+class Ordering:
+
+    def __init__(self, expr, order_dir):
+        self.expr = expr
+        self.order_dir = order_dir
+
 class Expr:
     """Represents an expression that can be evaluated to a value within the
     execution of a pipeline.
@@ -55,8 +61,8 @@ class LogicalMin(Function):
 
 
 class MapGet(Function):
-    def __init__(self, map: Expr, name: str):
-        super().__init__("map_get", [map, Constant(name)])
+    def __init__(self, map_: Expr, key: str):
+        super().__init__("map_get", [map_, Constant(key)])
 
 
 class Mod(Function):
@@ -75,13 +81,13 @@ class Parent(Function):
 
 
 class ReplaceAll(Function):
-    def __init__(self, value: Expr, find: Expr, replacement: Expr):
-        super().__init__("replace_all", [value, find, replacement])
+    def __init__(self, value: Expr, pattern: Expr, replacement: Expr):
+        super().__init__("replace_all", [value, pattern, replacement])
 
 
 class ReplaceFirst(Function):
-    def __init__(self, value: Expr, find: Expr, replacement: Expr):
-        super().__init__("replace_first", [value, find, replacement])
+    def __init__(self, value: Expr, pattern: Expr, replacement: Expr):
+        super().__init__("replace_first", [value, pattern, replacement])
 
 
 class Reverse(Function):
@@ -90,8 +96,8 @@ class Reverse(Function):
 
 
 class StrConcat(Function):
-    def __init__(self, first: Expr, exprs: List[Expr]):
-        super().__init__("str_concat", [first] + exprs)
+    def __init__(self, *exprs: Expr):
+        super().__init__("str_concat", exprs)
 
 
 class Subtract(Function):
@@ -125,13 +131,13 @@ class TimestampToUnixSeconds(Function):
 
 
 class ToLower(Function):
-    def __init__(self, expr: Expr):
-        super().__init__("to_lower", [expr])
+    def __init__(self, value: Expr):
+        super().__init__("to_lower", [value])
 
 
 class ToUpper(Function):
-    def __init__(self, expr: Expr):
-        super().__init__("to_upper", [expr])
+    def __init__(self, value: Expr):
+        super().__init__("to_upper", [value])
 
 
 class Trim(Function):
@@ -219,23 +225,23 @@ class Accumulator(Function):
 
 
 class Max(Accumulator):
-    def __init__(self, value: Expr, distinct: bool):
+    def __init__(self, value: Expr, distinct: bool=False):
         super().__init__("max", [value])
 
 
 class Min(Accumulator):
-    def __init__(self, value: Expr, distinct: bool):
+    def __init__(self, value: Expr, distinct: bool=False):
         super().__init__("min", [value])
 
 
 class Sum(Accumulator):
-    def __init__(self, value: Expr, distinct: bool):
+    def __init__(self, value: Expr, distinct: bool=False):
         super().__init__("sum", [value])
 
 
 class Avg(Accumulator):
-    def __init__(self, value: Expr, distinct: bool):
-        super(Function, self).__init__("avg", [value])
+    def __init__(self, value: Expr, distinct: bool=False):
+        super().__init__("avg", [value])
 
 
 class Count(Accumulator):
@@ -244,25 +250,34 @@ class Count(Accumulator):
 
 
 class CountIf(Function):
-    def __init__(self, value: Expr, distinct: bool):
+    def __init__(self, value: Expr, distinct: bool=False):
         super(Function, self).__init__("countif", [value] if value else [])
 
 
 class Selectable:
     """Points at something in the database?"""
 
+    def _to_map(self):
+        raise NotImplementedError
+
 
 class AccumulatorTarget(Selectable):
-    def __init__(self, accumulator: Accumulator, field_name: str, distinct: bool):
+    def __init__(self, accumulator: Accumulator, field_name: str, distinct: bool=False):
         self.accumulator = accumulator
         self.field_name = field_name
         self.distinct = distinct
+
+    def _to_map(self):
+        return self.field_name, self.accumulator
 
 
 class ExprWithAlias(Expr, Selectable):
     def __init__(self, expr: Expr, alias: str):
         self.expr = expr
         self.alias = alias
+
+    def _to_map(self):
+        return self.alias, self.expr
 
 
 class Field(Expr, Selectable):
@@ -271,13 +286,16 @@ class Field(Expr, Selectable):
     def __init__(self, path: str):
         self.path = path
 
+    def _to_map(self):
+        return self.path, self
+
 
 class FilterCondition(Function):
     """Filters the given data in some way."""
 
 
 class And(FilterCondition):
-    def __init__(self, conditions: List["FilterCondition"]):
+    def __init__(self, *conditions: "FilterCondition"):
         super().__init__("and", conditions)
 
 
@@ -335,7 +353,7 @@ class In(FilterCondition):
         super().__init__("in", [left, ListOfExprs(others)])
 
 
-class IsNan(FilterCondition):
+class IsNaN(FilterCondition):
     def __init__(self, value: Expr):
         super().__init__("is_nan", [value])
 
@@ -366,7 +384,7 @@ class Not(FilterCondition):
 
 
 class Or(FilterCondition):
-    def __init__(self, conditions: List["FilterCondition"]):
+    def __init__(self, *conditions: "FilterCondition"):
         super().__init__("or", conditions)
 
 

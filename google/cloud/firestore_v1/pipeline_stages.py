@@ -40,17 +40,18 @@ class Stage:
     def __init__(self, custom_name: Optional[str] = None):
         self.name = custom_name or type(self).__name__.lower()
 
+
 class AddFields(Stage):
-    def __init__(self, fields: Dict[str, Expr]):
+    def __init__(self, *fields: Selectable):
         super().__init__("add_fields")
-        self.fields = fields
+        self.fields = dict(f._to_map() for f in fields)
 
 
 class Aggregate(Stage):
     def __init__(
         self,
-        groups: Optional[Dict[str, Expr]] = None,
-        accumulators: Optional[Dict[str, Accumulator]] = None,
+        groups={},
+        accumulators={}
     ):
         super().__init__()
         self.groups = groups or {}
@@ -77,9 +78,14 @@ class Database(Stage):
 
 
 class Distinct(Stage):
-    def __init__(self, groups: Dict[str, Expr]):
+    def __init__(self, *fields: str | Selectable):
         super().__init__()
-        self.groups = groups
+        self.fields = dict(
+            f._to_map()
+            if isinstance(f, Selectable)
+            else (f,Field(f))
+            for f in fields
+        )
 
 
 class Documents(Stage):
@@ -127,9 +133,14 @@ class Offset(Stage):
 
 
 class RemoveFields(Stage):
-    def __init__(self, fields: List[Field]):
+    def __init__(self, *fields: str | Field):
         super().__init__("remove_fields")
-        self.fields = fields
+        self.fields = dict(
+            f._to_map()
+            if isinstance(f, Selectable)
+            else (f,Field(f))
+            for f in fields
+        )
 
 
 class Replace(Stage):
@@ -151,9 +162,16 @@ class Sample(Stage):
 
 
 class Select(Stage):
-    def __init__(self, projections: Dict[str, Expr]):
+    def __init__(self, *fields: str | Selectable):
         super().__init__()
-        self.projections = projections
+        self.projections = dict(
+            f._to_map()
+            if isinstance(f, Selectable)
+            else (f,Field(f))
+            for f in fields
+        )
+
+
 
 
 class Sort(Stage):
