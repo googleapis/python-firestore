@@ -1,7 +1,7 @@
 from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar
 from enum import Enum
 from enum import auto
-from dataclass import dataclass
+from dataclasses import dataclass
 
 class Ordering:
 
