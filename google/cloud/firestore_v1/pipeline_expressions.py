@@ -1,19 +1,18 @@
 from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar
+from enum import Enum
+from enum import auto
 
+
+class OrderingDirection(Enum):
+    ASCENDING = auto()
+    DESCENDING = auto()
 
 class Ordering:
 
-    def __init__(self, expr, order_dir):
+    def __init__(self, expr, order_dir: OrderingDirection | str):
         self.expr = expr
-        self.order_dir = order_dir
+        self.order_dir = OrderingDirection[order_dir] if isinstance(order_dir, str) else order_dir
 
-    @staticmethod
-    def ascending(expr):
-        return Ordering(expr, "asc")
-
-    @staticmethod
-    def descending(expr):
-        return Ordering(expr, "desc")
 
 class Expr:
     """Represents an expression that can be evaluated to a value within the
