@@ -139,8 +139,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: genre
               right:
@@ -167,8 +166,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Lt:
+        - Lt:
               left:
                 Field: published
               right:
@@ -181,8 +179,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Lt:
+          - Lt:
               left:
                 Field: published
               right:
@@ -201,8 +198,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Lt:
+          - Lt:
               left:
                 Field: published
               right:
@@ -217,8 +213,7 @@ tests:
           groups:
             - genre
       - Where:
-          condition:
-            Gt:
+          - Gt:
               left:
                 Field: avg_rating
               right:
@@ -339,8 +334,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            And:
+          - And:
               - Gt:
                   left:
                     Field: rating
@@ -368,8 +362,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Or:
+          - Or:
               - Eq:
                   left:
                     Field: genre
@@ -409,8 +402,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            ArrayContains:
+          - ArrayContains:
               - tags
               - comedy
     results:
@@ -430,8 +422,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            ArrayContainsAny:
+          - ArrayContainsAny:
               array:  tags
               elements:
                 - comedy
@@ -445,8 +436,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            ArrayContainsAll:
+          - ArrayContainsAll:
               array:
                 Field: tags
               elements:
@@ -466,8 +456,7 @@ tests:
                 - Field: tags
             alias: tagsCount
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: tagsCount
               right:
@@ -522,8 +511,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            StartsWith:
+          - StartsWith:
               - Field: title
               - Constant: the
       - Select:
@@ -541,8 +529,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            EndsWith:
+          - EndsWith:
               - Field: title
               - Constant: y
       - Select:
@@ -565,8 +552,7 @@ tests:
             alias: titleLength
         - title
       - Where:
-          condition:
-            Gt:
+          - Gt:
               left:
                 Field: titleLength
               right:
@@ -586,8 +572,7 @@ tests:
                 - Field: title
             alias: reversed_title
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: author
               right:
@@ -607,8 +592,7 @@ tests:
                 replacement: A
             alias: replaced_title
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: author
               right:
@@ -628,8 +612,7 @@ tests:
                 replacement: _
             alias: replaced_title
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: author
               right:
@@ -646,8 +629,7 @@ tests:
                 - Field: title
             alias: title_length
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: author
               right:
@@ -666,8 +648,7 @@ tests:
                   - Constant: _银河系漫游指南
             alias: title_byte_length
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: author
               right:
@@ -726,8 +707,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Like:
+          - Like:
               - Field: title
               - Constant: "%Guide%"
       - Select:
@@ -738,8 +718,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            RegexContains:
+          - RegexContains:
               - Field: title
               - Constant: "(?i)(the|of)"
     results:
@@ -752,8 +731,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            RegexMatch:
+          - RegexMatch:
               - Field: title
               - Constant: ".*(?i)(the|of).*"
     results:
@@ -800,8 +778,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            And:
+          - And:
               - Gt:
                   left:
                     Field: rating
@@ -835,8 +812,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Or:
+          - Or:
               - And:
                   - Gt:
                       left:
@@ -867,7 +843,6 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
             - Not:
                 - IsNaN:
                   - Field: rating
@@ -894,8 +869,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: author
               right:
@@ -947,8 +921,7 @@ tests:
               alias: hugoAward
           - Field: title
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: hugoAward
               right:
@@ -1001,8 +974,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: awards.hugo
               right:
@@ -1019,8 +991,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: awards.hugo
               right:
@@ -1087,8 +1058,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          condition:
-            Eq:
+          - Eq:
               left:
                 Field: title
               right:
