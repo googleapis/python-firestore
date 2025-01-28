@@ -87,14 +87,14 @@ def parse_expressions(yaml_element: Any):
         if len(yaml_element) == 1 and isinstance(list(yaml_element)[0], str) and hasattr(pipeline_expressions, list(yaml_element)[0]):
             # build pipeline expressions if possible
             cls_str = list(yaml_element)[0]
-            cls = parse_expressions(cls_str)
+            cls = getattr(pipeline_expressions, cls_str)
             yaml_args = yaml_element[cls_str]
             return _apply_yaml_args(cls, yaml_args)
         else:
             # otherwise, return dict
             return {parse_expressions(k): parse_expressions(v) for k,v in yaml_element.items()}
     elif isinstance(yaml_element, str) and hasattr(pipeline_expressions, yaml_element):
-        return getattr(pipeline_expressions, yaml_element)
+        return getattr(pipeline_expressions, yaml_element)()
     else:
         return yaml_element
 
