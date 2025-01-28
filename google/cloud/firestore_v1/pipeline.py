@@ -13,8 +13,17 @@ from google.cloud.firestore_v1.pipeline_expressions import (
 
 
 class Pipeline:
-    def __init__(self):
-        self.stages = []
+    def __init__(self, *stages: stages.Stage):
+        self.stages = list(stages)
+
+    def __repr__(self):
+        if not self.stages:
+            return "Pipeline()"
+        elif len(self.stages) == 1:
+            return f"Pipeline({self.stages[0]!r})"
+        else:
+            stages_str = ",\n  ".join([repr(s) for s in self.stages])
+            return f"Pipeline(\n  {stages_str}\n)"
 
     def add_fields(self, fields: Dict[str, Expr]) -> Pipeline:
         self.stages.append(stages.AddFields(fields))

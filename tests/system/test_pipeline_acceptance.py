@@ -8,6 +8,7 @@ from typing import Any
 # from google.cloud.firestore_v1.pipeline_stages import *
 from google.cloud.firestore_v1 import pipeline_stages
 from google.cloud.firestore_v1 import pipeline_expressions
+from google.cloud.firestore_v1.pipeline import Pipeline
 
 from google.cloud.firestore import Client
 
@@ -15,7 +16,6 @@ FIRESTORE_TEST_DB = os.environ.get("SYSTEM_TESTS_DATABASE", "system-tests-named-
 FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 
 test_dir_name = os.path.dirname(__file__)
-
 
 
 def loader():
@@ -77,7 +77,7 @@ def parse_pipeline(pipeline: list[dict[str, Any], str]):
             # yaml has no arguments
             stage_obj = stage_cls()
         result_list.append(stage_obj)
-    return result_list
+    return Pipeline(*result_list)
 
 
 def parse_expressions(yaml_element: Any):
