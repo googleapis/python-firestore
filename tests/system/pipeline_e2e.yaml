@@ -131,7 +131,7 @@ tests:
       - Collection: books
       - Aggregate:
           - ExprWithAlias:
-              expr: CountAll
+              expr: Count
               alias: count
     results:
       - count: 10
@@ -147,7 +147,7 @@ tests:
                 Constant: Science Fiction
       - Aggregate:
           - ExprWithAlias:
-              expr: CountAll
+              expr: Count
               alias: count
           - ExprWithAlias:
               expr:
@@ -236,7 +236,7 @@ tests:
       - Aggregate:
           accumulators:
             - ExprWithAlias:
-                expr: CountAll
+                expr: Count
                 alias: count
             - ExprWithAlias:
                 expr:
@@ -259,7 +259,7 @@ tests:
           - title
           - author
       - Sort:
-          - OrderBy:
+          - Ordering:
             - Field: author
             - ASCENDING
     results:
@@ -311,7 +311,7 @@ tests:
         - Field: genre
         - Field: nestedField # Field does not exist, should be ignored
       - Sort:
-        - OrderBy:
+        - Ordering:
           - Field: author_title
           - ASCENDING
     results:
@@ -390,7 +390,7 @@ tests:
     pipeline:
       - Collection: books
       - Sort:
-          - OrderBy:
+          - Ordering:
             - Field: author
             - ASCENDING
       - Offset: 5
@@ -529,7 +529,7 @@ tests:
       - Select:
         - title
       - Sort:
-        - OrderBy:
+        - Ordering:
             - Field: title
             - ASCENDING
     results:
@@ -548,7 +548,7 @@ tests:
       - Select:
         - title
       - Sort:
-        - OrderBy:
+        - Ordering:
           - Field: title
           - DESCENDING
     results:
@@ -821,10 +821,9 @@ tests:
         - rating
         - title
       - Sort:
-        - OrderBy:
-            expr:
-              Field: title
-            direction: ASCENDING
+        - Ordering:
+          - Field: title
+          - direction: ASCENDING
     results:
       - rating: 4.3
         title: Crime and Punishment
