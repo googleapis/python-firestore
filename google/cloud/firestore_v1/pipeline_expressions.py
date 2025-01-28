@@ -439,12 +439,12 @@ class Avg(Accumulator):
 
 class Count(Accumulator):
     def __init__(self, value: Expr = None):
-        super(Function, self).__init__("count", [value] if value else [])
+        super().__init__("count", [value] if value else [])
 
 
 class CountIf(Function):
     def __init__(self, value: Expr, distinct: bool=False):
-        super(Function, self).__init__("countif", [value] if value else [])
+        super().__init__("countif", [value] if value else [])
 
 
 class Selectable:
