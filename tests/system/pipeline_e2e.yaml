@@ -965,32 +965,32 @@ tests:
           - ExprWithAlias:
               expr:
                 CosineDistance:
-                  - Vector:
-                      - Constant: 0.1
-                      - Constant: 0.1
-                  - Vector:
-                      - Constant: 0.5
-                      - Constant: 0.8
+                  vector1:
+                    - 0.1
+                    - 0.1
+                  vector2:
+                    - 0.5
+                    - 0.8
               alias: cosineDistance
           - ExprWithAlias:
               expr:
                 DotProduct:
-                  - Vector:
-                      - Constant: 0.1
-                      - Constant: 0.1
-                  - Vector:
-                      - Constant: 0.5
-                      - Constant: 0.8
+                  vector1:
+                    - 0.1
+                    - 0.1
+                  vector2:
+                    - 0.5
+                    - 0.8
               alias: dotProductDistance
           - ExprWithAlias:
               expr:
                 EuclideanDistance:
-                  - Vector:
-                      - Constant: 0.1
-                      - Constant: 0.1
-                  - Vector:
-                      - Constant: 0.5
-                      - Constant: 0.8
+                  vector1:
+                    - 0.1
+                    - 0.1
+                  vector2:
+                    - 0.5
+                    - 0.8
               alias: euclideanDistance
       - Limit: 1
     results:
