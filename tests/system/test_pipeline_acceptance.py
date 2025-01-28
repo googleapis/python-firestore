@@ -79,12 +79,16 @@ def parse_pipeline(pipeline: list[dict[str, Any], str]):
         result_list.append(stage_obj)
     return Pipeline(*result_list)
 
+def _is_expr_string(yaml_str):
+    return isinstance(yaml_str, str) and \
+            yaml_str[0].isupper() and \
+            hasattr(pipeline_expressions, yaml_str)
 
 def parse_expressions(yaml_element: Any):
     if isinstance(yaml_element, list):
         return [parse_expressions(v) for v in yaml_element]
     elif isinstance(yaml_element, dict):
-        if len(yaml_element) == 1 and isinstance(list(yaml_element)[0], str) and hasattr(pipeline_expressions, list(yaml_element)[0]):
+        if len(yaml_element) == 1 and _is_expr_string(list(yaml_element)[0]):
             # build pipeline expressions if possible
             cls_str = list(yaml_element)[0]
             cls = getattr(pipeline_expressions, cls_str)
@@ -93,7 +97,7 @@ def parse_expressions(yaml_element: Any):
         else:
             # otherwise, return dict
             return {parse_expressions(k): parse_expressions(v) for k,v in yaml_element.items()}
-    elif isinstance(yaml_element, str) and hasattr(pipeline_expressions, yaml_element):
+    elif _is_expr_string(yaml_element):
         return getattr(pipeline_expressions, yaml_element)()
     else:
         return yaml_element
