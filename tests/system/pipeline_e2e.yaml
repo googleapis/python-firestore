@@ -1005,23 +1005,6 @@ tests:
         awards.hugo: true
       - title: Dune
         awards.hugo: true
-#  - description: testReplace
-#    pipeline:
-#      - Collection: books
-#      - Replace: awards
-#    results:
-#      - title: The Hitchhiker's Guide to the Galaxy
-#        author: Douglas Adams
-#        genre: Science Fiction
-#        published: 1979
-#        rating: 4.2
-#        tags:
-#          - comedy
-#          - space
-#          - adventure
-#        hugo: true
-#        nebula: false
-#      # ... other results with replaced awards
   #- description: testSampleLimit
   #  pipeline:
   #    - Collection: books
@@ -1045,6 +1028,26 @@ tests:
   #    - # document data
   #    - # document data
   #    - # document data
+  - description: testReplace
+    pipeline:
+      - Collection: books
+      - Where:
+        - Eq:
+          - Field: title
+          - "The Hitchhiker's Guide to the Galaxy"
+      - Replace: awards
+    results:
+      - title: The Hitchhiker's Guide to the Galaxy
+        author: Douglas Adams
+        genre: Science Fiction
+        published: 1979
+        rating: 4.2
+        tags:
+          - comedy
+          - space
+          - adventure
+        hugo: true
+        nebula: false
   - description: testUnion
     pipeline:
       - Collection: books
