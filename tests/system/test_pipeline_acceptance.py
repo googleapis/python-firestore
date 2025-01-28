@@ -94,6 +94,9 @@ def parse_expressions(yaml_element: Any):
             cls = getattr(pipeline_expressions, cls_str)
             yaml_args = yaml_element[cls_str]
             return _apply_yaml_args(cls, yaml_args)
+        elif len(yaml_element) == 1 and list(yaml_element)[0] == "Pipeline":
+            # find Pipeline objects for Union expressions
+            return parse_pipeline(yaml_element["Pipeline"])
         else:
             # otherwise, return dict
             return {parse_expressions(k): parse_expressions(v) for k,v in yaml_element.items()}

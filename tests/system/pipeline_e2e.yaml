@@ -999,7 +999,7 @@ tests:
       - Select:
           - title
           - Field: awards.hugo
-          - __name__
+          - Field: "__name__"
     results:
       - title: The Hitchhiker's Guide to the Galaxy
         awards.hugo: true
@@ -1045,15 +1045,13 @@ tests:
   #    - # document data
   #    - # document data
   #    - # document data
-  #- description: testUnion
-  #  pipeline:
-  #    - Union:
-  #        - Collection: books
-  #        - Collection: books
-  #  results: # Results will be duplicated
-  #    - # document data
-  #    - # document data
-  #    # ... 20 results total
+  - description: testUnion
+    pipeline:
+      - Collection: books
+      - Union:
+        - Pipeline:
+          - Collection: books
+    results_num: 20 # Results will be duplicated
   - description: testUnnest
     pipeline:
       - Collection: books
