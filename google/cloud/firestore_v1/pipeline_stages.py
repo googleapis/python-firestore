@@ -44,7 +44,10 @@ class Stage:
 class AddFields(Stage):
     def __init__(self, *fields: Selectable):
         super().__init__("add_fields")
-        self.fields = dict(f._to_map() for f in fields)
+        self.fields = list(fields)
+
+    def _fields_map(self) -> dict[str, Expr]:
+        return dict(f._to_map() for f in self.fields)
 
 
 class Aggregate(Stage):
@@ -55,13 +58,16 @@ class Aggregate(Stage):
         groups: Sequence[str | Selectable] = (),
     ):
         super().__init__()
-        self.groups: dict[str, Expr] = dict(
-            f._to_map()
-            if isinstance(f, Selectable)
-            else (f,Field(f))
-            for f in groups
-        )
-        self.accumulators: dict[str, Expr] = dict(f._to_map() for f in [*accumulators, *extra_accumulators])
+        self.groups: list[Selectable] = [Field(f) if isinstance(f, str) else f for f in groups]
+        self.accumulators: list[ExprWithAlias[Accumulator]] = [*accumulators, *extra_accumulators]
+
+    @property
+    def _group_map(self) -> dict[str, Expr]:
+        return dict(f._to_map() for f in self.groups)
+
+    @property
+    def _accumulators_map(self) -> dict[str, Expr]:
+        return dict(f._to_map() for f in self.accumulators)
 
 
 class Collection(Stage):
@@ -86,18 +92,22 @@ class Database(Stage):
 class Distinct(Stage):
     def __init__(self, *fields: str | Selectable):
         super().__init__()
-        self.fields = dict(
+        self.fields: list[Selectable] = [Field(f) if isinstance(f, str) else f for f in fields]
+
+    @property
+    def _fields_dict(self) -> dict[str, Selectable]:
+        return dict(
             f._to_map()
             if isinstance(f, Selectable)
             else (f,Field(f))
-            for f in fields
+            for f in self.fields
         )
 
 
 class Documents(Stage):
-    def __init__(self, documents: List[str]):
+    def __init__(self, *documents: str):
         super().__init__()
-        self.documents = documents
+        self.documents = list(documents)
 
     @staticmethod
     def of(*documents: "DocumentReference") -> "Documents":
@@ -121,9 +131,9 @@ class FindNearest(Stage):
 
 
 class GenericStage(Stage):
-    def __init__(self, name: str, params: List[Any]):
+    def __init__(self, name: str, *params: Any):
         super().__init__(name)
-        self.params = params
+        self.params = list(params)
 
 
 class Limit(Stage):
@@ -141,12 +151,11 @@ class Offset(Stage):
 class RemoveFields(Stage):
     def __init__(self, *fields: str | Field):
         super().__init__("remove_fields")
-        self.fields = dict(
-            f._to_map()
-            if isinstance(f, Selectable)
-            else (f,Field(f))
-            for f in fields
-        )
+        self.fields = [Field(f) if isinstance(f, str) else f for f in fields]
+
+    @property
+    def _fields_map(self) -> dict[str, Field]:
+        dict(f._to_map() for f in self.fields)
 
 
 class Replace(Stage):
@@ -170,20 +179,19 @@ class Sample(Stage):
 class Select(Stage):
     def __init__(self, *fields: str | Selectable):
         super().__init__()
-        self.projections = dict(
-            f._to_map()
-            if isinstance(f, Selectable)
-            else (f,Field(f))
-            for f in fields
-        )
+        self.projections = [Field(f) if isinstance(f, str) else f for f in fields]
+
+    @property
+    def _projections_map(self) -> dict[str, Expr]:
+        return dict(f._to_map() for f in self.projections)
 
 
 
 
 class Sort(Stage):
-    def __init__(self, orders: List["Ordering"]):
+    def __init__(self, *orders: "Ordering"):
         super().__init__()
-        self.orders = orders
+        self.orders = list(orders)
 
 
 class Union(Stage):
