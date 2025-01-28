@@ -1005,29 +1005,6 @@ tests:
         awards.hugo: true
       - title: Dune
         awards.hugo: true
-  #- description: testSampleLimit
-  #  pipeline:
-  #    - Collection: books
-  #    - Sample:
-  #        method: LIMIT
-  #        n: 3
-  #  results: # Results will vary due to randomness
-  #    - # document data
-  #    - # document data
-  #    - # document data
-  #- description: testSamplePercentage
-  #  pipeline:
-  #    - Collection: books
-  #    - Sample:
-  #        method: PERCENTAGE
-  #        n: 60
-  #  results: # Results will vary due to randomness
-  #    - # document data
-  #    - # document data
-  #    - # document data
-  #    - # document data
-  #    - # document data
-  #    - # document data
   - description: testReplace
     pipeline:
       - Collection: books
@@ -1048,6 +1025,18 @@ tests:
           - adventure
         hugo: true
         nebula: false
+  - description: testSampleLimit
+    pipeline:
+      - Collection: books
+      - Sample: 3
+    results_num: 3 # Results will vary due to randomness
+  - description: testSamplePercentage
+    pipeline:
+      - Collection: books
+      - Sample:
+          - 60
+          - PERCENTAGE
+    results_num: 6 # Results will vary due to randomness
   - description: testUnion
     pipeline:
       - Collection: books

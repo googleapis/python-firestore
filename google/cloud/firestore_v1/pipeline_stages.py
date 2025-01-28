@@ -1,6 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Optional, Sequence
 from enum import Enum
+from enum import auto
 
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
@@ -19,16 +20,6 @@ class FindNearestOptions:
     ):
         self.limit = limit
         self.distance_field = distance_field
-
-
-class SampleOptions:
-    class Mode(Enum):
-        DOCUMENTS = "documents"
-        PERCENT = "percent"
-
-    def __init__(self, n: int | float, mode: Mode):
-        self.n = n
-        self.mode = mode
 
 
 class UnnestOptions:
@@ -185,10 +176,15 @@ class Replace(Stage):
 
 
 class Sample(Stage):
-    def __init__(self, options: "SampleOptions"):
-        super().__init__()
-        self.options = options
 
+    class Mode(Enum):
+        DOCUMENTS = auto()
+        PERCENTAGE = auto()
+
+    def __init__(self, n: int, mode: Mode = Mode.DOCUMENTS):
+        super().__init__()
+        self.n = n
+        self.mode = mode
 
 class Select(Stage):
     def __init__(self, *fields: str | Selectable):

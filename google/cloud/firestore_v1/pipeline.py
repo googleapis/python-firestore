@@ -64,8 +64,8 @@ class Pipeline:
         self.stages.append(stages.Replace(field, mode))
         return self
 
-    def sample(self, options: stages.SampleOptions) -> Pipeline:
-        self.stages.append(stages.Sample(options))
+    def sample(self, n: int, mode: Sample.Mode = Sample.Mode.DOCUMENTS) -> Pipeline:
+        self.stages.append(stages.Sample(n, mode)
         return self
 
     def union(self, other: Pipeline) -> Pipeline:
