@@ -50,8 +50,8 @@ class AddFields(Stage):
 class Aggregate(Stage):
     def __init__(
         self,
-        groups:dict[str, Expr] | None = None,
-        accumulators:dict[str, Accumulator] | None = None,
+        *accumulators: AccumulatorTarget,
+        groups: list[str | Selectable] | None = None,
     ):
         super().__init__()
         self.groups = groups or {}
