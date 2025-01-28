@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Mapping
+from typing import Any, Iterable, List, Mapping, Union
 
 
 class Ordering:
@@ -6,6 +6,14 @@ class Ordering:
     def __init__(self, expr, order_dir):
         self.expr = expr
         self.order_dir = order_dir
+
+    @staticmethod
+    def ascending(expr):
+        return Ordering(expr, "asc")
+
+    @staticmethod
+    def descending(expr):
+        return Ordering(expr, "desc")
 
 class Expr:
     """Represents an expression that can be evaluated to a value within the
@@ -16,10 +24,196 @@ class Expr:
         items = ("%s = %r" % (k, v) for k, v in self.__dict__.items())
         return "<%s: {%s}>" % (self.__class__.__name__, ', '.join(items))
 
+    @staticmethod
+    def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
+        return o if isinstance(o, Expr) else Constant(o)
+
+    def add(self, other: Any) -> "Add":
+        return Add(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def subtract(self, other: Any) -> "Subtract":
+        return Subtract(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def multiply(self, other: Any) -> "Multiply":
+        return Multiply(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def divide(self, other: Any) -> "Divide":
+        return Divide(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def mod(self, other: Any) -> "Mod":
+        return Mod(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def logical_max(self, other: Any) -> "LogicalMax":
+        return LogicalMax(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def logical_min(self, other: Any) -> "LogicalMin":
+        return LogicalMin(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def eq(self, other: Any) -> "Eq":
+        return Eq(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def neq(self, other: Any) -> "Neq":
+        return Neq(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def gt(self, other: Any) -> "Gt":
+        return Gt(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def gte(self, other: Any) -> "Gte":
+        return Gte(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def lt(self, other: Any) -> "Lt":
+        return Lt(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def lte(self, other: Any) -> "Lte":
+        return Lte(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def in_(self, *others: Any) -> "In":
+        return In(self, ListOfExprs([self._cast_to_expr_or_convert_to_constant(o) for o in others]))
+
+    def not_in(self, *others: Any) -> "Not":
+        return Not(self.in_(*others))
+
+    def array_concat(self, array: List[Any]) -> "ArrayConcat":
+        return ArrayConcat(self, ListOfExprs([self._cast_to_expr_or_convert_to_constant(o) for o in array]))
+
+    def array_contains(self, element: Any) -> "ArrayContains":
+        return ArrayContains(self, self._cast_to_expr_or_convert_to_constant(element))
+
+    def array_contains_all(self, elements: List[Any]) -> "ArrayContainsAll":
+        return ArrayContainsAll(self, ListOfExprs([self._cast_to_expr_or_convert_to_constant(e) for e in elements]))
+
+    def array_contains_any(self, elements: List[Any]) -> "ArrayContainsAny":
+        return ArrayContainsAny(self, ListOfExprs([self._cast_to_expr_or_convert_to_constant(e) for e in elements]))
+
+    def array_length(self) -> "ArrayLength":
+        return ArrayLength(self)
+
+    def array_reverse(self) -> "ArrayReverse":
+        return ArrayReverse(self)
+
+    def is_nan(self) -> "IsNaN":
+        return IsNaN(self)
+
+    def exists(self) -> "Exists":
+        return Exists(self)
+
+    def sum(self) -> "Sum":
+        return Sum(self, False)
+
+    def avg(self) -> "Avg":
+        return Avg(self, False)
+
+    def count(self) -> "Count":
+        return Count(self)
+
+    def min(self) -> "Min":
+        return Min(self, False)
+
+    def max(self) -> "Max":
+        return Max(self, False)
+
+    def char_length(self) -> "CharLength":
+        return CharLength(self)
+
+    def byte_length(self) -> "ByteLength":
+        return ByteLength(self)
+
+    def like(self, pattern: Any) -> "Like":
+        return Like(self, self._cast_to_expr_or_convert_to_constant(pattern))
+
+    def regex_contains(self, regex: Any) -> "RegexContains":
+        return RegexContains(self, self._cast_to_expr_or_convert_to_constant(regex))
+
+    def regex_matches(self, regex: Any) -> "RegexMatch":
+        return RegexMatch(self, self._cast_to_expr_or_convert_to_constant(regex))
+
+    def str_contains(self, substring: Any) -> "StrContains":
+        return StrContains(self, self._cast_to_expr_or_convert_to_constant(substring))
+
+    def starts_with(self, prefix: Any) -> "StartsWith":
+        return StartsWith(self, self._cast_to_expr_or_convert_to_constant(prefix))
+
+    def ends_with(self, postfix: Any) -> "EndsWith":
+        return EndsWith(self, self._cast_to_expr_or_convert_to_constant(postfix))
+
+    def str_concat(self, *elements: Any) -> "StrConcat":
+        return StrConcat(*[self._cast_to_expr_or_convert_to_constant(el) for el in elements])
+
+    def to_lower(self) -> "ToLower":
+        return ToLower(self)
+
+    def to_upper(self) -> "ToUpper":
+        return ToUpper(self)
+
+    def trim(self) -> "Trim":
+        return Trim(self)
+
+    def reverse(self) -> "Reverse":
+        return Reverse(self)
+
+    def replace_first(self, find: Any, replace: Any) -> "ReplaceFirst":
+        return ReplaceFirst(self, self._cast_to_expr_or_convert_to_constant(find), self._cast_to_expr_or_convert_to_constant(replace))
+
+    def replace_all(self, find: Any, replace: Any) -> "ReplaceAll":
+        return ReplaceAll(self, self._cast_to_expr_or_convert_to_constant(find), self._cast_to_expr_or_convert_to_constant(replace))
+
+    def map_get(self, key: str) -> "MapGet":
+        return MapGet(self, key)
+
+    def cosine_distance(self, other: Any) -> "CosineDistance":
+        return CosineDistance(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def euclidean_distance(self, other: Any) -> "EuclideanDistance":
+        return EuclideanDistance(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def dot_product(self, other: Any) -> "DotProduct":
+        return DotProduct(self, self._cast_to_expr_or_convert_to_constant(other))
+
+    def vector_length(self) -> "VectorLength":
+        return VectorLength(self)
+
+    def timestamp_to_unix_micros(self) -> "TimestampToUnixMicros":
+        return TimestampToUnixMicros(self)
+
+    def unix_micros_to_timestamp(self) -> "UnixMicrosToTimestamp":
+        return UnixMicrosToTimestamp(self)
+
+    def timestamp_to_unix_millis(self) -> "TimestampToUnixMillis":
+        return TimestampToUnixMillis(self)
+
+    def unix_millis_to_timestamp(self) -> "UnixMillisToTimestamp":
+        return UnixMillisToTimestamp(self)
+
+    def timestamp_to_unix_seconds(self) -> "TimestampToUnixSeconds":
+        return TimestampToUnixSeconds(self)
+
+    def unix_seconds_to_timestamp(self) -> "UnixSecondsToTimestamp":
+        return UnixSecondsToTimestamp(self)
+
+    def timestamp_add(self, unit: Any, amount: Any) -> "TimestampAdd":
+        return TimestampAdd(self, self._cast_to_expr_or_convert_to_constant(unit), self._cast_to_expr_or_convert_to_constant(amount))
+
+    def timestamp_sub(self, unit: Any, amount: Any) -> "TimestampSub":
+        return TimestampSub(self, self._cast_to_expr_or_convert_to_constant(unit), self._cast_to_expr_or_convert_to_constant(amount))
+
+    def ascending(self) -> Ordering:
+        return Ordering.ascending(self)
+
+    def descending(self) -> Ordering:
+        return Ordering.descending(self)
+
+    def as_(self, alias: str) -> "ExprWithAlias":
+        return ExprWithAlias(self, alias)
+
 
 class Constant(Expr):
     def __init__(self, value: Any):
         self.value = value
+
+    @staticmethod
+    def of(value):
+        return Constant(value)
+
 
 
 class ListOfExprs(Expr):
@@ -285,6 +479,10 @@ class Field(Expr, Selectable):
 
     def __init__(self, path: str):
         self.path = path
+
+    @staticmethod
+    def of(path: str)
+        return Field(path)
 
     def _to_map(self):
         return self.path, self
