@@ -13,6 +13,12 @@ class Ordering:
         self.expr = expr
         self.order_dir = OrderingDirection[order_dir] if isinstance(order_dir, str) else order_dir
 
+    def __repr__(self):
+        if self.order_dir is OrderingDirection.ASCENDING:
+            order_str = ".ascending()"
+        else:
+            order_str = ".descending()"
+        return f"{self.expr!r}{order_str}"
 
 class Expr:
     """Represents an expression that can be evaluated to a value within the
@@ -20,8 +26,7 @@ class Expr:
     """
 
     def __repr__(self):
-        items = ("%s = %r" % (k, v) for k, v in self.__dict__.items())
-        return "<%s: {%s}>" % (self.__class__.__name__, ', '.join(items))
+        return f"{self.__class__.__name__}()"
 
     @staticmethod
     def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
@@ -213,6 +218,9 @@ class Constant(Expr):
     def of(value):
         return Constant(value)
 
+    def __repr__(self):
+        return f"Constant.of({self.value!r})"
+
 
 
 class ListOfExprs(Expr):
@@ -227,6 +235,8 @@ class Function(Expr):
         self.name = name
         self.params = params
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
 
 class Divide(Function):
     def __init__(self, left: Expr, right: Expr):
@@ -463,6 +473,9 @@ class ExprWithAlias(Expr, Selectable, Generic[T]):
     def _to_map(self):
         return self.alias, self.expr
 
+    def __repr__(self):
+        return f"{self.expr}.as('{self.alias}')"
+
 
 class Field(Expr, Selectable):
     DOCUMENT_ID = "__name__"
@@ -476,6 +489,9 @@ class Field(Expr, Selectable):
 
     def _to_map(self):
         return self.path, self
+
+    def __repr__(self):
+        return f"Field.of({self.path!r})"
 
 
 class FilterCondition(Function):

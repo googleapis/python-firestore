@@ -104,6 +104,7 @@ def parse_expressions(yaml_element: Any):
 )
 def test_e2e_scenario(test_dict):
     pipeline = parse_pipeline(test_dict["pipeline"])
+    print(pipeline)
 
     # before_ast = ast.parse(test_dict["before"])
     # got_ast = before_ast

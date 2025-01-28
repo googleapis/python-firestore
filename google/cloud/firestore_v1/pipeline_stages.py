@@ -40,6 +40,10 @@ class Stage:
     def __init__(self, custom_name: Optional[str] = None):
         self.name = custom_name or type(self).__name__.lower()
 
+    def __repr__(self):
+        items = ("%s=%r" % (k, v) for k, v in self.__dict__.items() if k != "name")
+        return f"{self.__class__.__name__}({', '.join(items)})"
+
 
 class AddFields(Stage):
     def __init__(self, *fields: Selectable):
@@ -68,6 +72,16 @@ class Aggregate(Stage):
     @property
     def _accumulators_map(self) -> dict[str, Expr]:
         return dict(f._to_map() for f in self.accumulators)
+
+
+    def __repr__(self):
+        accumulator_str = ', '.join(repr(v) for v in self.accumulators)
+        group_str = ""
+        if self.groups:
+            if self.accumulators:
+                group_str = ", "
+            group_str += f"groups={self.groups}"
+        return f"{self.__class__.__name__}({accumulator_str}{group_str})"
 
 
 class Collection(Stage):
