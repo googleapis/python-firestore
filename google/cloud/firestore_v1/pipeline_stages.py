@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Sequence
 from enum import Enum
 
 from google.cloud.firestore_v1.pipeline_expressions import (
@@ -50,12 +50,18 @@ class AddFields(Stage):
 class Aggregate(Stage):
     def __init__(
         self,
-        *accumulators: AccumulatorTarget,
-        groups: list[str | Selectable] | None = None,
+        *extra_accumulators: ExprWithAlias[Accumulator],
+        accumulators: Sequence[ExprWithAlias[Accumulator]] = (),
+        groups: Sequence[str | Selectable] = (),
     ):
         super().__init__()
-        self.groups = groups or {}
-        self.accumulators = accumulators or {}
+        self.groups: dict[str, Expr] = dict(
+            f._to_map()
+            if isinstance(f, Selectable)
+            else (f,Field(f))
+            for f in groups
+        )
+        self.accumulators: dict[str, Expr] = dict(f._to_map() for f in [*accumulators, *extra_accumulators])
 
 
 class Collection(Stage):

@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Mapping, Union
+from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar
 
 
 class Ordering:
@@ -455,18 +455,9 @@ class Selectable:
         raise NotImplementedError
 
 
-class AccumulatorTarget(Selectable):
-    def __init__(self, accumulator: Accumulator, field_name: str, distinct: bool=False):
-        self.accumulator = accumulator
-        self.field_name = field_name
-        self.distinct = distinct
-
-    def _to_map(self):
-        return self.field_name, self.accumulator
-
-
-class ExprWithAlias(Expr, Selectable):
-    def __init__(self, expr: Expr, alias: str):
+T = TypeVar('T', bound=Expr)
+class ExprWithAlias(Expr, Selectable, Generic[T]):
+    def __init__(self, expr: T, alias: str):
         self.expr = expr
         self.alias = alias
 
@@ -481,7 +472,7 @@ class Field(Expr, Selectable):
         self.path = path
 
     @staticmethod
-    def of(path: str)
+    def of(path: str):
         return Field(path)
 
     def _to_map(self):

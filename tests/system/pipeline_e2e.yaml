@@ -130,10 +130,9 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-          accumulators:
-            - ExprWithAlias:
-                expr: CountAll
-                alias: count
+          - ExprWithAlias:
+              expr: CountAll
+              alias: count
     results:
       - count: 10
   - description: "testAggregates - avg, count, max"
@@ -147,20 +146,19 @@ tests:
               right:
                 Constant: Science Fiction
       - Aggregate:
-          accumulators:
-            - ExprWithAlias:
-                expr: CountAll
-                alias: count
-            - ExprWithAlias:
-                expr:
-                  Avg:
-                    value: rating
-                alias: avg_rating
-            - ExprWithAlias:
-                expr:
-                  Max:
-                    value: rating
-                alias: max_rating
+          - ExprWithAlias:
+              expr: CountAll
+              alias: count
+          - ExprWithAlias:
+              expr:
+                Avg:
+                  value: rating
+              alias: avg_rating
+          - ExprWithAlias:
+              expr:
+                Max:
+                  value: rating
+              alias: max_rating
     results:
       - count: 2
         avg_rating: 4.4
