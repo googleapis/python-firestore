@@ -9,6 +9,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Field,
     FilterCondition,
     Selectable,
+    SampleOptions,
 )
 
 
@@ -64,8 +65,8 @@ class Pipeline:
         self.stages.append(stages.Replace(field, mode))
         return self
 
-    def sample(self, n: int, mode: Sample.Mode = Sample.Mode.DOCUMENTS) -> Pipeline:
-        self.stages.append(stages.Sample(n, mode)
+    def sample(self, limit_or_options: int | SampleOptions) -> Pipeline:
+        self.stages.append(stages.Sample(limit_or_options))
         return self
 
     def union(self, other: Pipeline) -> Pipeline:

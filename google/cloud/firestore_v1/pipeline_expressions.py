@@ -1,24 +1,33 @@
 from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar
 from enum import Enum
 from enum import auto
-
-
-class OrderingDirection(Enum):
-    ASCENDING = auto()
-    DESCENDING = auto()
+from dataclass import dataclass
 
 class Ordering:
 
-    def __init__(self, expr, order_dir: OrderingDirection | str):
+    class Direction(Enum):
+        ASCENDING = auto()
+        DESCENDING = auto()
+
+    def __init__(self, expr, order_dir: Direction | str):
         self.expr = expr
-        self.order_dir = OrderingDirection[order_dir] if isinstance(order_dir, str) else order_dir
+        self.order_dir = Ordering.Direction[order_dir] if isinstance(order_dir, str) else order_dir
 
     def __repr__(self):
-        if self.order_dir is OrderingDirection.ASCENDING:
+        if self.order_dir is Ordering.Direction.ASCENDING:
             order_str = ".ascending()"
         else:
             order_str = ".descending()"
         return f"{self.expr!r}{order_str}"
+
+@dataclass
+class SampleOptions:
+    class Mode(Enum):
+        DOCUMENTS = auto()
+        PERCENTAGE = auto()
+
+    n: int
+    mode: Mode
 
 class Expr:
     """Represents an expression that can be evaluated to a value within the

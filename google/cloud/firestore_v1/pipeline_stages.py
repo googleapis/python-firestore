@@ -10,6 +10,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Field,
     FilterCondition,
     Selectable,
+    SampleOptions,
 )
 
 class FindNearestOptions:
@@ -177,14 +178,11 @@ class Replace(Stage):
 
 class Sample(Stage):
 
-    class Mode(Enum):
-        DOCUMENTS = auto()
-        PERCENTAGE = auto()
-
-    def __init__(self, n: int, mode: Mode = Mode.DOCUMENTS):
+    def __init__(self, limit_or_options: int | SampleOptions):
         super().__init__()
-        self.n = n
-        self.mode = mode
+        if isinstance(limit_or_options, int):
+            limit_or_options = SampleOptions(limit_or_options, SampleOptions.Mode.DOCUMENTS)
+        self.options = limit_or_options
 
 class Select(Stage):
     def __init__(self, *fields: str | Selectable):
