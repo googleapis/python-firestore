@@ -49,8 +49,9 @@ def loader():
 
 def _apply_yaml_args(cls, yaml_args):
     if isinstance(yaml_args, dict):
-        # yaml has a mapping of arguments. Treat as kwargs
-        return cls(**parse_expressions(yaml_args))
+        # reject mapping arguments: use only positional arguments in yaml
+        # for cross-language simplicity
+        raise ValueError(f"found kwargs for class: {cls}")
     elif isinstance(yaml_args, list):
         # yaml has an array of arguments. Treat as args
         return cls(*parse_expressions(yaml_args))

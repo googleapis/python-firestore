@@ -131,8 +131,8 @@ tests:
       - Collection: books
       - Aggregate:
         - - ExprWithAlias:
-              expr: Count
-              alias: count
+              - Count
+              - "count"
     results:
       - count: 10
   - description: "testAggregates - avg, count, max"
@@ -144,16 +144,14 @@ tests:
               - Constant: Science Fiction
       - Aggregate:
         - - ExprWithAlias:
-              expr: Count
-              alias: count
+              - Count
+              - "count"
           - ExprWithAlias:
-              expr:
-                Avg: rating
-              alias: avg_rating
+              - Avg: rating
+              - "avg_rating"
           - ExprWithAlias:
-              expr:
-                Max: rating
-              alias: max_rating
+              - Max: rating
+              - "max_rating"
     results:
       - count: 2
         avg_rating: 4.4
@@ -178,10 +176,9 @@ tests:
               - Constant: 1900
       - Distinct:
         - ExprWithAlias:
-            expr:
-              ToLower:
+            - ToLower:
                 - Field: genre
-            alias: lower_genre
+            - "lower_genre"
     results:
       - lower_genre: romance
       - lower_genre: psychological thriller
@@ -194,9 +191,8 @@ tests:
               - Constant: 1984
       - Aggregate:
         - - ExprWithAlias:
-              expr:
-                Avg: rating
-              alias: avg_rating
+              - Avg: rating
+              - "avg_rating"
         - - genre
       - Where:
           - Gt:
@@ -214,16 +210,14 @@ tests:
       - Collection: books
       - Aggregate:
           - - ExprWithAlias:
-                expr: Count
-                alias: count
+                - Count
+                - "count"
             - ExprWithAlias:
-                expr:
-                  Max: rating
-                alias: max_rating
+                - Max: rating
+                - "max_rating"
             - ExprWithAlias:
-                expr:
-                  Min: published
-                alias: min_published
+                - Min: published
+                - "min_published"
     results:
       - count: 10
         max_rating: 4.7
@@ -264,19 +258,17 @@ tests:
       - Collection: books
       - AddFields:
         - ExprWithAlias:
-            expr:
-              StrConcat:
+            - StrConcat:
                 - Field: author
                 - Constant: _
                 - Field: title
-            alias: author_title
+            - "author_title"
         - ExprWithAlias:
-            expr:
-              StrConcat:
+            - StrConcat:
                 - Field: title
                 - Constant: _
                 - Field: author
-            alias: title_author
+            - "title_author"
       - RemoveFields:
         - title_author
         - tags
@@ -396,10 +388,8 @@ tests:
       - Collection: books
       - Where:
           - ArrayContainsAny:
-              array:  tags
-              elements:
-                - comedy
-                - classic
+            - tags
+            - ["comedy", "classic"]
       - Select:
         - title
     results:
@@ -410,11 +400,8 @@ tests:
       - Collection: books
       - Where:
           - ArrayContainsAll:
-              array:
-                Field: tags
-              elements:
-                - adventure
-                - magic
+              - Field: tags
+              - ["adventure", "magic"]
       - Select:
         - title
     results:
@@ -424,16 +411,13 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              ArrayLength:
+            - ArrayLength:
                 - Field: tags
-            alias: tagsCount
+            - "tagsCount"
       - Where:
           - Eq:
-              left:
-                Field: tagsCount
-              right:
-                Constant: 3
+              - Field: tagsCount
+              - Constant: 3
     results: # All documents have 3 tags
       - tagsCount: 3
       - tagsCount: 3
@@ -450,14 +434,10 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              ArrayConcat:
-                array:
-                  Field: tags
-                rest:
-                  - newTag1
-                  - newTag2
-            alias: modifiedTags
+            - ArrayConcat:
+                - Field: tags
+                - ["newTag1", "newTag2"]
+            - "modifiedTags"
       - Limit: 1
     results:
       - modifiedTags:
@@ -471,12 +451,11 @@ tests:
       - Collection: books
       - Select:
           - ExprWithAlias:
-              expr:
-                StrConcat:
+              - StrConcat:
                   - Field: author
                   - Constant:  " - "
                   - Field: title
-              alias: bookInfo
+              - "bookInfo"
       - Limit: 1
     results:
       - bookInfo: Douglas Adams - The Hitchhiker's Guide to the Galaxy
@@ -519,10 +498,9 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              CharLength:
+            - CharLength:
                 - Field: title
-            alias: titleLength
+            - "titleLength"
         - title
       - Where:
           - Gt:
@@ -538,10 +516,9 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              Reverse:
+            - Reverse:
                 - Field: title
-            alias: reversed_title
+            - "reversed_title"
       - Where:
           - Eq:
               - Field: author
@@ -553,12 +530,11 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              ReplaceFirst:
+            - ReplaceFirst:
                 - Field: title
                 - The
                 - A
-            alias: replaced_title
+            - "replaced_title"
       - Where:
           - Eq:
               - Field: author
@@ -570,12 +546,11 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              ReplaceAll:
+            - ReplaceAll:
                 - Field: title
                 - " "
                 - "_"
-            alias: replaced_title
+            - "replaced_title"
       - Where:
           - Eq:
               - Field: author
@@ -587,10 +562,9 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              CharLength:
+            - CharLength:
                 - Field: title
-            alias: title_length
+            - "title_length"
       - Where:
           - Eq:
               - Field: author
@@ -602,12 +576,11 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              ByteLength:
+            - ByteLength:
                 - StrConcat:
                   - Field: title
                   - Constant: _银河系漫游指南
-            alias: title_byte_length
+            - "title_byte_length"
       - Where:
           - Eq:
               - Field: author
@@ -619,10 +592,9 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              ToLower:
+            - ToLower:
                 - Field: title
-            alias: lowercaseTitle
+            - "lowercaseTitle"
       - Limit: 1
     results:
       - lowercaseTitle: the hitchhiker's guide to the galaxy
@@ -631,10 +603,9 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              ToUpper:
+            - ToUpper:
                 - Field: author
-            alias: uppercaseAuthor
+            - "uppercaseAuthor"
       - Limit: 1
     results:
       - uppercaseAuthor: DOUGLAS ADAMS
@@ -643,18 +614,16 @@ tests:
       - Collection: books
       - AddFields:
         - ExprWithAlias:
-            expr:
-              StrConcat:
+            - StrConcat:
                 - Constant: " "
                 - Field: title
                 - Constant: " "
-            alias: spacedTitle
+            - "spacedTitle"
       - Select:
         - ExprWithAlias:
-            expr:
-              Trim:
+            - Trim:
                 - Field: spacedTitle
-            alias: trimmedTitle
+            - "trimmedTitle"
         - spacedTitle
       - Limit: 1
     results:
@@ -702,29 +671,25 @@ tests:
       - Collection: books
       - Select:
         - ExprWithAlias:
-            expr:
-              Add:
+            - Add:
                 - Field: rating
                 - Constant: 1
-            alias: ratingPlusOne
+            - "ratingPlusOne"
         - ExprWithAlias:
-            expr:
-              Subtract:
+            - Subtract:
                 - Field: published
                 - Constant: 1900
-            alias: yearsSince1900
+            - "yearsSince1900"
         - ExprWithAlias:
-            expr:
-              Multiply:
+            - Multiply:
                 - Field: rating
                 - Constant: 10
-            alias: ratingTimesTen
+            - "ratingTimesTen"
         - ExprWithAlias:
-            expr:
-              Divide:
+            - Divide:
                 - Field: rating
                 - Constant: 2
-            alias: ratingDividedByTwo
+            - "ratingDividedByTwo"
       - Limit: 1
     results:
       - ratingPlusOne: 5.2
@@ -793,17 +758,15 @@ tests:
                   - Field: rating
       - Select:
           - ExprWithAlias:
-              expr:
-                Eq:
+              - Eq:
                   - Field: rating
                   - Constant: null
-              alias: ratingIsNull
+              - "ratingIsNull"
           - ExprWithAlias:
-              expr:
-                - Not:
+              - Not:
                   - IsNaN:
                     - Field: rating
-              alias: ratingIsNotNaN
+              - "ratingIsNotNaN"
       - Limit: 1
     results:
       - ratingIsNull: false
@@ -817,17 +780,15 @@ tests:
               - Constant: Douglas Adams
       - Select:
           - ExprWithAlias:
-              expr:
-                LogicalMax:
+              - LogicalMax:
                   - Field: rating
                   - Constant: 4.5
-              alias: max_rating
+              - "max_rating"
           - ExprWithAlias:
-              expr:
-                LogicalMax:
+              - LogicalMax:
                   - Field: published
                   - Constant: 1900
-              alias: max_published
+              - "max_published"
     results:
       - max_rating: 4.5
         max_published: 1979
@@ -836,17 +797,15 @@ tests:
       - Collection: books
       - Select:
           - ExprWithAlias:
-              expr:
-                LogicalMin:
+              - LogicalMin:
                   - Field: rating
                   - Constant: 4.5
-              alias: min_rating
+              - "min_rating"
           - ExprWithAlias:
-              expr:
-                LogicalMin:
+              - LogicalMin:
                   - Field: published
                   - Constant: 1900
-              alias: min_published
+              - "min_published"
     results:
       - min_rating: 4.2
         min_published: 1900
@@ -855,11 +814,10 @@ tests:
       - Collection: books
       - Select:
           - ExprWithAlias:
-              expr:
-                MapGet:
+              - MapGet:
                   - Field: awards
                   - hugo
-              alias: hugoAward
+              - "hugoAward"
           - Field: title
       - Where:
           - Eq:
@@ -875,35 +833,20 @@ tests:
       - Collection: books
       - Select:
           - ExprWithAlias:
-              expr:
-                CosineDistance:
-                  vector1:
-                    - 0.1
-                    - 0.1
-                  vector2:
-                    - 0.5
-                    - 0.8
-              alias: cosineDistance
+              - CosineDistance:
+                - [0.1, 0.1]
+                - [0.5, 0.8]
+              - "cosineDistance"
           - ExprWithAlias:
-              expr:
-                DotProduct:
-                  vector1:
-                    - 0.1
-                    - 0.1
-                  vector2:
-                    - 0.5
-                    - 0.8
-              alias: dotProductDistance
+              - DotProduct:
+                - [0.1, 0.1]
+                - [0.5, 0.8]
+              - "dotProductDistance"
           - ExprWithAlias:
-              expr:
-                EuclideanDistance:
-                  vector1:
-                    - 0.1
-                    - 0.1
-                  vector2:
-                    - 0.5
-                    - 0.8
-              alias: euclideanDistance
+              - EuclideanDistance:
+                - [0.1, 0.1]
+                - [0.5, 0.8]
+              - "euclideanDistance"
       - Limit: 1
     results:
       - cosineDistance: 0.02560880430538015
