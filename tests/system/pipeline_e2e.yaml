@@ -148,13 +148,11 @@ tests:
               alias: count
           - ExprWithAlias:
               expr:
-                Avg:
-                  value: rating
+                Avg: rating
               alias: avg_rating
           - ExprWithAlias:
               expr:
-                Max:
-                  value: rating
+                Max: rating
               alias: max_rating
     results:
       - count: 2
@@ -197,8 +195,7 @@ tests:
       - Aggregate:
         - - ExprWithAlias:
               expr:
-                Avg:
-                  value: rating
+                Avg: rating
               alias: avg_rating
         - - genre
       - Where:
@@ -221,13 +218,11 @@ tests:
                 alias: count
             - ExprWithAlias:
                 expr:
-                  Max:
-                    value: rating
+                  Max: rating
                 alias: max_rating
             - ExprWithAlias:
                 expr:
-                  Min:
-                    value: published
+                  Min: published
                 alias: min_published
     results:
       - count: 10
@@ -560,10 +555,9 @@ tests:
         - ExprWithAlias:
             expr:
               ReplaceFirst:
-                value:
-                  Field: title
-                pattern: The
-                replacement: A
+                - Field: title
+                - The
+                - A
             alias: replaced_title
       - Where:
           - Eq:
@@ -578,10 +572,9 @@ tests:
         - ExprWithAlias:
             expr:
               ReplaceAll:
-                value:
-                  Field: title
-                pattern: " "
-                replacement: _
+                - Field: title
+                - " "
+                - "_"
             alias: replaced_title
       - Where:
           - Eq:
@@ -628,8 +621,7 @@ tests:
         - ExprWithAlias:
             expr:
               ToLower:
-                value:
-                  Field: title
+                - Field: title
             alias: lowercaseTitle
       - Limit: 1
     results:
@@ -641,8 +633,7 @@ tests:
         - ExprWithAlias:
             expr:
               ToUpper:
-                value:
-                  Field: author
+                - Field: author
             alias: uppercaseAuthor
       - Limit: 1
     results:
