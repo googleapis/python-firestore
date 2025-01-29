@@ -130,7 +130,7 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-          - ExprWithAlias:
+        - - ExprWithAlias:
               expr: Count
               alias: count
     results:
@@ -140,12 +140,10 @@ tests:
       - Collection: books
       - Where:
           - Eq:
-              left:
-                Field: genre
-              right:
-                Constant: Science Fiction
+              - Field: genre
+              - Constant: Science Fiction
       - Aggregate:
-          - ExprWithAlias:
+        - - ExprWithAlias:
               expr: Count
               alias: count
           - ExprWithAlias:
@@ -167,29 +165,24 @@ tests:
       - Collection: books
       - Where:
         - Lt:
-              left:
-                Field: published
-              right:
-                Constant: 1900
+          - Field: published
+          - Constant: 1900
       - Aggregate:
-          groups:
-            - genre
+        - []
+        - - genre
     error: "Cannot groupBy without accumulators"
   - description: testDistinct
     pipeline:
       - Collection: books
       - Where:
           - Lt:
-              left:
-                Field: published
-              right:
-                Constant: 1900
+              - Field: published
+              - Constant: 1900
       - Distinct:
         - ExprWithAlias:
             expr:
               ToLower:
-                value:
-                  Field: genre
+                - Field: genre
             alias: lower_genre
     results:
       - lower_genre: romance
@@ -199,25 +192,19 @@ tests:
       - Collection: books
       - Where:
           - Lt:
-              left:
-                Field: published
-              right:
-                Constant: 1984
+              - Field: published
+              - Constant: 1984
       - Aggregate:
-          accumulators:
-            - ExprWithAlias:
-                expr:
-                  Avg:
-                    value: rating
-                alias: avg_rating
-          groups:
-            - genre
+        - - ExprWithAlias:
+              expr:
+                Avg:
+                  value: rating
+              alias: avg_rating
+        - - genre
       - Where:
           - Gt:
-              left:
-                Field: avg_rating
-              right:
-                Constant: 4.3
+              - Field: avg_rating
+              - Constant: 4.3
     results:
       - avg_rating: 4.7
         genre: Fantasy
@@ -229,8 +216,7 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-          accumulators:
-            - ExprWithAlias:
+          - - ExprWithAlias:
                 expr: Count
                 alias: count
             - ExprWithAlias:
@@ -336,15 +322,11 @@ tests:
       - Where:
           - And:
               - Gt:
-                  left:
-                    Field: rating
-                  right:
-                    Constant: 4.5
+                  - Field: rating
+                  - Constant: 4.5
               - Eq:
-                  left:
-                    Field: genre
-                  right:
-                    Constant: Science Fiction
+                  - Field: genre
+                  - Constant: Science Fiction
     results:
       - title: Dune
         author: Frank Herbert
@@ -364,15 +346,11 @@ tests:
       - Where:
           - Or:
               - Eq:
-                  left:
-                    Field: genre
-                  right:
-                    Constant: Romance
+                  - Field: genre
+                  - Constant: Romance
               - Eq:
-                  left:
-                    Field: genre
-                  right:
-                    Constant: Dystopian
+                  - Field: genre
+                  - Constant: Dystopian
       - Select:
         - title
     results:
@@ -553,10 +531,8 @@ tests:
         - title
       - Where:
           - Gt:
-              left:
-                Field: titleLength
-              right:
-                Constant: 20
+              - Field: titleLength
+              - Constant: 20
     results:
       - titleLength: 32
         title: The Hitchhiker's Guide to the Galaxy
@@ -573,10 +549,8 @@ tests:
             alias: reversed_title
       - Where:
           - Eq:
-              left:
-                Field: author
-              right:
-                Constant: Douglas Adams
+              - Field: author
+              - Constant: Douglas Adams
     results:
       - reversed_title: yxalaG ot ediug s'reknhiHcH ehT
   - description: testStringFunctions - ReplaceFirst
@@ -593,10 +567,8 @@ tests:
             alias: replaced_title
       - Where:
           - Eq:
-              left:
-                Field: author
-              right:
-                Constant: Douglas Adams
+              - Field: author
+              - Constant: Douglas Adams
     results:
       - replaced_title: A Hitchhiker's Guide to the Galaxy
   - description: testStringFunctions - ReplaceAll
@@ -613,10 +585,8 @@ tests:
             alias: replaced_title
       - Where:
           - Eq:
-              left:
-                Field: author
-              right:
-                Constant: Douglas Adams
+              - Field: author
+              - Constant: Douglas Adams
     results:
       - replaced_title: The_Hitchhiker's_Guide_to_the_Galaxy
   - description: testStringFunctions - CharLength
@@ -630,10 +600,8 @@ tests:
             alias: title_length
       - Where:
           - Eq:
-              left:
-                Field: author
-              right:
-                Constant: Douglas Adams
+              - Field: author
+              - Constant: Douglas Adams
     results:
       - title_length: 30
   - description: testStringFunctions - ByteLength
@@ -649,10 +617,8 @@ tests:
             alias: title_byte_length
       - Where:
           - Eq:
-              left:
-                Field: author
-              right:
-                Constant: Douglas Adams
+              - Field: author
+              - Constant: Douglas Adams
     results:
       - title_byte_length: 42
   - description: testToLowercase
@@ -780,20 +746,14 @@ tests:
       - Where:
           - And:
               - Gt:
-                  left:
-                    Field: rating
-                  right:
-                    Constant: 4.2
+                  - Field: rating
+                  - Constant: 4.2
               - Lte:
-                  left:
-                    Field: rating
-                  right:
-                    Constant: 4.5
+                  - Field: rating
+                  - Constant: 4.5
               - Neq:
-                  left:
-                    Field: genre
-                  right:
-                    Constant: Science Fiction
+                  - Field: genre
+                  - Constant: Science Fiction
       - Select:
         - rating
         - title
@@ -815,20 +775,14 @@ tests:
           - Or:
               - And:
                   - Gt:
-                      left:
-                        Field: rating
-                      right:
-                        Constant: 4.5
+                      - Field: rating
+                      - Constant: 4.5
                   - Eq:
-                      left:
-                        Field: genre
-                      right:
-                        Constant: Science Fiction
+                      - Field: genre
+                      - Constant: Science Fiction
               - Lt:
-                  left:
-                    Field: published
-                  right:
-                    Constant: 1900
+                  - Field: published
+                  - Constant: 1900
       - Select:
           - title
       - Sort:
@@ -850,10 +804,8 @@ tests:
           - ExprWithAlias:
               expr:
                 Eq:
-                  left:
-                    Field: rating
-                  right:
-                    Constant: null
+                  - Field: rating
+                  - Constant: null
               alias: ratingIsNull
           - ExprWithAlias:
               expr:
@@ -870,10 +822,8 @@ tests:
       - Collection: books
       - Where:
           - Eq:
-              left:
-                Field: author
-              right:
-                Constant: Douglas Adams
+              - Field: author
+              - Constant: Douglas Adams
       - Select:
           - ExprWithAlias:
               expr:
@@ -922,10 +872,8 @@ tests:
           - Field: title
       - Where:
           - Eq:
-              left:
-                Field: hugoAward
-              right:
-                Constant: true
+              - Field: hugoAward
+              - Constant: true
     results:
       - hugoAward: true
         title: The Hitchhiker's Guide to the Galaxy
@@ -975,10 +923,8 @@ tests:
       - Collection: books
       - Where:
           - Eq:
-              left:
-                Field: awards.hugo
-              right:
-                Constant: true
+              - Field: awards.hugo
+              - Constant: true
       - Select:
           - title
           - Field: awards.hugo
@@ -992,10 +938,8 @@ tests:
       - Collection: books
       - Where:
           - Eq:
-              left:
-                Field: awards.hugo
-              right:
-                Constant: true
+              - Field: awards.hugo
+              - Constant: true
       - Select:
           - title
           - Field: awards.hugo
@@ -1034,8 +978,9 @@ tests:
     pipeline:
       - Collection: books
       - Sample:
-          - 60
-          - PERCENTAGE
+          - SampleOptions:
+            - 60
+            - PERCENTAGE
     results_num: 6 # Results will vary due to randomness
   - description: testUnion
     pipeline:
@@ -1049,10 +994,8 @@ tests:
       - Collection: books
       - Where:
           - Eq:
-              left:
-                Field: title
-              right:
-                Constant: The Hitchhiker's Guide to the Galaxy
+              - Field: title
+              - Constant: The Hitchhiker's Guide to the Galaxy
       - Unnest: tags
     results:
       - tags: comedy
