@@ -16,6 +16,7 @@ import types
 
 import mock
 
+from datetime import datetime
 from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT
 
 
@@ -266,7 +267,7 @@ def test_add_w_retry_timeout():
     _add_helper(retry=retry, timeout=timeout)
 
 
-def _list_documents_helper(page_size=None, retry=None, timeout=None):
+def _list_documents_helper(page_size=None, retry=None, timeout=None, read_time=None):
     from google.api_core.page_iterator import Iterator, Page
 
     from google.cloud.firestore_v1 import _helpers as _fs_v1_helpers
@@ -299,9 +300,13 @@ def _list_documents_helper(page_size=None, retry=None, timeout=None):
     kwargs = _fs_v1_helpers.make_retry_timeout_kwargs(retry, timeout)
 
     if page_size is not None:
-        documents = list(collection.list_documents(page_size=page_size, **kwargs))
+        documents = list(collection.list_documents(
+            page_size=page_size,
+            **kwargs,
+            read_time=read_time,
+        ))
     else:
-        documents = list(collection.list_documents(**kwargs))
+        documents = list(collection.list_documents(**kwargs, read_time=read_time))
 
     # Verify the response and the mocks.
     assert len(documents) == len(document_ids)
@@ -318,6 +323,7 @@ def _list_documents_helper(page_size=None, retry=None, timeout=None):
             "page_size": page_size,
             "show_missing": True,
             "mask": {"field_paths": None},
+            "read_time": read_time,
         },
         metadata=client._rpc_metadata,
         **kwargs,
@@ -338,6 +344,10 @@ def test_list_documents_w_retry_timeout():
 
 def test_list_documents_w_page_size():
     _list_documents_helper(page_size=25)
+
+
+def test_list_documents_w_read_time():
+    _list_documents_helper(read_time=datetime.now())
 
 
 @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)

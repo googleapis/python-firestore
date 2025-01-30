@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
 import mock
 import pytest
 
@@ -312,13 +313,15 @@ def test_transaction__commit_failure(database):
     )
 
 
-def _transaction_get_all_helper(retry=None, timeout=None):
+def _transaction_get_all_helper(retry=None, timeout=None, read_time=None):
     from google.cloud.firestore_v1 import _helpers
 
     client = mock.Mock(spec=["get_all"])
     transaction = _make_transaction(client)
     ref1, ref2 = mock.Mock(), mock.Mock()
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+    if read_time is not None:
+        kwargs["read_time"] = read_time
 
     result = transaction.get_all([ref1, ref2], **kwargs)
 
@@ -342,10 +345,16 @@ def test_transaction_get_all_w_retry_timeout():
     _transaction_get_all_helper(retry=retry, timeout=timeout)
 
 
+def test_transaction_get_all_w_read_time():
+    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
+    _transaction_get_all_helper(read_time=read_time)
+
+
 def _transaction_get_w_document_ref_helper(
     retry=None,
     timeout=None,
     explain_options=None,
+    read_time=None,
 ):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.document import DocumentReference
@@ -357,6 +366,8 @@ def _transaction_get_w_document_ref_helper(
 
     if explain_options is not None:
         kwargs["explain_options"] = explain_options
+    if read_time is not None:
+        kwargs["read_time"] = read_time
 
     result = transaction.get(ref, **kwargs)
 
@@ -392,6 +403,7 @@ def _transaction_get_w_query_helper(
     retry=None,
     timeout=None,
     explain_options=None,
+    read_time=None,
 ):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.query import Query
@@ -434,6 +446,7 @@ def _transaction_get_w_query_helper(
         query,
         **kwargs,
         explain_options=explain_options,
+        read_time=read_time,
     )
 
     # Verify the response.
@@ -459,6 +472,7 @@ def _transaction_get_w_query_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": b"beep-fail-commit",
+        "read_time": read_time,
     }
     if explain_options is not None:
         request["explain_options"] = explain_options._to_dict()
@@ -487,6 +501,11 @@ def test_transaction_get_w_query_w_explain_options():
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
     _transaction_get_w_query_helper(explain_options=ExplainOptions(analyze=True))
+
+
+def test_transaction_get_w_query_w_read_time():
+    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
+    _transaction_get_w_query_helper(read_time=read_time)
 
 
 @pytest.mark.parametrize("database", [None, "somedb"])

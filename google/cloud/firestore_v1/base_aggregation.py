@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import abc
 from abc import ABC
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Coroutine, List, Optional, Tuple, Union
 
 from google.api_core import gapic_v1
@@ -205,12 +206,14 @@ class BaseAggregationQuery(ABC):
         retry: Union[retries.Retry, retries.AsyncRetry, None, object] = None,
         timeout: float | None = None,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime] = None,
     ) -> Tuple[dict, dict]:
         parent_path, expected_prefix = self._collection_ref._parent_info()
         request = {
             "parent": parent_path,
             "structured_aggregation_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
+            "read_time": read_time,
         }
         if explain_options:
             request["explain_options"] = explain_options._to_dict()
@@ -228,6 +231,7 @@ class BaseAggregationQuery(ABC):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime] = None,
     ) -> (
         QueryResultsList[AggregationResult]
         | Coroutine[Any, Any, List[List[AggregationResult]]]
@@ -253,6 +257,10 @@ class BaseAggregationQuery(ABC):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour,
+                or if Point-in-Time Recovery is enabled, can additionally be a whole minute
+                timestamp within the past 7 days.
 
         Returns:
             (QueryResultsList[List[AggregationResult]] | Coroutine[Any, Any, List[List[AggregationResult]]]):
@@ -270,6 +278,7 @@ class BaseAggregationQuery(ABC):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime] = None,
     ) -> (
         StreamGenerator[List[AggregationResult]]
         | AsyncStreamGenerator[List[AggregationResult]]
@@ -291,6 +300,10 @@ class BaseAggregationQuery(ABC):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour,
+                or if Point-in-Time Recovery is enabled, can additionally be a whole minute
+                timestamp within the past 7 days.
 
         Returns:
             StreamGenerator[List[AggregationResult]] | AsyncStreamGenerator[List[AggregationResult]]:

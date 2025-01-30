@@ -218,6 +218,42 @@ def test_collection_stream_or_get_w_explain_options_analyze_true(
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_collections_w_read_time(client, cleanup, database):
+    first_collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    first_document_id = "doc" + UNIQUE_RESOURCE_ID
+    first_document = client.document(first_collection_id, first_document_id)
+    # Add to clean-up before API request (in case ``create()`` fails).
+    cleanup(first_document.delete)
+
+    data = {
+        "status": "new"
+    }
+    write_result = first_document.create(data)
+    read_time = write_result.update_time
+    num_collections = len(list(client.collections()))
+
+    second_collection_id = "doc-create" + UNIQUE_RESOURCE_ID + "-2"
+    second_document_id = "doc" + UNIQUE_RESOURCE_ID + "-2"
+    second_document = client.document(second_collection_id, second_document_id)
+    cleanup(second_document.delete)
+    second_document.create(data)
+
+    # We're just testing that we added one collection at read_time, not two.
+    collections = list(client.collections(read_time=read_time))
+    assert len(collections) == num_collections
+    ids = [collection.id for collection in collections]
+    assert second_collection_id not in ids
+    assert first_collection_id in ids
+
+    # Test that listing current collections does have the second id.
+    curr_collections = list(client.collections())
+    assert len(curr_collections) == num_collections + 1
+    ids = [collection.id for collection in curr_collections]
+    assert second_collection_id in ids
+    assert first_collection_id in ids
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_create_document(client, cleanup, database):
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
@@ -947,6 +983,32 @@ def test_document_get(client, cleanup, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_document_get_w_read_time(client, cleanup, database):
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
+    document_id = "for-get" + UNIQUE_RESOURCE_ID
+    document = client.document("created", document_id)
+    # Add to clean-up before API request (in case ``create()`` fails).
+    cleanup(document.delete)
+
+    # First make sure it doesn't exist.
+    assert not document.get().exists
+
+    initial_data = {
+        "test": "success"
+    }
+    write_result = document.create(initial_data)
+    read_time = write_result.update_time
+
+    new_data = {
+        "test": "changed"
+    }
+    document.update(new_data)
+
+    snapshot = document.get(read_time=read_time)
+    check_snapshot(snapshot, document, initial_data, write_result)
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_document_delete(client, cleanup, database):
     document_id = "deleted" + UNIQUE_RESOURCE_ID
     document = client.document("here-to-be", document_id)
@@ -1070,6 +1132,31 @@ def test_collection_add(client, cleanup, database):
     }
     assert set(collection2.list_documents()) == {document_ref3, document_ref4}
     assert set(collection3.list_documents()) == {document_ref5}
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_list_collections_with_read_time(client, cleanup, database):
+    # TODO(microgen): list_documents is returning a generator, not a list.
+    # Consider if this is desired. Also, Document isn't hashable.
+    collection_id = "coll-add" + UNIQUE_RESOURCE_ID
+    collection = client.collection(collection_id)
+
+    assert set(collection.list_documents()) == set()
+
+    data1 = {"foo": "bar"}
+    update_time1, document_ref1 = collection.add(data1)
+    cleanup(document_ref1.delete)
+    assert set(collection.list_documents()) == {document_ref1}
+
+    data2 = {"bar": "baz"}
+    update_time2, document_ref2 = collection.add(data2)
+    cleanup(document_ref2.delete)
+    assert set(collection.list_documents()) == {document_ref1, document_ref2}
+    assert set(collection.list_documents(read_time=update_time1)) == {document_ref1}
+    assert set(collection.list_documents(read_time=update_time2)) == {
+        document_ref1,
+        document_ref2,
+    }
 
 
 @pytest.fixture
@@ -1451,6 +1538,41 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_query_stream_w_read_time(query_docs, cleanup, database):
+    collection, stored, allowed_vals = query_docs
+    num_vals = len(allowed_vals)
+
+    # Find the most recent read_time in collections
+    read_time = max(docref.get().read_time for docref in collection.list_documents())
+    new_data = {
+        "a": 9000,
+        "b": 1,
+        "c": [10000, 1000],
+        "stats": {"sum": 9001, "product": 9000},
+    }
+    _, new_ref = collection.add(new_data)
+    # Add to clean-up.
+    cleanup(new_ref.delete)
+    stored[new_ref.id] = new_data
+
+    # Compare query at read_time to query at current time.
+    query = collection.where(filter=FieldFilter("b", "==", 1))
+    values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream(read_time=read_time)}
+    assert len(values) == num_vals
+    assert new_ref.id not in values
+    for key, value in values.items():
+        assert stored[key] == value
+        assert value["b"] == 1
+        assert value["a"] != 9000
+        assert key != new_ref
+
+    new_values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
+    assert len(new_values) == num_vals + 1
+    assert new_ref.id in new_values
+    assert new_values[new_ref.id] == new_data
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_query_with_order_dot_key(client, cleanup, database):
     db = client
     collection_id = "collek" + UNIQUE_RESOURCE_ID
@@ -1760,12 +1882,15 @@ def test_get_all(client, cleanup, database):
     document3 = client.document(collection_name, "c")
     # Add to clean-up before API requests (in case ``create()`` fails).
     cleanup(document1.delete)
+    cleanup(document2.delete)
     cleanup(document3.delete)
 
     data1 = {"a": {"b": 2, "c": 3}, "d": 4, "e": 0}
     write_result1 = document1.create(data1)
     data3 = {"a": {"b": 5, "c": 6}, "d": 7, "e": 100}
     write_result3 = document3.create(data3)
+
+    read_time = write_result3.update_time
 
     # 0. Get 3 unique documents, one of which is missing.
     snapshots = list(client.get_all([document1, document2, document3]))
@@ -1801,6 +1926,26 @@ def test_get_all(client, cleanup, database):
     check_snapshot(snapshot1, document1, restricted1, write_result1)
     restricted3 = {"a": {"b": data3["a"]["b"]}, "d": data3["d"]}
     check_snapshot(snapshot3, document3, restricted3, write_result3)
+
+    # 3. Use ``read_time`` in ``get_all``
+    new_data = {"a": {"b": 8, "c": 9}, "d": 10, "e": 1010}
+    document1.update(new_data)
+    document2.create(new_data)
+    document3.update(new_data)
+    
+
+    snapshots = list(client.get_all([document1, document2, document3], read_time=read_time))
+    assert snapshots[0].exists
+    assert snapshots[1].exists
+    assert not snapshots[2].exists
+
+    snapshots = [snapshot for snapshot in snapshots if snapshot.exists]
+    id_attr = operator.attrgetter("id")
+    snapshots.sort(key=id_attr)
+
+    snapshot1, snapshot3 = snapshots
+    check_snapshot(snapshot1, document1, data1, write_result1)
+    check_snapshot(snapshot3, document3, data3, write_result3)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -2978,6 +3123,45 @@ def test_aggregation_query_stream_or_get_w_explain_options_analyze_false(
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("aggregation_type,expected_value", 
+                         [("count", 5), ("sum", 100), ("avg", 4.0)])
+def test_aggregation_queries_with_read_time(collection, query, cleanup, database, aggregation_type, expected_value):
+    """
+    Ensure that all aggregation queries work when read_time is passed into 
+    a query.<aggregation_type>.().get() method
+    """
+    # Find the most recent read_time in collections
+    read_time = max(docref.get().read_time for docref in collection.list_documents())
+    document_data = {
+        "a": 1,
+        "b": 9000,
+        "c": [1, 123123123],
+        "stats": {"sum": 9001, "product": 9000},
+    }
+
+    _, doc_ref = collection.add(document_data)
+    cleanup(doc_ref.delete)
+
+    if aggregation_type == "count":
+        aggregation_query = query.count()
+    elif aggregation_type == "sum":
+        aggregation_query = collection.sum("stats.product")
+    elif aggregation_type == "avg":
+        aggregation_query = collection.avg("stats.product")
+
+    # Check that adding the new document data affected the results of the aggregation queries.
+    new_result = aggregation_query.get()
+    assert len(new_result) == 1
+    for r in new_result[0]:
+        assert r.value != expected_value
+
+    old_result = aggregation_query.get(read_time=read_time)
+    assert len(old_result) == 1
+    for r in old_result[0]:
+        assert r.value == expected_value
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_query_with_and_composite_filter(collection, database):
     and_filter = And(
         filters=[
@@ -3198,6 +3382,50 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
             assert isinstance(explain_metrics, ExplainMetrics)
             assert explain_metrics.plan_summary is not None
             assert explain_metrics.execution_stats is not None
+
+            inner_fn_ran = True
+
+        in_transaction(transaction)
+        # make sure we didn't skip assertions in inner function
+        assert inner_fn_ran is True
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_query_in_transaction_with_read_time(client, cleanup, database):
+    """
+    Test query profiling in transactions.
+    """
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
+    doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
+    for doc_ref in doc_refs:
+        cleanup(doc_ref.delete)
+    doc_refs[0].create({"a": 1, "b": 2})
+    doc_refs[1].create({"a": 1, "b": 1})
+
+    read_time = max(docref.get().read_time for docref in doc_refs)
+    doc_refs[2].create({"a": 1, "b": 3})
+
+    collection = client.collection(collection_id)
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+
+    with client.transaction() as transaction:
+        # should work when transaction is initiated through transactional decorator
+        @firestore.transactional
+        def in_transaction(transaction):
+            global inner_fn_ran
+
+            new_b_values = [docs.get("b") for docs in transaction.get(query, read_time=read_time)]
+            assert len(new_b_values) == 2
+            assert 1 in new_b_values
+            assert 2 in new_b_values
+            assert 3 not in new_b_values
+
+            new_b_values = [docs.get("b") for docs in transaction.get(query)]
+            assert len(new_b_values) == 3
+            assert 1 in new_b_values
+            assert 2 in new_b_values
+            assert 3 in new_b_values
 
             inner_fn_ran = True
 

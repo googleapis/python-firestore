@@ -25,6 +25,7 @@ In the hierarchy of API concepts
 """
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Generator, Iterable, List, Optional, Union
 
 from google.api_core import gapic_v1
@@ -201,10 +202,12 @@ class Client(BaseClient):
     def get_all(
         self,
         references: list,
-        field_paths: Iterable[str] | None = None,
-        transaction: Transaction | None = None,
+        field_paths: Iterable[str] = None,
+        transaction: Transaction = None,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | None = None,
+        timeout: float = None,
+        *,
+        read_time: Optional[datetime] = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieve a batch of documents.
 
@@ -239,13 +242,17 @@ class Client(BaseClient):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
             query, or :data:`None` if the document does not exist.
         """
         request, reference_map, kwargs = self._prep_get_all(
-            references, field_paths, transaction, retry, timeout
+            references, field_paths, transaction, retry, timeout, read_time
         )
 
         response_iterator = self._firestore_api.batch_get_documents(
@@ -260,7 +267,9 @@ class Client(BaseClient):
     def collections(
         self,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
-        timeout: float | None = None,
+        timeout: float = None,
+        *,
+        read_time: Optional[datetime] = None,
     ) -> Generator[Any, Any, None]:
         """List top-level collections of the client's database.
 
@@ -269,12 +278,16 @@ class Client(BaseClient):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.collection.CollectionReference`]:
                 iterator of subcollections of the current document.
         """
-        request, kwargs = self._prep_collections(retry, timeout)
+        request, kwargs = self._prep_collections(retry, timeout, read_time)
 
         iterator = self._firestore_api.list_collection_ids(
             request=request,

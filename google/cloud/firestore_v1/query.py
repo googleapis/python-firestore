@@ -20,6 +20,7 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
+from datetime import datetime
 from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Type
 
 from google.api_core import exceptions, gapic_v1
@@ -141,6 +142,7 @@ class Query(BaseQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime] = None,
     ) -> QueryResultsList[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
@@ -162,6 +164,10 @@ class Query(BaseQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
 
         Returns:
             QueryResultsList[DocumentSnapshot]: The documents in the collection
@@ -188,6 +194,7 @@ class Query(BaseQuery):
             retry=retry,
             timeout=timeout,
             explain_options=explain_options,
+            read_time=read_time,
         )
         result_list = list(result)
         if is_limited_to_last:
@@ -238,13 +245,14 @@ class Query(BaseQuery):
             ):
                 return
 
-    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
+    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None, read_time=None):
         """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
             retry,
             timeout,
             explain_options,
+            read_time,
         )
 
         response_iterator = self._client._firestore_api.run_query(
@@ -353,6 +361,7 @@ class Query(BaseQuery):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime] = None,
     ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
@@ -386,6 +395,10 @@ class Query(BaseQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
 
         Yields:
             DocumentSnapshot:
@@ -402,6 +415,7 @@ class Query(BaseQuery):
             retry,
             timeout,
             explain_options,
+            read_time,
         )
 
         last_snapshot = None
@@ -416,6 +430,7 @@ class Query(BaseQuery):
                         transaction,
                         retry,
                         timeout,
+                        read_time=read_time,
                     )
                     continue
                 else:
@@ -448,6 +463,7 @@ class Query(BaseQuery):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime] = None,
     ) -> StreamGenerator[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
@@ -479,6 +495,10 @@ class Query(BaseQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
 
         Returns:
             `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
@@ -488,6 +508,7 @@ class Query(BaseQuery):
             retry=retry,
             timeout=timeout,
             explain_options=explain_options,
+            read_time=read_time,
         )
         return StreamGenerator(inner_generator, explain_options)
 
@@ -580,6 +601,8 @@ class CollectionGroup(Query, BaseCollectionGroup):
         partition_count,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
+        *,
+        read_time: Optional[datetime] = None
     ) -> Generator[QueryPartition, None, None]:
         """Partition a query for parallelization.
 
@@ -595,8 +618,12 @@ class CollectionGroup(Query, BaseCollectionGroup):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
         """
-        request, kwargs = self._prep_get_partitions(partition_count, retry, timeout)
+        request, kwargs = self._prep_get_partitions(partition_count, retry, timeout, read_time)
 
         pager = self._client._firestore_api.partition_query(
             request=request,

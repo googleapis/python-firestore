@@ -16,6 +16,7 @@
 import mock
 import pytest
 
+from proto.datetime_helpers import DatetimeWithNanoseconds
 from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT
 
 
@@ -393,6 +394,7 @@ def _get_helper(
     retry=None,
     timeout=None,
     database=None,
+    read_time=None,
 ):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.transaction import Transaction
@@ -401,10 +403,10 @@ def _get_helper(
     # Create a minimal fake GAPIC with a dummy response.
     create_time = 123
     update_time = 234
-    read_time = 345
+    response_read_time = read_time.timestamp_pb() if read_time else 345
     firestore_api = mock.Mock(spec=["batch_get_documents"])
     response = mock.create_autospec(firestore.BatchGetDocumentsResponse)
-    response.read_time = read_time
+    response.read_time = response_read_time
     response.found = mock.create_autospec(document.Document)
     response.found.fields = {}
     response.found.create_time = create_time
@@ -435,7 +437,10 @@ def _get_helper(
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     snapshot = document_reference.get(
-        field_paths=field_paths, transaction=transaction, **kwargs
+        field_paths=field_paths,
+        transaction=transaction,
+        **kwargs,
+        read_time=read_time,
     )
 
     assert snapshot.reference is document_reference
@@ -448,7 +453,7 @@ def _get_helper(
     else:
         assert snapshot.to_dict() == {}
         assert snapshot.exists
-        assert snapshot.read_time is read_time
+        assert snapshot.read_time is response_read_time
         assert snapshot.create_time is create_time
         assert snapshot.update_time is update_time
 
@@ -469,6 +474,7 @@ def _get_helper(
             "documents": [document_reference._document_path],
             "mask": mask,
             "transaction": expected_transaction_id,
+            "read_time": read_time,
         },
         metadata=client._rpc_metadata,
         **kwargs,
@@ -519,8 +525,18 @@ def test_documentreference_get_with_multiple_field_paths(database):
 def test_documentreference_get_with_transaction(database):
     _get_helper(use_transaction=True, database=database)
 
+@pytest.mark.parametrize("database", [None, "somedb"])
+def test_documentreference_get_with_read_time(database):
+    _get_helper(read_time=DatetimeWithNanoseconds.now(), database=database)
 
-def _collections_helper(page_size=None, retry=None, timeout=None, database=None):
+
+def _collections_helper(
+    page_size=None,
+    retry=None,
+    timeout=None,
+    read_time=None,
+    database=None
+):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.collection import CollectionReference
     from google.cloud.firestore_v1.services.firestore.client import FirestoreClient
@@ -541,9 +557,9 @@ def _collections_helper(page_size=None, retry=None, timeout=None, database=None)
     # Actually make a document and call delete().
     document = _make_document_reference("where", "we-are", client=client)
     if page_size is not None:
-        collections = list(document.collections(page_size=page_size, **kwargs))
+        collections = list(document.collections(page_size=page_size, **kwargs, read_time=read_time))
     else:
-        collections = list(document.collections(**kwargs))
+        collections = list(document.collections(**kwargs, read_time=read_time))
 
     # Verify the response and the mocks.
     assert len(collections) == len(collection_ids)
@@ -553,7 +569,11 @@ def _collections_helper(page_size=None, retry=None, timeout=None, database=None)
         assert collection.id == collection_id
 
     api_client.list_collection_ids.assert_called_once_with(
-        request={"parent": document._document_path, "page_size": page_size},
+        request={
+            "parent": document._document_path, 
+            "page_size": page_size,
+            "read_time": read_time,
+        },
         metadata=client._rpc_metadata,
         **kwargs,
     )
@@ -576,6 +596,11 @@ def test_documentreference_collections_w_retry_timeout(database):
     retry = Retry(predicate=object())
     timeout = 123.0
     _collections_helper(retry=retry, timeout=timeout, database=database)
+
+
+@pytest.mark.parametrize("database", [None, "somedb"])
+def test_documentreference_collections_w_page_size(database):
+    _collections_helper(read_time=DatetimeWithNanoseconds.now(), database=database)
 
 
 @mock.patch("google.cloud.firestore_v1.document.Watch", autospec=True)

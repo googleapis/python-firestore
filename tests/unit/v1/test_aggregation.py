@@ -327,6 +327,7 @@ def test_aggregation_query_prep_stream():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
+        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -353,6 +354,7 @@ def test_aggregation_query_prep_stream_with_transaction():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": txn_id,
+        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -379,6 +381,7 @@ def test_aggregation_query_prep_stream_with_explain_options():
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
         "explain_options": explain_options._to_dict(),
+        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -387,8 +390,9 @@ def test_aggregation_query_prep_stream_with_explain_options():
 def _aggregation_query_get_helper(
     retry=None,
     timeout=None,
-    read_time=None,
     explain_options=None,
+    response_read_time=None,
+    query_read_time=None,
 ):
     from google.cloud._helpers import _datetime_to_pb_timestamp
 
@@ -411,7 +415,7 @@ def _aggregation_query_get_helper(
     aggregation_query = make_aggregation_query(query)
     aggregation_query.count(alias="all")
 
-    aggregation_result = AggregationResult(alias="total", value=5, read_time=read_time)
+    aggregation_result = AggregationResult(alias="total", value=5, read_time=response_read_time)
 
     if explain_options is not None:
         explain_metrics = {"execution_stats": {"results_returned": 1}}
@@ -419,14 +423,18 @@ def _aggregation_query_get_helper(
         explain_metrics = None
     response_pb = make_aggregation_query_response(
         [aggregation_result],
-        read_time=read_time,
+        read_time=response_read_time,
         explain_metrics=explain_metrics,
     )
     firestore_api.run_aggregation_query.return_value = iter([response_pb])
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     # Execute the query and check the response.
-    returned = aggregation_query.get(**kwargs, explain_options=explain_options)
+    returned = aggregation_query.get(
+        **kwargs,
+        explain_options=explain_options,
+        read_time=query_read_time,
+    )
     assert isinstance(returned, QueryResultsList)
     assert len(returned) == 1
 
@@ -434,9 +442,9 @@ def _aggregation_query_get_helper(
         for r in result:
             assert r.alias == aggregation_result.alias
             assert r.value == aggregation_result.value
-            if read_time is not None:
+            if response_read_time is not None:
                 result_datetime = _datetime_to_pb_timestamp(r.read_time)
-                assert result_datetime == read_time
+                assert result_datetime == response_read_time
 
     assert returned._explain_options == explain_options
     assert returned.explain_options == explain_options
@@ -454,6 +462,7 @@ def _aggregation_query_get_helper(
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
+        "read_time": query_read_time,
     }
     if explain_options is not None:
         expected_request["explain_options"] = explain_options._to_dict()
@@ -473,9 +482,9 @@ def test_aggregation_query_get():
 def test_aggregation_query_get_with_readtime():
     from google.cloud._helpers import _datetime_to_pb_timestamp
 
-    one_hour_ago = datetime.now(tz=timezone.utc) - timedelta(hours=1)
-    read_time = _datetime_to_pb_timestamp(one_hour_ago)
-    _aggregation_query_get_helper(read_time=read_time)
+    query_read_time = datetime.now(tz=timezone.utc) - timedelta(hours=1)
+    response_read_time = _datetime_to_pb_timestamp(query_read_time)
+    _aggregation_query_get_helper(response_read_time=response_read_time, query_read_time=query_read_time)
 
 
 def test_aggregation_query_get_retry_timeout():
@@ -535,6 +544,7 @@ def test_aggregation_query_get_transaction():
             "parent": parent_path,
             "structured_aggregation_query": aggregation_query._to_protobuf(),
             "transaction": txn_id,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
         **kwargs,
@@ -555,6 +565,7 @@ def _aggregation_query_stream_w_retriable_exc_helper(
     timeout=None,
     transaction=None,
     expect_retry=True,
+    read_time=None,
 ):
     from google.api_core import exceptions, gapic_v1
 
@@ -634,6 +645,7 @@ def _aggregation_query_stream_w_retriable_exc_helper(
             "parent": parent_path,
             "structured_aggregation_query": aggregation_query._to_protobuf(),
             "transaction": expected_transaction_id,
+            "read_time": read_time,
         },
         metadata=client._rpc_metadata,
         **kwargs,
@@ -645,6 +657,7 @@ def _aggregation_query_stream_w_retriable_exc_helper(
                 "parent": parent_path,
                 "structured_aggregation_query": aggregation_query._to_protobuf(),
                 "transaction": None,
+                "read_time": read_time,
             },
             metadata=client._rpc_metadata,
             **kwargs,
@@ -713,7 +726,11 @@ def _aggregation_query_stream_helper(
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     # Execute the query and check the response.
-    returned = aggregation_query.stream(**kwargs, explain_options=explain_options)
+    returned = aggregation_query.stream(
+        **kwargs,
+        explain_options=explain_options,
+        read_time=read_time
+    )
     assert isinstance(returned, StreamGenerator)
 
     results = []
@@ -740,6 +757,7 @@ def _aggregation_query_stream_helper(
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
+        "read_time": read_time,
     }
     if explain_options is not None:
         expected_request["explain_options"] = explain_options._to_dict()
@@ -756,7 +774,7 @@ def test_aggregation_query_stream():
     _aggregation_query_stream_helper()
 
 
-def test_aggregation_query_stream_with_readtime():
+def test_aggregation_query_stream_w_read_time():
     from google.cloud._helpers import _datetime_to_pb_timestamp
 
     one_hour_ago = datetime.now(tz=timezone.utc) - timedelta(hours=1)
@@ -830,6 +848,7 @@ def test_aggregation_from_query():
                 "parent": parent_path,
                 "structured_aggregation_query": aggregation_query._to_protobuf(),
                 "transaction": txn_id,
+                "read_time": None,
             },
             metadata=client._rpc_metadata,
             **kwargs,

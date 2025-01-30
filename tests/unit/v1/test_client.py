@@ -281,7 +281,7 @@ def test_client_document_factory_w_nested_path(database):
     assert isinstance(document2, DocumentReference)
 
 
-def _collections_helper(retry=None, timeout=None, database=None):
+def _collections_helper(retry=None, timeout=None, database=None, read_time=None):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.collection import CollectionReference
 
@@ -298,7 +298,7 @@ def _collections_helper(retry=None, timeout=None, database=None):
     client._firestore_api_internal = firestore_api
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
-    collections = list(client.collections(**kwargs))
+    collections = list(client.collections(read_time=read_time, **kwargs))
 
     assert len(collections) == len(collection_ids)
     for collection, collection_id in zip(collections, collection_ids):
@@ -308,7 +308,10 @@ def _collections_helper(retry=None, timeout=None, database=None):
 
     base_path = client._database_string + "/documents"
     firestore_api.list_collection_ids.assert_called_once_with(
-        request={"parent": base_path},
+        request={
+            "parent": base_path,
+            "read_time": read_time,
+        },
         metadata=client._rpc_metadata,
         **kwargs,
     )
@@ -328,6 +331,12 @@ def test_client_collections_w_retry_timeout(database):
     _collections_helper(retry=retry, timeout=timeout, database=database)
 
 
+@pytest.mark.parametrize("database", [None, DEFAULT_DATABASE, "somedb"])
+def test_client_collections_read_time(database):
+    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
+    _collections_helper(database=database, read_time=read_time)
+
+
 def _invoke_get_all(client, references, document_pbs, **kwargs):
     # Create a minimal fake GAPIC with a dummy response.
     firestore_api = mock.Mock(spec=["batch_get_documents"])
@@ -345,7 +354,7 @@ def _invoke_get_all(client, references, document_pbs, **kwargs):
 
 
 def _get_all_helper(
-    num_snapshots=2, txn_id=None, retry=None, timeout=None, database=None
+    num_snapshots=2, txn_id=None, retry=None, timeout=None, database=None, read_time=None
 ):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.async_document import DocumentSnapshot
@@ -384,6 +393,7 @@ def _get_all_helper(
         documents,
         responses,
         field_paths=field_paths,
+        read_time=read_time,
         **kwargs,
     )
 
@@ -409,6 +419,7 @@ def _get_all_helper(
             "documents": doc_paths,
             "mask": mask,
             "transaction": txn_id,
+            "read_time": read_time,
         },
         metadata=client._rpc_metadata,
         **kwargs,
@@ -441,6 +452,12 @@ def test_client_get_all_wrong_order(database):
 
 
 @pytest.mark.parametrize("database", [None, DEFAULT_DATABASE, "somedb"])
+def test_client_get_all_read_time(database):
+    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
+    _get_all_helper(database=database, read_time=read_time)
+
+
+@pytest.mark.parametrize("database", [None, DEFAULT_DATABASE, "somedb"])
 def test_client_get_all_unknown_result(database):
     from google.cloud.firestore_v1.base_client import _BAD_DOC_TEMPLATE
 
@@ -468,6 +485,7 @@ def test_client_get_all_unknown_result(database):
             "documents": doc_paths,
             "mask": None,
             "transaction": None,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )

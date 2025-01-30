@@ -26,6 +26,7 @@ In the hierarchy of API concepts
 from __future__ import annotations
 
 import os
+from datetime import datetime
 from typing import (
     Any,
     AsyncGenerator,
@@ -437,6 +438,7 @@ class BaseClient(ClientWithProject):
         transaction: BaseTransaction | None = None,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
+        read_time: datetime | None = None,
     ) -> Tuple[dict, dict, dict]:
         """Shared setup for async/sync :meth:`get_all`."""
         document_paths, reference_map = _reference_info(references)
@@ -446,6 +448,7 @@ class BaseClient(ClientWithProject):
             "documents": document_paths,
             "mask": mask,
             "transaction": _helpers.get_transaction_id(transaction),
+            "read_time": read_time,
         }
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
@@ -458,6 +461,8 @@ class BaseClient(ClientWithProject):
         transaction=None,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
+        *,
+        read_time: datetime | None = None
     ) -> Union[
         AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
     ]:
@@ -467,9 +472,13 @@ class BaseClient(ClientWithProject):
         self,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
+        read_time: datetime | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
-        request = {"parent": "{}/documents".format(self._database_string)}
+        request = {
+            "parent": "{}/documents".format(self._database_string),
+            "read_time": read_time,
+        }
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
@@ -478,6 +487,8 @@ class BaseClient(ClientWithProject):
         self,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
+        *,
+        read_time: datetime | None = None,
     ):
         raise NotImplementedError
 
