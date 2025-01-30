@@ -740,6 +740,38 @@ def test_create_document_w_subcollection(client, cleanup, database):
     assert sorted(child.id for child in children) == sorted(child_ids)
 
 
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_document_collections_w_read_time(client, cleanup, database):
+    collection_id = "doc-create-sub" + UNIQUE_RESOURCE_ID
+    document_id = "doc" + UNIQUE_RESOURCE_ID
+    document = client.document(collection_id, document_id)
+    # Add to clean-up before API request (in case ``create()`` fails).
+    cleanup(document.delete)
+
+    data = {"now": firestore.SERVER_TIMESTAMP}
+    document.create(data)
+
+    original_child_ids = ["child1", "child2"]
+    read_time = None
+
+    for child_id in original_child_ids:
+        subcollection = document.collection(child_id)
+        update_time, subdoc = subcollection.add({"foo": "bar"})
+        read_time = update_time if read_time is None or update_time > read_time else read_time
+        cleanup(subdoc.delete)
+    
+    update_time, newdoc = document.collection("child3").add({"foo": "bar"})
+    cleanup(newdoc.delete)
+    assert update_time > read_time
+
+    # Compare the query at read_time to the query at new update time.
+    original_children = document.collections(read_time=read_time)
+    assert sorted(child.id for child in original_children) == sorted(original_child_ids)
+
+    original_children = document.collections()
+    assert sorted(child.id for child in original_children) == sorted(original_child_ids + ["child3"])
+
+
 def assert_timestamp_less(timestamp_pb1, timestamp_pb2):
     assert timestamp_pb1 < timestamp_pb2
 
