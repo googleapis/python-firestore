@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import datetime
 import os
+from datetime import datetime
 from typing import (
     Any,
     AsyncGenerator,
@@ -448,6 +449,7 @@ class BaseClient(ClientWithProject):
             "documents": document_paths,
             "mask": mask,
             "transaction": _helpers.get_transaction_id(transaction),
+            "read_time": read_time,
         }
         if read_time is not None:
             request["read_time"] = read_time

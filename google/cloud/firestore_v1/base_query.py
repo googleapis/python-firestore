@@ -1060,6 +1060,7 @@ class BaseQuery(object):
             "parent": parent_path,
             "structured_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
+            "read_time": read_time,
         }
         if explain_options is not None:
             request["explain_options"] = explain_options._to_dict()
@@ -1449,6 +1450,7 @@ class BaseCollectionGroup(BaseQuery):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "partition_count": partition_count,
+            "read_time": read_time,
         }
         if read_time is not None:
             request["read_time"] = read_time

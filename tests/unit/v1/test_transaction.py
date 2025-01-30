@@ -472,6 +472,7 @@ def _transaction_get_w_query_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": b"beep-fail-commit",
+        "read_time": read_time,
     }
     if explain_options is not None:
         request["explain_options"] = explain_options._to_dict()

@@ -96,6 +96,7 @@ def _query_get_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": None,
+        "read_time": read_time,
     }
     if explain_options:
         request["explain_options"] = explain_options._to_dict()
@@ -178,6 +179,7 @@ def test_query_get_limit_to_last(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -379,9 +381,7 @@ def _query_stream_helper(
     # Execute the query and check the response.
     query = make_query(parent)
 
-    get_response = query.stream(
-        **kwargs, explain_options=explain_options, read_time=read_time
-    )
+    get_response = query.stream(**kwargs, explain_options=explain_options, read_time=read_time)
 
     assert isinstance(get_response, StreamGenerator)
     returned = list(get_response)
@@ -405,6 +405,7 @@ def _query_stream_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": None,
+        "read_time": read_time,
     }
     if explain_options is not None:
         request["explain_options"] = explain_options._to_dict()
@@ -499,64 +500,6 @@ def test_query_stream_with_transaction(database):
     )
 
 
-def test_query_stream_w_explain_options():
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
-
-    explain_options = ExplainOptions(analyze=True)
-    _query_stream_helper(explain_options=explain_options)
-
-
-@pytest.mark.parametrize("database", [None, "somedb"])
-def test_query_stream_with_transaction_and_read_time(database):
-    from google.cloud.firestore_v1.stream_generator import StreamGenerator
-
-    # Create a minimal fake GAPIC.
-    firestore_api = mock.Mock(spec=["run_query"])
-
-    # Attach the fake GAPIC to a real client.
-    client = make_client(database=database)
-    client._firestore_api_internal = firestore_api
-
-    # Create a real-ish transaction for this client.
-    transaction = client.transaction()
-    txn_id = b"\x00\x00\x01-work-\xf2"
-    transaction._id = txn_id
-
-    # Create a read_time for this client.
-    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
-
-    # Make a **real** collection reference as parent.
-    parent = client.collection("declaration")
-
-    # Add a dummy response to the minimal fake GAPIC.
-    parent_path, expected_prefix = parent._parent_info()
-    name = "{}/burger".format(expected_prefix)
-    data = {"lettuce": b"\xee\x87"}
-    response_pb = _make_query_response(name=name, data=data)
-    firestore_api.run_query.return_value = iter([response_pb])
-
-    # Execute the query and check the response.
-    query = make_query(parent)
-    get_response = query.stream(transaction=transaction, read_time=read_time)
-    assert isinstance(get_response, StreamGenerator)
-    returned = list(get_response)
-    assert len(returned) == 1
-    snapshot = returned[0]
-    assert snapshot.reference._path == ("declaration", "burger")
-    assert snapshot.to_dict() == data
-
-    # Verify the mock call.
-    firestore_api.run_query.assert_called_once_with(
-        request={
-            "parent": parent_path,
-            "structured_query": query._to_protobuf(),
-            "transaction": txn_id,
-            "read_time": read_time,
-        },
-        metadata=client._rpc_metadata,
-    )
-
-
 @pytest.mark.parametrize("database", [None, "somedb"])
 def test_query_stream_no_results(database):
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
@@ -587,6 +530,7 @@ def test_query_stream_no_results(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -622,6 +566,7 @@ def test_query_stream_second_response_in_empty_stream(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -666,6 +611,7 @@ def test_query_stream_with_skipped_results(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -710,6 +656,7 @@ def test_query_stream_empty_after_first_response(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -757,6 +704,7 @@ def test_query_stream_w_collection_group(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -767,12 +715,7 @@ _not_passed = object()
 
 
 def _query_stream_w_retriable_exc_helper(
-    retry=_not_passed,
-    timeout=None,
-    transaction=None,
-    expect_retry=True,
-    database=None,
-    read_time=None,
+    retry=_not_passed, timeout=None, transaction=None, expect_retry=True, database=None, read_time=None
 ):
     from google.api_core import exceptions, gapic_v1
 
@@ -930,9 +873,7 @@ def test_collection_group_constructor_all_descendents_is_false():
         _make_collection_group(mock.sentinel.parent, all_descendants=False)
 
 
-def _collection_group_get_partitions_helper(
-    retry=None, timeout=None, database=None, read_time=None
-):
+def _collection_group_get_partitions_helper(retry=None, timeout=None, database=None, read_time=None):
     from google.cloud.firestore_v1 import _helpers
 
     # Create a minimal fake GAPIC.

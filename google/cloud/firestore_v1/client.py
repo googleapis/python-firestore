@@ -203,8 +203,8 @@ class Client(BaseClient):
     def get_all(
         self,
         references: list,
-        field_paths: Iterable[str] | None = None,
-        transaction: Transaction | None = None,
+        field_paths: Iterable[str] = None,
+        transaction: Transaction = None,
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,

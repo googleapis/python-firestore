@@ -225,7 +225,9 @@ def test_collections_w_read_time(client, cleanup, database):
     # Add to clean-up before API request (in case ``create()`` fails).
     cleanup(first_document.delete)
 
-    data = {"status": "new"}
+    data = {
+        "status": "new"
+    }
     write_result = first_document.create(data)
     read_time = write_result.update_time
     num_collections = len(list(client.collections()))
@@ -1018,6 +1020,7 @@ def test_document_get(client, cleanup, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_document_get_w_read_time(client, cleanup, database):
+    now = datetime.datetime.now(tz=datetime.timezone.utc)
     document_id = "for-get" + UNIQUE_RESOURCE_ID
     document = client.document("created", document_id)
     # Add to clean-up before API request (in case ``create()`` fails).
@@ -1026,11 +1029,15 @@ def test_document_get_w_read_time(client, cleanup, database):
     # First make sure it doesn't exist.
     assert not document.get().exists
 
-    initial_data = {"test": "success"}
+    initial_data = {
+        "test": "success"
+    }
     write_result = document.create(initial_data)
     read_time = write_result.update_time
 
-    new_data = {"test": "changed"}
+    new_data = {
+        "test": "changed"
+    }
     document.update(new_data)
 
     snapshot = document.get(read_time=read_time)
@@ -1586,10 +1593,7 @@ def test_query_stream_w_read_time(query_docs, cleanup, database):
 
     # Compare query at read_time to query at current time.
     query = collection.where(filter=FieldFilter("b", "==", 1))
-    values = {
-        snapshot.id: snapshot.to_dict()
-        for snapshot in query.stream(read_time=read_time)
-    }
+    values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream(read_time=read_time)}
     assert len(values) == num_vals
     assert new_ref.id not in values
     for key, value in values.items():
@@ -1964,10 +1968,9 @@ def test_get_all(client, cleanup, database):
     document1.update(new_data)
     document2.create(new_data)
     document3.update(new_data)
+    
 
-    snapshots = list(
-        client.get_all([document1, document2, document3], read_time=read_time)
-    )
+    snapshots = list(client.get_all([document1, document2, document3], read_time=read_time))
     assert snapshots[0].exists
     assert snapshots[1].exists
     assert not snapshots[2].exists
@@ -3156,14 +3159,11 @@ def test_aggregation_query_stream_or_get_w_explain_options_analyze_false(
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-@pytest.mark.parametrize(
-    "aggregation_type,expected_value", [("count", 5), ("sum", 100), ("avg", 4.0)]
-)
-def test_aggregation_queries_with_read_time(
-    collection, query, cleanup, database, aggregation_type, expected_value
-):
+@pytest.mark.parametrize("aggregation_type,expected_value", 
+                         [("count", 5), ("sum", 100), ("avg", 4.0)])
+def test_aggregation_queries_with_read_time(collection, query, cleanup, database, aggregation_type, expected_value):
     """
-    Ensure that all aggregation queries work when read_time is passed into
+    Ensure that all aggregation queries work when read_time is passed into 
     a query.<aggregation_type>.().get() method
     """
     # Find the most recent read_time in collections
@@ -3440,6 +3440,50 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
             assert isinstance(explain_metrics, ExplainMetrics)
             assert explain_metrics.plan_summary is not None
             assert explain_metrics.execution_stats is not None
+
+            inner_fn_ran = True
+
+        in_transaction(transaction)
+        # make sure we didn't skip assertions in inner function
+        assert inner_fn_ran is True
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_query_in_transaction_with_read_time(client, cleanup, database):
+    """
+    Test query profiling in transactions.
+    """
+    collection_id = "doc-create" + UNIQUE_RESOURCE_ID
+    doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
+    doc_refs = [client.document(collection_id, doc_id) for doc_id in doc_ids]
+    for doc_ref in doc_refs:
+        cleanup(doc_ref.delete)
+    doc_refs[0].create({"a": 1, "b": 2})
+    doc_refs[1].create({"a": 1, "b": 1})
+
+    read_time = max(docref.get().read_time for docref in doc_refs)
+    doc_refs[2].create({"a": 1, "b": 3})
+
+    collection = client.collection(collection_id)
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+
+    with client.transaction() as transaction:
+        # should work when transaction is initiated through transactional decorator
+        @firestore.transactional
+        def in_transaction(transaction):
+            global inner_fn_ran
+
+            new_b_values = [docs.get("b") for docs in transaction.get(query, read_time=read_time)]
+            assert len(new_b_values) == 2
+            assert 1 in new_b_values
+            assert 2 in new_b_values
+            assert 3 not in new_b_values
+
+            new_b_values = [docs.get("b") for docs in transaction.get(query)]
+            assert len(new_b_values) == 3
+            assert 1 in new_b_values
+            assert 2 in new_b_values
+            assert 3 in new_b_values
 
             inner_fn_ran = True
 

@@ -246,9 +246,7 @@ class Query(BaseQuery):
             ):
                 return
 
-    def _get_stream_iterator(
-        self, transaction, retry, timeout, explain_options=None, read_time=None
-    ):
+    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None, read_time=None):
         """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
@@ -626,9 +624,7 @@ class CollectionGroup(Query, BaseCollectionGroup):
                 if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
                 within the past 7 days. For the most accurate results, use UTC timezone.
         """
-        request, kwargs = self._prep_get_partitions(
-            partition_count, retry, timeout, read_time
-        )
+        request, kwargs = self._prep_get_partitions(partition_count, retry, timeout, read_time)
 
         pager = self._client._firestore_api.partition_query(
             request=request,

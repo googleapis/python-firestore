@@ -329,6 +329,7 @@ def test_aggregation_query_prep_stream():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
+        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -355,6 +356,7 @@ def test_aggregation_query_prep_stream_with_transaction():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": txn_id,
+        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -381,6 +383,7 @@ def test_aggregation_query_prep_stream_with_explain_options():
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
         "explain_options": explain_options._to_dict(),
+        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -476,9 +479,7 @@ def _aggregation_query_get_helper(
     aggregation_query = make_aggregation_query(query)
     aggregation_query.count(alias="all")
 
-    aggregation_result = AggregationResult(
-        alias="total", value=5, read_time=response_read_time
-    )
+    aggregation_result = AggregationResult(alias="total", value=5, read_time=response_read_time)
 
     if explain_options is not None:
         explain_metrics = {"execution_stats": {"results_returned": 1}}
@@ -525,6 +526,7 @@ def _aggregation_query_get_helper(
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
+        "read_time": query_read_time,
     }
     if explain_options is not None:
         expected_request["explain_options"] = explain_options._to_dict()
@@ -548,9 +550,7 @@ def test_aggregation_query_get_with_readtime():
 
     query_read_time = datetime.now(tz=timezone.utc) - timedelta(hours=1)
     response_read_time = _datetime_to_pb_timestamp(query_read_time)
-    _aggregation_query_get_helper(
-        response_read_time=response_read_time, query_read_time=query_read_time
-    )
+    _aggregation_query_get_helper(response_read_time=response_read_time, query_read_time=query_read_time)
 
 
 def test_aggregation_query_get_retry_timeout():
@@ -610,6 +610,7 @@ def test_aggregation_query_get_transaction():
             "parent": parent_path,
             "structured_aggregation_query": aggregation_query._to_protobuf(),
             "transaction": txn_id,
+            "read_time": None,
         },
         metadata=client._rpc_metadata,
         **kwargs,
@@ -797,7 +798,9 @@ def _aggregation_query_stream_helper(
 
     # Execute the query and check the response.
     returned = aggregation_query.stream(
-        **kwargs, explain_options=explain_options, read_time=read_time
+        **kwargs,
+        explain_options=explain_options,
+        read_time=read_time
     )
     assert isinstance(returned, StreamGenerator)
 
@@ -825,6 +828,7 @@ def _aggregation_query_stream_helper(
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
+        "read_time": read_time,
     }
     if explain_options is not None:
         expected_request["explain_options"] = explain_options._to_dict()
@@ -917,6 +921,7 @@ def test_aggregation_from_query():
                 "parent": parent_path,
                 "structured_aggregation_query": aggregation_query._to_protobuf(),
                 "transaction": txn_id,
+                "read_time": None,
             },
             metadata=client._rpc_metadata,
             **kwargs,
