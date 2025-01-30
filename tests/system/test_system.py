@@ -1018,7 +1018,6 @@ def test_document_get(client, cleanup, database):
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_document_get_w_read_time(client, cleanup, database):
-    now = datetime.datetime.now(tz=datetime.timezone.utc)
     document_id = "for-get" + UNIQUE_RESOURCE_ID
     document = client.document("created", document_id)
     # Add to clean-up before API request (in case ``create()`` fails).

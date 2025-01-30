@@ -598,7 +598,7 @@ def test_documentreference_collections_w_retry_timeout(database):
 
 
 @pytest.mark.parametrize("database", [None, "somedb"])
-def test_documentreference_collections_w_page_size(database):
+def test_documentreference_collections_w_read_time(database):
     _collections_helper(read_time=DatetimeWithNanoseconds.now(), database=database)
 
 
