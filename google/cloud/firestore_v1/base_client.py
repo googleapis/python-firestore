@@ -462,7 +462,7 @@ class BaseClient(ClientWithProject):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
         *,
-        read_time: datetime | None = None
+        read_time: datetime | None = None,
     ) -> Union[
         AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
     ]:

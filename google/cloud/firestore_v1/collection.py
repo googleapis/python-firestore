@@ -162,7 +162,9 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 collection does not exist at the time of `snapshot`, the
                 iterator will be empty
         """
-        request, kwargs = self._prep_list_documents(page_size, retry, timeout, read_time)
+        request, kwargs = self._prep_list_documents(
+            page_size, retry, timeout, read_time
+        )
 
         iterator = self._client._firestore_api.list_documents(
             request=request,

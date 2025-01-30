@@ -525,17 +525,14 @@ def test_documentreference_get_with_multiple_field_paths(database):
 def test_documentreference_get_with_transaction(database):
     _get_helper(use_transaction=True, database=database)
 
+
 @pytest.mark.parametrize("database", [None, "somedb"])
 def test_documentreference_get_with_read_time(database):
     _get_helper(read_time=DatetimeWithNanoseconds.now(), database=database)
 
 
 def _collections_helper(
-    page_size=None,
-    retry=None,
-    timeout=None,
-    read_time=None,
-    database=None
+    page_size=None, retry=None, timeout=None, read_time=None, database=None
 ):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.collection import CollectionReference
@@ -557,7 +554,9 @@ def _collections_helper(
     # Actually make a document and call delete().
     document = _make_document_reference("where", "we-are", client=client)
     if page_size is not None:
-        collections = list(document.collections(page_size=page_size, **kwargs, read_time=read_time))
+        collections = list(
+            document.collections(page_size=page_size, **kwargs, read_time=read_time)
+        )
     else:
         collections = list(document.collections(**kwargs, read_time=read_time))
 
@@ -570,7 +569,7 @@ def _collections_helper(
 
     api_client.list_collection_ids.assert_called_once_with(
         request={
-            "parent": document._document_path, 
+            "parent": document._document_path,
             "page_size": page_size,
             "read_time": read_time,
         },

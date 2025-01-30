@@ -404,7 +404,9 @@ class DocumentReference(BaseDocumentReference):
         """
         from google.cloud.firestore_v1.base_client import _parse_batch_get
 
-        request, kwargs = self._prep_batch_get(field_paths, transaction, retry, timeout, read_time)
+        request, kwargs = self._prep_batch_get(
+            field_paths, transaction, retry, timeout, read_time
+        )
 
         response_iter = self._client._firestore_api.batch_get_documents(
             request=request,

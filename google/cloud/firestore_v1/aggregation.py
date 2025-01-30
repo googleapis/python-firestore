@@ -107,7 +107,9 @@ class AggregationQuery(BaseAggregationQuery):
 
         return QueryResultsList(result_list, explain_options, explain_metrics)
 
-    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None, read_time=None):
+    def _get_stream_iterator(
+        self, transaction, retry, timeout, explain_options=None, read_time=None
+    ):
         """Helper method for :meth:`stream`."""
         request, kwargs = self._prep_stream(
             transaction,

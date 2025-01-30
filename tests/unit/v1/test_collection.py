@@ -300,11 +300,13 @@ def _list_documents_helper(page_size=None, retry=None, timeout=None, read_time=N
     kwargs = _fs_v1_helpers.make_retry_timeout_kwargs(retry, timeout)
 
     if page_size is not None:
-        documents = list(collection.list_documents(
-            page_size=page_size,
-            **kwargs,
-            read_time=read_time,
-        ))
+        documents = list(
+            collection.list_documents(
+                page_size=page_size,
+                **kwargs,
+                read_time=read_time,
+            )
+        )
     else:
         documents = list(collection.list_documents(**kwargs, read_time=read_time))
 
