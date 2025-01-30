@@ -844,7 +844,7 @@ def _query_stream_w_retriable_exc_helper(
         expected_transaction_id = transaction.id
     else:
         expected_transaction_id = None
-    
+
     expected_request = {
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
