@@ -1059,10 +1059,11 @@ class BaseQuery(object):
             "parent": parent_path,
             "structured_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
-            "read_time": read_time,
         }
         if explain_options is not None:
             request["explain_options"] = explain_options._to_dict()
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, expected_prefix, kwargs

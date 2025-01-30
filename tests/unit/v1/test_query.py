@@ -96,10 +96,11 @@ def _query_get_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": None,
-        "read_time": read_time,
     }
     if explain_options:
         request["explain_options"] = explain_options._to_dict()
+    if read_time:
+        request["read_time"] = read_time
 
     # Verify the mock call.
     firestore_api.run_query.assert_called_once_with(
@@ -177,7 +178,6 @@ def test_query_get_limit_to_last(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -405,10 +405,11 @@ def _query_stream_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": None,
-        "read_time": read_time,
     }
     if explain_options is not None:
         request["explain_options"] = explain_options._to_dict()
+    if read_time is not None:
+        request["read_time"] = read_time
 
     # Verify the mock call.
     firestore_api.run_query.assert_called_once_with(
@@ -493,7 +494,6 @@ def test_query_stream_with_transaction(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": txn_id,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -587,7 +587,6 @@ def test_query_stream_no_results(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -623,7 +622,6 @@ def test_query_stream_second_response_in_empty_stream(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -668,7 +666,6 @@ def test_query_stream_with_skipped_results(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -713,7 +710,6 @@ def test_query_stream_empty_after_first_response(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -761,7 +757,6 @@ def test_query_stream_w_collection_group(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -849,27 +844,33 @@ def _query_stream_w_retriable_exc_helper(
         expected_transaction_id = transaction.id
     else:
         expected_transaction_id = None
+    
+    expected_request = {
+        "parent": parent_path,
+        "structured_query": query._to_protobuf(),
+        "transaction": expected_transaction_id,
+    }
+    if read_time is not None:
+        expected_request["read_time"] = read_time
 
     assert calls[0] == mock.call(
-        request={
-            "parent": parent_path,
-            "structured_query": query._to_protobuf(),
-            "transaction": expected_transaction_id,
-            "read_time": read_time,
-        },
+        request=expected_request,
         metadata=client._rpc_metadata,
         **kwargs,
     )
 
     if expect_retry:
         new_query = query.start_after(snapshot)
+        expected_request = {
+            "parent": parent_path,
+            "structured_query": new_query._to_protobuf(),
+            "transaction": None,
+        }
+        if read_time is not None:
+            expected_request["read_time"] = read_time
+
         assert calls[1] == mock.call(
-            request={
-                "parent": parent_path,
-                "structured_query": new_query._to_protobuf(),
-                "transaction": None,
-                "read_time": read_time,
-            },
+            request=expected_request,
             metadata=client._rpc_metadata,
             **kwargs,
         )

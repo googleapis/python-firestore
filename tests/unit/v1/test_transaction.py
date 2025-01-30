@@ -472,10 +472,11 @@ def _transaction_get_w_query_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": b"beep-fail-commit",
-        "read_time": read_time,
     }
     if explain_options is not None:
         request["explain_options"] = explain_options._to_dict()
+    if read_time is not None:
+        request["read_time"] = read_time
 
     # Verify the mock call.
     firestore_api.run_query.assert_called_once_with(
