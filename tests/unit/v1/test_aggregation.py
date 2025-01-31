@@ -327,7 +327,6 @@ def test_aggregation_query_prep_stream():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
-        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -354,7 +353,6 @@ def test_aggregation_query_prep_stream_with_transaction():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": txn_id,
-        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -381,7 +379,6 @@ def test_aggregation_query_prep_stream_with_explain_options():
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
         "explain_options": explain_options._to_dict(),
-        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -464,10 +461,11 @@ def _aggregation_query_get_helper(
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
-        "read_time": query_read_time,
     }
     if explain_options is not None:
         expected_request["explain_options"] = explain_options._to_dict()
+    if query_read_time is not None:
+        expected_request["read_time"] = query_read_time
 
     # Verify the mock call.
     firestore_api.run_aggregation_query.assert_called_once_with(
@@ -548,7 +546,6 @@ def test_aggregation_query_get_transaction():
             "parent": parent_path,
             "structured_aggregation_query": aggregation_query._to_protobuf(),
             "transaction": txn_id,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
         **kwargs,
@@ -644,25 +641,30 @@ def _aggregation_query_stream_w_retriable_exc_helper(
     else:
         expected_transaction_id = None
 
+    expected_request = {
+        "parent": parent_path,
+        "structured_aggregation_query": aggregation_query._to_protobuf(),
+        "transaction": expected_transaction_id,
+    }
+    if read_time is not None:
+        expected_request["read_time"] = read_time
+
     assert calls[0] == mock.call(
-        request={
-            "parent": parent_path,
-            "structured_aggregation_query": aggregation_query._to_protobuf(),
-            "transaction": expected_transaction_id,
-            "read_time": read_time,
-        },
+        request=expected_request,
         metadata=client._rpc_metadata,
         **kwargs,
     )
 
     if expect_retry:
+        expected_request = {
+            "parent": parent_path,
+            "structured_aggregation_query": aggregation_query._to_protobuf(),
+            "transaction": None,
+        }
+        if read_time is not None:
+            expected_request["read_time"] = None
         assert calls[1] == mock.call(
-            request={
-                "parent": parent_path,
-                "structured_aggregation_query": aggregation_query._to_protobuf(),
-                "transaction": None,
-                "read_time": read_time,
-            },
+            request=expected_request,
             metadata=client._rpc_metadata,
             **kwargs,
         )
@@ -759,10 +761,11 @@ def _aggregation_query_stream_helper(
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
-        "read_time": read_time,
     }
     if explain_options is not None:
         expected_request["explain_options"] = explain_options._to_dict()
+    if read_time is not None:
+        expected_request["read_time"] = read_time
 
     # Verify the mock call.
     firestore_api.run_aggregation_query.assert_called_once_with(
@@ -850,7 +853,6 @@ def test_aggregation_from_query():
                 "parent": parent_path,
                 "structured_aggregation_query": aggregation_query._to_protobuf(),
                 "transaction": txn_id,
-                "read_time": None,
             },
             metadata=client._rpc_metadata,
             **kwargs,
