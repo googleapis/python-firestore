@@ -569,7 +569,7 @@ def _collections_helper(
         assert isinstance(collection, CollectionReference)
         assert collection.parent == document
         assert collection.id == collection_id
-    
+
     expected_result = {
         "parent": document._document_path,
         "page_size": page_size,
