@@ -16,7 +16,7 @@ import types
 
 import mock
 
-from datetime import datetime
+from datetime import datetime, timezone
 from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT
 
 
@@ -419,6 +419,24 @@ def test_get_w_explain_options(query_class):
 
 
 @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
+def test_get_w_read_time(query_class):
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    read_time = datetime.now(tz=timezone.utc)
+    collection = _make_collection_reference("collection")
+    get_response = collection.get(read_time=read_time)
+
+    query_class.assert_called_once_with(collection)
+    query_instance = query_class.return_value
+
+    assert get_response is query_instance.get.return_value
+    query_instance.get.assert_called_once_with(
+        transaction=None,
+        read_time=read_time,
+    )
+
+
+@mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
 def test_stream(query_class):
     collection = _make_collection_reference("collection")
     stream_response = collection.stream()
@@ -475,6 +493,24 @@ def test_stream_w_explain_options(query_class):
     query_instance.stream.assert_called_once_with(
         transaction=None,
         explain_options=explain_options,
+    )
+
+
+@mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
+def test_stream_w_read_time(query_class):
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    read_time = datetime.now(tz=timezone.utc)
+    collection = _make_collection_reference("collection")
+    get_response = collection.stream(read_time=read_time)
+
+    query_class.assert_called_once_with(collection)
+    query_instance = query_class.return_value
+
+    assert get_response is query_instance.stream.return_value
+    query_instance.stream.assert_called_once_with(
+        transaction=None,
+        read_time=read_time,
     )
 
 
