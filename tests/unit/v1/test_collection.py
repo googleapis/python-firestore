@@ -420,8 +420,6 @@ def test_get_w_explain_options(query_class):
 
 @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
 def test_get_w_read_time(query_class):
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
-
     read_time = datetime.now(tz=timezone.utc)
     collection = _make_collection_reference("collection")
     get_response = collection.get(read_time=read_time)
@@ -498,8 +496,6 @@ def test_stream_w_explain_options(query_class):
 
 @mock.patch("google.cloud.firestore_v1.query.Query", autospec=True)
 def test_stream_w_read_time(query_class):
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
-
     read_time = datetime.now(tz=timezone.utc)
     collection = _make_collection_reference("collection")
     get_response = collection.stream(read_time=read_time)
