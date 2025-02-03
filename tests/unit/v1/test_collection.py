@@ -318,15 +318,18 @@ def _list_documents_helper(page_size=None, retry=None, timeout=None, read_time=N
         assert document.id == document_id
 
     parent, _ = collection._parent_info()
+    expected_request = {
+        "parent": parent,
+        "collection_id": collection.id,
+        "page_size": page_size,
+        "show_missing": True,
+        "mask": {"field_paths": None},
+    }
+    if read_time is not None:
+        expected_request["read_time"] = read_time
+
     api_client.list_documents.assert_called_once_with(
-        request={
-            "parent": parent,
-            "collection_id": collection.id,
-            "page_size": page_size,
-            "show_missing": True,
-            "mask": {"field_paths": None},
-            "read_time": read_time,
-        },
+        request=expected_request,
         metadata=client._rpc_metadata,
         **kwargs,
     )

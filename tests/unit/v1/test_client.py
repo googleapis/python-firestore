@@ -307,11 +307,13 @@ def _collections_helper(retry=None, timeout=None, database=None, read_time=None)
         assert collection.id == collection_id
 
     base_path = client._database_string + "/documents"
+    expected_request = {
+        "parent": base_path,
+    }
+    if read_time is not None:
+        expected_request["read_time"] = read_time
     firestore_api.list_collection_ids.assert_called_once_with(
-        request={
-            "parent": base_path,
-            "read_time": read_time,
-        },
+        request=expected_request,
         metadata=client._rpc_metadata,
         **kwargs,
     )
@@ -417,15 +419,17 @@ def _get_all_helper(
     mask = common.DocumentMask(field_paths=field_paths)
 
     kwargs.pop("transaction", None)
+    expected_request = {
+        "database": client._database_string,
+        "documents": doc_paths,
+        "mask": mask,
+        "transaction": txn_id,
+    }
+    if read_time is not None:
+        expected_request["read_time"] = read_time
 
     client._firestore_api.batch_get_documents.assert_called_once_with(
-        request={
-            "database": client._database_string,
-            "documents": doc_paths,
-            "mask": mask,
-            "transaction": txn_id,
-            "read_time": read_time,
-        },
+        request=expected_request,
         metadata=client._rpc_metadata,
         **kwargs,
     )
@@ -490,7 +494,6 @@ def test_client_get_all_unknown_result(database):
             "documents": doc_paths,
             "mask": None,
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )

@@ -468,14 +468,17 @@ def _get_helper(
     else:
         expected_transaction_id = None
 
+    expected_request = {
+        "database": client._database_string,
+        "documents": [document_reference._document_path],
+        "mask": mask,
+        "transaction": expected_transaction_id,
+    }
+    if read_time is not None:
+        expected_request["read_time"] = read_time
+
     firestore_api.batch_get_documents.assert_called_once_with(
-        request={
-            "database": client._database_string,
-            "documents": [document_reference._document_path],
-            "mask": mask,
-            "transaction": expected_transaction_id,
-            "read_time": read_time,
-        },
+        request=expected_request,
         metadata=client._rpc_metadata,
         **kwargs,
     )
@@ -566,13 +569,16 @@ def _collections_helper(
         assert isinstance(collection, CollectionReference)
         assert collection.parent == document
         assert collection.id == collection_id
+    
+    expected_result = {
+        "parent": document._document_path,
+        "page_size": page_size,
+    }
+    if read_time is not None:
+        expected_result["read_time"] = read_time
 
     api_client.list_collection_ids.assert_called_once_with(
-        request={
-            "parent": document._document_path,
-            "page_size": page_size,
-            "read_time": read_time,
-        },
+        request=expected_result,
         metadata=client._rpc_metadata,
         **kwargs,
     )

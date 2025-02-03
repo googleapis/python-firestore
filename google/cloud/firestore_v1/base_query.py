@@ -1448,8 +1448,9 @@ class BaseCollectionGroup(BaseQuery):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "partition_count": partition_count,
-            "read_time": read_time,
         }
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs

@@ -970,13 +970,15 @@ def _collection_group_get_partitions_helper(
         parent,
         orders=(query._make_order("__name__", query.ASCENDING),),
     )
+    expected_request = {
+        "parent": parent_path,
+        "structured_query": partition_query._to_protobuf(),
+        "partition_count": 2,
+    }
+    if read_time is not None:
+        expected_request["read_time"] = read_time
     firestore_api.partition_query.assert_called_once_with(
-        request={
-            "parent": parent_path,
-            "structured_query": partition_query._to_protobuf(),
-            "partition_count": 2,
-            "read_time": read_time,
-        },
+        request=expected_request,
         metadata=client._rpc_metadata,
         **kwargs,
     )

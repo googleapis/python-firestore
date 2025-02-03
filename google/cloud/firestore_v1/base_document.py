@@ -307,8 +307,9 @@ class BaseDocumentReference(object):
             "documents": [self._document_path],
             "mask": mask,
             "transaction": _helpers.get_transaction_id(transaction),
-            "read_time": read_time,
         }
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
@@ -335,8 +336,9 @@ class BaseDocumentReference(object):
         request = {
             "parent": self._document_path,
             "page_size": page_size,
-            "read_time": read_time,
         }
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
