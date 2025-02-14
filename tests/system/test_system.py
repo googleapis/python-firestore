@@ -3471,10 +3471,16 @@ def test_query_in_transaction_with_read_time(client, cleanup, database):
             # if the read_time dates before the DB was created, or FailedPrecondition
             # otherwise.
             with pytest.raises((InvalidArgument, FailedPrecondition)):
-                [docs.get("b") for docs in transaction.get(query, read_time=past_read_time)]
-    
+                [
+                    docs.get("b")
+                    for docs in transaction.get(query, read_time=past_read_time)
+                ]
+
             with pytest.raises(InvalidArgument):
-                [docs.get("b") for docs in transaction.get(query, read_time=future_read_time)]
+                [
+                    docs.get("b")
+                    for docs in transaction.get(query, read_time=future_read_time)
+                ]
 
             inner_fn_ran = True
 

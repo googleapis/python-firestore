@@ -26,7 +26,10 @@ from google.cloud.firestore_v1.base_aggregation import (
 from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
 from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
-from google.cloud.firestore_v1.types import RunAggregationQueryRequest, RunAggregationQueryResponse
+from google.cloud.firestore_v1.types import (
+    RunAggregationQueryRequest,
+    RunAggregationQueryResponse,
+)
 from google.protobuf.timestamp_pb2 import Timestamp
 from tests.unit.v1._test_helpers import (
     make_aggregation_query,
@@ -412,9 +415,7 @@ def test_aggregation_query_prep_stream_with_read_time():
     assert kwargs == {"retry": None}
 
 
-@pytest.mark.parametrize(
-    "timezone", [None, timezone.utc, timezone(timedelta(hours=5))]
-)
+@pytest.mark.parametrize("timezone", [None, timezone.utc, timezone(timedelta(hours=5))])
 def test_aggregation_query_get_stream_iterator_read_time_different_timezones(timezone):
     client = make_client()
     parent = client.collection("dee")
@@ -429,7 +430,7 @@ def test_aggregation_query_get_stream_iterator_read_time_different_timezones(tim
     read_time = datetime(1970, 1, 1, 0, 30)
     if timezone is not None:
         read_time = read_time.astimezone(timezone)
-    
+
     # The internal firestore API needs to be initialized before it gets mocked.
     client._firestore_api
 
@@ -439,10 +440,7 @@ def test_aggregation_query_get_stream_iterator_read_time_different_timezones(tim
     ) as call:
         call.return_value = iter([RunAggregationQueryResponse()])
         aggregation_query._get_stream_iterator(
-            transaction=None,
-            retry=None,
-            timeout=None,
-            read_time=read_time
+            transaction=None, retry=None, timeout=None, read_time=read_time
         )
         assert len(call.mock_calls) == 1
         _, args, _ = call.mock_calls[0]
