@@ -26,10 +26,7 @@ from google.cloud.firestore_v1.base_aggregation import (
 from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
 from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
-from google.cloud.firestore_v1.types import (
-    RunAggregationQueryRequest,
-    RunAggregationQueryResponse,
-)
+from google.cloud.firestore_v1.types import RunAggregationQueryResponse
 from google.protobuf.timestamp_pb2 import Timestamp
 from tests.unit.v1._test_helpers import (
     make_aggregation_query,
