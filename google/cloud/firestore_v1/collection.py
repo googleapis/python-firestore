@@ -15,7 +15,8 @@
 """Classes for representing collections for the Google Cloud Firestore API."""
 from __future__ import annotations
 
-from datetime import datetime
+import datetime
+
 from typing import TYPE_CHECKING, Any, Callable, Generator, Optional, Tuple, Union
 
 from google.api_core import gapic_v1
@@ -139,7 +140,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: Union[float, None] = None,
         *,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Generator[Any, Any, None]:
         """List all subdocuments of the current collection.
 
@@ -152,9 +153,9 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
             read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour, or
-                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
-                within the past 7 days. For the most accurate results, use UTC timezone.
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.collection.DocumentReference`]:
@@ -183,7 +184,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         timeout: Union[float, None] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> QueryResultsList[DocumentSnapshot]:
         """Read the documents in this collection.
 
@@ -203,9 +204,9 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
             read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour, or
-                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
-                within the past 7 days. For the most accurate results, use UTC timezone.
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
@@ -230,7 +231,7 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> StreamGenerator[DocumentSnapshot]:
         """Read the documents in this collection.
 
@@ -263,9 +264,9 @@ class CollectionReference(BaseCollectionReference[query_mod.Query]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
             read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour, or
-                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
-                within the past 7 days. For the most accurate results, use UTC timezone.
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             `StreamGenerator[DocumentSnapshot]`: A generator of the query results.

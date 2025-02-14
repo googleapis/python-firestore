@@ -25,8 +25,8 @@ In the hierarchy of API concepts
 """
 from __future__ import annotations
 
+import datetime
 import os
-from datetime import datetime
 from typing import (
     Any,
     AsyncGenerator,
@@ -438,7 +438,7 @@ class BaseClient(ClientWithProject):
         transaction: BaseTransaction | None = None,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
-        read_time: datetime | None = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, dict, dict]:
         """Shared setup for async/sync :meth:`get_all`."""
         document_paths, reference_map = _reference_info(references)
@@ -463,7 +463,7 @@ class BaseClient(ClientWithProject):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
         *,
-        read_time: datetime | None = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Union[
         AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
     ]:
@@ -473,7 +473,7 @@ class BaseClient(ClientWithProject):
         self,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
-        read_time: datetime | None = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {
@@ -490,7 +490,7 @@ class BaseClient(ClientWithProject):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
         *,
-        read_time: datetime | None = None,
+        read_time: Optional[datetime.datetime] = None,
     ):
         raise NotImplementedError
 

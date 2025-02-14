@@ -390,9 +390,9 @@ class DocumentReference(BaseDocumentReference):
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
             read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour, or
-                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
-                within the past 7 days. For the most accurate results, use UTC timezone.
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             :class:`~google.cloud.firestore_v1.base_document.DocumentSnapshot`:
@@ -456,9 +456,9 @@ class DocumentReference(BaseDocumentReference):
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
             read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour, or
-                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
-                within the past 7 days. For the most accurate results, use UTC timezone.
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             Sequence[:class:`~google.cloud.firestore_v1.collection.CollectionReference`]:

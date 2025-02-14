@@ -20,7 +20,8 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-from datetime import datetime
+import datetime
+
 from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
 
 from google.api_core import exceptions, gapic_v1
@@ -57,7 +58,7 @@ class AggregationQuery(BaseAggregationQuery):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> QueryResultsList[AggregationResult]:
         """Runs the aggregation query.
 
@@ -80,10 +81,11 @@ class AggregationQuery(BaseAggregationQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
-            read_time (Optional[datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour,
-                or if Point-in-Time Recovery is enabled, can additionally be a whole minute
-                timestamp within the past 7 days.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
+
 
         Returns:
             QueryResultsList[AggregationResult]: The aggregation query results.
@@ -142,7 +144,7 @@ class AggregationQuery(BaseAggregationQuery):
         retry: Union[retries.Retry, None, object] = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Generator[List[AggregationResult], Any, Optional[ExplainMetrics]]:
         """Internal method for stream(). Runs the aggregation query.
 
@@ -166,10 +168,10 @@ class AggregationQuery(BaseAggregationQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
-            read_time (Optional[datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour,
-                or if Point-in-Time Recovery is enabled, can additionally be a whole minute
-                timestamp within the past 7 days.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Yields:
             List[AggregationResult]:
@@ -224,7 +226,7 @@ class AggregationQuery(BaseAggregationQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> StreamGenerator[List[AggregationResult]]:
         """Runs the aggregation query.
 
@@ -248,10 +250,10 @@ class AggregationQuery(BaseAggregationQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
-            read_time (Optional[datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour,
-                or if Point-in-Time Recovery is enabled, can additionally be a whole minute
-                timestamp within the past 7 days.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             `StreamGenerator[List[AggregationResult]]`:

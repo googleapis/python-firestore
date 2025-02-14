@@ -15,7 +15,8 @@
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
 from __future__ import annotations
 
-from datetime import datetime
+import datetime
+
 from typing import TYPE_CHECKING, Any, Callable, Generator, Optional
 
 from google.api_core import exceptions, gapic_v1
@@ -156,7 +157,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieves multiple documents from Firestore.
 
@@ -167,10 +168,10 @@ class Transaction(batch.WriteBatch, BaseTransaction):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
-            read_time (Optional[datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour,
-                or if Point-in-Time Recovery is enabled, can additionally be a whole minute
-                timestamp within the past 7 days.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the
@@ -188,7 +189,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> StreamGenerator[DocumentSnapshot] | Generator[DocumentSnapshot, Any, None]:
         """Retrieve a document or a query result from the database.
 
@@ -205,9 +206,9 @@ class Transaction(batch.WriteBatch, BaseTransaction):
                 explain_metrics will be available on the returned generator.
                 Can only be used when running a query, not a document reference.
             read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
-                time. This must be a microsecond precision timestamp within the past one hour, or
-                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
-                within the past 7 days. For the most accurate results, use UTC timezone.
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Yields:
             .DocumentSnapshot: The next document snapshot that fulfills the

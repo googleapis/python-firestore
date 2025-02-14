@@ -20,7 +20,8 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from datetime import datetime
+import datetime
+
 from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Type
 
 from google.api_core import exceptions, gapic_v1
@@ -142,7 +143,7 @@ class Query(BaseQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> QueryResultsList[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
@@ -363,7 +364,7 @@ class Query(BaseQuery):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
@@ -465,7 +466,7 @@ class Query(BaseQuery):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> StreamGenerator[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
@@ -604,7 +605,7 @@ class CollectionGroup(Query, BaseCollectionGroup):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Generator[QueryPartition, None, None]:
         """Partition a query for parallelization.
 

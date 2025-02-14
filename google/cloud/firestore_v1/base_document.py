@@ -16,6 +16,8 @@
 from __future__ import annotations
 
 import copy
+import datetime
+
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -26,7 +28,6 @@ from typing import (
     Union,
     Awaitable,
 )
-from datetime import datetime
 
 from google.api_core import retry as retries
 
@@ -291,7 +292,7 @@ class BaseDocumentReference(object):
         transaction=None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | None = None,
-        read_time: datetime | None = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`get`."""
         if isinstance(field_paths, str):
@@ -321,7 +322,7 @@ class BaseDocumentReference(object):
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> "DocumentSnapshot" | Awaitable["DocumentSnapshot"]:
         raise NotImplementedError
 
@@ -330,7 +331,7 @@ class BaseDocumentReference(object):
         page_size: int | None = None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | None = None,
-        read_time: datetime | None = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {
@@ -349,7 +350,7 @@ class BaseDocumentReference(object):
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ):
         raise NotImplementedError
 

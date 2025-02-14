@@ -3429,7 +3429,7 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_query_in_transaction_with_read_time(client, cleanup, database):
     """
-    Test query profiling in transactions.
+    Test read_time in transactions.
     """
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     doc_ids = [f"doc{i}" + UNIQUE_RESOURCE_ID for i in range(5)]
@@ -3440,6 +3440,8 @@ def test_query_in_transaction_with_read_time(client, cleanup, database):
     doc_refs[1].create({"a": 1, "b": 1})
 
     read_time = max(docref.get().read_time for docref in doc_refs)
+    past_read_time = read_time + datetime.timedelta(days=-10)
+    future_read_time = read_time + datetime.timedelta(days=10)
     doc_refs[2].create({"a": 1, "b": 3})
 
     collection = client.collection(collection_id)
@@ -3464,6 +3466,15 @@ def test_query_in_transaction_with_read_time(client, cleanup, database):
             assert 1 in new_b_values
             assert 2 in new_b_values
             assert 3 in new_b_values
+
+            # Read times too far in the past fail with either InvalidArgument
+            # if the read_time dates before the DB was created, or FailedPrecondition
+            # otherwise.
+            with pytest.raises((InvalidArgument, FailedPrecondition)):
+                [docs.get("b") for docs in transaction.get(query, read_time=past_read_time)]
+    
+            with pytest.raises(InvalidArgument):
+                [docs.get("b") for docs in transaction.get(query, read_time=future_read_time)]
 
             inner_fn_ran = True
 

@@ -15,7 +15,8 @@
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
 from __future__ import annotations
 
-from datetime import datetime
+import datetime
+
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -150,7 +151,7 @@ class BaseTransaction(object):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         Generator[DocumentSnapshot, Any, None]
         | Coroutine[Any, Any, AsyncGenerator[DocumentSnapshot, Any]]
@@ -164,7 +165,7 @@ class BaseTransaction(object):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
-        read_time: Optional[datetime] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         StreamGenerator[DocumentSnapshot]
         | Generator[DocumentSnapshot, Any, None]

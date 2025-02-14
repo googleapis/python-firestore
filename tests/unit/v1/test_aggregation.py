@@ -26,6 +26,8 @@ from google.cloud.firestore_v1.base_aggregation import (
 from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
 from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.stream_generator import StreamGenerator
+from google.cloud.firestore_v1.types import RunAggregationQueryRequest, RunAggregationQueryResponse
+from google.protobuf.timestamp_pb2 import Timestamp
 from tests.unit.v1._test_helpers import (
     make_aggregation_query,
     make_aggregation_query_response,
@@ -382,6 +384,73 @@ def test_aggregation_query_prep_stream_with_explain_options():
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
+
+
+def test_aggregation_query_prep_stream_with_read_time():
+    client = make_client()
+    parent = client.collection("dee")
+    query = make_query(parent)
+    aggregation_query = make_aggregation_query(query)
+
+    aggregation_query.count(alias="all")
+    aggregation_query.sum("someref", alias="sumall")
+    aggregation_query.avg("anotherref", alias="avgall")
+
+    # 1800 seconds after epoch
+    read_time = datetime.now()
+
+    request, kwargs = aggregation_query._prep_stream(read_time=read_time)
+
+    parent_path, _ = parent._parent_info()
+    expected_request = {
+        "parent": parent_path,
+        "structured_aggregation_query": aggregation_query._to_protobuf(),
+        "transaction": None,
+        "read_time": read_time,
+    }
+    assert request == expected_request
+    assert kwargs == {"retry": None}
+
+
+@pytest.mark.parametrize(
+    "timezone", [None, timezone.utc, timezone(timedelta(hours=5))]
+)
+def test_aggregation_query_get_stream_iterator_read_time_different_timezones(timezone):
+    client = make_client()
+    parent = client.collection("dee")
+    query = make_query(parent)
+    aggregation_query = make_aggregation_query(query)
+
+    aggregation_query.count(alias="all")
+    aggregation_query.sum("someref", alias="sumall")
+    aggregation_query.avg("anotherref", alias="avgall")
+
+    # 1800 seconds after epoch
+    read_time = datetime(1970, 1, 1, 0, 30)
+    if timezone is not None:
+        read_time = read_time.astimezone(timezone)
+    
+    # The internal firestore API needs to be initialized before it gets mocked.
+    client._firestore_api
+
+    # Validate that the same timestamp_pb object would be sent in the actual request.
+    with mock.patch.object(
+        type(client._firestore_api_internal.transport.run_aggregation_query), "__call__"
+    ) as call:
+        call.return_value = iter([RunAggregationQueryResponse()])
+        aggregation_query._get_stream_iterator(
+            transaction=None,
+            retry=None,
+            timeout=None,
+            read_time=read_time
+        )
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request_read_time = args[0].read_time
+
+        # Verify that the timestamp is correct.
+        expected_timestamp = Timestamp(seconds=1800)
+        assert request_read_time.timestamp_pb() == expected_timestamp
 
 
 def _aggregation_query_get_helper(
