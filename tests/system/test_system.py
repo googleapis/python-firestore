@@ -3240,14 +3240,11 @@ def test_update_w_uuid(client, cleanup, database):
     doc_ref.create({key: "I'm a UUID!"})
 
     expected = "UPDATED VALUE"
-    doc_ref.update(
-        {
-            key: expected
-        }
-    )
+    doc_ref.update({key: expected})
     # read updated doc
     snapshot = doc_ref.get()
     assert snapshot.to_dict()[key] == expected
+
 
 @pytest.mark.parametrize("with_rollback,expected", [(True, 2), (False, 3)])
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
