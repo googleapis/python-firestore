@@ -3151,6 +3151,31 @@ def test_or_query_in_transaction(client, cleanup, database):
         assert inner_fn_ran is True
 
 
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_transaction_w_uuid(client, cleanup, database):
+    """
+    https://github.com/googleapis/python-firestore/issues/1012
+    """
+    import uuid
+    from google.cloud.firestore_v1.services.firestore import client as firestore_client
+
+    collection_id = "uuid_collection" + UNIQUE_RESOURCE_ID
+    doc_ref = client.document(collection_id, "doc")
+    cleanup(doc_ref.delete)
+    key = "b7992822-eacb-40be-8af6-559b9e2fb0b7"
+    doc_ref.create({key: "I'm a UUID!"})
+
+    @firestore.transactional
+    def update_doc(tx, doc_ref, key, value):
+        tx.update(doc_ref, {key: value})
+
+    expected = "UPDATED VALUE"
+    update_doc(client.transaction(), doc_ref, key, expected)
+    # read updated doc
+    snapshot = doc_ref.get()
+    assert snapshot.to_dict()[key] == expected
+
+
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
