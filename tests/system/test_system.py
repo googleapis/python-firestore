@@ -3156,9 +3156,6 @@ def test_transaction_w_uuid(client, cleanup, database):
     """
     https://github.com/googleapis/python-firestore/issues/1012
     """
-    import uuid
-    from google.cloud.firestore_v1.services.firestore import client as firestore_client
-
     collection_id = "uuid_collection" + UNIQUE_RESOURCE_ID
     doc_ref = client.document(collection_id, "doc")
     cleanup(doc_ref.delete)
