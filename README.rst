@@ -132,9 +132,8 @@ A logging scope is a period-separated namespace that begins with :code:`google`,
 
 **NOTE**: If the logging scope is invalid, the library does not set up any logging handlers.
 
-Examples
-^^^^^^^^
-
+Environment-Based Examples
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 - Enabling the default handler for all Google-based loggers
 
 .. code-block:: console
@@ -153,8 +152,8 @@ Advanced, code-based configuration
 
 You can also configure a valid logging scope using Python's standard `logging` mechanism.
 
-Examples
-^^^^^^^^
+Code-Based Examples
+^^^^^^^^^^^^^^^^^^^
 
 - Configuring a handler for all Google-based loggers
 
