@@ -1,7 +1,12 @@
 from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar
 from enum import Enum
 from enum import auto
+import datetime
 from dataclasses import dataclass
+from google.cloud.firestore_v1.types.document import Value
+
+CONSTANT_ELEMENTS = Union[str, int, float, bool, datetime.datetime, bytes, tuple[float, float]]
+CONSTANT_TYPES = Union[CONSTANT_ELEMENTS, list[Union[CONSTANT_ELEMENTS, list, dict]], dict[str, Union[CONSTANT_ELEMENTS, list, dict]]]
 
 class Ordering:
 
@@ -36,6 +41,9 @@ class Expr:
 
     def __repr__(self):
         return f"{self.__class__.__name__}()"
+
+    def _to_pb(self) -> Value:
+        raise NotImplementedError
 
     @staticmethod
     def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
@@ -220,21 +228,47 @@ class Expr:
 
 
 class Constant(Expr):
-    def __init__(self, value: Any):
+    def __init__(self, value: CONSTANT_TYPES):
         self.value = value
 
     @staticmethod
-    def of(value):
+    def of(value:CONSTANT_TYPES):
         return Constant(value)
 
     def __repr__(self):
         return f"Constant.of({self.value!r})"
 
+    def _to_pb(self):
+        if self.value is None:
+            return Value(null_value=Value.NullValue.NULL_VALUE)
+        elif isinstance(self.value, bool):
+            return Value(boolean_value=self.value)
+        elif isinstance(self.value, int):
+            return Value(integer_value=self.value)
+        elif isinstance(self.value, float):
+            return Value(double_value=self.value)
+        elif isinstance(self.value, datetime.datetime):
+            return Value(timestamp_value=self.value.timestamp())
+        elif isinstance(self.value, str):
+            return Value(string_value=self.value)
+        elif isinstance(self.value, bytes):
+            return Value(bytes_value=self.value)
+        elif isinstance(self.value, tuple) and len(self.value) == 2 and isinstance(self.value[0], float) and isinstance(self.value[1], float):
+            return Value(geo_point_value=self.value)
+        elif isinstance(self.value, list):
+            return Value(array_value={"values":[Constant(v)._to_pb() for v in self.value]})
+        elif isinstance(self.value, dict):
+            return Value(map_value={"fields": {k: Constant(v)._to_pb() for k, v in self.value.items()}})
+        else:
+            raise ValueError(f"Unsupported type: {type(self.value)}")
 
 
 class ListOfExprs(Expr):
     def __init__(self, exprs: List[Expr]):
         self.exprs = exprs
+
+    def _to_pb(self):
+        return Value(array_value={"values": [e._to_pb() for e in self.exprs]})
 
 
 class Function(Expr):
@@ -246,6 +280,13 @@ class Function(Expr):
 
     def __repr__(self):
         return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
+
+    def _to_pb(self):
+        return Value(
+            function_value={
+                "name": self.name, "args": [p._to_pb() for p in self.params]
+            }
+        )
 
 class Divide(Function):
     def __init__(self, left: Expr, right: Expr):
@@ -485,6 +526,11 @@ class ExprWithAlias(Expr, Selectable, Generic[T]):
     def __repr__(self):
         return f"{self.expr}.as('{self.alias}')"
 
+    def _to_pb(self):
+        return Value(
+            map_value={"fields": {self.alias: self.expr._to_pb()}}
+        )
+
 
 class Field(Expr, Selectable):
     DOCUMENT_ID = "__name__"
@@ -501,6 +547,9 @@ class Field(Expr, Selectable):
 
     def __repr__(self):
         return f"Field.of({self.path!r})"
+
+    def _to_pb(self):
+        return Value(field_path=self.path)
 
 
 class FilterCondition(Function):
