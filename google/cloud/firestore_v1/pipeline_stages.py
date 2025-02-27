@@ -56,11 +56,7 @@ class AddFields(Stage):
         self.fields = list(fields)
 
     def _pb_args(self) -> list[Value]:
-        return [Value(map_value=self._fields_map())]
-
-    def _fields_map(self) -> dict[str, Expr]:
-        return dict(f._to_map() for f in self.fields)
-
+        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})]
 
 class Aggregate(Stage):
     def __init__(
@@ -75,18 +71,9 @@ class Aggregate(Stage):
 
     def _pb_args(self) -> list[Value]:
         return [
-            Value(map_value={"fields": self._accumulators_map}),
-            Value(map_value={"groups": self._group_map}),
+            Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.accumulators]}}),
+            Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.groups]}})
         ]
-
-    @property
-    def _group_map(self) -> dict[str, Expr]:
-        return dict(f._to_map() for f in self.groups)
-
-    @property
-    def _accumulators_map(self) -> dict[str, Expr]:
-        return dict(f._to_map() for f in self.accumulators)
-
 
     def __repr__(self):
         accumulator_str = ', '.join(repr(v) for v in self.accumulators)
@@ -141,7 +128,7 @@ class Documents(Stage):
         return Documents(doc_paths)
 
     def _pb_args(self):
-        return [Value(list_value=self.documents)]
+        return [Value(list_value={"values": [Value(string_value=doc) for doc in self.documents]})]
 
 
 class FindNearest(Stage):
@@ -204,12 +191,8 @@ class RemoveFields(Stage):
         super().__init__("remove_fields")
         self.fields = [Field(f) if isinstance(f, str) else f for f in fields]
 
-    @property
-    def _fields_map(self) -> dict[str, Field]:
-        dict(f._to_map() for f in self.fields)
-
     def _pb_args(self) -> list[Value]:
-        return [Value(map_value=self._fields_map())]
+        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})]
 
 
 class Replace(Stage):
@@ -246,12 +229,8 @@ class Select(Stage):
         super().__init__()
         self.projections = [Field(f) if isinstance(f, str) else f for f in fields]
 
-    @property
-    def _projections_map(self) -> dict[str, Expr]:
-        return dict(f._to_map() for f in self.projections)
-
     def _pb_args(self) -> list[Value]:
-        return [Value(map_value=self._projections_map())]
+        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.projections]}})]}
 
 
 class Sort(Stage):
@@ -260,7 +239,7 @@ class Sort(Stage):
         self.orders = list(orders)
 
     def _pb_args(self):
-        return [Value(map_value=o._to_map()) for o in self.orders]
+        return [Value(map_value={"fields": {m[0]: m[1] for m in [o._to_map() for o in self.orders]}})]
 
 
 class Union(Stage):
@@ -269,7 +248,7 @@ class Union(Stage):
         self.other = other
 
     def _pb_args(self):
-        return [Value(map_value=self.other._to_map())]
+        return [Value(pipeline_value=self.other._to_pb())]
 
 
 class Unnest(Stage):
@@ -294,5 +273,5 @@ class Where(Stage):
         self.condition = condition
 
     def _pb_args(self):
-        return [Value(map_value=self.condition._to_map())]
+        return [Value(map_value={"fields": {m[0]: m[1] for m in [self.condition._to_map()]}})]
 
