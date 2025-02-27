@@ -28,8 +28,13 @@ from .common import (
 from .document import (
     ArrayValue,
     Document,
+    Function,
     MapValue,
+    Pipeline,
     Value,
+)
+from .explain_stats import (
+    ExplainStats,
 )
 from .firestore import (
     BatchGetDocumentsRequest,
@@ -42,6 +47,8 @@ from .firestore import (
     CommitResponse,
     CreateDocumentRequest,
     DeleteDocumentRequest,
+    ExecutePipelineRequest,
+    ExecutePipelineResponse,
     GetDocumentRequest,
     ListCollectionIdsRequest,
     ListCollectionIdsResponse,
@@ -61,6 +68,9 @@ from .firestore import (
     UpdateDocumentRequest,
     WriteRequest,
     WriteResponse,
+)
+from .pipeline import (
+    StructuredPipeline,
 )
 from .query import (
     Cursor,
@@ -92,8 +102,11 @@ __all__ = (
     "TransactionOptions",
     "ArrayValue",
     "Document",
+    "Function",
     "MapValue",
+    "Pipeline",
     "Value",
+    "ExplainStats",
     "BatchGetDocumentsRequest",
     "BatchGetDocumentsResponse",
     "BatchWriteRequest",
@@ -104,6 +117,8 @@ __all__ = (
     "CommitResponse",
     "CreateDocumentRequest",
     "DeleteDocumentRequest",
+    "ExecutePipelineRequest",
+    "ExecutePipelineResponse",
     "GetDocumentRequest",
     "ListCollectionIdsRequest",
     "ListCollectionIdsResponse",
@@ -123,6 +138,7 @@ __all__ = (
     "UpdateDocumentRequest",
     "WriteRequest",
     "WriteResponse",
+    "StructuredPipeline",
     "Cursor",
     "StructuredAggregationQuery",
     "StructuredQuery",

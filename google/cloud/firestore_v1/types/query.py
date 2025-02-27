@@ -44,6 +44,7 @@ class StructuredQuery(proto.Message):
     4. order_by + start_at + end_at
     5. offset
     6. limit
+    7. find_nearest
 
     Attributes:
         select (google.cloud.firestore_v1.types.StructuredQuery.Projection):

@@ -55,6 +55,7 @@ from google.cloud.firestore_v1.types import aggregation_result
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import document as gf_document
+from google.cloud.firestore_v1.types import explain_stats
 from google.cloud.firestore_v1.types import firestore
 from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.types import query_profile
@@ -1553,6 +1554,72 @@ class FirestoreClient(metaclass=FirestoreClientMeta):
 
         # Validate the universe domain.
         self._validate_universe_domain()
+
+        # Send the request.
+        response = rpc(
+            request,
+            retry=retry,
+            timeout=timeout,
+            metadata=metadata,
+        )
+
+        # Done; return the response.
+        return response
+
+    def execute_pipeline(
+        self,
+        request: Optional[Union[firestore.ExecutePipelineRequest, dict]] = None,
+        *,
+        retry: OptionalRetry = gapic_v1.method.DEFAULT,
+        timeout: Union[float, object] = gapic_v1.method.DEFAULT,
+        metadata: Sequence[Tuple[str, str]] = (),
+    ) -> Iterable[firestore.ExecutePipelineResponse]:
+        r"""Executes a pipeline query.
+
+        Args:
+            request (Union[google.cloud.firestore_v1.types.ExecutePipelineRequest, dict]):
+                The request object. The request for
+                [Firestore.ExecutePipeline][google.firestore.v1.Firestore.ExecutePipeline].
+            retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                should be retried.
+            timeout (float): The timeout for this request.
+            metadata (Sequence[Tuple[str, str]]): Strings which should be
+                sent along with the request as metadata.
+
+        Returns:
+            Iterable[google.cloud.firestore_v1.types.ExecutePipelineResponse]:
+                The response for [Firestore.Execute][].
+        """
+        # Create or coerce a protobuf request object.
+        # Minor optimization to avoid making a copy if the user passes
+        # in a firestore.ExecutePipelineRequest.
+        # There's no risk of modifying the input as we've already verified
+        # there are no flattened fields.
+        if not isinstance(request, firestore.ExecutePipelineRequest):
+            request = firestore.ExecutePipelineRequest(request)
+
+        # Wrap the RPC method; this adds retry and timeout information,
+        # and friendly error handling.
+        rpc = self._transport._wrapped_methods[self._transport.execute_pipeline]
+
+        header_params = {}
+
+        routing_param_regex = re.compile("^projects/(?P<project_id>[^/]+)(?:/.*)?$")
+        regex_match = routing_param_regex.match(request.database)
+        if regex_match and regex_match.group("project_id"):
+            header_params["project_id"] = regex_match.group("project_id")
+
+        routing_param_regex = re.compile(
+            "^projects/[^/]+/databases/(?P<database_id>[^/]+)(?:/.*)?$"
+        )
+        regex_match = routing_param_regex.match(request.database)
+        if regex_match and regex_match.group("database_id"):
+            header_params["database_id"] = regex_match.group("database_id")
+
+        if header_params:
+            metadata = tuple(metadata) + (
+                gapic_v1.routing_header.to_grpc_metadata(header_params),
+            )
 
         # Send the request.
         response = rpc(

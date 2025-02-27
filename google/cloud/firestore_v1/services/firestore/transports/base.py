@@ -286,6 +286,11 @@ class FirestoreTransport(abc.ABC):
                 default_timeout=300.0,
                 client_info=client_info,
             ),
+            self.execute_pipeline: gapic_v1.method.wrap_method(
+                self.execute_pipeline,
+                default_timeout=None,
+                client_info=client_info,
+            ),
             self.run_aggregation_query: gapic_v1.method.wrap_method(
                 self.run_aggregation_query,
                 default_retry=retries.Retry(
