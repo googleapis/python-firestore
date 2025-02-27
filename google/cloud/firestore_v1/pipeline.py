@@ -26,6 +26,9 @@ class Pipeline:
             stages_str = ",\n  ".join([repr(s) for s in self.stages])
             return f"Pipeline(\n  {stages_str}\n)"
 
+    def _to_pb(self) -> Pipeline:
+        return Pipeline(stages=[s._to_pb() for s in self.stages])
+
     def add_fields(self, fields: Dict[str, Expr]) -> Pipeline:
         self.stages.append(stages.AddFields(fields))
         return self
