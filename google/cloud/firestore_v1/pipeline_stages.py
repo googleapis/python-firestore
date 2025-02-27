@@ -74,7 +74,10 @@ class Aggregate(Stage):
         self.accumulators: list[ExprWithAlias[Accumulator]] = [*accumulators, *extra_accumulators]
 
     def _pb_args(self) -> list[Value]:
-        raise NotImplementedError
+        return [
+            Value(map_value={"fields": self._accumulators_map}),
+            Value(map_value={"groups": self._group_map}),
+        ]
 
     @property
     def _group_map(self) -> dict[str, Expr]:
@@ -123,17 +126,8 @@ class Distinct(Stage):
         super().__init__()
         self.fields: list[Selectable] = [Field(f) if isinstance(f, str) else f for f in fields]
 
-    @property
-    def _fields_dict(self) -> dict[str, Selectable]:
-        return dict(
-            f._to_map()
-            if isinstance(f, Selectable)
-            else (f,Field(f))
-            for f in self.fields
-        )
-
     def _pb_args(self) -> list[Value]:
-        raise NotImplementedError
+        raise Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})
 
 
 class Documents(Stage):
@@ -165,18 +159,26 @@ class FindNearest(Stage):
         self.options = options or FindNearestOptions()
 
     def _pb_args(self):
-        raise NotImplementedError
+        return [
+            self.property._to_pb(),
+            Value(array_value={"values": self.vector}),
+        ]
 
     def _pb_options(self) -> dict[str, Value]:
-        raise NotImplementedError
+        options = {}
+        if self.options and self.options.limit is not None:
+            options["limit"] = Value(integer_value=self.options.limit)
+        if self.options and self.options.distance_field is not None:
+            options["distance_field"] = self.options.distance_field._to_pb()
+        return options
 
 class GenericStage(Stage):
-    def __init__(self, name: str, *params: Any):
+    def __init__(self, name: str, *params: Value):
         super().__init__(name)
         self.params = list(params)
 
     def _pb_args(self):
-        raise NotImplementedError
+        return self.params
 
 
 class Limit(Stage):
@@ -222,7 +224,7 @@ class Replace(Stage):
         self.mode = mode
 
     def _pb_args(self):
-        raise NotImplementedError
+        return [self.field._to_pb(), Value(string_value=self.mode.value)]
 
 
 class Sample(Stage):
@@ -277,7 +279,7 @@ class Unnest(Stage):
         self.options = options
 
     def _pb_args(self):
-        raise NotImplementedError
+        return [self.field._to_pb()]
 
     def _pb_options(self):
         options = {}

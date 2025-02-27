@@ -507,7 +507,7 @@ class CountIf(Function):
         super().__init__("countif", [value] if value else [])
 
 
-class Selectable:
+class Selectable(Expr):
     """Points at something in the database?"""
 
     def _to_map(self):
@@ -515,13 +515,13 @@ class Selectable:
 
 
 T = TypeVar('T', bound=Expr)
-class ExprWithAlias(Expr, Selectable, Generic[T]):
+class ExprWithAlias(Selectable, Generic[T]):
     def __init__(self, expr: T, alias: str):
         self.expr = expr
         self.alias = alias
 
     def _to_map(self):
-        return self.alias, self.expr
+        return self.alias, self.expr._to_pb()
 
     def __repr__(self):
         return f"{self.expr}.as('{self.alias}')"
@@ -532,7 +532,7 @@ class ExprWithAlias(Expr, Selectable, Generic[T]):
         )
 
 
-class Field(Expr, Selectable):
+class Field(Selectable):
     DOCUMENT_ID = "__name__"
 
     def __init__(self, path: str):
@@ -543,7 +543,7 @@ class Field(Expr, Selectable):
         return Field(path)
 
     def _to_map(self):
-        return self.path, self
+        return self.path, self._to_pb()
 
     def __repr__(self):
         return f"Field.of({self.path!r})"
