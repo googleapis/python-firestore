@@ -35,11 +35,11 @@ class Stage:
         self.name = custom_name or type(self).__name__.lower()
 
     def _to_pb(self) -> Pipeline.Stage:
-        return Pipeline.Stage(name=self.name, args=self._pb_args(), options=self._pb_options())
+        return Pipeline.Stage(name=self.name, args=[*self._pb_args()], options=self._pb_options())
 
-    def _pb_args(self) -> list[Value]:
+    def _pb_args(self) -> tuple[Value, ...]:
         """Return Ordered list of arguments the given stage expects"""
-        return []
+        return ()
 
     def _pb_options(self) -> dict[str, Value]:
         """Return optional named arguments that certain functions may support."""
@@ -114,7 +114,7 @@ class Distinct(Stage):
         self.fields: list[Selectable] = [Field(f) if isinstance(f, str) else f for f in fields]
 
     def _pb_args(self) -> list[Value]:
-        raise Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})
+        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})]
 
 
 class Documents(Stage):
@@ -149,6 +149,7 @@ class FindNearest(Stage):
         return [
             self.property._to_pb(),
             Value(array_value={"values": self.vector}),
+            Value(string_value=self.distance_measure.value),
         ]
 
     def _pb_options(self) -> dict[str, Value]:
@@ -201,10 +202,10 @@ class Replace(Stage):
         MERGE_PREFER_NEXT = "merge_prefer_nest"
         MERGE_PREFER_PARENT = "merge_prefer_parent"
 
-    def __init__(self, field: Selectable, mode: Mode = Mode.FULL_REPLACE):
+    def __init__(self, field: Selectable | str, mode: Mode | str = Mode.FULL_REPLACE):
         super().__init__()
-        self.field = field
-        self.mode = mode
+        self.field = Field(field) if isinstance(field, str) else field
+        self.mode = self.Mode[mode] if isinstance(mode, str) else mode
 
     def _pb_args(self):
         return [self.field._to_pb(), Value(string_value=self.mode.value)]
@@ -221,7 +222,7 @@ class Sample(Stage):
         self.options: SampleOptions = options
 
     def _pb_args(self):
-        return [Value(integer_value=self.options.limit), Value(string_value=self.options.mode.value)]
+        return [Value(integer_value=self.options.n), Value(string_value=self.options.mode.value)]
 
 
 class Select(Stage):
@@ -230,7 +231,7 @@ class Select(Stage):
         self.projections = [Field(f) if isinstance(f, str) else f for f in fields]
 
     def _pb_args(self) -> list[Value]:
-        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.projections]}})]}
+        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.projections]}})]
 
 
 class Sort(Stage):
@@ -239,7 +240,7 @@ class Sort(Stage):
         self.orders = list(orders)
 
     def _pb_args(self):
-        return [Value(map_value={"fields": {m[0]: m[1] for m in [o._to_map() for o in self.orders]}})]
+        return [o._to_pb() for o in self.orders]
 
 
 class Union(Stage):
@@ -252,9 +253,9 @@ class Union(Stage):
 
 
 class Unnest(Stage):
-    def __init__(self, field: Field, options: Optional["UnnestOptions"] = None):
+    def __init__(self, field: Field | str, options: Optional["UnnestOptions"] = None):
         super().__init__()
-        self.field = field
+        self.field: Field = Field(field) if isinstance(field, str) else field
         self.options = options
 
     def _pb_args(self):
@@ -273,5 +274,5 @@ class Where(Stage):
         self.condition = condition
 
     def _pb_args(self):
-        return [Value(map_value={"fields": {m[0]: m[1] for m in [self.condition._to_map()]}})]
+        return [self.condition._to_pb()]
 

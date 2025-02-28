@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Optional
 from google.cloud.firestore_v1 import pipeline_stages as stages
-
+from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
     Expr,
@@ -26,8 +26,8 @@ class Pipeline:
             stages_str = ",\n  ".join([repr(s) for s in self.stages])
             return f"Pipeline(\n  {stages_str}\n)"
 
-    def _to_pb(self) -> Pipeline:
-        return Pipeline(stages=[s._to_pb() for s in self.stages])
+    def _to_pb(self) -> Pipeline_pb:
+        return Pipeline_pb(stages=[s._to_pb() for s in self.stages])
 
     def add_fields(self, fields: Dict[str, Expr]) -> Pipeline:
         self.stages.append(stages.AddFields(fields))

@@ -130,9 +130,9 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-        - - ExprWithAlias:
-              - Count
-              - "count"
+        - ExprWithAlias:
+            - Count
+            - "count"
     results:
       - count: 10
   - description: "testAggregates - avg, count, max"
@@ -143,15 +143,15 @@ tests:
               - Field: genre
               - Constant: Science Fiction
       - Aggregate:
-        - - ExprWithAlias:
-              - Count
-              - "count"
-          - ExprWithAlias:
-              - Avg: rating
-              - "avg_rating"
-          - ExprWithAlias:
-              - Max: rating
-              - "max_rating"
+        - ExprWithAlias:
+            - Count
+            - "count"
+        - ExprWithAlias:
+            - Avg: rating
+            - "avg_rating"
+        - ExprWithAlias:
+            - Max: rating
+            - "max_rating"
     results:
       - count: 2
         avg_rating: 4.4
@@ -164,8 +164,8 @@ tests:
           - Field: published
           - Constant: 1900
       - Aggregate:
-        - []
-        - - genre
+          accumulators: []
+          groups: [genre]
     error: "Cannot groupBy without accumulators"
   - description: testDistinct
     pipeline:
@@ -190,10 +190,11 @@ tests:
               - Field: published
               - Constant: 1984
       - Aggregate:
-        - - ExprWithAlias:
-              - Avg: rating
-              - "avg_rating"
-        - - genre
+        accumulators:
+          - ExprWithAlias:
+            - Avg: rating
+            - "avg_rating"
+        groups: [genre]
       - Where:
           - Gt:
               - Field: avg_rating
@@ -209,15 +210,15 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-          - - ExprWithAlias:
-                - Count
-                - "count"
-            - ExprWithAlias:
-                - Max: rating
-                - "max_rating"
-            - ExprWithAlias:
-                - Min: published
-                - "min_published"
+          - ExprWithAlias:
+              - Count
+              - "count"
+          - ExprWithAlias:
+              - Max: rating
+              - "max_rating"
+          - ExprWithAlias:
+              - Min: published
+              - "min_published"
     results:
       - count: 10
         max_rating: 4.7
@@ -715,8 +716,8 @@ tests:
         - title
       - Sort:
         - Ordering:
-          - Field: title
-          - direction: ASCENDING
+          - title
+          - ASCENDING
     results:
       - rating: 4.3
         title: Crime and Punishment
@@ -914,7 +915,7 @@ tests:
       - Sample:
           - SampleOptions:
             - 60
-            - PERCENTAGE
+            - percent
     results_num: 6 # Results will vary due to randomness
   - description: testUnion
     pipeline:

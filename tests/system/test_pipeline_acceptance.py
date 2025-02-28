@@ -49,15 +49,16 @@ def loader():
 
 def _apply_yaml_args(cls, yaml_args):
     if isinstance(yaml_args, dict):
-        # reject mapping arguments: use only positional arguments in yaml
-        # for cross-language simplicity
-        raise ValueError(f"found kwargs for class: {cls}")
+        return cls(**parse_expressions(yaml_args))
     elif isinstance(yaml_args, list):
         # yaml has an array of arguments. Treat as args
         return cls(*parse_expressions(yaml_args))
-    else:
+    elif yaml_args is not None:
         # yaml has a single argument
         return cls(parse_expressions(yaml_args))
+    else:
+        # no arguments
+        return cls()
 
 
 def parse_pipeline(pipeline: list[dict[str, Any], str]):
@@ -112,7 +113,7 @@ def parse_expressions(yaml_element: Any):
 )
 def test_e2e_scenario(test_dict):
     pipeline = parse_pipeline(test_dict["pipeline"])
-    print(pipeline)
+    print(pipeline._to_pb())
 
     # before_ast = ast.parse(test_dict["before"])
     # got_ast = before_ast

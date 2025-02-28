@@ -5,7 +5,7 @@ import datetime
 from dataclasses import dataclass
 from google.cloud.firestore_v1.types.document import Value
 
-CONSTANT_ELEMENTS = Union[str, int, float, bool, datetime.datetime, bytes, tuple[float, float]]
+CONSTANT_ELEMENTS = Union[str, int, float, bool, datetime.datetime, bytes, tuple[float, float], None]
 CONSTANT_TYPES = Union[CONSTANT_ELEMENTS, list[Union[CONSTANT_ELEMENTS, list, dict]], dict[str, Union[CONSTANT_ELEMENTS, list, dict]]]
 
 class Ordering:
@@ -15,7 +15,7 @@ class Ordering:
         DESCENDING = auto()
 
     def __init__(self, expr, order_dir: Direction | str):
-        self.expr = expr
+        self.expr = expr if isinstance(expr, Expr) else Field.of(expr)
         self.order_dir = Ordering.Direction[order_dir] if isinstance(order_dir, str) else order_dir
 
     def __repr__(self):
@@ -25,14 +25,27 @@ class Ordering:
             order_str = ".descending()"
         return f"{self.expr!r}{order_str}"
 
+    def _to_pb(self) -> Value:
+        return Value(
+            map_value={"fields":
+                {
+                    "direction": Value(string_value=self.order_dir.name),
+                    "expression": self.expr._to_pb()
+                }
+            }
+        )
+
 @dataclass
 class SampleOptions:
     class Mode(Enum):
-        DOCUMENTS = auto()
-        PERCENTAGE = auto()
+        DOCUMENTS = "documents"
+        PERCENTAGE = "percent"
 
     n: int
     mode: Mode
+
+    def __post_init__(self):
+        self.mode = SampleOptions.Mode(self.mode) if isinstance(self.mode, str) else self.mode
 
 class Expr:
     """Represents an expression that can be evaluated to a value within the
@@ -228,7 +241,7 @@ class Expr:
 
 
 class Constant(Expr):
-    def __init__(self, value: CONSTANT_TYPES):
+    def __init__(self, value: CONSTANT_TYPES=None):
         self.value = value
 
     @staticmethod
@@ -240,7 +253,7 @@ class Constant(Expr):
 
     def _to_pb(self):
         if self.value is None:
-            return Value(null_value=Value.NullValue.NULL_VALUE)
+            return Value(null_value=0)
         elif isinstance(self.value, bool):
             return Value(boolean_value=self.value)
         elif isinstance(self.value, int):
@@ -265,7 +278,7 @@ class Constant(Expr):
 
 class ListOfExprs(Expr):
     def __init__(self, exprs: List[Expr]):
-        self.exprs = exprs
+        self.exprs: list[Expr] = [Field.of(e) if isinstance(e, str) else e for e in exprs]
 
     def _to_pb(self):
         return Value(array_value={"values": [e._to_pb() for e in self.exprs]})
@@ -276,7 +289,7 @@ class Function(Expr):
 
     def __init__(self, name: str, params: List[Expr]):
         self.name = name
-        self.params = params
+        self.params = [Field.of(p) if isinstance(p, str) else p for p in params]
 
     def __repr__(self):
         return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
@@ -295,11 +308,15 @@ class Divide(Function):
 
 class DotProduct(Function):
     def __init__(self, vector1: Expr, vector2: Expr):
+        vector1 = Constant(vector1) if isinstance(vector1, list) else vector1
+        vector2 = Constant(vector2) if isinstance(vector2, list) else vector2
         super().__init__("dot_product", [vector1, vector2])
 
 
 class EuclideanDistance(Function):
     def __init__(self, vector1: Expr, vector2: Expr):
+        vector1 = Constant(vector1) if isinstance(vector1, list) else vector1
+        vector2 = Constant(vector2) if isinstance(vector2, list) else vector2
         super().__init__("euclidean_distance", [vector1, vector2])
 
 
@@ -470,6 +487,8 @@ class CollectionId(Function):
 
 class CosineDistance(Function):
     def __init__(self, vector1: Expr, vector2: Expr):
+        vector1 = Constant(vector1) if isinstance(vector1, list) else vector1
+        vector2 = Constant(vector2) if isinstance(vector2, list) else vector2
         super().__init__("cosine_distance", [vector1, vector2])
 
 
@@ -549,7 +568,7 @@ class Field(Selectable):
         return f"Field.of({self.path!r})"
 
     def _to_pb(self):
-        return Value(field_path=self.path)
+        return Value(field_reference_value=self.path)
 
 
 class FilterCondition(Function):
