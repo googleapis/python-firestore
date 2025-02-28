@@ -19,6 +19,9 @@ from enum import auto
 
 from google.cloud.firestore_v1.types.document import Pipeline
 from google.cloud.firestore_v1.types.document import Value
+from google.cloud.firestore_v1.document import DocumentReference
+from google.cloud.firestore_v1.vector import Vector
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
     Expr,
@@ -27,6 +30,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     FilterCondition,
     Selectable,
     SampleOptions,
+    Ordering
 )
 
 class FindNearestOptions:
@@ -49,11 +53,11 @@ class Stage:
         self.name = custom_name or type(self).__name__.lower()
 
     def _to_pb(self) -> Pipeline.Stage:
-        return Pipeline.Stage(name=self.name, args=[*self._pb_args()], options=self._pb_options())
+        return Pipeline.Stage(name=self.name, args=self._pb_args(), options=self._pb_options())
 
-    def _pb_args(self) -> tuple[Value, ...]:
+    def _pb_args(self) -> list[Value]:
         """Return Ordered list of arguments the given stage expects"""
-        return ()
+        return []
 
     def _pb_options(self) -> dict[str, Value]:
         """Return optional named arguments that certain functions may support."""
@@ -69,7 +73,7 @@ class AddFields(Stage):
         super().__init__("add_fields")
         self.fields = list(fields)
 
-    def _pb_args(self) -> list[Value]:
+    def _pb_args(self):
         return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})]
 
 class Aggregate(Stage):
@@ -83,7 +87,7 @@ class Aggregate(Stage):
         self.groups: list[Selectable] = [Field(f) if isinstance(f, str) else f for f in groups]
         self.accumulators: list[ExprWithAlias[Accumulator]] = [*accumulators, *extra_accumulators]
 
-    def _pb_args(self) -> list[Value]:
+    def _pb_args(self):
         return [
             Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.accumulators]}}),
             Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.groups]}})
@@ -132,30 +136,30 @@ class Distinct(Stage):
 
 
 class Documents(Stage):
-    def __init__(self, *documents: str):
+    def __init__(self, *paths: str):
         super().__init__()
-        self.documents = list(documents)
+        self.paths = paths
 
     @staticmethod
     def of(*documents: "DocumentReference") -> "Documents":
         doc_paths = ["/" + doc.path for doc in documents]
-        return Documents(doc_paths)
+        return Documents(*doc_paths)
 
     def _pb_args(self):
-        return [Value(list_value={"values": [Value(string_value=doc) for doc in self.documents]})]
+        return [Value(list_value={"values": [Value(string_value=path) for path in self.paths]})]
 
 
 class FindNearest(Stage):
     def __init__(
         self,
         property: Expr,
-        vector: List[float],
+        vector: Sequence[float] | Vector,
         distance_measure: "DistanceMeasure",
         options: Optional["FindNearestOptions"] = None,
     ):
         super().__init__("find_nearest")
         self.property = property
-        self.vector = vector
+        self.vector: Vector = vector if isinstance(vector, Vector) else Vector(vector)
         self.distance_measure = distance_measure
         self.options = options or FindNearestOptions()
 
