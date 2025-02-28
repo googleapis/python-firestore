@@ -67,13 +67,9 @@ def _apply_yaml_args(cls, yaml_args):
     elif isinstance(yaml_args, list):
         # yaml has an array of arguments. Treat as args
         return cls(*parse_expressions(yaml_args))
-    elif yaml_args is not None:
+    else:
         # yaml has a single argument
         return cls(parse_expressions(yaml_args))
-    else:
-        # no arguments
-        return cls()
-
 
 def parse_pipeline(pipeline: list[dict[str, Any], str]):
     """

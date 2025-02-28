@@ -13,15 +13,18 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar, List, Dict, Tuple
+from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar, List, Dict, Tuple, Sequence
 from enum import Enum
 from enum import auto
 import datetime
 from dataclasses import dataclass
 from google.cloud.firestore_v1.types.document import Value
+from google.cloud.firestore_v1.vector import Vector
+from google.cloud.firestore_v1._helpers import GeoPoint
+from google.cloud.firestore_v1._helpers import encode_value
 
-CONSTANT_ELEMENTS = Union[str, int, float, bool, datetime.datetime, bytes, tuple[float, float], None]
-CONSTANT_TYPES = Union[CONSTANT_ELEMENTS, list[Union[CONSTANT_ELEMENTS, list, dict]], dict[str, Union[CONSTANT_ELEMENTS, list, dict]]]
+CONSTANT_TYPE = TypeVar('CONSTANT_TYPE', str, int, float, bool, datetime.datetime, bytes, GeoPoint, Vector, list, Dict[str, Any], None)
+
 
 class Ordering:
 
@@ -77,61 +80,61 @@ class Expr:
     def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
         return o if isinstance(o, Expr) else Constant(o)
 
-    def add(self, other: Any) -> "Add":
+    def add(self, other: Expr | float) -> "Add":
         return Add(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def subtract(self, other: Any) -> "Subtract":
+    def subtract(self, other: Expr | float) -> "Subtract":
         return Subtract(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def multiply(self, other: Any) -> "Multiply":
+    def multiply(self, other: Expr | float) -> "Multiply":
         return Multiply(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def divide(self, other: Any) -> "Divide":
+    def divide(self, other: Expr | float) -> "Divide":
         return Divide(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def mod(self, other: Any) -> "Mod":
+    def mod(self, other: Expr | float) -> "Mod":
         return Mod(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def logical_max(self, other: Any) -> "LogicalMax":
+    def logical_max(self, other: Expr | CONSTANT_TYPE) -> "LogicalMax":
         return LogicalMax(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def logical_min(self, other: Any) -> "LogicalMin":
+    def logical_min(self, other: Expr | CONSTANT_TYPE) -> "LogicalMin":
         return LogicalMin(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def eq(self, other: Any) -> "Eq":
+    def eq(self, other: Expr | CONSTANT_TYPE) -> "Eq":
         return Eq(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def neq(self, other: Any) -> "Neq":
+    def neq(self, other: Expr | CONSTANT_TYPE) -> "Neq":
         return Neq(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def gt(self, other: Any) -> "Gt":
+    def gt(self, other: Expr | CONSTANT_TYPE) -> "Gt":
         return Gt(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def gte(self, other: Any) -> "Gte":
+    def gte(self, other: Expr | CONSTANT_TYPE) -> "Gte":
         return Gte(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def lt(self, other: Any) -> "Lt":
+    def lt(self, other: Expr | CONSTANT_TYPE) -> "Lt":
         return Lt(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def lte(self, other: Any) -> "Lte":
+    def lte(self, other: Expr | CONSTANT_TYPE) -> "Lte":
         return Lte(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def in_(self, *others: Any) -> "In":
+    def in_any(self, *others: Expr | CONSTANT_TYPE) -> "In":
         return In(self, [self._cast_to_expr_or_convert_to_constant(o) for o in others])
 
-    def not_in(self, *others: Any) -> "Not":
-        return Not(self.in_(*others))
+    def not_in_any(self, *others: Expr | CONSTANT_TYPE) -> "Not":
+        return Not(self.in_any(*others))
 
-    def array_concat(self, array: List[Any]) -> "ArrayConcat":
+    def array_concat(self, array: List[Expr | CONSTANT_TYPE]) -> "ArrayConcat":
         return ArrayConcat(self, [self._cast_to_expr_or_convert_to_constant(o) for o in array])
 
-    def array_contains(self, element: Any) -> "ArrayContains":
+    def array_contains(self, element: Expr | CONSTANT_TYPE) -> "ArrayContains":
         return ArrayContains(self, self._cast_to_expr_or_convert_to_constant(element))
 
-    def array_contains_all(self, elements: List[Any]) -> "ArrayContainsAll":
+    def array_contains_all(self, elements: List[Expr | CONSTANT_TYPE]) -> "ArrayContainsAll":
         return ArrayContainsAll(self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements])
 
-    def array_contains_any(self, elements: List[Any]) -> "ArrayContainsAny":
+    def array_contains_any(self, elements: List[Expr | CONSTANT_TYPE]) -> "ArrayContainsAny":
         return ArrayContainsAny(self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements])
 
     def array_length(self) -> "ArrayLength":
@@ -167,25 +170,25 @@ class Expr:
     def byte_length(self) -> "ByteLength":
         return ByteLength(self)
 
-    def like(self, pattern: Any) -> "Like":
+    def like(self, pattern: Expr | str) -> "Like":
         return Like(self, self._cast_to_expr_or_convert_to_constant(pattern))
 
-    def regex_contains(self, regex: Any) -> "RegexContains":
+    def regex_contains(self, regex: Expr | str) -> "RegexContains":
         return RegexContains(self, self._cast_to_expr_or_convert_to_constant(regex))
 
-    def regex_matches(self, regex: Any) -> "RegexMatch":
+    def regex_matches(self, regex: Expr | str) -> "RegexMatch":
         return RegexMatch(self, self._cast_to_expr_or_convert_to_constant(regex))
 
-    def str_contains(self, substring: Any) -> "StrContains":
+    def str_contains(self, substring: Expr | str) -> "StrContains":
         return StrContains(self, self._cast_to_expr_or_convert_to_constant(substring))
 
-    def starts_with(self, prefix: Any) -> "StartsWith":
+    def starts_with(self, prefix: Expr | str) -> "StartsWith":
         return StartsWith(self, self._cast_to_expr_or_convert_to_constant(prefix))
 
-    def ends_with(self, postfix: Any) -> "EndsWith":
+    def ends_with(self, postfix: Expr | str) -> "EndsWith":
         return EndsWith(self, self._cast_to_expr_or_convert_to_constant(postfix))
 
-    def str_concat(self, *elements: Any) -> "StrConcat":
+    def str_concat(self, *elements: Expr | CONSTANT_TYPE) -> "StrConcat":
         return StrConcat(*[self._cast_to_expr_or_convert_to_constant(el) for el in elements])
 
     def to_lower(self) -> "ToLower":
@@ -200,22 +203,22 @@ class Expr:
     def reverse(self) -> "Reverse":
         return Reverse(self)
 
-    def replace_first(self, find: Any, replace: Any) -> "ReplaceFirst":
+    def replace_first(self, find: Expr | str, replace: Expr | str) -> "ReplaceFirst":
         return ReplaceFirst(self, self._cast_to_expr_or_convert_to_constant(find), self._cast_to_expr_or_convert_to_constant(replace))
 
-    def replace_all(self, find: Any, replace: Any) -> "ReplaceAll":
+    def replace_all(self, find: Expr | str, replace: Expr | str) -> "ReplaceAll":
         return ReplaceAll(self, self._cast_to_expr_or_convert_to_constant(find), self._cast_to_expr_or_convert_to_constant(replace))
 
     def map_get(self, key: str) -> "MapGet":
         return MapGet(self, key)
 
-    def cosine_distance(self, other: Any) -> "CosineDistance":
+    def cosine_distance(self, other: Expr | list[float] | Vector) -> "CosineDistance":
         return CosineDistance(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def euclidean_distance(self, other: Any) -> "EuclideanDistance":
+    def euclidean_distance(self, other: Expr | list[float] | Vector) -> "EuclideanDistance":
         return EuclideanDistance(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def dot_product(self, other: Any) -> "DotProduct":
+    def dot_product(self, other: Expr | list[float] | Vector) -> "DotProduct":
         return DotProduct(self, self._cast_to_expr_or_convert_to_constant(other))
 
     def vector_length(self) -> "VectorLength":
@@ -239,10 +242,10 @@ class Expr:
     def unix_seconds_to_timestamp(self) -> "UnixSecondsToTimestamp":
         return UnixSecondsToTimestamp(self)
 
-    def timestamp_add(self, unit: Any, amount: Any) -> "TimestampAdd":
+    def timestamp_add(self, unit: Expr | str, amount: Expr | float) -> "TimestampAdd":
         return TimestampAdd(self, self._cast_to_expr_or_convert_to_constant(unit), self._cast_to_expr_or_convert_to_constant(amount))
 
-    def timestamp_sub(self, unit: Any, amount: Any) -> "TimestampSub":
+    def timestamp_sub(self, unit: Expr | str, amount: Expr | float) -> "TimestampSub":
         return TimestampSub(self, self._cast_to_expr_or_convert_to_constant(unit), self._cast_to_expr_or_convert_to_constant(amount))
 
     def ascending(self) -> Ordering:
@@ -254,46 +257,23 @@ class Expr:
     def as_(self, alias: str) -> "ExprWithAlias":
         return ExprWithAlias(self, alias)
 
-
-class Constant(Expr):
-    def __init__(self, value: CONSTANT_TYPES=None):
-        self.value = value
+class Constant(Expr, Generic[CONSTANT_TYPE]):
+    def __init__(self, value: CONSTANT_TYPE):
+        self.value: CONSTANT_TYPE = value
 
     @staticmethod
-    def of(value:CONSTANT_TYPES):
+    def of(value:CONSTANT_TYPE) -> Constant[CONSTANT_TYPE]:
         return Constant(value)
 
     def __repr__(self):
         return f"Constant.of({self.value!r})"
 
-    def _to_pb(self):
-        if self.value is None:
-            return Value(null_value=0)
-        elif isinstance(self.value, bool):
-            return Value(boolean_value=self.value)
-        elif isinstance(self.value, int):
-            return Value(integer_value=self.value)
-        elif isinstance(self.value, float):
-            return Value(double_value=self.value)
-        elif isinstance(self.value, datetime.datetime):
-            return Value(timestamp_value=self.value.timestamp())
-        elif isinstance(self.value, str):
-            return Value(string_value=self.value)
-        elif isinstance(self.value, bytes):
-            return Value(bytes_value=self.value)
-        elif isinstance(self.value, tuple) and len(self.value) == 2 and isinstance(self.value[0], float) and isinstance(self.value[1], float):
-            return Value(geo_point_value=self.value)
-        elif isinstance(self.value, list):
-            return Value(array_value={"values":[Constant(v)._to_pb() for v in self.value]})
-        elif isinstance(self.value, dict):
-            return Value(map_value={"fields": {k: Constant(v)._to_pb() for k, v in self.value.items()}})
-        else:
-            raise ValueError(f"Unsupported type: {type(self.value)}")
-
+    def _to_pb(self) -> Value:
+        return encode_value(self.value)
 
 class ListOfExprs(Expr):
     def __init__(self, exprs: List[Expr]):
-        self.exprs: list[Expr] = [Field.of(e) if isinstance(e, str) else e for e in exprs]
+        self.exprs: list[Expr] = exprs
 
     def _to_pb(self):
         return Value(array_value={"values": [e._to_pb() for e in self.exprs]})
@@ -302,9 +282,9 @@ class ListOfExprs(Expr):
 class Function(Expr):
     """A type of Expression that takes in inputs and gives outputs."""
 
-    def __init__(self, name: str, params: List[Expr]):
+    def __init__(self, name: str, params: Sequence[Expr]):
         self.name = name
-        self.params = [Field.of(p) if isinstance(p, str) else p for p in params]
+        self.params = list(params)
 
     def __repr__(self):
         return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
@@ -323,15 +303,11 @@ class Divide(Function):
 
 class DotProduct(Function):
     def __init__(self, vector1: Expr, vector2: Expr):
-        vector1 = Constant(vector1) if isinstance(vector1, list) else vector1
-        vector2 = Constant(vector2) if isinstance(vector2, list) else vector2
         super().__init__("dot_product", [vector1, vector2])
 
 
 class EuclideanDistance(Function):
     def __init__(self, vector1: Expr, vector2: Expr):
-        vector1 = Constant(vector1) if isinstance(vector1, list) else vector1
-        vector2 = Constant(vector2) if isinstance(vector2, list) else vector2
         super().__init__("euclidean_distance", [vector1, vector2])
 
 
@@ -502,8 +478,6 @@ class CollectionId(Function):
 
 class CosineDistance(Function):
     def __init__(self, vector1: Expr, vector2: Expr):
-        vector1 = Constant(vector1) if isinstance(vector1, list) else vector1
-        vector2 = Constant(vector2) if isinstance(vector2, list) else vector2
         super().__init__("cosine_distance", [vector1, vector2])
 
 
@@ -532,7 +506,7 @@ class Avg(Accumulator):
 
 
 class Count(Accumulator):
-    def __init__(self, value: Expr = None):
+    def __init__(self, value: Expr | None = None):
         super().__init__("count", [value] if value else [])
 
 

@@ -147,10 +147,12 @@ tests:
             - Count
             - "count"
         - ExprWithAlias:
-            - Avg: rating
+            - Avg: 
+              - Field: rating
             - "avg_rating"
         - ExprWithAlias:
-            - Max: rating
+            - Max: 
+              - Field: rating
             - "max_rating"
     results:
       - count: 2
@@ -190,11 +192,12 @@ tests:
               - Field: published
               - Constant: 1984
       - Aggregate:
-        accumulators:
-          - ExprWithAlias:
-            - Avg: rating
-            - "avg_rating"
-        groups: [genre]
+          accumulators:
+            - ExprWithAlias:
+              - Avg:
+                - Field: rating
+              - "avg_rating"
+          groups: [genre]
       - Where:
           - Gt:
               - Field: avg_rating
@@ -214,10 +217,12 @@ tests:
               - Count
               - "count"
           - ExprWithAlias:
-              - Max: rating
+              - Max:
+                - Field: rating
               - "max_rating"
           - ExprWithAlias:
-              - Min: published
+              - Min:
+                - Field: published
               - "min_published"
     results:
       - count: 10
@@ -369,8 +374,8 @@ tests:
       - Collection: books
       - Where:
           - ArrayContains:
-              - tags
-              - comedy
+              - Constant: tags
+              - Constant: comedy
     results:
       - title: The Hitchhiker's Guide to the Galaxy
         author: Douglas Adams
@@ -389,8 +394,9 @@ tests:
       - Collection: books
       - Where:
           - ArrayContainsAny:
-            - tags
-            - ["comedy", "classic"]
+            - Field: tags
+            - - Constant: comedy
+              - Constant: classic
       - Select:
         - title
     results:
@@ -402,7 +408,8 @@ tests:
       - Where:
           - ArrayContainsAll:
               - Field: tags
-              - ["adventure", "magic"]
+              - - Constant: adventure
+                - Constant: magic
       - Select:
         - title
     results:
@@ -437,7 +444,8 @@ tests:
         - ExprWithAlias:
             - ArrayConcat:
                 - Field: tags
-                - ["newTag1", "newTag2"]
+                - - Constant: newTag1
+                  - Constant: newTag2
             - "modifiedTags"
       - Limit: 1
     results:
@@ -533,8 +541,8 @@ tests:
         - ExprWithAlias:
             - ReplaceFirst:
                 - Field: title
-                - The
-                - A
+                - Constant: The
+                - Constant: A
             - "replaced_title"
       - Where:
           - Eq:
@@ -549,8 +557,8 @@ tests:
         - ExprWithAlias:
             - ReplaceAll:
                 - Field: title
-                - " "
-                - "_"
+                - Constant: " "
+                - Constant: "_"
             - "replaced_title"
       - Where:
           - Eq:
@@ -835,18 +843,18 @@ tests:
       - Select:
           - ExprWithAlias:
               - CosineDistance:
-                - [0.1, 0.1]
-                - [0.5, 0.8]
+                - Constant: [[0.1, 0.1]]
+                - Constant: [[0.5, 0.8]]
               - "cosineDistance"
           - ExprWithAlias:
               - DotProduct:
-                - [0.1, 0.1]
-                - [0.5, 0.8]
+                - Constant: [[0.1, 0.1]]
+                - Constant: [[0.5, 0.8]]
               - "dotProductDistance"
           - ExprWithAlias:
               - EuclideanDistance:
-                - [0.1, 0.1]
-                - [0.5, 0.8]
+                - Constant: [[0.1, 0.1]]
+                - Constant: [[0.5, 0.8]]
               - "euclideanDistance"
       - Limit: 1
     results:
@@ -890,7 +898,7 @@ tests:
       - Where:
         - Eq:
           - Field: title
-          - "The Hitchhiker's Guide to the Galaxy"
+          - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Replace: awards
     results:
       - title: The Hitchhiker's Guide to the Galaxy
