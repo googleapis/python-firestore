@@ -117,22 +117,22 @@ class Expr:
         return Lte(self, self._cast_to_expr_or_convert_to_constant(other))
 
     def in_(self, *others: Any) -> "In":
-        return In(self, ListOfExprs([self._cast_to_expr_or_convert_to_constant(o) for o in others]))
+        return In(self, [self._cast_to_expr_or_convert_to_constant(o) for o in others])
 
     def not_in(self, *others: Any) -> "Not":
         return Not(self.in_(*others))
 
     def array_concat(self, array: List[Any]) -> "ArrayConcat":
-        return ArrayConcat(self, ListOfExprs([self._cast_to_expr_or_convert_to_constant(o) for o in array]))
+        return ArrayConcat(self, [self._cast_to_expr_or_convert_to_constant(o) for o in array])
 
     def array_contains(self, element: Any) -> "ArrayContains":
         return ArrayContains(self, self._cast_to_expr_or_convert_to_constant(element))
 
     def array_contains_all(self, elements: List[Any]) -> "ArrayContainsAll":
-        return ArrayContainsAll(self, ListOfExprs([self._cast_to_expr_or_convert_to_constant(e) for e in elements]))
+        return ArrayContainsAll(self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements])
 
     def array_contains_any(self, elements: List[Any]) -> "ArrayContainsAny":
-        return ArrayContainsAny(self, ListOfExprs([self._cast_to_expr_or_convert_to_constant(e) for e in elements]))
+        return ArrayContainsAny(self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements])
 
     def array_length(self) -> "ArrayLength":
         return ArrayLength(self)
@@ -246,10 +246,10 @@ class Expr:
         return TimestampSub(self, self._cast_to_expr_or_convert_to_constant(unit), self._cast_to_expr_or_convert_to_constant(amount))
 
     def ascending(self) -> Ordering:
-        return Ordering.ascending(self)
+        return Ordering(self, Ordering.Direction.ASCENDING)
 
     def descending(self) -> Ordering:
-        return Ordering.descending(self)
+        return Ordering(self, Ordering.Direction.DESCENDING)
 
     def as_(self, alias: str) -> "ExprWithAlias":
         return ExprWithAlias(self, alias)
