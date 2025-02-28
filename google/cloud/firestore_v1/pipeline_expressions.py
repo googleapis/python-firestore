@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar, List, Dict, Tuple, Sequence
+from abc import ABC
+from abc import abstractmethod
 from enum import Enum
 from enum import auto
 import datetime
@@ -65,7 +67,7 @@ class SampleOptions:
     def __post_init__(self):
         self.mode = SampleOptions.Mode(self.mode) if isinstance(self.mode, str) else self.mode
 
-class Expr:
+class Expr(ABC):
     """Represents an expression that can be evaluated to a value within the
     execution of a pipeline.
     """
@@ -73,6 +75,7 @@ class Expr:
     def __repr__(self):
         return f"{self.__class__.__name__}()"
 
+    @abstractmethod
     def _to_pb(self) -> Value:
         raise NotImplementedError
 
@@ -518,6 +521,7 @@ class CountIf(Function):
 class Selectable(Expr):
     """Points at something in the database?"""
 
+    @abstractmethod
     def _to_map(self):
         raise NotImplementedError
 
