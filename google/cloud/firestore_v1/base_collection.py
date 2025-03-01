@@ -35,6 +35,8 @@ from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.base_query import QueryType
+from google.cloud.firestore_v1.pipeline import Pipeline
+from google.cloud.firestore_v1.pipeline_stages import Collection as CollectionStage
 
 if TYPE_CHECKING:  # pragma: NO COVER
     # Types needed only for Type Hints
@@ -589,6 +591,11 @@ class BaseCollectionReference(Generic[QueryType]):
             distance_result_field=distance_result_field,
             distance_threshold=distance_threshold,
         )
+
+    def pipeline(self) -> Pipeline:
+        path_str = "/".join(self._path)
+        # TODO: add other query fields
+        return Pipeline(self._client, CollectionStage(path_str))
 
 
 def _auto_id() -> str:

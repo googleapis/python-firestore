@@ -13,9 +13,11 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import AsyncIterable, Any, Dict, Iterable, List, Optional, Sequence
 from google.cloud.firestore_v1 import pipeline_stages as stages
-from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
+from google.cloud.firestore_v1.types.pipeline import StructuredPipeline as StructuredPipeline_pb
+from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
+from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.pipeline_expressions import (
@@ -30,7 +32,8 @@ from google.cloud.firestore_v1.pipeline_expressions import (
 
 
 class Pipeline:
-    def __init__(self, *stages: stages.Stage):
+    def __init__(self, client, *stages: stages.Stage):
+        self._client = client
         self.stages = list(stages)
 
     def __repr__(self):
@@ -42,8 +45,8 @@ class Pipeline:
             stages_str = ",\n  ".join([repr(s) for s in self.stages])
             return f"Pipeline(\n  {stages_str}\n)"
 
-    def _to_pb(self) -> Pipeline_pb:
-        return Pipeline_pb(stages=[s._to_pb() for s in self.stages])
+    def _to_pb(self) -> StructuredPipeline_pb:
+        return StructuredPipeline_pb(pipeline={"stages":[s._to_pb() for s in self.stages]})
 
     def add_fields(self, *fields: Selectable) -> Pipeline:
         self.stages.append(stages.AddFields(*fields))
@@ -124,8 +127,18 @@ class Pipeline:
         self.stages.append(stages.Distinct(*fields))
         return self
 
-    def execute(self) -> list["PipelineResult"]:
-        return []
+    def execute(self) -> Iterable["ExecutePipelineResponse"]:
+        breakpoint()
+        request = ExecutePipelineRequest(
+            database=self._client._database,
+            structured_pipeline=self._to_pb(),
+            transaction=b"test",
+        )
+        results = self._client._firestore_api.execute_pipeline(request)
+        print(request)
+        return results
 
-    async def execute_async(self) -> List["PipelineResult"]:
-        return []
+    async def execute_async(self) -> AsyncIterable["ExecutePipelineResponse"]:
+        from google.cloud.firestore_v1.async_client import AsyncClient
+        if not isinstance(self._client, AsyncClient):
+            raise TypeError("execute_async requires AsyncClient")

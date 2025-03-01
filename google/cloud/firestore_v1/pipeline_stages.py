@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, Dict, Iterable, List, Optional, Sequence
+from typing import Any, Dict, Iterable, List, Optional, Sequence, TYPE_CHECKING
 from enum import Enum
 from enum import auto
 
@@ -22,7 +22,6 @@ from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
-from google.cloud.firestore_v1.pipeline import Pipeline
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
     Expr,
@@ -33,6 +32,10 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     SampleOptions,
     Ordering
 )
+
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.pipeline import Pipeline
+
 
 class FindNearestOptions:
     def __init__(

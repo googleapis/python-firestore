@@ -71,7 +71,7 @@ def _apply_yaml_args(cls, yaml_args):
         # yaml has a single argument
         return cls(parse_expressions(yaml_args))
 
-def parse_pipeline(pipeline: list[dict[str, Any], str]):
+def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
     """
     parse a yaml list of pipeline stages into firestore.pipeline_stages.Stage classes
     """
@@ -89,7 +89,7 @@ def parse_pipeline(pipeline: list[dict[str, Any], str]):
             # yaml has no arguments
             stage_obj = stage_cls()
         result_list.append(stage_obj)
-    return Pipeline(*result_list)
+    return Pipeline(client, *result_list)
 
 def _is_expr_string(yaml_str):
     return isinstance(yaml_str, str) and \
@@ -122,7 +122,8 @@ def parse_expressions(yaml_element: Any):
     "test_dict", loader(), ids=lambda x: f"{x.get('description', '')}"
 )
 def test_e2e_scenario(test_dict):
-    pipeline = parse_pipeline(test_dict["pipeline"])
+    client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
+    pipeline = parse_pipeline(client, test_dict["pipeline"])
     print(pipeline._to_pb())
 
     # before_ast = ast.parse(test_dict["before"])
