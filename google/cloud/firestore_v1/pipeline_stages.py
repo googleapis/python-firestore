@@ -17,11 +17,12 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence
 from enum import Enum
 from enum import auto
 
-from google.cloud.firestore_v1.types.document import Pipeline
+from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+from google.cloud.firestore_v1.pipeline import Pipeline
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
     Expr,
@@ -52,8 +53,8 @@ class Stage:
     def __init__(self, custom_name: Optional[str] = None):
         self.name = custom_name or type(self).__name__.lower()
 
-    def _to_pb(self) -> Pipeline.Stage:
-        return Pipeline.Stage(name=self.name, args=self._pb_args(), options=self._pb_options())
+    def _to_pb(self) -> Pipeline_pb.Stage:
+        return Pipeline_pb.Stage(name=self.name, args=self._pb_args(), options=self._pb_options())
 
     def _pb_args(self) -> list[Value]:
         """Return Ordered list of arguments the given stage expects"""
@@ -152,20 +153,20 @@ class Documents(Stage):
 class FindNearest(Stage):
     def __init__(
         self,
-        property: Expr,
+        field: str | Expr,
         vector: Sequence[float] | Vector,
         distance_measure: "DistanceMeasure",
         options: Optional["FindNearestOptions"] = None,
     ):
         super().__init__("find_nearest")
-        self.property = property
+        self.field: Expr = Field(field) if isinstance(field, str) else field
         self.vector: Vector = vector if isinstance(vector, Vector) else Vector(vector)
         self.distance_measure = distance_measure
         self.options = options or FindNearestOptions()
 
     def _pb_args(self):
         return [
-            self.property._to_pb(),
+            self.field._to_pb(),
             Value(array_value={"values": self.vector}),
             Value(string_value=self.distance_measure.value),
         ]
@@ -179,9 +180,9 @@ class FindNearest(Stage):
         return options
 
 class GenericStage(Stage):
-    def __init__(self, name: str, *params: Value):
+    def __init__(self, name: str, *params: Expr | Value):
         super().__init__(name)
-        self.params = list(params)
+        self.params: list[Value] = [p._to_pb() if isinstance(p, Expr) else p for p in params]
 
     def _pb_args(self):
         return self.params
@@ -244,9 +245,9 @@ class Sample(Stage):
 
 
 class Select(Stage):
-    def __init__(self, *fields: str | Selectable):
+    def __init__(self, *selections: str | Selectable):
         super().__init__()
-        self.projections = [Field(f) if isinstance(f, str) else f for f in fields]
+        self.projections = [Field(s) if isinstance(s, str) else s for s in selections]
 
     def _pb_args(self) -> list[Value]:
         return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.projections]}})]
@@ -262,7 +263,7 @@ class Sort(Stage):
 
 
 class Union(Stage):
-    def __init__(self, other: "Pipeline"):
+    def __init__(self, other: Pipeline):
         super().__init__()
         self.other = other
 

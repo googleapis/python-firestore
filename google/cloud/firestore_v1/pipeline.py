@@ -13,9 +13,11 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any, Dict, Iterable, List, Optional, Sequence
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
+from google.cloud.firestore_v1.vector import Vector
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
     Expr,
@@ -43,16 +45,16 @@ class Pipeline:
     def _to_pb(self) -> Pipeline_pb:
         return Pipeline_pb(stages=[s._to_pb() for s in self.stages])
 
-    def add_fields(self, fields: Dict[str, Expr]) -> Pipeline:
-        self.stages.append(stages.AddFields(fields))
+    def add_fields(self, *fields: Selectable) -> Pipeline:
+        self.stages.append(stages.AddFields(*fields))
         return self
 
-    def remove_fields(self, fields: List[Field]) -> Pipeline:
-        self.stages.append(stages.RemoveFields(fields))
+    def remove_fields(self, *fields: Field | str) -> Pipeline:
+        self.stages.append(stages.RemoveFields(*fields))
         return self
 
-    def select(self, projections: Dict[str, Expr]) -> Pipeline:
-        self.stages.append(stages.Select(projections))
+    def select(self, *selections: str | Selectable) -> Pipeline:
+        self.stages.append(stages.Select(*selections))
         return self
 
     def where(self, condition: FilterCondition) -> Pipeline:
@@ -62,16 +64,16 @@ class Pipeline:
     def find_nearest(
         self,
         field: str | Expr,
-        vector: "Vector",
-        distance_measure: "FindNearest.DistanceMeasure",
+        vector: Sequence[float] | "Vector",
+        distance_measure: "DistanceMeasure",
         limit: int | None,
         options: Optional[stages.FindNearestOptions] = None,
     ) -> Pipeline:
         self.stages.append(stages.FindNearest(field, vector, distance_measure, options))
         return self
 
-    def sort(self, orders: List[stages.Ordering]) -> Pipeline:
-        self.stages.append(stages.Sort(orders))
+    def sort(self, *orders: stages.Ordering) -> Pipeline:
+        self.stages.append(stages.Sort(*orders))
         return self
 
     def replace(
@@ -98,8 +100,8 @@ class Pipeline:
         self.stages.append(stages.Unnest(field_name, options))
         return self
 
-    def generic_stage(self, name: str, params: List[Any]) -> Pipeline:
-        self.stages.append(stages.GenericStage(name, params))
+    def generic_stage(self, name: str, *params: Expr) -> Pipeline:
+        self.stages.append(stages.GenericStage(name, *params))
         return self
 
     def offset(self, offset: int) -> Pipeline:
@@ -112,13 +114,14 @@ class Pipeline:
 
     def aggregate(
         self,
-        accumulators: Optional[Dict[str, Accumulator]] = None,
+        *accumulators: ExprWithAlias[Accumulator],
+        groups: Sequence[str | Selectable] = (),
     ) -> Pipeline:
-        self.stages.append(stages.Aggregate(accumulators=accumulators))
+        self.stages.append(stages.Aggregate(*accumulators, groups=groups))
         return self
 
-    def distinct(self, fields: Dict[str, Expr]) -> Pipeline:
-        self.stages.append(stages.Distinct(fields))
+    def distinct(self, *fields: str | Selectable) -> Pipeline:
+        self.stages.append(stages.Distinct(*fields))
         return self
 
     def execute(self) -> list["PipelineResult"]:
