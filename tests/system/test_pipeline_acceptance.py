@@ -61,15 +61,15 @@ def loader():
                 document_ref.delete()
 
 
-def _apply_yaml_args(cls, yaml_args):
+def _apply_yaml_args(cls, client, yaml_args):
     if isinstance(yaml_args, dict):
-        return cls(**parse_expressions(yaml_args))
+        return cls(**parse_expressions(client, yaml_args))
     elif isinstance(yaml_args, list):
         # yaml has an array of arguments. Treat as args
-        return cls(*parse_expressions(yaml_args))
+        return cls(*parse_expressions(client, yaml_args))
     else:
         # yaml has a single argument
-        return cls(parse_expressions(yaml_args))
+        return cls(parse_expressions(client, yaml_args))
 
 def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
     """
@@ -84,7 +84,7 @@ def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
         # find arguments if given
         if isinstance(stage, dict):
             stage_yaml_args = stage[stage_name]
-            stage_obj = _apply_yaml_args(stage_cls, stage_yaml_args)
+            stage_obj = _apply_yaml_args(stage_cls, client, stage_yaml_args)
         else:
             # yaml has no arguments
             stage_obj = stage_cls()
@@ -96,22 +96,23 @@ def _is_expr_string(yaml_str):
             yaml_str[0].isupper() and \
             hasattr(pipeline_expressions, yaml_str)
 
-def parse_expressions(yaml_element: Any):
+def parse_expressions(client, yaml_element: Any):
     if isinstance(yaml_element, list):
-        return [parse_expressions(v) for v in yaml_element]
+        return [parse_expressions(client, v) for v in yaml_element]
     elif isinstance(yaml_element, dict):
         if len(yaml_element) == 1 and _is_expr_string(list(yaml_element)[0]):
             # build pipeline expressions if possible
             cls_str = list(yaml_element)[0]
             cls = getattr(pipeline_expressions, cls_str)
             yaml_args = yaml_element[cls_str]
-            return _apply_yaml_args(cls, yaml_args)
+            return _apply_yaml_args(cls, client, yaml_args)
         elif len(yaml_element) == 1 and list(yaml_element)[0] == "Pipeline":
             # find Pipeline objects for Union expressions
-            return parse_pipeline(yaml_element["Pipeline"])
+            other_ppl = yaml_element["Pipeline"]
+            return parse_pipeline(client, other_ppl)
         else:
             # otherwise, return dict
-            return {parse_expressions(k): parse_expressions(v) for k,v in yaml_element.items()}
+            return {parse_expressions(client, k): parse_expressions(client, v) for k,v in yaml_element.items()}
     elif _is_expr_string(yaml_element):
         return getattr(pipeline_expressions, yaml_element)()
     else:
