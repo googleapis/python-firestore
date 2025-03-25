@@ -126,6 +126,7 @@ def test_e2e_scenario(test_dict):
     client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     print(pipeline._to_pb())
+    pipeline.execute()
 
     # before_ast = ast.parse(test_dict["before"])
     # got_ast = before_ast

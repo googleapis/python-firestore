@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
+import datetime
 from typing import AsyncIterable, Any, Dict, Iterable, List, Optional, Sequence
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import StructuredPipeline as StructuredPipeline_pb
@@ -128,14 +129,13 @@ class Pipeline:
         return self
 
     def execute(self) -> Iterable["ExecutePipelineResponse"]:
-        breakpoint()
+        database_name = f"projects/{self._client.project}/databases/{self._client._database}"
         request = ExecutePipelineRequest(
-            database=self._client._database,
+            database=database_name,
             structured_pipeline=self._to_pb(),
-            transaction=b"test",
+            read_time=datetime.datetime.now(),
         )
         results = self._client._firestore_api.execute_pipeline(request)
-        print(request)
         return results
 
     async def execute_async(self) -> AsyncIterable["ExecutePipelineResponse"]:
