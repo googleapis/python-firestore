@@ -271,7 +271,7 @@ class Union(Stage):
         self.other = other
 
     def _pb_args(self):
-        return [Value(pipeline_value=self.other._to_pb())]
+        return [Value(pipeline_value=self.other._to_pb().pipeline)]
 
 
 class Unnest(Stage):
