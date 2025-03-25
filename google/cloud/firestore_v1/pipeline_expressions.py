@@ -31,8 +31,8 @@ CONSTANT_TYPE = TypeVar('CONSTANT_TYPE', str, int, float, bool, datetime.datetim
 class Ordering:
 
     class Direction(Enum):
-        ASCENDING = auto()
-        DESCENDING = auto()
+        ASCENDING = "ascending"
+        DESCENDING = "descending"
 
     def __init__(self, expr, order_dir: Direction | str):
         self.expr = expr if isinstance(expr, Expr) else Field.of(expr)
@@ -49,7 +49,7 @@ class Ordering:
         return Value(
             map_value={"fields":
                 {
-                    "direction": Value(string_value=self.order_dir.name),
+                    "direction": Value(string_value=self.order_dir.value),
                     "expression": self.expr._to_pb()
                 }
             }
@@ -316,12 +316,12 @@ class EuclideanDistance(Function):
 
 class LogicalMax(Function):
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("logical_max", [left, right])
+        super().__init__("logical_maximum", [left, right])
 
 
 class LogicalMin(Function):
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("logical_min", [left, right])
+        super().__init__("logical_minimum", [left, right])
 
 
 class MapGet(Function):
@@ -490,12 +490,12 @@ class Accumulator(Function):
 
 class Max(Accumulator):
     def __init__(self, value: Expr, distinct: bool=False):
-        super().__init__("max", [value])
+        super().__init__("maximum", [value])
 
 
 class Min(Accumulator):
     def __init__(self, value: Expr, distinct: bool=False):
-        super().__init__("min", [value])
+        super().__init__("minimum", [value])
 
 
 class Sum(Accumulator):
