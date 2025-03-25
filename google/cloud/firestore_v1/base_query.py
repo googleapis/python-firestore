@@ -57,6 +57,7 @@ from google.cloud.firestore_v1.types import (
     query,
 )
 from google.cloud.firestore_v1.vector import Vector
+from google.cloud.firestore_v1.pipeline import Pipeline
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
@@ -1102,6 +1103,70 @@ class BaseQuery(object):
             )
 
         return copied
+
+    def pipeline(self) -> Pipeline:
+        # TODO: add extensive tests
+        ppl = Pipeline(self._client)
+        if self._all_descendants:
+            ppl = ppl.collection_group(self._parent.id)
+        else:
+            ppl = ppl.collection("/".join(self._parent._path))
+
+        # Filters
+        for filter in self._field_filters:
+            ppl = ppl.where(filter)
+
+        # Projections
+        if self._projection and self._projection.fields:
+            ppl = ppl.select(
+                *[
+                    field.field_path
+                    for field in self._projection.fields
+                ]
+            )
+
+        # Orders
+        orders = self._normalize_orders()
+        if orders:
+            # Add exists filters to match Query's implicit orderby semantics.
+            exists = []
+            for order in orders:
+                # skip __name__
+                if order.field.field_path == "__name__":
+                    continue
+                exists.append(field_path_module.FieldPath(order.field.field_path).exists())
+
+            if len(exists) > 1:
+                ppl = ppl.where(field_path_module.And(*exists))
+            elif len(exists) == 1:
+                ppl = ppl.where(exists[0])
+
+            orderings = []
+            for order in orders:
+                direction = (
+                    "asc" if order.direction == StructuredQuery.Direction.ASCENDING else "desc"
+                )
+                orderings.append(
+                    getattr(field_path_module.FieldPath(order.field.field_path), direction)()
+                )
+            ppl = ppl.sort(*orderings)
+
+        # Cursors, Limit and Offset
+        if self._start_at or self._end_at or self._limit_to_last:
+            ppl = ppl.paginate(
+                start_at=self._start_at,
+                end_at=self._end_at,
+                limit=self._limit,
+                limit_to_last=self._limit_to_last,
+                offset=self._offset,
+            )
+        else:  # Limit & Offset without cursors
+            if self._offset:
+                ppl = ppl.offset(self._offset)
+            if self._limit:
+                ppl = ppl.limit(self._limit)
+
+        return ppl
 
     def _comparator(self, doc1, doc2) -> int:
         _orders = self._orders

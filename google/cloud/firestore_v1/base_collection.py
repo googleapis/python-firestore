@@ -592,11 +592,6 @@ class BaseCollectionReference(Generic[QueryType]):
             distance_threshold=distance_threshold,
         )
 
-    def pipeline(self) -> Pipeline:
-        path_str = "/".join(self._path)
-        # TODO: add other query fields
-        return Pipeline(self._client, CollectionStage(path_str))
-
 
 def _auto_id() -> str:
     """Generate a "random" automatically generated ID.
