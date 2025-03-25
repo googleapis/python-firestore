@@ -150,7 +150,11 @@ def mypy(session):
     session.install("-e", ".")
     session.install("mypy", "types-setuptools")
     # TODO: also verify types on tests, all of google package
-    session.run("mypy", "-p", "google.cloud.firestore", "--no-incremental")
+    session.run("mypy", 
+        "-p", "google.cloud.firestore_v1.pipeline_expressions",
+        "-p", "google.cloud.firestore_v1.pipeline_stages",
+        "-p", "google.cloud.firestore_v1.pipeline",
+    "--no-incremental")
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)

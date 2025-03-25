@@ -142,3 +142,5 @@ class Pipeline:
         from google.cloud.firestore_v1.async_client import AsyncClient
         if not isinstance(self._client, AsyncClient):
             raise TypeError("execute_async requires AsyncClient")
+        # TODO
+        raise NotImplementedError
