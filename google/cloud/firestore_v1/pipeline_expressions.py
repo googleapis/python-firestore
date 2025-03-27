@@ -35,9 +35,18 @@ class Ordering:
         ASCENDING = "ascending"
         DESCENDING = "descending"
 
-    def __init__(self, expr, order_dir: Direction | str):
+    def __init__(self, expr, order_dir: Direction | str=Direction.ASCENDING):
+        """
+        Initializes an Ordering instance
+
+        Args:
+            expr (Expr | str): The expression or field path string to sort by.
+                If a string is provided, it's treated as a field path.
+            order_dir (Direction | str): The direction to sort in.
+                Defaults to ascending
+        """
         self.expr = expr if isinstance(expr, Expr) else Field.of(expr)
-        self.order_dir = Ordering.Direction[order_dir] if isinstance(order_dir, str) else order_dir
+        self.order_dir = Ordering.Direction[order_dir.upper()] if isinstance(order_dir, str) else order_dir
 
     def __repr__(self):
         if self.order_dir is Ordering.Direction.ASCENDING:
