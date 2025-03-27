@@ -270,13 +270,16 @@ class Sample(Stage):
     def __init__(self, limit_or_options: int | SampleOptions):
         super().__init__()
         if isinstance(limit_or_options, int):
-            options = SampleOptions(limit_or_options, SampleOptions.Mode.DOCUMENTS)
+            options = SampleOptions.doc_limit(limit_or_options)
         else:
             options = limit_or_options
         self.options: SampleOptions = options
 
     def _pb_args(self):
-        return [Value(integer_value=self.options.n), Value(string_value=self.options.mode.value)]
+        if self.options.mode == SampleOptions.Mode.DOCUMENTS:
+            return [Value(integer_value=self.options.value), Value(string_value="documents")]
+        else:
+            return [Value(double_value=self.options.value), Value(string_value="percent")]
 
 
 class Select(Stage):

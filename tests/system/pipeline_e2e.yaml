@@ -922,7 +922,7 @@ tests:
       - Collection: books
       - Sample:
           - SampleOptions:
-            - 60
+            - 0.6
             - percent
     results_num: 6 # Results will vary due to randomness
   - description: testUnion

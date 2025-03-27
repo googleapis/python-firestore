@@ -333,8 +333,9 @@ class _BasePipeline:
             >>> pipeline = firestore.pipeline().collection("books")
             >>> # Sample 10 books, if available.
             >>> pipeline = pipeline.sample(10)
+            >>> pipeline = pipeline.sample(SampleOptions.doc_limit(10))
             >>> # Sample 50% of books.
-            >>> pipeline = pipeline.sample(SampleOptions(n=50, mode=SampleOptions.Mode.PERCENTAGE))
+            >>> pipeline = pipeline.sample(SampleOptions.percentage(0.5))
 
 
         Args:
