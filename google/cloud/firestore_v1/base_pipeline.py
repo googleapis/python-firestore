@@ -384,8 +384,7 @@ class _BasePipeline:
         array, it produces an output document where the original array field is
         replaced by the current element's value.
 
-        Optionally, `UnnestOptions` can specify a field to store the original index
-        of the element within the array.
+.
 
         Example:
             Input document:
@@ -397,15 +396,26 @@ class _BasePipeline:
             >>> pipeline = firestore.pipeline().collection("books")
             >>> # Emit a document for each tag
             >>> pipeline = pipeline.unnest("tags")
-            >>> # Emit a document for each tag, including the index
-            >>> pipeline = pipeline.unnest("tags", options=UnnestOptions(index_field="tagIndex"))
-
 
             Output documents (without options):
             ```json
             { "title": "The Hitchhiker's Guide", "tags": "comedy", ... }
             { "title": "The Hitchhiker's Guide", "tags": "sci-fi", ... }
             ```
+
+        Optionally, `UnnestOptions` can specify a field to store the original index
+        of the element within the array
+
+        Example:
+            Input document:
+            ```json
+            { "title": "The Hitchhiker's Guide", "tags": [ "comedy", "sci-fi" ], ... }
+            ```
+
+            >>> from google.cloud.firestore_v1.pipeline_stages import UnnestOptions
+            >>> pipeline = firestore.pipeline().collection("books")
+            >>> # Emit a document for each tag, including the index
+            >>> pipeline = pipeline.unnest("tags", options=UnnestOptions(index_field="tagIndex"))
 
             Output documents (with index_field="tagIndex"):
             ```json

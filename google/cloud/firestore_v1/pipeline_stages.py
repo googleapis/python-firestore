@@ -38,6 +38,13 @@ if TYPE_CHECKING:
 
 
 class FindNearestOptions:
+    """Options for configuring the `FindNearest` pipeline stage.
+
+    Attributes:
+        limit (Optional[int]): The maximum number of nearest neighbors to return.
+        distance_field (Optional[Field]): An optional field to store the calculated
+            distance in the output documents.
+    """
     def __init__(
         self,
         limit: Optional[int] = None,
@@ -48,11 +55,23 @@ class FindNearestOptions:
 
 
 class UnnestOptions:
+    """Options for configuring the `Unnest` pipeline stage.
+
+    Attributes:
+        index_field (str): The name of the field to add to each output document,
+            storing the original 0-based index of the element within the array.
+    """
     def __init__(self, index_field: str):
         self.index_field = index_field
 
 
 class Stage:
+    """Base class for all pipeline stages.
+
+    Each stage represents a specific operation (e.g., filtering, sorting,
+    transforming) within a Firestore pipeline. Subclasses define the specific
+    arguments and behavior for each operation.
+    """
     def __init__(self, custom_name: Optional[str] = None):
         self.name = custom_name or type(self).__name__.lower()
 
@@ -73,6 +92,7 @@ class Stage:
 
 
 class AddFields(Stage):
+    """Adds new fields to outputs from previous stages."""
     def __init__(self, *fields: Selectable):
         super().__init__("add_fields")
         self.fields = list(fields)
@@ -81,6 +101,7 @@ class AddFields(Stage):
         return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})]
 
 class Aggregate(Stage):
+    """Performs aggregation operations, optionally grouped."""
     def __init__(
         self,
         *extra_accumulators: ExprWithAlias[Accumulator],
@@ -108,6 +129,7 @@ class Aggregate(Stage):
 
 
 class Collection(Stage):
+    """Specifies a collection as the initial data source."""
     def __init__(self, path: str):
         super().__init__()
         if not path.startswith("/"):
@@ -118,6 +140,7 @@ class Collection(Stage):
         return [Value(reference_value=self.path)]
 
 class CollectionGroup(Stage):
+    """Specifies a collection group as the initial data source."""
     def __init__(self, collection_id: str):
         super().__init__("collection_group")
         self.collection_id = collection_id
@@ -127,10 +150,12 @@ class CollectionGroup(Stage):
 
 
 class Database(Stage):
+    """Specifies the default database as the initial data source."""
     def __init__(self):
         super().__init__()
 
 class Distinct(Stage):
+    """Returns documents with distinct combinations of specified field values."""
     def __init__(self, *fields: str | Selectable):
         super().__init__()
         self.fields: list[Selectable] = [Field(f) if isinstance(f, str) else f for f in fields]
@@ -140,6 +165,7 @@ class Distinct(Stage):
 
 
 class Documents(Stage):
+    """Specifies specific documents as the initial data source."""
     def __init__(self, *paths: str):
         super().__init__()
         self.paths = paths
@@ -154,6 +180,7 @@ class Documents(Stage):
 
 
 class FindNearest(Stage):
+    """Performs vector distance (similarity) search."""
     def __init__(
         self,
         field: str | Expr,
@@ -183,6 +210,7 @@ class FindNearest(Stage):
         return options
 
 class GenericStage(Stage):
+    """Represents a generic, named stage with parameters."""
     def __init__(self, name: str, *params: Expr | Value):
         super().__init__(name)
         self.params: list[Value] = [p._to_pb() if isinstance(p, Expr) else p for p in params]
@@ -192,6 +220,7 @@ class GenericStage(Stage):
 
 
 class Limit(Stage):
+    """Limits the maximum number of documents returned."""
     def __init__(self, limit: int):
         super().__init__()
         self.limit = limit
@@ -201,6 +230,7 @@ class Limit(Stage):
 
 
 class Offset(Stage):
+    """Skips a specified number of documents."""
     def __init__(self, offset: int):
         super().__init__()
         self.offset = offset
@@ -210,6 +240,7 @@ class Offset(Stage):
 
 
 class RemoveFields(Stage):
+    """Removes specified fields from outputs."""
     def __init__(self, *fields: str | Field):
         super().__init__("remove_fields")
         self.fields = [Field(f) if isinstance(f, str) else f for f in fields]
@@ -219,6 +250,7 @@ class RemoveFields(Stage):
 
 
 class Replace(Stage):
+    """Replaces the document content with the value of a specified field."""
     class Mode(Enum):
         FULL_REPLACE = "full_replace"
         MERGE_PREFER_NEXT = "merge_prefer_nest"
@@ -234,7 +266,7 @@ class Replace(Stage):
 
 
 class Sample(Stage):
-
+    """Performs pseudo-random sampling of documents."""
     def __init__(self, limit_or_options: int | SampleOptions):
         super().__init__()
         if isinstance(limit_or_options, int):
@@ -248,6 +280,7 @@ class Sample(Stage):
 
 
 class Select(Stage):
+    """Selects or creates a set of fields."""
     def __init__(self, *selections: str | Selectable):
         super().__init__()
         self.projections = [Field(s) if isinstance(s, str) else s for s in selections]
@@ -257,6 +290,7 @@ class Select(Stage):
 
 
 class Sort(Stage):
+    """Sorts documents based on specified criteria."""
     def __init__(self, *orders: "Ordering"):
         super().__init__()
         self.orders = list(orders)
@@ -266,6 +300,7 @@ class Sort(Stage):
 
 
 class Union(Stage):
+    """Performs a union of documents from two pipelines."""
     def __init__(self, other: Pipeline):
         super().__init__()
         self.other = other
@@ -275,6 +310,7 @@ class Union(Stage):
 
 
 class Unnest(Stage):
+    """Produces a document for each element in an array field."""
     def __init__(self, field: Field | str, options: Optional["UnnestOptions"] = None):
         super().__init__()
         self.field: Field = Field(field) if isinstance(field, str) else field
@@ -291,6 +327,7 @@ class Unnest(Stage):
 
 
 class Where(Stage):
+    """Filters documents based on a specified condition."""
     def __init__(self, condition: FilterCondition):
         super().__init__()
         self.condition = condition
