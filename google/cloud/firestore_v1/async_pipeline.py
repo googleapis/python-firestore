@@ -14,34 +14,26 @@
 
 from __future__ import annotations
 import datetime
-from typing import AsyncIterable, Iterable, TYPE_CHECKING
+from typing import AsyncIterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 
 if TYPE_CHECKING:
-    from google.cloud.firestore_v1.client import Client
+    from google.cloud.firestore_v1.async_client import AsyncClient
 
 
 class Pipeline(_BasePipeline):
-    def __init__(self, client:Client, *stages: stages.Stage):
+    def __init__(self, client:AsyncClient, *stages: stages.Stage):
         super().__init__(*stages)
         self._client = client
 
-    def execute(self) -> Iterable["ExecutePipelineResponse"]:
+    async def execute_async(self) -> AsyncIterable["ExecutePipelineResponse"]:
         database_name = f"projects/{self._client.project}/databases/{self._client._database}"
         request = ExecutePipelineRequest(
             database=database_name,
             structured_pipeline=self._to_pb(),
             read_time=datetime.datetime.now(),
         )
-        results = self._client._firestore_api.execute_pipeline(request)
-        return results
-
-    async def execute_async(self) -> AsyncIterable["ExecutePipelineResponse"]:
-        from google.cloud.firestore_v1.async_client import AsyncClient
-        if not isinstance(self._client, AsyncClient):
-            raise TypeError("execute_async requires AsyncClient")
-        # TODO
-        raise NotImplementedError
+        return await self._client._firestore_api.execute_pipeline(request)
