@@ -17,12 +17,15 @@ import sys
 import os
 import pytest
 import yaml
+import re
 from typing import Any
+from contextlib import nullcontext
 
 # from google.cloud.firestore_v1.pipeline_stages import *
 from google.cloud.firestore_v1 import pipeline_stages
 from google.cloud.firestore_v1 import pipeline_expressions
 from google.cloud.firestore_v1.pipeline import Pipeline
+from google.api_core.exceptions import GoogleAPIError
 
 from google.cloud.firestore import Client
 
@@ -124,9 +127,16 @@ def parse_expressions(client, yaml_element: Any):
 )
 def test_e2e_scenario(test_dict):
     client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
-    pipeline = parse_pipeline(client, test_dict["pipeline"])
-    print(pipeline._to_pb())
-    pipeline.execute()
+    error_regex = test_dict.get("error", None)
+    with pytest.raises(GoogleAPIError) if error_regex else nullcontext() as ctx:
+        pipeline = parse_pipeline(client, test_dict["pipeline"])
+        print(pipeline._to_pb())
+        pipeline.execute()
+    # check for error message if expected
+    if error_regex:
+        found_error = str(ctx.value)
+        match = re.search(error_regex, found_error)
+        assert match, f"error '{found_error}' does not match '{error_regex}'"
 
     # before_ast = ast.parse(test_dict["before"])
     # got_ast = before_ast

@@ -168,7 +168,7 @@ tests:
       - Aggregate:
           accumulators: []
           groups: [genre]
-    error: "Cannot groupBy without accumulators"
+    error: ".* requires at least one accumulator"
   - description: testDistinct
     pipeline:
       - Collection: books
