@@ -25,7 +25,38 @@ if TYPE_CHECKING:
 
 
 class Pipeline(_BasePipeline):
+    """
+    Pipelines allow for complex data transformations and queries involving
+    multiple stages like filtering, projection, aggregation, and vector search.
+
+    This class extends `_BasePipeline` and provides methods to execute the
+    defined pipeline stages using an asynchronous `AsyncClient`.
+
+    Usage Example:
+        >>> import asyncio
+        >>> from google.cloud.firestore_v1.pipeline_expressions import Field, gt
+        >>>
+        >>> async def run_pipeline():
+        ...     client = AsyncClient(...)
+        ...     pipeline = client.pipeline()
+        ...                      .collection("books")
+        ...                      .where(gt(Field.of("published"), 1980))
+        ...                      .select("title", "author")
+        ...     async for result in pipeline.execute_async():
+        ...         print(result)
+        >>>
+        >>> asyncio.run(run_pipeline())
+
+    Use `AsyncClient.pipeline()` to create instances of this class.
+    """
     def __init__(self, client:AsyncClient, *stages: stages.Stage):
+        """
+        Initializes an asynchronous Pipeline.
+
+        Args:
+            client: The asynchronous `AsyncClient` instance to use for execution.
+            *stages: Initial stages for the pipeline.
+        """
         super().__init__(*stages)
         self._client = client
 
