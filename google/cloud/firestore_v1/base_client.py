@@ -475,6 +475,9 @@ class BaseClient(ClientWithProject):
     def transaction(self, **kwargs) -> BaseTransaction:
         raise NotImplementedError
 
+    def pipeline(self):
+        raise NotImplementedError
+
 
 def _reference_info(references: list) -> Tuple[list, dict]:
     """Get information about document references.

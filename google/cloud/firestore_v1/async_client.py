@@ -46,6 +46,7 @@ from google.cloud.firestore_v1.services.firestore import (
 from google.cloud.firestore_v1.services.firestore.transports import (
     grpc_asyncio as firestore_grpc_transport,
 )
+from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.bulk_writer import BulkWriter  # pragma: NO COVER
@@ -412,3 +413,6 @@ class AsyncClient(BaseClient):
             A transaction attached to this client.
         """
         return AsyncTransaction(self, **kwargs)
+
+    def pipeline(self) -> AsyncPipeline:
+        return AsyncPipeline(self)

@@ -57,7 +57,7 @@ from google.cloud.firestore_v1.types import (
     query,
 )
 from google.cloud.firestore_v1.vector import Vector
-from google.cloud.firestore_v1.pipeline import Pipeline
+from google.cloud.firestore_v1 import pipeline_expressions
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
@@ -1104,9 +1104,9 @@ class BaseQuery(object):
 
         return copied
 
-    def pipeline(self) -> Pipeline:
+    def pipeline(self):
         # TODO: add extensive tests
-        ppl = Pipeline(self._client)
+        ppl = self._client.pipeline()
         if self._all_descendants:
             ppl = ppl.collection_group(self._parent.id)
         else:

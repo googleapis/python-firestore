@@ -61,7 +61,6 @@ class Pipeline(_BasePipeline):
         request = ExecutePipelineRequest(
             database=database_name,
             structured_pipeline=self._to_pb(),
-            read_time=datetime.datetime.now(),
         )
         results = self._client._firestore_api.execute_pipeline(request)
         return results

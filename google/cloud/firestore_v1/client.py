@@ -48,6 +48,7 @@ from google.cloud.firestore_v1.services.firestore.transports import (
     grpc as firestore_grpc_transport,
 )
 from google.cloud.firestore_v1.transaction import Transaction
+from google.cloud.firestore_v1.pipeline import Pipeline
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.bulk_writer import BulkWriter  # pragma: NO COVER
@@ -404,3 +405,6 @@ class Client(BaseClient):
             A transaction attached to this client.
         """
         return Transaction(self, **kwargs)
+
+    def pipeline(self) -> Pipeline:
+        return Pipeline(self)

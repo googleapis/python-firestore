@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     from google.cloud.firestore_v1.async_client import AsyncClient
 
 
-class Pipeline(_BasePipeline):
+class AsyncPipeline(_BasePipeline):
     """
     Pipelines allow for complex data transformations and queries involving
     multiple stages like filtering, projection, aggregation, and vector search.
