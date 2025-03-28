@@ -154,22 +154,22 @@ class _BasePipeline:
         clause in SQL. You can filter documents based on their field values, using
         implementations of `FilterCondition`, typically including but not limited to:
             - field comparators: `eq`, `lt` (less than), `gt` (greater than), etc.
-            - logical operators: `and_`, `or_`, `not_`, etc.
-            - advanced functions: `regex_match`, `array_contains`, etc.
+            - logical operators: `And`, `Or`, `Not`, etc.
+            - advanced functions: `regex_matches`, `array_contains`, etc.
 
         Example:
-            >>> from google.cloud.firestore_v1.pipeline_expressions import Field, and_, gt, eq
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field, And,
             >>> pipeline = client.collection("books").pipeline()
             >>> # Using static functions
             >>> pipeline = pipeline.where(
-            ...     and_(
-            ...         gt(Field.of("rating"), 4.0),   # Filter for ratings > 4.0
-            ...         eq(Field.of("genre"), "Science Fiction") # Filter for genre
+            ...     And(
+            ...         Field.of("rating").gt(4.0),   # Filter for ratings > 4.0
+            ...         Field.of("genre").eq("Science Fiction") # Filter for genre
             ...     )
             ... )
             >>> # Using methods on expressions
             >>> pipeline = pipeline.where(
-            ...     and_(
+            ...     And(
             ...         Field.of("rating").gt(4.0),
             ...         Field.of("genre").eq("Science Fiction")
             ...     )
