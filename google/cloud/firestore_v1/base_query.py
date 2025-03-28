@@ -1128,38 +1128,28 @@ class BaseQuery(object):
         # Orders
         orders = self._normalize_orders()
         if orders:
-            # Add exists filters to match Query's implicit orderby semantics.
             exists = []
+            orderings = []
             for order in orders:
-                # skip __name__
-                if order.field.field_path == "__name__":
-                    continue
-                exists.append(field_path_module.FieldPath(order.field.field_path).exists())
+                field = pipeline_expressions.Field.of(order.field.field_path)
+                exists.append(field.exists())
+                direction = (
+                    "ascending" if order.direction == BaseQuery.Direction.ASCENDING else "descending"
+                )
+                orderings.append(pipeline_expressions.Ordering(field, direction))
 
+            # Add exists filters to match Query's implicit orderby semantics.
             if len(exists) > 1:
                 ppl = ppl.where(field_path_module.And(*exists))
             elif len(exists) == 1:
                 ppl = ppl.where(exists[0])
 
-            orderings = []
-            for order in orders:
-                direction = (
-                    "asc" if order.direction == StructuredQuery.Direction.ASCENDING else "desc"
-                )
-                orderings.append(
-                    getattr(field_path_module.FieldPath(order.field.field_path), direction)()
-                )
+            # Add sort orderings
             ppl = ppl.sort(*orderings)
 
         # Cursors, Limit and Offset
         if self._start_at or self._end_at or self._limit_to_last:
-            ppl = ppl.paginate(
-                start_at=self._start_at,
-                end_at=self._end_at,
-                limit=self._limit,
-                limit_to_last=self._limit_to_last,
-                offset=self._offset,
-            )
+            raise NotImplementedError("Query to Pipeline conversion: cursors and limitToLast is not supported yet.")
         else:  # Limit & Offset without cursors
             if self._offset:
                 ppl = ppl.offset(self._offset)
