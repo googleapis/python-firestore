@@ -374,18 +374,18 @@ class _BasePipeline:
 
     def unnest(
         self,
-        field_name: str,
+        field: str | Selectable,
+        alias: str | Field | None = None,
         options: Optional[stages.UnnestOptions] = None,
     ) -> Self:
         """
         Produces a document for each element in an array field from the previous stage document.
 
-        For each input document, this stage emits zero or more augmented documents.
-        It takes an array field specified by `field_name`. For each element in that
-        array, it produces an output document where the original array field is
-        replaced by the current element's value.
-
-.
+        For each previous stage document, this stage will emit zero or more augmented documents. The
+        input array found in the previous stage document field specified by the `fieldName` parameter,
+        will emit an augmented document for each input array element. The input array element will
+        augment the previous stage document by setting the `alias` field  with the array element value.
+        If `alias` is unset, the data in `field` will be overwritten.
 
         Example:
             Input document:
@@ -396,12 +396,12 @@ class _BasePipeline:
             >>> from google.cloud.firestore_v1.pipeline_stages import UnnestOptions
             >>> pipeline = firestore.pipeline().collection("books")
             >>> # Emit a document for each tag
-            >>> pipeline = pipeline.unnest("tags")
+            >>> pipeline = pipeline.unnest("tags", alias="tag")
 
             Output documents (without options):
             ```json
-            { "title": "The Hitchhiker's Guide", "tags": "comedy", ... }
-            { "title": "The Hitchhiker's Guide", "tags": "sci-fi", ... }
+            { "title": "The Hitchhiker's Guide", "tag": "comedy", ... }
+            { "title": "The Hitchhiker's Guide", "tag": "sci-fi", ... }
             ```
 
         Optionally, `UnnestOptions` can specify a field to store the original index
@@ -425,13 +425,15 @@ class _BasePipeline:
             ```
 
         Args:
-            field_name: The name of the field containing the array to unnest.
-            options: Optional `UnnestOptions` to configure behavior, like adding an index field.
+            field: The name of the field containing the array to unnest.
+            alias The alias field is used as the field name for each element within the output array.
+                If unset, or if `alias` matches the `field`, the output data will overwrite the original field.
+            options: Optional `UnnestOptions` to configure additional behavior, like adding an index field.
 
         Returns:
             A reference to this pipeline instance. Used for method chaining
         """
-        self.stages.append(stages.Unnest(field_name, options))
+        self.stages.append(stages.Unnest(field, alias, options))
         return self
 
     def generic_stage(self, name: str, *params: Expr) -> Self:

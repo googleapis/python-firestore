@@ -314,13 +314,19 @@ class Union(Stage):
 
 class Unnest(Stage):
     """Produces a document for each element in an array field."""
-    def __init__(self, field: Field | str, options: Optional["UnnestOptions"] = None):
+    def __init__(self, field: Selectable | str, alias: Field | str | None=None, options: UnnestOptions|None=None):
         super().__init__()
         self.field: Field = Field(field) if isinstance(field, str) else field
+        if alias is None:
+            self.alias = self.field
+        elif isinstance(alias, str):
+            self.alias = Field(alias)
+        else:
+            self.alias = alias
         self.options = options
 
     def _pb_args(self):
-        return [self.field._to_pb()]
+        return [self.field._to_pb(), self.alias._to_pb()]
 
     def _pb_options(self):
         options = {}
