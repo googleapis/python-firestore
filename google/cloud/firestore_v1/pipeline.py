@@ -30,20 +30,18 @@ class Pipeline(_BasePipeline):
     multiple stages like filtering, projection, aggregation, and vector search.
 
     Usage Example:
-        >>> from google.cloud.firestore_v1.pipeline_expressions import Field, gt
+        >>> from google.cloud.firestore_v1.pipeline_expressions import Field
         >>>
-        >>> async def run_pipeline():
+        >>> def run_pipeline():
         ...     client = Client(...)
-        ...     pipeline = client.pipeline()
-        ...                      .collection("books")
-        ...                      .where(gt(Field.of("published"), 1980))
+        ...     pipeline = client.collection("books")
+        ...                      .pipeline()
+        ...                      .where(Field.of("published").gt(1980))
         ...                      .select("title", "author")
         ...     for result in pipeline.execute():
         ...         print(result)
-        >>>
-        >>> asyncio.run(run_pipeline())
 
-    Use `Client.pipeline()` to create instances of this class.
+    Use `client.collection("...").pipeline()` to create instances of this class.
     """
     def __init__(self, client:Client, *stages: stages.Stage):
         """
