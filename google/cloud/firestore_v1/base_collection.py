@@ -35,8 +35,6 @@ from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.base_query import QueryType
-from google.cloud.firestore_v1.pipeline import Pipeline
-from google.cloud.firestore_v1.pipeline_stages import Collection as CollectionStage
 
 if TYPE_CHECKING:  # pragma: NO COVER
     # Types needed only for Type Hints
