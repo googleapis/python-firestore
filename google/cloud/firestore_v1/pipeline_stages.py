@@ -246,7 +246,7 @@ class RemoveFields(Stage):
         self.fields = [Field(f) if isinstance(f, str) else f for f in fields]
 
     def _pb_args(self) -> list[Value]:
-        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})]
+        return [f._to_pb() for f in self.fields]
 
 
 class Replace(Stage):
