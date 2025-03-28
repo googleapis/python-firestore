@@ -475,7 +475,7 @@ class BaseClient(ClientWithProject):
     def transaction(self, **kwargs) -> BaseTransaction:
         raise NotImplementedError
 
-    def pipeline(self):
+    def pipeline(self, *stages):
         raise NotImplementedError
 
 

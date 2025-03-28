@@ -414,5 +414,5 @@ class AsyncClient(BaseClient):
         """
         return AsyncTransaction(self, **kwargs)
 
-    def pipeline(self) -> AsyncPipeline:
-        return AsyncPipeline(self)
+    def pipeline(self, *stages) -> AsyncPipeline:
+        return AsyncPipeline(self, *stages)
