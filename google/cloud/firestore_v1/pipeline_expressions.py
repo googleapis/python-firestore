@@ -1417,6 +1417,10 @@ class Field(Selectable):
 class FilterCondition(Function):
     """Filters the given data in some way."""
 
+    @staticmethod
+    def _from_pb(filter_pb):
+        raise NotImplementedError
+
 
 class And(FilterCondition):
     def __init__(self, *conditions: "FilterCondition"):

@@ -590,6 +590,9 @@ class BaseCollectionReference(Generic[QueryType]):
             distance_threshold=distance_threshold,
         )
 
+    def pipeline(self):
+        return self._query().pipeline()
+
 
 def _auto_id() -> str:
     """Generate a "random" automatically generated ID.

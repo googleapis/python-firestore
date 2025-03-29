@@ -1115,7 +1115,7 @@ class BaseQuery(object):
 
         # Filters
         for filter_ in self._field_filters:
-            ppl = ppl.where(filter_)
+            ppl = ppl.where(pipeline_expressions.FilterCondition._from_pb(filter_))
 
         # Projections
         if self._projection and self._projection.fields:
@@ -1135,13 +1135,13 @@ class BaseQuery(object):
                 field = pipeline_expressions.Field.of(order.field.field_path)
                 exists.append(field.exists())
                 direction = (
-                    "ascending" if order.direction == BaseQuery.Direction.ASCENDING else "descending"
+                    "ascending" if order.direction == StructuredQuery.Direction.ASCENDING else "descending"
                 )
                 orderings.append(pipeline_expressions.Ordering(field, direction))
 
             # Add exists filters to match Query's implicit orderby semantics.
             if len(exists) > 1:
-                ppl = ppl.where(field_path_module.And(*exists))
+                ppl = ppl.where(pipeline_expressions.And(*exists))
             elif len(exists) == 1:
                 ppl = ppl.where(exists[0])
 
