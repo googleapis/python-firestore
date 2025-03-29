@@ -1115,7 +1115,7 @@ class BaseQuery(object):
 
         # Filters
         for filter_ in self._field_filters:
-            ppl = ppl.where(pipeline_expressions.FilterCondition._from_pb(filter_))
+            ppl = ppl.where(pipeline_expressions.FilterCondition._from_pb(filter_, self._client))
 
         # Projections
         if self._projection and self._projection.fields:

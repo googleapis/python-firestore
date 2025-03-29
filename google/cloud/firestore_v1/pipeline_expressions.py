@@ -21,9 +21,11 @@ from enum import auto
 import datetime
 from dataclasses import dataclass
 from google.cloud.firestore_v1.types.document import Value
+from google.cloud.firestore_v1.types.query import StructuredQuery as Query_pb
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1._helpers import GeoPoint
 from google.cloud.firestore_v1._helpers import encode_value
+from google.cloud.firestore_v1._helpers import decode_value
 
 CONSTANT_TYPE = TypeVar('CONSTANT_TYPE', str, int, float, bool, datetime.datetime, bytes, GeoPoint, Vector, list, Dict[str, Any], None)
 
@@ -1418,8 +1420,58 @@ class FilterCondition(Function):
     """Filters the given data in some way."""
 
     @staticmethod
-    def _from_pb(filter_pb):
-        raise NotImplementedError
+    def _from_pb(filter_pb, client):
+        if isinstance(filter_pb, Query_pb.CompositeFilter):
+            sub_filters = [FilterCondition._from_pb(f, client) for f in filter_pb.filters]
+            if filter_pb.op == Query_pb.CompositeFilter.Operator.OR:
+                return Or(*sub_filters)
+            elif filter_pb.op == Query_pb.CompositeFilter.Operator.AND:
+                return And(*sub_filters)
+            else:
+                raise TypeError(f"Unexpected CompositeFilter operator type: {filter_pb.op}")
+        elif isinstance(filter_pb, Query_pb.UnaryFilter):
+            field = Field.of(filter_pb.field)
+            if filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NAN:
+                return And(field.exists(), field.is_nan())
+            elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
+                return And(field.exists(), Not(field.is_nan()))
+            elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NULL:
+                return And(field.exists(), field.eq(None))
+            elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NULL:
+                return And(field.exists(), Not(field.eq(None)))
+            else:
+                raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
+        elif isinstance(filter_pb, Query_pb.FieldFilter):
+            field = Field.of(filter_pb.field)
+            value = decode_value(filter_pb.value, client)
+            if filter_pb.op == Query_pb.FieldFilter.Operator.LESS_THAN:
+                return And(field.exists(), field.lt(value))
+            elif filter_pb.op == Query_pb.FieldFilter.Operator.LESS_THAN_OR_EQUAL:
+                return And(field.exists(), field.lte(value))
+            elif filter_pb.op == Query_pb.FieldFilter.Operator.GREATER_THAN:
+                return And(field.exists(), field.gt(value))
+            elif filter_pb.op == Query_pb.FieldFilter.Operator.GREATER_THAN_OR_EQUAL:
+                return And(field.exists(), field.gte(value))
+            elif filter_pb.op == Query_pb.FieldFilter.Operator.EQUAL:
+                return And(field.exists(), field.eq(value))
+            elif filter_pb.op == Query_pb.FieldFilter.Operator.NOT_EQUAL:
+                return And(field.exists(), field.neq(value))
+            if filter_pb.op == Query_pb.FieldFilter.Operator.ARRAY_CONTAINS:
+                return And(field.exists(), field.array_contains(value))
+            elif filter_pb.op == Query_pb.FieldFilter.Operator.ARRAY_CONTAINS_ANY:
+                return And(field.exists(), field.array_contains_any(value))
+            elif filter_pb.op == Query_pb.FieldFilter.Operator.IN:
+                return And(field.exists(), field.in_any(value))
+            elif filter_pb.op == Query_pb.FieldFilter.Operator.NOT_IN:
+                return And(field.exists(), field.not_in_any(value))
+            else:
+                raise TypeError(f"Unexpected FieldFilter operator type: {filter_pb.op}")
+        elif isinstance(filter_pb, Query_pb.Filter):
+            # unwrap oneof
+            f = filter_pb.composite_filter or filter_pb.field_filter or filter_pb.unary_filter
+            return FilterCondition._from_pb(f, client)
+        else:
+            raise TypeError(f"Unexpected filter type: {type(filter_pb)}")
 
 
 class And(FilterCondition):
