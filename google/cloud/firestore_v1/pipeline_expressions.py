@@ -1420,9 +1420,9 @@ class FilterCondition(Function):
     """Filters the given data in some way."""
 
     @staticmethod
-    def _from_pb(filter_pb, client):
+    def _from_query_filter_pb(filter_pb, client):
         if isinstance(filter_pb, Query_pb.CompositeFilter):
-            sub_filters = [FilterCondition._from_pb(f, client) for f in filter_pb.filters]
+            sub_filters = [FilterCondition._from_query_filter_pb(f, client) for f in filter_pb.filters]
             if filter_pb.op == Query_pb.CompositeFilter.Operator.OR:
                 return Or(*sub_filters)
             elif filter_pb.op == Query_pb.CompositeFilter.Operator.AND:
@@ -1469,7 +1469,7 @@ class FilterCondition(Function):
         elif isinstance(filter_pb, Query_pb.Filter):
             # unwrap oneof
             f = filter_pb.composite_filter or filter_pb.field_filter or filter_pb.unary_filter
-            return FilterCondition._from_pb(f, client)
+            return FilterCondition._from_query_filter_pb(f, client)
         else:
             raise TypeError(f"Unexpected filter type: {type(filter_pb)}")
 
