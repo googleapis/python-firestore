@@ -1106,7 +1106,6 @@ class BaseQuery(object):
         return copied
 
     def pipeline(self):
-        # TODO: add extensive tests
         if self._all_descendants:
             base_stage = pipeline_stages.CollectionGroup(self._parent.id)
         else:
