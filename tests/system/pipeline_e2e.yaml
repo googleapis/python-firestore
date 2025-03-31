@@ -133,7 +133,7 @@ tests:
         - ExprWithAlias:
             - Count
             - "count"
-    results:
+    assert_results:
       - count: 10
   - description: "testAggregates - avg, count, max"
     pipeline:
@@ -154,7 +154,7 @@ tests:
             - Max: 
               - Field: rating
             - "max_rating"
-    results:
+    assert_results:
       - count: 2
         avg_rating: 4.4
         max_rating: 4.6
@@ -168,7 +168,7 @@ tests:
       - Aggregate:
           accumulators: []
           groups: [genre]
-    error: ".* requires at least one accumulator"
+    assert_error: ".* requires at least one accumulator"
   - description: testDistinct
     pipeline:
       - Collection: books
@@ -181,7 +181,7 @@ tests:
             - ToLower:
                 - Field: genre
             - "lower_genre"
-    results:
+    assert_results:
       - lower_genre: romance
       - lower_genre: psychological thriller
   - description: testGroupBysAndAggregate
@@ -202,7 +202,7 @@ tests:
           - Gt:
               - Field: avg_rating
               - Constant: 4.3
-    results:
+    assert_results:
       - avg_rating: 4.7
         genre: Fantasy
       - avg_rating: 4.5
@@ -224,7 +224,7 @@ tests:
               - Min:
                 - Field: published
               - "min_published"
-    results:
+    assert_results:
       - count: 10
         max_rating: 4.7
         min_published: 1813
@@ -238,7 +238,7 @@ tests:
           - Ordering:
             - Field: author
             - ASCENDING
-    results:
+    assert_results:
       - title: "The Hitchhiker's Guide to the Galaxy"
         author: "Douglas Adams"
       - title: "Pride and Prejudice"
@@ -288,7 +288,7 @@ tests:
         - Ordering:
           - Field: author_title
           - ASCENDING
-    results:
+    assert_results:
       - author: Douglas Adams
         author_title: Douglas Adams_The Hitchhiker's Guide to the Galaxy
       - author: Jane Austen
@@ -320,7 +320,7 @@ tests:
               - Eq:
                   - Field: genre
                   - Constant: Science Fiction
-    results:
+    assert_results:
       - title: Dune
         author: Frank Herbert
         genre: Science Fiction
@@ -346,7 +346,7 @@ tests:
                   - Constant: Dystopian
       - Select:
         - title
-    results:
+    assert_results:
       - title: Pride and Prejudice
       - title: The Handmaid's Tale
       - title: 1984
@@ -362,7 +362,7 @@ tests:
       - Select:
         - title
         - author
-    results:
+    assert_results:
       - title: 1984
         author: George Orwell
       - title: To Kill a Mockingbird
@@ -376,7 +376,7 @@ tests:
           - ArrayContains:
               - Constant: tags
               - Constant: comedy
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
         author: Douglas Adams
         genre: Science Fiction
@@ -399,7 +399,7 @@ tests:
               - Constant: classic
       - Select:
         - title
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
       - title: Pride and Prejudice
   - description: testArrayContainsAll
@@ -412,7 +412,7 @@ tests:
                 - Constant: magic
       - Select:
         - title
-    results:
+    assert_results:
       - title: The Lord of the Rings
   - description: testArrayLength
     pipeline:
@@ -426,7 +426,7 @@ tests:
           - Eq:
               - Field: tagsCount
               - Constant: 3
-    results: # All documents have 3 tags
+    assert_results: # All documents have 3 tags
       - tagsCount: 3
       - tagsCount: 3
       - tagsCount: 3
@@ -448,7 +448,7 @@ tests:
                   - Constant: newTag2
             - "modifiedTags"
       - Limit: 1
-    results:
+    assert_results:
       - modifiedTags:
           - comedy
           - space
@@ -466,7 +466,7 @@ tests:
                   - Field: title
               - "bookInfo"
       - Limit: 1
-    results:
+    assert_results:
       - bookInfo: Douglas Adams - The Hitchhiker's Guide to the Galaxy
   - description: testStartsWith
     pipeline:
@@ -481,7 +481,7 @@ tests:
         - Ordering:
             - Field: title
             - ASCENDING
-    results:
+    assert_results:
       - title: The Great Gatsby
       - title: The Handmaid's Tale
       - title: The Hitchhiker's Guide to the Galaxy
@@ -499,7 +499,7 @@ tests:
         - Ordering:
           - Field: title
           - DESCENDING
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
       - title: The Great Gatsby
   - description: testLength
@@ -515,7 +515,7 @@ tests:
           - Gt:
               - Field: titleLength
               - Constant: 20
-    results:
+    assert_results:
       - titleLength: 32
         title: The Hitchhiker's Guide to the Galaxy
       - titleLength: 27
@@ -532,7 +532,7 @@ tests:
           - Eq:
               - Field: author
               - Constant: Douglas Adams
-    results:
+    assert_results:
       - reversed_title: yxalaG ot ediug s'reknhiHcH ehT
   - description: testStringFunctions - ReplaceFirst
     pipeline:
@@ -548,7 +548,7 @@ tests:
           - Eq:
               - Field: author
               - Constant: Douglas Adams
-    results:
+    assert_results:
       - replaced_title: A Hitchhiker's Guide to the Galaxy
   - description: testStringFunctions - ReplaceAll
     pipeline:
@@ -564,7 +564,7 @@ tests:
           - Eq:
               - Field: author
               - Constant: Douglas Adams
-    results:
+    assert_results:
       - replaced_title: The_Hitchhiker's_Guide_to_the_Galaxy
   - description: testStringFunctions - CharLength
     pipeline:
@@ -578,7 +578,7 @@ tests:
           - Eq:
               - Field: author
               - Constant: Douglas Adams
-    results:
+    assert_results:
       - title_length: 30
   - description: testStringFunctions - ByteLength
     pipeline:
@@ -594,7 +594,7 @@ tests:
           - Eq:
               - Field: author
               - Constant: Douglas Adams
-    results:
+    assert_results:
       - title_byte_length: 42
   - description: testToLowercase
     pipeline:
@@ -605,7 +605,7 @@ tests:
                 - Field: title
             - "lowercaseTitle"
       - Limit: 1
-    results:
+    assert_results:
       - lowercaseTitle: the hitchhiker's guide to the galaxy
   - description: testToUppercase
     pipeline:
@@ -616,7 +616,7 @@ tests:
                 - Field: author
             - "uppercaseAuthor"
       - Limit: 1
-    results:
+    assert_results:
       - uppercaseAuthor: DOUGLAS ADAMS
   - description: testTrim
     pipeline:
@@ -635,7 +635,7 @@ tests:
             - "trimmedTitle"
         - spacedTitle
       - Limit: 1
-    results:
+    assert_results:
       - trimmedTitle: The Hitchhiker's Guide to the Galaxy
         spacedTitle: " The Hitchhiker's Guide to the Galaxy "
   - description: testLike
@@ -647,7 +647,7 @@ tests:
               - Constant: "%Guide%"
       - Select:
         - title
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
   - description: testRegexContains
     pipeline:
@@ -656,7 +656,7 @@ tests:
           - RegexContains:
               - Field: title
               - Constant: "(?i)(the|of)"
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
       - title: One Hundred Years of Solitude
       - title: The Lord of the Rings
@@ -669,7 +669,7 @@ tests:
           - RegexMatch:
               - Field: title
               - Constant: ".*(?i)(the|of).*"
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
       - title: One Hundred Years of Solitude
       - title: The Lord of the Rings
@@ -700,7 +700,7 @@ tests:
                 - Constant: 2
             - "ratingDividedByTwo"
       - Limit: 1
-    results:
+    assert_results:
       - ratingPlusOne: 5.2
         yearsSince1900: 79
         ratingTimesTen: 42.0
@@ -726,7 +726,7 @@ tests:
         - Ordering:
           - title
           - ASCENDING
-    results:
+    assert_results:
       - rating: 4.3
         title: Crime and Punishment
       - rating: 4.3
@@ -754,7 +754,7 @@ tests:
         - Ordering:
           - Field: title
           - ASCENDING
-    results:
+    assert_results:
       - title: Crime and Punishment
       - title: Dune
       - title: Pride and Prejudice
@@ -777,7 +777,7 @@ tests:
                     - Field: rating
               - "ratingIsNotNaN"
       - Limit: 1
-    results:
+    assert_results:
       - ratingIsNull: false
         ratingIsNotNaN: true
   - description: testLogicalMinMax
@@ -798,7 +798,7 @@ tests:
                   - Field: published
                   - Constant: 1900
               - "max_published"
-    results:
+    assert_results:
       - max_rating: 4.5
         max_published: 1979
   - description: testLogicalMinMax - min
@@ -815,7 +815,7 @@ tests:
                   - Field: published
                   - Constant: 1900
               - "min_published"
-    results:
+    assert_results:
       - min_rating: 4.2
         min_published: 1900
   - description: testMapGet
@@ -832,7 +832,7 @@ tests:
           - Eq:
               - Field: hugoAward
               - Constant: true
-    results:
+    assert_results:
       - hugoAward: true
         title: The Hitchhiker's Guide to the Galaxy
       - hugoAward: true
@@ -857,7 +857,7 @@ tests:
                 - Constant: [[0.5, 0.8]]
               - "euclideanDistance"
       - Limit: 1
-    results:
+    assert_results:
       - cosineDistance: 0.02560880430538015
         dotProductDistance: 0.13
         euclideanDistance: 0.806225774829855
@@ -871,7 +871,7 @@ tests:
       - Select:
           - title
           - Field: awards.hugo
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
         awards.hugo: true
       - title: Dune
@@ -887,7 +887,7 @@ tests:
           - title
           - Field: awards.hugo
           - Field: "__name__"
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
         awards.hugo: true
       - title: Dune
@@ -900,7 +900,7 @@ tests:
           - Field: title
           - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Replace: awards
-    results:
+    assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
         author: Douglas Adams
         genre: Science Fiction
@@ -916,7 +916,7 @@ tests:
     pipeline:
       - Collection: books
       - Sample: 3
-    results_num: 3 # Results will vary due to randomness
+    assert_count: 3 # Results will vary due to randomness
   - description: testSamplePercentage
     pipeline:
       - Collection: books
@@ -924,14 +924,14 @@ tests:
           - SampleOptions:
             - 0.6
             - percent
-    results_num: 6 # Results will vary due to randomness
+    assert_count: 6 # Results will vary due to randomness
   - description: testUnion
     pipeline:
       - Collection: books
       - Union:
         - Pipeline:
           - Collection: books
-    results_num: 20 # Results will be duplicated
+    assert_count: 20 # Results will be duplicated
   - description: testUnnest
     pipeline:
       - Collection: books
@@ -940,7 +940,7 @@ tests:
               - Field: title
               - Constant: The Hitchhiker's Guide to the Galaxy
       - Unnest: tags
-    results:
+    assert_results:
       - tags: comedy
       - tags: space
       - tags: adventure
