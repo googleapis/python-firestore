@@ -1430,7 +1430,7 @@ class FilterCondition(Function):
             else:
                 raise TypeError(f"Unexpected CompositeFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.UnaryFilter):
-            field = Field.of(filter_pb.field)
+            field = Field.of(filter_pb.field.field_path)
             if filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NAN:
                 return And(field.exists(), field.is_nan())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
@@ -1442,7 +1442,7 @@ class FilterCondition(Function):
             else:
                 raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.FieldFilter):
-            field = Field.of(filter_pb.field)
+            field = Field.of(filter_pb.field.field_path)
             value = decode_value(filter_pb.value, client)
             if filter_pb.op == Query_pb.FieldFilter.Operator.LESS_THAN:
                 return And(field.exists(), field.lt(value))
