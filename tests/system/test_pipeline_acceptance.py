@@ -21,6 +21,8 @@ import re
 from typing import Any
 from contextlib import nullcontext
 
+from google.protobuf.json_format import MessageToDict
+
 # from google.cloud.firestore_v1.pipeline_stages import *
 from google.cloud.firestore_v1 import pipeline_stages
 from google.cloud.firestore_v1 import pipeline_expressions
@@ -127,35 +129,18 @@ def parse_expressions(client, yaml_element: Any):
 )
 def test_e2e_scenario(test_dict):
     client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
-    error_regex = test_dict.get("error", None)
+    error_regex = test_dict.get("assert_error", None)
+    expected_proto = test_dict.get("assert_proto", None)
+    pipeline = parse_pipeline(client, test_dict["pipeline"])
+    # check if proto matches as expected
+    if expected_proto:
+        got_proto = MessageToDict(pipeline._to_pb()._pb)
+        assert yaml.dump(expected_proto) == yaml.dump(got_proto)
+    # check if server responds as expected
     with pytest.raises(GoogleAPIError) if error_regex else nullcontext() as ctx:
-        pipeline = parse_pipeline(client, test_dict["pipeline"])
-        print(pipeline._to_pb())
         pipeline.execute()
     # check for error message if expected
     if error_regex:
         found_error = str(ctx.value)
         match = re.search(error_regex, found_error)
         assert match, f"error '{found_error}' does not match '{error_regex}'"
-
-    # before_ast = ast.parse(test_dict["before"])
-    # got_ast = before_ast
-    # for transformer_info in test_dict["transformers"]:
-    #     # transformer can be passed as a string, or a dict with name and args
-    #     if isinstance(transformer_info, str):
-    #         transformer_class = globals()[transformer_info]
-    #         transformer_args = {}
-    #     else:
-    #         transformer_class = globals()[transformer_info["name"]]
-    #         transformer_args = transformer_info.get("args", {})
-    #     transformer = transformer_class(**transformer_args)
-    #     got_ast = transformer.visit(got_ast)
-    # if got_ast is None:
-    #     final_str = ""
-    # else:
-    #     final_str = black.format_str(ast.unparse(got_ast), mode=black.FileMode())
-    # if test_dict.get("after") is None:
-    #     expected_str = ""
-    # else:
-    #     expected_str = black.format_str(test_dict["after"], mode=black.FileMode())
-    # assert final_str == expected_str, f"Expected:\n{expected_str}\nGot:\n{final_str}"
