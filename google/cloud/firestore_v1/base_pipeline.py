@@ -13,7 +13,8 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Optional, Sequence, Self
+from typing import Optional, Sequence
+from typing_extensions import Self
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import StructuredPipeline as StructuredPipeline_pb
 from google.cloud.firestore_v1.vector import Vector
@@ -43,7 +44,7 @@ class _BasePipeline:
         Args:
             *stages: Initial stages for the pipeline.
         """
-        self.stages = list(stages)
+        self.stages = tuple(stages)
 
     def __repr__(self):
         if not self.stages:
@@ -56,6 +57,12 @@ class _BasePipeline:
 
     def _to_pb(self) -> StructuredPipeline_pb:
         return StructuredPipeline_pb(pipeline={"stages":[s._to_pb() for s in self.stages]})
+
+    def _append(self, new_stage):
+        """
+        Create a new Pipeline object with a new stage appended
+        """
+        return self.__class__((*self.stages, new_stage))
 
     def add_fields(self, *fields: Selectable) -> Self:
         """
@@ -83,10 +90,9 @@ class _BasePipeline:
                      expressions.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.AddFields(*fields))
-        return self
+        return self._append(stages.AddFields(*fields))
 
     def remove_fields(self, *fields: Field | str) -> Self:
         """
@@ -106,10 +112,9 @@ class _BasePipeline:
                      `Field` objects.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.RemoveFields(*fields))
-        return self
+        return self._append(stages.RemoveFields(*fields))
 
     def select(self, *selections: str | Selectable) -> Self:
         """
@@ -140,10 +145,9 @@ class _BasePipeline:
                          field names (str) or `Selectable` expressions.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Select(*selections))
-        return self
+        return self._append(stages.Select(*selections))
 
     def where(self, condition: FilterCondition) -> Self:
         """
@@ -180,10 +184,9 @@ class _BasePipeline:
             condition: The `FilterCondition` to apply.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Where(condition))
-        return self
+        return self._append(stages.Where(condition))
 
     def find_nearest(
         self,
@@ -235,10 +238,9 @@ class _BasePipeline:
                      such as limit and output distance field name.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.FindNearest(field, vector, distance_measure, options))
-        return self
+        return self._append(stages.FindNearest(field, vector, distance_measure, options))
 
     def sort(self, *orders: stages.Ordering) -> Self:
         """
@@ -264,10 +266,9 @@ class _BasePipeline:
             *orders: One or more `Ordering` instances specifying the sorting criteria.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Sort(*orders))
-        return self
+        return self._append(stages.Sort(*orders))
 
     def replace(
         self,
@@ -313,10 +314,9 @@ class _BasePipeline:
             mode: The replacement mode
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Replace(field, mode))
-        return self
+        return self._append(stages.Replace(field, mode))
 
     def sample(self, limit_or_options: int | SampleOptions) -> Self:
         """
@@ -343,10 +343,9 @@ class _BasePipeline:
                               documents to sample, or a `SampleOptions` object.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Sample(limit_or_options))
-        return self
+        return self._append(stages.Sample(limit_or_options))
 
     def union(self, other: Self) -> Self:
         """
@@ -367,10 +366,9 @@ class _BasePipeline:
             other: The other `Pipeline` whose results will be unioned with this one.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Union(other))
-        return self
+        return self._append(stages.Union(other))
 
     def unnest(
         self,
@@ -431,10 +429,9 @@ class _BasePipeline:
             options: Optional `UnnestOptions` to configure additional behavior, like adding an index field.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Unnest(field, alias, options))
-        return self
+        return self._append(stages.Unnest(field, alias, options))
 
     def generic_stage(self, name: str, *params: Expr) -> Self:
         """
@@ -455,10 +452,9 @@ class _BasePipeline:
             *params: A sequence of `Expr` objects representing the parameters for the stage.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.GenericStage(name, *params))
-        return self
+        return self._append(stages.GenericStage(name, *params))
 
     def offset(self, offset: int) -> Self:
         """
@@ -480,10 +476,9 @@ class _BasePipeline:
             offset: The non-negative number of documents to skip.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Offset(offset))
-        return self
+        return self._append(stages.Offset(offset))
 
     def limit(self, limit: int) -> Self:
         """
@@ -505,10 +500,9 @@ class _BasePipeline:
             limit: The non-negative maximum number of documents to return.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Limit(limit))
-        return self
+        return self._append(stages.Limit(limit))
 
     def aggregate(
         self,
@@ -556,10 +550,9 @@ class _BasePipeline:
                     expressions to group by before aggregating.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Aggregate(*accumulators, groups=groups))
-        return self
+        return self._append(stages.Aggregate(*accumulators, groups=groups))
 
     def distinct(self, *fields: str | Selectable) -> Self:
         """
@@ -588,7 +581,6 @@ class _BasePipeline:
                      contain these fields/expressions.
 
         Returns:
-            A reference to this pipeline instance. Used for method chaining
+            A new Pipeline object with this stage appended to the stage list
         """
-        self.stages.append(stages.Distinct(*fields))
-        return self
+        return self._append(stages.Distinct(*fields))
