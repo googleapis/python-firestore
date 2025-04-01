@@ -33,13 +33,13 @@ class AsyncPipeline(_BasePipeline):
     defined pipeline stages using an asynchronous `AsyncClient`.
 
     Usage Example:
-        >>> from google.cloud.firestore_v1.pipeline_expressions import Field, gt
+        >>> from google.cloud.firestore_v1.pipeline_expressions import Field
         >>>
         >>> async def run_pipeline():
         ...     client = AsyncClient(...)
         ...     pipeline = client.collection("books")
         ...                      .pipeline()
-        ...                      .where(gt(Field.of("published"), 1980))
+        ...                      .where(Field.of("published").gt(1980))
         ...                      .select("title", "author")
         ...     async for result in pipeline.execute_async():
         ...         print(result)
