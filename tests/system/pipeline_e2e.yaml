@@ -1725,7 +1725,7 @@ tests:
           - ExprWithAlias:
               - MapGet:
                   - Field: awards
-                  - hugo
+                  - Constant: hugo
               - "hugoAward"
           - Field: title
       - Where:
