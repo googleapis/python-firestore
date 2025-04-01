@@ -1071,7 +1071,7 @@ class ListOfExprs(Expr):
         self.exprs: list[Expr] = exprs
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({', '.join([repr(e) for e in self.exprs])})"
+        return f"{self.__class__.__name__}({self.exprs})"
 
     def _to_pb(self):
         return Value(array_value={"values": [e._to_pb() for e in self.exprs]})
