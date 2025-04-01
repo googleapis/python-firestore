@@ -366,29 +366,29 @@ class Expr(ABC):
         """
         return Lte(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def in_any(self, *others: Expr | CONSTANT_TYPE) -> "In":
+    def in_any(self, array: List[Expr | CONSTANT_TYPE]) -> "In":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
         Example:
             >>> # Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-            >>> Field.of("category").in_any("Electronics", Field.of("primaryType"))
+            >>> Field.of("category").in_any(["Electronics", Field.of("primaryType")])
 
         Args:
-            *others: The values or expressions to check against.
+            array: The values or expressions to check against.
 
         Returns:
             A new `Expr` representing the 'IN' comparison.
         """
-        return In(self, [self._cast_to_expr_or_convert_to_constant(o) for o in others])
+        return In(self, [self._cast_to_expr_or_convert_to_constant(v) for v in array])
 
-    def not_in_any(self, *others: Expr | CONSTANT_TYPE) -> "Not":
+    def not_in_any(self, array: List[Expr | CONSTANT_TYPE]) -> "Not":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
         Example:
             >>> # Check if the 'status' field is neither "pending" nor "cancelled"
-            >>> Field.of("status").not_in_any("pending", "cancelled")
+            >>> Field.of("status").not_in_any(["pending", "cancelled"])
 
         Args:
             *others: The values or expressions to check against.
@@ -396,7 +396,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'NOT IN' comparison.
         """
-        return Not(self.in_any(*others))
+        return Not(self.in_any(array))
 
     def array_concat(self, array: List[Expr | CONSTANT_TYPE]) -> "ArrayConcat":
         """Creates an expression that concatenates an array expression with another array.
@@ -1069,6 +1069,9 @@ class ListOfExprs(Expr):
     """Represents a list of expressions, typically used as an argument to functions like 'in' or array functions."""
     def __init__(self, exprs: List[Expr]):
         self.exprs: list[Expr] = exprs
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({', '.join([repr(e) for e in self.exprs])})"
 
     def _to_pb(self):
         return Value(array_value={"values": [e._to_pb() for e in self.exprs]})
