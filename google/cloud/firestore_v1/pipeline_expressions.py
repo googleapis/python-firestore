@@ -102,7 +102,7 @@ class SampleOptions:
         Args:
             value: percentage of documents to return
         """
-        return SampleOptions(value, mode=SampleOptions.Mode.PERCENTAGE)
+        return SampleOptions(value, mode=SampleOptions.Mode.PERCENT)
 
 class Expr(ABC):
     """Represents an expression that can be evaluated to a value within the
@@ -817,7 +817,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the value associated with the given key in the map.
         """
-        return MapGet(self, key)
+        return MapGet(self, Constant.of(key))
 
     def cosine_distance(self, other: Expr | list[float] | Vector) -> "CosineDistance":
         """Calculates the cosine distance between two vectors.
@@ -1126,8 +1126,8 @@ class LogicalMin(Function):
 
 class MapGet(Function):
     """Represents accessing a value within a map by key."""
-    def __init__(self, map_: Expr, key: str):
-        super().__init__("map_get", [map_, Constant(key)])
+    def __init__(self, map_: Expr, key: Constant[str]):
+        super().__init__("map_get", [map_, key])
 
 
 class Mod(Function):
