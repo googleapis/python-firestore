@@ -36,14 +36,18 @@ FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 
 test_dir_name = os.path.dirname(__file__)
 
-
-def loader():
-    # load test cases
+def yaml_loader(field="tests"):
+    """
+    loads test cases or data from yaml file
+    """
     with open(f"{test_dir_name}/pipeline_e2e.yaml") as f:
         test_cases = yaml.safe_load(f)
-    # load data
-    data = test_cases["data"]
+    return test_cases[field]
+
+@pytest.fixture
+def client():
     client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
+    data = yaml_loader("data")
     try:
         # setup data
         batch = client.batch()
@@ -54,9 +58,8 @@ def loader():
                 batch.set(document_ref, document_data)
         batch.commit()
 
-        # run tests
-        for test in test_cases["tests"]:
-            yield test
+        yield client
+
     finally:
         # clear data
         for collection_name, documents in data.items():
@@ -123,12 +126,10 @@ def parse_expressions(client, yaml_element: Any):
     else:
         return yaml_element
 
-
 @pytest.mark.parametrize(
-    "test_dict", loader(), ids=lambda x: f"{x.get('description', '')}"
+    "test_dict", yaml_loader(), ids=lambda x: f"{x.get('description', '')}"
 )
-def test_e2e_scenario(test_dict):
-    client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
+def test_e2e_scenario(test_dict, client):
     error_regex = test_dict.get("assert_error", None)
     expected_proto = test_dict.get("assert_proto", None)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
