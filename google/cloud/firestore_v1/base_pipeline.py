@@ -58,11 +58,12 @@ class _BasePipeline:
     def _to_pb(self) -> StructuredPipeline_pb:
         return StructuredPipeline_pb(pipeline={"stages":[s._to_pb() for s in self.stages]})
 
+
     def _append(self, new_stage):
         """
         Create a new Pipeline object with a new stage appended
         """
-        return self.__class__((*self.stages, new_stage))
+        return self.__class__(*self.stages, new_stage)
 
     def add_fields(self, *fields: Selectable) -> Self:
         """

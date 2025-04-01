@@ -54,6 +54,9 @@ class Pipeline(_BasePipeline):
         super().__init__(*stages)
         self._client = client
 
+    def _append(self, new_stage):
+        return self.__class__(self._client, *self.stages, new_stage)
+
     def execute(self) -> Iterable["ExecutePipelineResponse"]:
         database_name = f"projects/{self._client.project}/databases/{self._client._database}"
         request = ExecutePipelineRequest(
