@@ -132,6 +132,7 @@ def parse_expressions(client, yaml_element: Any):
 def test_e2e_scenario(test_dict, client):
     error_regex = test_dict.get("assert_error", None)
     expected_proto = test_dict.get("assert_proto", None)
+    expected_results = test_dict.get("assert_results", None)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     # check if proto matches as expected
     if expected_proto:
@@ -139,7 +140,9 @@ def test_e2e_scenario(test_dict, client):
         assert yaml.dump(expected_proto) == yaml.dump(got_proto)
     # check if server responds as expected
     with pytest.raises(GoogleAPIError) if error_regex else nullcontext() as ctx:
-        pipeline.execute()
+        got_results = [snapshot.to_dict() for snapshot in pipeline.execute()]
+        if expected_results:
+            assert got_results == expected_results
     # check for error message if expected
     if error_regex:
         found_error = str(ctx.value)

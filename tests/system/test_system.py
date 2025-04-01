@@ -92,7 +92,7 @@ def verify_pipeline(query):
     query_exception = None
     query_results = None
     try:
-        query_results = query.get()
+        query_results = [s.to_dict() for s in query.get()]
     except Exception as e:
         query_exception = e
     pipeline = query.pipeline()
@@ -102,7 +102,7 @@ def verify_pipeline(query):
             pipeline.execute()
     else:
         # ensure results match query
-        pipeline_results = pipeline.execute()
+        pipeline_results = [s.to_dict() for s in pipeline.execute()]
         assert query_results == pipeline_results
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
