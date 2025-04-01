@@ -23,9 +23,9 @@ from google.protobuf import timestamp_pb2  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.firestore.admin.v1',
+    package="google.firestore.admin.v1",
     manifest={
-        'UserCreds',
+        "UserCreds",
     },
 )
 
@@ -59,6 +59,7 @@ class UserCreds(proto.Message):
 
             This field is a member of `oneof`_ ``UserCredsIdentity``.
     """
+
     class State(proto.Enum):
         r"""The state of the user creds (ENABLED or DISABLED).
 
@@ -115,7 +116,7 @@ class UserCreds(proto.Message):
     resource_identity: ResourceIdentity = proto.Field(
         proto.MESSAGE,
         number=6,
-        oneof='UserCredsIdentity',
+        oneof="UserCredsIdentity",
         message=ResourceIdentity,
     )
 
