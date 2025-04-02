@@ -437,24 +437,24 @@ tests:
     assert_results:
       - author: Douglas Adams
         author_title: Douglas Adams_The Hitchhiker's Guide to the Galaxy
-      - author: Jane Austen
-        author_title: Jane Austen_Pride and Prejudice
-      - author: Margaret Atwood
-        author_title: Margaret Atwood_The Handmaid's Tale
-      - author: Fyodor Dostoevsky
-        author_title: Fyodor Dostoevsky_Crime and Punishment
       - author: F. Scott Fitzgerald
         author_title: F. Scott Fitzgerald_The Great Gatsby
       - author: Frank Herbert
         author_title: Frank Herbert_Dune
-      - author: Harper Lee
-        author_title: Harper Lee_To Kill a Mockingbird
+      - author: Fyodor Dostoevsky
+        author_title: Fyodor Dostoevsky_Crime and Punishment
       - author: Gabriel García Márquez
         author_title: Gabriel García Márquez_One Hundred Years of Solitude
       - author: George Orwell
         author_title: George Orwell_1984
+      - author: Harper Lee
+        author_title: Harper Lee_To Kill a Mockingbird
       - author: J.R.R. Tolkien
         author_title: J.R.R. Tolkien_The Lord of the Rings
+      - author: Jane Austen
+        author_title: Jane Austen_Pride and Prejudice
+      - author: Margaret Atwood
+        author_title: Margaret Atwood_The Handmaid's Tale
     assert_proto:
       pipeline:
         stages:
@@ -599,7 +599,7 @@ tests:
         - title
         - author
     assert_results:
-      - title: 1984
+      - title: "1984"
         author: George Orwell
       - title: To Kill a Mockingbird
         author: Harper Lee
@@ -642,36 +642,6 @@ tests:
               - Constant: comedy
     assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
-    assert_proto:
-      pipeline:
-        stages:
-        - args:
-          - referenceValue: /books
-          name: collection
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: title
-              - stringValue: '%Guide%'
-              name: like
-          name: where
-        - args:
-          - mapValue:
-              fields:
-                title:
-                  fieldReferenceValue: title
-          name: select
-        author: Douglas Adams
-        genre: Science Fiction
-        published: 1979
-        rating: 4.2
-        tags:
-          - comedy
-          - space
-          - adventure
-        awards:
-          hugo: true
-          nebula: false
     assert_proto:
       pipeline:
         stages:
