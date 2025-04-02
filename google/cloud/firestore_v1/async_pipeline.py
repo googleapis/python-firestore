@@ -60,11 +60,13 @@ class AsyncPipeline(_BasePipeline):
     def _append(self, new_stage):
         return self.__class__(self._client, *self.stages, new_stage)
 
-    async def execute_async(self) -> AsyncIterable["ExecutePipelineResponse"]:
+    async def execute_async(self) -> AsyncIterable["DocumentSnapshot"]:
         database_name = f"projects/{self._client.project}/databases/{self._client._database}"
         request = ExecutePipelineRequest(
             database=database_name,
             structured_pipeline=self._to_pb(),
             read_time=datetime.datetime.now(),
         )
-        return await self._client._firestore_api.execute_pipeline(request)
+        async for response in await self._client._firestore_api.execute_pipeline(request):
+            for snapshot in self._parse_response(response, self._client):
+                yield snapshot

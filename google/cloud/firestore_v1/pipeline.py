@@ -57,11 +57,11 @@ class Pipeline(_BasePipeline):
     def _append(self, new_stage):
         return self.__class__(self._client, *self.stages, new_stage)
 
-    def execute(self) -> Iterable["ExecutePipelineResponse"]:
+    def execute(self) -> Iterable["DocumentSnapshot"]:
         database_name = f"projects/{self._client.project}/databases/{self._client._database}"
         request = ExecutePipelineRequest(
             database=database_name,
             structured_pipeline=self._to_pb(),
         )
-        results = self._client._firestore_api.execute_pipeline(request)
-        return results
+        for response in self._client._firestore_api.execute_pipeline(request):
+            yield from self._parse_response(response, self)

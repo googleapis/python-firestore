@@ -19,6 +19,7 @@ from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import StructuredPipeline as StructuredPipeline_pb
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+from google.cloud.firestore_v1 import _helpers, document
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
     Expr,
@@ -64,6 +65,19 @@ class _BasePipeline:
         Create a new Pipeline object with a new stage appended
         """
         return self.__class__(*self.stages, new_stage)
+
+    @staticmethod
+    def _parse_response(response_pb, client):
+        for doc in response_pb.results:
+            data = _helpers.decode_dict(doc.fields, client)
+            yield document.DocumentSnapshot(
+                None,
+                data,
+                exists=True,
+                read_time=response_pb._pb.execution_time,
+                create_time=doc.create_time,
+                update_time=doc.update_time,
+            )
 
     def add_fields(self, *fields: Selectable) -> Self:
         """
