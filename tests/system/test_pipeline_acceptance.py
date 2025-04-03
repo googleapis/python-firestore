@@ -44,7 +44,17 @@ def yaml_loader(field="tests"):
         test_cases = yaml.safe_load(f)
     return test_cases[field]
 
-@pytest.fixture
+@pytest.fixture(scope="session")
+def event_loop():
+    import asyncio
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+@pytest.fixture(scope="module")
 def client():
     client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
     data = yaml_loader("data")
@@ -57,9 +67,7 @@ def client():
                 document_ref = collection_ref.document(document_id)
                 batch.set(document_ref, document_data)
         batch.commit()
-
         yield client
-
     finally:
         # clear data
         for collection_name, documents in data.items():
@@ -68,7 +76,7 @@ def client():
                 document_ref = collection_ref.document(document_id)
                 document_ref.delete()
 
-@pytest.fixture
+@pytest.fixture(scope="module")
 def async_client(client):
     yield AsyncClient(project=client.project, database=client._database)
 
