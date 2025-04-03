@@ -56,7 +56,7 @@ class AsyncPipeline(_BasePipeline):
         """
         super().__init__(client, *stages)
 
-    async def execute_async(self) -> AsyncIterable["DocumentSnapshot"]:
+    async def execute(self) -> AsyncIterable["DocumentSnapshot"]:
         database_name = f"projects/{self._client.project}/databases/{self._client._database}"
         request = ExecutePipelineRequest(
             database=database_name,
