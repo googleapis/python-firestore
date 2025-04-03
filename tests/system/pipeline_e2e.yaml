@@ -638,10 +638,18 @@ tests:
       - Collection: books
       - Where:
           - ArrayContains:
-              - Constant: tags
+              - Field: tags
               - Constant: comedy
     assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
+        author: Douglas Adams
+        awards:
+          hugo: true
+          nebula: false
+        genre: Science Fiction
+        published: 1979
+        rating: 4.2
+        tags: ["comedy", "space", "adventure"]
     assert_proto:
       pipeline:
         stages:
@@ -651,7 +659,7 @@ tests:
         - args:
           - functionValue:
               args:
-              - stringValue: tags
+              - fieldReferenceValue: tags
               - stringValue: comedy
               name: array_contains
           name: where
@@ -846,7 +854,7 @@ tests:
       - Where:
           - StartsWith:
               - Field: title
-              - Constant: the
+              - Constant: The
       - Select:
         - title
       - Sort:
@@ -868,7 +876,7 @@ tests:
           - functionValue:
               args:
               - fieldReferenceValue: title
-              - stringValue: the
+              - stringValue: The
               name: starts_with
           name: where
         - args:
@@ -1089,23 +1097,30 @@ tests:
   - description: testStringFunctions - CharLength
     pipeline:
       - Collection: books
+      - Where:
+          - Eq:
+              - Field: author
+              - Constant: "Douglas Adams"
       - Select:
         - ExprWithAlias:
             - CharLength:
                 - Field: title
             - "title_length"
-      - Where:
-          - Eq:
-              - Field: author
-              - Constant: Douglas Adams
     assert_results:
-      - title_length: 30
+      - title_length: 36
     assert_proto:
       pipeline:
         stages:
         - args:
           - referenceValue: /books
           name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: eq
+          name: where
         - args:
           - mapValue:
               fields:
@@ -1115,16 +1130,13 @@ tests:
                     - fieldReferenceValue: title
                     name: char_length
           name: select
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: author
-              - stringValue: Douglas Adams
-              name: eq
-          name: where
   - description: testStringFunctions - ByteLength
     pipeline:
       - Collection: books
+      - Where:
+          - Eq:
+              - Field: author
+              - Constant: Douglas Adams
       - Select:
         - ExprWithAlias:
             - ByteLength:
@@ -1132,10 +1144,6 @@ tests:
                   - Field: title
                   - Constant: _银河系漫游指南
             - "title_byte_length"
-      - Where:
-          - Eq:
-              - Field: author
-              - Constant: Douglas Adams
     assert_results:
       - title_byte_length: 42
     assert_proto:
@@ -1144,6 +1152,13 @@ tests:
         - args:
           - referenceValue: /books
           name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: eq
+          name: where
         - args:
           - mapValue:
               fields:
@@ -1157,13 +1172,6 @@ tests:
                         name: str_concat
                     name: byte_length
           name: select
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: author
-              - stringValue: Douglas Adams
-              name: eq
-          name: where
   - description: testToLowercase
     pipeline:
       - Collection: books
