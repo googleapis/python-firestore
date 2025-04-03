@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Optional, Sequence
 from typing_extensions import Self
 from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1.base_client import BaseClient
 from google.cloud.firestore_v1.types.pipeline import StructuredPipeline as StructuredPipeline_pb
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
@@ -38,13 +39,17 @@ class _BasePipeline:
     This class is not intended to be instantiated directly.
     Use `client.collection.("...").pipeline()` to create pipeline instances.
     """
-    def __init__(self, *stages: stages.Stage):
+    def __init__(self, client: BaseClient, *stages: stages.Stage):
         """
         Initializes a new pipeline with the given stages.
 
+        Pipeline classes should not be instantiated directly.
+
         Args:
+            client: The client associated with the pipeline
             *stages: Initial stages for the pipeline.
         """
+        self._client = client
         self.stages = tuple(stages)
 
     def __repr__(self):
@@ -64,7 +69,7 @@ class _BasePipeline:
         """
         Create a new Pipeline object with a new stage appended
         """
-        return self.__class__(*self.stages, new_stage)
+        return self.__class__(self._client, *self.stages, new_stage)
 
     @staticmethod
     def _parse_response(response_pb, client):

@@ -51,11 +51,7 @@ class Pipeline(_BasePipeline):
             client: The `Client` instance to use for execution.
             *stages: Initial stages for the pipeline.
         """
-        super().__init__(*stages)
-        self._client = client
-
-    def _append(self, new_stage):
-        return self.__class__(self._client, *self.stages, new_stage)
+        super().__init__(client, *stages)
 
     def execute(self) -> Iterable["DocumentSnapshot"]:
         database_name = f"projects/{self._client.project}/databases/{self._client._database}"
