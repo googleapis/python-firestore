@@ -2024,6 +2024,9 @@ def test_get_index(request_type, transport: str = "grpc"):
             query_scope=index.Index.QueryScope.COLLECTION,
             api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
             state=index.Index.State.CREATING,
+            density=index.Index.Density.SPARSE_ALL,
+            multikey=True,
+            shard_count=1178,
         )
         response = client.get_index(request)
 
@@ -2039,6 +2042,9 @@ def test_get_index(request_type, transport: str = "grpc"):
     assert response.query_scope == index.Index.QueryScope.COLLECTION
     assert response.api_scope == index.Index.ApiScope.DATASTORE_MODE_API
     assert response.state == index.Index.State.CREATING
+    assert response.density == index.Index.Density.SPARSE_ALL
+    assert response.multikey is True
+    assert response.shard_count == 1178
 
 
 def test_get_index_non_empty_request_with_auto_populated_field():
@@ -2166,6 +2172,9 @@ async def test_get_index_async(
                 query_scope=index.Index.QueryScope.COLLECTION,
                 api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
                 state=index.Index.State.CREATING,
+                density=index.Index.Density.SPARSE_ALL,
+                multikey=True,
+                shard_count=1178,
             )
         )
         response = await client.get_index(request)
@@ -2182,6 +2191,9 @@ async def test_get_index_async(
     assert response.query_scope == index.Index.QueryScope.COLLECTION
     assert response.api_scope == index.Index.ApiScope.DATASTORE_MODE_API
     assert response.state == index.Index.State.CREATING
+    assert response.density == index.Index.Density.SPARSE_ALL
+    assert response.multikey is True
+    assert response.shard_count == 1178
 
 
 @pytest.mark.asyncio
@@ -5189,7 +5201,9 @@ def test_get_database(request_type, transport: str = "grpc"):
             key_prefix="key_prefix_value",
             delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
             previous_id="previous_id_value",
+            free_tier=True,
             etag="etag_value",
+            database_edition=database.Database.DatabaseEdition.STANDARD,
         )
         response = client.get_database(request)
 
@@ -5220,7 +5234,9 @@ def test_get_database(request_type, transport: str = "grpc"):
         == database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED
     )
     assert response.previous_id == "previous_id_value"
+    assert response.free_tier is True
     assert response.etag == "etag_value"
+    assert response.database_edition == database.Database.DatabaseEdition.STANDARD
 
 
 def test_get_database_non_empty_request_with_auto_populated_field():
@@ -5356,7 +5372,9 @@ async def test_get_database_async(
                 key_prefix="key_prefix_value",
                 delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
                 previous_id="previous_id_value",
+                free_tier=True,
                 etag="etag_value",
+                database_edition=database.Database.DatabaseEdition.STANDARD,
             )
         )
         response = await client.get_database(request)
@@ -5388,7 +5406,9 @@ async def test_get_database_async(
         == database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED
     )
     assert response.previous_id == "previous_id_value"
+    assert response.free_tier is True
     assert response.etag == "etag_value"
+    assert response.database_edition == database.Database.DatabaseEdition.STANDARD
 
 
 @pytest.mark.asyncio
@@ -18468,6 +18488,9 @@ async def test_get_index_empty_call_grpc_asyncio():
                 query_scope=index.Index.QueryScope.COLLECTION,
                 api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
                 state=index.Index.State.CREATING,
+                density=index.Index.Density.SPARSE_ALL,
+                multikey=True,
+                shard_count=1178,
             )
         )
         await client.get_index(request=None)
@@ -18708,7 +18731,9 @@ async def test_get_database_empty_call_grpc_asyncio():
                 key_prefix="key_prefix_value",
                 delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
                 previous_id="previous_id_value",
+                free_tier=True,
                 etag="etag_value",
+                database_edition=database.Database.DatabaseEdition.STANDARD,
             )
         )
         await client.get_database(request=None)
@@ -19306,6 +19331,9 @@ def test_create_index_rest_call_success(request_type):
             }
         ],
         "state": 1,
+        "density": 1,
+        "multikey": True,
+        "shard_count": 1178,
     }
     # The version of a generated dependency at test runtime may differ from the version used during generation.
     # Delete any fields which are not present in the current runtime dependency
@@ -19643,6 +19671,9 @@ def test_get_index_rest_call_success(request_type):
             query_scope=index.Index.QueryScope.COLLECTION,
             api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
             state=index.Index.State.CREATING,
+            density=index.Index.Density.SPARSE_ALL,
+            multikey=True,
+            shard_count=1178,
         )
 
         # Wrap the value into a proper Response obj
@@ -19663,6 +19694,9 @@ def test_get_index_rest_call_success(request_type):
     assert response.query_scope == index.Index.QueryScope.COLLECTION
     assert response.api_scope == index.Index.ApiScope.DATASTORE_MODE_API
     assert response.state == index.Index.State.CREATING
+    assert response.density == index.Index.Density.SPARSE_ALL
+    assert response.multikey is True
+    assert response.shard_count == 1178
 
 
 @pytest.mark.parametrize("null_interceptor", [True, False])
@@ -20029,6 +20063,9 @@ def test_update_field_rest_call_success(request_type):
                         }
                     ],
                     "state": 1,
+                    "density": 1,
+                    "multikey": True,
+                    "shard_count": 1178,
                 }
             ],
             "uses_ancestor_config": True,
@@ -20755,7 +20792,9 @@ def test_create_database_rest_call_success(request_type):
             "backup": {"backup": "backup_value"},
             "operation": "operation_value",
         },
+        "free_tier": True,
         "etag": "etag_value",
+        "database_edition": 1,
     }
     # The version of a generated dependency at test runtime may differ from the version used during generation.
     # Delete any fields which are not present in the current runtime dependency
@@ -20961,7 +21000,9 @@ def test_get_database_rest_call_success(request_type):
             key_prefix="key_prefix_value",
             delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
             previous_id="previous_id_value",
+            free_tier=True,
             etag="etag_value",
+            database_edition=database.Database.DatabaseEdition.STANDARD,
         )
 
         # Wrap the value into a proper Response obj
@@ -20997,7 +21038,9 @@ def test_get_database_rest_call_success(request_type):
         == database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED
     )
     assert response.previous_id == "previous_id_value"
+    assert response.free_tier is True
     assert response.etag == "etag_value"
+    assert response.database_edition == database.Database.DatabaseEdition.STANDARD
 
 
 @pytest.mark.parametrize("null_interceptor", [True, False])
@@ -21260,7 +21303,9 @@ def test_update_database_rest_call_success(request_type):
             "backup": {"backup": "backup_value"},
             "operation": "operation_value",
         },
+        "free_tier": True,
         "etag": "etag_value",
+        "database_edition": 1,
     }
     # The version of a generated dependency at test runtime may differ from the version used during generation.
     # Delete any fields which are not present in the current runtime dependency
