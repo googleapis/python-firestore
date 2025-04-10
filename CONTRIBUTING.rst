@@ -167,6 +167,16 @@ To update the copy of these conformance tests used by this repository, run the p
 
    $ make -f Makefile_v1
 
+**************************
+Updating Conformance Tests
+**************************
+
+The firestore client libraries use a shared set of conformance tests, the source of which can be found at https://github.com/googleapis/conformance-tests.
+
+To update the copy of these conformance tests used by this repository, run the provided Makefile:
+
+   $ make -f Makefile_v1
+
 *************
 Test Coverage
 *************
