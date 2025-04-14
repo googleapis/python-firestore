@@ -30,6 +30,7 @@ import nox
 FLAKE8_VERSION = "flake8==6.1.0"
 PYTYPE_VERSION = "pytype==2020.7.24"
 PYTYPE_VERSION = "pytype==2020.7.24"
+PYTYPE_VERSION = "pytype==2020.7.24"
 BLACK_VERSION = "black[jupyter]==23.7.0"
 ISORT_VERSION = "isort==5.11.0"
 LINT_PATHS = ["docs", "google", "tests", "noxfile.py", "setup.py"]
@@ -179,6 +180,24 @@ def mypy(session):
     session.run("mypy", "-p", "google.cloud.firestore", "--no-incremental")
 
 
+@nox.session(python="3.7")
+def pytype(session):
+    """Verify type hints are pytype compatible."""
+    session.install(PYTYPE_VERSION)
+    session.run(
+        "pytype",
+    )
+
+
+@nox.session(python=DEFAULT_PYTHON_VERSION)
+def mypy(session):
+    """Verify type hints are mypy compatible."""
+    session.install("-e", ".")
+    session.install("mypy", "types-setuptools")
+    # TODO: also verify types on tests, all of google package
+    session.run("mypy", "-p", "google.cloud.firestore", "--no-incremental")
+
+
 @nox.session(python=DEFAULT_PYTHON_VERSION)
 def lint_setup_py(session):
     """Verify that setup.py is valid (including RST check)."""
@@ -283,6 +302,57 @@ def install_systemtest_dependencies(session, *constraints):
         session.install("-e", f".[{','.join(extras)}]", *constraints)
     else:
         session.install("-e", ".", *constraints)
+
+
+@nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
+def system_emulated(session):
+    import subprocess
+    import signal
+
+    try:
+        # https://github.com/googleapis/python-firestore/issues/472
+        # Kokoro image doesn't have java installed, don't attempt to run emulator.
+        subprocess.call(["java", "--version"])
+    except OSError:
+        session.skip("java not found but required for emulator support")
+
+    try:
+        subprocess.call(["gcloud", "--version"])
+    except OSError:
+        session.skip("gcloud not found but required for emulator support")
+
+    # Currently, CI/CD doesn't have beta component of gcloud.
+    subprocess.call(
+        [
+            "gcloud",
+            "components",
+            "install",
+            "beta",
+            "cloud-firestore-emulator",
+        ]
+    )
+
+    hostport = "localhost:8789"
+    session.env["FIRESTORE_EMULATOR_HOST"] = hostport
+
+    p = subprocess.Popen(
+        [
+            "gcloud",
+            "--quiet",
+            "beta",
+            "emulators",
+            "firestore",
+            "start",
+            "--host-port",
+            hostport,
+        ]
+    )
+
+    try:
+        system(session)
+    finally:
+        # Stop Emulator
+        os.killpg(os.getpgid(p.pid), signal.SIGKILL)
 
 
 @nox.session(python=SYSTEM_TEST_PYTHON_VERSIONS)
