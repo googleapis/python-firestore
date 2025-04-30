@@ -329,7 +329,6 @@ def test_aggregation_query_prep_stream():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
-        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -356,7 +355,6 @@ def test_aggregation_query_prep_stream_with_transaction():
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": txn_id,
-        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -383,7 +381,6 @@ def test_aggregation_query_prep_stream_with_explain_options():
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
         "explain_options": explain_options._to_dict(),
-        "read_time": None,
     }
     assert request == expected_request
     assert kwargs == {"retry": None}
@@ -526,7 +523,6 @@ def _aggregation_query_get_helper(
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
-        "read_time": query_read_time,
     }
     if explain_options is not None:
         expected_request["explain_options"] = explain_options._to_dict()
@@ -610,7 +606,6 @@ def test_aggregation_query_get_transaction():
             "parent": parent_path,
             "structured_aggregation_query": aggregation_query._to_protobuf(),
             "transaction": txn_id,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
         **kwargs,
@@ -669,13 +664,17 @@ def _aggregation_query_stream_w_retriable_exc_helper(
         raise retriable_exc
 
     firestore_api.run_aggregation_query.side_effect = [_stream_w_exception(), iter([])]
-    kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
+    kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)    
 
     # Execute the query and check the response.
     query = make_query(parent)
     aggregation_query = make_aggregation_query(query)
 
-    get_response = aggregation_query.stream(transaction=transaction, **kwargs)
+    get_response = aggregation_query.stream(
+        transaction=transaction,
+        **kwargs,
+        read_time=read_time,
+    )
 
     assert isinstance(get_response, stream_generator.StreamGenerator)
     if expect_retry:
@@ -727,7 +726,8 @@ def _aggregation_query_stream_w_retriable_exc_helper(
             "transaction": None,
         }
         if read_time is not None:
-            expected_request["read_time"] = None
+            expected_request["read_time"] = read_time
+
         assert calls[1] == mock.call(
             request=expected_request,
             metadata=client._rpc_metadata,
@@ -751,6 +751,11 @@ def test_aggregation_query_stream_w_retriable_exc_w_transaction():
     txn = transaction.Transaction(client=mock.Mock(spec=[]))
     txn._id = b"DEADBEEF"
     _aggregation_query_stream_w_retriable_exc_helper(transaction=txn)
+
+
+def test_aggregation_query_stream_w_retriable_exc_w_read_time():
+    read_time = datetime.now(tz=timezone.utc)
+    _aggregation_query_stream_w_retriable_exc_helper(read_time=read_time)
 
 
 def _aggregation_query_stream_helper(
@@ -828,7 +833,6 @@ def _aggregation_query_stream_helper(
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),
         "transaction": None,
-        "read_time": read_time,
     }
     if explain_options is not None:
         expected_request["explain_options"] = explain_options._to_dict()
@@ -921,7 +925,6 @@ def test_aggregation_from_query():
                 "parent": parent_path,
                 "structured_aggregation_query": aggregation_query._to_protobuf(),
                 "transaction": txn_id,
-                "read_time": None,
             },
             metadata=client._rpc_metadata,
             **kwargs,

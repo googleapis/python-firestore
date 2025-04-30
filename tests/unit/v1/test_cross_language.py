@@ -154,7 +154,6 @@ def test_get_testprotos(test_proto):
         "documents": [doc._document_path],
         "mask": None,
         "transaction": None,
-        "read_time": None,
     }
 
     firestore_api.batch_get_documents.assert_called_once_with(

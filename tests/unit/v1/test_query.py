@@ -96,7 +96,6 @@ def _query_get_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": None,
-        "read_time": read_time,
     }
     if explain_options:
         request["explain_options"] = explain_options._to_dict()
@@ -179,7 +178,6 @@ def test_query_get_limit_to_last(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -405,7 +403,6 @@ def _query_stream_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": None,
-        "read_time": read_time,
     }
     if explain_options is not None:
         request["explain_options"] = explain_options._to_dict()
@@ -530,7 +527,6 @@ def test_query_stream_no_results(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -566,7 +562,6 @@ def test_query_stream_second_response_in_empty_stream(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -611,7 +606,6 @@ def test_query_stream_with_skipped_results(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -656,7 +650,6 @@ def test_query_stream_empty_after_first_response(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )
@@ -704,7 +697,6 @@ def test_query_stream_w_collection_group(database):
             "parent": parent_path,
             "structured_query": query._to_protobuf(),
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )

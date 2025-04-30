@@ -399,6 +399,11 @@ def test_transaction_get_w_document_ref_w_explain_options():
         )
 
 
+def test_transaction_get_w_document_ref_w_read_time():
+    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
+    _transaction_get_w_document_ref_helper(read_time=read_time)
+
+
 def _transaction_get_w_query_helper(
     retry=None,
     timeout=None,
@@ -472,7 +477,6 @@ def _transaction_get_w_query_helper(
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
         "transaction": b"beep-fail-commit",
-        "read_time": read_time,
     }
     if explain_options is not None:
         request["explain_options"] = explain_options._to_dict()

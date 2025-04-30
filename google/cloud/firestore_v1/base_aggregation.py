@@ -214,7 +214,6 @@ class BaseAggregationQuery(ABC):
             "parent": parent_path,
             "structured_aggregation_query": self._to_protobuf(),
             "transaction": _helpers.get_transaction_id(transaction),
-            "read_time": read_time,
         }
         if explain_options:
             request["explain_options"] = explain_options._to_dict()

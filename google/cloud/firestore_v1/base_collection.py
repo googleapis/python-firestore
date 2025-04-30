@@ -217,7 +217,6 @@ class BaseCollectionReference(Generic[QueryType]):
             # include any fields. To save on data transfer, we can set a field_path mask
             # to include no fields
             "mask": {"field_paths": None},
-            "read_time": read_time,
         }
         if read_time is not None:
             request["read_time"] = read_time

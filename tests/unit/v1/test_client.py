@@ -489,7 +489,6 @@ def test_client_get_all_unknown_result(database):
             "documents": doc_paths,
             "mask": None,
             "transaction": None,
-            "read_time": None,
         },
         metadata=client._rpc_metadata,
     )

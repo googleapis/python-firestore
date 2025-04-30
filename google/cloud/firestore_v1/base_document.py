@@ -309,7 +309,6 @@ class BaseDocumentReference(object):
             "documents": [self._document_path],
             "mask": mask,
             "transaction": _helpers.get_transaction_id(transaction),
-            "read_time": read_time,
         }
         if read_time is not None:
             request["read_time"] = read_time
