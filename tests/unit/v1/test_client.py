@@ -356,7 +356,12 @@ def _invoke_get_all(client, references, document_pbs, **kwargs):
 
 
 def _get_all_helper(
-    num_snapshots=2, txn_id=None, retry=None, timeout=None, database=None, read_time=None
+    num_snapshots=2,
+    txn_id=None,
+    retry=None,
+    timeout=None,
+    database=None,
+    read_time=None,
 ):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.async_document import DocumentSnapshot

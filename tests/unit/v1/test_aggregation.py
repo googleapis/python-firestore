@@ -476,7 +476,9 @@ def _aggregation_query_get_helper(
     aggregation_query = make_aggregation_query(query)
     aggregation_query.count(alias="all")
 
-    aggregation_result = AggregationResult(alias="total", value=5, read_time=response_read_time)
+    aggregation_result = AggregationResult(
+        alias="total", value=5, read_time=response_read_time
+    )
 
     if explain_options is not None:
         explain_metrics = {"execution_stats": {"results_returned": 1}}
@@ -546,7 +548,9 @@ def test_aggregation_query_get_with_readtime():
 
     query_read_time = datetime.now(tz=timezone.utc) - timedelta(hours=1)
     response_read_time = _datetime_to_pb_timestamp(query_read_time)
-    _aggregation_query_get_helper(response_read_time=response_read_time, query_read_time=query_read_time)
+    _aggregation_query_get_helper(
+        response_read_time=response_read_time, query_read_time=query_read_time
+    )
 
 
 def test_aggregation_query_get_retry_timeout():
@@ -664,7 +668,7 @@ def _aggregation_query_stream_w_retriable_exc_helper(
         raise retriable_exc
 
     firestore_api.run_aggregation_query.side_effect = [_stream_w_exception(), iter([])]
-    kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)    
+    kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     # Execute the query and check the response.
     query = make_query(parent)
@@ -803,9 +807,7 @@ def _aggregation_query_stream_helper(
 
     # Execute the query and check the response.
     returned = aggregation_query.stream(
-        **kwargs,
-        explain_options=explain_options,
-        read_time=read_time
+        **kwargs, explain_options=explain_options, read_time=read_time
     )
     assert isinstance(returned, StreamGenerator)
 

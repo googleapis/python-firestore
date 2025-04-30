@@ -379,7 +379,9 @@ def _query_stream_helper(
     # Execute the query and check the response.
     query = make_query(parent)
 
-    get_response = query.stream(**kwargs, explain_options=explain_options, read_time=read_time)
+    get_response = query.stream(
+        **kwargs, explain_options=explain_options, read_time=read_time
+    )
 
     assert isinstance(get_response, StreamGenerator)
     returned = list(get_response)
@@ -707,7 +709,12 @@ _not_passed = object()
 
 
 def _query_stream_w_retriable_exc_helper(
-    retry=_not_passed, timeout=None, transaction=None, expect_retry=True, database=None, read_time=None
+    retry=_not_passed,
+    timeout=None,
+    transaction=None,
+    expect_retry=True,
+    database=None,
+    read_time=None,
 ):
     from google.api_core import exceptions, gapic_v1
 
@@ -865,7 +872,9 @@ def test_collection_group_constructor_all_descendents_is_false():
         _make_collection_group(mock.sentinel.parent, all_descendants=False)
 
 
-def _collection_group_get_partitions_helper(retry=None, timeout=None, database=None, read_time=None):
+def _collection_group_get_partitions_helper(
+    retry=None, timeout=None, database=None, read_time=None
+):
     from google.cloud.firestore_v1 import _helpers
 
     # Create a minimal fake GAPIC.

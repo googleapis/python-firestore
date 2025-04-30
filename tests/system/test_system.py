@@ -225,9 +225,7 @@ def test_collections_w_read_time(client, cleanup, database):
     # Add to clean-up before API request (in case ``create()`` fails).
     cleanup(first_document.delete)
 
-    data = {
-        "status": "new"
-    }
+    data = {"status": "new"}
     write_result = first_document.create(data)
     read_time = write_result.update_time
     num_collections = len(list(client.collections()))
@@ -1029,15 +1027,11 @@ def test_document_get_w_read_time(client, cleanup, database):
     # First make sure it doesn't exist.
     assert not document.get().exists
 
-    initial_data = {
-        "test": "success"
-    }
+    initial_data = {"test": "success"}
     write_result = document.create(initial_data)
     read_time = write_result.update_time
 
-    new_data = {
-        "test": "changed"
-    }
+    new_data = {"test": "changed"}
     document.update(new_data)
 
     snapshot = document.get(read_time=read_time)
@@ -1593,7 +1587,10 @@ def test_query_stream_w_read_time(query_docs, cleanup, database):
 
     # Compare query at read_time to query at current time.
     query = collection.where(filter=FieldFilter("b", "==", 1))
-    values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream(read_time=read_time)}
+    values = {
+        snapshot.id: snapshot.to_dict()
+        for snapshot in query.stream(read_time=read_time)
+    }
     assert len(values) == num_vals
     assert new_ref.id not in values
     for key, value in values.items():
@@ -1968,9 +1965,10 @@ def test_get_all(client, cleanup, database):
     document1.update(new_data)
     document2.create(new_data)
     document3.update(new_data)
-    
 
-    snapshots = list(client.get_all([document1, document2, document3], read_time=read_time))
+    snapshots = list(
+        client.get_all([document1, document2, document3], read_time=read_time)
+    )
     assert snapshots[0].exists
     assert snapshots[1].exists
     assert not snapshots[2].exists
@@ -3159,11 +3157,14 @@ def test_aggregation_query_stream_or_get_w_explain_options_analyze_false(
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-@pytest.mark.parametrize("aggregation_type,expected_value", 
-                         [("count", 5), ("sum", 100), ("avg", 4.0)])
-def test_aggregation_queries_with_read_time(collection, query, cleanup, database, aggregation_type, expected_value):
+@pytest.mark.parametrize(
+    "aggregation_type,expected_value", [("count", 5), ("sum", 100), ("avg", 4.0)]
+)
+def test_aggregation_queries_with_read_time(
+    collection, query, cleanup, database, aggregation_type, expected_value
+):
     """
-    Ensure that all aggregation queries work when read_time is passed into 
+    Ensure that all aggregation queries work when read_time is passed into
     a query.<aggregation_type>.().get() method
     """
     # Find the most recent read_time in collections
@@ -3473,7 +3474,9 @@ def test_query_in_transaction_with_read_time(client, cleanup, database):
         def in_transaction(transaction):
             global inner_fn_ran
 
-            new_b_values = [docs.get("b") for docs in transaction.get(query, read_time=read_time)]
+            new_b_values = [
+                docs.get("b") for docs in transaction.get(query, read_time=read_time)
+            ]
             assert len(new_b_values) == 2
             assert 1 in new_b_values
             assert 2 in new_b_values
