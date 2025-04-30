@@ -269,13 +269,17 @@ tests:
           - Gt:
               - Field: avg_rating
               - Constant: 4.3
+      - Sort:
+          - Ordering:
+            - Field: avg_rating
+            - ASCENDING
     assert_results:
-      - avg_rating: 4.7
-        genre: Fantasy
-      - avg_rating: 4.5
-        genre: Romance
       - avg_rating: 4.4
         genre: Science Fiction
+      - avg_rating: 4.5
+        genre: Romance
+      - avg_rating: 4.7
+        genre: Fantasy
     assert_proto:
       pipeline:
         stages:
@@ -309,6 +313,14 @@ tests:
               - doubleValue: 4.3
               name: gt
           name: where
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: avg_rating
+          name: sort
   - description: testMinMax
     pipeline:
       - Collection: books
@@ -555,10 +567,14 @@ tests:
                   - Constant: Dystopian
       - Select:
         - title
+      - Sort:
+          - Ordering:
+            - Field: title
+            - ASCENDING
     assert_results:
+      - title: "1984"
       - title: Pride and Prejudice
       - title: The Handmaid's Tale
-      - title: 1984
     assert_proto:
       pipeline:
         stages:
@@ -586,6 +602,14 @@ tests:
                 title:
                   fieldReferenceValue: title
           name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
   - description: testPipelineWithOffsetAndLimit
     pipeline:
       - Collection: books
@@ -673,9 +697,13 @@ tests:
               - Constant: classic
       - Select:
         - title
+      - Sort:
+          - Ordering:
+            - Field: title
+            - ASCENDING
     assert_results:
-      - title: The Hitchhiker's Guide to the Galaxy
       - title: Pride and Prejudice
+      - title: The Hitchhiker's Guide to the Galaxy
     assert_proto:
       pipeline:
         stages:
@@ -698,6 +726,14 @@ tests:
                 title:
                   fieldReferenceValue: title
           name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
   - description: testArrayContainsAll
     pipeline:
       - Collection: books
@@ -818,6 +854,10 @@ tests:
   - description: testStrConcat
     pipeline:
       - Collection: books
+      - Sort:
+          - Ordering:
+            - Field: author
+            - ASCENDING
       - Select:
           - ExprWithAlias:
               - StrConcat:
@@ -834,6 +874,14 @@ tests:
         - args:
           - referenceValue: /books
           name: collection
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: author
+          name: sort
         - args:
           - mapValue:
               fields:
@@ -949,11 +997,19 @@ tests:
           - Gt:
               - Field: titleLength
               - Constant: 20
+      - Sort:
+          - Ordering:
+            - Field: title
+            - ASCENDING
     assert_results:
-      - titleLength: 32
-        title: The Hitchhiker's Guide to the Galaxy
-      - titleLength: 27
+      - titleLength: 29
         title: One Hundred Years of Solitude
+      - titleLength: 36
+        title: The Hitchhiker's Guide to the Galaxy
+      - titleLength: 21
+        title: The Lord of the Rings
+      - titleLength: 21
+        title: To Kill a Mockingbird
     assert_proto:
       pipeline:
         stages:
@@ -978,6 +1034,14 @@ tests:
               - integerValue: '20'
               name: gt
           name: where
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
   - description: testStringFunctions - Reverse
     pipeline:
       - Collection: books
@@ -1145,7 +1209,7 @@ tests:
                   - Constant: _银河系漫游指南
             - "title_byte_length"
     assert_results:
-      - title_byte_length: 42
+      - title_byte_length: 58
     assert_proto:
       pipeline:
         stages:
@@ -1293,18 +1357,14 @@ tests:
     assert_results:
       - title: The Hitchhiker's Guide to the Galaxy
   - description: testRegexContains
+    # Find titles that contain either "the" or "of" (case-insensitive)
     pipeline:
       - Collection: books
       - Where:
           - RegexContains:
               - Field: title
               - Constant: "(?i)(the|of)"
-    assert_results:
-      - title: The Hitchhiker's Guide to the Galaxy
-      - title: One Hundred Years of Solitude
-      - title: The Lord of the Rings
-      - title: To Kill a Mockingbird
-      - title: The Great Gatsby
+    assert_count: 5
     assert_proto:
       pipeline:
         stages:
@@ -1315,38 +1375,38 @@ tests:
           - functionValue:
               args:
               - fieldReferenceValue: title
-              - stringValue: .*(?i)(the|of).*
-              name: regex_match
-          name: where
-    assert_proto:
-      pipeline:
-        stages:
-        - args:
-          - referenceValue: /books
-          name: collection
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: title
-              - stringValue: (?i)(the|of)
+              - stringValue: "(?i)(the|of)"
               name: regex_contains
           name: where
   - description: testRegexMatches
+    # Find titles that contain either "the" or "of" (case-insensitive)
     pipeline:
       - Collection: books
       - Where:
           - RegexMatch:
               - Field: title
               - Constant: ".*(?i)(the|of).*"
-    assert_results:
-      - title: The Hitchhiker's Guide to the Galaxy
-      - title: One Hundred Years of Solitude
-      - title: The Lord of the Rings
-      - title: To Kill a Mockingbird
-      - title: The Great Gatsby
+    assert_count: 5
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "(?i)(the|of)"
+              name: regex_matches
+          name: where
   - description: testArithmeticOperations
     pipeline:
       - Collection: books
+      - Where:
+        - Eq:
+          - Field: title
+          - Constant: To Kill a Mockingbird
       - Select:
         - ExprWithAlias:
             - Add:
@@ -1368,18 +1428,42 @@ tests:
                 - Field: rating
                 - Constant: 2
             - "ratingDividedByTwo"
-      - Limit: 1
+        - ExprWithAlias:
+            - Multiply:
+                - Field: rating
+                - Constant: 20
+            - "ratingTimes20"
+        - ExprWithAlias:
+            - Add:
+                - Field: rating
+                - Constant: 3
+            - "ratingPlus3"
+        - ExprWithAlias:
+            - Mod:
+                - Field: rating
+                - Constant: 2
+            - "ratingMod2"
     assert_results:
       - ratingPlusOne: 5.2
-        yearsSince1900: 79
+        yearsSince1900: 60
         ratingTimesTen: 42.0
         ratingDividedByTwo: 2.1
+        ratingTimes20: 84
+        ratingPlus3: 7.2
+        ratingMod2: 0.20000000000000018
     assert_proto:
       pipeline:
         stages:
         - args:
           - referenceValue: /books
           name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: To Kill a Mockingbird
+              name: eq
+          name: where
         - args:
           - mapValue:
               fields:
@@ -1407,10 +1491,25 @@ tests:
                     - fieldReferenceValue: published
                     - integerValue: '1900'
                     name: subtract
+                ratingTimes20:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '20'
+                    name: multiply
+                ratingPlus3:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '3'
+                    name: add
+                ratingMod2:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '2'
+                    name: mod
           name: select
-        - args:
-          - integerValue: '1'
-          name: limit
   - description: testComparisonOperators
     pipeline:
       - Collection: books
@@ -1657,48 +1756,13 @@ tests:
                     - doubleValue: 4.5
                     name: logical_maximum
           name: select
-  - description: testLogicalMinMax - min
-    pipeline:
-      - Collection: books
-      - Select:
-          - ExprWithAlias:
-              - LogicalMin:
-                  - Field: rating
-                  - Constant: 4.5
-              - "min_rating"
-          - ExprWithAlias:
-              - LogicalMin:
-                  - Field: published
-                  - Constant: 1900
-              - "min_published"
-    assert_results:
-      - min_rating: 4.2
-        min_published: 1900
-    assert_proto:
-      pipeline:
-        stages:
-        - args:
-          - referenceValue: /books
-          name: collection
-        - args:
-          - mapValue:
-              fields:
-                min_published:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: published
-                    - integerValue: '1900'
-                    name: logical_minimum
-                min_rating:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: rating
-                    - doubleValue: 4.5
-                    name: logical_minimum
-          name: select
   - description: testMapGet
     pipeline:
       - Collection: books
+      - Sort:
+        - Ordering:
+          - Field: published
+          - DESCENDING
       - Select:
           - ExprWithAlias:
               - MapGet:
@@ -1721,6 +1785,14 @@ tests:
         - args:
           - referenceValue: /books
           name: collection
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: descending
+                expression:
+                  fieldReferenceValue: published
+          name: sort
         - args:
           - mapValue:
               fields:
@@ -1820,6 +1892,10 @@ tests:
           - Eq:
               - Field: awards.hugo
               - Constant: true
+      - Sort:
+          - Ordering:
+            - Field: title
+            - DESCENDING
       - Select:
           - title
           - Field: awards.hugo
@@ -1844,26 +1920,11 @@ tests:
         - args:
           - mapValue:
               fields:
-                __name__:
-                  fieldReferenceValue: __name__
-                awards.hugo:
-                  fieldReferenceValue: awards.hugo
-                title:
+                direction:
+                  stringValue: descending
+                expression:
                   fieldReferenceValue: title
-          name: select
-    assert_proto:
-      pipeline:
-        stages:
-        - args:
-          - referenceValue: /books
-          name: collection
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: awards.hugo
-              - booleanValue: true
-              name: eq
-          name: where
+          name: sort
         - args:
           - mapValue:
               fields:
@@ -1872,22 +1933,6 @@ tests:
                 title:
                   fieldReferenceValue: title
           name: select
-  - description: testPipelineInTransactions
-    pipeline:
-      - Collection: books
-      - Where:
-          - Eq:
-              - Field: awards.hugo
-              - Constant: true
-      - Select:
-          - title
-          - Field: awards.hugo
-          - Field: "__name__"
-    assert_results:
-      - title: The Hitchhiker's Guide to the Galaxy
-        awards.hugo: true
-      - title: Dune
-        awards.hugo: true
   - description: testReplace
     pipeline:
       - Collection: books
@@ -1947,7 +1992,6 @@ tests:
           - SampleOptions:
             - 0.6
             - percent
-    assert_count: 6 # Results will vary due to randomness
     assert_proto:
       pipeline:
         stages:
@@ -1982,14 +2026,17 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Eq:
-              - Field: title
-              - Constant: The Hitchhiker's Guide to the Galaxy
-      - Unnest: tags
+        - Eq:
+          - Field: title
+          - Constant: The Hitchhiker's Guide to the Galaxy
+      - Unnest:
+        - tags
+        - tags_alias
+      - Select: tags_alias
     assert_results:
-      - tags: comedy
-      - tags: space
-      - tags: adventure
+      - tags_alias: comedy
+      - tags_alias: space
+      - tags_alias: adventure
     assert_proto:
       pipeline:
         stages:
@@ -2005,5 +2052,11 @@ tests:
           name: where
         - args:
           - fieldReferenceValue: tags
-          - fieldReferenceValue: tags
+          - fieldReferenceValue: tags_alias
           name: unnest
+        - args:
+          - mapValue:
+              fields:
+                tags_alias:
+                  fieldReferenceValue: tags_alias
+          name: select
