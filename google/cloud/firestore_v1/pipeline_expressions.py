@@ -398,21 +398,6 @@ class Expr(ABC):
         """
         return Not(self.in_any(array))
 
-    def array_concat(self, array: List[Expr | CONSTANT_TYPE]) -> "ArrayConcat":
-        """Creates an expression that concatenates an array expression with another array.
-
-        Example:
-            >>> # Combine the 'tags' array with a new array and an array field
-            >>> Field.of("tags").array_concat(["newTag1", "newTag2", Field.of("otherTag")])
-
-        Args:
-            array: The list of constants or expressions to concat with.
-
-        Returns:
-            A new `Expr` representing the concatenated array.
-        """
-        return ArrayConcat(self, [self._cast_to_expr_or_convert_to_constant(o) for o in array])
-
     def array_contains(self, element: Expr | CONSTANT_TYPE) -> "ArrayContains":
         """Creates an expression that checks if an array contains a specific element or value.
 
@@ -717,92 +702,6 @@ class Expr(ABC):
         """
         return StrConcat(*[self._cast_to_expr_or_convert_to_constant(el) for el in elements])
 
-    def to_lower(self) -> "ToLower":
-        """Creates an expression that converts a string to lowercase.
-
-        Example:
-            >>> # Convert the 'name' field to lowercase
-            >>> Field.of("name").to_lower()
-
-        Returns:
-            A new `Expr` representing the lowercase string.
-        """
-        return ToLower(self)
-
-    def to_upper(self) -> "ToUpper":
-        """Creates an expression that converts a string to uppercase.
-
-        Example:
-            >>> # Convert the 'title' field to uppercase
-            >>> Field.of("title").to_upper()
-
-        Returns:
-            A new `Expr` representing the uppercase string.
-        """
-        return ToUpper(self)
-
-    def trim(self) -> "Trim":
-        """Creates an expression that removes leading and trailing whitespace from a string.
-
-        Example:
-            >>> # Trim whitespace from the 'userInput' field
-            >>> Field.of("userInput").trim()
-
-        Returns:
-            A new `Expr` representing the trimmed string.
-        """
-        return Trim(self)
-
-    def reverse(self) -> "Reverse":
-        """Creates an expression that reverses a string.
-
-        Example:
-            >>> # Reverse the 'userInput' field
-            >>> Field.of("userInput").reverse()
-
-        Returns:
-            A new `Expr` representing the reversed string.
-        """
-        return Reverse(self)
-
-    def replace_first(self, find: Expr | str, replace: Expr | str) -> "ReplaceFirst":
-        """Creates an expression that replaces the first occurrence of a substring within a string with
-        another substring.
-
-        Example:
-            >>> # Replace the first occurrence of "hello" with "hi" in the 'message' field
-            >>> Field.of("message").replace_first("hello", "hi")
-            >>> # Replace the first occurrence of the value in 'findField' with the value in 'replaceField' in the 'message' field
-            >>> Field.of("message").replace_first(Field.of("findField"), Field.of("replaceField"))
-
-        Args:
-            find: The substring (string or expression) to search for.
-            replace: The substring (string or expression) to replace the first occurrence of 'find' with.
-
-        Returns:
-            A new `Expr` representing the string with the first occurrence replaced.
-        """
-        return ReplaceFirst(self, self._cast_to_expr_or_convert_to_constant(find), self._cast_to_expr_or_convert_to_constant(replace))
-
-    def replace_all(self, find: Expr | str, replace: Expr | str) -> "ReplaceAll":
-        """Creates an expression that replaces all occurrences of a substring within a string with another
-        substring.
-
-        Example:
-            >>> # Replace all occurrences of "hello" with "hi" in the 'message' field
-            >>> Field.of("message").replace_all("hello", "hi")
-            >>> # Replace all occurrences of the value in 'findField' with the value in 'replaceField' in the 'message' field
-            >>> Field.of("message").replace_all(Field.of("findField"), Field.of("replaceField"))
-
-        Args:
-            find: The substring (string or expression) to search for.
-            replace: The substring (string or expression) to replace all occurrences of 'find' with.
-
-        Returns:
-            A new `Expr` representing the string with all occurrences replaced.
-        """
-        return ReplaceAll(self, self._cast_to_expr_or_convert_to_constant(find), self._cast_to_expr_or_convert_to_constant(replace))
-
     def map_get(self, key: str) -> "MapGet":
         """Accesses a value from a map (object) field using the provided key.
 
@@ -818,57 +717,6 @@ class Expr(ABC):
             A new `Expr` representing the value associated with the given key in the map.
         """
         return MapGet(self, Constant.of(key))
-
-    def cosine_distance(self, other: Expr | list[float] | Vector) -> "CosineDistance":
-        """Calculates the cosine distance between two vectors.
-
-        Example:
-            >>> # Calculate the cosine distance between the 'userVector' field and the 'itemVector' field
-            >>> Field.of("userVector").cosine_distance(Field.of("itemVector"))
-            >>> # Calculate the Cosine distance between the 'location' field and a target location
-            >>> Field.of("location").cosine_distance([37.7749, -122.4194])
-
-        Args:
-            other: The other vector (represented as an Expr, list of floats, or Vector) to compare against.
-
-        Returns:
-            A new `Expr` representing the cosine distance between the two vectors.
-        """
-        return CosineDistance(self, self._cast_to_expr_or_convert_to_constant(other))
-
-    def euclidean_distance(self, other: Expr | list[float] | Vector) -> "EuclideanDistance":
-        """Calculates the Euclidean distance between two vectors.
-
-        Example:
-            >>> # Calculate the Euclidean distance between the 'location' field and a target location
-            >>> Field.of("location").euclidean_distance([37.7749, -122.4194])
-            >>> # Calculate the Euclidean distance between two vector fields: 'pointA' and 'pointB'
-            >>> Field.of("pointA").euclidean_distance(Field.of("pointB"))
-
-        Args:
-            other: The other vector (represented as an Expr, list of floats, or Vector) to compare against.
-
-        Returns:
-            A new `Expr` representing the Euclidean distance between the two vectors.
-        """
-        return EuclideanDistance(self, self._cast_to_expr_or_convert_to_constant(other))
-
-    def dot_product(self, other: Expr | list[float] | Vector) -> "DotProduct":
-        """Calculates the dot product between two vectors.
-
-        Example:
-            >>> # Calculate the dot product between a feature vector and a target vector
-            >>> Field.of("features").dot_product([0.5, 0.8, 0.2])
-            >>> # Calculate the dot product between two document vectors: 'docVector1' and 'docVector2'
-            >>> Field.of("docVector1").dot_product(Field.of("docVector2"))
-
-        Args:
-            other: The other vector (represented as an Expr, list of floats, or Vector) to calculate dot product with.
-
-        Returns:
-            A new `Expr` representing the dot product between the two vectors.
-        """
-        return DotProduct(self, self._cast_to_expr_or_convert_to_constant(other))
 
     def vector_length(self) -> "VectorLength":
         """Creates an expression that calculates the length (dimension) of a Firestore Vector.
@@ -1100,18 +948,6 @@ class Divide(Function):
         super().__init__("divide", [left, right])
 
 
-class DotProduct(Function):
-    """Represents the vector dot product function."""
-    def __init__(self, vector1: Expr, vector2: Expr):
-        super().__init__("dot_product", [vector1, vector2])
-
-
-class EuclideanDistance(Function):
-    """Represents the vector Euclidean distance function."""
-    def __init__(self, vector1: Expr, vector2: Expr):
-        super().__init__("euclidean_distance", [vector1, vector2])
-
-
 class LogicalMax(Function):
     """Represents the logical maximum function based on Firestore type ordering."""
     def __init__(self, left: Expr, right: Expr):
@@ -1146,24 +982,6 @@ class Parent(Function):
     """Represents getting the parent document reference."""
     def __init__(self, value: Expr):
         super().__init__("parent", [value])
-
-
-class ReplaceAll(Function):
-    """Represents replacing all occurrences of a substring."""
-    def __init__(self, value: Expr, pattern: Expr, replacement: Expr):
-        super().__init__("replace_all", [value, pattern, replacement])
-
-
-class ReplaceFirst(Function):
-    """Represents replacing the first occurrence of a substring."""
-    def __init__(self, value: Expr, pattern: Expr, replacement: Expr):
-        super().__init__("replace_first", [value, pattern, replacement])
-
-
-class Reverse(Function):
-    """Represents reversing a string."""
-    def __init__(self, expr: Expr):
-        super().__init__("reverse", [expr])
 
 
 class StrConcat(Function):
@@ -1208,24 +1026,6 @@ class TimestampToUnixSeconds(Function):
         super().__init__("timestamp_to_unix_seconds", [input])
 
 
-class ToLower(Function):
-    """Represents converting a string to lowercase."""
-    def __init__(self, value: Expr):
-        super().__init__("to_lower", [value])
-
-
-class ToUpper(Function):
-    """Represents converting a string to uppercase."""
-    def __init__(self, value: Expr):
-        super().__init__("to_upper", [value])
-
-
-class Trim(Function):
-    """Represents trimming whitespace from a string."""
-    def __init__(self, expr: Expr):
-        super().__init__("trim", [expr])
-
-
 class UnixMicrosToTimestamp(Function):
     """Represents converting microseconds since epoch to a timestamp."""
     def __init__(self, input: Expr):
@@ -1254,12 +1054,6 @@ class Add(Function):
     """Represents the addition function."""
     def __init__(self, left: Expr, right: Expr):
         super().__init__("add", [left, right])
-
-
-class ArrayConcat(Function):
-    """Represents concatenating multiple arrays."""
-    def __init__(self, array: Expr, rest: List[Expr]):
-        super().__init__("array_concat", [array] + rest)
 
 
 class ArrayElement(Function):
@@ -1308,12 +1102,6 @@ class CollectionId(Function):
     """Represents getting the collection ID from a document reference."""
     def __init__(self, value: Expr):
         super().__init__("collection_id", [value])
-
-
-class CosineDistance(Function):
-    """Represents the vector cosine distance function."""
-    def __init__(self, vector1: Expr, vector2: Expr):
-        super().__init__("cosine_distance", [vector1, vector2])
 
 
 class Accumulator(Function):
