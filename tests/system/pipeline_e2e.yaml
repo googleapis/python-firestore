@@ -1097,8 +1097,8 @@ tests:
           - functionValue:
               args:
               - fieldReferenceValue: title
-              - stringValue: "(?i)(the|of)"
-              name: regex_matches
+              - stringValue: ".*(?i)(the|of).*"
+              name: regex_match
           name: where
   - description: testArithmeticOperations
     pipeline:
