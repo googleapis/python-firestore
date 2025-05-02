@@ -14,6 +14,8 @@
 
 from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Optional, Sequence, TYPE_CHECKING
+from abc import ABC
+from abc import abstractmethod
 from enum import Enum
 from enum import auto
 
@@ -67,7 +69,7 @@ class UnnestOptions:
         self.index_field = index_field
 
 
-class Stage:
+class Stage(ABC):
     """Base class for all pipeline stages.
 
     Each stage represents a specific operation (e.g., filtering, sorting,
@@ -83,9 +85,10 @@ class Stage:
             name=self.name, args=self._pb_args(), options=self._pb_options()
         )
 
+    @abstractmethod
     def _pb_args(self) -> list[Value]:
         """Return Ordered list of arguments the given stage expects"""
-        return []
+        raise NotImplementedError
 
     def _pb_options(self) -> dict[str, Value]:
         """Return optional named arguments that certain functions may support."""
