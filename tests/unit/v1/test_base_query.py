@@ -1951,6 +1951,7 @@ def test__collection_group_query_response_to_snapshot_response():
     assert snapshot.create_time == response_pb._pb.document.create_time
     assert snapshot.update_time == response_pb._pb.document.update_time
 
+
 def test__query_pipeline_decendants():
     from google.cloud.firestore_v1 import pipeline_stages
 

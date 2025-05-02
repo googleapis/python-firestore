@@ -13,7 +13,19 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, Iterable, List, Mapping, Union, Generic, TypeVar, List, Dict, Tuple, Sequence
+from typing import (
+    Any,
+    Iterable,
+    List,
+    Mapping,
+    Union,
+    Generic,
+    TypeVar,
+    List,
+    Dict,
+    Tuple,
+    Sequence,
+)
 from abc import ABC
 from abc import abstractmethod
 from enum import Enum
@@ -27,7 +39,20 @@ from google.cloud.firestore_v1._helpers import GeoPoint
 from google.cloud.firestore_v1._helpers import encode_value
 from google.cloud.firestore_v1._helpers import decode_value
 
-CONSTANT_TYPE = TypeVar('CONSTANT_TYPE', str, int, float, bool, datetime.datetime, bytes, GeoPoint, Vector, list, Dict[str, Any], None)
+CONSTANT_TYPE = TypeVar(
+    "CONSTANT_TYPE",
+    str,
+    int,
+    float,
+    bool,
+    datetime.datetime,
+    bytes,
+    GeoPoint,
+    Vector,
+    list,
+    Dict[str, Any],
+    None,
+)
 
 
 class Ordering:
@@ -37,7 +62,7 @@ class Ordering:
         ASCENDING = "ascending"
         DESCENDING = "descending"
 
-    def __init__(self, expr, order_dir: Direction | str=Direction.ASCENDING):
+    def __init__(self, expr, order_dir: Direction | str = Direction.ASCENDING):
         """
         Initializes an Ordering instance
 
@@ -48,7 +73,11 @@ class Ordering:
                 Defaults to ascending
         """
         self.expr = expr if isinstance(expr, Expr) else Field.of(expr)
-        self.order_dir = Ordering.Direction[order_dir.upper()] if isinstance(order_dir, str) else order_dir
+        self.order_dir = (
+            Ordering.Direction[order_dir.upper()]
+            if isinstance(order_dir, str)
+            else order_dir
+        )
 
     def __repr__(self):
         if self.order_dir is Ordering.Direction.ASCENDING:
@@ -59,21 +88,23 @@ class Ordering:
 
     def _to_pb(self) -> Value:
         return Value(
-            map_value={"fields":
-                {
+            map_value={
+                "fields": {
                     "direction": Value(string_value=self.order_dir.value),
-                    "expression": self.expr._to_pb()
+                    "expression": self.expr._to_pb(),
                 }
             }
         )
 
+
 class SampleOptions:
     """Options for the 'sample' pipeline stage."""
+
     class Mode(Enum):
         DOCUMENTS = "documents"
         PERCENT = "percent"
 
-    def __init__(self, value: int | float, mode:Mode | str):
+    def __init__(self, value: int | float, mode: Mode | str):
         self.value = value
         self.mode = SampleOptions.Mode[mode.upper()] if isinstance(mode, str) else mode
 
@@ -85,7 +116,7 @@ class SampleOptions:
         return f"SampleOptions.{mode_str}({self.value})"
 
     @staticmethod
-    def doc_limit(value:int):
+    def doc_limit(value: int):
         """
         Sample a set number of documents
 
@@ -95,7 +126,7 @@ class SampleOptions:
         return SampleOptions(value, mode=SampleOptions.Mode.DOCUMENTS)
 
     @staticmethod
-    def percentage(value:float):
+    def percentage(value: float):
         """
         Sample a percentage of documents
 
@@ -103,6 +134,7 @@ class SampleOptions:
             value: percentage of documents to return
         """
         return SampleOptions(value, mode=SampleOptions.Mode.PERCENT)
+
 
 class Expr(ABC):
     """Represents an expression that can be evaluated to a value within the
@@ -415,7 +447,9 @@ class Expr(ABC):
         """
         return ArrayContains(self, self._cast_to_expr_or_convert_to_constant(element))
 
-    def array_contains_all(self, elements: List[Expr | CONSTANT_TYPE]) -> "ArrayContainsAll":
+    def array_contains_all(
+        self, elements: List[Expr | CONSTANT_TYPE]
+    ) -> "ArrayContainsAll":
         """Creates an expression that checks if an array contains all the specified elements.
 
         Example:
@@ -430,9 +464,13 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'array_contains_all' comparison.
         """
-        return ArrayContainsAll(self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements])
+        return ArrayContainsAll(
+            self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
+        )
 
-    def array_contains_any(self, elements: List[Expr | CONSTANT_TYPE]) -> "ArrayContainsAny":
+    def array_contains_any(
+        self, elements: List[Expr | CONSTANT_TYPE]
+    ) -> "ArrayContainsAny":
         """Creates an expression that checks if an array contains any of the specified elements.
 
         Example:
@@ -448,7 +486,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'array_contains_any' comparison.
         """
-        return ArrayContainsAny(self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements])
+        return ArrayContainsAny(
+            self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
+        )
 
     def array_length(self) -> "ArrayLength":
         """Creates an expression that calculates the length of an array.
@@ -700,7 +740,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the concatenated string.
         """
-        return StrConcat(*[self._cast_to_expr_or_convert_to_constant(el) for el in elements])
+        return StrConcat(
+            *[self._cast_to_expr_or_convert_to_constant(el) for el in elements]
+        )
 
     def map_get(self, key: str) -> "MapGet":
         """Accesses a value from a map (object) field using the provided key.
@@ -831,7 +873,11 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the resulting timestamp.
         """
-        return TimestampAdd(self, self._cast_to_expr_or_convert_to_constant(unit), self._cast_to_expr_or_convert_to_constant(amount))
+        return TimestampAdd(
+            self,
+            self._cast_to_expr_or_convert_to_constant(unit),
+            self._cast_to_expr_or_convert_to_constant(amount),
+        )
 
     def timestamp_sub(self, unit: Expr | str, amount: Expr | float) -> "TimestampSub":
         """Creates an expression that subtracts a specified amount of time from this timestamp expression.
@@ -850,7 +896,11 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the resulting timestamp.
         """
-        return TimestampSub(self, self._cast_to_expr_or_convert_to_constant(unit), self._cast_to_expr_or_convert_to_constant(amount))
+        return TimestampSub(
+            self,
+            self._cast_to_expr_or_convert_to_constant(unit),
+            self._cast_to_expr_or_convert_to_constant(amount),
+        )
 
     def ascending(self) -> Ordering:
         """Creates an `Ordering` that sorts documents in ascending order based on this expression.
@@ -897,13 +947,15 @@ class Expr(ABC):
         """
         return ExprWithAlias(self, alias)
 
+
 class Constant(Expr, Generic[CONSTANT_TYPE]):
     """Represents a constant literal value in an expression."""
+
     def __init__(self, value: CONSTANT_TYPE):
         self.value: CONSTANT_TYPE = value
 
     @staticmethod
-    def of(value:CONSTANT_TYPE) -> Constant[CONSTANT_TYPE]:
+    def of(value: CONSTANT_TYPE) -> Constant[CONSTANT_TYPE]:
         """Creates a constant expression from a Python value."""
         return Constant(value)
 
@@ -913,8 +965,10 @@ class Constant(Expr, Generic[CONSTANT_TYPE]):
     def _to_pb(self) -> Value:
         return encode_value(self.value)
 
+
 class ListOfExprs(Expr):
     """Represents a list of expressions, typically used as an argument to functions like 'in' or array functions."""
+
     def __init__(self, exprs: List[Expr]):
         self.exprs: list[Expr] = exprs
 
@@ -938,168 +992,197 @@ class Function(Expr):
     def _to_pb(self):
         return Value(
             function_value={
-                "name": self.name, "args": [p._to_pb() for p in self.params]
+                "name": self.name,
+                "args": [p._to_pb() for p in self.params],
             }
         )
 
+
 class Divide(Function):
     """Represents the division function."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("divide", [left, right])
 
 
 class LogicalMax(Function):
     """Represents the logical maximum function based on Firestore type ordering."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("logical_maximum", [left, right])
 
 
 class LogicalMin(Function):
     """Represents the logical minimum function based on Firestore type ordering."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("logical_minimum", [left, right])
 
 
 class MapGet(Function):
     """Represents accessing a value within a map by key."""
+
     def __init__(self, map_: Expr, key: Constant[str]):
         super().__init__("map_get", [map_, key])
 
 
 class Mod(Function):
     """Represents the modulo function."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("mod", [left, right])
 
 
 class Multiply(Function):
     """Represents the multiplication function."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("multiply", [left, right])
 
 
 class Parent(Function):
     """Represents getting the parent document reference."""
+
     def __init__(self, value: Expr):
         super().__init__("parent", [value])
 
 
 class StrConcat(Function):
     """Represents concatenating multiple strings."""
+
     def __init__(self, *exprs: Expr):
         super().__init__("str_concat", exprs)
 
 
 class Subtract(Function):
     """Represents the subtraction function."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("subtract", [left, right])
 
 
 class TimestampAdd(Function):
     """Represents adding a duration to a timestamp."""
+
     def __init__(self, timestamp: Expr, unit: Expr, amount: Expr):
         super().__init__("timestamp_add", [timestamp, unit, amount])
 
 
 class TimestampSub(Function):
     """Represents subtracting a duration from a timestamp."""
+
     def __init__(self, timestamp: Expr, unit: Expr, amount: Expr):
         super().__init__("timestamp_sub", [timestamp, unit, amount])
 
 
 class TimestampToUnixMicros(Function):
     """Represents converting a timestamp to microseconds since epoch."""
+
     def __init__(self, input: Expr):
         super().__init__("timestamp_to_unix_micros", [input])
 
 
 class TimestampToUnixMillis(Function):
     """Represents converting a timestamp to milliseconds since epoch."""
+
     def __init__(self, input: Expr):
         super().__init__("timestamp_to_unix_millis", [input])
 
 
 class TimestampToUnixSeconds(Function):
     """Represents converting a timestamp to seconds since epoch."""
+
     def __init__(self, input: Expr):
         super().__init__("timestamp_to_unix_seconds", [input])
 
 
 class UnixMicrosToTimestamp(Function):
     """Represents converting microseconds since epoch to a timestamp."""
+
     def __init__(self, input: Expr):
         super().__init__("unix_micros_to_timestamp", [input])
 
 
 class UnixMillisToTimestamp(Function):
     """Represents converting milliseconds since epoch to a timestamp."""
+
     def __init__(self, input: Expr):
         super().__init__("unix_millis_to_timestamp", [input])
 
 
 class UnixSecondsToTimestamp(Function):
     """Represents converting seconds since epoch to a timestamp."""
+
     def __init__(self, input: Expr):
         super().__init__("unix_seconds_to_timestamp", [input])
 
 
 class VectorLength(Function):
     """Represents getting the length (dimension) of a vector."""
+
     def __init__(self, array: Expr):
         super().__init__("vector_length", [array])
 
 
 class Add(Function):
     """Represents the addition function."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("add", [left, right])
 
 
 class ArrayElement(Function):
     """Represents accessing an element within an array"""
+
     def __init__(self):
         super().__init__("array_element", [])
 
 
 class ArrayFilter(Function):
     """Represents filtering elements from an array based on a condition."""
+
     def __init__(self, array: Expr, filter: "FilterCondition"):
         super().__init__("array_filter", [array, filter])
 
 
 class ArrayLength(Function):
     """Represents getting the length of an array."""
+
     def __init__(self, array: Expr):
         super().__init__("array_length", [array])
 
 
 class ArrayReverse(Function):
     """Represents reversing the elements of an array."""
+
     def __init__(self, array: Expr):
         super().__init__("array_reverse", [array])
 
 
 class ArrayTransform(Function):
     """Represents applying a transformation function to each element of an array."""
+
     def __init__(self, array: Expr, transform: Function):
         super().__init__("array_transform", [array, transform])
 
 
 class ByteLength(Function):
     """Represents getting the byte length of a string (UTF-8)."""
+
     def __init__(self, expr: Expr):
         super().__init__("byte_length", [expr])
 
 
 class CharLength(Function):
     """Represents getting the character length of a string."""
+
     def __init__(self, expr: Expr):
         super().__init__("char_length", [expr])
 
 
 class CollectionId(Function):
     """Represents getting the collection ID from a document reference."""
+
     def __init__(self, value: Expr):
         super().__init__("collection_id", [value])
 
@@ -1110,37 +1193,43 @@ class Accumulator(Function):
 
 class Max(Accumulator):
     """Represents the maximum aggregation function."""
-    def __init__(self, value: Expr, distinct: bool=False):
+
+    def __init__(self, value: Expr, distinct: bool = False):
         super().__init__("maximum", [value])
 
 
 class Min(Accumulator):
     """Represents the minimum aggregation function."""
-    def __init__(self, value: Expr, distinct: bool=False):
+
+    def __init__(self, value: Expr, distinct: bool = False):
         super().__init__("minimum", [value])
 
 
 class Sum(Accumulator):
     """Represents the sum aggregation function."""
-    def __init__(self, value: Expr, distinct: bool=False):
+
+    def __init__(self, value: Expr, distinct: bool = False):
         super().__init__("sum", [value])
 
 
 class Avg(Accumulator):
     """Represents the average aggregation function."""
-    def __init__(self, value: Expr, distinct: bool=False):
+
+    def __init__(self, value: Expr, distinct: bool = False):
         super().__init__("avg", [value])
 
 
 class Count(Accumulator):
     """Represents the count aggregation function."""
+
     def __init__(self, value: Expr | None = None):
         super().__init__("count", [value] if value else [])
 
 
 class CountIf(Function):
     """Represents counting inputs where a condition is true (likely used internally or planned)."""
-    def __init__(self, value: Expr, distinct: bool=False):
+
+    def __init__(self, value: Expr, distinct: bool = False):
         super().__init__("countif", [value] if value else [])
 
 
@@ -1152,9 +1241,12 @@ class Selectable(Expr):
         raise NotImplementedError
 
 
-T = TypeVar('T', bound=Expr)
+T = TypeVar("T", bound=Expr)
+
+
 class ExprWithAlias(Selectable, Generic[T]):
     """Wraps an expression with an alias."""
+
     def __init__(self, expr: T, alias: str):
         self.expr = expr
         self.alias = alias
@@ -1166,13 +1258,12 @@ class ExprWithAlias(Selectable, Generic[T]):
         return f"{self.expr}.as_('{self.alias}')"
 
     def _to_pb(self):
-        return Value(
-            map_value={"fields": {self.alias: self.expr._to_pb()}}
-        )
+        return Value(map_value={"fields": {self.alias: self.expr._to_pb()}})
 
 
 class Field(Selectable):
     """Represents a reference to a field within a document."""
+
     DOCUMENT_ID = "__name__"
 
     def __init__(self, path: str):
@@ -1213,13 +1304,18 @@ class FilterCondition(Function):
     @staticmethod
     def _from_query_filter_pb(filter_pb, client):
         if isinstance(filter_pb, Query_pb.CompositeFilter):
-            sub_filters = [FilterCondition._from_query_filter_pb(f, client) for f in filter_pb.filters]
+            sub_filters = [
+                FilterCondition._from_query_filter_pb(f, client)
+                for f in filter_pb.filters
+            ]
             if filter_pb.op == Query_pb.CompositeFilter.Operator.OR:
                 return Or(*sub_filters)
             elif filter_pb.op == Query_pb.CompositeFilter.Operator.AND:
                 return And(*sub_filters)
             else:
-                raise TypeError(f"Unexpected CompositeFilter operator type: {filter_pb.op}")
+                raise TypeError(
+                    f"Unexpected CompositeFilter operator type: {filter_pb.op}"
+                )
         elif isinstance(filter_pb, Query_pb.UnaryFilter):
             field = Field.of(filter_pb.field.field_path)
             if filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NAN:
@@ -1259,7 +1355,11 @@ class FilterCondition(Function):
                 raise TypeError(f"Unexpected FieldFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.Filter):
             # unwrap oneof
-            f = filter_pb.composite_filter or filter_pb.field_filter or filter_pb.unary_filter
+            f = (
+                filter_pb.composite_filter
+                or filter_pb.field_filter
+                or filter_pb.unary_filter
+            )
             return FilterCondition._from_query_filter_pb(f, client)
         else:
             raise TypeError(f"Unexpected filter type: {type(filter_pb)}")
@@ -1279,48 +1379,56 @@ class ArrayContains(FilterCondition):
 
 class ArrayContainsAll(FilterCondition):
     """Represents checking if an array contains all specified elements."""
+
     def __init__(self, array: Expr, elements: List[Expr]):
         super().__init__("array_contains_all", [array, ListOfExprs(elements)])
 
 
 class ArrayContainsAny(FilterCondition):
     """Represents checking if an array contains any of the specified elements."""
+
     def __init__(self, array: Expr, elements: List[Expr]):
         super().__init__("array_contains_any", [array, ListOfExprs(elements)])
 
 
 class EndsWith(FilterCondition):
     """Represents checking if a string ends with a specific postfix."""
+
     def __init__(self, expr: Expr, postfix: Expr):
         super().__init__("ends_with", [expr, postfix])
 
 
 class Eq(FilterCondition):
     """Represents the equality comparison."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("eq", [left, right if right else Constant(None)])
 
 
 class Exists(FilterCondition):
     """Represents checking if a field exists."""
+
     def __init__(self, expr: Expr):
         super().__init__("exists", [expr])
 
 
 class Gt(FilterCondition):
     """Represents the greater than comparison."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("gt", [left, right if right else Constant(None)])
 
 
 class Gte(FilterCondition):
     """Represents the greater than or equal to comparison."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("gte", [left, right if right else Constant(None)])
 
 
 class If(FilterCondition):
     """Represents a conditional expression (if-then-else)."""
+
     def __init__(self, condition: "FilterCondition", true_expr: Expr, false_expr: Expr):
         super().__init__(
             "if", [condition, true_expr, false_expr if false_expr else Constant(None)]
@@ -1329,77 +1437,90 @@ class If(FilterCondition):
 
 class In(FilterCondition):
     """Represents checking if an expression's value is within a list of values."""
+
     def __init__(self, left: Expr, others: List[Expr]):
         super().__init__("in", [left, ListOfExprs(others)])
 
 
 class IsNaN(FilterCondition):
     """Represents checking if a numeric value is NaN."""
+
     def __init__(self, value: Expr):
         super().__init__("is_nan", [value])
 
 
 class Like(FilterCondition):
     """Represents a case-sensitive wildcard string comparison."""
+
     def __init__(self, expr: Expr, pattern: Expr):
         super().__init__("like", [expr, pattern])
 
 
 class Lt(FilterCondition):
     """Represents the less than comparison."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("lt", [left, right if right else Constant(None)])
 
 
 class Lte(FilterCondition):
     """Represents the less than or equal to comparison."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("lte", [left, right if right else Constant(None)])
 
 
 class Neq(FilterCondition):
     """Represents the inequality comparison."""
+
     def __init__(self, left: Expr, right: Expr):
         super().__init__("neq", [left, right if right else Constant(None)])
 
 
 class Not(FilterCondition):
     """Represents the logical NOT of a filter condition."""
+
     def __init__(self, condition: Expr):
         super().__init__("not", [condition])
 
 
 class Or(FilterCondition):
     """Represents the logical OR of multiple filter conditions."""
+
     def __init__(self, *conditions: "FilterCondition"):
         super().__init__("or", conditions)
 
 
 class RegexContains(FilterCondition):
     """Represents checking if a string contains a substring matching a regex."""
+
     def __init__(self, expr: Expr, regex: Expr):
         super().__init__("regex_contains", [expr, regex])
 
 
 class RegexMatch(FilterCondition):
     """Represents checking if a string fully matches a regex."""
+
     def __init__(self, expr: Expr, regex: Expr):
         super().__init__("regex_match", [expr, regex])
 
 
 class StartsWith(FilterCondition):
     """Represents checking if a string starts with a specific prefix."""
+
     def __init__(self, expr: Expr, prefix: Expr):
         super().__init__("starts_with", [expr, prefix])
 
 
 class StrContains(FilterCondition):
     """Represents checking if a string contains a specific substring."""
+
     def __init__(self, expr: Expr, substring: Expr):
         super().__init__("str_contains", [expr, substring])
 
 
 class Xor(FilterCondition):
     """Represents the logical XOR of multiple filter conditions."""
+
     def __init__(self, conditions: List["FilterCondition"]):
         super().__init__("xor", conditions)

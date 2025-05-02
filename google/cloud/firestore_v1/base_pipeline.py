@@ -17,7 +17,9 @@ from typing import Optional, Sequence
 from typing_extensions import Self
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_client import BaseClient
-from google.cloud.firestore_v1.types.pipeline import StructuredPipeline as StructuredPipeline_pb
+from google.cloud.firestore_v1.types.pipeline import (
+    StructuredPipeline as StructuredPipeline_pb,
+)
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1 import _helpers, document
@@ -39,6 +41,7 @@ class _BasePipeline:
     This class is not intended to be instantiated directly.
     Use `client.collection.("...").pipeline()` to create pipeline instances.
     """
+
     def __init__(self, client: BaseClient, *stages: stages.Stage):
         """
         Initializes a new pipeline with the given stages.
@@ -62,8 +65,9 @@ class _BasePipeline:
             return f"Pipeline(\n  {stages_str}\n)"
 
     def _to_pb(self) -> StructuredPipeline_pb:
-        return StructuredPipeline_pb(pipeline={"stages":[s._to_pb() for s in self.stages]})
-
+        return StructuredPipeline_pb(
+            pipeline={"stages": [s._to_pb() for s in self.stages]}
+        )
 
     def _append(self, new_stage):
         """
@@ -260,7 +264,9 @@ class _BasePipeline:
         Returns:
             A new Pipeline object with this stage appended to the stage list
         """
-        return self._append(stages.FindNearest(field, vector, distance_measure, options))
+        return self._append(
+            stages.FindNearest(field, vector, distance_measure, options)
+        )
 
     def sort(self, *orders: stages.Ordering) -> Self:
         """
@@ -409,8 +415,8 @@ class _BasePipeline:
         """
         Adds a generic, named stage to the pipeline with specified parameters.
 
-        This method provides a flexible way to extend the pipeline's functionality 
-        by adding custom stages. Each generic stage is defined by a unique `name` 
+        This method provides a flexible way to extend the pipeline's functionality
+        by adding custom stages. Each generic stage is defined by a unique `name`
         and a set of `params` that control its behavior.
 
         Example:

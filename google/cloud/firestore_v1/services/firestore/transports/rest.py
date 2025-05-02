@@ -1145,9 +1145,9 @@ class FirestoreRestTransport(FirestoreTransport):
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
+
     class _ExecutePipeline(FirestoreRestStub):
         def __hash__(self):
-
             # Send the request
             headers = dict(metadata)
             headers["Content-Type"] = "application/json"
@@ -1230,6 +1230,7 @@ class FirestoreRestTransport(FirestoreTransport):
             query_params.update(self._get_unset_required_fields(query_params))
 
             query_params["$alt"] = "json;enum-encoding=int"
+
     class _ExecutePipeline(FirestoreRestStub):
         def __hash__(self):
             return hash("ExecutePipeline")

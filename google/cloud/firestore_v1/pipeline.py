@@ -43,7 +43,8 @@ class Pipeline(_BasePipeline):
 
     Use `client.collection("...").pipeline()` to create instances of this class.
     """
-    def __init__(self, client:Client, *stages: stages.Stage):
+
+    def __init__(self, client: Client, *stages: stages.Stage):
         """
         Initializes a Pipeline.
 
@@ -54,7 +55,9 @@ class Pipeline(_BasePipeline):
         super().__init__(client, *stages)
 
     def execute(self) -> Iterable["DocumentSnapshot"]:
-        database_name = f"projects/{self._client.project}/databases/{self._client._database}"
+        database_name = (
+            f"projects/{self._client.project}/databases/{self._client._database}"
+        )
         request = ExecutePipelineRequest(
             database=database_name,
             structured_pipeline=self._to_pb(),

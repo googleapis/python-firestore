@@ -1114,16 +1114,15 @@ class BaseQuery(object):
 
         # Filters
         for filter_ in self._field_filters:
-            ppl = ppl.where(pipeline_expressions.FilterCondition._from_query_filter_pb(filter_, self._client))
+            ppl = ppl.where(
+                pipeline_expressions.FilterCondition._from_query_filter_pb(
+                    filter_, self._client
+                )
+            )
 
         # Projections
         if self._projection and self._projection.fields:
-            ppl = ppl.select(
-                *[
-                    field.field_path
-                    for field in self._projection.fields
-                ]
-            )
+            ppl = ppl.select(*[field.field_path for field in self._projection.fields])
 
         # Orders
         orders = self._normalize_orders()
@@ -1134,7 +1133,9 @@ class BaseQuery(object):
                 field = pipeline_expressions.Field.of(order.field.field_path)
                 exists.append(field.exists())
                 direction = (
-                    "ascending" if order.direction == StructuredQuery.Direction.ASCENDING else "descending"
+                    "ascending"
+                    if order.direction == StructuredQuery.Direction.ASCENDING
+                    else "descending"
                 )
                 orderings.append(pipeline_expressions.Ordering(field, direction))
 
@@ -1149,7 +1150,9 @@ class BaseQuery(object):
 
         # Cursors, Limit and Offset
         if self._start_at or self._end_at or self._limit_to_last:
-            raise NotImplementedError("Query to Pipeline conversion: cursors and limitToLast is not supported yet.")
+            raise NotImplementedError(
+                "Query to Pipeline conversion: cursors and limitToLast is not supported yet."
+            )
         else:  # Limit & Offset without cursors
             if self._offset:
                 ppl = ppl.offset(self._offset)

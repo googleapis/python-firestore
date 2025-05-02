@@ -46,7 +46,8 @@ class AsyncPipeline(_BasePipeline):
 
     Use `client.collection("...").pipeline()` to create instances of this class.
     """
-    def __init__(self, client:AsyncClient, *stages: stages.Stage):
+
+    def __init__(self, client: AsyncClient, *stages: stages.Stage):
         """
         Initializes an asynchronous Pipeline.
 
@@ -57,12 +58,16 @@ class AsyncPipeline(_BasePipeline):
         super().__init__(client, *stages)
 
     async def execute(self) -> AsyncIterable["DocumentSnapshot"]:
-        database_name = f"projects/{self._client.project}/databases/{self._client._database}"
+        database_name = (
+            f"projects/{self._client.project}/databases/{self._client._database}"
+        )
         request = ExecutePipelineRequest(
             database=database_name,
             structured_pipeline=self._to_pb(),
             read_time=datetime.datetime.now(),
         )
-        async for response in await self._client._firestore_api.execute_pipeline(request):
+        async for response in await self._client._firestore_api.execute_pipeline(
+            request
+        ):
             for snapshot in self._parse_response(response, self._client):
                 yield snapshot

@@ -44,9 +44,11 @@ def yaml_loader(field="tests"):
         test_cases = yaml.safe_load(f)
     return test_cases[field]
 
+
 @pytest.fixture(scope="session")
 def event_loop():
     import asyncio
+
     try:
         loop = asyncio.get_running_loop()
     except RuntimeError:

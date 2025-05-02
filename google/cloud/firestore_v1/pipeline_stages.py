@@ -30,7 +30,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     FilterCondition,
     Selectable,
     SampleOptions,
-    Ordering
+    Ordering,
 )
 
 if TYPE_CHECKING:
@@ -45,6 +45,7 @@ class FindNearestOptions:
         distance_field (Optional[Field]): An optional field to store the calculated
             distance in the output documents.
     """
+
     def __init__(
         self,
         limit: Optional[int] = None,
@@ -61,6 +62,7 @@ class UnnestOptions:
         index_field (str): The name of the field to add to each output document,
             storing the original 0-based index of the element within the array.
     """
+
     def __init__(self, index_field: str):
         self.index_field = index_field
 
@@ -72,11 +74,14 @@ class Stage:
     transforming) within a Firestore pipeline. Subclasses define the specific
     arguments and behavior for each operation.
     """
+
     def __init__(self, custom_name: Optional[str] = None):
         self.name = custom_name or type(self).__name__.lower()
 
     def _to_pb(self) -> Pipeline_pb.Stage:
-        return Pipeline_pb.Stage(name=self.name, args=self._pb_args(), options=self._pb_options())
+        return Pipeline_pb.Stage(
+            name=self.name, args=self._pb_args(), options=self._pb_options()
+        )
 
     def _pb_args(self) -> list[Value]:
         """Return Ordered list of arguments the given stage expects"""
@@ -93,15 +98,24 @@ class Stage:
 
 class AddFields(Stage):
     """Adds new fields to outputs from previous stages."""
+
     def __init__(self, *fields: Selectable):
         super().__init__("add_fields")
         self.fields = list(fields)
 
     def _pb_args(self):
-        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})]
+        return [
+            Value(
+                map_value={
+                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}
+                }
+            )
+        ]
+
 
 class Aggregate(Stage):
     """Performs aggregation operations, optionally grouped."""
+
     def __init__(
         self,
         *extra_accumulators: ExprWithAlias[Accumulator],
@@ -109,17 +123,32 @@ class Aggregate(Stage):
         groups: Sequence[str | Selectable] = (),
     ):
         super().__init__()
-        self.groups: list[Selectable] = [Field(f) if isinstance(f, str) else f for f in groups]
-        self.accumulators: list[ExprWithAlias[Accumulator]] = [*accumulators, *extra_accumulators]
+        self.groups: list[Selectable] = [
+            Field(f) if isinstance(f, str) else f for f in groups
+        ]
+        self.accumulators: list[ExprWithAlias[Accumulator]] = [
+            *accumulators,
+            *extra_accumulators,
+        ]
 
     def _pb_args(self):
         return [
-            Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.accumulators]}}),
-            Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.groups]}})
+            Value(
+                map_value={
+                    "fields": {
+                        m[0]: m[1] for m in [f._to_map() for f in self.accumulators]
+                    }
+                }
+            ),
+            Value(
+                map_value={
+                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.groups]}
+                }
+            ),
         ]
 
     def __repr__(self):
-        accumulator_str = ', '.join(repr(v) for v in self.accumulators)
+        accumulator_str = ", ".join(repr(v) for v in self.accumulators)
         group_str = ""
         if self.groups:
             if self.accumulators:
@@ -130,6 +159,7 @@ class Aggregate(Stage):
 
 class Collection(Stage):
     """Specifies a collection as the initial data source."""
+
     def __init__(self, path: str):
         super().__init__()
         if not path.startswith("/"):
@@ -139,8 +169,10 @@ class Collection(Stage):
     def _pb_args(self):
         return [Value(reference_value=self.path)]
 
+
 class CollectionGroup(Stage):
     """Specifies a collection group as the initial data source."""
+
     def __init__(self, collection_id: str):
         super().__init__("collection_group")
         self.collection_id = collection_id
@@ -151,21 +183,33 @@ class CollectionGroup(Stage):
 
 class Database(Stage):
     """Specifies the default database as the initial data source."""
+
     def __init__(self):
         super().__init__()
 
+
 class Distinct(Stage):
     """Returns documents with distinct combinations of specified field values."""
+
     def __init__(self, *fields: str | Selectable):
         super().__init__()
-        self.fields: list[Selectable] = [Field(f) if isinstance(f, str) else f for f in fields]
+        self.fields: list[Selectable] = [
+            Field(f) if isinstance(f, str) else f for f in fields
+        ]
 
     def _pb_args(self) -> list[Value]:
-        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}})]
+        return [
+            Value(
+                map_value={
+                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}
+                }
+            )
+        ]
 
 
 class Documents(Stage):
     """Specifies specific documents as the initial data source."""
+
     def __init__(self, *paths: str):
         super().__init__()
         self.paths = paths
@@ -176,11 +220,16 @@ class Documents(Stage):
         return Documents(*doc_paths)
 
     def _pb_args(self):
-        return [Value(list_value={"values": [Value(string_value=path) for path in self.paths]})]
+        return [
+            Value(
+                list_value={"values": [Value(string_value=path) for path in self.paths]}
+            )
+        ]
 
 
 class FindNearest(Stage):
     """Performs vector distance (similarity) search."""
+
     def __init__(
         self,
         field: str | Expr,
@@ -209,11 +258,15 @@ class FindNearest(Stage):
             options["distance_field"] = self.options.distance_field._to_pb()
         return options
 
+
 class GenericStage(Stage):
     """Represents a generic, named stage with parameters."""
+
     def __init__(self, name: str, *params: Expr | Value):
         super().__init__(name)
-        self.params: list[Value] = [p._to_pb() if isinstance(p, Expr) else p for p in params]
+        self.params: list[Value] = [
+            p._to_pb() if isinstance(p, Expr) else p for p in params
+        ]
 
     def _pb_args(self):
         return self.params
@@ -221,6 +274,7 @@ class GenericStage(Stage):
 
 class Limit(Stage):
     """Limits the maximum number of documents returned."""
+
     def __init__(self, limit: int):
         super().__init__()
         self.limit = limit
@@ -231,6 +285,7 @@ class Limit(Stage):
 
 class Offset(Stage):
     """Skips a specified number of documents."""
+
     def __init__(self, offset: int):
         super().__init__()
         self.offset = offset
@@ -241,6 +296,7 @@ class Offset(Stage):
 
 class RemoveFields(Stage):
     """Removes specified fields from outputs."""
+
     def __init__(self, *fields: str | Field):
         super().__init__("remove_fields")
         self.fields = [Field(f) if isinstance(f, str) else f for f in fields]
@@ -251,6 +307,7 @@ class RemoveFields(Stage):
 
 class Sample(Stage):
     """Performs pseudo-random sampling of documents."""
+
     def __init__(self, limit_or_options: int | SampleOptions):
         super().__init__()
         if isinstance(limit_or_options, int):
@@ -261,23 +318,39 @@ class Sample(Stage):
 
     def _pb_args(self):
         if self.options.mode == SampleOptions.Mode.DOCUMENTS:
-            return [Value(integer_value=self.options.value), Value(string_value="documents")]
+            return [
+                Value(integer_value=self.options.value),
+                Value(string_value="documents"),
+            ]
         else:
-            return [Value(double_value=self.options.value), Value(string_value="percent")]
+            return [
+                Value(double_value=self.options.value),
+                Value(string_value="percent"),
+            ]
 
 
 class Select(Stage):
     """Selects or creates a set of fields."""
+
     def __init__(self, *selections: str | Selectable):
         super().__init__()
         self.projections = [Field(s) if isinstance(s, str) else s for s in selections]
 
     def _pb_args(self) -> list[Value]:
-        return [Value(map_value={"fields": {m[0]: m[1] for m in [f._to_map() for f in self.projections]}})]
+        return [
+            Value(
+                map_value={
+                    "fields": {
+                        m[0]: m[1] for m in [f._to_map() for f in self.projections]
+                    }
+                }
+            )
+        ]
 
 
 class Sort(Stage):
     """Sorts documents based on specified criteria."""
+
     def __init__(self, *orders: "Ordering"):
         super().__init__()
         self.orders = list(orders)
@@ -288,6 +361,7 @@ class Sort(Stage):
 
 class Union(Stage):
     """Performs a union of documents from two pipelines."""
+
     def __init__(self, other: Pipeline):
         super().__init__()
         self.other = other
@@ -298,7 +372,13 @@ class Union(Stage):
 
 class Unnest(Stage):
     """Produces a document for each element in an array field."""
-    def __init__(self, field: Selectable | str, alias: Field | str | None=None, options: UnnestOptions|None=None):
+
+    def __init__(
+        self,
+        field: Selectable | str,
+        alias: Field | str | None = None,
+        options: UnnestOptions | None = None,
+    ):
         super().__init__()
         self.field: Selectable = Field(field) if isinstance(field, str) else field
         if alias is None:
@@ -321,10 +401,10 @@ class Unnest(Stage):
 
 class Where(Stage):
     """Filters documents based on a specified condition."""
+
     def __init__(self, condition: FilterCondition):
         super().__init__()
         self.condition = condition
 
     def _pb_args(self):
         return [self.condition._to_pb()]
-
