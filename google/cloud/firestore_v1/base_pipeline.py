@@ -296,6 +296,54 @@ class _BasePipeline:
         """
         return self._append(stages.Sort(*orders))
 
+    def replace(
+        self,
+        field: Selectable,
+        mode: stages.Replace.Mode = stages.Replace.Mode.FULL_REPLACE,
+    ) -> Self:
+        """
+        Replaces the entire document content with the value of a specified field,
+        typically a map.
+
+        This stage allows you to emit a map value as the new document structure.
+        Each key of the map becomes a field in the output document, containing the
+        corresponding value.
+
+        Example:
+            Input document:
+            ```json
+            {
+              "name": "John Doe Jr.",
+              "parents": {
+                "father": "John Doe Sr.",
+                "mother": "Jane Doe"
+              }
+            }
+            ```
+
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field
+            >>> pipeline = client.collection("people").pipeline()
+            >>> # Emit the 'parents' map as the document
+            >>> pipeline = pipeline.replace(Field.of("parents"))
+
+            Output document:
+            ```json
+            {
+              "father": "John Doe Sr.",
+              "mother": "Jane Doe"
+            }
+            ```
+
+        Args:
+            field: The `Selectable` field containing the map whose content will
+                   replace the document.
+            mode: The replacement mode
+
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.Replace(field, mode))
+
     def sample(self, limit_or_options: int | SampleOptions) -> Self:
         """
         Performs a pseudo-random sampling of the documents from the previous stage.
