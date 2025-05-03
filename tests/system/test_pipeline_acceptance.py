@@ -157,6 +157,25 @@ def test_pipeline_parse_proto(test_dict, client):
 
 @pytest.mark.parametrize(
     "test_dict",
+    [t for t in yaml_loader() if "assert_error" in t],
+    ids=lambda x: f"{x.get('description', '')}"
+)
+def test_pipeline_expected_errors(test_dict, client):
+    """
+    Finds assert_error statements in yaml, and ensures the pipeline raises the expected error
+    """
+    error_regex = test_dict["assert_error"]
+    pipeline = parse_pipeline(client, test_dict["pipeline"])
+    # check if server responds as expected
+    with pytest.raises(GoogleAPIError) as err:
+        [_ for _ in pipeline.execute()]
+    found_error = str(err.value)
+    match = re.search(error_regex, found_error)
+    assert match, f"error '{found_error}' does not match '{error_regex}'"
+
+
+@pytest.mark.parametrize(
+    "test_dict",
     [t for t in yaml_loader() if "assert_results" in t or "assert_count" in t],
     ids=lambda x: f"{x.get('description', '')}"
 )
@@ -173,6 +192,25 @@ def test_pipeline_results(test_dict, client):
         assert got_results == expected_results
     if expected_count is not None:
         assert len(got_results) == expected_count
+
+@pytest.mark.parametrize(
+    "test_dict",
+    [t for t in yaml_loader() if "assert_error" in t],
+    ids=lambda x: f"{x.get('description', '')}"
+)
+@pytest.mark.asyncio
+async def test_pipeline_expected_errors_async(test_dict, async_client):
+    """
+    Finds assert_error statements in yaml, and ensures the pipeline raises the expected error
+    """
+    error_regex = test_dict["assert_error"]
+    pipeline = parse_pipeline(async_client, test_dict["pipeline"])
+    # check if server responds as expected
+    with pytest.raises(GoogleAPIError) as err:
+        [_ async for _ in pipeline.execute()]
+    found_error = str(err.value)
+    match = re.search(error_regex, found_error)
+    assert match, f"error '{found_error}' does not match '{error_regex}'"
 
 @pytest.mark.parametrize(
     "test_dict",

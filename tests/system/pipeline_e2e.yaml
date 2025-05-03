@@ -126,6 +126,207 @@ data:
         hugo: true
         nebula: true
 tests:
+  - description: "testAggregates - count"
+    pipeline:
+      - Collection: books
+      - Aggregate:
+        - ExprWithAlias:
+            - Count
+            - "count"
+    assert_results:
+      - count: 10
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                count:
+                  functionValue:
+                    name: count
+          - mapValue: {}
+          name: aggregate
+  - description: "testAggregates - avg, count, max"
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: genre
+              - Constant: Science Fiction
+      - Aggregate:
+        - ExprWithAlias:
+            - Count
+            - "count"
+        - ExprWithAlias:
+            - Avg: 
+              - Field: rating
+            - "avg_rating"
+        - ExprWithAlias:
+            - Max: 
+              - Field: rating
+            - "max_rating"
+    assert_results:
+      - count: 2
+        avg_rating: 4.4
+        max_rating: 4.6
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: genre
+              - stringValue: Science Fiction
+              name: eq
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                avg_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: avg
+                count:
+                  functionValue:
+                    name: count
+                max_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: maximum
+          - mapValue: {}
+          name: aggregate
+  - description: testGroupBysWithoutAccumulators
+    pipeline:
+      - Collection: books
+      - Where:
+        - Lt:
+          - Field: published
+          - Constant: 1900
+      - Aggregate:
+          accumulators: []
+          groups: [genre]
+    assert_error: ".* requires at least one accumulator"
+  - description: testGroupBysAndAggregate
+    pipeline:
+      - Collection: books
+      - Where:
+          - Lt:
+              - Field: published
+              - Constant: 1984
+      - Aggregate:
+          accumulators:
+            - ExprWithAlias:
+              - Avg:
+                - Field: rating
+              - "avg_rating"
+          groups: [genre]
+      - Where:
+          - Gt:
+              - Field: avg_rating
+              - Constant: 4.3
+      - Sort:
+          - Ordering:
+            - Field: avg_rating
+            - ASCENDING
+    assert_results:
+      - avg_rating: 4.4
+        genre: Science Fiction
+      - avg_rating: 4.5
+        genre: Romance
+      - avg_rating: 4.7
+        genre: Fantasy
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: published
+              - integerValue: '1984'
+              name: lt
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                avg_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: avg
+          - mapValue:
+              fields:
+                genre:
+                  fieldReferenceValue: genre
+          name: aggregate
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: avg_rating
+              - doubleValue: 4.3
+              name: gt
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: avg_rating
+          name: sort
+  - description: testMinMax
+    pipeline:
+      - Collection: books
+      - Aggregate:
+          - ExprWithAlias:
+              - Count
+              - "count"
+          - ExprWithAlias:
+              - Max:
+                - Field: rating
+              - "max_rating"
+          - ExprWithAlias:
+              - Min:
+                - Field: published
+              - "min_published"
+    assert_results:
+      - count: 10
+        max_rating: 4.7
+        min_published: 1813
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                count:
+                  functionValue:
+                    name: count
+                max_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: maximum
+                min_published:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: published
+                    name: minimum
+          - mapValue: {}
+          name: aggregate
   - description: selectSpecificFields
     pipeline:
       - Collection: books
@@ -178,6 +379,98 @@ tests:
                   stringValue: ascending
                 expression:
                   fieldReferenceValue: author
+          name: sort
+  - description: addAndRemoveFields
+    pipeline:
+      - Collection: books
+      - AddFields:
+        - ExprWithAlias:
+            - StrConcat:
+                - Field: author
+                - Constant: _
+                - Field: title
+            - "author_title"
+        - ExprWithAlias:
+            - StrConcat:
+                - Field: title
+                - Constant: _
+                - Field: author
+            - "title_author"
+      - RemoveFields:
+        - title_author
+        - tags
+        - awards
+        - rating
+        - title
+        - Field: published
+        - Field: genre
+        - Field: nestedField # Field does not exist, should be ignored
+      - Sort:
+        - Ordering:
+          - Field: author_title
+          - ASCENDING
+    assert_results:
+      - author: Douglas Adams
+        author_title: Douglas Adams_The Hitchhiker's Guide to the Galaxy
+      - author: F. Scott Fitzgerald
+        author_title: F. Scott Fitzgerald_The Great Gatsby
+      - author: Frank Herbert
+        author_title: Frank Herbert_Dune
+      - author: Fyodor Dostoevsky
+        author_title: Fyodor Dostoevsky_Crime and Punishment
+      - author: Gabriel García Márquez
+        author_title: Gabriel García Márquez_One Hundred Years of Solitude
+      - author: George Orwell
+        author_title: George Orwell_1984
+      - author: Harper Lee
+        author_title: Harper Lee_To Kill a Mockingbird
+      - author: J.R.R. Tolkien
+        author_title: J.R.R. Tolkien_The Lord of the Rings
+      - author: Jane Austen
+        author_title: Jane Austen_Pride and Prejudice
+      - author: Margaret Atwood
+        author_title: Margaret Atwood_The Handmaid's Tale
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                author_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: author
+                    - stringValue: _
+                    - fieldReferenceValue: title
+                    name: str_concat
+                title_author:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    - stringValue: _
+                    - fieldReferenceValue: author
+                    name: str_concat
+          name: add_fields
+        - args:
+          - fieldReferenceValue: title_author
+          - fieldReferenceValue: tags
+          - fieldReferenceValue: awards
+          - fieldReferenceValue: rating
+          - fieldReferenceValue: title
+          - fieldReferenceValue: published
+          - fieldReferenceValue: genre
+          - fieldReferenceValue: nestedField
+          name: remove_fields
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: author_title
           name: sort
   - description: whereByMultipleConditions
     pipeline:
@@ -404,6 +697,519 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
+  - description: testArrayContainsAll
+    pipeline:
+      - Collection: books
+      - Where:
+          - ArrayContainsAll:
+              - Field: tags
+              - - Constant: adventure
+                - Constant: magic
+      - Select:
+        - title
+    assert_results:
+      - title: The Lord of the Rings
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: tags
+              - arrayValue:
+                  values:
+                  - stringValue: adventure
+                  - stringValue: magic
+              name: array_contains_all
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: select
+  - description: testArrayLength
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            - ArrayLength:
+                - Field: tags
+            - "tagsCount"
+      - Where:
+          - Eq:
+              - Field: tagsCount
+              - Constant: 3
+    assert_results: # All documents have 3 tags
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+      - tagsCount: 3
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                tagsCount:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    name: array_length
+          name: select
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: tagsCount
+              - integerValue: '3'
+              name: eq
+          name: where
+  - description: testStrConcat
+    pipeline:
+      - Collection: books
+      - Sort:
+          - Ordering:
+            - Field: author
+            - ASCENDING
+      - Select:
+          - ExprWithAlias:
+              - StrConcat:
+                  - Field: author
+                  - Constant:  " - "
+                  - Field: title
+              - "bookInfo"
+      - Limit: 1
+    assert_results:
+      - bookInfo: Douglas Adams - The Hitchhiker's Guide to the Galaxy
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: author
+          name: sort
+        - args:
+          - mapValue:
+              fields:
+                bookInfo:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: author
+                    - stringValue: ' - '
+                    - fieldReferenceValue: title
+                    name: str_concat
+          name: select
+        - args:
+          - integerValue: '1'
+          name: limit
+  - description: testStartsWith
+    pipeline:
+      - Collection: books
+      - Where:
+          - StartsWith:
+              - Field: title
+              - Constant: The
+      - Select:
+        - title
+      - Sort:
+        - Ordering:
+            - Field: title
+            - ASCENDING
+    assert_results:
+      - title: The Great Gatsby
+      - title: The Handmaid's Tale
+      - title: The Hitchhiker's Guide to the Galaxy
+      - title: The Lord of the Rings
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: The
+              name: starts_with
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+  - description: testEndsWith
+    pipeline:
+      - Collection: books
+      - Where:
+          - EndsWith:
+              - Field: title
+              - Constant: y
+      - Select:
+        - title
+      - Sort:
+        - Ordering:
+          - Field: title
+          - DESCENDING
+    assert_results:
+      - title: The Hitchhiker's Guide to the Galaxy
+      - title: The Great Gatsby
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: y
+              name: ends_with
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: descending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+  - description: testLength
+    pipeline:
+      - Collection: books
+      - Select:
+        - ExprWithAlias:
+            - CharLength:
+                - Field: title
+            - "titleLength"
+        - title
+      - Where:
+          - Gt:
+              - Field: titleLength
+              - Constant: 20
+      - Sort:
+          - Ordering:
+            - Field: title
+            - ASCENDING
+    assert_results:
+      - titleLength: 29
+        title: One Hundred Years of Solitude
+      - titleLength: 36
+        title: The Hitchhiker's Guide to the Galaxy
+      - titleLength: 21
+        title: The Lord of the Rings
+      - titleLength: 21
+        title: To Kill a Mockingbird
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+                titleLength:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    name: char_length
+          name: select
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: titleLength
+              - integerValue: '20'
+              name: gt
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+  - description: testStringFunctions - CharLength
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - ExprWithAlias:
+            - CharLength:
+                - Field: title
+            - "title_length"
+    assert_results:
+      - title_length: 36
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: eq
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title_length:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    name: char_length
+          name: select
+  - description: testStringFunctions - ByteLength
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: author
+              - Constant: Douglas Adams
+      - Select:
+        - ExprWithAlias:
+            - ByteLength:
+                - StrConcat:
+                  - Field: title
+                  - Constant: _银河系漫游指南
+            - "title_byte_length"
+    assert_results:
+      - title_byte_length: 58
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: eq
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title_byte_length:
+                  functionValue:
+                    args:
+                    - functionValue:
+                        args:
+                        - fieldReferenceValue: title
+                        - stringValue: "_\u94F6\u6CB3\u7CFB\u6F2B\u6E38\u6307\u5357"
+                        name: str_concat
+                    name: byte_length
+          name: select
+  - description: testLike
+    pipeline:
+      - Collection: books
+      - Where:
+          - Like:
+              - Field: title
+              - Constant: "%Guide%"
+      - Select:
+        - title
+    assert_results:
+      - title: The Hitchhiker's Guide to the Galaxy
+  - description: testRegexContains
+    # Find titles that contain either "the" or "of" (case-insensitive)
+    pipeline:
+      - Collection: books
+      - Where:
+          - RegexContains:
+              - Field: title
+              - Constant: "(?i)(the|of)"
+    assert_count: 5
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "(?i)(the|of)"
+              name: regex_contains
+          name: where
+  - description: testRegexMatches
+    # Find titles that contain either "the" or "of" (case-insensitive)
+    pipeline:
+      - Collection: books
+      - Where:
+          - RegexMatch:
+              - Field: title
+              - Constant: ".*(?i)(the|of).*"
+    assert_count: 5
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: ".*(?i)(the|of).*"
+              name: regex_match
+          name: where
+  - description: testArithmeticOperations
+    pipeline:
+      - Collection: books
+      - Where:
+        - Eq:
+          - Field: title
+          - Constant: To Kill a Mockingbird
+      - Select:
+        - ExprWithAlias:
+            - Add:
+                - Field: rating
+                - Constant: 1
+            - "ratingPlusOne"
+        - ExprWithAlias:
+            - Subtract:
+                - Field: published
+                - Constant: 1900
+            - "yearsSince1900"
+        - ExprWithAlias:
+            - Multiply:
+                - Field: rating
+                - Constant: 10
+            - "ratingTimesTen"
+        - ExprWithAlias:
+            - Divide:
+                - Field: rating
+                - Constant: 2
+            - "ratingDividedByTwo"
+        - ExprWithAlias:
+            - Multiply:
+                - Field: rating
+                - Constant: 20
+            - "ratingTimes20"
+        - ExprWithAlias:
+            - Add:
+                - Field: rating
+                - Constant: 3
+            - "ratingPlus3"
+        - ExprWithAlias:
+            - Mod:
+                - Field: rating
+                - Constant: 2
+            - "ratingMod2"
+    assert_results:
+      - ratingPlusOne: 5.2
+        yearsSince1900: 60
+        ratingTimesTen: 42.0
+        ratingDividedByTwo: 2.1
+        ratingTimes20: 84
+        ratingPlus3: 7.2
+        ratingMod2: 0.20000000000000018
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: To Kill a Mockingbird
+              name: eq
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                ratingDividedByTwo:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '2'
+                    name: divide
+                ratingPlusOne:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '1'
+                    name: add
+                ratingTimesTen:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '10'
+                    name: multiply
+                yearsSince1900:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: published
+                    - integerValue: '1900'
+                    name: subtract
+                ratingTimes20:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '20'
+                    name: multiply
+                ratingPlus3:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '3'
+                    name: add
+                ratingMod2:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '2'
+                    name: mod
+          name: select
   - description: testComparisonOperators
     pipeline:
       - Collection: books
@@ -542,6 +1348,158 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
+  - description: testChecks
+    pipeline:
+      - Collection: books
+      - Where:
+            - Not:
+                - IsNaN:
+                  - Field: rating
+      - Select:
+          - ExprWithAlias:
+              - Not:
+                  - IsNaN:
+                    - Field: rating
+              - "ratingIsNotNaN"
+      - Limit: 1
+    assert_results:
+      - ratingIsNotNaN: true
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - functionValue:
+                  args:
+                  - fieldReferenceValue: rating
+                  name: is_nan
+              name: not
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                ratingIsNotNaN:
+                  functionValue:
+                    args:
+                    - functionValue:
+                        args:
+                        - fieldReferenceValue: rating
+                        name: is_nan
+                    name: not
+          name: select
+        - args:
+          - integerValue: '1'
+          name: limit
+  - description: testLogicalMinMax
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: author
+              - Constant: Douglas Adams
+      - Select:
+          - ExprWithAlias:
+              - LogicalMax:
+                  - Field: rating
+                  - Constant: 4.5
+              - "max_rating"
+          - ExprWithAlias:
+              - LogicalMax:
+                  - Field: published
+                  - Constant: 1900
+              - "max_published"
+    assert_results:
+      - max_rating: 4.5
+        max_published: 1979
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: eq
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                max_published:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: published
+                    - integerValue: '1900'
+                    name: logical_maximum
+                max_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - doubleValue: 4.5
+                    name: logical_maximum
+          name: select
+  - description: testMapGet
+    pipeline:
+      - Collection: books
+      - Sort:
+        - Ordering:
+          - Field: published
+          - DESCENDING
+      - Select:
+          - ExprWithAlias:
+              - MapGet:
+                  - Field: awards
+                  - Constant: hugo
+              - "hugoAward"
+          - Field: title
+      - Where:
+          - Eq:
+              - Field: hugoAward
+              - Constant: true
+    assert_results:
+      - hugoAward: true
+        title: The Hitchhiker's Guide to the Galaxy
+      - hugoAward: true
+        title: Dune
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: descending
+                expression:
+                  fieldReferenceValue: published
+          name: sort
+        - args:
+          - mapValue:
+              fields:
+                hugoAward:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: awards
+                    - stringValue: hugo
+                    name: map_get
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: hugoAward
+              - booleanValue: true
+              name: eq
+          name: where
   - description: testNestedFields
     pipeline:
       - Collection: books
@@ -589,4 +1547,94 @@ tests:
                   fieldReferenceValue: awards.hugo
                 title:
                   fieldReferenceValue: title
+          name: select
+  - description: testSampleLimit
+    pipeline:
+      - Collection: books
+      - Sample: 3
+    assert_count: 3 # Results will vary due to randomness
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - integerValue: '3'
+          - stringValue: documents
+          name: sample
+  - description: testSamplePercentage
+    pipeline:
+      - Collection: books
+      - Sample:
+          - SampleOptions:
+            - 0.6
+            - percent
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - doubleValue: 0.6
+          - stringValue: percent
+          name: sample
+  - description: testUnion
+    pipeline:
+      - Collection: books
+      - Union:
+        - Pipeline:
+          - Collection: books
+    assert_count: 20 # Results will be duplicated
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - pipelineValue:
+              stages:
+              - args:
+                - referenceValue: /books
+                name: collection
+          name: union
+  - description: testUnnest
+    pipeline:
+      - Collection: books
+      - Where:
+        - Eq:
+          - Field: title
+          - Constant: The Hitchhiker's Guide to the Galaxy
+      - Unnest:
+        - tags
+        - tags_alias
+      - Select: tags_alias
+    assert_results:
+      - tags_alias: comedy
+      - tags_alias: space
+      - tags_alias: adventure
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: The Hitchhiker's Guide to the Galaxy
+              name: eq
+          name: where
+        - args:
+          - fieldReferenceValue: tags
+          - fieldReferenceValue: tags_alias
+          name: unnest
+        - args:
+          - mapValue:
+              fields:
+                tags_alias:
+                  fieldReferenceValue: tags_alias
           name: select
