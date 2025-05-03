@@ -21,6 +21,10 @@ from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.pipeline_expressions import (
     Expr,
+    Field,
+    FilterCondition,
+    Selectable,
+    Ordering,
 )
 
 class Stage(ABC):
@@ -53,6 +57,30 @@ class Stage(ABC):
         return f"{self.__class__.__name__}({', '.join(items)})"
 
 
+class Collection(Stage):
+    """Specifies a collection as the initial data source."""
+
+    def __init__(self, path: str):
+        super().__init__()
+        if not path.startswith("/"):
+            path = f"/{path}"
+        self.path = path
+
+    def _pb_args(self):
+        return [Value(reference_value=self.path)]
+
+
+class CollectionGroup(Stage):
+    """Specifies a collection group as the initial data source."""
+
+    def __init__(self, collection_id: str):
+        super().__init__("collection_group")
+        self.collection_id = collection_id
+
+    def _pb_args(self):
+        return [Value(string_value=self.collection_id)]
+
+
 class GenericStage(Stage):
     """Represents a generic, named stage with parameters."""
 
@@ -64,3 +92,65 @@ class GenericStage(Stage):
 
     def _pb_args(self):
         return self.params
+
+
+class Limit(Stage):
+    """Limits the maximum number of documents returned."""
+
+    def __init__(self, limit: int):
+        super().__init__()
+        self.limit = limit
+
+    def _pb_args(self):
+        return [Value(integer_value=self.limit)]
+
+
+class Offset(Stage):
+    """Skips a specified number of documents."""
+
+    def __init__(self, offset: int):
+        super().__init__()
+        self.offset = offset
+
+    def _pb_args(self):
+        return [Value(integer_value=self.offset)]
+
+
+class Select(Stage):
+    """Selects or creates a set of fields."""
+
+    def __init__(self, *selections: str | Selectable):
+        super().__init__()
+        self.projections = [Field(s) if isinstance(s, str) else s for s in selections]
+
+    def _pb_args(self) -> list[Value]:
+        return [
+            Value(
+                map_value={
+                    "fields": {
+                        m[0]: m[1] for m in [f._to_map() for f in self.projections]
+                    }
+                }
+            )
+        ]
+
+
+class Sort(Stage):
+    """Sorts documents based on specified criteria."""
+
+    def __init__(self, *orders: "Ordering"):
+        super().__init__()
+        self.orders = list(orders)
+
+    def _pb_args(self):
+        return [o._to_pb() for o in self.orders]
+
+class Where(Stage):
+    """Filters documents based on a specified condition."""
+
+    def __init__(self, condition: FilterCondition):
+        super().__init__()
+        self.condition = condition
+
+    def _pb_args(self):
+        return [self.condition._to_pb()]

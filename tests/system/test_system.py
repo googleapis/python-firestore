@@ -80,6 +80,31 @@ def cleanup():
         operation()
 
 
+@pytest.fixture
+def verify_pipeline(query):
+    """
+    This fixture ensures a pipeline produces the same
+    results as the query it is derived from
+
+    It can be attached to existing query tests both
+    modalities at the same time
+    """
+    query_exception = None
+    query_results = None
+    try:
+        query_results = [s.to_dict() for s in query.get()]
+    except Exception as e:
+        query_exception = e
+    pipeline = query.pipeline()
+    if query_exception:
+        # ensure that the pipeline uses same error as query
+        with pytest.raises(query_exception):
+            pipeline.execute()
+    else:
+        # ensure results match query
+        pipeline_results = [s.to_dict() for s in pipeline.execute()]
+        assert query_results == pipeline_results
+
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_collections(client, database):
     collections = list(client.collections())
@@ -104,7 +129,7 @@ def test_collections_w_import(database):
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_collection_stream_or_get_w_no_explain_options(database, query_docs, method):
+def test_collection_stream_or_get_w_no_explain_options(database, query_docs, method, verify_pipeline):
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
     collection, _, _ = query_docs
@@ -119,7 +144,7 @@ def test_collection_stream_or_get_w_no_explain_options(database, query_docs, met
         match="explain_options not set on query.",
     ):
         results.get_explain_metrics()
-
+    verify_pipeline(collection)
 
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
@@ -127,7 +152,7 @@ def test_collection_stream_or_get_w_no_explain_options(database, query_docs, met
 @pytest.mark.parametrize("method", ["get", "stream"])
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_collection_stream_or_get_w_explain_options_analyze_false(
-    database, method, query_docs
+    database, method, query_docs, verify_pipeline
 ):
     from google.cloud.firestore_v1.query_profile import (
         ExplainMetrics,
@@ -157,6 +182,7 @@ def test_collection_stream_or_get_w_explain_options_analyze_false(
         match="execution_stats not available when explain_options.analyze=False",
     ):
         explain_metrics.execution_stats
+    verify_pipeline(collection)
 
 
 @pytest.mark.skipif(
@@ -165,7 +191,7 @@ def test_collection_stream_or_get_w_explain_options_analyze_false(
 @pytest.mark.parametrize("method", ["get", "stream"])
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_collection_stream_or_get_w_explain_options_analyze_true(
-    database, method, query_docs
+    database, method, query_docs, verify_pipeline
 ):
     from google.cloud.firestore_v1.query_profile import (
         ExecutionStats,
@@ -215,6 +241,7 @@ def test_collection_stream_or_get_w_explain_options_analyze_true(
     assert "documents_scanned" in execution_stats.debug_stats
     assert "index_entries_scanned" in execution_stats.debug_stats
     assert len(execution_stats.debug_stats) > 0
+    verify_pipeline(collection)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -1113,7 +1140,7 @@ def query(collection):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_legacy_where(query_docs, database):
+def test_query_stream_legacy_where(query_docs, database, verify_pipeline):
     """Assert the legacy code still works and returns value"""
     collection, stored, allowed_vals = query_docs
     with pytest.warns(
@@ -1126,10 +1153,11 @@ def test_query_stream_legacy_where(query_docs, database):
         for key, value in values.items():
             assert stored[key] == value
             assert value["a"] == 1
+        verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_simple_field_eq_op(query_docs, database):
+def test_query_stream_w_simple_field_eq_op(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("a", "==", 1))
     values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
@@ -1137,10 +1165,13 @@ def test_query_stream_w_simple_field_eq_op(query_docs, database):
     for key, value in values.items():
         assert stored[key] == value
         assert value["a"] == 1
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_simple_field_array_contains_op(query_docs, database):
+def test_query_stream_w_simple_field_array_contains_op(
+    query_docs, database, verify_pipeline
+):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("c", "array_contains", 1))
     values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
@@ -1148,10 +1179,11 @@ def test_query_stream_w_simple_field_array_contains_op(query_docs, database):
     for key, value in values.items():
         assert stored[key] == value
         assert value["a"] == 1
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_simple_field_in_op(query_docs, database):
+def test_query_stream_w_simple_field_in_op(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = collection.where(filter=FieldFilter("a", "in", [1, num_vals + 100]))
@@ -1160,10 +1192,11 @@ def test_query_stream_w_simple_field_in_op(query_docs, database):
     for key, value in values.items():
         assert stored[key] == value
         assert value["a"] == 1
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_not_eq_op(query_docs, database):
+def test_query_stream_w_not_eq_op(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("stats.sum", "!=", 4))
     values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
@@ -1182,10 +1215,11 @@ def test_query_stream_w_not_eq_op(query_docs, database):
         ]
     )
     assert expected_ab_pairs == ab_pairs2
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_simple_not_in_op(query_docs, database):
+def test_query_stream_w_simple_not_in_op(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = collection.where(
@@ -1194,10 +1228,13 @@ def test_query_stream_w_simple_not_in_op(query_docs, database):
     values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
 
     assert len(values) == 22
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_simple_field_array_contains_any_op(query_docs, database):
+def test_query_stream_w_simple_field_array_contains_any_op(
+    query_docs, database, verify_pipeline
+):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = collection.where(
@@ -1208,10 +1245,11 @@ def test_query_stream_w_simple_field_array_contains_any_op(query_docs, database)
     for key, value in values.items():
         assert stored[key] == value
         assert value["a"] == 1
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_order_by(query_docs, database):
+def test_query_stream_w_order_by(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     query = collection.order_by("b", direction=firestore.Query.DESCENDING)
     values = [(snapshot.id, snapshot.to_dict()) for snapshot in query.stream()]
@@ -1222,10 +1260,11 @@ def test_query_stream_w_order_by(query_docs, database):
         b_vals.append(value["b"])
     # Make sure the ``b``-values are in DESCENDING order.
     assert sorted(b_vals, reverse=True) == b_vals
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_field_path(query_docs, database):
+def test_query_stream_w_field_path(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("stats.sum", ">", 4))
     values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
@@ -1247,7 +1286,7 @@ def test_query_stream_w_field_path(query_docs, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_start_end_cursor(query_docs, database):
+def test_query_stream_w_start_end_cursor(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = (
@@ -1260,19 +1299,21 @@ def test_query_stream_w_start_end_cursor(query_docs, database):
     for key, value in values:
         assert stored[key] == value
         assert value["a"] == num_vals - 2
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_wo_results(query_docs, database):
+def test_query_stream_wo_results(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = collection.where(filter=FieldFilter("b", "==", num_vals + 100))
     values = list(query.stream())
     assert len(values) == 0
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_projection(query_docs, database):
+def test_query_stream_w_projection(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = collection.where(filter=FieldFilter("b", "<=", 1)).select(
@@ -1286,10 +1327,11 @@ def test_query_stream_w_projection(query_docs, database):
             "stats": {"product": stored[key]["stats"]["product"]},
         }
         assert expected == value
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_multiple_filters(query_docs, database):
+def test_query_stream_w_multiple_filters(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("stats.product", ">", 5)).where(
         filter=FieldFilter("stats.product", "<", 10)
@@ -1306,10 +1348,11 @@ def test_query_stream_w_multiple_filters(query_docs, database):
         assert stored[key] == value
         pair = (value["a"], value["b"])
         assert pair in matching_pairs
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_stream_w_offset(query_docs, database):
+def test_query_stream_w_offset(query_docs, database, verify_pipeline):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     offset = 3
@@ -1322,6 +1365,7 @@ def test_query_stream_w_offset(query_docs, database):
     for key, value in values.items():
         assert stored[key] == value
         assert value["b"] == 2
+    verify_pipeline(query)
 
 
 @pytest.mark.skipif(
@@ -1451,7 +1495,7 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_with_order_dot_key(client, cleanup, database):
+def test_query_with_order_dot_key(client, cleanup, database, verify_pipeline):
     db = client
     collection_id = "collek" + UNIQUE_RESOURCE_ID
     collection = db.collection(collection_id)
@@ -1463,33 +1507,38 @@ def test_query_with_order_dot_key(client, cleanup, database):
     query = collection.order_by("wordcount.page1").limit(3)
     data = [doc.to_dict()["wordcount"]["page1"] for doc in query.stream()]
     assert [100, 110, 120] == data
-    for snapshot in collection.order_by("wordcount.page1").limit(3).stream():
+    verify_pipeline(query)
+    query2 = collection.order_by("wordcount.page1").limit(3)
+    for snapshot in query2.stream():
         last_value = snapshot.get("wordcount.page1")
+    verify_pipeline(query2)
     cursor_with_nested_keys = {"wordcount": {"page1": last_value}}
-    found = list(
+    query3 = (
         collection.order_by("wordcount.page1")
         .start_after(cursor_with_nested_keys)
         .limit(3)
-        .stream()
     )
+    found = list(query3.stream())
     found_data = [
         {"count": 30, "wordcount": {"page1": 130}},
         {"count": 40, "wordcount": {"page1": 140}},
         {"count": 50, "wordcount": {"page1": 150}},
     ]
     assert found_data == [snap.to_dict() for snap in found]
+    verify_pipeline(query3)
     cursor_with_dotted_paths = {"wordcount.page1": last_value}
-    cursor_with_key_data = list(
+    query4 = (
         collection.order_by("wordcount.page1")
         .start_after(cursor_with_dotted_paths)
         .limit(3)
-        .stream()
     )
+    cursor_with_key_data = list(query4.stream())
     assert found_data == [snap.to_dict() for snap in cursor_with_key_data]
+    verify_pipeline(query4)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_unary(client, cleanup, database):
+def test_query_unary(client, cleanup, database, verify_pipeline):
     collection_name = "unary" + UNIQUE_RESOURCE_ID
     collection = client.collection(collection_name)
     field_name = "foo"
@@ -1510,6 +1559,7 @@ def test_query_unary(client, cleanup, database):
     snapshot0 = values0[0]
     assert snapshot0.reference._path == document0._path
     assert snapshot0.to_dict() == {field_name: None}
+    verify_pipeline(query0)
 
     # 1. Query for a NAN.
     query1 = collection.where(filter=FieldFilter(field_name, "==", nan_val))
@@ -1520,10 +1570,11 @@ def test_query_unary(client, cleanup, database):
     data1 = snapshot1.to_dict()
     assert len(data1) == 1
     assert math.isnan(data1[field_name])
+    verify_pipeline(query1)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_collection_group_queries(client, cleanup, database):
+def test_collection_group_queries(client, cleanup, database, verify_pipeline):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
     doc_paths = [
@@ -1553,10 +1604,13 @@ def test_collection_group_queries(client, cleanup, database):
     found = [snapshot.id for snapshot in snapshots]
     expected = ["cg-doc1", "cg-doc2", "cg-doc3", "cg-doc4", "cg-doc5"]
     assert found == expected
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_collection_group_queries_startat_endat(client, cleanup, database):
+def test_collection_group_queries_startat_endat(
+    client, cleanup, database, verify_pipeline
+):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
     doc_paths = [
@@ -1586,6 +1640,7 @@ def test_collection_group_queries_startat_endat(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2", "cg-doc3", "cg-doc4"])
+    verify_pipeline(query)
 
     query = (
         client.collection_group(collection_group)
@@ -1596,10 +1651,11 @@ def test_collection_group_queries_startat_endat(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2"])
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_collection_group_queries_filters(client, cleanup, database):
+def test_collection_group_queries_filters(client, cleanup, database, verify_pipeline):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
     doc_paths = [
@@ -1641,6 +1697,7 @@ def test_collection_group_queries_filters(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2", "cg-doc3", "cg-doc4"])
+    verify_pipeline(query)
 
     query = (
         client.collection_group(collection_group)
@@ -1662,6 +1719,7 @@ def test_collection_group_queries_filters(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2"])
+    verify_pipeline(query)
 
 
 @pytest.mark.skipif(
@@ -1927,7 +1985,7 @@ def test_watch_collection(client, cleanup, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_watch_query(client, cleanup, database):
+def test_watch_query(client, cleanup, database, verify_pipeline):
     db = client
     collection_ref = db.collection("wq-users" + UNIQUE_RESOURCE_ID)
     doc_ref = collection_ref.document("alovelace")
@@ -1944,10 +2002,10 @@ def test_watch_query(client, cleanup, database):
         on_snapshot.called_count += 1
 
         # A snapshot should return the same thing as if a query ran now.
-        query_ran = collection_ref.where(
-            filter=FieldFilter("first", "==", "Ada")
-        ).stream()
+        query_ran_query = collection_ref.where(filter=FieldFilter("first", "==", "Ada"))
+        query_ran = query_ran_query.stream()
         assert len(docs) == len([i for i in query_ran])
+        verify_pipeline(query_ran_query)
 
     on_snapshot.called_count = 0
 
@@ -2148,11 +2206,12 @@ def test_recursive_delete_serialized_empty(client, cleanup, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_recursive_query(client, cleanup, database):
+def test_recursive_query(client, cleanup, database, verify_pipeline):
     col_id: str = f"philosophers-recursive-query{UNIQUE_RESOURCE_ID}"
     _persist_documents(client, col_id, philosophers_data_set, cleanup)
 
-    ids = [doc.id for doc in client.collection_group(col_id).recursive().get()]
+    query = client.collection_group(col_id).recursive()
+    ids = [doc.id for doc in query.get()]
 
     expected_ids = [
         # Aristotle doc and subdocs
@@ -2184,16 +2243,18 @@ def test_recursive_query(client, cleanup, database):
             f"Expected '{expected_ids[index]}' at spot {index}, " "got '{ids[index]}'"
         )
         assert ids[index] == expected_ids[index], error_msg
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_nested_recursive_query(client, cleanup, database):
+def test_nested_recursive_query(client, cleanup, database, verify_pipeline):
     col_id: str = f"philosophers-nested-recursive-query{UNIQUE_RESOURCE_ID}"
     _persist_documents(client, col_id, philosophers_data_set, cleanup)
 
     collection_ref = client.collection(col_id)
     aristotle = collection_ref.document("Aristotle")
-    ids = [doc.id for doc in aristotle.collection("pets").recursive().get()]
+    query = aristotle.collection("pets").recursive()
+    ids = [doc.id for doc in query.get()]
 
     expected_ids = [
         # Aristotle pets
@@ -2208,7 +2269,7 @@ def test_nested_recursive_query(client, cleanup, database):
             f"Expected '{expected_ids[index]}' at spot {index}, " "got '{ids[index]}'"
         )
         assert ids[index] == expected_ids[index], error_msg
-
+    verify_pipeline(query)
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_chunked_query(client, cleanup, database):
@@ -2287,7 +2348,7 @@ def test_chunked_and_recursive(client, cleanup, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_watch_query_order(client, cleanup, database):
+def test_watch_query_order(client, cleanup, database, verify_pipeline):
     db = client
     collection_ref = db.collection("users")
     doc_ref1 = collection_ref.document("alovelace" + UNIQUE_RESOURCE_ID)
@@ -2323,6 +2384,7 @@ def test_watch_query_order(client, cleanup, database):
                 ), "expect the sort order to match, born"
             on_snapshot.called_count += 1
             on_snapshot.last_doc_count = len(docs)
+            verify_pipeline(query_ref)
         except Exception as e:
             on_snapshot.failed = e
 
@@ -2363,7 +2425,7 @@ def test_watch_query_order(client, cleanup, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_repro_429(client, cleanup, database):
+def test_repro_429(client, cleanup, database, verify_pipeline):
     # See: https://github.com/googleapis/python-firestore/issues/429
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     collection = client.collection("repro-429" + UNIQUE_RESOURCE_ID)
@@ -2388,6 +2450,8 @@ def test_repro_429(client, cleanup, database):
 
     for snapshot in query2.stream():
         print(f"id: {snapshot.id}")
+    verify_pipeline(query)
+    verify_pipeline(query2)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -2957,7 +3021,7 @@ def test_aggregation_query_stream_or_get_w_explain_options_analyze_false(
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_with_and_composite_filter(collection, database):
+def test_query_with_and_composite_filter(collection, database, verify_pipeline):
     and_filter = And(
         filters=[
             FieldFilter("stats.product", ">", 5),
@@ -2969,10 +3033,11 @@ def test_query_with_and_composite_filter(collection, database):
     for result in query.stream():
         assert result.get("stats.product") > 5
         assert result.get("stats.product") < 10
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_with_or_composite_filter(collection, database):
+def test_query_with_or_composite_filter(collection, database, verify_pipeline):
     or_filter = Or(
         filters=[
             FieldFilter("stats.product", ">", 5),
@@ -2992,10 +3057,11 @@ def test_query_with_or_composite_filter(collection, database):
 
     assert gt_5 > 0
     assert lt_10 > 0
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_with_complex_composite_filter(collection, database):
+def test_query_with_complex_composite_filter(collection, database, verify_pipeline):
     field_filter = FieldFilter("b", "==", 0)
     or_filter = Or(
         filters=[FieldFilter("stats.sum", "==", 0), FieldFilter("stats.sum", "==", 4)]
@@ -3015,6 +3081,7 @@ def test_query_with_complex_composite_filter(collection, database):
 
     assert sum_0 > 0
     assert sum_4 > 0
+    verify_pipeline(query)
 
     # b == 3 || (stats.sum == 4  && a == 4)
     comp_filter = Or(
@@ -3037,6 +3104,7 @@ def test_query_with_complex_composite_filter(collection, database):
 
     assert b_3 is True
     assert b_not_3 is True
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize(
@@ -3045,7 +3113,7 @@ def test_query_with_complex_composite_filter(collection, database):
 )
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_aggregation_query_in_transaction(
-    client, cleanup, database, aggregation_type, aggregation_args, expected
+    client, cleanup, database, aggregation_type, aggregation_args, expected, verify_pipeline
 ):
     """
     Test creating an aggregation query inside a transaction
@@ -3079,6 +3147,7 @@ def test_aggregation_query_in_transaction(
             assert len(result[0]) == 1
             assert result[0][0].value == expected
             inner_fn_ran = True
+            verify_pipeline(aggregation_query)
 
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function
@@ -3086,7 +3155,7 @@ def test_aggregation_query_in_transaction(
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_or_query_in_transaction(client, cleanup, database):
+def test_or_query_in_transaction(client, cleanup, database, verify_pipeline):
     """
     Test running or query inside a transaction. Should pass transaction id along with request
     """
@@ -3124,6 +3193,7 @@ def test_or_query_in_transaction(client, cleanup, database):
                 result[0].get("b") == 2 and result[1].get("b") == 1
             )
             inner_fn_ran = True
+            verify_pipeline(query)
 
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function
@@ -3134,7 +3204,7 @@ def test_or_query_in_transaction(client, cleanup, database):
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_in_transaction_with_explain_options(client, cleanup, database):
+def test_query_in_transaction_with_explain_options(client, cleanup, database, verify_pipeline):
     """
     Test query profiling in transactions.
     """
@@ -3179,6 +3249,7 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
             assert explain_metrics.execution_stats is not None
 
             inner_fn_ran = True
+            verify_pipeline(query)
 
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function
@@ -3187,7 +3258,7 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
 
 @pytest.mark.parametrize("with_rollback,expected", [(True, 2), (False, 3)])
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_transaction_rollback(client, cleanup, database, with_rollback, expected):
+def test_transaction_rollback(client, cleanup, database, with_rollback, expected, verify_pipeline):
     """
     Create a document in a transaction that is rolled back
     Document should not show up in later queries
@@ -3231,3 +3302,4 @@ def test_transaction_rollback(client, cleanup, database, with_rollback, expected
     assert len(result) == 1
     assert len(result[0]) == 1
     assert result[0][0].value == expected
+    Vector(query)
