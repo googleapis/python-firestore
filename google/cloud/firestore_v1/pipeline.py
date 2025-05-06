@@ -34,14 +34,14 @@ class Pipeline(_BasePipeline):
         >>>
         >>> def run_pipeline():
         ...     client = Client(...)
-        ...     pipeline = client.collection("books")
-        ...                      .pipeline()
+        ...     pipeline = client.pipeline()
+        ...                      .collection("books")
         ...                      .where(Field.of("published").gt(1980))
         ...                      .select("title", "author")
         ...     for result in pipeline.execute():
         ...         print(result)
 
-    Use `client.collection("...").pipeline()` to create instances of this class.
+    Use `client.pipeline()` to create instances of this class.
     """
 
     def __init__(self, client: Client, *stages: stages.Stage):

@@ -37,14 +37,14 @@ class AsyncPipeline(_BasePipeline):
         >>>
         >>> async def run_pipeline():
         ...     client = AsyncClient(...)
-        ...     pipeline = client.collection("books")
-        ...                      .pipeline()
+        ...     pipeline = client.pipeline()
+        ...                      .collection("books")
         ...                      .where(Field.of("published").gt(1980))
         ...                      .select("title", "author")
         ...     async for result in pipeline.execute_async():
         ...         print(result)
 
-    Use `client.collection("...").pipeline()` to create instances of this class.
+    Use `client.pipeline()` to create instances of this class.
     """
 
     def __init__(self, client: AsyncClient, *stages: stages.Stage):

@@ -39,7 +39,7 @@ class _BasePipeline:
     Base class for building Firestore data transformation and query pipelines.
 
     This class is not intended to be instantiated directly.
-    Use `client.collection.("...").pipeline()` to create pipeline instances.
+    Use `client.pipeline()` to create pipeline instances.
     """
 
     def __init__(self, client: BaseClient, *stages: stages.Stage):
@@ -155,7 +155,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, to_upper
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Select by name
             >>> pipeline = pipeline.select("name", "address")
             >>> # Select using Field and Function expressions
@@ -187,7 +187,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, And,
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Using static functions
             >>> pipeline = pipeline.where(
             ...     And(
@@ -281,7 +281,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Sort books by rating descending, then title ascending
             >>> pipeline = pipeline.sort(
             ...     Field.of("rating").descending(),
@@ -444,7 +444,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Retrieve the second page of 20 results (assuming sorted)
             >>> pipeline = pipeline.sort(Field.of("published").descending())
             >>> pipeline = pipeline.offset(20)  # Skip the first 20 results
@@ -469,7 +469,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Limit the results to the top 10 highest-rated books
             >>> pipeline = pipeline.sort(Field.of("rating").descending())
             >>> pipeline = pipeline.limit(10)
