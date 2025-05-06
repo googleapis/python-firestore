@@ -22,8 +22,10 @@ from __future__ import annotations
 
 import abc
 import copy
+import datetime
 import math
 import warnings
+
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -1031,6 +1033,7 @@ class BaseQuery(object):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         QueryResultsList[DocumentSnapshot]
         | Coroutine[Any, Any, QueryResultsList[DocumentSnapshot]]
@@ -1043,6 +1046,7 @@ class BaseQuery(object):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, str, dict]:
         """Shared setup for async / sync :meth:`stream`"""
         if self._limit_to_last:
@@ -1059,6 +1063,8 @@ class BaseQuery(object):
         }
         if explain_options is not None:
             request["explain_options"] = explain_options._to_dict()
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, expected_prefix, kwargs
@@ -1070,6 +1076,7 @@ class BaseQuery(object):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         StreamGenerator[document.DocumentSnapshot]
         | AsyncStreamGenerator[DocumentSnapshot]
@@ -1426,6 +1433,7 @@ class BaseCollectionGroup(BaseQuery):
         partition_count,
         retry: retries.Retry | object | None = None,
         timeout: float | None = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, dict]:
         self._validate_partition_query()
         parent_path, expected_prefix = self._parent._parent_info()
@@ -1442,6 +1450,8 @@ class BaseCollectionGroup(BaseQuery):
             "structured_query": query._to_protobuf(),
             "partition_count": partition_count,
         }
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
@@ -1451,6 +1461,8 @@ class BaseCollectionGroup(BaseQuery):
         partition_count,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
+        *,
+        read_time: Optional[datetime.datetime] = None,
     ):
         raise NotImplementedError
 
