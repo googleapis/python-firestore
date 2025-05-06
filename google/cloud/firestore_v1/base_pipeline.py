@@ -103,7 +103,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, add
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> pipeline = pipeline.add_fields(
             ...     Field.of("rating").as_("bookRating"), # Rename 'rating' to 'bookRating'
             ...     add(5, Field.of("quantity")).as_("totalCost")  # Calculate 'totalCost'
@@ -124,7 +124,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Remove by name
             >>> pipeline = pipeline.remove_fields("rating", "cost")
             >>> # Remove by Field object
@@ -234,7 +234,7 @@ class _BasePipeline:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field
             >>>
             >>> target_vector = [0.1, 0.2, 0.3]
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Find using field name
             >>> pipeline = pipeline.find_nearest(
             ...     "topicVectors",
@@ -308,7 +308,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import SampleOptions
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Sample 10 books, if available.
             >>> pipeline = pipeline.sample(10)
             >>> pipeline = pipeline.sample(SampleOptions.doc_limit(10))
@@ -335,8 +335,8 @@ class _BasePipeline:
         pipeline provided. The order of documents emitted from this stage is undefined.
 
         Example:
-            >>> books_pipeline = client.collection("books").pipeline()
-            >>> magazines_pipeline = client.collection("magazines").pipeline()
+            >>> books_pipeline = client.pipeline().collection("books")
+            >>> magazines_pipeline = client.pipeline().collection("magazines")
             >>> # Emit documents from both collections
             >>> combined_pipeline = books_pipeline.union(magazines_pipeline)
 
@@ -370,7 +370,7 @@ class _BasePipeline:
             ```
 
             >>> from google.cloud.firestore_v1.pipeline_stages import UnnestOptions
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Emit a document for each tag
             >>> pipeline = pipeline.unnest("tags", alias="tag")
 
@@ -390,7 +390,7 @@ class _BasePipeline:
             ```
 
             >>> from google.cloud.firestore_v1.pipeline_stages import UnnestOptions
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Emit a document for each tag, including the index
             >>> pipeline = pipeline.unnest("tags", options=UnnestOptions(index_field="tagIndex"))
 
@@ -421,7 +421,7 @@ class _BasePipeline:
 
         Example:
             >>> # Assume we don't have a built-in "where" stage
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> pipeline = pipeline.generic_stage("where", [Field.of("published").lt(900)])
             >>> pipeline = pipeline.select("title", "author")
 
@@ -503,7 +503,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, avg, count_all
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Calculate the average rating and total count for all books
             >>> pipeline = pipeline.aggregate(
             ...     avg(Field.of("rating")).as_("averageRating"),
@@ -543,7 +543,7 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, to_upper
-            >>> pipeline = client.collection("books").pipeline()
+            >>> pipeline = client.pipeline().collection("books")
             >>> # Get a list of unique genres (output has only 'genre' field)
             >>> pipeline = pipeline.distinct("genre")
             >>> # Get unique combinations of author (uppercase) and genre
