@@ -322,7 +322,7 @@ class _BasePipeline:
             ```
 
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field
-            >>> pipeline = client.collection("people").pipeline()
+            >>> pipeline = client.pipeline().collection("people")
             >>> # Emit the 'parents' map as the document
             >>> pipeline = pipeline.replace(Field.of("parents"))
 

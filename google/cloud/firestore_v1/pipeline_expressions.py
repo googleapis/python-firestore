@@ -1059,7 +1059,7 @@ class Expr(ABC):
 
         Example:
             >>> # Sort documents by the 'name' field in ascending order
-            >>> firestore.pipeline().collection("users").sort(Field.of("name").ascending())
+            >>> client.pipeline().collection("users").sort(Field.of("name").ascending())
 
         Returns:
             A new `Ordering` for ascending sorting.
@@ -1071,7 +1071,7 @@ class Expr(ABC):
 
         Example:
             >>> # Sort documents by the 'createdAt' field in descending order
-            >>> firestore.pipeline().collection("users").sort(Field.of("createdAt").descending())
+            >>> client.pipeline().collection("users").sort(Field.of("createdAt").descending())
 
         Returns:
             A new `Ordering` for descending sorting.
@@ -1086,7 +1086,7 @@ class Expr(ABC):
 
         Example:
             >>> # Calculate the total price and assign it the alias "totalPrice" and add it to the output.
-            >>> firestore.pipeline().collection("items").add_fields(
+            >>> client.pipeline().collection("items").add_fields(
             ...     Field.of("price").multiply(Field.of("quantity")).as_("totalPrice")
             ... )
 
