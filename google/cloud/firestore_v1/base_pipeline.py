@@ -13,12 +13,18 @@
 # limitations under the License.
 
 from __future__ import annotations
+from typing import TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
-from google.cloud.firestore_v1.base_client import BaseClient
+from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
+from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1 import _helpers, document
+
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.client import Client
+    from google.cloud.firestore_v1.async_client import AsyncClient
 
 
 class _BasePipeline:
@@ -29,7 +35,7 @@ class _BasePipeline:
     Use `client.collection.("...").pipeline()` to create pipeline instances.
     """
 
-    def __init__(self, client: BaseClient, *stages: stages.Stage):
+    def __init__(self, client: Client | AsyncClient, *stages: stages.Stage):
         """
         Initializes a new pipeline with the given stages.
 
@@ -61,16 +67,3 @@ class _BasePipeline:
         Create a new Pipeline object with a new stage appended
         """
         return self.__class__(self._client, *self.stages, new_stage)
-
-    @staticmethod
-    def _parse_response(response_pb, client):
-        for doc in response_pb.results:
-            data = _helpers.decode_dict(doc.fields, client)
-            yield document.DocumentSnapshot(
-                None,
-                data,
-                exists=True,
-                read_time=response_pb._pb.execution_time,
-                create_time=doc.create_time,
-                update_time=doc.update_time,
-            )

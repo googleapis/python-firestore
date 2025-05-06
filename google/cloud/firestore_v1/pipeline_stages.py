@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 from abc import ABC
 from abc import abstractmethod
 
@@ -22,6 +22,10 @@ from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.pipeline_expressions import (
     Expr,
 )
+
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.base_document import BaseDocumentReference
+
 
 class Stage(ABC):
     """Base class for all pipeline stages.
@@ -95,7 +99,7 @@ class Documents(Stage):
         self.paths = paths
 
     @staticmethod
-    def of(*documents: "DocumentReference") -> "Documents":
+    def of(*documents: "BaseDocumentReference") -> "Documents":
         doc_paths = ["/" + doc.path for doc in documents]
         return Documents(*doc_paths)
 

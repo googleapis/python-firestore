@@ -20,7 +20,7 @@ from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
-    from google.cloud.firestore_v1.document import DocumentReference
+    from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 
 
@@ -73,7 +73,7 @@ class PipelineSource(Generic[PipelineType]):
         """
         return self.client._pipeline_cls(self.client, stages.Database())
 
-    def documents(self, *docs: "DocumentReference") -> PipelineType:
+    def documents(self, *docs: "BaseDocumentReference") -> PipelineType:
         """
         Creates a new Pipeline that operates on a specific set of Firestore documents.
 

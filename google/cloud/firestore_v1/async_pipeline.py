@@ -17,8 +17,9 @@ import datetime
 from typing import AsyncIterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
-from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
+from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
+from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.async_client import AsyncClient
@@ -57,7 +58,7 @@ class AsyncPipeline(_BasePipeline):
         """
         super().__init__(client, *stages)
 
-    async def execute(self) -> AsyncIterable["DocumentSnapshot"]:
+    async def execute(self) -> AsyncIterable[PipelineResult]:
         database_name = (
             f"projects/{self._client.project}/databases/{self._client._database}"
         )
@@ -69,5 +70,13 @@ class AsyncPipeline(_BasePipeline):
         async for response in await self._client._firestore_api.execute_pipeline(
             request
         ):
-            for snapshot in self._parse_response(response, self._client):
-                yield snapshot
+            for doc in response.results:
+                doc_ref = AsyncDocumentReference(doc.name, client=self._client) if doc.name else None
+                yield PipelineResult(
+                    self._client,
+                    doc.fields,
+                    doc_ref,
+                    response._pb.execution_time,
+                    doc.create_time,
+                    doc.update_tiem,
+                )

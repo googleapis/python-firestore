@@ -148,12 +148,15 @@ def pytype(session):
 def mypy(session):
     """Verify type hints are mypy compatible."""
     session.install("-e", ".")
-    session.install("mypy", "types-setuptools")
+    session.install("mypy", "types-setuptools", "types-protobuf")
     # TODO: also verify types on tests, all of google package
     session.run("mypy", 
         "-p", "google.cloud.firestore_v1.pipeline_expressions",
         "-p", "google.cloud.firestore_v1.pipeline_stages",
         "-p", "google.cloud.firestore_v1.pipeline_source",
+        "-p", "google.cloud.firestore_v1.pipeline_result",
+        "-p", "google.cloud.firestore_v1.base_pipeline",
+        "-p", "google.cloud.firestore_v1.async_pipeline",
         "-p", "google.cloud.firestore_v1.pipeline",
     "--no-incremental")
 
