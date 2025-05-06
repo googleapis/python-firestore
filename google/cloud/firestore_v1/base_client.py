@@ -34,6 +34,7 @@ from typing import (
     Optional,
     Tuple,
     Union,
+    Type
 )
 
 import google.api_core.client_options
@@ -57,6 +58,7 @@ from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.base_transaction import BaseTransaction
 from google.cloud.firestore_v1.bulk_writer import BulkWriter, BulkWriterOptions
 from google.cloud.firestore_v1.field_path import render_field_path
+from google.cloud.firestore_v1.pipeline import PipelineSource, _BasePipeline
 
 DEFAULT_DATABASE = "(default)"
 """str: The default database used in a :class:`~google.cloud.firestore_v1.client.Client`."""
@@ -475,9 +477,12 @@ class BaseClient(ClientWithProject):
     def transaction(self, **kwargs) -> BaseTransaction:
         raise NotImplementedError
 
-    def pipeline(self, *stages):
-        raise NotImplementedError
+    def pipeline(self) -> PipelineSource:
+        return PipelineSource(self)
 
+    @property
+    def _pipeline_cls(self) -> Type["_BasePipeline"]:
+        raise NotImplementedError
 
 def _reference_info(references: list) -> Tuple[list, dict]:
     """Get information about document references.

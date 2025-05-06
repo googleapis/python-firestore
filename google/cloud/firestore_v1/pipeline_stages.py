@@ -53,6 +53,60 @@ class Stage(ABC):
         return f"{self.__class__.__name__}({', '.join(items)})"
 
 
+class Collection(Stage):
+    """Specifies a collection as the initial data source."""
+
+    def __init__(self, path: str):
+        super().__init__()
+        if not path.startswith("/"):
+            path = f"/{path}"
+        self.path = path
+
+    def _pb_args(self):
+        return [Value(reference_value=self.path)]
+
+
+class CollectionGroup(Stage):
+    """Specifies a collection group as the initial data source."""
+
+    def __init__(self, collection_id: str):
+        super().__init__("collection_group")
+        self.collection_id = collection_id
+
+    def _pb_args(self):
+        return [Value(string_value=self.collection_id)]
+
+
+class Database(Stage):
+    """Specifies the default database as the initial data source."""
+
+    def __init__(self):
+        super().__init__()
+
+    def _pb_args(self):
+        return []
+
+
+class Documents(Stage):
+    """Specifies specific documents as the initial data source."""
+
+    def __init__(self, *paths: str):
+        super().__init__()
+        self.paths = paths
+
+    @staticmethod
+    def of(*documents: "DocumentReference") -> "Documents":
+        doc_paths = ["/" + doc.path for doc in documents]
+        return Documents(*doc_paths)
+
+    def _pb_args(self):
+        return [
+            Value(
+                list_value={"values": [Value(string_value=path) for path in self.paths]}
+            )
+        ]
+
+
 class GenericStage(Stage):
     """Represents a generic, named stage with parameters."""
 

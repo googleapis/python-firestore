@@ -153,6 +153,7 @@ def mypy(session):
     session.run("mypy", 
         "-p", "google.cloud.firestore_v1.pipeline_expressions",
         "-p", "google.cloud.firestore_v1.pipeline_stages",
+        "-p", "google.cloud.firestore_v1.pipeline_source",
         "-p", "google.cloud.firestore_v1.pipeline",
     "--no-incremental")
 

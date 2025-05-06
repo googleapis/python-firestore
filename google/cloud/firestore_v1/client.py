@@ -406,5 +406,6 @@ class Client(BaseClient):
         """
         return Transaction(self, **kwargs)
 
-    def pipeline(self, *stages) -> Pipeline:
-        return Pipeline(self, *stages)
+    @property
+    def _pipeline_cls(self):
+        raise Pipeline
