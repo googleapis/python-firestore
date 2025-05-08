@@ -23,8 +23,8 @@ if TYPE_CHECKING:
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 
+PipelineType = TypeVar("PipelineType", bound=_BasePipeline)
 
-PipelineType = TypeVar('PipelineType', bound=_BasePipeline)
 
 class PipelineSource(Generic[PipelineType]):
     """
@@ -62,7 +62,9 @@ class PipelineSource(Generic[PipelineType]):
         Returns:
             a new pipeline instance targeting the specified collection group
         """
-        return self.client._pipeline_cls(self.client, stages.CollectionGroup(collection_id))
+        return self.client._pipeline_cls(
+            self.client, stages.CollectionGroup(collection_id)
+        )
 
     def database(self) -> PipelineType:
         """

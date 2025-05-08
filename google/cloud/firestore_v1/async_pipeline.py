@@ -71,7 +71,11 @@ class AsyncPipeline(_BasePipeline):
             request
         ):
             for doc in response.results:
-                doc_ref = AsyncDocumentReference(doc.name, client=self._client) if doc.name else None
+                doc_ref = (
+                    AsyncDocumentReference(doc.name, client=self._client)
+                    if doc.name
+                    else None
+                )
                 yield PipelineResult(
                     self._client,
                     doc.fields,

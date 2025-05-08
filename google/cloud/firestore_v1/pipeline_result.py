@@ -133,6 +133,8 @@ class PipelineResult:
         Returns:
             The data at the specified field location, decoded to Python types.
         """
-        str_path = field_path if isinstance(field_path, str) else field_path.to_api_repr()
+        str_path = (
+            field_path if isinstance(field_path, str) else field_path.to_api_repr()
+        )
         value = get_nested_value(str_path, self._fields_pb)
         return decode_value(value, self._client)

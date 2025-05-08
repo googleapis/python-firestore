@@ -65,7 +65,11 @@ class Pipeline(_BasePipeline):
         )
         for response in self._client._firestore_api.execute_pipeline(request):
             for doc in response.results:
-                doc_ref = DocumentReference(doc.name, client=self._client) if doc.name else None
+                doc_ref = (
+                    DocumentReference(doc.name, client=self._client)
+                    if doc.name
+                    else None
+                )
                 yield PipelineResult(
                     self._client,
                     doc.fields,

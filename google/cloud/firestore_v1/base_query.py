@@ -1108,7 +1108,6 @@ class BaseQuery(object):
     def pipeline(self):
         raise NotImplementedError
 
-
     def _comparator(self, doc1, doc2) -> int:
         _orders = self._orders
 

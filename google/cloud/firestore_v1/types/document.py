@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -184,6 +184,37 @@ class Value(proto.Message):
             This field is a member of `oneof`_ ``value_type``.
         map_value (google.cloud.firestore_v1.types.MapValue):
             A map value.
+
+            This field is a member of `oneof`_ ``value_type``.
+        field_reference_value (str):
+            Value which references a field.
+
+            This is considered relative (vs absolute) since it only
+            refers to a field and not a field within a particular
+            document.
+
+            **Requires:**
+
+            -  Must follow [field reference][FieldReference.field_path]
+               limitations.
+
+            -  Not allowed to be used when writing documents.
+
+            This field is a member of `oneof`_ ``value_type``.
+        function_value (google.cloud.firestore_v1.types.Function):
+            A value that represents an unevaluated expression.
+
+            **Requires:**
+
+            -  Not allowed to be used when writing documents.
+
+            This field is a member of `oneof`_ ``value_type``.
+        pipeline_value (google.cloud.firestore_v1.types.Pipeline):
+            A value that represents an unevaluated pipeline.
+
+            **Requires:**
+
+            -  Not allowed to be used when writing documents.
 
             This field is a member of `oneof`_ ``value_type``.
     """

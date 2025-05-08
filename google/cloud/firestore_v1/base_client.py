@@ -34,7 +34,7 @@ from typing import (
     Optional,
     Tuple,
     Union,
-    Type
+    Type,
 )
 
 import google.api_core.client_options
@@ -483,6 +483,7 @@ class BaseClient(ClientWithProject):
     @property
     def _pipeline_cls(self) -> Type["_BasePipeline"]:
         raise NotImplementedError
+
 
 def _reference_info(references: list) -> Tuple[list, dict]:
     """Get information about document references.
