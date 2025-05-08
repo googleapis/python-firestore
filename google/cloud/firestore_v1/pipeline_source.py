@@ -20,7 +20,6 @@ from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
-    from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 
 PipelineType = TypeVar("PipelineType", bound=_BasePipeline)

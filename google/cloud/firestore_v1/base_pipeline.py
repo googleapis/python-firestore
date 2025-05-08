@@ -15,12 +15,9 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
-from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
-from google.cloud.firestore_v1.pipeline_result import PipelineResult
-from google.cloud.firestore_v1 import _helpers, document
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
