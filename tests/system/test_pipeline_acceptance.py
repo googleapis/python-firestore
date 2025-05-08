@@ -36,6 +36,7 @@ FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 
 test_dir_name = os.path.dirname(__file__)
 
+
 def yaml_loader(field="tests"):
     """
     loads test cases or data from yaml file
@@ -55,6 +56,7 @@ def event_loop():
         loop = asyncio.new_event_loop()
     yield loop
     loop.close()
+
 
 @pytest.fixture(scope="module")
 def client():
@@ -78,9 +80,11 @@ def client():
                 document_ref = collection_ref.document(document_id)
                 document_ref.delete()
 
+
 @pytest.fixture(scope="module")
 def async_client(client):
     yield AsyncClient(project=client.project, database=client._database)
+
 
 def _apply_yaml_args(cls, client, yaml_args):
     if isinstance(yaml_args, dict):
@@ -91,6 +95,7 @@ def _apply_yaml_args(cls, client, yaml_args):
     else:
         # yaml has a single argument
         return cls(parse_expressions(client, yaml_args))
+
 
 def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
     """
@@ -112,10 +117,14 @@ def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
         result_list.append(stage_obj)
     return client.pipeline(*result_list)
 
+
 def _is_expr_string(yaml_str):
-    return isinstance(yaml_str, str) and \
-            yaml_str[0].isupper() and \
-            hasattr(pipeline_expressions, yaml_str)
+    return (
+        isinstance(yaml_str, str)
+        and yaml_str[0].isupper()
+        and hasattr(pipeline_expressions, yaml_str)
+    )
+
 
 def parse_expressions(client, yaml_element: Any):
     if isinstance(yaml_element, list):
@@ -133,16 +142,20 @@ def parse_expressions(client, yaml_element: Any):
             return parse_pipeline(client, other_ppl)
         else:
             # otherwise, return dict
-            return {parse_expressions(client, k): parse_expressions(client, v) for k,v in yaml_element.items()}
+            return {
+                parse_expressions(client, k): parse_expressions(client, v)
+                for k, v in yaml_element.items()
+            }
     elif _is_expr_string(yaml_element):
         return getattr(pipeline_expressions, yaml_element)()
     else:
         return yaml_element
 
+
 @pytest.mark.parametrize(
     "test_dict",
     [t for t in yaml_loader() if "assert_proto" in t],
-    ids=lambda x: f"{x.get('description', '')}"
+    ids=lambda x: f"{x.get('description', '')}",
 )
 def test_pipeline_parse_proto(test_dict, client):
     """
@@ -154,6 +167,7 @@ def test_pipeline_parse_proto(test_dict, client):
     if expected_proto:
         got_proto = MessageToDict(pipeline._to_pb()._pb)
         assert yaml.dump(expected_proto) == yaml.dump(got_proto)
+
 
 @pytest.mark.parametrize(
     "test_dict",
@@ -177,7 +191,7 @@ def test_pipeline_expected_errors(test_dict, client):
 @pytest.mark.parametrize(
     "test_dict",
     [t for t in yaml_loader() if "assert_results" in t or "assert_count" in t],
-    ids=lambda x: f"{x.get('description', '')}"
+    ids=lambda x: f"{x.get('description', '')}",
 )
 def test_pipeline_results(test_dict, client):
     """
@@ -192,6 +206,7 @@ def test_pipeline_results(test_dict, client):
         assert got_results == expected_results
     if expected_count is not None:
         assert len(got_results) == expected_count
+
 
 @pytest.mark.parametrize(
     "test_dict",
@@ -215,7 +230,7 @@ async def test_pipeline_expected_errors_async(test_dict, async_client):
 @pytest.mark.parametrize(
     "test_dict",
     [t for t in yaml_loader() if "assert_results" in t or "assert_count" in t],
-    ids=lambda x: f"{x.get('description', '')}"
+    ids=lambda x: f"{x.get('description', '')}",
 )
 @pytest.mark.asyncio
 async def test_pipeline_results_async(test_dict, async_client):
@@ -231,4 +246,3 @@ async def test_pipeline_results_async(test_dict, async_client):
         assert got_results == expected_results
     if expected_count is not None:
         assert len(got_results) == expected_count
-

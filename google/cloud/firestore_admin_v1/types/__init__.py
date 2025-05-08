@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -29,17 +29,22 @@ from .firestore_admin import (
     CreateDatabaseMetadata,
     CreateDatabaseRequest,
     CreateIndexRequest,
+    CreateUserCredsRequest,
     DeleteBackupRequest,
     DeleteBackupScheduleRequest,
     DeleteDatabaseMetadata,
     DeleteDatabaseRequest,
     DeleteIndexRequest,
+    DeleteUserCredsRequest,
+    DisableUserCredsRequest,
+    EnableUserCredsRequest,
     ExportDocumentsRequest,
     GetBackupRequest,
     GetBackupScheduleRequest,
     GetDatabaseRequest,
     GetFieldRequest,
     GetIndexRequest,
+    GetUserCredsRequest,
     ImportDocumentsRequest,
     ListBackupSchedulesRequest,
     ListBackupSchedulesResponse,
@@ -51,6 +56,9 @@ from .firestore_admin import (
     ListFieldsResponse,
     ListIndexesRequest,
     ListIndexesResponse,
+    ListUserCredsRequest,
+    ListUserCredsResponse,
+    ResetUserPasswordRequest,
     RestoreDatabaseRequest,
     UpdateBackupScheduleRequest,
     UpdateDatabaseMetadata,
@@ -79,6 +87,9 @@ from .schedule import (
     DailyRecurrence,
     WeeklyRecurrence,
 )
+from .user_creds import (
+    UserCreds,
+)
 
 __all__ = (
     "Backup",
@@ -90,17 +101,22 @@ __all__ = (
     "CreateDatabaseMetadata",
     "CreateDatabaseRequest",
     "CreateIndexRequest",
+    "CreateUserCredsRequest",
     "DeleteBackupRequest",
     "DeleteBackupScheduleRequest",
     "DeleteDatabaseMetadata",
     "DeleteDatabaseRequest",
     "DeleteIndexRequest",
+    "DeleteUserCredsRequest",
+    "DisableUserCredsRequest",
+    "EnableUserCredsRequest",
     "ExportDocumentsRequest",
     "GetBackupRequest",
     "GetBackupScheduleRequest",
     "GetDatabaseRequest",
     "GetFieldRequest",
     "GetIndexRequest",
+    "GetUserCredsRequest",
     "ImportDocumentsRequest",
     "ListBackupSchedulesRequest",
     "ListBackupSchedulesResponse",
@@ -112,6 +128,9 @@ __all__ = (
     "ListFieldsResponse",
     "ListIndexesRequest",
     "ListIndexesResponse",
+    "ListUserCredsRequest",
+    "ListUserCredsResponse",
+    "ResetUserPasswordRequest",
     "RestoreDatabaseRequest",
     "UpdateBackupScheduleRequest",
     "UpdateDatabaseMetadata",
@@ -131,4 +150,5 @@ __all__ = (
     "BackupSchedule",
     "DailyRecurrence",
     "WeeklyRecurrence",
+    "UserCreds",
 )

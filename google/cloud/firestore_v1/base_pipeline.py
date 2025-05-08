@@ -15,13 +15,15 @@
 from __future__ import annotations
 from typing import Optional, Sequence
 from typing_extensions import Self
+from typing import TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
-from google.cloud.firestore_v1.base_client import BaseClient
+from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1 import _helpers, document
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
@@ -33,6 +35,10 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     SampleOptions,
 )
 
+if TYPE_CHECKING:
+    from google.cloud.firestore_v1.client import Client
+    from google.cloud.firestore_v1.async_client import AsyncClient
+
 
 class _BasePipeline:
     """
@@ -42,7 +48,7 @@ class _BasePipeline:
     Use `client.pipeline()` to create pipeline instances.
     """
 
-    def __init__(self, client: BaseClient, *stages: stages.Stage):
+    def __init__(self, client: Client | AsyncClient, *stages: stages.Stage):
         """
         Initializes a new pipeline with the given stages.
 

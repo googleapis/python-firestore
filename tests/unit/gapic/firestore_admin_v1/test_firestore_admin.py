@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ except ImportError:  # pragma: NO COVER
 
 import grpc
 from grpc.experimental import aio
-from collections.abc import Iterable
+from collections.abc import Iterable, AsyncIterable
 from google.protobuf import json_format
 import json
 import math
@@ -36,6 +36,13 @@ from requests import Response
 from requests import Request, PreparedRequest
 from requests.sessions import Session
 from google.protobuf import json_format
+
+try:
+    from google.auth.aio import credentials as ga_credentials_async
+
+    HAS_GOOGLE_AUTH_AIO = True
+except ImportError:  # pragma: NO COVER
+    HAS_GOOGLE_AUTH_AIO = False
 
 from google.api_core import client_options
 from google.api_core import exceptions as core_exceptions
@@ -68,6 +75,8 @@ from google.cloud.firestore_admin_v1.types import index
 from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.cloud.firestore_admin_v1.types import operation as gfa_operation
 from google.cloud.firestore_admin_v1.types import schedule
+from google.cloud.firestore_admin_v1.types import user_creds
+from google.cloud.firestore_admin_v1.types import user_creds as gfa_user_creds
 from google.cloud.location import locations_pb2
 from google.longrunning import operations_pb2  # type: ignore
 from google.oauth2 import service_account
@@ -79,8 +88,30 @@ from google.type import dayofweek_pb2  # type: ignore
 import google.auth
 
 
+CRED_INFO_JSON = {
+    "credential_source": "/path/to/file",
+    "credential_type": "service account credentials",
+    "principal": "service-account@example.com",
+}
+CRED_INFO_STRING = json.dumps(CRED_INFO_JSON)
+
+
+async def mock_async_gen(data, chunk_size=1):
+    for i in range(0, len(data)):  # pragma: NO COVER
+        chunk = data[i : i + chunk_size]
+        yield chunk.encode("utf-8")
+
+
 def client_cert_source_callback():
     return b"cert bytes", b"key bytes"
+
+
+# TODO: use async auth anon credentials by default once the minimum version of google-auth is upgraded.
+# See related issue: https://github.com/googleapis/gapic-generator-python/issues/2107.
+def async_anonymous_credentials():
+    if HAS_GOOGLE_AUTH_AIO:
+        return ga_credentials_async.AnonymousCredentials()
+    return ga_credentials.AnonymousCredentials()
 
 
 # If default endpoint is localhost, then default mtls endpoint will be the same.
@@ -323,83 +354,46 @@ def test__get_universe_domain():
 
 
 @pytest.mark.parametrize(
-    "client_class,transport_class,transport_name",
+    "error_code,cred_info_json,show_cred_info",
     [
-        (FirestoreAdminClient, transports.FirestoreAdminGrpcTransport, "grpc"),
-        (FirestoreAdminClient, transports.FirestoreAdminRestTransport, "rest"),
+        (401, CRED_INFO_JSON, True),
+        (403, CRED_INFO_JSON, True),
+        (404, CRED_INFO_JSON, True),
+        (500, CRED_INFO_JSON, False),
+        (401, None, False),
+        (403, None, False),
+        (404, None, False),
+        (500, None, False),
     ],
 )
-def test__validate_universe_domain(client_class, transport_class, transport_name):
-    client = client_class(
-        transport=transport_class(credentials=ga_credentials.AnonymousCredentials())
-    )
-    assert client._validate_universe_domain() == True
+def test__add_cred_info_for_auth_errors(error_code, cred_info_json, show_cred_info):
+    cred = mock.Mock(["get_cred_info"])
+    cred.get_cred_info = mock.Mock(return_value=cred_info_json)
+    client = FirestoreAdminClient(credentials=cred)
+    client._transport._credentials = cred
 
-    # Test the case when universe is already validated.
-    assert client._validate_universe_domain() == True
+    error = core_exceptions.GoogleAPICallError("message", details=["foo"])
+    error.code = error_code
 
-    if transport_name == "grpc":
-        # Test the case where credentials are provided by the
-        # `local_channel_credentials`. The default universes in both match.
-        channel = grpc.secure_channel(
-            "http://localhost/", grpc.local_channel_credentials()
-        )
-        client = client_class(transport=transport_class(channel=channel))
-        assert client._validate_universe_domain() == True
+    client._add_cred_info_for_auth_errors(error)
+    if show_cred_info:
+        assert error.details == ["foo", CRED_INFO_STRING]
+    else:
+        assert error.details == ["foo"]
 
-        # Test the case where credentials do not exist: e.g. a transport is provided
-        # with no credentials. Validation should still succeed because there is no
-        # mismatch with non-existent credentials.
-        channel = grpc.secure_channel(
-            "http://localhost/", grpc.local_channel_credentials()
-        )
-        transport = transport_class(channel=channel)
-        transport._credentials = None
-        client = client_class(transport=transport)
-        assert client._validate_universe_domain() == True
 
-    # TODO: This is needed to cater for older versions of google-auth
-    # Make this test unconditional once the minimum supported version of
-    # google-auth becomes 2.23.0 or higher.
-    google_auth_major, google_auth_minor = [
-        int(part) for part in google.auth.__version__.split(".")[0:2]
-    ]
-    if google_auth_major > 2 or (google_auth_major == 2 and google_auth_minor >= 23):
-        credentials = ga_credentials.AnonymousCredentials()
-        credentials._universe_domain = "foo.com"
-        # Test the case when there is a universe mismatch from the credentials.
-        client = client_class(transport=transport_class(credentials=credentials))
-        with pytest.raises(ValueError) as excinfo:
-            client._validate_universe_domain()
-        assert (
-            str(excinfo.value)
-            == "The configured universe domain (googleapis.com) does not match the universe domain found in the credentials (foo.com). If you haven't configured the universe domain explicitly, `googleapis.com` is the default."
-        )
+@pytest.mark.parametrize("error_code", [401, 403, 404, 500])
+def test__add_cred_info_for_auth_errors_no_get_cred_info(error_code):
+    cred = mock.Mock([])
+    assert not hasattr(cred, "get_cred_info")
+    client = FirestoreAdminClient(credentials=cred)
+    client._transport._credentials = cred
 
-        # Test the case when there is a universe mismatch from the client.
-        #
-        # TODO: Make this test unconditional once the minimum supported version of
-        # google-api-core becomes 2.15.0 or higher.
-        api_core_major, api_core_minor = [
-            int(part) for part in api_core_version.__version__.split(".")[0:2]
-        ]
-        if api_core_major > 2 or (api_core_major == 2 and api_core_minor >= 15):
-            client = client_class(
-                client_options={"universe_domain": "bar.com"},
-                transport=transport_class(
-                    credentials=ga_credentials.AnonymousCredentials(),
-                ),
-            )
-            with pytest.raises(ValueError) as excinfo:
-                client._validate_universe_domain()
-            assert (
-                str(excinfo.value)
-                == "The configured universe domain (bar.com) does not match the universe domain found in the credentials (googleapis.com). If you haven't configured the universe domain explicitly, `googleapis.com` is the default."
-            )
+    error = core_exceptions.GoogleAPICallError("message", details=[])
+    error.code = error_code
 
-    # Test that ValueError is raised if universe_domain is provided via client options and credentials is None
-    with pytest.raises(ValueError):
-        client._compare_universes("foo.bar", None)
+    client._add_cred_info_for_auth_errors(error)
+    assert error.details == []
 
 
 @pytest.mark.parametrize(
@@ -1180,25 +1174,6 @@ def test_create_index(request_type, transport: str = "grpc"):
     assert isinstance(response, future.Future)
 
 
-def test_create_index_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.create_index), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.create_index()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.CreateIndexRequest()
-
-
 def test_create_index_non_empty_request_with_auto_populated_field():
     # This test is a coverage failsafe to make sure that UUID4 fields are
     # automatically populated, according to AIP-4235, with non-empty requests.
@@ -1268,27 +1243,6 @@ def test_create_index_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_create_index_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.create_index), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.create_index()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.CreateIndexRequest()
-
-
-@pytest.mark.asyncio
 async def test_create_index_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -1296,7 +1250,7 @@ async def test_create_index_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -1340,7 +1294,7 @@ async def test_create_index_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.CreateIndexRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -1403,7 +1357,7 @@ def test_create_index_field_headers():
 @pytest.mark.asyncio
 async def test_create_index_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -1478,7 +1432,7 @@ def test_create_index_flattened_error():
 @pytest.mark.asyncio
 async def test_create_index_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -1511,7 +1465,7 @@ async def test_create_index_flattened_async():
 @pytest.mark.asyncio
 async def test_create_index_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -1558,25 +1512,6 @@ def test_list_indexes(request_type, transport: str = "grpc"):
     # Establish that the response is the type that we expect.
     assert isinstance(response, pagers.ListIndexesPager)
     assert response.next_page_token == "next_page_token_value"
-
-
-def test_list_indexes_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.list_indexes), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.list_indexes()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListIndexesRequest()
 
 
 def test_list_indexes_non_empty_request_with_auto_populated_field():
@@ -1647,29 +1582,6 @@ def test_list_indexes_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_list_indexes_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.list_indexes), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            firestore_admin.ListIndexesResponse(
-                next_page_token="next_page_token_value",
-            )
-        )
-        response = await client.list_indexes()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListIndexesRequest()
-
-
-@pytest.mark.asyncio
 async def test_list_indexes_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -1677,7 +1589,7 @@ async def test_list_indexes_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -1716,7 +1628,7 @@ async def test_list_indexes_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.ListIndexesRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -1782,7 +1694,7 @@ def test_list_indexes_field_headers():
 @pytest.mark.asyncio
 async def test_list_indexes_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -1852,7 +1764,7 @@ def test_list_indexes_flattened_error():
 @pytest.mark.asyncio
 async def test_list_indexes_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -1881,7 +1793,7 @@ async def test_list_indexes_flattened_async():
 @pytest.mark.asyncio
 async def test_list_indexes_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -1991,7 +1903,7 @@ def test_list_indexes_pages(transport_name: str = "grpc"):
 @pytest.mark.asyncio
 async def test_list_indexes_async_pager():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -2041,7 +1953,7 @@ async def test_list_indexes_async_pager():
 @pytest.mark.asyncio
 async def test_list_indexes_async_pages():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -2112,6 +2024,9 @@ def test_get_index(request_type, transport: str = "grpc"):
             query_scope=index.Index.QueryScope.COLLECTION,
             api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
             state=index.Index.State.CREATING,
+            density=index.Index.Density.SPARSE_ALL,
+            multikey=True,
+            shard_count=1178,
         )
         response = client.get_index(request)
 
@@ -2127,25 +2042,9 @@ def test_get_index(request_type, transport: str = "grpc"):
     assert response.query_scope == index.Index.QueryScope.COLLECTION
     assert response.api_scope == index.Index.ApiScope.DATASTORE_MODE_API
     assert response.state == index.Index.State.CREATING
-
-
-def test_get_index_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.get_index), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.get_index()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetIndexRequest()
+    assert response.density == index.Index.Density.SPARSE_ALL
+    assert response.multikey is True
+    assert response.shard_count == 1178
 
 
 def test_get_index_non_empty_request_with_auto_populated_field():
@@ -2212,38 +2111,12 @@ def test_get_index_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_get_index_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.get_index), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            index.Index(
-                name="name_value",
-                query_scope=index.Index.QueryScope.COLLECTION,
-                api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
-                state=index.Index.State.CREATING,
-            )
-        )
-        response = await client.get_index()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetIndexRequest()
-
-
-@pytest.mark.asyncio
 async def test_get_index_async_use_cached_wrapped_rpc(transport: str = "grpc_asyncio"):
     # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -2282,7 +2155,7 @@ async def test_get_index_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.GetIndexRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -2299,6 +2172,9 @@ async def test_get_index_async(
                 query_scope=index.Index.QueryScope.COLLECTION,
                 api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
                 state=index.Index.State.CREATING,
+                density=index.Index.Density.SPARSE_ALL,
+                multikey=True,
+                shard_count=1178,
             )
         )
         response = await client.get_index(request)
@@ -2315,6 +2191,9 @@ async def test_get_index_async(
     assert response.query_scope == index.Index.QueryScope.COLLECTION
     assert response.api_scope == index.Index.ApiScope.DATASTORE_MODE_API
     assert response.state == index.Index.State.CREATING
+    assert response.density == index.Index.Density.SPARSE_ALL
+    assert response.multikey is True
+    assert response.shard_count == 1178
 
 
 @pytest.mark.asyncio
@@ -2354,7 +2233,7 @@ def test_get_index_field_headers():
 @pytest.mark.asyncio
 async def test_get_index_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -2422,7 +2301,7 @@ def test_get_index_flattened_error():
 @pytest.mark.asyncio
 async def test_get_index_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -2449,7 +2328,7 @@ async def test_get_index_flattened_async():
 @pytest.mark.asyncio
 async def test_get_index_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -2492,25 +2371,6 @@ def test_delete_index(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert response is None
-
-
-def test_delete_index_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.delete_index), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.delete_index()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.DeleteIndexRequest()
 
 
 def test_delete_index_non_empty_request_with_auto_populated_field():
@@ -2577,25 +2437,6 @@ def test_delete_index_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_delete_index_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.delete_index), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
-        response = await client.delete_index()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.DeleteIndexRequest()
-
-
-@pytest.mark.asyncio
 async def test_delete_index_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -2603,7 +2444,7 @@ async def test_delete_index_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -2642,7 +2483,7 @@ async def test_delete_index_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.DeleteIndexRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -2703,7 +2544,7 @@ def test_delete_index_field_headers():
 @pytest.mark.asyncio
 async def test_delete_index_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -2771,7 +2612,7 @@ def test_delete_index_flattened_error():
 @pytest.mark.asyncio
 async def test_delete_index_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -2798,7 +2639,7 @@ async def test_delete_index_flattened_async():
 @pytest.mark.asyncio
 async def test_delete_index_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -2844,25 +2685,6 @@ def test_get_field(request_type, transport: str = "grpc"):
     # Establish that the response is the type that we expect.
     assert isinstance(response, field.Field)
     assert response.name == "name_value"
-
-
-def test_get_field_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.get_field), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.get_field()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetFieldRequest()
 
 
 def test_get_field_non_empty_request_with_auto_populated_field():
@@ -2929,35 +2751,12 @@ def test_get_field_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_get_field_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.get_field), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            field.Field(
-                name="name_value",
-            )
-        )
-        response = await client.get_field()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetFieldRequest()
-
-
-@pytest.mark.asyncio
 async def test_get_field_async_use_cached_wrapped_rpc(transport: str = "grpc_asyncio"):
     # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -2996,7 +2795,7 @@ async def test_get_field_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.GetFieldRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -3062,7 +2861,7 @@ def test_get_field_field_headers():
 @pytest.mark.asyncio
 async def test_get_field_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -3130,7 +2929,7 @@ def test_get_field_flattened_error():
 @pytest.mark.asyncio
 async def test_get_field_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -3157,7 +2956,7 @@ async def test_get_field_flattened_async():
 @pytest.mark.asyncio
 async def test_get_field_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -3200,25 +2999,6 @@ def test_update_field(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert isinstance(response, future.Future)
-
-
-def test_update_field_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.update_field), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.update_field()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.UpdateFieldRequest()
 
 
 def test_update_field_non_empty_request_with_auto_populated_field():
@@ -3286,27 +3066,6 @@ def test_update_field_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_update_field_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.update_field), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.update_field()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.UpdateFieldRequest()
-
-
-@pytest.mark.asyncio
 async def test_update_field_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -3314,7 +3073,7 @@ async def test_update_field_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -3358,7 +3117,7 @@ async def test_update_field_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.UpdateFieldRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -3421,7 +3180,7 @@ def test_update_field_field_headers():
 @pytest.mark.asyncio
 async def test_update_field_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -3491,7 +3250,7 @@ def test_update_field_flattened_error():
 @pytest.mark.asyncio
 async def test_update_field_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -3520,7 +3279,7 @@ async def test_update_field_flattened_async():
 @pytest.mark.asyncio
 async def test_update_field_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -3566,25 +3325,6 @@ def test_list_fields(request_type, transport: str = "grpc"):
     # Establish that the response is the type that we expect.
     assert isinstance(response, pagers.ListFieldsPager)
     assert response.next_page_token == "next_page_token_value"
-
-
-def test_list_fields_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.list_fields), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.list_fields()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListFieldsRequest()
 
 
 def test_list_fields_non_empty_request_with_auto_populated_field():
@@ -3655,29 +3395,6 @@ def test_list_fields_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_list_fields_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.list_fields), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            firestore_admin.ListFieldsResponse(
-                next_page_token="next_page_token_value",
-            )
-        )
-        response = await client.list_fields()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListFieldsRequest()
-
-
-@pytest.mark.asyncio
 async def test_list_fields_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -3685,7 +3402,7 @@ async def test_list_fields_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -3724,7 +3441,7 @@ async def test_list_fields_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.ListFieldsRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -3790,7 +3507,7 @@ def test_list_fields_field_headers():
 @pytest.mark.asyncio
 async def test_list_fields_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -3860,7 +3577,7 @@ def test_list_fields_flattened_error():
 @pytest.mark.asyncio
 async def test_list_fields_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -3889,7 +3606,7 @@ async def test_list_fields_flattened_async():
 @pytest.mark.asyncio
 async def test_list_fields_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -3999,7 +3716,7 @@ def test_list_fields_pages(transport_name: str = "grpc"):
 @pytest.mark.asyncio
 async def test_list_fields_async_pager():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -4049,7 +3766,7 @@ async def test_list_fields_async_pager():
 @pytest.mark.asyncio
 async def test_list_fields_async_pages():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -4128,25 +3845,6 @@ def test_export_documents(request_type, transport: str = "grpc"):
     assert isinstance(response, future.Future)
 
 
-def test_export_documents_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.export_documents), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.export_documents()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ExportDocumentsRequest()
-
-
 def test_export_documents_non_empty_request_with_auto_populated_field():
     # This test is a coverage failsafe to make sure that UUID4 fields are
     # automatically populated, according to AIP-4235, with non-empty requests.
@@ -4220,27 +3918,6 @@ def test_export_documents_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_export_documents_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.export_documents), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.export_documents()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ExportDocumentsRequest()
-
-
-@pytest.mark.asyncio
 async def test_export_documents_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -4248,7 +3925,7 @@ async def test_export_documents_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -4292,7 +3969,7 @@ async def test_export_documents_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.ExportDocumentsRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -4355,7 +4032,7 @@ def test_export_documents_field_headers():
 @pytest.mark.asyncio
 async def test_export_documents_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -4425,7 +4102,7 @@ def test_export_documents_flattened_error():
 @pytest.mark.asyncio
 async def test_export_documents_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -4454,7 +4131,7 @@ async def test_export_documents_flattened_async():
 @pytest.mark.asyncio
 async def test_export_documents_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -4497,25 +4174,6 @@ def test_import_documents(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert isinstance(response, future.Future)
-
-
-def test_import_documents_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.import_documents), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.import_documents()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ImportDocumentsRequest()
 
 
 def test_import_documents_non_empty_request_with_auto_populated_field():
@@ -4591,27 +4249,6 @@ def test_import_documents_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_import_documents_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.import_documents), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.import_documents()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ImportDocumentsRequest()
-
-
-@pytest.mark.asyncio
 async def test_import_documents_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -4619,7 +4256,7 @@ async def test_import_documents_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -4663,7 +4300,7 @@ async def test_import_documents_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.ImportDocumentsRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -4726,7 +4363,7 @@ def test_import_documents_field_headers():
 @pytest.mark.asyncio
 async def test_import_documents_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -4796,7 +4433,7 @@ def test_import_documents_flattened_error():
 @pytest.mark.asyncio
 async def test_import_documents_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -4825,7 +4462,7 @@ async def test_import_documents_flattened_async():
 @pytest.mark.asyncio
 async def test_import_documents_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -4870,27 +4507,6 @@ def test_bulk_delete_documents(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert isinstance(response, future.Future)
-
-
-def test_bulk_delete_documents_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.bulk_delete_documents), "__call__"
-    ) as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.bulk_delete_documents()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.BulkDeleteDocumentsRequest()
 
 
 def test_bulk_delete_documents_non_empty_request_with_auto_populated_field():
@@ -4969,29 +4585,6 @@ def test_bulk_delete_documents_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_bulk_delete_documents_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.bulk_delete_documents), "__call__"
-    ) as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.bulk_delete_documents()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.BulkDeleteDocumentsRequest()
-
-
-@pytest.mark.asyncio
 async def test_bulk_delete_documents_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -4999,7 +4592,7 @@ async def test_bulk_delete_documents_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -5044,7 +4637,7 @@ async def test_bulk_delete_documents_async(
     request_type=firestore_admin.BulkDeleteDocumentsRequest,
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -5111,7 +4704,7 @@ def test_bulk_delete_documents_field_headers():
 @pytest.mark.asyncio
 async def test_bulk_delete_documents_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -5185,7 +4778,7 @@ def test_bulk_delete_documents_flattened_error():
 @pytest.mark.asyncio
 async def test_bulk_delete_documents_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -5216,7 +4809,7 @@ async def test_bulk_delete_documents_flattened_async():
 @pytest.mark.asyncio
 async def test_bulk_delete_documents_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -5259,25 +4852,6 @@ def test_create_database(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert isinstance(response, future.Future)
-
-
-def test_create_database_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.create_database), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.create_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.CreateDatabaseRequest()
 
 
 def test_create_database_non_empty_request_with_auto_populated_field():
@@ -5351,27 +4925,6 @@ def test_create_database_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_create_database_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.create_database), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.create_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.CreateDatabaseRequest()
-
-
-@pytest.mark.asyncio
 async def test_create_database_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -5379,7 +4932,7 @@ async def test_create_database_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -5423,7 +4976,7 @@ async def test_create_database_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.CreateDatabaseRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -5486,7 +5039,7 @@ def test_create_database_field_headers():
 @pytest.mark.asyncio
 async def test_create_database_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -5566,7 +5119,7 @@ def test_create_database_flattened_error():
 @pytest.mark.asyncio
 async def test_create_database_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -5603,7 +5156,7 @@ async def test_create_database_flattened_async():
 @pytest.mark.asyncio
 async def test_create_database_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -5648,7 +5201,9 @@ def test_get_database(request_type, transport: str = "grpc"):
             key_prefix="key_prefix_value",
             delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
             previous_id="previous_id_value",
+            free_tier=True,
             etag="etag_value",
+            database_edition=database.Database.DatabaseEdition.STANDARD,
         )
         response = client.get_database(request)
 
@@ -5679,26 +5234,9 @@ def test_get_database(request_type, transport: str = "grpc"):
         == database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED
     )
     assert response.previous_id == "previous_id_value"
+    assert response.free_tier is True
     assert response.etag == "etag_value"
-
-
-def test_get_database_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.get_database), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.get_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetDatabaseRequest()
+    assert response.database_edition == database.Database.DatabaseEdition.STANDARD
 
 
 def test_get_database_non_empty_request_with_auto_populated_field():
@@ -5765,39 +5303,6 @@ def test_get_database_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_get_database_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.get_database), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            database.Database(
-                name="name_value",
-                uid="uid_value",
-                location_id="location_id_value",
-                type_=database.Database.DatabaseType.FIRESTORE_NATIVE,
-                concurrency_mode=database.Database.ConcurrencyMode.OPTIMISTIC,
-                point_in_time_recovery_enablement=database.Database.PointInTimeRecoveryEnablement.POINT_IN_TIME_RECOVERY_ENABLED,
-                app_engine_integration_mode=database.Database.AppEngineIntegrationMode.ENABLED,
-                key_prefix="key_prefix_value",
-                delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
-                previous_id="previous_id_value",
-                etag="etag_value",
-            )
-        )
-        response = await client.get_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetDatabaseRequest()
-
-
-@pytest.mark.asyncio
 async def test_get_database_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -5805,7 +5310,7 @@ async def test_get_database_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -5844,7 +5349,7 @@ async def test_get_database_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.GetDatabaseRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -5867,7 +5372,9 @@ async def test_get_database_async(
                 key_prefix="key_prefix_value",
                 delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
                 previous_id="previous_id_value",
+                free_tier=True,
                 etag="etag_value",
+                database_edition=database.Database.DatabaseEdition.STANDARD,
             )
         )
         response = await client.get_database(request)
@@ -5899,7 +5406,9 @@ async def test_get_database_async(
         == database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED
     )
     assert response.previous_id == "previous_id_value"
+    assert response.free_tier is True
     assert response.etag == "etag_value"
+    assert response.database_edition == database.Database.DatabaseEdition.STANDARD
 
 
 @pytest.mark.asyncio
@@ -5939,7 +5448,7 @@ def test_get_database_field_headers():
 @pytest.mark.asyncio
 async def test_get_database_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -6007,7 +5516,7 @@ def test_get_database_flattened_error():
 @pytest.mark.asyncio
 async def test_get_database_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -6034,7 +5543,7 @@ async def test_get_database_flattened_async():
 @pytest.mark.asyncio
 async def test_get_database_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -6080,25 +5589,6 @@ def test_list_databases(request_type, transport: str = "grpc"):
     # Establish that the response is the type that we expect.
     assert isinstance(response, firestore_admin.ListDatabasesResponse)
     assert response.unreachable == ["unreachable_value"]
-
-
-def test_list_databases_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.list_databases), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.list_databases()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListDatabasesRequest()
 
 
 def test_list_databases_non_empty_request_with_auto_populated_field():
@@ -6165,29 +5655,6 @@ def test_list_databases_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_list_databases_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.list_databases), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            firestore_admin.ListDatabasesResponse(
-                unreachable=["unreachable_value"],
-            )
-        )
-        response = await client.list_databases()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListDatabasesRequest()
-
-
-@pytest.mark.asyncio
 async def test_list_databases_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -6195,7 +5662,7 @@ async def test_list_databases_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -6234,7 +5701,7 @@ async def test_list_databases_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.ListDatabasesRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -6300,7 +5767,7 @@ def test_list_databases_field_headers():
 @pytest.mark.asyncio
 async def test_list_databases_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -6370,7 +5837,7 @@ def test_list_databases_flattened_error():
 @pytest.mark.asyncio
 async def test_list_databases_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -6399,7 +5866,7 @@ async def test_list_databases_flattened_async():
 @pytest.mark.asyncio
 async def test_list_databases_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -6442,25 +5909,6 @@ def test_update_database(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert isinstance(response, future.Future)
-
-
-def test_update_database_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.update_database), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.update_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.UpdateDatabaseRequest()
 
 
 def test_update_database_non_empty_request_with_auto_populated_field():
@@ -6528,27 +5976,6 @@ def test_update_database_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_update_database_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.update_database), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.update_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.UpdateDatabaseRequest()
-
-
-@pytest.mark.asyncio
 async def test_update_database_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -6556,7 +5983,7 @@ async def test_update_database_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -6600,7 +6027,7 @@ async def test_update_database_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.UpdateDatabaseRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -6663,7 +6090,7 @@ def test_update_database_field_headers():
 @pytest.mark.asyncio
 async def test_update_database_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -6738,7 +6165,7 @@ def test_update_database_flattened_error():
 @pytest.mark.asyncio
 async def test_update_database_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -6771,7 +6198,7 @@ async def test_update_database_flattened_async():
 @pytest.mark.asyncio
 async def test_update_database_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -6815,25 +6242,6 @@ def test_delete_database(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert isinstance(response, future.Future)
-
-
-def test_delete_database_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.delete_database), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.delete_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.DeleteDatabaseRequest()
 
 
 def test_delete_database_non_empty_request_with_auto_populated_field():
@@ -6907,27 +6315,6 @@ def test_delete_database_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_delete_database_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.delete_database), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.delete_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.DeleteDatabaseRequest()
-
-
-@pytest.mark.asyncio
 async def test_delete_database_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -6935,7 +6322,7 @@ async def test_delete_database_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -6979,7 +6366,7 @@ async def test_delete_database_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.DeleteDatabaseRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -7042,7 +6429,7 @@ def test_delete_database_field_headers():
 @pytest.mark.asyncio
 async def test_delete_database_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -7112,7 +6499,7 @@ def test_delete_database_flattened_error():
 @pytest.mark.asyncio
 async def test_delete_database_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -7141,7 +6528,7 @@ async def test_delete_database_flattened_async():
 @pytest.mark.asyncio
 async def test_delete_database_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -7149,6 +6536,2397 @@ async def test_delete_database_flattened_error_async():
     with pytest.raises(ValueError):
         await client.delete_database(
             firestore_admin.DeleteDatabaseRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.CreateUserCredsRequest,
+        dict,
+    ],
+)
+def test_create_user_creds(request_type, transport: str = "grpc"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = gfa_user_creds.UserCreds(
+            name="name_value",
+            state=gfa_user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+        response = client.create_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.CreateUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, gfa_user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == gfa_user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+def test_create_user_creds_non_empty_request_with_auto_populated_field():
+    # This test is a coverage failsafe to make sure that UUID4 fields are
+    # automatically populated, according to AIP-4235, with non-empty requests.
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Populate all string fields in the request which are not UUID4
+    # since we want to check that UUID4 are populated automatically
+    # if they meet the requirements of AIP 4235.
+    request = firestore_admin.CreateUserCredsRequest(
+        parent="parent_value",
+        user_creds_id="user_creds_id_value",
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        call.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client.create_user_creds(request=request)
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == firestore_admin.CreateUserCredsRequest(
+            parent="parent_value",
+            user_creds_id="user_creds_id_value",
+        )
+
+
+def test_create_user_creds_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="grpc",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.create_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.create_user_creds
+        ] = mock_rpc
+        request = {}
+        client.create_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.create_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_create_user_creds_async_use_cached_wrapped_rpc(
+    transport: str = "grpc_asyncio",
+):
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
+        client = FirestoreAdminAsyncClient(
+            credentials=async_anonymous_credentials(),
+            transport=transport,
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._client._transport.create_user_creds
+            in client._client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.AsyncMock()
+        mock_rpc.return_value = mock.Mock()
+        client._client._transport._wrapped_methods[
+            client._client._transport.create_user_creds
+        ] = mock_rpc
+
+        request = {}
+        await client.create_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        await client.create_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_create_user_creds_async(
+    transport: str = "grpc_asyncio", request_type=firestore_admin.CreateUserCredsRequest
+):
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            gfa_user_creds.UserCreds(
+                name="name_value",
+                state=gfa_user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        response = await client.create_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.CreateUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, gfa_user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == gfa_user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.asyncio
+async def test_create_user_creds_async_from_dict():
+    await test_create_user_creds_async(request_type=dict)
+
+
+def test_create_user_creds_field_headers():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.CreateUserCredsRequest()
+
+    request.parent = "parent_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        call.return_value = gfa_user_creds.UserCreds()
+        client.create_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "parent=parent_value",
+    ) in kw["metadata"]
+
+
+@pytest.mark.asyncio
+async def test_create_user_creds_field_headers_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.CreateUserCredsRequest()
+
+    request.parent = "parent_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            gfa_user_creds.UserCreds()
+        )
+        await client.create_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "parent=parent_value",
+    ) in kw["metadata"]
+
+
+def test_create_user_creds_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = gfa_user_creds.UserCreds()
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        client.create_user_creds(
+            parent="parent_value",
+            user_creds=gfa_user_creds.UserCreds(name="name_value"),
+            user_creds_id="user_creds_id_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].parent
+        mock_val = "parent_value"
+        assert arg == mock_val
+        arg = args[0].user_creds
+        mock_val = gfa_user_creds.UserCreds(name="name_value")
+        assert arg == mock_val
+        arg = args[0].user_creds_id
+        mock_val = "user_creds_id_value"
+        assert arg == mock_val
+
+
+def test_create_user_creds_flattened_error():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.create_user_creds(
+            firestore_admin.CreateUserCredsRequest(),
+            parent="parent_value",
+            user_creds=gfa_user_creds.UserCreds(name="name_value"),
+            user_creds_id="user_creds_id_value",
+        )
+
+
+@pytest.mark.asyncio
+async def test_create_user_creds_flattened_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = gfa_user_creds.UserCreds()
+
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            gfa_user_creds.UserCreds()
+        )
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        response = await client.create_user_creds(
+            parent="parent_value",
+            user_creds=gfa_user_creds.UserCreds(name="name_value"),
+            user_creds_id="user_creds_id_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].parent
+        mock_val = "parent_value"
+        assert arg == mock_val
+        arg = args[0].user_creds
+        mock_val = gfa_user_creds.UserCreds(name="name_value")
+        assert arg == mock_val
+        arg = args[0].user_creds_id
+        mock_val = "user_creds_id_value"
+        assert arg == mock_val
+
+
+@pytest.mark.asyncio
+async def test_create_user_creds_flattened_error_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        await client.create_user_creds(
+            firestore_admin.CreateUserCredsRequest(),
+            parent="parent_value",
+            user_creds=gfa_user_creds.UserCreds(name="name_value"),
+            user_creds_id="user_creds_id_value",
+        )
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.GetUserCredsRequest,
+        dict,
+    ],
+)
+def test_get_user_creds(request_type, transport: str = "grpc"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds(
+            name="name_value",
+            state=user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+        response = client.get_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.GetUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+def test_get_user_creds_non_empty_request_with_auto_populated_field():
+    # This test is a coverage failsafe to make sure that UUID4 fields are
+    # automatically populated, according to AIP-4235, with non-empty requests.
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Populate all string fields in the request which are not UUID4
+    # since we want to check that UUID4 are populated automatically
+    # if they meet the requirements of AIP 4235.
+    request = firestore_admin.GetUserCredsRequest(
+        name="name_value",
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        call.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client.get_user_creds(request=request)
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == firestore_admin.GetUserCredsRequest(
+            name="name_value",
+        )
+
+
+def test_get_user_creds_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="grpc",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.get_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[client._transport.get_user_creds] = mock_rpc
+        request = {}
+        client.get_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.get_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_get_user_creds_async_use_cached_wrapped_rpc(
+    transport: str = "grpc_asyncio",
+):
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
+        client = FirestoreAdminAsyncClient(
+            credentials=async_anonymous_credentials(),
+            transport=transport,
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._client._transport.get_user_creds
+            in client._client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.AsyncMock()
+        mock_rpc.return_value = mock.Mock()
+        client._client._transport._wrapped_methods[
+            client._client._transport.get_user_creds
+        ] = mock_rpc
+
+        request = {}
+        await client.get_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        await client.get_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_get_user_creds_async(
+    transport: str = "grpc_asyncio", request_type=firestore_admin.GetUserCredsRequest
+):
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds(
+                name="name_value",
+                state=user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        response = await client.get_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.GetUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.asyncio
+async def test_get_user_creds_async_from_dict():
+    await test_get_user_creds_async(request_type=dict)
+
+
+def test_get_user_creds_field_headers():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.GetUserCredsRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        call.return_value = user_creds.UserCreds()
+        client.get_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+@pytest.mark.asyncio
+async def test_get_user_creds_field_headers_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.GetUserCredsRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds()
+        )
+        await client.get_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+def test_get_user_creds_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds()
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        client.get_user_creds(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+def test_get_user_creds_flattened_error():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.get_user_creds(
+            firestore_admin.GetUserCredsRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.asyncio
+async def test_get_user_creds_flattened_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds()
+
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds()
+        )
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        response = await client.get_user_creds(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+@pytest.mark.asyncio
+async def test_get_user_creds_flattened_error_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        await client.get_user_creds(
+            firestore_admin.GetUserCredsRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ListUserCredsRequest,
+        dict,
+    ],
+)
+def test_list_user_creds(request_type, transport: str = "grpc"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = firestore_admin.ListUserCredsResponse()
+        response = client.list_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.ListUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, firestore_admin.ListUserCredsResponse)
+
+
+def test_list_user_creds_non_empty_request_with_auto_populated_field():
+    # This test is a coverage failsafe to make sure that UUID4 fields are
+    # automatically populated, according to AIP-4235, with non-empty requests.
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Populate all string fields in the request which are not UUID4
+    # since we want to check that UUID4 are populated automatically
+    # if they meet the requirements of AIP 4235.
+    request = firestore_admin.ListUserCredsRequest(
+        parent="parent_value",
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        call.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client.list_user_creds(request=request)
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == firestore_admin.ListUserCredsRequest(
+            parent="parent_value",
+        )
+
+
+def test_list_user_creds_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="grpc",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.list_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[client._transport.list_user_creds] = mock_rpc
+        request = {}
+        client.list_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.list_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_list_user_creds_async_use_cached_wrapped_rpc(
+    transport: str = "grpc_asyncio",
+):
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
+        client = FirestoreAdminAsyncClient(
+            credentials=async_anonymous_credentials(),
+            transport=transport,
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._client._transport.list_user_creds
+            in client._client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.AsyncMock()
+        mock_rpc.return_value = mock.Mock()
+        client._client._transport._wrapped_methods[
+            client._client._transport.list_user_creds
+        ] = mock_rpc
+
+        request = {}
+        await client.list_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        await client.list_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_list_user_creds_async(
+    transport: str = "grpc_asyncio", request_type=firestore_admin.ListUserCredsRequest
+):
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListUserCredsResponse()
+        )
+        response = await client.list_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.ListUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, firestore_admin.ListUserCredsResponse)
+
+
+@pytest.mark.asyncio
+async def test_list_user_creds_async_from_dict():
+    await test_list_user_creds_async(request_type=dict)
+
+
+def test_list_user_creds_field_headers():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.ListUserCredsRequest()
+
+    request.parent = "parent_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        call.return_value = firestore_admin.ListUserCredsResponse()
+        client.list_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "parent=parent_value",
+    ) in kw["metadata"]
+
+
+@pytest.mark.asyncio
+async def test_list_user_creds_field_headers_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.ListUserCredsRequest()
+
+    request.parent = "parent_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListUserCredsResponse()
+        )
+        await client.list_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "parent=parent_value",
+    ) in kw["metadata"]
+
+
+def test_list_user_creds_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = firestore_admin.ListUserCredsResponse()
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        client.list_user_creds(
+            parent="parent_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].parent
+        mock_val = "parent_value"
+        assert arg == mock_val
+
+
+def test_list_user_creds_flattened_error():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.list_user_creds(
+            firestore_admin.ListUserCredsRequest(),
+            parent="parent_value",
+        )
+
+
+@pytest.mark.asyncio
+async def test_list_user_creds_flattened_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = firestore_admin.ListUserCredsResponse()
+
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListUserCredsResponse()
+        )
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        response = await client.list_user_creds(
+            parent="parent_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].parent
+        mock_val = "parent_value"
+        assert arg == mock_val
+
+
+@pytest.mark.asyncio
+async def test_list_user_creds_flattened_error_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        await client.list_user_creds(
+            firestore_admin.ListUserCredsRequest(),
+            parent="parent_value",
+        )
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.EnableUserCredsRequest,
+        dict,
+    ],
+)
+def test_enable_user_creds(request_type, transport: str = "grpc"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds(
+            name="name_value",
+            state=user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+        response = client.enable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.EnableUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+def test_enable_user_creds_non_empty_request_with_auto_populated_field():
+    # This test is a coverage failsafe to make sure that UUID4 fields are
+    # automatically populated, according to AIP-4235, with non-empty requests.
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Populate all string fields in the request which are not UUID4
+    # since we want to check that UUID4 are populated automatically
+    # if they meet the requirements of AIP 4235.
+    request = firestore_admin.EnableUserCredsRequest(
+        name="name_value",
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        call.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client.enable_user_creds(request=request)
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == firestore_admin.EnableUserCredsRequest(
+            name="name_value",
+        )
+
+
+def test_enable_user_creds_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="grpc",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.enable_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.enable_user_creds
+        ] = mock_rpc
+        request = {}
+        client.enable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.enable_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_enable_user_creds_async_use_cached_wrapped_rpc(
+    transport: str = "grpc_asyncio",
+):
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
+        client = FirestoreAdminAsyncClient(
+            credentials=async_anonymous_credentials(),
+            transport=transport,
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._client._transport.enable_user_creds
+            in client._client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.AsyncMock()
+        mock_rpc.return_value = mock.Mock()
+        client._client._transport._wrapped_methods[
+            client._client._transport.enable_user_creds
+        ] = mock_rpc
+
+        request = {}
+        await client.enable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        await client.enable_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_enable_user_creds_async(
+    transport: str = "grpc_asyncio", request_type=firestore_admin.EnableUserCredsRequest
+):
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds(
+                name="name_value",
+                state=user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        response = await client.enable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.EnableUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.asyncio
+async def test_enable_user_creds_async_from_dict():
+    await test_enable_user_creds_async(request_type=dict)
+
+
+def test_enable_user_creds_field_headers():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.EnableUserCredsRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        call.return_value = user_creds.UserCreds()
+        client.enable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+@pytest.mark.asyncio
+async def test_enable_user_creds_field_headers_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.EnableUserCredsRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds()
+        )
+        await client.enable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+def test_enable_user_creds_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds()
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        client.enable_user_creds(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+def test_enable_user_creds_flattened_error():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.enable_user_creds(
+            firestore_admin.EnableUserCredsRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.asyncio
+async def test_enable_user_creds_flattened_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds()
+
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds()
+        )
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        response = await client.enable_user_creds(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+@pytest.mark.asyncio
+async def test_enable_user_creds_flattened_error_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        await client.enable_user_creds(
+            firestore_admin.EnableUserCredsRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.DisableUserCredsRequest,
+        dict,
+    ],
+)
+def test_disable_user_creds(request_type, transport: str = "grpc"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds(
+            name="name_value",
+            state=user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+        response = client.disable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.DisableUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+def test_disable_user_creds_non_empty_request_with_auto_populated_field():
+    # This test is a coverage failsafe to make sure that UUID4 fields are
+    # automatically populated, according to AIP-4235, with non-empty requests.
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Populate all string fields in the request which are not UUID4
+    # since we want to check that UUID4 are populated automatically
+    # if they meet the requirements of AIP 4235.
+    request = firestore_admin.DisableUserCredsRequest(
+        name="name_value",
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        call.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client.disable_user_creds(request=request)
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == firestore_admin.DisableUserCredsRequest(
+            name="name_value",
+        )
+
+
+def test_disable_user_creds_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="grpc",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._transport.disable_user_creds in client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.disable_user_creds
+        ] = mock_rpc
+        request = {}
+        client.disable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.disable_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_disable_user_creds_async_use_cached_wrapped_rpc(
+    transport: str = "grpc_asyncio",
+):
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
+        client = FirestoreAdminAsyncClient(
+            credentials=async_anonymous_credentials(),
+            transport=transport,
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._client._transport.disable_user_creds
+            in client._client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.AsyncMock()
+        mock_rpc.return_value = mock.Mock()
+        client._client._transport._wrapped_methods[
+            client._client._transport.disable_user_creds
+        ] = mock_rpc
+
+        request = {}
+        await client.disable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        await client.disable_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_disable_user_creds_async(
+    transport: str = "grpc_asyncio",
+    request_type=firestore_admin.DisableUserCredsRequest,
+):
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds(
+                name="name_value",
+                state=user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        response = await client.disable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.DisableUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.asyncio
+async def test_disable_user_creds_async_from_dict():
+    await test_disable_user_creds_async(request_type=dict)
+
+
+def test_disable_user_creds_field_headers():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.DisableUserCredsRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        call.return_value = user_creds.UserCreds()
+        client.disable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+@pytest.mark.asyncio
+async def test_disable_user_creds_field_headers_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.DisableUserCredsRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds()
+        )
+        await client.disable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+def test_disable_user_creds_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds()
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        client.disable_user_creds(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+def test_disable_user_creds_flattened_error():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.disable_user_creds(
+            firestore_admin.DisableUserCredsRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.asyncio
+async def test_disable_user_creds_flattened_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds()
+
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds()
+        )
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        response = await client.disable_user_creds(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+@pytest.mark.asyncio
+async def test_disable_user_creds_flattened_error_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        await client.disable_user_creds(
+            firestore_admin.DisableUserCredsRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ResetUserPasswordRequest,
+        dict,
+    ],
+)
+def test_reset_user_password(request_type, transport: str = "grpc"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds(
+            name="name_value",
+            state=user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+        response = client.reset_user_password(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.ResetUserPasswordRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+def test_reset_user_password_non_empty_request_with_auto_populated_field():
+    # This test is a coverage failsafe to make sure that UUID4 fields are
+    # automatically populated, according to AIP-4235, with non-empty requests.
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Populate all string fields in the request which are not UUID4
+    # since we want to check that UUID4 are populated automatically
+    # if they meet the requirements of AIP 4235.
+    request = firestore_admin.ResetUserPasswordRequest(
+        name="name_value",
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        call.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client.reset_user_password(request=request)
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == firestore_admin.ResetUserPasswordRequest(
+            name="name_value",
+        )
+
+
+def test_reset_user_password_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="grpc",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._transport.reset_user_password in client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.reset_user_password
+        ] = mock_rpc
+        request = {}
+        client.reset_user_password(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.reset_user_password(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_reset_user_password_async_use_cached_wrapped_rpc(
+    transport: str = "grpc_asyncio",
+):
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
+        client = FirestoreAdminAsyncClient(
+            credentials=async_anonymous_credentials(),
+            transport=transport,
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._client._transport.reset_user_password
+            in client._client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.AsyncMock()
+        mock_rpc.return_value = mock.Mock()
+        client._client._transport._wrapped_methods[
+            client._client._transport.reset_user_password
+        ] = mock_rpc
+
+        request = {}
+        await client.reset_user_password(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        await client.reset_user_password(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_reset_user_password_async(
+    transport: str = "grpc_asyncio",
+    request_type=firestore_admin.ResetUserPasswordRequest,
+):
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds(
+                name="name_value",
+                state=user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        response = await client.reset_user_password(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.ResetUserPasswordRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.asyncio
+async def test_reset_user_password_async_from_dict():
+    await test_reset_user_password_async(request_type=dict)
+
+
+def test_reset_user_password_field_headers():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.ResetUserPasswordRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        call.return_value = user_creds.UserCreds()
+        client.reset_user_password(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+@pytest.mark.asyncio
+async def test_reset_user_password_field_headers_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.ResetUserPasswordRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds()
+        )
+        await client.reset_user_password(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+def test_reset_user_password_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds()
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        client.reset_user_password(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+def test_reset_user_password_flattened_error():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.reset_user_password(
+            firestore_admin.ResetUserPasswordRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.asyncio
+async def test_reset_user_password_flattened_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = user_creds.UserCreds()
+
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds()
+        )
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        response = await client.reset_user_password(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+@pytest.mark.asyncio
+async def test_reset_user_password_flattened_error_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        await client.reset_user_password(
+            firestore_admin.ResetUserPasswordRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.DeleteUserCredsRequest,
+        dict,
+    ],
+)
+def test_delete_user_creds(request_type, transport: str = "grpc"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = None
+        response = client.delete_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.DeleteUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert response is None
+
+
+def test_delete_user_creds_non_empty_request_with_auto_populated_field():
+    # This test is a coverage failsafe to make sure that UUID4 fields are
+    # automatically populated, according to AIP-4235, with non-empty requests.
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Populate all string fields in the request which are not UUID4
+    # since we want to check that UUID4 are populated automatically
+    # if they meet the requirements of AIP 4235.
+    request = firestore_admin.DeleteUserCredsRequest(
+        name="name_value",
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        call.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client.delete_user_creds(request=request)
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == firestore_admin.DeleteUserCredsRequest(
+            name="name_value",
+        )
+
+
+def test_delete_user_creds_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="grpc",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.delete_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.delete_user_creds
+        ] = mock_rpc
+        request = {}
+        client.delete_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.delete_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_delete_user_creds_async_use_cached_wrapped_rpc(
+    transport: str = "grpc_asyncio",
+):
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
+        client = FirestoreAdminAsyncClient(
+            credentials=async_anonymous_credentials(),
+            transport=transport,
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._client._transport.delete_user_creds
+            in client._client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.AsyncMock()
+        mock_rpc.return_value = mock.Mock()
+        client._client._transport._wrapped_methods[
+            client._client._transport.delete_user_creds
+        ] = mock_rpc
+
+        request = {}
+        await client.delete_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        await client.delete_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_delete_user_creds_async(
+    transport: str = "grpc_asyncio", request_type=firestore_admin.DeleteUserCredsRequest
+):
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
+        response = await client.delete_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        request = firestore_admin.DeleteUserCredsRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    assert response is None
+
+
+@pytest.mark.asyncio
+async def test_delete_user_creds_async_from_dict():
+    await test_delete_user_creds_async(request_type=dict)
+
+
+def test_delete_user_creds_field_headers():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.DeleteUserCredsRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        call.return_value = None
+        client.delete_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+@pytest.mark.asyncio
+async def test_delete_user_creds_field_headers_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Any value that is part of the HTTP/1.1 URI should be sent as
+    # a field header. Set these to a non-empty value.
+    request = firestore_admin.DeleteUserCredsRequest()
+
+    request.name = "name_value"
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
+        await client.delete_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == request
+
+    # Establish that the field header was sent.
+    _, _, kw = call.mock_calls[0]
+    assert (
+        "x-goog-request-params",
+        "name=name_value",
+    ) in kw["metadata"]
+
+
+def test_delete_user_creds_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = None
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        client.delete_user_creds(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+def test_delete_user_creds_flattened_error():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.delete_user_creds(
+            firestore_admin.DeleteUserCredsRequest(),
+            name="name_value",
+        )
+
+
+@pytest.mark.asyncio
+async def test_delete_user_creds_flattened_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = None
+
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
+        # Call the method with a truthy value for each flattened field,
+        # using the keyword arguments to the method.
+        response = await client.delete_user_creds(
+            name="name_value",
+        )
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        arg = args[0].name
+        mock_val = "name_value"
+        assert arg == mock_val
+
+
+@pytest.mark.asyncio
+async def test_delete_user_creds_flattened_error_async():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        await client.delete_user_creds(
+            firestore_admin.DeleteUserCredsRequest(),
             name="name_value",
         )
 
@@ -7193,25 +8971,6 @@ def test_get_backup(request_type, transport: str = "grpc"):
     assert response.database == "database_value"
     assert response.database_uid == "database_uid_value"
     assert response.state == backup.Backup.State.CREATING
-
-
-def test_get_backup_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.get_backup), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.get_backup()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetBackupRequest()
 
 
 def test_get_backup_non_empty_request_with_auto_populated_field():
@@ -7278,38 +9037,12 @@ def test_get_backup_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_get_backup_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.get_backup), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            backup.Backup(
-                name="name_value",
-                database="database_value",
-                database_uid="database_uid_value",
-                state=backup.Backup.State.CREATING,
-            )
-        )
-        response = await client.get_backup()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetBackupRequest()
-
-
-@pytest.mark.asyncio
 async def test_get_backup_async_use_cached_wrapped_rpc(transport: str = "grpc_asyncio"):
     # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -7348,7 +9081,7 @@ async def test_get_backup_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.GetBackupRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -7420,7 +9153,7 @@ def test_get_backup_field_headers():
 @pytest.mark.asyncio
 async def test_get_backup_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -7488,7 +9221,7 @@ def test_get_backup_flattened_error():
 @pytest.mark.asyncio
 async def test_get_backup_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -7515,7 +9248,7 @@ async def test_get_backup_flattened_async():
 @pytest.mark.asyncio
 async def test_get_backup_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -7563,25 +9296,6 @@ def test_list_backups(request_type, transport: str = "grpc"):
     assert response.unreachable == ["unreachable_value"]
 
 
-def test_list_backups_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.list_backups), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.list_backups()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListBackupsRequest()
-
-
 def test_list_backups_non_empty_request_with_auto_populated_field():
     # This test is a coverage failsafe to make sure that UUID4 fields are
     # automatically populated, according to AIP-4235, with non-empty requests.
@@ -7595,6 +9309,7 @@ def test_list_backups_non_empty_request_with_auto_populated_field():
     # if they meet the requirements of AIP 4235.
     request = firestore_admin.ListBackupsRequest(
         parent="parent_value",
+        filter="filter_value",
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -7607,6 +9322,7 @@ def test_list_backups_non_empty_request_with_auto_populated_field():
         _, args, _ = call.mock_calls[0]
         assert args[0] == firestore_admin.ListBackupsRequest(
             parent="parent_value",
+            filter="filter_value",
         )
 
 
@@ -7646,29 +9362,6 @@ def test_list_backups_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_list_backups_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.list_backups), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            firestore_admin.ListBackupsResponse(
-                unreachable=["unreachable_value"],
-            )
-        )
-        response = await client.list_backups()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListBackupsRequest()
-
-
-@pytest.mark.asyncio
 async def test_list_backups_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -7676,7 +9369,7 @@ async def test_list_backups_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -7715,7 +9408,7 @@ async def test_list_backups_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.ListBackupsRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -7781,7 +9474,7 @@ def test_list_backups_field_headers():
 @pytest.mark.asyncio
 async def test_list_backups_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -7851,7 +9544,7 @@ def test_list_backups_flattened_error():
 @pytest.mark.asyncio
 async def test_list_backups_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -7880,7 +9573,7 @@ async def test_list_backups_flattened_async():
 @pytest.mark.asyncio
 async def test_list_backups_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -7923,25 +9616,6 @@ def test_delete_backup(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert response is None
-
-
-def test_delete_backup_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.delete_backup), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.delete_backup()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.DeleteBackupRequest()
 
 
 def test_delete_backup_non_empty_request_with_auto_populated_field():
@@ -8008,25 +9682,6 @@ def test_delete_backup_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_delete_backup_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.delete_backup), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
-        response = await client.delete_backup()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.DeleteBackupRequest()
-
-
-@pytest.mark.asyncio
 async def test_delete_backup_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -8034,7 +9689,7 @@ async def test_delete_backup_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -8073,7 +9728,7 @@ async def test_delete_backup_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.DeleteBackupRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -8134,7 +9789,7 @@ def test_delete_backup_field_headers():
 @pytest.mark.asyncio
 async def test_delete_backup_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -8202,7 +9857,7 @@ def test_delete_backup_flattened_error():
 @pytest.mark.asyncio
 async def test_delete_backup_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -8229,7 +9884,7 @@ async def test_delete_backup_flattened_async():
 @pytest.mark.asyncio
 async def test_delete_backup_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -8272,25 +9927,6 @@ def test_restore_database(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert isinstance(response, future.Future)
-
-
-def test_restore_database_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.restore_database), "__call__") as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.restore_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.RestoreDatabaseRequest()
 
 
 def test_restore_database_non_empty_request_with_auto_populated_field():
@@ -8368,27 +10004,6 @@ def test_restore_database_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_restore_database_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(type(client.transport.restore_database), "__call__") as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            operations_pb2.Operation(name="operations/spam")
-        )
-        response = await client.restore_database()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.RestoreDatabaseRequest()
-
-
-@pytest.mark.asyncio
 async def test_restore_database_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -8396,7 +10011,7 @@ async def test_restore_database_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -8440,7 +10055,7 @@ async def test_restore_database_async(
     transport: str = "grpc_asyncio", request_type=firestore_admin.RestoreDatabaseRequest
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -8503,7 +10118,7 @@ def test_restore_database_field_headers():
 @pytest.mark.asyncio
 async def test_restore_database_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -8568,27 +10183,6 @@ def test_create_backup_schedule(request_type, transport: str = "grpc"):
     # Establish that the response is the type that we expect.
     assert isinstance(response, schedule.BackupSchedule)
     assert response.name == "name_value"
-
-
-def test_create_backup_schedule_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.create_backup_schedule), "__call__"
-    ) as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.create_backup_schedule()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.CreateBackupScheduleRequest()
 
 
 def test_create_backup_schedule_non_empty_request_with_auto_populated_field():
@@ -8662,31 +10256,6 @@ def test_create_backup_schedule_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_create_backup_schedule_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.create_backup_schedule), "__call__"
-    ) as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            schedule.BackupSchedule(
-                name="name_value",
-            )
-        )
-        response = await client.create_backup_schedule()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.CreateBackupScheduleRequest()
-
-
-@pytest.mark.asyncio
 async def test_create_backup_schedule_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -8694,7 +10263,7 @@ async def test_create_backup_schedule_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -8734,7 +10303,7 @@ async def test_create_backup_schedule_async(
     request_type=firestore_admin.CreateBackupScheduleRequest,
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -8804,7 +10373,7 @@ def test_create_backup_schedule_field_headers():
 @pytest.mark.asyncio
 async def test_create_backup_schedule_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -8883,7 +10452,7 @@ def test_create_backup_schedule_flattened_error():
 @pytest.mark.asyncio
 async def test_create_backup_schedule_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -8918,7 +10487,7 @@ async def test_create_backup_schedule_flattened_async():
 @pytest.mark.asyncio
 async def test_create_backup_schedule_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -8967,27 +10536,6 @@ def test_get_backup_schedule(request_type, transport: str = "grpc"):
     # Establish that the response is the type that we expect.
     assert isinstance(response, schedule.BackupSchedule)
     assert response.name == "name_value"
-
-
-def test_get_backup_schedule_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.get_backup_schedule), "__call__"
-    ) as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.get_backup_schedule()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetBackupScheduleRequest()
 
 
 def test_get_backup_schedule_non_empty_request_with_auto_populated_field():
@@ -9060,31 +10608,6 @@ def test_get_backup_schedule_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_get_backup_schedule_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.get_backup_schedule), "__call__"
-    ) as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            schedule.BackupSchedule(
-                name="name_value",
-            )
-        )
-        response = await client.get_backup_schedule()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.GetBackupScheduleRequest()
-
-
-@pytest.mark.asyncio
 async def test_get_backup_schedule_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -9092,7 +10615,7 @@ async def test_get_backup_schedule_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -9132,7 +10655,7 @@ async def test_get_backup_schedule_async(
     request_type=firestore_admin.GetBackupScheduleRequest,
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -9202,7 +10725,7 @@ def test_get_backup_schedule_field_headers():
 @pytest.mark.asyncio
 async def test_get_backup_schedule_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -9276,7 +10799,7 @@ def test_get_backup_schedule_flattened_error():
 @pytest.mark.asyncio
 async def test_get_backup_schedule_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -9307,7 +10830,7 @@ async def test_get_backup_schedule_flattened_async():
 @pytest.mark.asyncio
 async def test_get_backup_schedule_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -9352,27 +10875,6 @@ def test_list_backup_schedules(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert isinstance(response, firestore_admin.ListBackupSchedulesResponse)
-
-
-def test_list_backup_schedules_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.list_backup_schedules), "__call__"
-    ) as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.list_backup_schedules()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListBackupSchedulesRequest()
 
 
 def test_list_backup_schedules_non_empty_request_with_auto_populated_field():
@@ -9446,29 +10948,6 @@ def test_list_backup_schedules_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_list_backup_schedules_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.list_backup_schedules), "__call__"
-    ) as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            firestore_admin.ListBackupSchedulesResponse()
-        )
-        response = await client.list_backup_schedules()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.ListBackupSchedulesRequest()
-
-
-@pytest.mark.asyncio
 async def test_list_backup_schedules_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -9476,7 +10955,7 @@ async def test_list_backup_schedules_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -9516,7 +10995,7 @@ async def test_list_backup_schedules_async(
     request_type=firestore_admin.ListBackupSchedulesRequest,
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -9583,7 +11062,7 @@ def test_list_backup_schedules_field_headers():
 @pytest.mark.asyncio
 async def test_list_backup_schedules_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -9657,7 +11136,7 @@ def test_list_backup_schedules_flattened_error():
 @pytest.mark.asyncio
 async def test_list_backup_schedules_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -9688,7 +11167,7 @@ async def test_list_backup_schedules_flattened_async():
 @pytest.mark.asyncio
 async def test_list_backup_schedules_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -9736,27 +11215,6 @@ def test_update_backup_schedule(request_type, transport: str = "grpc"):
     # Establish that the response is the type that we expect.
     assert isinstance(response, schedule.BackupSchedule)
     assert response.name == "name_value"
-
-
-def test_update_backup_schedule_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.update_backup_schedule), "__call__"
-    ) as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.update_backup_schedule()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.UpdateBackupScheduleRequest()
 
 
 def test_update_backup_schedule_non_empty_request_with_auto_populated_field():
@@ -9826,31 +11284,6 @@ def test_update_backup_schedule_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_update_backup_schedule_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.update_backup_schedule), "__call__"
-    ) as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
-            schedule.BackupSchedule(
-                name="name_value",
-            )
-        )
-        response = await client.update_backup_schedule()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.UpdateBackupScheduleRequest()
-
-
-@pytest.mark.asyncio
 async def test_update_backup_schedule_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -9858,7 +11291,7 @@ async def test_update_backup_schedule_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -9898,7 +11331,7 @@ async def test_update_backup_schedule_async(
     request_type=firestore_admin.UpdateBackupScheduleRequest,
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -9968,7 +11401,7 @@ def test_update_backup_schedule_field_headers():
 @pytest.mark.asyncio
 async def test_update_backup_schedule_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -10047,7 +11480,7 @@ def test_update_backup_schedule_flattened_error():
 @pytest.mark.asyncio
 async def test_update_backup_schedule_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -10082,7 +11515,7 @@ async def test_update_backup_schedule_flattened_async():
 @pytest.mark.asyncio
 async def test_update_backup_schedule_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -10128,27 +11561,6 @@ def test_delete_backup_schedule(request_type, transport: str = "grpc"):
 
     # Establish that the response is the type that we expect.
     assert response is None
-
-
-def test_delete_backup_schedule_empty_call():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.delete_backup_schedule), "__call__"
-    ) as call:
-        call.return_value.name = (
-            "foo"  # operation_request.operation in compute client(s) expect a string.
-        )
-        client.delete_backup_schedule()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.DeleteBackupScheduleRequest()
 
 
 def test_delete_backup_schedule_non_empty_request_with_auto_populated_field():
@@ -10222,27 +11634,6 @@ def test_delete_backup_schedule_use_cached_wrapped_rpc():
 
 
 @pytest.mark.asyncio
-async def test_delete_backup_schedule_empty_call_async():
-    # This test is a coverage failsafe to make sure that totally empty calls,
-    # i.e. request == None and no flattened fields passed, work.
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-
-    # Mock the actual call within the gRPC stub, and fake the request.
-    with mock.patch.object(
-        type(client.transport.delete_backup_schedule), "__call__"
-    ) as call:
-        # Designate an appropriate return value for the call.
-        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
-        response = await client.delete_backup_schedule()
-        call.assert_called()
-        _, args, _ = call.mock_calls[0]
-        assert args[0] == firestore_admin.DeleteBackupScheduleRequest()
-
-
-@pytest.mark.asyncio
 async def test_delete_backup_schedule_async_use_cached_wrapped_rpc(
     transport: str = "grpc_asyncio",
 ):
@@ -10250,7 +11641,7 @@ async def test_delete_backup_schedule_async_use_cached_wrapped_rpc(
     # instead of constructing them on each call
     with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
         client = FirestoreAdminAsyncClient(
-            credentials=ga_credentials.AnonymousCredentials(),
+            credentials=async_anonymous_credentials(),
             transport=transport,
         )
 
@@ -10290,7 +11681,7 @@ async def test_delete_backup_schedule_async(
     request_type=firestore_admin.DeleteBackupScheduleRequest,
 ):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -10355,7 +11746,7 @@ def test_delete_backup_schedule_field_headers():
 @pytest.mark.asyncio
 async def test_delete_backup_schedule_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -10427,7 +11818,7 @@ def test_delete_backup_schedule_flattened_error():
 @pytest.mark.asyncio
 async def test_delete_backup_schedule_flattened_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Mock the actual call within the gRPC stub, and fake the request.
@@ -10456,7 +11847,7 @@ async def test_delete_backup_schedule_flattened_async():
 @pytest.mark.asyncio
 async def test_delete_backup_schedule_flattened_error_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Attempting to call a method with both a request object and flattened
@@ -10466,124 +11857,6 @@ async def test_delete_backup_schedule_flattened_error_async():
             firestore_admin.DeleteBackupScheduleRequest(),
             name="name_value",
         )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.CreateIndexRequest,
-        dict,
-    ],
-)
-def test_create_index_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
-    }
-    request_init["index"] = {
-        "name": "name_value",
-        "query_scope": 1,
-        "api_scope": 1,
-        "fields": [
-            {
-                "field_path": "field_path_value",
-                "order": 1,
-                "array_config": 1,
-                "vector_config": {"dimension": 966, "flat": {}},
-            }
-        ],
-        "state": 1,
-    }
-    # The version of a generated dependency at test runtime may differ from the version used during generation.
-    # Delete any fields which are not present in the current runtime dependency
-    # See https://github.com/googleapis/gapic-generator-python/issues/1748
-
-    # Determine if the message type is proto-plus or protobuf
-    test_field = firestore_admin.CreateIndexRequest.meta.fields["index"]
-
-    def get_message_fields(field):
-        # Given a field which is a message (composite type), return a list with
-        # all the fields of the message.
-        # If the field is not a composite type, return an empty list.
-        message_fields = []
-
-        if hasattr(field, "message") and field.message:
-            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
-
-            if is_field_type_proto_plus_type:
-                message_fields = field.message.meta.fields.values()
-            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
-            else:  # pragma: NO COVER
-                message_fields = field.message.DESCRIPTOR.fields
-        return message_fields
-
-    runtime_nested_fields = [
-        (field.name, nested_field.name)
-        for field in get_message_fields(test_field)
-        for nested_field in get_message_fields(field)
-    ]
-
-    subfields_not_in_runtime = []
-
-    # For each item in the sample request, create a list of sub fields which are not present at runtime
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for field, value in request_init["index"].items():  # pragma: NO COVER
-        result = None
-        is_repeated = False
-        # For repeated fields
-        if isinstance(value, list) and len(value):
-            is_repeated = True
-            result = value[0]
-        # For fields where the type is another message
-        if isinstance(value, dict):
-            result = value
-
-        if result and hasattr(result, "keys"):
-            for subfield in result.keys():
-                if (field, subfield) not in runtime_nested_fields:
-                    subfields_not_in_runtime.append(
-                        {
-                            "field": field,
-                            "subfield": subfield,
-                            "is_repeated": is_repeated,
-                        }
-                    )
-
-    # Remove fields from the sample request which are not present in the runtime version of the dependency
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
-        field = subfield_to_delete.get("field")
-        field_repeated = subfield_to_delete.get("is_repeated")
-        subfield = subfield_to_delete.get("subfield")
-        if subfield:
-            if field_repeated:
-                for i in range(0, len(request_init["index"][field])):
-                    del request_init["index"][field][i][subfield]
-            else:
-                del request_init["index"][field][subfield]
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.create_index(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_create_index_rest_use_cached_wrapped_rpc():
@@ -10690,6 +11963,7 @@ def test_create_index_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.create_index(request)
 
@@ -10713,91 +11987,6 @@ def test_create_index_rest_unset_required_fields():
             )
         )
     )
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_create_index_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_create_index"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_create_index"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.CreateIndexRequest.pb(
-            firestore_admin.CreateIndexRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.CreateIndexRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.create_index(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_create_index_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.CreateIndexRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.create_index(request)
 
 
 def test_create_index_rest_flattened():
@@ -10829,6 +12018,7 @@ def test_create_index_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.create_index(**mock_args)
 
@@ -10857,54 +12047,6 @@ def test_create_index_rest_flattened_error(transport: str = "rest"):
             parent="parent_value",
             index=gfa_index.Index(name="name_value"),
         )
-
-
-def test_create_index_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.ListIndexesRequest,
-        dict,
-    ],
-)
-def test_list_indexes_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = firestore_admin.ListIndexesResponse(
-            next_page_token="next_page_token_value",
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = firestore_admin.ListIndexesResponse.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.list_indexes(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, pagers.ListIndexesPager)
-    assert response.next_page_token == "next_page_token_value"
 
 
 def test_list_indexes_rest_use_cached_wrapped_rpc():
@@ -11017,6 +12159,7 @@ def test_list_indexes_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_indexes(request)
 
@@ -11041,89 +12184,6 @@ def test_list_indexes_rest_unset_required_fields():
         )
         & set(("parent",))
     )
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_list_indexes_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_list_indexes"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_list_indexes"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.ListIndexesRequest.pb(
-            firestore_admin.ListIndexesRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = firestore_admin.ListIndexesResponse.to_json(
-            firestore_admin.ListIndexesResponse()
-        )
-
-        request = firestore_admin.ListIndexesRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = firestore_admin.ListIndexesResponse()
-
-        client.list_indexes(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_list_indexes_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.ListIndexesRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.list_indexes(request)
 
 
 def test_list_indexes_rest_flattened():
@@ -11156,6 +12216,7 @@ def test_list_indexes_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_indexes(**mock_args)
 
@@ -11248,54 +12309,6 @@ def test_list_indexes_rest_pager(transport: str = "rest"):
         pages = list(client.list_indexes(request=sample_request).pages)
         for page_, token in zip(pages, ["abc", "def", "ghi", ""]):
             assert page_.raw_page.next_page_token == token
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.GetIndexRequest,
-        dict,
-    ],
-)
-def test_get_index_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/indexes/sample4"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = index.Index(
-            name="name_value",
-            query_scope=index.Index.QueryScope.COLLECTION,
-            api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
-            state=index.Index.State.CREATING,
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = index.Index.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.get_index(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, index.Index)
-    assert response.name == "name_value"
-    assert response.query_scope == index.Index.QueryScope.COLLECTION
-    assert response.api_scope == index.Index.ApiScope.DATASTORE_MODE_API
-    assert response.state == index.Index.State.CREATING
 
 
 def test_get_index_rest_use_cached_wrapped_rpc():
@@ -11398,6 +12411,7 @@ def test_get_index_rest_required_fields(request_type=firestore_admin.GetIndexReq
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_index(request)
 
@@ -11413,87 +12427,6 @@ def test_get_index_rest_unset_required_fields():
 
     unset_fields = transport.get_index._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_get_index_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_get_index"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_get_index"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.GetIndexRequest.pb(
-            firestore_admin.GetIndexRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = index.Index.to_json(index.Index())
-
-        request = firestore_admin.GetIndexRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = index.Index()
-
-        client.get_index(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_get_index_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.GetIndexRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/indexes/sample4"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.get_index(request)
 
 
 def test_get_index_rest_flattened():
@@ -11526,6 +12459,7 @@ def test_get_index_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_index(**mock_args)
 
@@ -11553,49 +12487,6 @@ def test_get_index_rest_flattened_error(transport: str = "rest"):
             firestore_admin.GetIndexRequest(),
             name="name_value",
         )
-
-
-def test_get_index_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.DeleteIndexRequest,
-        dict,
-    ],
-)
-def test_delete_index_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/indexes/sample4"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = None
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = ""
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.delete_index(request)
-
-    # Establish that the response is the type that we expect.
-    assert response is None
 
 
 def test_delete_index_rest_use_cached_wrapped_rpc():
@@ -11697,6 +12588,7 @@ def test_delete_index_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.delete_index(request)
 
@@ -11712,81 +12604,6 @@ def test_delete_index_rest_unset_required_fields():
 
     unset_fields = transport.delete_index._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_delete_index_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_delete_index"
-    ) as pre:
-        pre.assert_not_called()
-        pb_message = firestore_admin.DeleteIndexRequest.pb(
-            firestore_admin.DeleteIndexRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-
-        request = firestore_admin.DeleteIndexRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-
-        client.delete_index(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-
-
-def test_delete_index_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.DeleteIndexRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/indexes/sample4"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.delete_index(request)
 
 
 def test_delete_index_rest_flattened():
@@ -11817,6 +12634,7 @@ def test_delete_index_rest_flattened():
         json_return_value = ""
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.delete_index(**mock_args)
 
@@ -11844,54 +12662,6 @@ def test_delete_index_rest_flattened_error(transport: str = "rest"):
             firestore_admin.DeleteIndexRequest(),
             name="name_value",
         )
-
-
-def test_delete_index_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.GetFieldRequest,
-        dict,
-    ],
-)
-def test_get_field_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = field.Field(
-            name="name_value",
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = field.Field.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.get_field(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, field.Field)
-    assert response.name == "name_value"
 
 
 def test_get_field_rest_use_cached_wrapped_rpc():
@@ -11994,6 +12764,7 @@ def test_get_field_rest_required_fields(request_type=firestore_admin.GetFieldReq
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_field(request)
 
@@ -12009,87 +12780,6 @@ def test_get_field_rest_unset_required_fields():
 
     unset_fields = transport.get_field._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_get_field_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_get_field"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_get_field"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.GetFieldRequest.pb(
-            firestore_admin.GetFieldRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = field.Field.to_json(field.Field())
-
-        request = firestore_admin.GetFieldRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = field.Field()
-
-        client.get_field(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_get_field_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.GetFieldRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.get_field(request)
 
 
 def test_get_field_rest_flattened():
@@ -12122,6 +12812,7 @@ def test_get_field_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_field(**mock_args)
 
@@ -12149,143 +12840,6 @@ def test_get_field_rest_flattened_error(transport: str = "rest"):
             firestore_admin.GetFieldRequest(),
             name="name_value",
         )
-
-
-def test_get_field_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.UpdateFieldRequest,
-        dict,
-    ],
-)
-def test_update_field_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "field": {
-            "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4"
-        }
-    }
-    request_init["field"] = {
-        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4",
-        "index_config": {
-            "indexes": [
-                {
-                    "name": "name_value",
-                    "query_scope": 1,
-                    "api_scope": 1,
-                    "fields": [
-                        {
-                            "field_path": "field_path_value",
-                            "order": 1,
-                            "array_config": 1,
-                            "vector_config": {"dimension": 966, "flat": {}},
-                        }
-                    ],
-                    "state": 1,
-                }
-            ],
-            "uses_ancestor_config": True,
-            "ancestor_field": "ancestor_field_value",
-            "reverting": True,
-        },
-        "ttl_config": {"state": 1},
-    }
-    # The version of a generated dependency at test runtime may differ from the version used during generation.
-    # Delete any fields which are not present in the current runtime dependency
-    # See https://github.com/googleapis/gapic-generator-python/issues/1748
-
-    # Determine if the message type is proto-plus or protobuf
-    test_field = firestore_admin.UpdateFieldRequest.meta.fields["field"]
-
-    def get_message_fields(field):
-        # Given a field which is a message (composite type), return a list with
-        # all the fields of the message.
-        # If the field is not a composite type, return an empty list.
-        message_fields = []
-
-        if hasattr(field, "message") and field.message:
-            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
-
-            if is_field_type_proto_plus_type:
-                message_fields = field.message.meta.fields.values()
-            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
-            else:  # pragma: NO COVER
-                message_fields = field.message.DESCRIPTOR.fields
-        return message_fields
-
-    runtime_nested_fields = [
-        (field.name, nested_field.name)
-        for field in get_message_fields(test_field)
-        for nested_field in get_message_fields(field)
-    ]
-
-    subfields_not_in_runtime = []
-
-    # For each item in the sample request, create a list of sub fields which are not present at runtime
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for field, value in request_init["field"].items():  # pragma: NO COVER
-        result = None
-        is_repeated = False
-        # For repeated fields
-        if isinstance(value, list) and len(value):
-            is_repeated = True
-            result = value[0]
-        # For fields where the type is another message
-        if isinstance(value, dict):
-            result = value
-
-        if result and hasattr(result, "keys"):
-            for subfield in result.keys():
-                if (field, subfield) not in runtime_nested_fields:
-                    subfields_not_in_runtime.append(
-                        {
-                            "field": field,
-                            "subfield": subfield,
-                            "is_repeated": is_repeated,
-                        }
-                    )
-
-    # Remove fields from the sample request which are not present in the runtime version of the dependency
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
-        field = subfield_to_delete.get("field")
-        field_repeated = subfield_to_delete.get("is_repeated")
-        subfield = subfield_to_delete.get("subfield")
-        if subfield:
-            if field_repeated:
-                for i in range(0, len(request_init["field"][field])):
-                    del request_init["field"][field][i][subfield]
-            else:
-                del request_init["field"][field][subfield]
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.update_field(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_update_field_rest_use_cached_wrapped_rpc():
@@ -12389,6 +12943,7 @@ def test_update_field_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.update_field(request)
 
@@ -12404,93 +12959,6 @@ def test_update_field_rest_unset_required_fields():
 
     unset_fields = transport.update_field._get_unset_required_fields({})
     assert set(unset_fields) == (set(("updateMask",)) & set(("field",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_update_field_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_update_field"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_update_field"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.UpdateFieldRequest.pb(
-            firestore_admin.UpdateFieldRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.UpdateFieldRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.update_field(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_update_field_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.UpdateFieldRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "field": {
-            "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4"
-        }
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.update_field(request)
 
 
 def test_update_field_rest_flattened():
@@ -12523,6 +12991,7 @@ def test_update_field_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.update_field(**mock_args)
 
@@ -12550,54 +13019,6 @@ def test_update_field_rest_flattened_error(transport: str = "rest"):
             firestore_admin.UpdateFieldRequest(),
             field=gfa_field.Field(name="name_value"),
         )
-
-
-def test_update_field_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.ListFieldsRequest,
-        dict,
-    ],
-)
-def test_list_fields_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = firestore_admin.ListFieldsResponse(
-            next_page_token="next_page_token_value",
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = firestore_admin.ListFieldsResponse.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.list_fields(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, pagers.ListFieldsPager)
-    assert response.next_page_token == "next_page_token_value"
 
 
 def test_list_fields_rest_use_cached_wrapped_rpc():
@@ -12710,6 +13131,7 @@ def test_list_fields_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_fields(request)
 
@@ -12734,89 +13156,6 @@ def test_list_fields_rest_unset_required_fields():
         )
         & set(("parent",))
     )
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_list_fields_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_list_fields"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_list_fields"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.ListFieldsRequest.pb(
-            firestore_admin.ListFieldsRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = firestore_admin.ListFieldsResponse.to_json(
-            firestore_admin.ListFieldsResponse()
-        )
-
-        request = firestore_admin.ListFieldsRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = firestore_admin.ListFieldsResponse()
-
-        client.list_fields(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_list_fields_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.ListFieldsRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.list_fields(request)
 
 
 def test_list_fields_rest_flattened():
@@ -12849,6 +13188,7 @@ def test_list_fields_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_fields(**mock_args)
 
@@ -12941,41 +13281,6 @@ def test_list_fields_rest_pager(transport: str = "rest"):
         pages = list(client.list_fields(request=sample_request).pages)
         for page_, token in zip(pages, ["abc", "def", "ghi", ""]):
             assert page_.raw_page.next_page_token == token
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.ExportDocumentsRequest,
-        dict,
-    ],
-)
-def test_export_documents_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.export_documents(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_export_documents_rest_use_cached_wrapped_rpc():
@@ -13084,6 +13389,7 @@ def test_export_documents_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.export_documents(request)
 
@@ -13099,89 +13405,6 @@ def test_export_documents_rest_unset_required_fields():
 
     unset_fields = transport.export_documents._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_export_documents_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_export_documents"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_export_documents"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.ExportDocumentsRequest.pb(
-            firestore_admin.ExportDocumentsRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.ExportDocumentsRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.export_documents(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_export_documents_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.ExportDocumentsRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.export_documents(request)
 
 
 def test_export_documents_rest_flattened():
@@ -13210,6 +13433,7 @@ def test_export_documents_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.export_documents(**mock_args)
 
@@ -13237,47 +13461,6 @@ def test_export_documents_rest_flattened_error(transport: str = "rest"):
             firestore_admin.ExportDocumentsRequest(),
             name="name_value",
         )
-
-
-def test_export_documents_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.ImportDocumentsRequest,
-        dict,
-    ],
-)
-def test_import_documents_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.import_documents(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_import_documents_rest_use_cached_wrapped_rpc():
@@ -13386,6 +13569,7 @@ def test_import_documents_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.import_documents(request)
 
@@ -13401,89 +13585,6 @@ def test_import_documents_rest_unset_required_fields():
 
     unset_fields = transport.import_documents._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_import_documents_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_import_documents"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_import_documents"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.ImportDocumentsRequest.pb(
-            firestore_admin.ImportDocumentsRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.ImportDocumentsRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.import_documents(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_import_documents_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.ImportDocumentsRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.import_documents(request)
 
 
 def test_import_documents_rest_flattened():
@@ -13512,6 +13613,7 @@ def test_import_documents_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.import_documents(**mock_args)
 
@@ -13539,47 +13641,6 @@ def test_import_documents_rest_flattened_error(transport: str = "rest"):
             firestore_admin.ImportDocumentsRequest(),
             name="name_value",
         )
-
-
-def test_import_documents_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.BulkDeleteDocumentsRequest,
-        dict,
-    ],
-)
-def test_bulk_delete_documents_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.bulk_delete_documents(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_bulk_delete_documents_rest_use_cached_wrapped_rpc():
@@ -13691,6 +13752,7 @@ def test_bulk_delete_documents_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.bulk_delete_documents(request)
 
@@ -13706,89 +13768,6 @@ def test_bulk_delete_documents_rest_unset_required_fields():
 
     unset_fields = transport.bulk_delete_documents._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_bulk_delete_documents_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_bulk_delete_documents"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_bulk_delete_documents"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.BulkDeleteDocumentsRequest.pb(
-            firestore_admin.BulkDeleteDocumentsRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.BulkDeleteDocumentsRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.bulk_delete_documents(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_bulk_delete_documents_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.BulkDeleteDocumentsRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.bulk_delete_documents(request)
 
 
 def test_bulk_delete_documents_rest_flattened():
@@ -13817,6 +13796,7 @@ def test_bulk_delete_documents_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.bulk_delete_documents(**mock_args)
 
@@ -13844,143 +13824,6 @@ def test_bulk_delete_documents_rest_flattened_error(transport: str = "rest"):
             firestore_admin.BulkDeleteDocumentsRequest(),
             name="name_value",
         )
-
-
-def test_bulk_delete_documents_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.CreateDatabaseRequest,
-        dict,
-    ],
-)
-def test_create_database_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1"}
-    request_init["database"] = {
-        "name": "name_value",
-        "uid": "uid_value",
-        "create_time": {"seconds": 751, "nanos": 543},
-        "update_time": {},
-        "delete_time": {},
-        "location_id": "location_id_value",
-        "type_": 1,
-        "concurrency_mode": 1,
-        "version_retention_period": {"seconds": 751, "nanos": 543},
-        "earliest_version_time": {},
-        "point_in_time_recovery_enablement": 1,
-        "app_engine_integration_mode": 1,
-        "key_prefix": "key_prefix_value",
-        "delete_protection_state": 1,
-        "cmek_config": {
-            "kms_key_name": "kms_key_name_value",
-            "active_key_version": [
-                "active_key_version_value1",
-                "active_key_version_value2",
-            ],
-        },
-        "previous_id": "previous_id_value",
-        "source_info": {
-            "backup": {"backup": "backup_value"},
-            "operation": "operation_value",
-        },
-        "etag": "etag_value",
-    }
-    # The version of a generated dependency at test runtime may differ from the version used during generation.
-    # Delete any fields which are not present in the current runtime dependency
-    # See https://github.com/googleapis/gapic-generator-python/issues/1748
-
-    # Determine if the message type is proto-plus or protobuf
-    test_field = firestore_admin.CreateDatabaseRequest.meta.fields["database"]
-
-    def get_message_fields(field):
-        # Given a field which is a message (composite type), return a list with
-        # all the fields of the message.
-        # If the field is not a composite type, return an empty list.
-        message_fields = []
-
-        if hasattr(field, "message") and field.message:
-            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
-
-            if is_field_type_proto_plus_type:
-                message_fields = field.message.meta.fields.values()
-            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
-            else:  # pragma: NO COVER
-                message_fields = field.message.DESCRIPTOR.fields
-        return message_fields
-
-    runtime_nested_fields = [
-        (field.name, nested_field.name)
-        for field in get_message_fields(test_field)
-        for nested_field in get_message_fields(field)
-    ]
-
-    subfields_not_in_runtime = []
-
-    # For each item in the sample request, create a list of sub fields which are not present at runtime
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for field, value in request_init["database"].items():  # pragma: NO COVER
-        result = None
-        is_repeated = False
-        # For repeated fields
-        if isinstance(value, list) and len(value):
-            is_repeated = True
-            result = value[0]
-        # For fields where the type is another message
-        if isinstance(value, dict):
-            result = value
-
-        if result and hasattr(result, "keys"):
-            for subfield in result.keys():
-                if (field, subfield) not in runtime_nested_fields:
-                    subfields_not_in_runtime.append(
-                        {
-                            "field": field,
-                            "subfield": subfield,
-                            "is_repeated": is_repeated,
-                        }
-                    )
-
-    # Remove fields from the sample request which are not present in the runtime version of the dependency
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
-        field = subfield_to_delete.get("field")
-        field_repeated = subfield_to_delete.get("is_repeated")
-        subfield = subfield_to_delete.get("subfield")
-        if subfield:
-            if field_repeated:
-                for i in range(0, len(request_init["database"][field])):
-                    del request_init["database"][field][i][subfield]
-            else:
-                del request_init["database"][field][subfield]
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.create_database(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_create_database_rest_use_cached_wrapped_rpc():
@@ -14096,6 +13939,7 @@ def test_create_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.create_database(request)
 
@@ -14128,89 +13972,6 @@ def test_create_database_rest_unset_required_fields():
     )
 
 
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_create_database_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_create_database"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_create_database"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.CreateDatabaseRequest.pb(
-            firestore_admin.CreateDatabaseRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.CreateDatabaseRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.create_database(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_create_database_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.CreateDatabaseRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.create_database(request)
-
-
 def test_create_database_rest_flattened():
     client = FirestoreAdminClient(
         credentials=ga_credentials.AnonymousCredentials(),
@@ -14239,6 +14000,7 @@ def test_create_database_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.create_database(**mock_args)
 
@@ -14266,81 +14028,6 @@ def test_create_database_rest_flattened_error(transport: str = "rest"):
             database=gfa_database.Database(name="name_value"),
             database_id="database_id_value",
         )
-
-
-def test_create_database_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.GetDatabaseRequest,
-        dict,
-    ],
-)
-def test_get_database_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = database.Database(
-            name="name_value",
-            uid="uid_value",
-            location_id="location_id_value",
-            type_=database.Database.DatabaseType.FIRESTORE_NATIVE,
-            concurrency_mode=database.Database.ConcurrencyMode.OPTIMISTIC,
-            point_in_time_recovery_enablement=database.Database.PointInTimeRecoveryEnablement.POINT_IN_TIME_RECOVERY_ENABLED,
-            app_engine_integration_mode=database.Database.AppEngineIntegrationMode.ENABLED,
-            key_prefix="key_prefix_value",
-            delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
-            previous_id="previous_id_value",
-            etag="etag_value",
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = database.Database.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.get_database(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, database.Database)
-    assert response.name == "name_value"
-    assert response.uid == "uid_value"
-    assert response.location_id == "location_id_value"
-    assert response.type_ == database.Database.DatabaseType.FIRESTORE_NATIVE
-    assert response.concurrency_mode == database.Database.ConcurrencyMode.OPTIMISTIC
-    assert (
-        response.point_in_time_recovery_enablement
-        == database.Database.PointInTimeRecoveryEnablement.POINT_IN_TIME_RECOVERY_ENABLED
-    )
-    assert (
-        response.app_engine_integration_mode
-        == database.Database.AppEngineIntegrationMode.ENABLED
-    )
-    assert response.key_prefix == "key_prefix_value"
-    assert (
-        response.delete_protection_state
-        == database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED
-    )
-    assert response.previous_id == "previous_id_value"
-    assert response.etag == "etag_value"
 
 
 def test_get_database_rest_use_cached_wrapped_rpc():
@@ -14445,6 +14132,7 @@ def test_get_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_database(request)
 
@@ -14460,85 +14148,6 @@ def test_get_database_rest_unset_required_fields():
 
     unset_fields = transport.get_database._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_get_database_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_get_database"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_get_database"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.GetDatabaseRequest.pb(
-            firestore_admin.GetDatabaseRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = database.Database.to_json(database.Database())
-
-        request = firestore_admin.GetDatabaseRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = database.Database()
-
-        client.get_database(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_get_database_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.GetDatabaseRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.get_database(request)
 
 
 def test_get_database_rest_flattened():
@@ -14569,6 +14178,7 @@ def test_get_database_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_database(**mock_args)
 
@@ -14594,52 +14204,6 @@ def test_get_database_rest_flattened_error(transport: str = "rest"):
             firestore_admin.GetDatabaseRequest(),
             name="name_value",
         )
-
-
-def test_get_database_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.ListDatabasesRequest,
-        dict,
-    ],
-)
-def test_list_databases_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = firestore_admin.ListDatabasesResponse(
-            unreachable=["unreachable_value"],
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = firestore_admin.ListDatabasesResponse.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.list_databases(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, firestore_admin.ListDatabasesResponse)
-    assert response.unreachable == ["unreachable_value"]
 
 
 def test_list_databases_rest_use_cached_wrapped_rpc():
@@ -14746,6 +14310,7 @@ def test_list_databases_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_databases(request)
 
@@ -14761,87 +14326,6 @@ def test_list_databases_rest_unset_required_fields():
 
     unset_fields = transport.list_databases._get_unset_required_fields({})
     assert set(unset_fields) == (set(("showDeleted",)) & set(("parent",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_list_databases_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_list_databases"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_list_databases"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.ListDatabasesRequest.pb(
-            firestore_admin.ListDatabasesRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = firestore_admin.ListDatabasesResponse.to_json(
-            firestore_admin.ListDatabasesResponse()
-        )
-
-        request = firestore_admin.ListDatabasesRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = firestore_admin.ListDatabasesResponse()
-
-        client.list_databases(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_list_databases_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.ListDatabasesRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.list_databases(request)
 
 
 def test_list_databases_rest_flattened():
@@ -14872,6 +14356,7 @@ def test_list_databases_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_databases(**mock_args)
 
@@ -14897,143 +14382,6 @@ def test_list_databases_rest_flattened_error(transport: str = "rest"):
             firestore_admin.ListDatabasesRequest(),
             parent="parent_value",
         )
-
-
-def test_list_databases_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.UpdateDatabaseRequest,
-        dict,
-    ],
-)
-def test_update_database_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"database": {"name": "projects/sample1/databases/sample2"}}
-    request_init["database"] = {
-        "name": "projects/sample1/databases/sample2",
-        "uid": "uid_value",
-        "create_time": {"seconds": 751, "nanos": 543},
-        "update_time": {},
-        "delete_time": {},
-        "location_id": "location_id_value",
-        "type_": 1,
-        "concurrency_mode": 1,
-        "version_retention_period": {"seconds": 751, "nanos": 543},
-        "earliest_version_time": {},
-        "point_in_time_recovery_enablement": 1,
-        "app_engine_integration_mode": 1,
-        "key_prefix": "key_prefix_value",
-        "delete_protection_state": 1,
-        "cmek_config": {
-            "kms_key_name": "kms_key_name_value",
-            "active_key_version": [
-                "active_key_version_value1",
-                "active_key_version_value2",
-            ],
-        },
-        "previous_id": "previous_id_value",
-        "source_info": {
-            "backup": {"backup": "backup_value"},
-            "operation": "operation_value",
-        },
-        "etag": "etag_value",
-    }
-    # The version of a generated dependency at test runtime may differ from the version used during generation.
-    # Delete any fields which are not present in the current runtime dependency
-    # See https://github.com/googleapis/gapic-generator-python/issues/1748
-
-    # Determine if the message type is proto-plus or protobuf
-    test_field = firestore_admin.UpdateDatabaseRequest.meta.fields["database"]
-
-    def get_message_fields(field):
-        # Given a field which is a message (composite type), return a list with
-        # all the fields of the message.
-        # If the field is not a composite type, return an empty list.
-        message_fields = []
-
-        if hasattr(field, "message") and field.message:
-            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
-
-            if is_field_type_proto_plus_type:
-                message_fields = field.message.meta.fields.values()
-            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
-            else:  # pragma: NO COVER
-                message_fields = field.message.DESCRIPTOR.fields
-        return message_fields
-
-    runtime_nested_fields = [
-        (field.name, nested_field.name)
-        for field in get_message_fields(test_field)
-        for nested_field in get_message_fields(field)
-    ]
-
-    subfields_not_in_runtime = []
-
-    # For each item in the sample request, create a list of sub fields which are not present at runtime
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for field, value in request_init["database"].items():  # pragma: NO COVER
-        result = None
-        is_repeated = False
-        # For repeated fields
-        if isinstance(value, list) and len(value):
-            is_repeated = True
-            result = value[0]
-        # For fields where the type is another message
-        if isinstance(value, dict):
-            result = value
-
-        if result and hasattr(result, "keys"):
-            for subfield in result.keys():
-                if (field, subfield) not in runtime_nested_fields:
-                    subfields_not_in_runtime.append(
-                        {
-                            "field": field,
-                            "subfield": subfield,
-                            "is_repeated": is_repeated,
-                        }
-                    )
-
-    # Remove fields from the sample request which are not present in the runtime version of the dependency
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
-        field = subfield_to_delete.get("field")
-        field_repeated = subfield_to_delete.get("is_repeated")
-        subfield = subfield_to_delete.get("subfield")
-        if subfield:
-            if field_repeated:
-                for i in range(0, len(request_init["database"][field])):
-                    del request_init["database"][field][i][subfield]
-            else:
-                del request_init["database"][field][subfield]
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.update_database(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_update_database_rest_use_cached_wrapped_rpc():
@@ -15137,6 +14485,7 @@ def test_update_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.update_database(request)
 
@@ -15152,89 +14501,6 @@ def test_update_database_rest_unset_required_fields():
 
     unset_fields = transport.update_database._get_unset_required_fields({})
     assert set(unset_fields) == (set(("updateMask",)) & set(("database",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_update_database_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_update_database"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_update_database"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.UpdateDatabaseRequest.pb(
-            firestore_admin.UpdateDatabaseRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.UpdateDatabaseRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.update_database(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_update_database_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.UpdateDatabaseRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"database": {"name": "projects/sample1/databases/sample2"}}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.update_database(request)
 
 
 def test_update_database_rest_flattened():
@@ -15264,6 +14530,7 @@ def test_update_database_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.update_database(**mock_args)
 
@@ -15291,47 +14558,6 @@ def test_update_database_rest_flattened_error(transport: str = "rest"):
             database=gfa_database.Database(name="name_value"),
             update_mask=field_mask_pb2.FieldMask(paths=["paths_value"]),
         )
-
-
-def test_update_database_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.DeleteDatabaseRequest,
-        dict,
-    ],
-)
-def test_delete_database_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.delete_database(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_delete_database_rest_use_cached_wrapped_rpc():
@@ -15439,6 +14665,7 @@ def test_delete_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.delete_database(request)
 
@@ -15454,89 +14681,6 @@ def test_delete_database_rest_unset_required_fields():
 
     unset_fields = transport.delete_database._get_unset_required_fields({})
     assert set(unset_fields) == (set(("etag",)) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_delete_database_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_delete_database"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_delete_database"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.DeleteDatabaseRequest.pb(
-            firestore_admin.DeleteDatabaseRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.DeleteDatabaseRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.delete_database(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_delete_database_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.DeleteDatabaseRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.delete_database(request)
 
 
 def test_delete_database_rest_flattened():
@@ -15565,6 +14709,7 @@ def test_delete_database_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.delete_database(**mock_args)
 
@@ -15592,56 +14737,1297 @@ def test_delete_database_rest_flattened_error(transport: str = "rest"):
         )
 
 
-def test_delete_database_rest_error():
+def test_create_user_creds_rest_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="rest",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.create_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.create_user_creds
+        ] = mock_rpc
+
+        request = {}
+        client.create_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.create_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+def test_create_user_creds_rest_required_fields(
+    request_type=firestore_admin.CreateUserCredsRequest,
+):
+    transport_class = transports.FirestoreAdminRestTransport
+
+    request_init = {}
+    request_init["parent"] = ""
+    request_init["user_creds_id"] = ""
+    request = request_type(**request_init)
+    pb_request = request_type.pb(request)
+    jsonified_request = json.loads(
+        json_format.MessageToJson(pb_request, use_integers_for_enums=False)
+    )
+
+    # verify fields with default values are dropped
+    assert "userCredsId" not in jsonified_request
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).create_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with default values are now present
+    assert "userCredsId" in jsonified_request
+    assert jsonified_request["userCredsId"] == request_init["user_creds_id"]
+
+    jsonified_request["parent"] = "parent_value"
+    jsonified_request["userCredsId"] = "user_creds_id_value"
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).create_user_creds._get_unset_required_fields(jsonified_request)
+    # Check that path parameters and body parameters are not mixing in.
+    assert not set(unset_fields) - set(("user_creds_id",))
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with non-default values are left alone
+    assert "parent" in jsonified_request
+    assert jsonified_request["parent"] == "parent_value"
+    assert "userCredsId" in jsonified_request
+    assert jsonified_request["userCredsId"] == "user_creds_id_value"
+
     client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type(**request_init)
+
+    # Designate an appropriate value for the returned response.
+    return_value = gfa_user_creds.UserCreds()
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # We need to mock transcode() because providing default values
+        # for required fields will fail the real version if the http_options
+        # expect actual values for those fields.
+        with mock.patch.object(path_template, "transcode") as transcode:
+            # A uri without fields and an empty body will force all the
+            # request fields to show up in the query_params.
+            pb_request = request_type.pb(request)
+            transcode_result = {
+                "uri": "v1/sample_method",
+                "method": "post",
+                "query_params": pb_request,
+            }
+            transcode_result["body"] = pb_request
+            transcode.return_value = transcode_result
+
+            response_value = Response()
+            response_value.status_code = 200
+
+            # Convert return value to protobuf type
+            return_value = gfa_user_creds.UserCreds.pb(return_value)
+            json_return_value = json_format.MessageToJson(return_value)
+
+            response_value._content = json_return_value.encode("UTF-8")
+            req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+            response = client.create_user_creds(request)
+
+            expected_params = [
+                (
+                    "userCredsId",
+                    "",
+                ),
+                ("$alt", "json;enum-encoding=int"),
+            ]
+            actual_params = req.call_args.kwargs["params"]
+            assert expected_params == actual_params
+
+
+def test_create_user_creds_rest_unset_required_fields():
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials
+    )
+
+    unset_fields = transport.create_user_creds._get_unset_required_fields({})
+    assert set(unset_fields) == (
+        set(("userCredsId",))
+        & set(
+            (
+                "parent",
+                "userCreds",
+                "userCredsId",
+            )
+        )
     )
 
 
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.GetBackupRequest,
-        dict,
-    ],
-)
-def test_get_backup_rest(request_type):
+def test_create_user_creds_rest_flattened():
     client = FirestoreAdminClient(
         credentials=ga_credentials.AnonymousCredentials(),
         transport="rest",
     )
 
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/locations/sample2/backups/sample3"}
-    request = request_type(**request_init)
-
     # Mock the http request call within the method and fake a response.
     with mock.patch.object(type(client.transport._session), "request") as req:
         # Designate an appropriate value for the returned response.
-        return_value = backup.Backup(
-            name="name_value",
-            database="database_value",
-            database_uid="database_uid_value",
-            state=backup.Backup.State.CREATING,
+        return_value = gfa_user_creds.UserCreds()
+
+        # get arguments that satisfy an http rule for this method
+        sample_request = {"parent": "projects/sample1/databases/sample2"}
+
+        # get truthy value for each flattened field
+        mock_args = dict(
+            parent="parent_value",
+            user_creds=gfa_user_creds.UserCreds(name="name_value"),
+            user_creds_id="user_creds_id_value",
         )
+        mock_args.update(sample_request)
 
         # Wrap the value into a proper Response obj
         response_value = Response()
         response_value.status_code = 200
         # Convert return value to protobuf type
-        return_value = backup.Backup.pb(return_value)
+        return_value = gfa_user_creds.UserCreds.pb(return_value)
         json_return_value = json_format.MessageToJson(return_value)
-
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
-        response = client.get_backup(request)
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, backup.Backup)
-    assert response.name == "name_value"
-    assert response.database == "database_value"
-    assert response.database_uid == "database_uid_value"
-    assert response.state == backup.Backup.State.CREATING
+        client.create_user_creds(**mock_args)
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(req.mock_calls) == 1
+        _, args, _ = req.mock_calls[0]
+        assert path_template.validate(
+            "%s/v1/{parent=projects/*/databases/*}/userCreds" % client.transport._host,
+            args[1],
+        )
+
+
+def test_create_user_creds_rest_flattened_error(transport: str = "rest"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.create_user_creds(
+            firestore_admin.CreateUserCredsRequest(),
+            parent="parent_value",
+            user_creds=gfa_user_creds.UserCreds(name="name_value"),
+            user_creds_id="user_creds_id_value",
+        )
+
+
+def test_get_user_creds_rest_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="rest",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.get_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[client._transport.get_user_creds] = mock_rpc
+
+        request = {}
+        client.get_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.get_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+def test_get_user_creds_rest_required_fields(
+    request_type=firestore_admin.GetUserCredsRequest,
+):
+    transport_class = transports.FirestoreAdminRestTransport
+
+    request_init = {}
+    request_init["name"] = ""
+    request = request_type(**request_init)
+    pb_request = request_type.pb(request)
+    jsonified_request = json.loads(
+        json_format.MessageToJson(pb_request, use_integers_for_enums=False)
+    )
+
+    # verify fields with default values are dropped
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).get_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with default values are now present
+
+    jsonified_request["name"] = "name_value"
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).get_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with non-default values are left alone
+    assert "name" in jsonified_request
+    assert jsonified_request["name"] == "name_value"
+
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type(**request_init)
+
+    # Designate an appropriate value for the returned response.
+    return_value = user_creds.UserCreds()
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # We need to mock transcode() because providing default values
+        # for required fields will fail the real version if the http_options
+        # expect actual values for those fields.
+        with mock.patch.object(path_template, "transcode") as transcode:
+            # A uri without fields and an empty body will force all the
+            # request fields to show up in the query_params.
+            pb_request = request_type.pb(request)
+            transcode_result = {
+                "uri": "v1/sample_method",
+                "method": "get",
+                "query_params": pb_request,
+            }
+            transcode.return_value = transcode_result
+
+            response_value = Response()
+            response_value.status_code = 200
+
+            # Convert return value to protobuf type
+            return_value = user_creds.UserCreds.pb(return_value)
+            json_return_value = json_format.MessageToJson(return_value)
+
+            response_value._content = json_return_value.encode("UTF-8")
+            req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+            response = client.get_user_creds(request)
+
+            expected_params = [("$alt", "json;enum-encoding=int")]
+            actual_params = req.call_args.kwargs["params"]
+            assert expected_params == actual_params
+
+
+def test_get_user_creds_rest_unset_required_fields():
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials
+    )
+
+    unset_fields = transport.get_user_creds._get_unset_required_fields({})
+    assert set(unset_fields) == (set(()) & set(("name",)))
+
+
+def test_get_user_creds_rest_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = user_creds.UserCreds()
+
+        # get arguments that satisfy an http rule for this method
+        sample_request = {
+            "name": "projects/sample1/databases/sample2/userCreds/sample3"
+        }
+
+        # get truthy value for each flattened field
+        mock_args = dict(
+            name="name_value",
+        )
+        mock_args.update(sample_request)
+
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        response_value.status_code = 200
+        # Convert return value to protobuf type
+        return_value = user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value._content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        client.get_user_creds(**mock_args)
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(req.mock_calls) == 1
+        _, args, _ = req.mock_calls[0]
+        assert path_template.validate(
+            "%s/v1/{name=projects/*/databases/*/userCreds/*}" % client.transport._host,
+            args[1],
+        )
+
+
+def test_get_user_creds_rest_flattened_error(transport: str = "rest"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.get_user_creds(
+            firestore_admin.GetUserCredsRequest(),
+            name="name_value",
+        )
+
+
+def test_list_user_creds_rest_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="rest",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.list_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[client._transport.list_user_creds] = mock_rpc
+
+        request = {}
+        client.list_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.list_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+def test_list_user_creds_rest_required_fields(
+    request_type=firestore_admin.ListUserCredsRequest,
+):
+    transport_class = transports.FirestoreAdminRestTransport
+
+    request_init = {}
+    request_init["parent"] = ""
+    request = request_type(**request_init)
+    pb_request = request_type.pb(request)
+    jsonified_request = json.loads(
+        json_format.MessageToJson(pb_request, use_integers_for_enums=False)
+    )
+
+    # verify fields with default values are dropped
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).list_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with default values are now present
+
+    jsonified_request["parent"] = "parent_value"
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).list_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with non-default values are left alone
+    assert "parent" in jsonified_request
+    assert jsonified_request["parent"] == "parent_value"
+
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type(**request_init)
+
+    # Designate an appropriate value for the returned response.
+    return_value = firestore_admin.ListUserCredsResponse()
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # We need to mock transcode() because providing default values
+        # for required fields will fail the real version if the http_options
+        # expect actual values for those fields.
+        with mock.patch.object(path_template, "transcode") as transcode:
+            # A uri without fields and an empty body will force all the
+            # request fields to show up in the query_params.
+            pb_request = request_type.pb(request)
+            transcode_result = {
+                "uri": "v1/sample_method",
+                "method": "get",
+                "query_params": pb_request,
+            }
+            transcode.return_value = transcode_result
+
+            response_value = Response()
+            response_value.status_code = 200
+
+            # Convert return value to protobuf type
+            return_value = firestore_admin.ListUserCredsResponse.pb(return_value)
+            json_return_value = json_format.MessageToJson(return_value)
+
+            response_value._content = json_return_value.encode("UTF-8")
+            req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+            response = client.list_user_creds(request)
+
+            expected_params = [("$alt", "json;enum-encoding=int")]
+            actual_params = req.call_args.kwargs["params"]
+            assert expected_params == actual_params
+
+
+def test_list_user_creds_rest_unset_required_fields():
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials
+    )
+
+    unset_fields = transport.list_user_creds._get_unset_required_fields({})
+    assert set(unset_fields) == (set(()) & set(("parent",)))
+
+
+def test_list_user_creds_rest_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = firestore_admin.ListUserCredsResponse()
+
+        # get arguments that satisfy an http rule for this method
+        sample_request = {"parent": "projects/sample1/databases/sample2"}
+
+        # get truthy value for each flattened field
+        mock_args = dict(
+            parent="parent_value",
+        )
+        mock_args.update(sample_request)
+
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        response_value.status_code = 200
+        # Convert return value to protobuf type
+        return_value = firestore_admin.ListUserCredsResponse.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value._content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        client.list_user_creds(**mock_args)
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(req.mock_calls) == 1
+        _, args, _ = req.mock_calls[0]
+        assert path_template.validate(
+            "%s/v1/{parent=projects/*/databases/*}/userCreds" % client.transport._host,
+            args[1],
+        )
+
+
+def test_list_user_creds_rest_flattened_error(transport: str = "rest"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.list_user_creds(
+            firestore_admin.ListUserCredsRequest(),
+            parent="parent_value",
+        )
+
+
+def test_enable_user_creds_rest_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="rest",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.enable_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.enable_user_creds
+        ] = mock_rpc
+
+        request = {}
+        client.enable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.enable_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+def test_enable_user_creds_rest_required_fields(
+    request_type=firestore_admin.EnableUserCredsRequest,
+):
+    transport_class = transports.FirestoreAdminRestTransport
+
+    request_init = {}
+    request_init["name"] = ""
+    request = request_type(**request_init)
+    pb_request = request_type.pb(request)
+    jsonified_request = json.loads(
+        json_format.MessageToJson(pb_request, use_integers_for_enums=False)
+    )
+
+    # verify fields with default values are dropped
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).enable_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with default values are now present
+
+    jsonified_request["name"] = "name_value"
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).enable_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with non-default values are left alone
+    assert "name" in jsonified_request
+    assert jsonified_request["name"] == "name_value"
+
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type(**request_init)
+
+    # Designate an appropriate value for the returned response.
+    return_value = user_creds.UserCreds()
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # We need to mock transcode() because providing default values
+        # for required fields will fail the real version if the http_options
+        # expect actual values for those fields.
+        with mock.patch.object(path_template, "transcode") as transcode:
+            # A uri without fields and an empty body will force all the
+            # request fields to show up in the query_params.
+            pb_request = request_type.pb(request)
+            transcode_result = {
+                "uri": "v1/sample_method",
+                "method": "post",
+                "query_params": pb_request,
+            }
+            transcode_result["body"] = pb_request
+            transcode.return_value = transcode_result
+
+            response_value = Response()
+            response_value.status_code = 200
+
+            # Convert return value to protobuf type
+            return_value = user_creds.UserCreds.pb(return_value)
+            json_return_value = json_format.MessageToJson(return_value)
+
+            response_value._content = json_return_value.encode("UTF-8")
+            req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+            response = client.enable_user_creds(request)
+
+            expected_params = [("$alt", "json;enum-encoding=int")]
+            actual_params = req.call_args.kwargs["params"]
+            assert expected_params == actual_params
+
+
+def test_enable_user_creds_rest_unset_required_fields():
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials
+    )
+
+    unset_fields = transport.enable_user_creds._get_unset_required_fields({})
+    assert set(unset_fields) == (set(()) & set(("name",)))
+
+
+def test_enable_user_creds_rest_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = user_creds.UserCreds()
+
+        # get arguments that satisfy an http rule for this method
+        sample_request = {
+            "name": "projects/sample1/databases/sample2/userCreds/sample3"
+        }
+
+        # get truthy value for each flattened field
+        mock_args = dict(
+            name="name_value",
+        )
+        mock_args.update(sample_request)
+
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        response_value.status_code = 200
+        # Convert return value to protobuf type
+        return_value = user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value._content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        client.enable_user_creds(**mock_args)
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(req.mock_calls) == 1
+        _, args, _ = req.mock_calls[0]
+        assert path_template.validate(
+            "%s/v1/{name=projects/*/databases/*/userCreds/*}:enable"
+            % client.transport._host,
+            args[1],
+        )
+
+
+def test_enable_user_creds_rest_flattened_error(transport: str = "rest"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.enable_user_creds(
+            firestore_admin.EnableUserCredsRequest(),
+            name="name_value",
+        )
+
+
+def test_disable_user_creds_rest_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="rest",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._transport.disable_user_creds in client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.disable_user_creds
+        ] = mock_rpc
+
+        request = {}
+        client.disable_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.disable_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+def test_disable_user_creds_rest_required_fields(
+    request_type=firestore_admin.DisableUserCredsRequest,
+):
+    transport_class = transports.FirestoreAdminRestTransport
+
+    request_init = {}
+    request_init["name"] = ""
+    request = request_type(**request_init)
+    pb_request = request_type.pb(request)
+    jsonified_request = json.loads(
+        json_format.MessageToJson(pb_request, use_integers_for_enums=False)
+    )
+
+    # verify fields with default values are dropped
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).disable_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with default values are now present
+
+    jsonified_request["name"] = "name_value"
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).disable_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with non-default values are left alone
+    assert "name" in jsonified_request
+    assert jsonified_request["name"] == "name_value"
+
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type(**request_init)
+
+    # Designate an appropriate value for the returned response.
+    return_value = user_creds.UserCreds()
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # We need to mock transcode() because providing default values
+        # for required fields will fail the real version if the http_options
+        # expect actual values for those fields.
+        with mock.patch.object(path_template, "transcode") as transcode:
+            # A uri without fields and an empty body will force all the
+            # request fields to show up in the query_params.
+            pb_request = request_type.pb(request)
+            transcode_result = {
+                "uri": "v1/sample_method",
+                "method": "post",
+                "query_params": pb_request,
+            }
+            transcode_result["body"] = pb_request
+            transcode.return_value = transcode_result
+
+            response_value = Response()
+            response_value.status_code = 200
+
+            # Convert return value to protobuf type
+            return_value = user_creds.UserCreds.pb(return_value)
+            json_return_value = json_format.MessageToJson(return_value)
+
+            response_value._content = json_return_value.encode("UTF-8")
+            req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+            response = client.disable_user_creds(request)
+
+            expected_params = [("$alt", "json;enum-encoding=int")]
+            actual_params = req.call_args.kwargs["params"]
+            assert expected_params == actual_params
+
+
+def test_disable_user_creds_rest_unset_required_fields():
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials
+    )
+
+    unset_fields = transport.disable_user_creds._get_unset_required_fields({})
+    assert set(unset_fields) == (set(()) & set(("name",)))
+
+
+def test_disable_user_creds_rest_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = user_creds.UserCreds()
+
+        # get arguments that satisfy an http rule for this method
+        sample_request = {
+            "name": "projects/sample1/databases/sample2/userCreds/sample3"
+        }
+
+        # get truthy value for each flattened field
+        mock_args = dict(
+            name="name_value",
+        )
+        mock_args.update(sample_request)
+
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        response_value.status_code = 200
+        # Convert return value to protobuf type
+        return_value = user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value._content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        client.disable_user_creds(**mock_args)
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(req.mock_calls) == 1
+        _, args, _ = req.mock_calls[0]
+        assert path_template.validate(
+            "%s/v1/{name=projects/*/databases/*/userCreds/*}:disable"
+            % client.transport._host,
+            args[1],
+        )
+
+
+def test_disable_user_creds_rest_flattened_error(transport: str = "rest"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.disable_user_creds(
+            firestore_admin.DisableUserCredsRequest(),
+            name="name_value",
+        )
+
+
+def test_reset_user_password_rest_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="rest",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._transport.reset_user_password in client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.reset_user_password
+        ] = mock_rpc
+
+        request = {}
+        client.reset_user_password(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.reset_user_password(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+def test_reset_user_password_rest_required_fields(
+    request_type=firestore_admin.ResetUserPasswordRequest,
+):
+    transport_class = transports.FirestoreAdminRestTransport
+
+    request_init = {}
+    request_init["name"] = ""
+    request = request_type(**request_init)
+    pb_request = request_type.pb(request)
+    jsonified_request = json.loads(
+        json_format.MessageToJson(pb_request, use_integers_for_enums=False)
+    )
+
+    # verify fields with default values are dropped
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).reset_user_password._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with default values are now present
+
+    jsonified_request["name"] = "name_value"
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).reset_user_password._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with non-default values are left alone
+    assert "name" in jsonified_request
+    assert jsonified_request["name"] == "name_value"
+
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type(**request_init)
+
+    # Designate an appropriate value for the returned response.
+    return_value = user_creds.UserCreds()
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # We need to mock transcode() because providing default values
+        # for required fields will fail the real version if the http_options
+        # expect actual values for those fields.
+        with mock.patch.object(path_template, "transcode") as transcode:
+            # A uri without fields and an empty body will force all the
+            # request fields to show up in the query_params.
+            pb_request = request_type.pb(request)
+            transcode_result = {
+                "uri": "v1/sample_method",
+                "method": "post",
+                "query_params": pb_request,
+            }
+            transcode_result["body"] = pb_request
+            transcode.return_value = transcode_result
+
+            response_value = Response()
+            response_value.status_code = 200
+
+            # Convert return value to protobuf type
+            return_value = user_creds.UserCreds.pb(return_value)
+            json_return_value = json_format.MessageToJson(return_value)
+
+            response_value._content = json_return_value.encode("UTF-8")
+            req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+            response = client.reset_user_password(request)
+
+            expected_params = [("$alt", "json;enum-encoding=int")]
+            actual_params = req.call_args.kwargs["params"]
+            assert expected_params == actual_params
+
+
+def test_reset_user_password_rest_unset_required_fields():
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials
+    )
+
+    unset_fields = transport.reset_user_password._get_unset_required_fields({})
+    assert set(unset_fields) == (set(()) & set(("name",)))
+
+
+def test_reset_user_password_rest_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = user_creds.UserCreds()
+
+        # get arguments that satisfy an http rule for this method
+        sample_request = {
+            "name": "projects/sample1/databases/sample2/userCreds/sample3"
+        }
+
+        # get truthy value for each flattened field
+        mock_args = dict(
+            name="name_value",
+        )
+        mock_args.update(sample_request)
+
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        response_value.status_code = 200
+        # Convert return value to protobuf type
+        return_value = user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value._content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        client.reset_user_password(**mock_args)
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(req.mock_calls) == 1
+        _, args, _ = req.mock_calls[0]
+        assert path_template.validate(
+            "%s/v1/{name=projects/*/databases/*/userCreds/*}:resetPassword"
+            % client.transport._host,
+            args[1],
+        )
+
+
+def test_reset_user_password_rest_flattened_error(transport: str = "rest"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.reset_user_password(
+            firestore_admin.ResetUserPasswordRequest(),
+            name="name_value",
+        )
+
+
+def test_delete_user_creds_rest_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreAdminClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="rest",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.delete_user_creds in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.delete_user_creds
+        ] = mock_rpc
+
+        request = {}
+        client.delete_user_creds(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.delete_user_creds(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+def test_delete_user_creds_rest_required_fields(
+    request_type=firestore_admin.DeleteUserCredsRequest,
+):
+    transport_class = transports.FirestoreAdminRestTransport
+
+    request_init = {}
+    request_init["name"] = ""
+    request = request_type(**request_init)
+    pb_request = request_type.pb(request)
+    jsonified_request = json.loads(
+        json_format.MessageToJson(pb_request, use_integers_for_enums=False)
+    )
+
+    # verify fields with default values are dropped
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).delete_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with default values are now present
+
+    jsonified_request["name"] = "name_value"
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).delete_user_creds._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with non-default values are left alone
+    assert "name" in jsonified_request
+    assert jsonified_request["name"] == "name_value"
+
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type(**request_init)
+
+    # Designate an appropriate value for the returned response.
+    return_value = None
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # We need to mock transcode() because providing default values
+        # for required fields will fail the real version if the http_options
+        # expect actual values for those fields.
+        with mock.patch.object(path_template, "transcode") as transcode:
+            # A uri without fields and an empty body will force all the
+            # request fields to show up in the query_params.
+            pb_request = request_type.pb(request)
+            transcode_result = {
+                "uri": "v1/sample_method",
+                "method": "delete",
+                "query_params": pb_request,
+            }
+            transcode.return_value = transcode_result
+
+            response_value = Response()
+            response_value.status_code = 200
+            json_return_value = ""
+
+            response_value._content = json_return_value.encode("UTF-8")
+            req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+            response = client.delete_user_creds(request)
+
+            expected_params = [("$alt", "json;enum-encoding=int")]
+            actual_params = req.call_args.kwargs["params"]
+            assert expected_params == actual_params
+
+
+def test_delete_user_creds_rest_unset_required_fields():
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials
+    )
+
+    unset_fields = transport.delete_user_creds._get_unset_required_fields({})
+    assert set(unset_fields) == (set(()) & set(("name",)))
+
+
+def test_delete_user_creds_rest_flattened():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = None
+
+        # get arguments that satisfy an http rule for this method
+        sample_request = {
+            "name": "projects/sample1/databases/sample2/userCreds/sample3"
+        }
+
+        # get truthy value for each flattened field
+        mock_args = dict(
+            name="name_value",
+        )
+        mock_args.update(sample_request)
+
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        response_value.status_code = 200
+        json_return_value = ""
+        response_value._content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        client.delete_user_creds(**mock_args)
+
+        # Establish that the underlying call was made with the expected
+        # request object values.
+        assert len(req.mock_calls) == 1
+        _, args, _ = req.mock_calls[0]
+        assert path_template.validate(
+            "%s/v1/{name=projects/*/databases/*/userCreds/*}" % client.transport._host,
+            args[1],
+        )
+
+
+def test_delete_user_creds_rest_flattened_error(transport: str = "rest"):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Attempting to call a method with both a request object and flattened
+    # fields is an error.
+    with pytest.raises(ValueError):
+        client.delete_user_creds(
+            firestore_admin.DeleteUserCredsRequest(),
+            name="name_value",
+        )
 
 
 def test_get_backup_rest_use_cached_wrapped_rpc():
@@ -15744,6 +16130,7 @@ def test_get_backup_rest_required_fields(request_type=firestore_admin.GetBackupR
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_backup(request)
 
@@ -15759,85 +16146,6 @@ def test_get_backup_rest_unset_required_fields():
 
     unset_fields = transport.get_backup._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_get_backup_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_get_backup"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_get_backup"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.GetBackupRequest.pb(
-            firestore_admin.GetBackupRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = backup.Backup.to_json(backup.Backup())
-
-        request = firestore_admin.GetBackupRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = backup.Backup()
-
-        client.get_backup(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_get_backup_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.GetBackupRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/locations/sample2/backups/sample3"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.get_backup(request)
 
 
 def test_get_backup_rest_flattened():
@@ -15868,6 +16176,7 @@ def test_get_backup_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_backup(**mock_args)
 
@@ -15894,52 +16203,6 @@ def test_get_backup_rest_flattened_error(transport: str = "rest"):
             firestore_admin.GetBackupRequest(),
             name="name_value",
         )
-
-
-def test_get_backup_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.ListBackupsRequest,
-        dict,
-    ],
-)
-def test_list_backups_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1/locations/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = firestore_admin.ListBackupsResponse(
-            unreachable=["unreachable_value"],
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = firestore_admin.ListBackupsResponse.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.list_backups(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, firestore_admin.ListBackupsResponse)
-    assert response.unreachable == ["unreachable_value"]
 
 
 def test_list_backups_rest_use_cached_wrapped_rpc():
@@ -16005,6 +16268,8 @@ def test_list_backups_rest_required_fields(
     unset_fields = transport_class(
         credentials=ga_credentials.AnonymousCredentials()
     ).list_backups._get_unset_required_fields(jsonified_request)
+    # Check that path parameters and body parameters are not mixing in.
+    assert not set(unset_fields) - set(("filter",))
     jsonified_request.update(unset_fields)
 
     # verify required fields with non-default values are left alone
@@ -16044,6 +16309,7 @@ def test_list_backups_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_backups(request)
 
@@ -16058,88 +16324,7 @@ def test_list_backups_rest_unset_required_fields():
     )
 
     unset_fields = transport.list_backups._get_unset_required_fields({})
-    assert set(unset_fields) == (set(()) & set(("parent",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_list_backups_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_list_backups"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_list_backups"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.ListBackupsRequest.pb(
-            firestore_admin.ListBackupsRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = firestore_admin.ListBackupsResponse.to_json(
-            firestore_admin.ListBackupsResponse()
-        )
-
-        request = firestore_admin.ListBackupsRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = firestore_admin.ListBackupsResponse()
-
-        client.list_backups(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_list_backups_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.ListBackupsRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1/locations/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.list_backups(request)
+    assert set(unset_fields) == (set(("filter",)) & set(("parent",)))
 
 
 def test_list_backups_rest_flattened():
@@ -16170,6 +16355,7 @@ def test_list_backups_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_backups(**mock_args)
 
@@ -16196,47 +16382,6 @@ def test_list_backups_rest_flattened_error(transport: str = "rest"):
             firestore_admin.ListBackupsRequest(),
             parent="parent_value",
         )
-
-
-def test_list_backups_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.DeleteBackupRequest,
-        dict,
-    ],
-)
-def test_delete_backup_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/locations/sample2/backups/sample3"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = None
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = ""
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.delete_backup(request)
-
-    # Establish that the response is the type that we expect.
-    assert response is None
 
 
 def test_delete_backup_rest_use_cached_wrapped_rpc():
@@ -16338,6 +16483,7 @@ def test_delete_backup_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.delete_backup(request)
 
@@ -16353,79 +16499,6 @@ def test_delete_backup_rest_unset_required_fields():
 
     unset_fields = transport.delete_backup._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_delete_backup_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_delete_backup"
-    ) as pre:
-        pre.assert_not_called()
-        pb_message = firestore_admin.DeleteBackupRequest.pb(
-            firestore_admin.DeleteBackupRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-
-        request = firestore_admin.DeleteBackupRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-
-        client.delete_backup(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-
-
-def test_delete_backup_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.DeleteBackupRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"name": "projects/sample1/locations/sample2/backups/sample3"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.delete_backup(request)
 
 
 def test_delete_backup_rest_flattened():
@@ -16454,6 +16527,7 @@ def test_delete_backup_rest_flattened():
         json_return_value = ""
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.delete_backup(**mock_args)
 
@@ -16480,47 +16554,6 @@ def test_delete_backup_rest_flattened_error(transport: str = "rest"):
             firestore_admin.DeleteBackupRequest(),
             name="name_value",
         )
-
-
-def test_delete_backup_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.RestoreDatabaseRequest,
-        dict,
-    ],
-)
-def test_restore_database_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation(name="operations/spam")
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.restore_database(request)
-
-    # Establish that the response is the type that we expect.
-    assert response.operation.name == "operations/spam"
 
 
 def test_restore_database_rest_use_cached_wrapped_rpc():
@@ -16637,6 +16670,7 @@ def test_restore_database_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.restore_database(request)
 
@@ -16661,212 +16695,6 @@ def test_restore_database_rest_unset_required_fields():
             )
         )
     )
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_restore_database_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        operation.Operation, "_set_result_from_operation"
-    ), mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_restore_database"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_restore_database"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.RestoreDatabaseRequest.pb(
-            firestore_admin.RestoreDatabaseRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = json_format.MessageToJson(
-            operations_pb2.Operation()
-        )
-
-        request = firestore_admin.RestoreDatabaseRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = operations_pb2.Operation()
-
-        client.restore_database(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_restore_database_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.RestoreDatabaseRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.restore_database(request)
-
-
-def test_restore_database_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.CreateBackupScheduleRequest,
-        dict,
-    ],
-)
-def test_create_backup_schedule_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1/databases/sample2"}
-    request_init["backup_schedule"] = {
-        "name": "name_value",
-        "create_time": {"seconds": 751, "nanos": 543},
-        "update_time": {},
-        "retention": {"seconds": 751, "nanos": 543},
-        "daily_recurrence": {},
-        "weekly_recurrence": {"day": 1},
-    }
-    # The version of a generated dependency at test runtime may differ from the version used during generation.
-    # Delete any fields which are not present in the current runtime dependency
-    # See https://github.com/googleapis/gapic-generator-python/issues/1748
-
-    # Determine if the message type is proto-plus or protobuf
-    test_field = firestore_admin.CreateBackupScheduleRequest.meta.fields[
-        "backup_schedule"
-    ]
-
-    def get_message_fields(field):
-        # Given a field which is a message (composite type), return a list with
-        # all the fields of the message.
-        # If the field is not a composite type, return an empty list.
-        message_fields = []
-
-        if hasattr(field, "message") and field.message:
-            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
-
-            if is_field_type_proto_plus_type:
-                message_fields = field.message.meta.fields.values()
-            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
-            else:  # pragma: NO COVER
-                message_fields = field.message.DESCRIPTOR.fields
-        return message_fields
-
-    runtime_nested_fields = [
-        (field.name, nested_field.name)
-        for field in get_message_fields(test_field)
-        for nested_field in get_message_fields(field)
-    ]
-
-    subfields_not_in_runtime = []
-
-    # For each item in the sample request, create a list of sub fields which are not present at runtime
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for field, value in request_init["backup_schedule"].items():  # pragma: NO COVER
-        result = None
-        is_repeated = False
-        # For repeated fields
-        if isinstance(value, list) and len(value):
-            is_repeated = True
-            result = value[0]
-        # For fields where the type is another message
-        if isinstance(value, dict):
-            result = value
-
-        if result and hasattr(result, "keys"):
-            for subfield in result.keys():
-                if (field, subfield) not in runtime_nested_fields:
-                    subfields_not_in_runtime.append(
-                        {
-                            "field": field,
-                            "subfield": subfield,
-                            "is_repeated": is_repeated,
-                        }
-                    )
-
-    # Remove fields from the sample request which are not present in the runtime version of the dependency
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
-        field = subfield_to_delete.get("field")
-        field_repeated = subfield_to_delete.get("is_repeated")
-        subfield = subfield_to_delete.get("subfield")
-        if subfield:
-            if field_repeated:
-                for i in range(0, len(request_init["backup_schedule"][field])):
-                    del request_init["backup_schedule"][field][i][subfield]
-            else:
-                del request_init["backup_schedule"][field][subfield]
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = schedule.BackupSchedule(
-            name="name_value",
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = schedule.BackupSchedule.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.create_backup_schedule(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, schedule.BackupSchedule)
-    assert response.name == "name_value"
 
 
 def test_create_backup_schedule_rest_use_cached_wrapped_rpc():
@@ -16977,6 +16805,7 @@ def test_create_backup_schedule_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.create_backup_schedule(request)
 
@@ -17000,87 +16829,6 @@ def test_create_backup_schedule_rest_unset_required_fields():
             )
         )
     )
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_create_backup_schedule_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_create_backup_schedule"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_create_backup_schedule"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.CreateBackupScheduleRequest.pb(
-            firestore_admin.CreateBackupScheduleRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = schedule.BackupSchedule.to_json(
-            schedule.BackupSchedule()
-        )
-
-        request = firestore_admin.CreateBackupScheduleRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = schedule.BackupSchedule()
-
-        client.create_backup_schedule(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_create_backup_schedule_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.CreateBackupScheduleRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.create_backup_schedule(request)
 
 
 def test_create_backup_schedule_rest_flattened():
@@ -17112,6 +16860,7 @@ def test_create_backup_schedule_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.create_backup_schedule(**mock_args)
 
@@ -17140,54 +16889,6 @@ def test_create_backup_schedule_rest_flattened_error(transport: str = "rest"):
             parent="parent_value",
             backup_schedule=schedule.BackupSchedule(name="name_value"),
         )
-
-
-def test_create_backup_schedule_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.GetBackupScheduleRequest,
-        dict,
-    ],
-)
-def test_get_backup_schedule_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = schedule.BackupSchedule(
-            name="name_value",
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = schedule.BackupSchedule.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.get_backup_schedule(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, schedule.BackupSchedule)
-    assert response.name == "name_value"
 
 
 def test_get_backup_schedule_rest_use_cached_wrapped_rpc():
@@ -17296,6 +16997,7 @@ def test_get_backup_schedule_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.get_backup_schedule(request)
 
@@ -17311,89 +17013,6 @@ def test_get_backup_schedule_rest_unset_required_fields():
 
     unset_fields = transport.get_backup_schedule._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_get_backup_schedule_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_get_backup_schedule"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_get_backup_schedule"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.GetBackupScheduleRequest.pb(
-            firestore_admin.GetBackupScheduleRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = schedule.BackupSchedule.to_json(
-            schedule.BackupSchedule()
-        )
-
-        request = firestore_admin.GetBackupScheduleRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = schedule.BackupSchedule()
-
-        client.get_backup_schedule(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_get_backup_schedule_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.GetBackupScheduleRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.get_backup_schedule(request)
 
 
 def test_get_backup_schedule_rest_flattened():
@@ -17426,6 +17045,7 @@ def test_get_backup_schedule_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.get_backup_schedule(**mock_args)
 
@@ -17453,49 +17073,6 @@ def test_get_backup_schedule_rest_flattened_error(transport: str = "rest"):
             firestore_admin.GetBackupScheduleRequest(),
             name="name_value",
         )
-
-
-def test_get_backup_schedule_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.ListBackupSchedulesRequest,
-        dict,
-    ],
-)
-def test_list_backup_schedules_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = firestore_admin.ListBackupSchedulesResponse()
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = firestore_admin.ListBackupSchedulesResponse.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.list_backup_schedules(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, firestore_admin.ListBackupSchedulesResponse)
 
 
 def test_list_backup_schedules_rest_use_cached_wrapped_rpc():
@@ -17605,6 +17182,7 @@ def test_list_backup_schedules_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.list_backup_schedules(request)
 
@@ -17620,87 +17198,6 @@ def test_list_backup_schedules_rest_unset_required_fields():
 
     unset_fields = transport.list_backup_schedules._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("parent",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_list_backup_schedules_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_list_backup_schedules"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_list_backup_schedules"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.ListBackupSchedulesRequest.pb(
-            firestore_admin.ListBackupSchedulesRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = firestore_admin.ListBackupSchedulesResponse.to_json(
-            firestore_admin.ListBackupSchedulesResponse()
-        )
-
-        request = firestore_admin.ListBackupSchedulesRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = firestore_admin.ListBackupSchedulesResponse()
-
-        client.list_backup_schedules(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_list_backup_schedules_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.ListBackupSchedulesRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {"parent": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.list_backup_schedules(request)
 
 
 def test_list_backup_schedules_rest_flattened():
@@ -17731,6 +17228,7 @@ def test_list_backup_schedules_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.list_backup_schedules(**mock_args)
 
@@ -17758,133 +17256,6 @@ def test_list_backup_schedules_rest_flattened_error(transport: str = "rest"):
             firestore_admin.ListBackupSchedulesRequest(),
             parent="parent_value",
         )
-
-
-def test_list_backup_schedules_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.UpdateBackupScheduleRequest,
-        dict,
-    ],
-)
-def test_update_backup_schedule_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "backup_schedule": {
-            "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
-        }
-    }
-    request_init["backup_schedule"] = {
-        "name": "projects/sample1/databases/sample2/backupSchedules/sample3",
-        "create_time": {"seconds": 751, "nanos": 543},
-        "update_time": {},
-        "retention": {"seconds": 751, "nanos": 543},
-        "daily_recurrence": {},
-        "weekly_recurrence": {"day": 1},
-    }
-    # The version of a generated dependency at test runtime may differ from the version used during generation.
-    # Delete any fields which are not present in the current runtime dependency
-    # See https://github.com/googleapis/gapic-generator-python/issues/1748
-
-    # Determine if the message type is proto-plus or protobuf
-    test_field = firestore_admin.UpdateBackupScheduleRequest.meta.fields[
-        "backup_schedule"
-    ]
-
-    def get_message_fields(field):
-        # Given a field which is a message (composite type), return a list with
-        # all the fields of the message.
-        # If the field is not a composite type, return an empty list.
-        message_fields = []
-
-        if hasattr(field, "message") and field.message:
-            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
-
-            if is_field_type_proto_plus_type:
-                message_fields = field.message.meta.fields.values()
-            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
-            else:  # pragma: NO COVER
-                message_fields = field.message.DESCRIPTOR.fields
-        return message_fields
-
-    runtime_nested_fields = [
-        (field.name, nested_field.name)
-        for field in get_message_fields(test_field)
-        for nested_field in get_message_fields(field)
-    ]
-
-    subfields_not_in_runtime = []
-
-    # For each item in the sample request, create a list of sub fields which are not present at runtime
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for field, value in request_init["backup_schedule"].items():  # pragma: NO COVER
-        result = None
-        is_repeated = False
-        # For repeated fields
-        if isinstance(value, list) and len(value):
-            is_repeated = True
-            result = value[0]
-        # For fields where the type is another message
-        if isinstance(value, dict):
-            result = value
-
-        if result and hasattr(result, "keys"):
-            for subfield in result.keys():
-                if (field, subfield) not in runtime_nested_fields:
-                    subfields_not_in_runtime.append(
-                        {
-                            "field": field,
-                            "subfield": subfield,
-                            "is_repeated": is_repeated,
-                        }
-                    )
-
-    # Remove fields from the sample request which are not present in the runtime version of the dependency
-    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
-    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
-        field = subfield_to_delete.get("field")
-        field_repeated = subfield_to_delete.get("is_repeated")
-        subfield = subfield_to_delete.get("subfield")
-        if subfield:
-            if field_repeated:
-                for i in range(0, len(request_init["backup_schedule"][field])):
-                    del request_init["backup_schedule"][field][i][subfield]
-            else:
-                del request_init["backup_schedule"][field][subfield]
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = schedule.BackupSchedule(
-            name="name_value",
-        )
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        # Convert return value to protobuf type
-        return_value = schedule.BackupSchedule.pb(return_value)
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.update_backup_schedule(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, schedule.BackupSchedule)
-    assert response.name == "name_value"
 
 
 def test_update_backup_schedule_rest_use_cached_wrapped_rpc():
@@ -17992,6 +17363,7 @@ def test_update_backup_schedule_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.update_backup_schedule(request)
 
@@ -18007,91 +17379,6 @@ def test_update_backup_schedule_rest_unset_required_fields():
 
     unset_fields = transport.update_backup_schedule._get_unset_required_fields({})
     assert set(unset_fields) == (set(("updateMask",)) & set(("backupSchedule",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_update_backup_schedule_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "post_update_backup_schedule"
-    ) as post, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_update_backup_schedule"
-    ) as pre:
-        pre.assert_not_called()
-        post.assert_not_called()
-        pb_message = firestore_admin.UpdateBackupScheduleRequest.pb(
-            firestore_admin.UpdateBackupScheduleRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-        req.return_value._content = schedule.BackupSchedule.to_json(
-            schedule.BackupSchedule()
-        )
-
-        request = firestore_admin.UpdateBackupScheduleRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-        post.return_value = schedule.BackupSchedule()
-
-        client.update_backup_schedule(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-        post.assert_called_once()
-
-
-def test_update_backup_schedule_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.UpdateBackupScheduleRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "backup_schedule": {
-            "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
-        }
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.update_backup_schedule(request)
 
 
 def test_update_backup_schedule_rest_flattened():
@@ -18127,6 +17414,7 @@ def test_update_backup_schedule_rest_flattened():
         json_return_value = json_format.MessageToJson(return_value)
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.update_backup_schedule(**mock_args)
 
@@ -18155,49 +17443,6 @@ def test_update_backup_schedule_rest_flattened_error(transport: str = "rest"):
             backup_schedule=schedule.BackupSchedule(name="name_value"),
             update_mask=field_mask_pb2.FieldMask(paths=["paths_value"]),
         )
-
-
-def test_update_backup_schedule_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        firestore_admin.DeleteBackupScheduleRequest,
-        dict,
-    ],
-)
-def test_delete_backup_schedule_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = None
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = ""
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-        response = client.delete_backup_schedule(request)
-
-    # Establish that the response is the type that we expect.
-    assert response is None
 
 
 def test_delete_backup_schedule_rest_use_cached_wrapped_rpc():
@@ -18304,6 +17549,7 @@ def test_delete_backup_schedule_rest_required_fields(
 
             response_value._content = json_return_value.encode("UTF-8")
             req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
             response = client.delete_backup_schedule(request)
 
@@ -18319,81 +17565,6 @@ def test_delete_backup_schedule_rest_unset_required_fields():
 
     unset_fields = transport.delete_backup_schedule._get_unset_required_fields({})
     assert set(unset_fields) == (set(()) & set(("name",)))
-
-
-@pytest.mark.parametrize("null_interceptor", [True, False])
-def test_delete_backup_schedule_rest_interceptors(null_interceptor):
-    transport = transports.FirestoreAdminRestTransport(
-        credentials=ga_credentials.AnonymousCredentials(),
-        interceptor=None
-        if null_interceptor
-        else transports.FirestoreAdminRestInterceptor(),
-    )
-    client = FirestoreAdminClient(transport=transport)
-    with mock.patch.object(
-        type(client.transport._session), "request"
-    ) as req, mock.patch.object(
-        path_template, "transcode"
-    ) as transcode, mock.patch.object(
-        transports.FirestoreAdminRestInterceptor, "pre_delete_backup_schedule"
-    ) as pre:
-        pre.assert_not_called()
-        pb_message = firestore_admin.DeleteBackupScheduleRequest.pb(
-            firestore_admin.DeleteBackupScheduleRequest()
-        )
-        transcode.return_value = {
-            "method": "post",
-            "uri": "my_uri",
-            "body": pb_message,
-            "query_params": pb_message,
-        }
-
-        req.return_value = Response()
-        req.return_value.status_code = 200
-        req.return_value.request = PreparedRequest()
-
-        request = firestore_admin.DeleteBackupScheduleRequest()
-        metadata = [
-            ("key", "val"),
-            ("cephalopod", "squid"),
-        ]
-        pre.return_value = request, metadata
-
-        client.delete_backup_schedule(
-            request,
-            metadata=[
-                ("key", "val"),
-                ("cephalopod", "squid"),
-            ],
-        )
-
-        pre.assert_called_once()
-
-
-def test_delete_backup_schedule_rest_bad_request(
-    transport: str = "rest", request_type=firestore_admin.DeleteBackupScheduleRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    # send a request that will satisfy transcoding
-    request_init = {
-        "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
-    }
-    request = request_type(**request_init)
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.delete_backup_schedule(request)
 
 
 def test_delete_backup_schedule_rest_flattened():
@@ -18424,6 +17595,7 @@ def test_delete_backup_schedule_rest_flattened():
         json_return_value = ""
         response_value._content = json_return_value.encode("UTF-8")
         req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
 
         client.delete_backup_schedule(**mock_args)
 
@@ -18451,12 +17623,6 @@ def test_delete_backup_schedule_rest_flattened_error(transport: str = "rest"):
             firestore_admin.DeleteBackupScheduleRequest(),
             name="name_value",
         )
-
-
-def test_delete_backup_schedule_rest_error():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
-    )
 
 
 def test_credentials_transport_error():
@@ -18551,18 +17717,7038 @@ def test_transport_adc(transport_class):
         adc.assert_called_once()
 
 
+def test_transport_kind_grpc():
+    transport = FirestoreAdminClient.get_transport_class("grpc")(
+        credentials=ga_credentials.AnonymousCredentials()
+    )
+    assert transport.kind == "grpc"
+
+
+def test_initialize_client_w_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="grpc"
+    )
+    assert client is not None
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_create_index_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.create_index), "__call__") as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.create_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_indexes_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_indexes), "__call__") as call:
+        call.return_value = firestore_admin.ListIndexesResponse()
+        client.list_indexes(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListIndexesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_index_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_index), "__call__") as call:
+        call.return_value = index.Index()
+        client.get_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_index_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_index), "__call__") as call:
+        call.return_value = None
+        client.delete_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_field_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_field), "__call__") as call:
+        call.return_value = field.Field()
+        client.get_field(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetFieldRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_update_field_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.update_field), "__call__") as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.update_field(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateFieldRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_fields_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_fields), "__call__") as call:
+        call.return_value = firestore_admin.ListFieldsResponse()
+        client.list_fields(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListFieldsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_export_documents_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.export_documents), "__call__") as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.export_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ExportDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_import_documents_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.import_documents), "__call__") as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.import_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ImportDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_bulk_delete_documents_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.bulk_delete_documents), "__call__"
+    ) as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.bulk_delete_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.BulkDeleteDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_create_database_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.create_database), "__call__") as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.create_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_database_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_database), "__call__") as call:
+        call.return_value = database.Database()
+        client.get_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_databases_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_databases), "__call__") as call:
+        call.return_value = firestore_admin.ListDatabasesResponse()
+        client.list_databases(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListDatabasesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_update_database_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.update_database), "__call__") as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.update_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_database_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_database), "__call__") as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.delete_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_create_user_creds_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        call.return_value = gfa_user_creds.UserCreds()
+        client.create_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_user_creds_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        call.return_value = user_creds.UserCreds()
+        client.get_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_user_creds_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        call.return_value = firestore_admin.ListUserCredsResponse()
+        client.list_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_enable_user_creds_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        call.return_value = user_creds.UserCreds()
+        client.enable_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.EnableUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_disable_user_creds_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        call.return_value = user_creds.UserCreds()
+        client.disable_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DisableUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_reset_user_password_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        call.return_value = user_creds.UserCreds()
+        client.reset_user_password(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ResetUserPasswordRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_user_creds_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        call.return_value = None
+        client.delete_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_backup_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_backup), "__call__") as call:
+        call.return_value = backup.Backup()
+        client.get_backup(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetBackupRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_backups_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_backups), "__call__") as call:
+        call.return_value = firestore_admin.ListBackupsResponse()
+        client.list_backups(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListBackupsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_backup_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_backup), "__call__") as call:
+        call.return_value = None
+        client.delete_backup(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteBackupRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_restore_database_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.restore_database), "__call__") as call:
+        call.return_value = operations_pb2.Operation(name="operations/op")
+        client.restore_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.RestoreDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_create_backup_schedule_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_backup_schedule), "__call__"
+    ) as call:
+        call.return_value = schedule.BackupSchedule()
+        client.create_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_backup_schedule_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.get_backup_schedule), "__call__"
+    ) as call:
+        call.return_value = schedule.BackupSchedule()
+        client.get_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_backup_schedules_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.list_backup_schedules), "__call__"
+    ) as call:
+        call.return_value = firestore_admin.ListBackupSchedulesResponse()
+        client.list_backup_schedules(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListBackupSchedulesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_update_backup_schedule_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.update_backup_schedule), "__call__"
+    ) as call:
+        call.return_value = schedule.BackupSchedule()
+        client.update_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_backup_schedule_empty_call_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_backup_schedule), "__call__"
+    ) as call:
+        call.return_value = None
+        client.delete_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+def test_transport_kind_grpc_asyncio():
+    transport = FirestoreAdminAsyncClient.get_transport_class("grpc_asyncio")(
+        credentials=async_anonymous_credentials()
+    )
+    assert transport.kind == "grpc_asyncio"
+
+
+def test_initialize_client_w_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(), transport="grpc_asyncio"
+    )
+    assert client is not None
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_create_index_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.create_index), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.create_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_list_indexes_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_indexes), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListIndexesResponse(
+                next_page_token="next_page_token_value",
+            )
+        )
+        await client.list_indexes(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListIndexesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_get_index_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_index), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            index.Index(
+                name="name_value",
+                query_scope=index.Index.QueryScope.COLLECTION,
+                api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
+                state=index.Index.State.CREATING,
+                density=index.Index.Density.SPARSE_ALL,
+                multikey=True,
+                shard_count=1178,
+            )
+        )
+        await client.get_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_delete_index_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_index), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
+        await client.delete_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_get_field_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_field), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            field.Field(
+                name="name_value",
+            )
+        )
+        await client.get_field(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetFieldRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_update_field_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.update_field), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.update_field(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateFieldRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_list_fields_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_fields), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListFieldsResponse(
+                next_page_token="next_page_token_value",
+            )
+        )
+        await client.list_fields(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListFieldsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_export_documents_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.export_documents), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.export_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ExportDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_import_documents_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.import_documents), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.import_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ImportDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_bulk_delete_documents_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.bulk_delete_documents), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.bulk_delete_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.BulkDeleteDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_create_database_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.create_database), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.create_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_get_database_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_database), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            database.Database(
+                name="name_value",
+                uid="uid_value",
+                location_id="location_id_value",
+                type_=database.Database.DatabaseType.FIRESTORE_NATIVE,
+                concurrency_mode=database.Database.ConcurrencyMode.OPTIMISTIC,
+                point_in_time_recovery_enablement=database.Database.PointInTimeRecoveryEnablement.POINT_IN_TIME_RECOVERY_ENABLED,
+                app_engine_integration_mode=database.Database.AppEngineIntegrationMode.ENABLED,
+                key_prefix="key_prefix_value",
+                delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
+                previous_id="previous_id_value",
+                free_tier=True,
+                etag="etag_value",
+                database_edition=database.Database.DatabaseEdition.STANDARD,
+            )
+        )
+        await client.get_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_list_databases_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_databases), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListDatabasesResponse(
+                unreachable=["unreachable_value"],
+            )
+        )
+        await client.list_databases(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListDatabasesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_update_database_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.update_database), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.update_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_delete_database_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_database), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.delete_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_create_user_creds_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            gfa_user_creds.UserCreds(
+                name="name_value",
+                state=gfa_user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        await client.create_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_get_user_creds_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds(
+                name="name_value",
+                state=user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        await client.get_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_list_user_creds_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListUserCredsResponse()
+        )
+        await client.list_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_enable_user_creds_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds(
+                name="name_value",
+                state=user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        await client.enable_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.EnableUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_disable_user_creds_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds(
+                name="name_value",
+                state=user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        await client.disable_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DisableUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_reset_user_password_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            user_creds.UserCreds(
+                name="name_value",
+                state=user_creds.UserCreds.State.ENABLED,
+                secure_password="secure_password_value",
+            )
+        )
+        await client.reset_user_password(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ResetUserPasswordRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_delete_user_creds_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
+        await client.delete_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_get_backup_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_backup), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            backup.Backup(
+                name="name_value",
+                database="database_value",
+                database_uid="database_uid_value",
+                state=backup.Backup.State.CREATING,
+            )
+        )
+        await client.get_backup(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetBackupRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_list_backups_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_backups), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListBackupsResponse(
+                unreachable=["unreachable_value"],
+            )
+        )
+        await client.list_backups(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListBackupsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_delete_backup_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_backup), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
+        await client.delete_backup(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteBackupRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_restore_database_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.restore_database), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            operations_pb2.Operation(name="operations/spam")
+        )
+        await client.restore_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.RestoreDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_create_backup_schedule_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_backup_schedule), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            schedule.BackupSchedule(
+                name="name_value",
+            )
+        )
+        await client.create_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_get_backup_schedule_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.get_backup_schedule), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            schedule.BackupSchedule(
+                name="name_value",
+            )
+        )
+        await client.get_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_list_backup_schedules_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.list_backup_schedules), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            firestore_admin.ListBackupSchedulesResponse()
+        )
+        await client.list_backup_schedules(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListBackupSchedulesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_update_backup_schedule_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.update_backup_schedule), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(
+            schedule.BackupSchedule(
+                name="name_value",
+            )
+        )
+        await client.update_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
+async def test_delete_backup_schedule_empty_call_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_backup_schedule), "__call__"
+    ) as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = grpc_helpers_async.FakeUnaryUnaryCall(None)
+        await client.delete_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+def test_transport_kind_rest():
+    transport = FirestoreAdminClient.get_transport_class("rest")(
+        credentials=ga_credentials.AnonymousCredentials()
+    )
+    assert transport.kind == "rest"
+
+
+def test_create_index_rest_bad_request(request_type=firestore_admin.CreateIndexRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.create_index(request)
+
+
 @pytest.mark.parametrize(
-    "transport_name",
+    "request_type",
     [
-        "grpc",
-        "rest",
+        firestore_admin.CreateIndexRequest,
+        dict,
     ],
 )
-def test_transport_kind(transport_name):
-    transport = FirestoreAdminClient.get_transport_class(transport_name)(
-        credentials=ga_credentials.AnonymousCredentials(),
+def test_create_index_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
     )
-    assert transport.kind == transport_name
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
+    }
+    request_init["index"] = {
+        "name": "name_value",
+        "query_scope": 1,
+        "api_scope": 1,
+        "fields": [
+            {
+                "field_path": "field_path_value",
+                "order": 1,
+                "array_config": 1,
+                "vector_config": {"dimension": 966, "flat": {}},
+            }
+        ],
+        "state": 1,
+        "density": 1,
+        "multikey": True,
+        "shard_count": 1178,
+    }
+    # The version of a generated dependency at test runtime may differ from the version used during generation.
+    # Delete any fields which are not present in the current runtime dependency
+    # See https://github.com/googleapis/gapic-generator-python/issues/1748
+
+    # Determine if the message type is proto-plus or protobuf
+    test_field = firestore_admin.CreateIndexRequest.meta.fields["index"]
+
+    def get_message_fields(field):
+        # Given a field which is a message (composite type), return a list with
+        # all the fields of the message.
+        # If the field is not a composite type, return an empty list.
+        message_fields = []
+
+        if hasattr(field, "message") and field.message:
+            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
+
+            if is_field_type_proto_plus_type:
+                message_fields = field.message.meta.fields.values()
+            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
+            else:  # pragma: NO COVER
+                message_fields = field.message.DESCRIPTOR.fields
+        return message_fields
+
+    runtime_nested_fields = [
+        (field.name, nested_field.name)
+        for field in get_message_fields(test_field)
+        for nested_field in get_message_fields(field)
+    ]
+
+    subfields_not_in_runtime = []
+
+    # For each item in the sample request, create a list of sub fields which are not present at runtime
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for field, value in request_init["index"].items():  # pragma: NO COVER
+        result = None
+        is_repeated = False
+        # For repeated fields
+        if isinstance(value, list) and len(value):
+            is_repeated = True
+            result = value[0]
+        # For fields where the type is another message
+        if isinstance(value, dict):
+            result = value
+
+        if result and hasattr(result, "keys"):
+            for subfield in result.keys():
+                if (field, subfield) not in runtime_nested_fields:
+                    subfields_not_in_runtime.append(
+                        {
+                            "field": field,
+                            "subfield": subfield,
+                            "is_repeated": is_repeated,
+                        }
+                    )
+
+    # Remove fields from the sample request which are not present in the runtime version of the dependency
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
+        field = subfield_to_delete.get("field")
+        field_repeated = subfield_to_delete.get("is_repeated")
+        subfield = subfield_to_delete.get("subfield")
+        if subfield:
+            if field_repeated:
+                for i in range(0, len(request_init["index"][field])):
+                    del request_init["index"][field][i][subfield]
+            else:
+                del request_init["index"][field][subfield]
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.create_index(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_create_index_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_create_index"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_create_index_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_create_index"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.CreateIndexRequest.pb(
+            firestore_admin.CreateIndexRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.CreateIndexRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.create_index(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_list_indexes_rest_bad_request(request_type=firestore_admin.ListIndexesRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.list_indexes(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ListIndexesRequest,
+        dict,
+    ],
+)
+def test_list_indexes_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = firestore_admin.ListIndexesResponse(
+            next_page_token="next_page_token_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = firestore_admin.ListIndexesResponse.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.list_indexes(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, pagers.ListIndexesPager)
+    assert response.next_page_token == "next_page_token_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_list_indexes_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_indexes"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_indexes_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_list_indexes"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ListIndexesRequest.pb(
+            firestore_admin.ListIndexesRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = firestore_admin.ListIndexesResponse.to_json(
+            firestore_admin.ListIndexesResponse()
+        )
+        req.return_value.content = return_value
+
+        request = firestore_admin.ListIndexesRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = firestore_admin.ListIndexesResponse()
+        post_with_metadata.return_value = (
+            firestore_admin.ListIndexesResponse(),
+            metadata,
+        )
+
+        client.list_indexes(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_get_index_rest_bad_request(request_type=firestore_admin.GetIndexRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/indexes/sample4"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.get_index(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.GetIndexRequest,
+        dict,
+    ],
+)
+def test_get_index_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/indexes/sample4"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = index.Index(
+            name="name_value",
+            query_scope=index.Index.QueryScope.COLLECTION,
+            api_scope=index.Index.ApiScope.DATASTORE_MODE_API,
+            state=index.Index.State.CREATING,
+            density=index.Index.Density.SPARSE_ALL,
+            multikey=True,
+            shard_count=1178,
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = index.Index.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.get_index(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, index.Index)
+    assert response.name == "name_value"
+    assert response.query_scope == index.Index.QueryScope.COLLECTION
+    assert response.api_scope == index.Index.ApiScope.DATASTORE_MODE_API
+    assert response.state == index.Index.State.CREATING
+    assert response.density == index.Index.Density.SPARSE_ALL
+    assert response.multikey is True
+    assert response.shard_count == 1178
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_get_index_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_index"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_index_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_get_index"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.GetIndexRequest.pb(
+            firestore_admin.GetIndexRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = index.Index.to_json(index.Index())
+        req.return_value.content = return_value
+
+        request = firestore_admin.GetIndexRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = index.Index()
+        post_with_metadata.return_value = index.Index(), metadata
+
+        client.get_index(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_delete_index_rest_bad_request(request_type=firestore_admin.DeleteIndexRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/indexes/sample4"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.delete_index(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.DeleteIndexRequest,
+        dict,
+    ],
+)
+def test_delete_index_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/indexes/sample4"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = None
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = ""
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.delete_index(request)
+
+    # Establish that the response is the type that we expect.
+    assert response is None
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_delete_index_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_delete_index"
+    ) as pre:
+        pre.assert_not_called()
+        pb_message = firestore_admin.DeleteIndexRequest.pb(
+            firestore_admin.DeleteIndexRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        request = firestore_admin.DeleteIndexRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+
+        client.delete_index(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+
+
+def test_get_field_rest_bad_request(request_type=firestore_admin.GetFieldRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.get_field(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.GetFieldRequest,
+        dict,
+    ],
+)
+def test_get_field_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = field.Field(
+            name="name_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = field.Field.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.get_field(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, field.Field)
+    assert response.name == "name_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_get_field_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_field"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_field_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_get_field"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.GetFieldRequest.pb(
+            firestore_admin.GetFieldRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = field.Field.to_json(field.Field())
+        req.return_value.content = return_value
+
+        request = firestore_admin.GetFieldRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = field.Field()
+        post_with_metadata.return_value = field.Field(), metadata
+
+        client.get_field(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_update_field_rest_bad_request(request_type=firestore_admin.UpdateFieldRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "field": {
+            "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4"
+        }
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.update_field(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.UpdateFieldRequest,
+        dict,
+    ],
+)
+def test_update_field_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "field": {
+            "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4"
+        }
+    }
+    request_init["field"] = {
+        "name": "projects/sample1/databases/sample2/collectionGroups/sample3/fields/sample4",
+        "index_config": {
+            "indexes": [
+                {
+                    "name": "name_value",
+                    "query_scope": 1,
+                    "api_scope": 1,
+                    "fields": [
+                        {
+                            "field_path": "field_path_value",
+                            "order": 1,
+                            "array_config": 1,
+                            "vector_config": {"dimension": 966, "flat": {}},
+                        }
+                    ],
+                    "state": 1,
+                    "density": 1,
+                    "multikey": True,
+                    "shard_count": 1178,
+                }
+            ],
+            "uses_ancestor_config": True,
+            "ancestor_field": "ancestor_field_value",
+            "reverting": True,
+        },
+        "ttl_config": {"state": 1},
+    }
+    # The version of a generated dependency at test runtime may differ from the version used during generation.
+    # Delete any fields which are not present in the current runtime dependency
+    # See https://github.com/googleapis/gapic-generator-python/issues/1748
+
+    # Determine if the message type is proto-plus or protobuf
+    test_field = firestore_admin.UpdateFieldRequest.meta.fields["field"]
+
+    def get_message_fields(field):
+        # Given a field which is a message (composite type), return a list with
+        # all the fields of the message.
+        # If the field is not a composite type, return an empty list.
+        message_fields = []
+
+        if hasattr(field, "message") and field.message:
+            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
+
+            if is_field_type_proto_plus_type:
+                message_fields = field.message.meta.fields.values()
+            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
+            else:  # pragma: NO COVER
+                message_fields = field.message.DESCRIPTOR.fields
+        return message_fields
+
+    runtime_nested_fields = [
+        (field.name, nested_field.name)
+        for field in get_message_fields(test_field)
+        for nested_field in get_message_fields(field)
+    ]
+
+    subfields_not_in_runtime = []
+
+    # For each item in the sample request, create a list of sub fields which are not present at runtime
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for field, value in request_init["field"].items():  # pragma: NO COVER
+        result = None
+        is_repeated = False
+        # For repeated fields
+        if isinstance(value, list) and len(value):
+            is_repeated = True
+            result = value[0]
+        # For fields where the type is another message
+        if isinstance(value, dict):
+            result = value
+
+        if result and hasattr(result, "keys"):
+            for subfield in result.keys():
+                if (field, subfield) not in runtime_nested_fields:
+                    subfields_not_in_runtime.append(
+                        {
+                            "field": field,
+                            "subfield": subfield,
+                            "is_repeated": is_repeated,
+                        }
+                    )
+
+    # Remove fields from the sample request which are not present in the runtime version of the dependency
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
+        field = subfield_to_delete.get("field")
+        field_repeated = subfield_to_delete.get("is_repeated")
+        subfield = subfield_to_delete.get("subfield")
+        if subfield:
+            if field_repeated:
+                for i in range(0, len(request_init["field"][field])):
+                    del request_init["field"][field][i][subfield]
+            else:
+                del request_init["field"][field][subfield]
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.update_field(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_update_field_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_update_field"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_update_field_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_update_field"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.UpdateFieldRequest.pb(
+            firestore_admin.UpdateFieldRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.UpdateFieldRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.update_field(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_list_fields_rest_bad_request(request_type=firestore_admin.ListFieldsRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.list_fields(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ListFieldsRequest,
+        dict,
+    ],
+)
+def test_list_fields_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "parent": "projects/sample1/databases/sample2/collectionGroups/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = firestore_admin.ListFieldsResponse(
+            next_page_token="next_page_token_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = firestore_admin.ListFieldsResponse.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.list_fields(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, pagers.ListFieldsPager)
+    assert response.next_page_token == "next_page_token_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_list_fields_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_fields"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_fields_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_list_fields"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ListFieldsRequest.pb(
+            firestore_admin.ListFieldsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = firestore_admin.ListFieldsResponse.to_json(
+            firestore_admin.ListFieldsResponse()
+        )
+        req.return_value.content = return_value
+
+        request = firestore_admin.ListFieldsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = firestore_admin.ListFieldsResponse()
+        post_with_metadata.return_value = firestore_admin.ListFieldsResponse(), metadata
+
+        client.list_fields(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_export_documents_rest_bad_request(
+    request_type=firestore_admin.ExportDocumentsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.export_documents(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ExportDocumentsRequest,
+        dict,
+    ],
+)
+def test_export_documents_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.export_documents(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_export_documents_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_export_documents"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_export_documents_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_export_documents"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ExportDocumentsRequest.pb(
+            firestore_admin.ExportDocumentsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.ExportDocumentsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.export_documents(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_import_documents_rest_bad_request(
+    request_type=firestore_admin.ImportDocumentsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.import_documents(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ImportDocumentsRequest,
+        dict,
+    ],
+)
+def test_import_documents_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.import_documents(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_import_documents_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_import_documents"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_import_documents_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_import_documents"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ImportDocumentsRequest.pb(
+            firestore_admin.ImportDocumentsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.ImportDocumentsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.import_documents(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_bulk_delete_documents_rest_bad_request(
+    request_type=firestore_admin.BulkDeleteDocumentsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.bulk_delete_documents(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.BulkDeleteDocumentsRequest,
+        dict,
+    ],
+)
+def test_bulk_delete_documents_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.bulk_delete_documents(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_bulk_delete_documents_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_bulk_delete_documents"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor,
+        "post_bulk_delete_documents_with_metadata",
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_bulk_delete_documents"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.BulkDeleteDocumentsRequest.pb(
+            firestore_admin.BulkDeleteDocumentsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.BulkDeleteDocumentsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.bulk_delete_documents(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_create_database_rest_bad_request(
+    request_type=firestore_admin.CreateDatabaseRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.create_database(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.CreateDatabaseRequest,
+        dict,
+    ],
+)
+def test_create_database_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1"}
+    request_init["database"] = {
+        "name": "name_value",
+        "uid": "uid_value",
+        "create_time": {"seconds": 751, "nanos": 543},
+        "update_time": {},
+        "delete_time": {},
+        "location_id": "location_id_value",
+        "type_": 1,
+        "concurrency_mode": 1,
+        "version_retention_period": {"seconds": 751, "nanos": 543},
+        "earliest_version_time": {},
+        "point_in_time_recovery_enablement": 1,
+        "app_engine_integration_mode": 1,
+        "key_prefix": "key_prefix_value",
+        "delete_protection_state": 1,
+        "cmek_config": {
+            "kms_key_name": "kms_key_name_value",
+            "active_key_version": [
+                "active_key_version_value1",
+                "active_key_version_value2",
+            ],
+        },
+        "previous_id": "previous_id_value",
+        "source_info": {
+            "backup": {"backup": "backup_value"},
+            "operation": "operation_value",
+        },
+        "free_tier": True,
+        "etag": "etag_value",
+        "database_edition": 1,
+    }
+    # The version of a generated dependency at test runtime may differ from the version used during generation.
+    # Delete any fields which are not present in the current runtime dependency
+    # See https://github.com/googleapis/gapic-generator-python/issues/1748
+
+    # Determine if the message type is proto-plus or protobuf
+    test_field = firestore_admin.CreateDatabaseRequest.meta.fields["database"]
+
+    def get_message_fields(field):
+        # Given a field which is a message (composite type), return a list with
+        # all the fields of the message.
+        # If the field is not a composite type, return an empty list.
+        message_fields = []
+
+        if hasattr(field, "message") and field.message:
+            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
+
+            if is_field_type_proto_plus_type:
+                message_fields = field.message.meta.fields.values()
+            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
+            else:  # pragma: NO COVER
+                message_fields = field.message.DESCRIPTOR.fields
+        return message_fields
+
+    runtime_nested_fields = [
+        (field.name, nested_field.name)
+        for field in get_message_fields(test_field)
+        for nested_field in get_message_fields(field)
+    ]
+
+    subfields_not_in_runtime = []
+
+    # For each item in the sample request, create a list of sub fields which are not present at runtime
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for field, value in request_init["database"].items():  # pragma: NO COVER
+        result = None
+        is_repeated = False
+        # For repeated fields
+        if isinstance(value, list) and len(value):
+            is_repeated = True
+            result = value[0]
+        # For fields where the type is another message
+        if isinstance(value, dict):
+            result = value
+
+        if result and hasattr(result, "keys"):
+            for subfield in result.keys():
+                if (field, subfield) not in runtime_nested_fields:
+                    subfields_not_in_runtime.append(
+                        {
+                            "field": field,
+                            "subfield": subfield,
+                            "is_repeated": is_repeated,
+                        }
+                    )
+
+    # Remove fields from the sample request which are not present in the runtime version of the dependency
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
+        field = subfield_to_delete.get("field")
+        field_repeated = subfield_to_delete.get("is_repeated")
+        subfield = subfield_to_delete.get("subfield")
+        if subfield:
+            if field_repeated:
+                for i in range(0, len(request_init["database"][field])):
+                    del request_init["database"][field][i][subfield]
+            else:
+                del request_init["database"][field][subfield]
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.create_database(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_create_database_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_create_database"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_create_database_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_create_database"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.CreateDatabaseRequest.pb(
+            firestore_admin.CreateDatabaseRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.CreateDatabaseRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.create_database(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_get_database_rest_bad_request(request_type=firestore_admin.GetDatabaseRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.get_database(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.GetDatabaseRequest,
+        dict,
+    ],
+)
+def test_get_database_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = database.Database(
+            name="name_value",
+            uid="uid_value",
+            location_id="location_id_value",
+            type_=database.Database.DatabaseType.FIRESTORE_NATIVE,
+            concurrency_mode=database.Database.ConcurrencyMode.OPTIMISTIC,
+            point_in_time_recovery_enablement=database.Database.PointInTimeRecoveryEnablement.POINT_IN_TIME_RECOVERY_ENABLED,
+            app_engine_integration_mode=database.Database.AppEngineIntegrationMode.ENABLED,
+            key_prefix="key_prefix_value",
+            delete_protection_state=database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED,
+            previous_id="previous_id_value",
+            free_tier=True,
+            etag="etag_value",
+            database_edition=database.Database.DatabaseEdition.STANDARD,
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = database.Database.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.get_database(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, database.Database)
+    assert response.name == "name_value"
+    assert response.uid == "uid_value"
+    assert response.location_id == "location_id_value"
+    assert response.type_ == database.Database.DatabaseType.FIRESTORE_NATIVE
+    assert response.concurrency_mode == database.Database.ConcurrencyMode.OPTIMISTIC
+    assert (
+        response.point_in_time_recovery_enablement
+        == database.Database.PointInTimeRecoveryEnablement.POINT_IN_TIME_RECOVERY_ENABLED
+    )
+    assert (
+        response.app_engine_integration_mode
+        == database.Database.AppEngineIntegrationMode.ENABLED
+    )
+    assert response.key_prefix == "key_prefix_value"
+    assert (
+        response.delete_protection_state
+        == database.Database.DeleteProtectionState.DELETE_PROTECTION_DISABLED
+    )
+    assert response.previous_id == "previous_id_value"
+    assert response.free_tier is True
+    assert response.etag == "etag_value"
+    assert response.database_edition == database.Database.DatabaseEdition.STANDARD
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_get_database_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_database"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_database_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_get_database"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.GetDatabaseRequest.pb(
+            firestore_admin.GetDatabaseRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = database.Database.to_json(database.Database())
+        req.return_value.content = return_value
+
+        request = firestore_admin.GetDatabaseRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = database.Database()
+        post_with_metadata.return_value = database.Database(), metadata
+
+        client.get_database(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_list_databases_rest_bad_request(
+    request_type=firestore_admin.ListDatabasesRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.list_databases(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ListDatabasesRequest,
+        dict,
+    ],
+)
+def test_list_databases_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = firestore_admin.ListDatabasesResponse(
+            unreachable=["unreachable_value"],
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = firestore_admin.ListDatabasesResponse.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.list_databases(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, firestore_admin.ListDatabasesResponse)
+    assert response.unreachable == ["unreachable_value"]
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_list_databases_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_databases"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_databases_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_list_databases"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ListDatabasesRequest.pb(
+            firestore_admin.ListDatabasesRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = firestore_admin.ListDatabasesResponse.to_json(
+            firestore_admin.ListDatabasesResponse()
+        )
+        req.return_value.content = return_value
+
+        request = firestore_admin.ListDatabasesRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = firestore_admin.ListDatabasesResponse()
+        post_with_metadata.return_value = (
+            firestore_admin.ListDatabasesResponse(),
+            metadata,
+        )
+
+        client.list_databases(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_update_database_rest_bad_request(
+    request_type=firestore_admin.UpdateDatabaseRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"database": {"name": "projects/sample1/databases/sample2"}}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.update_database(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.UpdateDatabaseRequest,
+        dict,
+    ],
+)
+def test_update_database_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"database": {"name": "projects/sample1/databases/sample2"}}
+    request_init["database"] = {
+        "name": "projects/sample1/databases/sample2",
+        "uid": "uid_value",
+        "create_time": {"seconds": 751, "nanos": 543},
+        "update_time": {},
+        "delete_time": {},
+        "location_id": "location_id_value",
+        "type_": 1,
+        "concurrency_mode": 1,
+        "version_retention_period": {"seconds": 751, "nanos": 543},
+        "earliest_version_time": {},
+        "point_in_time_recovery_enablement": 1,
+        "app_engine_integration_mode": 1,
+        "key_prefix": "key_prefix_value",
+        "delete_protection_state": 1,
+        "cmek_config": {
+            "kms_key_name": "kms_key_name_value",
+            "active_key_version": [
+                "active_key_version_value1",
+                "active_key_version_value2",
+            ],
+        },
+        "previous_id": "previous_id_value",
+        "source_info": {
+            "backup": {"backup": "backup_value"},
+            "operation": "operation_value",
+        },
+        "free_tier": True,
+        "etag": "etag_value",
+        "database_edition": 1,
+    }
+    # The version of a generated dependency at test runtime may differ from the version used during generation.
+    # Delete any fields which are not present in the current runtime dependency
+    # See https://github.com/googleapis/gapic-generator-python/issues/1748
+
+    # Determine if the message type is proto-plus or protobuf
+    test_field = firestore_admin.UpdateDatabaseRequest.meta.fields["database"]
+
+    def get_message_fields(field):
+        # Given a field which is a message (composite type), return a list with
+        # all the fields of the message.
+        # If the field is not a composite type, return an empty list.
+        message_fields = []
+
+        if hasattr(field, "message") and field.message:
+            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
+
+            if is_field_type_proto_plus_type:
+                message_fields = field.message.meta.fields.values()
+            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
+            else:  # pragma: NO COVER
+                message_fields = field.message.DESCRIPTOR.fields
+        return message_fields
+
+    runtime_nested_fields = [
+        (field.name, nested_field.name)
+        for field in get_message_fields(test_field)
+        for nested_field in get_message_fields(field)
+    ]
+
+    subfields_not_in_runtime = []
+
+    # For each item in the sample request, create a list of sub fields which are not present at runtime
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for field, value in request_init["database"].items():  # pragma: NO COVER
+        result = None
+        is_repeated = False
+        # For repeated fields
+        if isinstance(value, list) and len(value):
+            is_repeated = True
+            result = value[0]
+        # For fields where the type is another message
+        if isinstance(value, dict):
+            result = value
+
+        if result and hasattr(result, "keys"):
+            for subfield in result.keys():
+                if (field, subfield) not in runtime_nested_fields:
+                    subfields_not_in_runtime.append(
+                        {
+                            "field": field,
+                            "subfield": subfield,
+                            "is_repeated": is_repeated,
+                        }
+                    )
+
+    # Remove fields from the sample request which are not present in the runtime version of the dependency
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
+        field = subfield_to_delete.get("field")
+        field_repeated = subfield_to_delete.get("is_repeated")
+        subfield = subfield_to_delete.get("subfield")
+        if subfield:
+            if field_repeated:
+                for i in range(0, len(request_init["database"][field])):
+                    del request_init["database"][field][i][subfield]
+            else:
+                del request_init["database"][field][subfield]
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.update_database(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_update_database_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_update_database"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_update_database_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_update_database"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.UpdateDatabaseRequest.pb(
+            firestore_admin.UpdateDatabaseRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.UpdateDatabaseRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.update_database(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_delete_database_rest_bad_request(
+    request_type=firestore_admin.DeleteDatabaseRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.delete_database(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.DeleteDatabaseRequest,
+        dict,
+    ],
+)
+def test_delete_database_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.delete_database(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_delete_database_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_delete_database"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_delete_database_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_delete_database"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.DeleteDatabaseRequest.pb(
+            firestore_admin.DeleteDatabaseRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.DeleteDatabaseRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.delete_database(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_create_user_creds_rest_bad_request(
+    request_type=firestore_admin.CreateUserCredsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.create_user_creds(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.CreateUserCredsRequest,
+        dict,
+    ],
+)
+def test_create_user_creds_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/databases/sample2"}
+    request_init["user_creds"] = {
+        "name": "name_value",
+        "create_time": {"seconds": 751, "nanos": 543},
+        "update_time": {},
+        "state": 1,
+        "secure_password": "secure_password_value",
+        "resource_identity": {"principal": "principal_value"},
+    }
+    # The version of a generated dependency at test runtime may differ from the version used during generation.
+    # Delete any fields which are not present in the current runtime dependency
+    # See https://github.com/googleapis/gapic-generator-python/issues/1748
+
+    # Determine if the message type is proto-plus or protobuf
+    test_field = firestore_admin.CreateUserCredsRequest.meta.fields["user_creds"]
+
+    def get_message_fields(field):
+        # Given a field which is a message (composite type), return a list with
+        # all the fields of the message.
+        # If the field is not a composite type, return an empty list.
+        message_fields = []
+
+        if hasattr(field, "message") and field.message:
+            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
+
+            if is_field_type_proto_plus_type:
+                message_fields = field.message.meta.fields.values()
+            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
+            else:  # pragma: NO COVER
+                message_fields = field.message.DESCRIPTOR.fields
+        return message_fields
+
+    runtime_nested_fields = [
+        (field.name, nested_field.name)
+        for field in get_message_fields(test_field)
+        for nested_field in get_message_fields(field)
+    ]
+
+    subfields_not_in_runtime = []
+
+    # For each item in the sample request, create a list of sub fields which are not present at runtime
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for field, value in request_init["user_creds"].items():  # pragma: NO COVER
+        result = None
+        is_repeated = False
+        # For repeated fields
+        if isinstance(value, list) and len(value):
+            is_repeated = True
+            result = value[0]
+        # For fields where the type is another message
+        if isinstance(value, dict):
+            result = value
+
+        if result and hasattr(result, "keys"):
+            for subfield in result.keys():
+                if (field, subfield) not in runtime_nested_fields:
+                    subfields_not_in_runtime.append(
+                        {
+                            "field": field,
+                            "subfield": subfield,
+                            "is_repeated": is_repeated,
+                        }
+                    )
+
+    # Remove fields from the sample request which are not present in the runtime version of the dependency
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
+        field = subfield_to_delete.get("field")
+        field_repeated = subfield_to_delete.get("is_repeated")
+        subfield = subfield_to_delete.get("subfield")
+        if subfield:
+            if field_repeated:
+                for i in range(0, len(request_init["user_creds"][field])):
+                    del request_init["user_creds"][field][i][subfield]
+            else:
+                del request_init["user_creds"][field][subfield]
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = gfa_user_creds.UserCreds(
+            name="name_value",
+            state=gfa_user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = gfa_user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.create_user_creds(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, gfa_user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == gfa_user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_create_user_creds_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_create_user_creds"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_create_user_creds_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_create_user_creds"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.CreateUserCredsRequest.pb(
+            firestore_admin.CreateUserCredsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = gfa_user_creds.UserCreds.to_json(gfa_user_creds.UserCreds())
+        req.return_value.content = return_value
+
+        request = firestore_admin.CreateUserCredsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = gfa_user_creds.UserCreds()
+        post_with_metadata.return_value = gfa_user_creds.UserCreds(), metadata
+
+        client.create_user_creds(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_get_user_creds_rest_bad_request(
+    request_type=firestore_admin.GetUserCredsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.get_user_creds(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.GetUserCredsRequest,
+        dict,
+    ],
+)
+def test_get_user_creds_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = user_creds.UserCreds(
+            name="name_value",
+            state=user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.get_user_creds(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_get_user_creds_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_user_creds"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_user_creds_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_get_user_creds"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.GetUserCredsRequest.pb(
+            firestore_admin.GetUserCredsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = user_creds.UserCreds.to_json(user_creds.UserCreds())
+        req.return_value.content = return_value
+
+        request = firestore_admin.GetUserCredsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = user_creds.UserCreds()
+        post_with_metadata.return_value = user_creds.UserCreds(), metadata
+
+        client.get_user_creds(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_list_user_creds_rest_bad_request(
+    request_type=firestore_admin.ListUserCredsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.list_user_creds(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ListUserCredsRequest,
+        dict,
+    ],
+)
+def test_list_user_creds_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = firestore_admin.ListUserCredsResponse()
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = firestore_admin.ListUserCredsResponse.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.list_user_creds(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, firestore_admin.ListUserCredsResponse)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_list_user_creds_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_user_creds"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_user_creds_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_list_user_creds"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ListUserCredsRequest.pb(
+            firestore_admin.ListUserCredsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = firestore_admin.ListUserCredsResponse.to_json(
+            firestore_admin.ListUserCredsResponse()
+        )
+        req.return_value.content = return_value
+
+        request = firestore_admin.ListUserCredsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = firestore_admin.ListUserCredsResponse()
+        post_with_metadata.return_value = (
+            firestore_admin.ListUserCredsResponse(),
+            metadata,
+        )
+
+        client.list_user_creds(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_enable_user_creds_rest_bad_request(
+    request_type=firestore_admin.EnableUserCredsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.enable_user_creds(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.EnableUserCredsRequest,
+        dict,
+    ],
+)
+def test_enable_user_creds_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = user_creds.UserCreds(
+            name="name_value",
+            state=user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.enable_user_creds(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_enable_user_creds_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_enable_user_creds"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_enable_user_creds_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_enable_user_creds"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.EnableUserCredsRequest.pb(
+            firestore_admin.EnableUserCredsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = user_creds.UserCreds.to_json(user_creds.UserCreds())
+        req.return_value.content = return_value
+
+        request = firestore_admin.EnableUserCredsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = user_creds.UserCreds()
+        post_with_metadata.return_value = user_creds.UserCreds(), metadata
+
+        client.enable_user_creds(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_disable_user_creds_rest_bad_request(
+    request_type=firestore_admin.DisableUserCredsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.disable_user_creds(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.DisableUserCredsRequest,
+        dict,
+    ],
+)
+def test_disable_user_creds_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = user_creds.UserCreds(
+            name="name_value",
+            state=user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.disable_user_creds(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_disable_user_creds_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_disable_user_creds"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor,
+        "post_disable_user_creds_with_metadata",
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_disable_user_creds"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.DisableUserCredsRequest.pb(
+            firestore_admin.DisableUserCredsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = user_creds.UserCreds.to_json(user_creds.UserCreds())
+        req.return_value.content = return_value
+
+        request = firestore_admin.DisableUserCredsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = user_creds.UserCreds()
+        post_with_metadata.return_value = user_creds.UserCreds(), metadata
+
+        client.disable_user_creds(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_reset_user_password_rest_bad_request(
+    request_type=firestore_admin.ResetUserPasswordRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.reset_user_password(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ResetUserPasswordRequest,
+        dict,
+    ],
+)
+def test_reset_user_password_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = user_creds.UserCreds(
+            name="name_value",
+            state=user_creds.UserCreds.State.ENABLED,
+            secure_password="secure_password_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = user_creds.UserCreds.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.reset_user_password(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, user_creds.UserCreds)
+    assert response.name == "name_value"
+    assert response.state == user_creds.UserCreds.State.ENABLED
+    assert response.secure_password == "secure_password_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_reset_user_password_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_reset_user_password"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor,
+        "post_reset_user_password_with_metadata",
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_reset_user_password"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ResetUserPasswordRequest.pb(
+            firestore_admin.ResetUserPasswordRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = user_creds.UserCreds.to_json(user_creds.UserCreds())
+        req.return_value.content = return_value
+
+        request = firestore_admin.ResetUserPasswordRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = user_creds.UserCreds()
+        post_with_metadata.return_value = user_creds.UserCreds(), metadata
+
+        client.reset_user_password(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_delete_user_creds_rest_bad_request(
+    request_type=firestore_admin.DeleteUserCredsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.delete_user_creds(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.DeleteUserCredsRequest,
+        dict,
+    ],
+)
+def test_delete_user_creds_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/databases/sample2/userCreds/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = None
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = ""
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.delete_user_creds(request)
+
+    # Establish that the response is the type that we expect.
+    assert response is None
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_delete_user_creds_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_delete_user_creds"
+    ) as pre:
+        pre.assert_not_called()
+        pb_message = firestore_admin.DeleteUserCredsRequest.pb(
+            firestore_admin.DeleteUserCredsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        request = firestore_admin.DeleteUserCredsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+
+        client.delete_user_creds(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+
+
+def test_get_backup_rest_bad_request(request_type=firestore_admin.GetBackupRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/locations/sample2/backups/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.get_backup(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.GetBackupRequest,
+        dict,
+    ],
+)
+def test_get_backup_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/locations/sample2/backups/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = backup.Backup(
+            name="name_value",
+            database="database_value",
+            database_uid="database_uid_value",
+            state=backup.Backup.State.CREATING,
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = backup.Backup.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.get_backup(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, backup.Backup)
+    assert response.name == "name_value"
+    assert response.database == "database_value"
+    assert response.database_uid == "database_uid_value"
+    assert response.state == backup.Backup.State.CREATING
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_get_backup_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_backup"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_backup_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_get_backup"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.GetBackupRequest.pb(
+            firestore_admin.GetBackupRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = backup.Backup.to_json(backup.Backup())
+        req.return_value.content = return_value
+
+        request = firestore_admin.GetBackupRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = backup.Backup()
+        post_with_metadata.return_value = backup.Backup(), metadata
+
+        client.get_backup(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_list_backups_rest_bad_request(request_type=firestore_admin.ListBackupsRequest):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/locations/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.list_backups(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ListBackupsRequest,
+        dict,
+    ],
+)
+def test_list_backups_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/locations/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = firestore_admin.ListBackupsResponse(
+            unreachable=["unreachable_value"],
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = firestore_admin.ListBackupsResponse.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.list_backups(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, firestore_admin.ListBackupsResponse)
+    assert response.unreachable == ["unreachable_value"]
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_list_backups_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_backups"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_backups_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_list_backups"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ListBackupsRequest.pb(
+            firestore_admin.ListBackupsRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = firestore_admin.ListBackupsResponse.to_json(
+            firestore_admin.ListBackupsResponse()
+        )
+        req.return_value.content = return_value
+
+        request = firestore_admin.ListBackupsRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = firestore_admin.ListBackupsResponse()
+        post_with_metadata.return_value = (
+            firestore_admin.ListBackupsResponse(),
+            metadata,
+        )
+
+        client.list_backups(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_delete_backup_rest_bad_request(
+    request_type=firestore_admin.DeleteBackupRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/locations/sample2/backups/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.delete_backup(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.DeleteBackupRequest,
+        dict,
+    ],
+)
+def test_delete_backup_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"name": "projects/sample1/locations/sample2/backups/sample3"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = None
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = ""
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.delete_backup(request)
+
+    # Establish that the response is the type that we expect.
+    assert response is None
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_delete_backup_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_delete_backup"
+    ) as pre:
+        pre.assert_not_called()
+        pb_message = firestore_admin.DeleteBackupRequest.pb(
+            firestore_admin.DeleteBackupRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        request = firestore_admin.DeleteBackupRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+
+        client.delete_backup(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+
+
+def test_restore_database_rest_bad_request(
+    request_type=firestore_admin.RestoreDatabaseRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.restore_database(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.RestoreDatabaseRequest,
+        dict,
+    ],
+)
+def test_restore_database_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation(name="operations/spam")
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.restore_database(request)
+
+    # Establish that the response is the type that we expect.
+    json_return_value = json_format.MessageToJson(return_value)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_restore_database_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        operation.Operation, "_set_result_from_operation"
+    ), mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_restore_database"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_restore_database_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_restore_database"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.RestoreDatabaseRequest.pb(
+            firestore_admin.RestoreDatabaseRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = json_format.MessageToJson(operations_pb2.Operation())
+        req.return_value.content = return_value
+
+        request = firestore_admin.RestoreDatabaseRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = operations_pb2.Operation()
+        post_with_metadata.return_value = operations_pb2.Operation(), metadata
+
+        client.restore_database(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_create_backup_schedule_rest_bad_request(
+    request_type=firestore_admin.CreateBackupScheduleRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.create_backup_schedule(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.CreateBackupScheduleRequest,
+        dict,
+    ],
+)
+def test_create_backup_schedule_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/databases/sample2"}
+    request_init["backup_schedule"] = {
+        "name": "name_value",
+        "create_time": {"seconds": 751, "nanos": 543},
+        "update_time": {},
+        "retention": {"seconds": 751, "nanos": 543},
+        "daily_recurrence": {},
+        "weekly_recurrence": {"day": 1},
+    }
+    # The version of a generated dependency at test runtime may differ from the version used during generation.
+    # Delete any fields which are not present in the current runtime dependency
+    # See https://github.com/googleapis/gapic-generator-python/issues/1748
+
+    # Determine if the message type is proto-plus or protobuf
+    test_field = firestore_admin.CreateBackupScheduleRequest.meta.fields[
+        "backup_schedule"
+    ]
+
+    def get_message_fields(field):
+        # Given a field which is a message (composite type), return a list with
+        # all the fields of the message.
+        # If the field is not a composite type, return an empty list.
+        message_fields = []
+
+        if hasattr(field, "message") and field.message:
+            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
+
+            if is_field_type_proto_plus_type:
+                message_fields = field.message.meta.fields.values()
+            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
+            else:  # pragma: NO COVER
+                message_fields = field.message.DESCRIPTOR.fields
+        return message_fields
+
+    runtime_nested_fields = [
+        (field.name, nested_field.name)
+        for field in get_message_fields(test_field)
+        for nested_field in get_message_fields(field)
+    ]
+
+    subfields_not_in_runtime = []
+
+    # For each item in the sample request, create a list of sub fields which are not present at runtime
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for field, value in request_init["backup_schedule"].items():  # pragma: NO COVER
+        result = None
+        is_repeated = False
+        # For repeated fields
+        if isinstance(value, list) and len(value):
+            is_repeated = True
+            result = value[0]
+        # For fields where the type is another message
+        if isinstance(value, dict):
+            result = value
+
+        if result and hasattr(result, "keys"):
+            for subfield in result.keys():
+                if (field, subfield) not in runtime_nested_fields:
+                    subfields_not_in_runtime.append(
+                        {
+                            "field": field,
+                            "subfield": subfield,
+                            "is_repeated": is_repeated,
+                        }
+                    )
+
+    # Remove fields from the sample request which are not present in the runtime version of the dependency
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
+        field = subfield_to_delete.get("field")
+        field_repeated = subfield_to_delete.get("is_repeated")
+        subfield = subfield_to_delete.get("subfield")
+        if subfield:
+            if field_repeated:
+                for i in range(0, len(request_init["backup_schedule"][field])):
+                    del request_init["backup_schedule"][field][i][subfield]
+            else:
+                del request_init["backup_schedule"][field][subfield]
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = schedule.BackupSchedule(
+            name="name_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = schedule.BackupSchedule.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.create_backup_schedule(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, schedule.BackupSchedule)
+    assert response.name == "name_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_create_backup_schedule_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_create_backup_schedule"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor,
+        "post_create_backup_schedule_with_metadata",
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_create_backup_schedule"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.CreateBackupScheduleRequest.pb(
+            firestore_admin.CreateBackupScheduleRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = schedule.BackupSchedule.to_json(schedule.BackupSchedule())
+        req.return_value.content = return_value
+
+        request = firestore_admin.CreateBackupScheduleRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = schedule.BackupSchedule()
+        post_with_metadata.return_value = schedule.BackupSchedule(), metadata
+
+        client.create_backup_schedule(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_get_backup_schedule_rest_bad_request(
+    request_type=firestore_admin.GetBackupScheduleRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.get_backup_schedule(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.GetBackupScheduleRequest,
+        dict,
+    ],
+)
+def test_get_backup_schedule_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = schedule.BackupSchedule(
+            name="name_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = schedule.BackupSchedule.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.get_backup_schedule(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, schedule.BackupSchedule)
+    assert response.name == "name_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_get_backup_schedule_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_get_backup_schedule"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor,
+        "post_get_backup_schedule_with_metadata",
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_get_backup_schedule"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.GetBackupScheduleRequest.pb(
+            firestore_admin.GetBackupScheduleRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = schedule.BackupSchedule.to_json(schedule.BackupSchedule())
+        req.return_value.content = return_value
+
+        request = firestore_admin.GetBackupScheduleRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = schedule.BackupSchedule()
+        post_with_metadata.return_value = schedule.BackupSchedule(), metadata
+
+        client.get_backup_schedule(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_list_backup_schedules_rest_bad_request(
+    request_type=firestore_admin.ListBackupSchedulesRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.list_backup_schedules(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.ListBackupSchedulesRequest,
+        dict,
+    ],
+)
+def test_list_backup_schedules_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"parent": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = firestore_admin.ListBackupSchedulesResponse()
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = firestore_admin.ListBackupSchedulesResponse.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.list_backup_schedules(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, firestore_admin.ListBackupSchedulesResponse)
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_list_backup_schedules_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_list_backup_schedules"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor,
+        "post_list_backup_schedules_with_metadata",
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_list_backup_schedules"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.ListBackupSchedulesRequest.pb(
+            firestore_admin.ListBackupSchedulesRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = firestore_admin.ListBackupSchedulesResponse.to_json(
+            firestore_admin.ListBackupSchedulesResponse()
+        )
+        req.return_value.content = return_value
+
+        request = firestore_admin.ListBackupSchedulesRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = firestore_admin.ListBackupSchedulesResponse()
+        post_with_metadata.return_value = (
+            firestore_admin.ListBackupSchedulesResponse(),
+            metadata,
+        )
+
+        client.list_backup_schedules(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_update_backup_schedule_rest_bad_request(
+    request_type=firestore_admin.UpdateBackupScheduleRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "backup_schedule": {
+            "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
+        }
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.update_backup_schedule(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.UpdateBackupScheduleRequest,
+        dict,
+    ],
+)
+def test_update_backup_schedule_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "backup_schedule": {
+            "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
+        }
+    }
+    request_init["backup_schedule"] = {
+        "name": "projects/sample1/databases/sample2/backupSchedules/sample3",
+        "create_time": {"seconds": 751, "nanos": 543},
+        "update_time": {},
+        "retention": {"seconds": 751, "nanos": 543},
+        "daily_recurrence": {},
+        "weekly_recurrence": {"day": 1},
+    }
+    # The version of a generated dependency at test runtime may differ from the version used during generation.
+    # Delete any fields which are not present in the current runtime dependency
+    # See https://github.com/googleapis/gapic-generator-python/issues/1748
+
+    # Determine if the message type is proto-plus or protobuf
+    test_field = firestore_admin.UpdateBackupScheduleRequest.meta.fields[
+        "backup_schedule"
+    ]
+
+    def get_message_fields(field):
+        # Given a field which is a message (composite type), return a list with
+        # all the fields of the message.
+        # If the field is not a composite type, return an empty list.
+        message_fields = []
+
+        if hasattr(field, "message") and field.message:
+            is_field_type_proto_plus_type = not hasattr(field.message, "DESCRIPTOR")
+
+            if is_field_type_proto_plus_type:
+                message_fields = field.message.meta.fields.values()
+            # Add `# pragma: NO COVER` because there may not be any `*_pb2` field types
+            else:  # pragma: NO COVER
+                message_fields = field.message.DESCRIPTOR.fields
+        return message_fields
+
+    runtime_nested_fields = [
+        (field.name, nested_field.name)
+        for field in get_message_fields(test_field)
+        for nested_field in get_message_fields(field)
+    ]
+
+    subfields_not_in_runtime = []
+
+    # For each item in the sample request, create a list of sub fields which are not present at runtime
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for field, value in request_init["backup_schedule"].items():  # pragma: NO COVER
+        result = None
+        is_repeated = False
+        # For repeated fields
+        if isinstance(value, list) and len(value):
+            is_repeated = True
+            result = value[0]
+        # For fields where the type is another message
+        if isinstance(value, dict):
+            result = value
+
+        if result and hasattr(result, "keys"):
+            for subfield in result.keys():
+                if (field, subfield) not in runtime_nested_fields:
+                    subfields_not_in_runtime.append(
+                        {
+                            "field": field,
+                            "subfield": subfield,
+                            "is_repeated": is_repeated,
+                        }
+                    )
+
+    # Remove fields from the sample request which are not present in the runtime version of the dependency
+    # Add `# pragma: NO COVER` because this test code will not run if all subfields are present at runtime
+    for subfield_to_delete in subfields_not_in_runtime:  # pragma: NO COVER
+        field = subfield_to_delete.get("field")
+        field_repeated = subfield_to_delete.get("is_repeated")
+        subfield = subfield_to_delete.get("subfield")
+        if subfield:
+            if field_repeated:
+                for i in range(0, len(request_init["backup_schedule"][field])):
+                    del request_init["backup_schedule"][field][i][subfield]
+            else:
+                del request_init["backup_schedule"][field][subfield]
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = schedule.BackupSchedule(
+            name="name_value",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = schedule.BackupSchedule.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.update_backup_schedule(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, schedule.BackupSchedule)
+    assert response.name == "name_value"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_update_backup_schedule_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "post_update_backup_schedule"
+    ) as post, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor,
+        "post_update_backup_schedule_with_metadata",
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_update_backup_schedule"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore_admin.UpdateBackupScheduleRequest.pb(
+            firestore_admin.UpdateBackupScheduleRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = schedule.BackupSchedule.to_json(schedule.BackupSchedule())
+        req.return_value.content = return_value
+
+        request = firestore_admin.UpdateBackupScheduleRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = schedule.BackupSchedule()
+        post_with_metadata.return_value = schedule.BackupSchedule(), metadata
+
+        client.update_backup_schedule(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_delete_backup_schedule_rest_bad_request(
+    request_type=firestore_admin.DeleteBackupScheduleRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.delete_backup_schedule(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore_admin.DeleteBackupScheduleRequest,
+        dict,
+    ],
+)
+def test_delete_backup_schedule_rest_call_success(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {
+        "name": "projects/sample1/databases/sample2/backupSchedules/sample3"
+    }
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = None
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = ""
+        response_value.content = json_return_value.encode("UTF-8")
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.delete_backup_schedule(request)
+
+    # Establish that the response is the type that we expect.
+    assert response is None
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_delete_backup_schedule_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreAdminRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None
+        if null_interceptor
+        else transports.FirestoreAdminRestInterceptor(),
+    )
+    client = FirestoreAdminClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreAdminRestInterceptor, "pre_delete_backup_schedule"
+    ) as pre:
+        pre.assert_not_called()
+        pb_message = firestore_admin.DeleteBackupScheduleRequest.pb(
+            firestore_admin.DeleteBackupScheduleRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        request = firestore_admin.DeleteBackupScheduleRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+
+        client.delete_backup_schedule(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+
+
+def test_cancel_operation_rest_bad_request(
+    request_type=operations_pb2.CancelOperationRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type()
+    request = json_format.ParseDict(
+        {"name": "projects/sample1/databases/sample2/operations/sample3"}, request
+    )
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = Request()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.cancel_operation(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        operations_pb2.CancelOperationRequest,
+        dict,
+    ],
+)
+def test_cancel_operation_rest(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    request_init = {"name": "projects/sample1/databases/sample2/operations/sample3"}
+    request = request_type(**request_init)
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = None
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = "{}"
+        response_value.content = json_return_value.encode("UTF-8")
+
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        response = client.cancel_operation(request)
+
+    # Establish that the response is the type that we expect.
+    assert response is None
+
+
+def test_delete_operation_rest_bad_request(
+    request_type=operations_pb2.DeleteOperationRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type()
+    request = json_format.ParseDict(
+        {"name": "projects/sample1/databases/sample2/operations/sample3"}, request
+    )
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = Request()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.delete_operation(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        operations_pb2.DeleteOperationRequest,
+        dict,
+    ],
+)
+def test_delete_operation_rest(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    request_init = {"name": "projects/sample1/databases/sample2/operations/sample3"}
+    request = request_type(**request_init)
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = None
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = "{}"
+        response_value.content = json_return_value.encode("UTF-8")
+
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        response = client.delete_operation(request)
+
+    # Establish that the response is the type that we expect.
+    assert response is None
+
+
+def test_get_operation_rest_bad_request(
+    request_type=operations_pb2.GetOperationRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type()
+    request = json_format.ParseDict(
+        {"name": "projects/sample1/databases/sample2/operations/sample3"}, request
+    )
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = Request()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.get_operation(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        operations_pb2.GetOperationRequest,
+        dict,
+    ],
+)
+def test_get_operation_rest(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    request_init = {"name": "projects/sample1/databases/sample2/operations/sample3"}
+    request = request_type(**request_init)
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.Operation()
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        response = client.get_operation(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, operations_pb2.Operation)
+
+
+def test_list_operations_rest_bad_request(
+    request_type=operations_pb2.ListOperationsRequest,
+):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type()
+    request = json_format.ParseDict(
+        {"name": "projects/sample1/databases/sample2"}, request
+    )
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = Response()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = Request()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.list_operations(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        operations_pb2.ListOperationsRequest,
+        dict,
+    ],
+)
+def test_list_operations_rest(request_type):
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    request_init = {"name": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = operations_pb2.ListOperationsResponse()
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+        json_return_value = json_format.MessageToJson(return_value)
+        response_value.content = json_return_value.encode("UTF-8")
+
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+        response = client.list_operations(request)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, operations_pb2.ListOperationsResponse)
+
+
+def test_initialize_client_w_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    assert client is not None
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_create_index_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.create_index), "__call__") as call:
+        client.create_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_indexes_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_indexes), "__call__") as call:
+        client.list_indexes(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListIndexesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_index_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_index), "__call__") as call:
+        client.get_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_index_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_index), "__call__") as call:
+        client.delete_index(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteIndexRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_field_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_field), "__call__") as call:
+        client.get_field(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetFieldRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_update_field_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.update_field), "__call__") as call:
+        client.update_field(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateFieldRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_fields_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_fields), "__call__") as call:
+        client.list_fields(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListFieldsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_export_documents_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.export_documents), "__call__") as call:
+        client.export_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ExportDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_import_documents_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.import_documents), "__call__") as call:
+        client.import_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ImportDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_bulk_delete_documents_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.bulk_delete_documents), "__call__"
+    ) as call:
+        client.bulk_delete_documents(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.BulkDeleteDocumentsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_create_database_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.create_database), "__call__") as call:
+        client.create_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_database_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_database), "__call__") as call:
+        client.get_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_databases_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_databases), "__call__") as call:
+        client.list_databases(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListDatabasesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_update_database_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.update_database), "__call__") as call:
+        client.update_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_database_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_database), "__call__") as call:
+        client.delete_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_create_user_creds_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_user_creds), "__call__"
+    ) as call:
+        client.create_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_user_creds_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_user_creds), "__call__") as call:
+        client.get_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_user_creds_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_user_creds), "__call__") as call:
+        client.list_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_enable_user_creds_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.enable_user_creds), "__call__"
+    ) as call:
+        client.enable_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.EnableUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_disable_user_creds_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.disable_user_creds), "__call__"
+    ) as call:
+        client.disable_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DisableUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_reset_user_password_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.reset_user_password), "__call__"
+    ) as call:
+        client.reset_user_password(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ResetUserPasswordRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_user_creds_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_user_creds), "__call__"
+    ) as call:
+        client.delete_user_creds(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteUserCredsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_backup_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.get_backup), "__call__") as call:
+        client.get_backup(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetBackupRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_backups_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.list_backups), "__call__") as call:
+        client.list_backups(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListBackupsRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_backup_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.delete_backup), "__call__") as call:
+        client.delete_backup(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteBackupRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_restore_database_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.restore_database), "__call__") as call:
+        client.restore_database(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.RestoreDatabaseRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_create_backup_schedule_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.create_backup_schedule), "__call__"
+    ) as call:
+        client.create_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.CreateBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_get_backup_schedule_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.get_backup_schedule), "__call__"
+    ) as call:
+        client.get_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.GetBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_list_backup_schedules_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.list_backup_schedules), "__call__"
+    ) as call:
+        client.list_backup_schedules(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.ListBackupSchedulesRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_update_backup_schedule_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.update_backup_schedule), "__call__"
+    ) as call:
+        client.update_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.UpdateBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+def test_delete_backup_schedule_empty_call_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(
+        type(client.transport.delete_backup_schedule), "__call__"
+    ) as call:
+        client.delete_backup_schedule(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore_admin.DeleteBackupScheduleRequest()
+
+        assert args[0] == request_msg
+
+
+def test_firestore_admin_rest_lro_client():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    transport = client.transport
+
+    # Ensure that we have an api-core operations client.
+    assert isinstance(
+        transport.operations_client,
+        operations_v1.AbstractOperationsClient,
+    )
+
+    # Ensure that subsequent calls to the property send the exact same object.
+    assert transport.operations_client is transport.operations_client
 
 
 def test_transport_grpc_default():
@@ -18613,6 +24799,13 @@ def test_firestore_admin_base_transport():
         "list_databases",
         "update_database",
         "delete_database",
+        "create_user_creds",
+        "get_user_creds",
+        "list_user_creds",
+        "enable_user_creds",
+        "disable_user_creds",
+        "reset_user_password",
+        "delete_user_creds",
         "get_backup",
         "list_backups",
         "delete_backup",
@@ -18838,23 +25031,6 @@ def test_firestore_admin_http_transport_client_cert_source_for_mtls():
         mock_configure_mtls_channel.assert_called_once_with(client_cert_source_callback)
 
 
-def test_firestore_admin_rest_lro_client():
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-    transport = client.transport
-
-    # Ensure that we have a api-core operations client.
-    assert isinstance(
-        transport.operations_client,
-        operations_v1.AbstractOperationsClient,
-    )
-
-    # Ensure that subsequent calls to the property send the exact same object.
-    assert transport.operations_client is transport.operations_client
-
-
 @pytest.mark.parametrize(
     "transport_name",
     [
@@ -18962,6 +25138,27 @@ def test_firestore_admin_client_transport_session_collision(transport_name):
     assert session1 != session2
     session1 = client1.transport.delete_database._session
     session2 = client2.transport.delete_database._session
+    assert session1 != session2
+    session1 = client1.transport.create_user_creds._session
+    session2 = client2.transport.create_user_creds._session
+    assert session1 != session2
+    session1 = client1.transport.get_user_creds._session
+    session2 = client2.transport.get_user_creds._session
+    assert session1 != session2
+    session1 = client1.transport.list_user_creds._session
+    session2 = client2.transport.list_user_creds._session
+    assert session1 != session2
+    session1 = client1.transport.enable_user_creds._session
+    session2 = client2.transport.enable_user_creds._session
+    assert session1 != session2
+    session1 = client1.transport.disable_user_creds._session
+    session2 = client2.transport.disable_user_creds._session
+    assert session1 != session2
+    session1 = client1.transport.reset_user_password._session
+    session2 = client2.transport.reset_user_password._session
+    assert session1 != session2
+    session1 = client1.transport.delete_user_creds._session
+    session2 = client2.transport.delete_user_creds._session
     assert session1 != session2
     session1 = client1.transport.get_backup._session
     session2 = client2.transport.get_backup._session
@@ -19364,8 +25561,34 @@ def test_parse_operation_path():
     assert expected == actual
 
 
+def test_user_creds_path():
+    project = "squid"
+    database = "clam"
+    user_creds = "whelk"
+    expected = "projects/{project}/databases/{database}/userCreds/{user_creds}".format(
+        project=project,
+        database=database,
+        user_creds=user_creds,
+    )
+    actual = FirestoreAdminClient.user_creds_path(project, database, user_creds)
+    assert expected == actual
+
+
+def test_parse_user_creds_path():
+    expected = {
+        "project": "octopus",
+        "database": "oyster",
+        "user_creds": "nudibranch",
+    }
+    path = FirestoreAdminClient.user_creds_path(**expected)
+
+    # Check that the path construction is reversible.
+    actual = FirestoreAdminClient.parse_user_creds_path(path)
+    assert expected == actual
+
+
 def test_common_billing_account_path():
-    billing_account = "squid"
+    billing_account = "cuttlefish"
     expected = "billingAccounts/{billing_account}".format(
         billing_account=billing_account,
     )
@@ -19375,7 +25598,7 @@ def test_common_billing_account_path():
 
 def test_parse_common_billing_account_path():
     expected = {
-        "billing_account": "clam",
+        "billing_account": "mussel",
     }
     path = FirestoreAdminClient.common_billing_account_path(**expected)
 
@@ -19385,7 +25608,7 @@ def test_parse_common_billing_account_path():
 
 
 def test_common_folder_path():
-    folder = "whelk"
+    folder = "winkle"
     expected = "folders/{folder}".format(
         folder=folder,
     )
@@ -19395,7 +25618,7 @@ def test_common_folder_path():
 
 def test_parse_common_folder_path():
     expected = {
-        "folder": "octopus",
+        "folder": "nautilus",
     }
     path = FirestoreAdminClient.common_folder_path(**expected)
 
@@ -19405,7 +25628,7 @@ def test_parse_common_folder_path():
 
 
 def test_common_organization_path():
-    organization = "oyster"
+    organization = "scallop"
     expected = "organizations/{organization}".format(
         organization=organization,
     )
@@ -19415,7 +25638,7 @@ def test_common_organization_path():
 
 def test_parse_common_organization_path():
     expected = {
-        "organization": "nudibranch",
+        "organization": "abalone",
     }
     path = FirestoreAdminClient.common_organization_path(**expected)
 
@@ -19425,7 +25648,7 @@ def test_parse_common_organization_path():
 
 
 def test_common_project_path():
-    project = "cuttlefish"
+    project = "squid"
     expected = "projects/{project}".format(
         project=project,
     )
@@ -19435,7 +25658,7 @@ def test_common_project_path():
 
 def test_parse_common_project_path():
     expected = {
-        "project": "mussel",
+        "project": "clam",
     }
     path = FirestoreAdminClient.common_project_path(**expected)
 
@@ -19445,8 +25668,8 @@ def test_parse_common_project_path():
 
 
 def test_common_location_path():
-    project = "winkle"
-    location = "nautilus"
+    project = "whelk"
+    location = "octopus"
     expected = "projects/{project}/locations/{location}".format(
         project=project,
         location=location,
@@ -19457,8 +25680,8 @@ def test_common_location_path():
 
 def test_parse_common_location_path():
     expected = {
-        "project": "scallop",
-        "location": "abalone",
+        "project": "oyster",
+        "location": "nudibranch",
     }
     path = FirestoreAdminClient.common_location_path(**expected)
 
@@ -19490,252 +25713,6 @@ def test_client_with_default_client_info():
         prep.assert_called_once_with(client_info)
 
 
-@pytest.mark.asyncio
-async def test_transport_close_async():
-    client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="grpc_asyncio",
-    )
-    with mock.patch.object(
-        type(getattr(client.transport, "grpc_channel")), "close"
-    ) as close:
-        async with client:
-            close.assert_not_called()
-        close.assert_called_once()
-
-
-def test_cancel_operation_rest_bad_request(
-    transport: str = "rest", request_type=operations_pb2.CancelOperationRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    request = request_type()
-    request = json_format.ParseDict(
-        {"name": "projects/sample1/databases/sample2/operations/sample3"}, request
-    )
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.cancel_operation(request)
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        operations_pb2.CancelOperationRequest,
-        dict,
-    ],
-)
-def test_cancel_operation_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-    request_init = {"name": "projects/sample1/databases/sample2/operations/sample3"}
-    request = request_type(**request_init)
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = None
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = "{}"
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-
-        response = client.cancel_operation(request)
-
-    # Establish that the response is the type that we expect.
-    assert response is None
-
-
-def test_delete_operation_rest_bad_request(
-    transport: str = "rest", request_type=operations_pb2.DeleteOperationRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    request = request_type()
-    request = json_format.ParseDict(
-        {"name": "projects/sample1/databases/sample2/operations/sample3"}, request
-    )
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.delete_operation(request)
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        operations_pb2.DeleteOperationRequest,
-        dict,
-    ],
-)
-def test_delete_operation_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-    request_init = {"name": "projects/sample1/databases/sample2/operations/sample3"}
-    request = request_type(**request_init)
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = None
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = "{}"
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-
-        response = client.delete_operation(request)
-
-    # Establish that the response is the type that we expect.
-    assert response is None
-
-
-def test_get_operation_rest_bad_request(
-    transport: str = "rest", request_type=operations_pb2.GetOperationRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    request = request_type()
-    request = json_format.ParseDict(
-        {"name": "projects/sample1/databases/sample2/operations/sample3"}, request
-    )
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.get_operation(request)
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        operations_pb2.GetOperationRequest,
-        dict,
-    ],
-)
-def test_get_operation_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-    request_init = {"name": "projects/sample1/databases/sample2/operations/sample3"}
-    request = request_type(**request_init)
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.Operation()
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-
-        response = client.get_operation(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, operations_pb2.Operation)
-
-
-def test_list_operations_rest_bad_request(
-    transport: str = "rest", request_type=operations_pb2.ListOperationsRequest
-):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport=transport,
-    )
-
-    request = request_type()
-    request = json_format.ParseDict(
-        {"name": "projects/sample1/databases/sample2"}, request
-    )
-
-    # Mock the http request call within the method and fake a BadRequest error.
-    with mock.patch.object(Session, "request") as req, pytest.raises(
-        core_exceptions.BadRequest
-    ):
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 400
-        response_value.request = Request()
-        req.return_value = response_value
-        client.list_operations(request)
-
-
-@pytest.mark.parametrize(
-    "request_type",
-    [
-        operations_pb2.ListOperationsRequest,
-        dict,
-    ],
-)
-def test_list_operations_rest(request_type):
-    client = FirestoreAdminClient(
-        credentials=ga_credentials.AnonymousCredentials(),
-        transport="rest",
-    )
-    request_init = {"name": "projects/sample1/databases/sample2"}
-    request = request_type(**request_init)
-    # Mock the http request call within the method and fake a response.
-    with mock.patch.object(type(client.transport._session), "request") as req:
-        # Designate an appropriate value for the returned response.
-        return_value = operations_pb2.ListOperationsResponse()
-
-        # Wrap the value into a proper Response obj
-        response_value = Response()
-        response_value.status_code = 200
-        json_return_value = json_format.MessageToJson(return_value)
-
-        response_value._content = json_return_value.encode("UTF-8")
-        req.return_value = response_value
-
-        response = client.list_operations(request)
-
-    # Establish that the response is the type that we expect.
-    assert isinstance(response, operations_pb2.ListOperationsResponse)
-
-
 def test_delete_operation(transport: str = "grpc"):
     client = FirestoreAdminClient(
         credentials=ga_credentials.AnonymousCredentials(),
@@ -19763,7 +25740,7 @@ def test_delete_operation(transport: str = "grpc"):
 @pytest.mark.asyncio
 async def test_delete_operation_async(transport: str = "grpc_asyncio"):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -19816,7 +25793,7 @@ def test_delete_operation_field_headers():
 @pytest.mark.asyncio
 async def test_delete_operation_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -19861,7 +25838,7 @@ def test_delete_operation_from_dict():
 @pytest.mark.asyncio
 async def test_delete_operation_from_dict_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client.transport.delete_operation), "__call__") as call:
@@ -19902,7 +25879,7 @@ def test_cancel_operation(transport: str = "grpc"):
 @pytest.mark.asyncio
 async def test_cancel_operation_async(transport: str = "grpc_asyncio"):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -19955,7 +25932,7 @@ def test_cancel_operation_field_headers():
 @pytest.mark.asyncio
 async def test_cancel_operation_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -20000,7 +25977,7 @@ def test_cancel_operation_from_dict():
 @pytest.mark.asyncio
 async def test_cancel_operation_from_dict_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client.transport.cancel_operation), "__call__") as call:
@@ -20041,7 +26018,7 @@ def test_get_operation(transport: str = "grpc"):
 @pytest.mark.asyncio
 async def test_get_operation_async(transport: str = "grpc_asyncio"):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -20096,7 +26073,7 @@ def test_get_operation_field_headers():
 @pytest.mark.asyncio
 async def test_get_operation_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -20143,7 +26120,7 @@ def test_get_operation_from_dict():
 @pytest.mark.asyncio
 async def test_get_operation_from_dict_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client.transport.get_operation), "__call__") as call:
@@ -20186,7 +26163,7 @@ def test_list_operations(transport: str = "grpc"):
 @pytest.mark.asyncio
 async def test_list_operations_async(transport: str = "grpc_asyncio"):
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
         transport=transport,
     )
 
@@ -20241,7 +26218,7 @@ def test_list_operations_field_headers():
 @pytest.mark.asyncio
 async def test_list_operations_field_headers_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
 
     # Any value that is part of the HTTP/1.1 URI should be sent as
@@ -20288,7 +26265,7 @@ def test_list_operations_from_dict():
 @pytest.mark.asyncio
 async def test_list_operations_from_dict_async():
     client = FirestoreAdminAsyncClient(
-        credentials=ga_credentials.AnonymousCredentials(),
+        credentials=async_anonymous_credentials(),
     )
     # Mock the actual call within the gRPC stub, and fake the request.
     with mock.patch.object(type(client.transport.list_operations), "__call__") as call:
@@ -20304,22 +26281,41 @@ async def test_list_operations_from_dict_async():
         call.assert_called()
 
 
-def test_transport_close():
-    transports = {
-        "rest": "_session",
-        "grpc": "_grpc_channel",
-    }
+def test_transport_close_grpc():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="grpc"
+    )
+    with mock.patch.object(
+        type(getattr(client.transport, "_grpc_channel")), "close"
+    ) as close:
+        with client:
+            close.assert_not_called()
+        close.assert_called_once()
 
-    for transport, close_name in transports.items():
-        client = FirestoreAdminClient(
-            credentials=ga_credentials.AnonymousCredentials(), transport=transport
-        )
-        with mock.patch.object(
-            type(getattr(client.transport, close_name)), "close"
-        ) as close:
-            with client:
-                close.assert_not_called()
-            close.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_transport_close_grpc_asyncio():
+    client = FirestoreAdminAsyncClient(
+        credentials=async_anonymous_credentials(), transport="grpc_asyncio"
+    )
+    with mock.patch.object(
+        type(getattr(client.transport, "_grpc_channel")), "close"
+    ) as close:
+        async with client:
+            close.assert_not_called()
+        close.assert_called_once()
+
+
+def test_transport_close_rest():
+    client = FirestoreAdminClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    with mock.patch.object(
+        type(getattr(client.transport, "_session")), "close"
+    ) as close:
+        with client:
+            close.assert_not_called()
+        close.assert_called_once()
 
 
 def test_client_ctx():
