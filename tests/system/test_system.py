@@ -1552,6 +1552,10 @@ def test_query_unary(client, cleanup, database, verify_pipeline):
     # Add to clean-up.
     cleanup(document1.delete)
 
+    _, document2 = collection.add({field_name: 123})
+    # Add to clean-up.
+    cleanup(document2.delete)
+
     # 0. Query for null.
     query0 = collection.where(filter=FieldFilter(field_name, "==", None))
     values0 = list(query0.stream())
@@ -1571,6 +1575,23 @@ def test_query_unary(client, cleanup, database, verify_pipeline):
     assert len(data1) == 1
     assert math.isnan(data1[field_name])
     verify_pipeline(query1)
+
+    # 2. Query for not null
+    query2 = collection.where(filter=FieldFilter(field_name, "!=", None))
+    values2 = list(query2.stream())
+    assert len(values2) == 2
+    # should fetch documents 1 (NaN) and 2 (int)
+    assert any(snapshot.reference._path == document1._path for snapshot in values2)
+    assert any(snapshot.reference._path == document2._path for snapshot in values2)
+
+    # 3. Query for not NAN.
+    query3 = collection.where(filter=FieldFilter(field_name, "!=", nan_val))
+    values3 = list(query3.stream())
+    assert len(values3) == 1
+    snapshot3 = values3[0]
+    assert snapshot3.reference._path == document2._path
+    # only document2 is not NaN
+    assert snapshot3.to_dict() == {field_name: 123}
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
@@ -3200,6 +3221,28 @@ def test_or_query_in_transaction(client, cleanup, database, verify_pipeline):
         assert inner_fn_ran is True
 
 
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_transaction_w_uuid(client, cleanup, database):
+    """
+    https://github.com/googleapis/python-firestore/issues/1012
+    """
+    collection_id = "uuid_collection" + UNIQUE_RESOURCE_ID
+    doc_ref = client.document(collection_id, "doc")
+    cleanup(doc_ref.delete)
+    key = "b7992822-eacb-40be-8af6-559b9e2fb0b7"
+    doc_ref.create({key: "I'm a UUID!"})
+
+    @firestore.transactional
+    def update_doc(tx, doc_ref, key, value):
+        tx.update(doc_ref, {key: value})
+
+    expected = "UPDATED VALUE"
+    update_doc(client.transaction(), doc_ref, key, expected)
+    # read updated doc
+    snapshot = doc_ref.get()
+    assert snapshot.to_dict()[key] == expected
+
+
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
@@ -3254,6 +3297,24 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database, ve
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function
         assert inner_fn_ran is True
+
+
+@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+def test_update_w_uuid(client, cleanup, database):
+    """
+    https://github.com/googleapis/python-firestore/issues/1012
+    """
+    collection_id = "uuid_collection" + UNIQUE_RESOURCE_ID
+    doc_ref = client.document(collection_id, "doc")
+    cleanup(doc_ref.delete)
+    key = "b7992822-eacb-40be-8af6-559b9e2fb0b7"
+    doc_ref.create({key: "I'm a UUID!"})
+
+    expected = "UPDATED VALUE"
+    doc_ref.update({key: expected})
+    # read updated doc
+    snapshot = doc_ref.get()
+    assert snapshot.to_dict()[key] == expected
 
 
 @pytest.mark.parametrize("with_rollback,expected", [(True, 2), (False, 3)])

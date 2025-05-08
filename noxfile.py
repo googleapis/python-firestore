@@ -35,7 +35,15 @@ LINT_PATHS = ["docs", "google", "tests", "noxfile.py", "setup.py"]
 
 DEFAULT_PYTHON_VERSION = "3.8"
 
-UNIT_TEST_PYTHON_VERSIONS: List[str] = ["3.7", "3.8", "3.9", "3.10", "3.11", "3.12"]
+UNIT_TEST_PYTHON_VERSIONS: List[str] = [
+    "3.7",
+    "3.8",
+    "3.9",
+    "3.10",
+    "3.11",
+    "3.12",
+    "3.13",
+]
 UNIT_TEST_STANDARD_DEPENDENCIES = [
     "mock",
     "asyncmock",
@@ -71,7 +79,6 @@ SYSTEM_TEST_EXTRAS_BY_PYTHON: Dict[str, List[str]] = {}
 
 CURRENT_DIRECTORY = pathlib.Path(__file__).parent.absolute()
 
-# 'docfx' is excluded since it only needs to run in 'docs-presubmit'
 nox.options.sessions = [
     "unit",
     "system_emulated",
@@ -82,6 +89,7 @@ nox.options.sessions = [
     "lint_setup_py",
     "blacken",
     "docs",
+    "docfx",
     "format",
 ]
 
@@ -148,13 +156,26 @@ def pytype(session):
 def mypy(session):
     """Verify type hints are mypy compatible."""
     session.install("-e", ".")
-    session.install("mypy", "types-setuptools")
+    session.install("mypy", "types-setuptools", "types-protobuf")
     # TODO: also verify types on tests, all of google package
-    session.run("mypy", 
-        "-p", "google.cloud.firestore_v1.pipeline_expressions",
-        "-p", "google.cloud.firestore_v1.pipeline_stages",
-        "-p", "google.cloud.firestore_v1.pipeline",
-    "--no-incremental")
+    session.run(
+        "mypy",
+        "-p",
+        "google.cloud.firestore_v1.pipeline_expressions",
+        "-p",
+        "google.cloud.firestore_v1.pipeline_stages",
+        "-p",
+        "google.cloud.firestore_v1.pipeline_source",
+        "-p",
+        "google.cloud.firestore_v1.pipeline_result",
+        "-p",
+        "google.cloud.firestore_v1.base_pipeline",
+        "-p",
+        "google.cloud.firestore_v1.async_pipeline",
+        "-p",
+        "google.cloud.firestore_v1.pipeline",
+        "--no-incremental",
+    )
 
 
 @nox.session(python=DEFAULT_PYTHON_VERSION)
@@ -200,7 +221,7 @@ def install_unittest_dependencies(session, *constraints):
 def unit(session, protobuf_implementation):
     # Install all test dependencies, then install this package in-place.
 
-    if protobuf_implementation == "cpp" and session.python in ("3.11", "3.12"):
+    if protobuf_implementation == "cpp" and session.python in ("3.11", "3.12", "3.13"):
         session.skip("cpp implementation is not supported in python 3.11+")
 
     constraints_path = str(
@@ -451,7 +472,7 @@ def docfx(session):
     )
 
 
-@nox.session(python="3.12")
+@nox.session(python="3.13")
 @nox.parametrize(
     "protobuf_implementation",
     ["python", "upb", "cpp"],
@@ -459,7 +480,7 @@ def docfx(session):
 def prerelease_deps(session, protobuf_implementation):
     """Run all tests with prerelease versions of dependencies installed."""
 
-    if protobuf_implementation == "cpp" and session.python in ("3.11", "3.12"):
+    if protobuf_implementation == "cpp" and session.python in ("3.11", "3.12", "3.13"):
         session.skip("cpp implementation is not supported in python 3.11+")
 
     # Install all dependencies
