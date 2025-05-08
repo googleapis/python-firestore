@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -867,6 +867,7 @@ class ExecutePipelineRequest(proto.Message):
             This field is a member of `oneof`_ ``consistency_selector``.
         new_transaction (google.cloud.firestore_v1.types.TransactionOptions):
             Execute the pipeline in a new transaction.
+
             The identifier of the newly created transaction
             will be returned in the first response on the
             stream. This defaults to a read-only
@@ -952,6 +953,7 @@ class ExecutePipelineResponse(proto.Message):
             represents the time at which the operation was run.
         explain_stats (google.cloud.firestore_v1.types.ExplainStats):
             Query explain stats.
+
             Contains all metadata related to pipeline
             planning and execution, specific contents depend
             on the supplied pipeline options.

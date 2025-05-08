@@ -37,6 +37,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.pipeline import Pipeline
+    from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 
 class FindNearestOptions:
@@ -190,6 +191,9 @@ class Database(Stage):
     def __init__(self):
         super().__init__()
 
+    def _pb_args(self):
+        return []
+
 
 class Distinct(Stage):
     """Returns documents with distinct combinations of specified field values."""
@@ -218,7 +222,7 @@ class Documents(Stage):
         self.paths = paths
 
     @staticmethod
-    def of(*documents: "DocumentReference") -> "Documents":
+    def of(*documents: "BaseDocumentReference") -> "Documents":
         doc_paths = ["/" + doc.path for doc in documents]
         return Documents(*doc_paths)
 

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -395,6 +395,26 @@ class FirestoreTransport(abc.ABC):
                 default_timeout=60.0,
                 client_info=client_info,
             ),
+            self.cancel_operation: gapic_v1.method.wrap_method(
+                self.cancel_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.delete_operation: gapic_v1.method.wrap_method(
+                self.delete_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.get_operation: gapic_v1.method.wrap_method(
+                self.get_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.list_operations: gapic_v1.method.wrap_method(
+                self.list_operations,
+                default_timeout=None,
+                client_info=client_info,
+            ),
         }
 
     def close(self):
@@ -491,6 +511,18 @@ class FirestoreTransport(abc.ABC):
     ) -> Callable[
         [firestore.RunQueryRequest],
         Union[firestore.RunQueryResponse, Awaitable[firestore.RunQueryResponse]],
+    ]:
+        raise NotImplementedError()
+
+    @property
+    def execute_pipeline(
+        self,
+    ) -> Callable[
+        [firestore.ExecutePipelineRequest],
+        Union[
+            firestore.ExecutePipelineResponse,
+            Awaitable[firestore.ExecutePipelineResponse],
+        ],
     ]:
         raise NotImplementedError()
 
