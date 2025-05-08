@@ -52,3 +52,15 @@ class PipelineSource(Generic[PipelineType]):
             a new pipeline instance targeting the specified collection
         """
         return self.client._pipeline_cls(self.client, stages.Collection(path))
+
+    def collection_group(self, collection_id: str) -> PipelineType:
+        """
+        Creates a new Pipeline that that operates on all documents in a collection group.
+        Args:
+            collection_id: The ID of the collection group
+        Returns:
+            a new pipeline instance targeting the specified collection group
+        """
+        return self.client._pipeline_cls(
+            self.client, stages.CollectionGroup(collection_id)
+        )
