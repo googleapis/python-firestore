@@ -123,6 +123,14 @@ class FirestoreRestInterceptor:
                 logging.log(f"Received request: {request}")
                 return request, metadata
 
+            def pre_execute_pipeline(self, request, metadata):
+                logging.log(f"Received request: {request}")
+                return request, metadata
+
+            def post_execute_pipeline(self, response):
+                logging.log(f"Received response: {response}")
+                return response
+
             def pre_get_document(self, request, metadata):
                 logging.log(f"Received request: {request}")
                 return request, metadata
@@ -440,6 +448,56 @@ class FirestoreRestInterceptor:
         before they are sent to the Firestore server.
         """
         return request, metadata
+
+    def pre_execute_pipeline(
+        self,
+        request: firestore.ExecutePipelineRequest,
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        firestore.ExecutePipelineRequest, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
+        """Pre-rpc interceptor for execute_pipeline
+
+        Override in a subclass to manipulate the request or metadata
+        before they are sent to the Firestore server.
+        """
+        return request, metadata
+
+    def post_execute_pipeline(
+        self, response: rest_streaming.ResponseIterator
+    ) -> rest_streaming.ResponseIterator:
+        """Post-rpc interceptor for execute_pipeline
+
+        DEPRECATED. Please use the `post_execute_pipeline_with_metadata`
+        interceptor instead.
+
+        Override in a subclass to read or manipulate the response
+        after it is returned by the Firestore server but before
+        it is returned to user code. This `post_execute_pipeline` interceptor runs
+        before the `post_execute_pipeline_with_metadata` interceptor.
+        """
+        return response
+
+    def post_execute_pipeline_with_metadata(
+        self,
+        response: rest_streaming.ResponseIterator,
+        metadata: Sequence[Tuple[str, Union[str, bytes]]],
+    ) -> Tuple[
+        rest_streaming.ResponseIterator, Sequence[Tuple[str, Union[str, bytes]]]
+    ]:
+        """Post-rpc interceptor for execute_pipeline
+
+        Override in a subclass to read or manipulate the response or metadata after it
+        is returned by the Firestore server but before it is returned to user code.
+
+        We recommend only using this `post_execute_pipeline_with_metadata`
+        interceptor in new development instead of the `post_execute_pipeline` interceptor.
+        When both interceptors are used, this `post_execute_pipeline_with_metadata` interceptor runs after the
+        `post_execute_pipeline` interceptor. The (possibly modified) response returned by
+        `post_execute_pipeline` will be passed to
+        `post_execute_pipeline_with_metadata`.
+        """
+        return response, metadata
 
     def pre_get_document(
         self,
@@ -932,35 +990,39 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
     ) -> None:
         """Instantiate the transport.
 
-        Args:
-            host (Optional[str]):
-                 The hostname to connect to (default: 'firestore.googleapis.com').
-            credentials (Optional[google.auth.credentials.Credentials]): The
-                authorization credentials to attach to requests. These
-                credentials identify the application to the service; if none
-                are specified, the client will attempt to ascertain the
-                credentials from the environment.
+        NOTE: This REST transport functionality is currently in a beta
+        state (preview). We welcome your feedback via a GitHub issue in
+        this library's repository. Thank you!
 
-            credentials_file (Optional[str]): A file with credentials that can
-                be loaded with :func:`google.auth.load_credentials_from_file`.
-                This argument is ignored if ``channel`` is provided.
-            scopes (Optional(Sequence[str])): A list of scopes. This argument is
-                ignored if ``channel`` is provided.
-            client_cert_source_for_mtls (Callable[[], Tuple[bytes, bytes]]): Client
-                certificate to configure mutual TLS HTTP channel. It is ignored
-                if ``channel`` is provided.
-            quota_project_id (Optional[str]): An optional project to use for billing
-                and quota.
-            client_info (google.api_core.gapic_v1.client_info.ClientInfo):
-                The client info used to send a user-agent string along with
-                API requests. If ``None``, then default info will be used.
-                Generally, you only need to set this if you are developing
-                your own client library.
-            always_use_jwt_access (Optional[bool]): Whether self signed JWT should
-                be used for service account credentials.
-            url_scheme: the protocol scheme for the API endpoint.  Normally
-                "https", but for testing or local servers,
-                "http" can be specified.
+         Args:
+             host (Optional[str]):
+                  The hostname to connect to (default: 'firestore.googleapis.com').
+             credentials (Optional[google.auth.credentials.Credentials]): The
+                 authorization credentials to attach to requests. These
+                 credentials identify the application to the service; if none
+                 are specified, the client will attempt to ascertain the
+                 credentials from the environment.
+
+             credentials_file (Optional[str]): A file with credentials that can
+                 be loaded with :func:`google.auth.load_credentials_from_file`.
+                 This argument is ignored if ``channel`` is provided.
+             scopes (Optional(Sequence[str])): A list of scopes. This argument is
+                 ignored if ``channel`` is provided.
+             client_cert_source_for_mtls (Callable[[], Tuple[bytes, bytes]]): Client
+                 certificate to configure mutual TLS HTTP channel. It is ignored
+                 if ``channel`` is provided.
+             quota_project_id (Optional[str]): An optional project to use for billing
+                 and quota.
+             client_info (google.api_core.gapic_v1.client_info.ClientInfo):
+                 The client info used to send a user-agent string along with
+                 API requests. If ``None``, then default info will be used.
+                 Generally, you only need to set this if you are developing
+                 your own client library.
+             always_use_jwt_access (Optional[bool]): Whether self signed JWT should
+                 be used for service account credentials.
+             url_scheme: the protocol scheme for the API endpoint.  Normally
+                 "https", but for testing or local servers,
+                 "http" can be specified.
         """
         # Run the base constructor
         # TODO(yon-mg): resolve other ctor params i.e. scopes, quota, etc.
@@ -1851,6 +1913,142 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
             # subclass.
             if response.status_code >= 400:
                 raise core_exceptions.from_http_response(response)
+
+    class _ExecutePipeline(
+        _BaseFirestoreRestTransport._BaseExecutePipeline, FirestoreRestStub
+    ):
+        def __hash__(self):
+            return hash("FirestoreRestTransport.ExecutePipeline")
+
+        @staticmethod
+        def _get_response(
+            host,
+            metadata,
+            query_params,
+            session,
+            timeout,
+            transcoded_request,
+            body=None,
+        ):
+            uri = transcoded_request["uri"]
+            method = transcoded_request["method"]
+            headers = dict(metadata)
+            headers["Content-Type"] = "application/json"
+            response = getattr(session, method)(
+                "{host}{uri}".format(host=host, uri=uri),
+                timeout=timeout,
+                headers=headers,
+                params=rest_helpers.flatten_query_params(query_params, strict=True),
+                data=body,
+                stream=True,
+            )
+            return response
+
+        def __call__(
+            self,
+            request: firestore.ExecutePipelineRequest,
+            *,
+            retry: OptionalRetry = gapic_v1.method.DEFAULT,
+            timeout: Optional[float] = None,
+            metadata: Sequence[Tuple[str, Union[str, bytes]]] = (),
+        ) -> rest_streaming.ResponseIterator:
+            r"""Call the execute pipeline method over HTTP.
+
+            Args:
+                request (~.firestore.ExecutePipelineRequest):
+                    The request object. The request for
+                [Firestore.ExecutePipeline][google.firestore.v1.Firestore.ExecutePipeline].
+                retry (google.api_core.retry.Retry): Designation of what errors, if any,
+                    should be retried.
+                timeout (float): The timeout for this request.
+                metadata (Sequence[Tuple[str, Union[str, bytes]]]): Key/value pairs which should be
+                    sent along with the request as metadata. Normally, each value must be of type `str`,
+                    but for metadata keys ending with the suffix `-bin`, the corresponding values must
+                    be of type `bytes`.
+
+            Returns:
+                ~.firestore.ExecutePipelineResponse:
+                    The response for [Firestore.Execute][].
+            """
+
+            http_options = (
+                _BaseFirestoreRestTransport._BaseExecutePipeline._get_http_options()
+            )
+
+            request, metadata = self._interceptor.pre_execute_pipeline(
+                request, metadata
+            )
+            transcoded_request = _BaseFirestoreRestTransport._BaseExecutePipeline._get_transcoded_request(
+                http_options, request
+            )
+
+            body = (
+                _BaseFirestoreRestTransport._BaseExecutePipeline._get_request_body_json(
+                    transcoded_request
+                )
+            )
+
+            # Jsonify the query params
+            query_params = (
+                _BaseFirestoreRestTransport._BaseExecutePipeline._get_query_params_json(
+                    transcoded_request
+                )
+            )
+
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                request_url = "{host}{uri}".format(
+                    host=self._host, uri=transcoded_request["uri"]
+                )
+                method = transcoded_request["method"]
+                try:
+                    request_payload = type(request).to_json(request)
+                except:
+                    request_payload = None
+                http_request = {
+                    "payload": request_payload,
+                    "requestMethod": method,
+                    "requestUrl": request_url,
+                    "headers": dict(metadata),
+                }
+                _LOGGER.debug(
+                    f"Sending request for google.firestore_v1.FirestoreClient.ExecutePipeline",
+                    extra={
+                        "serviceName": "google.firestore.v1.Firestore",
+                        "rpcName": "ExecutePipeline",
+                        "httpRequest": http_request,
+                        "metadata": http_request["headers"],
+                    },
+                )
+
+            # Send the request
+            response = FirestoreRestTransport._ExecutePipeline._get_response(
+                self._host,
+                metadata,
+                query_params,
+                self._session,
+                timeout,
+                transcoded_request,
+                body,
+            )
+
+            # In case of error, raise the appropriate core_exceptions.GoogleAPICallError exception
+            # subclass.
+            if response.status_code >= 400:
+                raise core_exceptions.from_http_response(response)
+
+            # Return the response
+            resp = rest_streaming.ResponseIterator(
+                response, firestore.ExecutePipelineResponse
+            )
+
+            resp = self._interceptor.post_execute_pipeline(resp)
+            response_metadata = [(k, str(v)) for k, v in response.headers.items()]
+            resp, _ = self._interceptor.post_execute_pipeline_with_metadata(
+                resp, response_metadata
+            )
+            return resp
 
     class _GetDocument(_BaseFirestoreRestTransport._BaseGetDocument, FirestoreRestStub):
         def __hash__(self):
@@ -3089,6 +3287,16 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
         # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
         # In C++ this would require a dynamic_cast
         return self._DeleteDocument(self._session, self._host, self._interceptor)  # type: ignore
+
+    @property
+    def execute_pipeline(
+        self,
+    ) -> Callable[
+        [firestore.ExecutePipelineRequest], firestore.ExecutePipelineResponse
+    ]:
+        # The return type is fine, but mypy isn't sophisticated enough to determine what's going on here.
+        # In C++ this would require a dynamic_cast
+        return self._ExecutePipeline(self._session, self._host, self._interceptor)  # type: ignore
 
     @property
     def get_document(
