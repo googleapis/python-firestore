@@ -52,36 +52,3 @@ class PipelineSource(Generic[PipelineType]):
             a new pipeline instance targeting the specified collection
         """
         return self.client._pipeline_cls(self.client, stages.Collection(path))
-
-    def collection_group(self, collection_id: str) -> PipelineType:
-        """
-        Creates a new Pipeline that that operates on all documents in a collection group.
-
-        Args:
-            collection_id: The ID of the collection group
-        Returns:
-            a new pipeline instance targeting the specified collection group
-        """
-        return self.client._pipeline_cls(
-            self.client, stages.CollectionGroup(collection_id)
-        )
-
-    def database(self) -> PipelineType:
-        """
-        Creates a new Pipeline that operates on all documents in the Firestore database.
-
-        Returns:
-            a new pipeline instance targeting the specified collection
-        """
-        return self.client._pipeline_cls(self.client, stages.Database())
-
-    def documents(self, *docs: "BaseDocumentReference") -> PipelineType:
-        """
-        Creates a new Pipeline that operates on a specific set of Firestore documents.
-
-        Args:
-            docs: The DocumentReference instances representing the documents to include in the pipeline.
-        Returns:
-            a new pipeline instance targeting the specified documents
-        """
-        return self.client._pipeline_cls(self.client, stages.Documents.of(*docs))

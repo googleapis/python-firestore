@@ -57,8 +57,6 @@ from google.cloud.firestore_v1.types import (
     query,
 )
 from google.cloud.firestore_v1.vector import Vector
-from google.cloud.firestore_v1 import pipeline_expressions
-from google.cloud.firestore_v1 import pipeline_stages
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
@@ -1120,9 +1118,6 @@ class BaseQuery(object):
             )
 
         return copied
-
-    def pipeline(self):
-        raise NotImplementedError
 
     def _comparator(self, doc1, doc2) -> int:
         _orders = self._orders
