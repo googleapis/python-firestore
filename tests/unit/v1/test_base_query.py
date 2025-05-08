@@ -1993,11 +1993,14 @@ def test__query_pipeline_decendants():
     assert stage.collection_id == "my_col"
 
 
-@pytest.mark.parametrize("in_path,out_path",[
-    ("my_col/doc/", "/my_col/doc/"),
-    ("/my_col/doc", "/my_col/doc"),
-    ("my_col/doc/sub_col", "/my_col/doc/sub_col"),
-])
+@pytest.mark.parametrize(
+    "in_path,out_path",
+    [
+        ("my_col/doc/", "/my_col/doc/"),
+        ("/my_col/doc", "/my_col/doc"),
+        ("my_col/doc/sub_col", "/my_col/doc/sub_col"),
+    ],
+)
 def test__query_pipeline_no_decendants(in_path, out_path):
     from google.cloud.firestore_v1 import pipeline_stages
 
@@ -2019,7 +2022,9 @@ def test__query_pipeline_composite_filter():
     client = make_client()
     in_filter = FieldFilter("field_a", "==", "value_a")
     query = client.collection("my_col").where(filter=in_filter)
-    with mock.patch.object(expr.FilterCondition, "_from_query_filter_pb") as convert_mock:
+    with mock.patch.object(
+        expr.FilterCondition, "_from_query_filter_pb"
+    ) as convert_mock:
         pipeline = query.pipeline()
         convert_mock.assert_called_once_with(in_filter._to_pb(), client)
         assert len(pipeline.stages) == 2
@@ -2064,6 +2069,7 @@ def test__query_pipeline_order_exists_multiple():
     assert operands[0].params[0].path == "field_a"
     assert isinstance(operands[1], expr.Exists)
     assert operands[1].params[0].path == "field_b"
+
 
 def test__query_pipeline_order_exists_single():
     from google.cloud.firestore_v1 import pipeline_expressions as expr

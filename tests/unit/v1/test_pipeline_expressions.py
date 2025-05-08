@@ -29,7 +29,6 @@ def mock_client():
 
 
 class TestFilterCondition:
-
     def test__from_query_filter_pb_composite_filter_or(self, mock_client):
         """
         test composite OR filters
@@ -53,13 +52,21 @@ class TestFilterCondition:
                 query_pb.StructuredQuery.Filter(unary_filter=filter2_pb),
             ],
         )
-        wrapped_filter_pb = query_pb.StructuredQuery.Filter(composite_filter=composite_pb)
+        wrapped_filter_pb = query_pb.StructuredQuery.Filter(
+            composite_filter=composite_pb
+        )
 
         result = FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         # should include existance checks
-        expected_cond1 = expr.And(expr.Exists(expr.Field.of("field1")), expr.Eq(expr.Field.of("field1"), expr.Constant("val1")))
-        expected_cond2 = expr.And(expr.Exists(expr.Field.of("field2")), expr.Eq(expr.Field.of("field2"), expr.Constant(None)))
+        expected_cond1 = expr.And(
+            expr.Exists(expr.Field.of("field1")),
+            expr.Eq(expr.Field.of("field1"), expr.Constant("val1")),
+        )
+        expected_cond2 = expr.And(
+            expr.Exists(expr.Field.of("field2")),
+            expr.Eq(expr.Field.of("field2"), expr.Constant(None)),
+        )
         expected = expr.Or(expected_cond1, expected_cond2)
 
         assert repr(result) == repr(expected)
@@ -88,13 +95,21 @@ class TestFilterCondition:
                 query_pb.StructuredQuery.Filter(field_filter=filter2_pb),
             ],
         )
-        wrapped_filter_pb = query_pb.StructuredQuery.Filter(composite_filter=composite_pb)
+        wrapped_filter_pb = query_pb.StructuredQuery.Filter(
+            composite_filter=composite_pb
+        )
 
         result = FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         # should include existance checks
-        expected_cond1 = expr.And(expr.Exists(expr.Field.of("field1")), expr.Gt(expr.Field.of("field1"), expr.Constant(100)))
-        expected_cond2 = expr.And(expr.Exists(expr.Field.of("field2")), expr.Lt(expr.Field.of("field2"), expr.Constant(200)))
+        expected_cond1 = expr.And(
+            expr.Exists(expr.Field.of("field1")),
+            expr.Gt(expr.Field.of("field1"), expr.Constant(100)),
+        )
+        expected_cond2 = expr.And(
+            expr.Exists(expr.Field.of("field2")),
+            expr.Lt(expr.Field.of("field2"), expr.Constant(200)),
+        )
         expected = expr.And(expected_cond1, expected_cond2)
         assert repr(result) == repr(expected)
 
@@ -131,18 +146,28 @@ class TestFilterCondition:
                 query_pb.StructuredQuery.Filter(composite_filter=inner_and_pb),
             ],
         )
-        wrapped_filter_pb = query_pb.StructuredQuery.Filter(composite_filter=outer_or_pb)
+        wrapped_filter_pb = query_pb.StructuredQuery.Filter(
+            composite_filter=outer_or_pb
+        )
 
         result = FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
-        expected_cond1 = expr.And(expr.Exists(expr.Field.of("field1")), expr.Eq(expr.Field.of("field1"), expr.Constant("val1")))
-        expected_cond2 = expr.And(expr.Exists(expr.Field.of("field2")), expr.Gt(expr.Field.of("field2"), expr.Constant(10)))
-        expected_cond3 = expr.And(expr.Exists(expr.Field.of("field3")), expr.Not(expr.Eq(expr.Field.of("field3"), expr.Constant(None))))
+        expected_cond1 = expr.And(
+            expr.Exists(expr.Field.of("field1")),
+            expr.Eq(expr.Field.of("field1"), expr.Constant("val1")),
+        )
+        expected_cond2 = expr.And(
+            expr.Exists(expr.Field.of("field2")),
+            expr.Gt(expr.Field.of("field2"), expr.Constant(10)),
+        )
+        expected_cond3 = expr.And(
+            expr.Exists(expr.Field.of("field3")),
+            expr.Not(expr.Eq(expr.Field.of("field3"), expr.Constant(None))),
+        )
         expected_inner_and = expr.And(expected_cond2, expected_cond3)
         expected_outer_or = expr.Or(expected_cond1, expected_inner_and)
 
         assert repr(result) == repr(expected_outer_or)
-
 
     def test__from_query_filter_pb_composite_filter_unknown_op(self, mock_client):
         """
@@ -157,7 +182,9 @@ class TestFilterCondition:
             op=query_pb.StructuredQuery.CompositeFilter.Operator.OPERATOR_UNSPECIFIED,
             filters=[query_pb.StructuredQuery.Filter(field_filter=filter1_pb)],
         )
-        wrapped_filter_pb = query_pb.StructuredQuery.Filter(composite_filter=composite_pb)
+        wrapped_filter_pb = query_pb.StructuredQuery.Filter(
+            composite_filter=composite_pb
+        )
 
         with pytest.raises(TypeError, match="Unexpected CompositeFilter operator type"):
             FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
@@ -166,12 +193,23 @@ class TestFilterCondition:
         "op_enum, expected_expr_func",
         [
             (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN, expr.IsNaN),
-            (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN, lambda f: expr.Not(f.is_nan())),
-            (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NULL, lambda f: f.eq(None)),
-            (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL, lambda f: expr.Not(f.eq(None))),
+            (
+                query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN,
+                lambda f: expr.Not(f.is_nan()),
+            ),
+            (
+                query_pb.StructuredQuery.UnaryFilter.Operator.IS_NULL,
+                lambda f: f.eq(None),
+            ),
+            (
+                query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL,
+                lambda f: expr.Not(f.eq(None)),
+            ),
         ],
     )
-    def test__from_query_filter_pb_unary_filter(self, mock_client, op_enum, expected_expr_func):
+    def test__from_query_filter_pb_unary_filter(
+        self, mock_client, op_enum, expected_expr_func
+    ):
         """
         test supported unary filters
         """
@@ -198,30 +236,51 @@ class TestFilterCondition:
         field_path = "unary_field"
         filter_pb = query_pb.StructuredQuery.UnaryFilter(
             field=query_pb.StructuredQuery.FieldReference(field_path=field_path),
-            op=query_pb.StructuredQuery.UnaryFilter.Operator.OPERATOR_UNSPECIFIED, # Unknown op
+            op=query_pb.StructuredQuery.UnaryFilter.Operator.OPERATOR_UNSPECIFIED,  # Unknown op
         )
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(unary_filter=filter_pb)
 
         with pytest.raises(TypeError, match="Unexpected UnaryFilter operator type"):
             FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
-
     @pytest.mark.parametrize(
         "op_enum, value, expected_expr_func",
         [
             (query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN, 10, expr.Lt),
-            (query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN_OR_EQUAL, 10, expr.Lte),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN_OR_EQUAL,
+                10,
+                expr.Lte,
+            ),
             (query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN, 10, expr.Gt),
-            (query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN_OR_EQUAL, 10, expr.Gte),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN_OR_EQUAL,
+                10,
+                expr.Gte,
+            ),
             (query_pb.StructuredQuery.FieldFilter.Operator.EQUAL, 10, expr.Eq),
             (query_pb.StructuredQuery.FieldFilter.Operator.NOT_EQUAL, 10, expr.Neq),
-            (query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS, 10, expr.ArrayContains),
-            (query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS_ANY, [10, 20], expr.ArrayContainsAny),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS,
+                10,
+                expr.ArrayContains,
+            ),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS_ANY,
+                [10, 20],
+                expr.ArrayContainsAny,
+            ),
             (query_pb.StructuredQuery.FieldFilter.Operator.IN, [10, 20], expr.In),
-            (query_pb.StructuredQuery.FieldFilter.Operator.NOT_IN, [10, 20], lambda f, v: expr.Not(f.in_any(v))),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.NOT_IN,
+                [10, 20],
+                lambda f, v: expr.Not(f.in_any(v)),
+            ),
         ],
     )
-    def test__from_query_filter_pb_field_filter(self, mock_client, op_enum, value, expected_expr_func):
+    def test__from_query_filter_pb_field_filter(
+        self, mock_client, op_enum, value, expected_expr_func
+    ):
         """
         test supported field filters
         """
@@ -238,7 +297,11 @@ class TestFilterCondition:
 
         field_expr = expr.Field.of(field_path)
         # convert values into constants
-        value = [expr.Constant(e) for e in value] if isinstance(value, list) else expr.Constant(value)
+        value = (
+            [expr.Constant(e) for e in value]
+            if isinstance(value, list)
+            else expr.Constant(value)
+        )
         expected_condition = expected_expr_func(field_expr, value)
         # should include existance checks
         expected = expr.And(expr.Exists(field_expr), expected_condition)
@@ -253,7 +316,7 @@ class TestFilterCondition:
         value_pb = _helpers.encode_value(10)
         filter_pb = query_pb.StructuredQuery.FieldFilter(
             field=query_pb.StructuredQuery.FieldReference(field_path=field_path),
-            op=query_pb.StructuredQuery.FieldFilter.Operator.OPERATOR_UNSPECIFIED, # Unknown op
+            op=query_pb.StructuredQuery.FieldFilter.Operator.OPERATOR_UNSPECIFIED,  # Unknown op
             value=value_pb,
         )
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(field_filter=filter_pb)
@@ -267,4 +330,4 @@ class TestFilterCondition:
         """
         # Test with an unexpected protobuf type
         with pytest.raises(TypeError, match="Unexpected filter type"):
-             FilterCondition._from_query_filter_pb(document_pb.Value(), mock_client)
+            FilterCondition._from_query_filter_pb(document_pb.Value(), mock_client)

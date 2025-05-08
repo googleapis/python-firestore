@@ -116,7 +116,6 @@ class Expr(ABC):
     def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
         return o if isinstance(o, Expr) else Constant(o)
 
-
     def eq(self, other: Expr | CONSTANT_TYPE) -> "Eq":
         """Creates an expression that checks if this expression is equal to another
         expression or constant value.
@@ -286,6 +285,7 @@ class Expr(ABC):
         """
         return Exists(self)
 
+
 class Constant(Expr, Generic[CONSTANT_TYPE]):
     """Represents a constant literal value in an expression."""
 
@@ -449,17 +449,20 @@ class And(FilterCondition):
     def __init__(self, *conditions: "FilterCondition"):
         super().__init__("and", conditions)
 
+
 class ArrayContains(FilterCondition):
     def __init__(self, array: Expr, element: Expr):
         super().__init__(
             "array_contains", [array, element if element else Constant(None)]
         )
 
+
 class ArrayContainsAny(FilterCondition):
     """Represents checking if an array contains any of the specified elements."""
 
     def __init__(self, array: Expr, elements: List[Expr]):
         super().__init__("array_contains_any", [array, ListOfExprs(elements)])
+
 
 class Eq(FilterCondition):
     """Represents the equality comparison."""
@@ -502,6 +505,7 @@ class IsNaN(FilterCondition):
     def __init__(self, value: Expr):
         super().__init__("is_nan", [value])
 
+
 class Lt(FilterCondition):
     """Represents the less than comparison."""
 
@@ -521,6 +525,7 @@ class Neq(FilterCondition):
 
     def __init__(self, left: Expr, right: Expr):
         super().__init__("neq", [left, right if right else Constant(None)])
+
 
 class Not(FilterCondition):
     """Represents the logical NOT of a filter condition."""

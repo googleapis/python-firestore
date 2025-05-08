@@ -105,6 +105,7 @@ def verify_pipeline(query):
         pipeline_results = [s.to_dict() for s in pipeline.execute()]
         assert query_results == pipeline_results
 
+
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_collections(client, database):
     collections = list(client.collections())
@@ -129,7 +130,9 @@ def test_collections_w_import(database):
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_collection_stream_or_get_w_no_explain_options(database, query_docs, method, verify_pipeline):
+def test_collection_stream_or_get_w_no_explain_options(
+    database, query_docs, method, verify_pipeline
+):
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
     collection, _, _ = query_docs
@@ -145,6 +148,7 @@ def test_collection_stream_or_get_w_no_explain_options(database, query_docs, met
     ):
         results.get_explain_metrics()
     verify_pipeline(collection)
+
 
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
@@ -2292,6 +2296,7 @@ def test_nested_recursive_query(client, cleanup, database, verify_pipeline):
         assert ids[index] == expected_ids[index], error_msg
     verify_pipeline(query)
 
+
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_chunked_query(client, cleanup, database):
     col = client.collection(f"chunked-test{UNIQUE_RESOURCE_ID}")
@@ -3134,7 +3139,13 @@ def test_query_with_complex_composite_filter(collection, database, verify_pipeli
 )
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
 def test_aggregation_query_in_transaction(
-    client, cleanup, database, aggregation_type, aggregation_args, expected, verify_pipeline
+    client,
+    cleanup,
+    database,
+    aggregation_type,
+    aggregation_args,
+    expected,
+    verify_pipeline,
 ):
     """
     Test creating an aggregation query inside a transaction
@@ -3247,7 +3258,9 @@ def test_transaction_w_uuid(client, cleanup, database):
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_query_in_transaction_with_explain_options(client, cleanup, database, verify_pipeline):
+def test_query_in_transaction_with_explain_options(
+    client, cleanup, database, verify_pipeline
+):
     """
     Test query profiling in transactions.
     """
@@ -3319,7 +3332,9 @@ def test_update_w_uuid(client, cleanup, database):
 
 @pytest.mark.parametrize("with_rollback,expected", [(True, 2), (False, 3)])
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-def test_transaction_rollback(client, cleanup, database, with_rollback, expected, verify_pipeline):
+def test_transaction_rollback(
+    client, cleanup, database, with_rollback, expected, verify_pipeline
+):
     """
     Create a document in a transaction that is rolled back
     Document should not show up in later queries

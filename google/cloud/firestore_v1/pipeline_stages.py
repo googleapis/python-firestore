@@ -149,6 +149,7 @@ class Sort(Stage):
     def _pb_args(self):
         return [o._to_pb() for o in self.orders]
 
+
 class Where(Stage):
     """Filters documents based on a specified condition."""
 
