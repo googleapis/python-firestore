@@ -51,9 +51,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
     async def get(
         self,
         transaction=None,
-        retry: Union[
-            retries.AsyncRetry, None, gapic_v1.method._MethodDefault
-        ] = gapic_v1.method.DEFAULT,
+        retry: Union[retries.AsyncRetry, None, object] = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
@@ -90,19 +88,22 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             timeout=timeout,
             explain_options=explain_options,
         )
-        result = [aggregation async for aggregation in stream_result]
+        try:
+            result = [aggregation async for aggregation in stream_result]
 
-        if explain_options is None:
-            explain_metrics = None
-        else:
-            explain_metrics = await stream_result.get_explain_metrics()
+            if explain_options is None:
+                explain_metrics = None
+            else:
+                explain_metrics = await stream_result.get_explain_metrics()
+        finally:
+            await stream_result.aclose()
 
         return QueryResultsList(result, explain_options, explain_metrics)
 
     async def _make_stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
     ) -> AsyncGenerator[List[AggregationResult] | query_profile_pb.ExplainMetrics, Any]:
@@ -162,7 +163,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
     def stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.AsyncRetry] = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,

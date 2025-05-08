@@ -23,11 +23,13 @@ In the hierarchy of API concepts
 * a :class:`~google.cloud.firestore_v1.client.Client` owns a
   :class:`~google.cloud.firestore_v1.document.DocumentReference`
 """
+from __future__ import annotations
 
 import os
 from typing import (
     Any,
     AsyncGenerator,
+    Awaitable,
     Generator,
     Iterable,
     List,
@@ -58,7 +60,7 @@ from google.cloud.firestore_v1.base_query import BaseQuery
 from google.cloud.firestore_v1.base_transaction import BaseTransaction
 from google.cloud.firestore_v1.bulk_writer import BulkWriter, BulkWriterOptions
 from google.cloud.firestore_v1.field_path import render_field_path
-from google.cloud.firestore_v1.pipeline import PipelineSource, _BasePipeline
+from google.cloud.firestore_v1.services.firestore import client as firestore_client
 
 DEFAULT_DATABASE = "(default)"
 """str: The default database used in a :class:`~google.cloud.firestore_v1.client.Client`."""
@@ -222,6 +224,16 @@ class BaseClient(ClientWithProject):
             return client_class.DEFAULT_ENDPOINT
 
     @property
+    def _target(self):
+        """Return the target (where the API is).
+        Eg. "firestore.googleapis.com"
+
+        Returns:
+            str: The location of the API.
+        """
+        return self._target_helper(firestore_client.FirestoreClient)
+
+    @property
     def _database_string(self):
         """The database string corresponding to this client's project.
 
@@ -267,7 +279,7 @@ class BaseClient(ClientWithProject):
 
         return self._rpc_metadata_internal
 
-    def collection(self, *collection_path) -> BaseCollectionReference[BaseQuery]:
+    def collection(self, *collection_path) -> BaseCollectionReference:
         raise NotImplementedError
 
     def collection_group(self, collection_id: str) -> BaseQuery:
@@ -332,9 +344,11 @@ class BaseClient(ClientWithProject):
 
     def recursive_delete(
         self,
-        reference: Union[BaseCollectionReference[BaseQuery], BaseDocumentReference],
-        bulk_writer: Optional["BulkWriter"] = None,  # type: ignore
-    ) -> int:
+        reference,
+        *,
+        bulk_writer: Optional["BulkWriter"] = None,
+        chunk_size: int = 5000,
+    ) -> int | Awaitable[int]:
         raise NotImplementedError
 
     @staticmethod
@@ -420,10 +434,10 @@ class BaseClient(ClientWithProject):
     def _prep_get_all(
         self,
         references: list,
-        field_paths: Iterable[str] = None,
-        transaction: BaseTransaction = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
+        field_paths: Iterable[str] | None = None,
+        transaction: BaseTransaction | None = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict, dict]:
         """Shared setup for async/sync :meth:`get_all`."""
         document_paths, reference_map = _reference_info(references)
@@ -441,10 +455,10 @@ class BaseClient(ClientWithProject):
     def get_all(
         self,
         references: list,
-        field_paths: Iterable[str] = None,
-        transaction: BaseTransaction = None,
-        retry: retries.Retry = None,
-        timeout: float = None,
+        field_paths: Iterable[str] | None = None,
+        transaction=None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
     ) -> Union[
         AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
     ]:
@@ -452,8 +466,8 @@ class BaseClient(ClientWithProject):
 
     def _prep_collections(
         self,
-        retry: retries.Retry = None,
-        timeout: float = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {"parent": "{}/documents".format(self._database_string)}
@@ -463,12 +477,9 @@ class BaseClient(ClientWithProject):
 
     def collections(
         self,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> Union[
-        AsyncGenerator[BaseCollectionReference[BaseQuery], Any],
-        Generator[BaseCollectionReference[BaseQuery], Any, Any],
-    ]:
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
+    ):
         raise NotImplementedError
 
     def batch(self) -> BaseWriteBatch:
@@ -592,7 +603,9 @@ def _parse_batch_get(
     return snapshot
 
 
-def _get_doc_mask(field_paths: Iterable[str]) -> Optional[types.common.DocumentMask]:
+def _get_doc_mask(
+    field_paths: Iterable[str] | None,
+) -> Optional[types.common.DocumentMask]:
     """Get a document mask if field paths are provided.
 
     Args:

@@ -17,7 +17,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Optional, TypeVar, Union
 
 from google.api_core import gapic_v1
-from google.api_core import retry_async as retries
+from google.api_core import retry as retries
 
 from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 from google.cloud.firestore_v1.base_query import (
@@ -54,7 +54,7 @@ class AsyncVectorQuery(BaseVectorQuery):
     async def get(
         self,
         transaction=None,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
@@ -91,22 +91,25 @@ class AsyncVectorQuery(BaseVectorQuery):
             timeout=timeout,
             explain_options=explain_options,
         )
-        result = [snapshot async for snapshot in stream_result]
+        try:
+            result = [snapshot async for snapshot in stream_result]
 
-        if explain_options is None:
-            explain_metrics = None
-        else:
-            explain_metrics = await stream_result.get_explain_metrics()
+            if explain_options is None:
+                explain_metrics = None
+            else:
+                explain_metrics = await stream_result.get_explain_metrics()
+        finally:
+            await stream_result.aclose()
 
         return QueryResultsList(result, explain_options, explain_metrics)
 
     async def _make_stream(
         self,
         transaction: Optional[transaction.Transaction] = None,
-        retry: Optional[retries.Retry] = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
-    ) -> AsyncGenerator[[DocumentSnapshot | query_profile_pb.ExplainMetrics], Any]:
+    ) -> AsyncGenerator[DocumentSnapshot | query_profile_pb.ExplainMetrics, Any]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
 
@@ -151,7 +154,6 @@ class AsyncVectorQuery(BaseVectorQuery):
             metadata=self._client._rpc_metadata,
             **kwargs,
         )
-
         async for response in response_iterator:
             if self._nested_query._all_descendants:
                 snapshot = _collection_group_query_response_to_snapshot(
@@ -171,7 +173,7 @@ class AsyncVectorQuery(BaseVectorQuery):
     def stream(
         self,
         transaction=None,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
