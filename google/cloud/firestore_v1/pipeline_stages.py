@@ -191,6 +191,9 @@ class Database(Stage):
     def __init__(self):
         super().__init__()
 
+    def _pb_args(self):
+        return []
+
 
 class Distinct(Stage):
     """Returns documents with distinct combinations of specified field values."""
