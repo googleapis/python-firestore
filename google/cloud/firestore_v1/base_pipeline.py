@@ -13,15 +13,18 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import TYPE_CHECKING
+from typing import Iterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
+from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
+from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
+    from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
 
 
 class _BasePipeline:
@@ -65,3 +68,31 @@ class _BasePipeline:
         Create a new Pipeline object with a new stage appended
         """
         return self.__class__(self._client, *self.stages, new_stage)
+
+    def _execute_request_helper(self) -> ExecutePipelineRequest:
+        """
+        shared logic for creating an ExecutePipelineRequest
+        """
+        database_name = (
+            f"projects/{self._client.project}/databases/{self._client._database}"
+        )
+        request = ExecutePipelineRequest(
+            database=database_name,
+            structured_pipeline=self._to_pb(),
+        )
+        return request
+
+    def _execute_response_helper(self, response:ExecutePipelineResponse) -> Iterable[PipelineResult]:
+        """
+        shared logic for unpacking an ExecutePipelineReponse into PipelineResults
+        """
+        for doc in response.results:
+            ref = self._client.document(doc.name) if doc.name else None
+            yield PipelineResult(
+                self._client,
+                doc.fields,
+                ref,
+                response._pb.execution_time,
+                doc.create_time.timestamp_pb() if doc.create_time else None,
+                doc.update_time.timestamp_pb() if doc.update_time else None,
+            )

@@ -16,13 +16,11 @@ from __future__ import annotations
 import datetime
 from typing import AsyncIterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
-from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
-from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
-from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.async_client import AsyncClient
+    from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 
 class AsyncPipeline(_BasePipeline):
@@ -59,23 +57,8 @@ class AsyncPipeline(_BasePipeline):
         super().__init__(client, *stages)
 
     async def execute(self) -> AsyncIterable[PipelineResult]:
-        database_name = (
-            f"projects/{self._client.project}/databases/{self._client._database}"
-        )
-        request = ExecutePipelineRequest(
-            database=database_name,
-            structured_pipeline=self._to_pb(),
-        )
         async for response in await self._client._firestore_api.execute_pipeline(
-            request
+            self._execute_request_helper()
         ):
-            for doc in response.results:
-                ref = self._client.document(doc.name) if doc.name else None
-                yield PipelineResult(
-                    self._client,
-                    doc.fields,
-                    ref,
-                    response._pb.execution_time,
-                    doc.create_time.timestamp_pb() if doc.create_time else None,
-                    doc.update_time.timestamp_pb() if doc.update_time else None,
-                )
+            for result in self._execute_response_helper(response):
+                yield result
