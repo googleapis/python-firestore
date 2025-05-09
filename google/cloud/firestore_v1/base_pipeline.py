@@ -46,13 +46,14 @@ class _BasePipeline:
         self.stages = tuple(stages)
 
     def __repr__(self):
+        cls_str = type(self).__name__
         if not self.stages:
-            return "Pipeline()"
+            return f"{cls_str}()"
         elif len(self.stages) == 1:
-            return f"Pipeline({self.stages[0]!r})"
+            return f"{cls_str}({self.stages[0]!r})"
         else:
             stages_str = ",\n  ".join([repr(s) for s in self.stages])
-            return f"Pipeline(\n  {stages_str}\n)"
+            return f"{cls_str}(\n  {stages_str}\n)"
 
     def _to_pb(self) -> StructuredPipeline_pb:
         return StructuredPipeline_pb(
