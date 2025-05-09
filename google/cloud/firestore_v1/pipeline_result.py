@@ -61,6 +61,9 @@ class PipelineResult:
         self._create_time = create_time
         self._update_time = update_time
 
+    def __repr__(self):
+        return f"{type(self).__name__}(data={self.data()})"
+
     @property
     def ref(self) -> BaseDocumentReference | None:
         """

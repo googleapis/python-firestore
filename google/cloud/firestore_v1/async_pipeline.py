@@ -65,22 +65,17 @@ class AsyncPipeline(_BasePipeline):
         request = ExecutePipelineRequest(
             database=database_name,
             structured_pipeline=self._to_pb(),
-            read_time=datetime.datetime.now(),
         )
         async for response in await self._client._firestore_api.execute_pipeline(
             request
         ):
             for doc in response.results:
-                doc_ref = (
-                    AsyncDocumentReference(doc.name, client=self._client)
-                    if doc.name
-                    else None
-                )
+                ref = self._client.document(doc.name) if doc.name else None
                 yield PipelineResult(
                     self._client,
                     doc.fields,
-                    doc_ref,
+                    ref,
                     response._pb.execution_time,
-                    doc.create_time,
-                    doc.update_tiem,
+                    doc.create_time.timestamp_pb() if doc.create_time else None,
+                    doc.update_time.timestamp_pb() if doc.update_time else None,
                 )
