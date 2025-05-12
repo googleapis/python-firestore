@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING
+from typing import Any, MutableMapping, TYPE_CHECKING
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
@@ -36,7 +36,7 @@ class PipelineResult:
     def __init__(
         self,
         client: BaseClient,
-        fields_pb: dict[str, ValueProto],
+        fields_pb: MutableMapping[str, ValueProto],
         ref: BaseDocumentReference | None = None,
         execution_time: Timestamp | None = None,
         create_time: Timestamp | None = None,

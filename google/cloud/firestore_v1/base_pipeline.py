@@ -105,6 +105,6 @@ class _BasePipeline:
                 doc.fields,
                 ref,
                 response._pb.execution_time,
-                doc.create_time.timestamp_pb() if doc.create_time else None,
-                doc.update_time.timestamp_pb() if doc.update_time else None,
+                doc._pb.create_time if doc.create_time else None,
+                doc._pb.update_time if doc.update_time else None,
             )
