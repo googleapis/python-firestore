@@ -399,4 +399,4 @@ class Client(BaseClient):
 
     @property
     def _pipeline_cls(self):
-        raise Pipeline
+        return Pipeline

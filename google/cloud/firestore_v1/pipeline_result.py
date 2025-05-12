@@ -13,9 +13,8 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING
-from google.cloud.firestore_v1._helpers import decode_dict
-from google.cloud.firestore_v1._helpers import decode_value
+from typing import Any, MutableMapping, TYPE_CHECKING
+from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
 
@@ -37,7 +36,7 @@ class PipelineResult:
     def __init__(
         self,
         client: BaseClient,
-        fields_pb: dict[str, ValueProto],
+        fields_pb: MutableMapping[str, ValueProto],
         ref: BaseDocumentReference | None = None,
         execution_time: Timestamp | None = None,
         create_time: Timestamp | None = None,
@@ -61,6 +60,9 @@ class PipelineResult:
         self._create_time = create_time
         self._update_time = update_time
 
+    def __repr__(self):
+        return f"{type(self).__name__}(data={self.data()})"
+
     @property
     def ref(self) -> BaseDocumentReference | None:
         """
@@ -75,7 +77,7 @@ class PipelineResult:
 
     @property
     def create_time(self) -> Timestamp | None:
-        """The creation time of the document. `None` if not applicable (e.g., not a document result or document doesn't exist)."""
+        """The creation time of the document. `None` if not applicable."""
         return self._create_time
 
     @property
@@ -121,7 +123,7 @@ class PipelineResult:
         if self._fields_pb is None:
             return None
 
-        return decode_dict(self._fields_pb, self._client)
+        return _helpers.decode_dict(self._fields_pb, self._client)
 
     def get(self, field_path: str | FieldPath) -> Any:
         """
@@ -137,4 +139,4 @@ class PipelineResult:
             field_path if isinstance(field_path, str) else field_path.to_api_repr()
         )
         value = get_nested_value(str_path, self._fields_pb)
-        return decode_value(value, self._client)
+        return _helpers.decode_value(value, self._client)

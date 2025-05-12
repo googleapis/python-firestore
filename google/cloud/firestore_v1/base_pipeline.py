@@ -14,22 +14,24 @@
 
 from __future__ import annotations
 from typing_extensions import Self
-from typing import TYPE_CHECKING
+from typing import Iterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
-from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
+from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
-from google.cloud.firestore_v1 import _helpers, document
 from google.cloud.firestore_v1.pipeline_expressions import (
     FilterCondition,
     Selectable,
 )
+from google.cloud.firestore_v1 import _helpers
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
+    from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
+    from google.cloud.firestore_v1.transaction import BaseTransaction
 
 
 class _BasePipeline:
@@ -54,13 +56,14 @@ class _BasePipeline:
         self.stages = tuple(stages)
 
     def __repr__(self):
+        cls_str = type(self).__name__
         if not self.stages:
-            return "Pipeline()"
+            return f"{cls_str}()"
         elif len(self.stages) == 1:
-            return f"Pipeline({self.stages[0]!r})"
+            return f"{cls_str}({self.stages[0]!r})"
         else:
             stages_str = ",\n  ".join([repr(s) for s in self.stages])
-            return f"Pipeline(\n  {stages_str}\n)"
+            return f"{cls_str}(\n  {stages_str}\n)"
 
     def _to_pb(self) -> StructuredPipeline_pb:
         return StructuredPipeline_pb(
@@ -73,17 +76,42 @@ class _BasePipeline:
         """
         return self.__class__(self._client, *self.stages, new_stage)
 
-    @staticmethod
-    def _parse_response(response_pb, client):
-        for doc in response_pb.results:
-            data = _helpers.decode_dict(doc.fields, client)
-            yield document.DocumentSnapshot(
-                None,
-                data,
-                exists=True,
-                read_time=response_pb._pb.execution_time,
-                create_time=doc.create_time,
-                update_time=doc.update_time,
+    def _prep_execute_request(
+        self, transaction: BaseTransaction | None
+    ) -> ExecutePipelineRequest:
+        """
+        shared logic for creating an ExecutePipelineRequest
+        """
+        database_name = (
+            f"projects/{self._client.project}/databases/{self._client._database}"
+        )
+        transaction_id = (
+            _helpers.get_transaction_id(transaction)
+            if transaction is not None
+            else None
+        )
+        request = ExecutePipelineRequest(
+            database=database_name,
+            transaction=transaction_id,
+            structured_pipeline=self._to_pb(),
+        )
+        return request
+
+    def _execute_response_helper(
+        self, response: ExecutePipelineResponse
+    ) -> Iterable[PipelineResult]:
+        """
+        shared logic for unpacking an ExecutePipelineReponse into PipelineResults
+        """
+        for doc in response.results:
+            ref = self._client.document(doc.name) if doc.name else None
+            yield PipelineResult(
+                self._client,
+                doc.fields,
+                ref,
+                response._pb.execution_time,
+                doc._pb.create_time if doc.create_time else None,
+                doc._pb.update_time if doc.update_time else None,
             )
 
     def select(self, *selections: str | Selectable) -> Self:

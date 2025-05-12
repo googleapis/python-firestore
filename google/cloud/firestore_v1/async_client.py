@@ -417,4 +417,4 @@ class AsyncClient(BaseClient):
 
     @property
     def _pipeline_cls(self):
-        raise AsyncPipeline
+        return AsyncPipeline

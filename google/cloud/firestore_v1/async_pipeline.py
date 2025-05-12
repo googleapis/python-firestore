@@ -13,16 +13,14 @@
 # limitations under the License.
 
 from __future__ import annotations
-import datetime
 from typing import AsyncIterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
-from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
-from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
-from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.async_client import AsyncClient
+    from google.cloud.firestore_v1.pipeline_result import PipelineResult
+    from google.cloud.firestore_v1.async_transaction import AsyncTransaction
 
 
 class AsyncPipeline(_BasePipeline):
@@ -58,29 +56,24 @@ class AsyncPipeline(_BasePipeline):
         """
         super().__init__(client, *stages)
 
-    async def execute(self) -> AsyncIterable[PipelineResult]:
-        database_name = (
-            f"projects/{self._client.project}/databases/{self._client._database}"
-        )
-        request = ExecutePipelineRequest(
-            database=database_name,
-            structured_pipeline=self._to_pb(),
-            read_time=datetime.datetime.now(),
-        )
+    async def execute(
+        self,
+        transaction: "AsyncTransaction" | None = None,
+    ) -> AsyncIterable[PipelineResult]:
+        """
+        Executes this pipeline, providing results through an Iterable
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+                If a ``transaction`` is used and it already has write operations
+                added, this method cannot be used (i.e. read-after-write is not
+                allowed).
+        """
+        request = self._prep_execute_request(transaction)
         async for response in await self._client._firestore_api.execute_pipeline(
             request
         ):
-            for doc in response.results:
-                doc_ref = (
-                    AsyncDocumentReference(doc.name, client=self._client)
-                    if doc.name
-                    else None
-                )
-                yield PipelineResult(
-                    self._client,
-                    doc.fields,
-                    doc_ref,
-                    response._pb.execution_time,
-                    doc.create_time,
-                    doc.update_tiem,
-                )
+            for result in self._execute_response_helper(response):
+                yield result

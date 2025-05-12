@@ -20,7 +20,6 @@ from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
-    from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 
 PipelineType = TypeVar("PipelineType", bound=_BasePipeline)
@@ -42,6 +41,9 @@ class PipelineSource(Generic[PipelineType]):
     def __init__(self, client: Client | AsyncClient):
         self.client = client
 
+    def _create_pipeline(self, source_stage):
+        return self.client._pipeline_cls(self.client, source_stage)
+
     def collection(self, path: str) -> PipelineType:
         """
         Creates a new Pipeline that operates on a specified Firestore collection.
@@ -51,7 +53,7 @@ class PipelineSource(Generic[PipelineType]):
         Returns:
             a new pipeline instance targeting the specified collection
         """
-        return self.client._pipeline_cls(self.client, stages.Collection(path))
+        return self._create_pipeline(stages.Collection(path))
 
     def collection_group(self, collection_id: str) -> PipelineType:
         """
@@ -61,6 +63,4 @@ class PipelineSource(Generic[PipelineType]):
         Returns:
             a new pipeline instance targeting the specified collection group
         """
-        return self.client._pipeline_cls(
-            self.client, stages.CollectionGroup(collection_id)
-        )
+        return self._create_pipeline(stages.CollectionGroup(collection_id))

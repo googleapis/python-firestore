@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Optional, TYPE_CHECKING
+from typing import Optional
 from abc import ABC
 from abc import abstractmethod
 
@@ -26,9 +26,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Selectable,
     Ordering,
 )
-
-if TYPE_CHECKING:
-    from google.cloud.firestore_v1.base_document import BaseDocumentReference
+from google.cloud.firestore_v1.pipeline_expressions import Expr
 
 
 class Stage(ABC):
@@ -96,6 +94,9 @@ class GenericStage(Stage):
 
     def _pb_args(self):
         return self.params
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name='{self.name}')"
 
 
 class Limit(Stage):
