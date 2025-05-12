@@ -19,9 +19,7 @@ from abc import abstractmethod
 
 from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
 from google.cloud.firestore_v1.types.document import Value
-from google.cloud.firestore_v1.pipeline_expressions import (
-    Expr,
-)
+from google.cloud.firestore_v1.pipeline_expressions import Expr
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
@@ -68,47 +66,6 @@ class Collection(Stage):
 
     def _pb_args(self):
         return [Value(reference_value=self.path)]
-
-
-class CollectionGroup(Stage):
-    """Specifies a collection group as the initial data source."""
-
-    def __init__(self, collection_id: str):
-        super().__init__("collection_group")
-        self.collection_id = collection_id
-
-    def _pb_args(self):
-        return [Value(string_value=self.collection_id)]
-
-
-class Database(Stage):
-    """Specifies the default database as the initial data source."""
-
-    def __init__(self):
-        super().__init__()
-
-    def _pb_args(self):
-        return []
-
-
-class Documents(Stage):
-    """Specifies specific documents as the initial data source."""
-
-    def __init__(self, *paths: str):
-        super().__init__()
-        self.paths = paths
-
-    @staticmethod
-    def of(*documents: "BaseDocumentReference") -> "Documents":
-        doc_paths = ["/" + doc.path for doc in documents]
-        return Documents(*doc_paths)
-
-    def _pb_args(self):
-        return [
-            Value(
-                list_value={"values": [Value(string_value=path) for path in self.paths]}
-            )
-        ]
 
 
 class GenericStage(Stage):
