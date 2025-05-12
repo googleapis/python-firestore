@@ -122,3 +122,6 @@ class GenericStage(Stage):
 
     def _pb_args(self):
         return self.params
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name='{self.name}')"
