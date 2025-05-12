@@ -24,7 +24,6 @@ from google.cloud.firestore_v1 import pipeline_stages as stages
 
 
 class TestPipelineSource:
-
     _expected_pipeline_type = Pipeline
 
     def _make_client(self):
@@ -53,6 +52,7 @@ class TestPipelineSourceWithAsyncClient(TestPipelineSource):
     """
     When an async client is used, it should produce async pipelines
     """
+
     _expected_pipeline_type = AsyncPipeline
 
     def _make_client(self):

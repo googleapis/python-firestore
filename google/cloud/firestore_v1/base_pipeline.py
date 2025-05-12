@@ -71,14 +71,20 @@ class _BasePipeline:
         """
         return self.__class__(self._client, *self.stages, new_stage)
 
-    def _prep_execute_request(self, transaction: BaseTransaction | None) -> ExecutePipelineRequest:
+    def _prep_execute_request(
+        self, transaction: BaseTransaction | None
+    ) -> ExecutePipelineRequest:
         """
         shared logic for creating an ExecutePipelineRequest
         """
         database_name = (
             f"projects/{self._client.project}/databases/{self._client._database}"
         )
-        transaction_id = _helpers.get_transaction_id(transaction) if transaction is not None else None
+        transaction_id = (
+            _helpers.get_transaction_id(transaction)
+            if transaction is not None
+            else None
+        )
         request = ExecutePipelineRequest(
             database=database_name,
             transaction=transaction_id,
@@ -86,7 +92,9 @@ class _BasePipeline:
         )
         return request
 
-    def _execute_response_helper(self, response:ExecutePipelineResponse) -> Iterable[PipelineResult]:
+    def _execute_response_helper(
+        self, response: ExecutePipelineResponse
+    ) -> Iterable[PipelineResult]:
         """
         shared logic for unpacking an ExecutePipelineReponse into PipelineResults
         """

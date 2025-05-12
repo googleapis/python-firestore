@@ -59,7 +59,7 @@ class AsyncPipeline(_BasePipeline):
 
     async def execute(
         self,
-        transaction: "AsyncTransaction" | None=None,
+        transaction: "AsyncTransaction" | None = None,
     ) -> AsyncIterable[PipelineResult]:
         """
         Executes this pipeline, providing results through an Iterable
@@ -73,6 +73,8 @@ class AsyncPipeline(_BasePipeline):
                 allowed).
         """
         request = self._prep_execute_request(transaction)
-        async for response in await self._client._firestore_api.execute_pipeline(request):
+        async for response in await self._client._firestore_api.execute_pipeline(
+            request
+        ):
             for result in self._execute_response_helper(response):
                 yield result

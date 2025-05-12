@@ -268,6 +268,7 @@ def test_pipeline_execute_multiple():
         assert isinstance(response, PipelineResult)
         assert response.data() == {"key": idx}
 
+
 def test_pipeline_execute_with_transaction():
     """
     test execute pipeline with fully populated doc ref
@@ -284,9 +285,7 @@ def test_pipeline_execute_with_transaction():
     transaction = Transaction(client)
     transaction._id = b"123"
 
-    mock_rpc.return_value = [
-        ExecutePipelineResponse()
-    ]
+    mock_rpc.return_value = [ExecutePipelineResponse()]
     ppl_1 = _make_pipeline(client=client)
 
     list(ppl_1.execute(transaction=transaction))

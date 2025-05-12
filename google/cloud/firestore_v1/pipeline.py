@@ -55,7 +55,7 @@ class Pipeline(_BasePipeline):
 
     def execute(
         self,
-        transaction: "Transaction" | None=None,
+        transaction: "Transaction" | None = None,
     ) -> Iterable[PipelineResult]:
         """
         Executes this pipeline, providing results through an Iterable

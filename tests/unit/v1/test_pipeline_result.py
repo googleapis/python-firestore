@@ -20,7 +20,6 @@ from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 
 class TestPipelineResult:
-
     def _make_one(self, *args, **kwargs):
         if not args:
             # use defaults if not passed
@@ -54,7 +53,7 @@ class TestPipelineResult:
         instance = self._make_one(update_time=expected)
         assert instance.update_time == expected
         # should be None if not set
-        assert self._make_one().update_time== None
+        assert self._make_one().update_time == None
 
     def test_exection_time(self):
         expected = object()
@@ -65,17 +64,24 @@ class TestPipelineResult:
             self._make_one().execution_time
             assert "execution_time" in e
 
-    @pytest.mark.parametrize("first,second,result", [
-        ((object(),{}), (object(), {}), True),
-        ((object(),{1:1}), (object(), {1:1}), True),
-        ((object(),{1:1}), (object(), {2:2}), False),
-        ((object(),{}, "ref"), (object(), {}, "ref"), True),
-        ((object(),{}, "ref"), (object(), {}, "diff"), False),
-        ((object(),{1:1}, "ref"), (object(), {1:1}, "ref"), True),
-        ((object(),{1:1}, "ref"), (object(), {2:2}, "ref"), False),
-        ((object(),{1:1}, "ref"), (object(), {1:1}, "diff"), False),
-        ((object(),{1:1}, "ref", 1,2,3), (object(), {1:1}, "ref", 4,5,6), True),
-    ])
+    @pytest.mark.parametrize(
+        "first,second,result",
+        [
+            ((object(), {}), (object(), {}), True),
+            ((object(), {1: 1}), (object(), {1: 1}), True),
+            ((object(), {1: 1}), (object(), {2: 2}), False),
+            ((object(), {}, "ref"), (object(), {}, "ref"), True),
+            ((object(), {}, "ref"), (object(), {}, "diff"), False),
+            ((object(), {1: 1}, "ref"), (object(), {1: 1}, "ref"), True),
+            ((object(), {1: 1}, "ref"), (object(), {2: 2}, "ref"), False),
+            ((object(), {1: 1}, "ref"), (object(), {1: 1}, "diff"), False),
+            (
+                (object(), {1: 1}, "ref", 1, 2, 3),
+                (object(), {1: 1}, "ref", 4, 5, 6),
+                True,
+            ),
+        ],
+    )
     def test_eq(self, first, second, result):
         first_obj = self._make_one(*first)
         second_obj = self._make_one(*second)
@@ -83,6 +89,7 @@ class TestPipelineResult:
 
     def test_data(self):
         from google.cloud.firestore_v1.types.document import Value
+
         client = mock.Mock()
         data = {"str": Value(string_value="hello world"), "int": Value(integer_value=5)}
         instance = self._make_one(client, data)
@@ -104,13 +111,16 @@ class TestPipelineResult:
         client = object()
         data = {"hello": "world"}
         instance = self._make_one(client, data)
-        with mock.patch("google.cloud.firestore_v1._helpers.decode_dict") as decode_mock:
+        with mock.patch(
+            "google.cloud.firestore_v1._helpers.decode_dict"
+        ) as decode_mock:
             got = instance.data()
             decode_mock.assert_called_once_with(data, client)
             assert got == decode_mock.return_value
 
     def test_get(self):
         from google.cloud.firestore_v1.types.document import Value
+
         client = object()
         data = {"key": Value(string_value="hello world")}
         instance = self._make_one(client, data)
@@ -119,10 +129,9 @@ class TestPipelineResult:
 
     def test_get_nested(self):
         from google.cloud.firestore_v1.types.document import Value
+
         client = object()
-        data = {
-            "first": {"second": Value(string_value="hello world")}
-        }
+        data = {"first": {"second": Value(string_value="hello world")}}
         instance = self._make_one(client, data)
         got = instance.get("first.second")
         assert got == "hello world"
@@ -130,10 +139,9 @@ class TestPipelineResult:
     def test_get_field_path(self):
         from google.cloud.firestore_v1.types.document import Value
         from google.cloud.firestore_v1.field_path import FieldPath
+
         client = object()
-        data = {
-            "first": {"second": Value(string_value="hello world")}
-        }
+        data = {"first": {"second": Value(string_value="hello world")}}
         path = FieldPath.from_string("first.second")
         instance = self._make_one(client, data)
         got = instance.get(path)
@@ -156,7 +164,9 @@ class TestPipelineResult:
         client = object()
         data = {"key": "value"}
         instance = self._make_one(client, data)
-        with mock.patch("google.cloud.firestore_v1._helpers.decode_value") as decode_mock:
+        with mock.patch(
+            "google.cloud.firestore_v1._helpers.decode_value"
+        ) as decode_mock:
             got = instance.get("key")
             decode_mock.assert_called_once_with("value", client)
             assert got == decode_mock.return_value

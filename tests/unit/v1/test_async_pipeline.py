@@ -165,7 +165,7 @@ async def test_async_pipeline_execute_no_doc_ref():
     assert isinstance(request, ExecutePipelineRequest)
     assert request.structured_pipeline == ppl_1._to_pb()
     assert request.database == "projects/A/databases/B"
-    assert request.transaction == b''
+    assert request.transaction == b""
 
     response = results[0]
     assert isinstance(response, PipelineResult)
@@ -305,9 +305,7 @@ async def test_async_pipeline_execute_with_transaction():
     transaction = AsyncTransaction(client)
     transaction._id = b"123"
 
-    mock_rpc.return_value =  _async_it([
-        ExecutePipelineResponse()
-    ])
+    mock_rpc.return_value = _async_it([ExecutePipelineResponse()])
     ppl_1 = _make_async_pipeline(client=client)
 
     [r async for r in ppl_1.execute(transaction=transaction)]
