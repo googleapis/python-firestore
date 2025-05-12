@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from __future__ import annotations
-import datetime
 from typing import AsyncIterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline

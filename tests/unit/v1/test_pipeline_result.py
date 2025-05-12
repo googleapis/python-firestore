@@ -14,7 +14,6 @@
 
 import mock
 import pytest
-import datetime
 
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
@@ -31,7 +30,7 @@ class TestPipelineResult:
         instance = self._make_one(ref=expected)
         assert instance.ref == expected
         # should be None if not set
-        assert self._make_one().ref == None
+        assert self._make_one().ref is None
 
     def test_id(self):
         ref = mock.Mock()
@@ -39,21 +38,21 @@ class TestPipelineResult:
         instance = self._make_one(ref=ref)
         assert instance.id == "test"
         # should be None if not set
-        assert self._make_one().id == None
+        assert self._make_one().id is None
 
     def test_create_time(self):
         expected = object()
         instance = self._make_one(create_time=expected)
         assert instance.create_time == expected
         # should be None if not set
-        assert self._make_one().create_time == None
+        assert self._make_one().create_time is None
 
     def test_update_time(self):
         expected = object()
         instance = self._make_one(update_time=expected)
         assert instance.update_time == expected
         # should be None if not set
-        assert self._make_one().update_time == None
+        assert self._make_one().update_time is None
 
     def test_exection_time(self):
         expected = object()

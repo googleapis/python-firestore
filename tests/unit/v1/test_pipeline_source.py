@@ -12,9 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License
 
-import mock
-import pytest
-
 from google.cloud.firestore_v1.pipeline_source import PipelineSource
 from google.cloud.firestore_v1.pipeline import Pipeline
 from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
