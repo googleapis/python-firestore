@@ -58,8 +58,8 @@ def test_pipeline_repr_multiple_stage():
     assert repr_str == (
         "Pipeline(\n"
         "  Collection(path='/path'),\n"
-        "  GenericStage(params=[2]),\n"
-        "  GenericStage(params=[3])\n"
+        "  GenericStage(name='second'),\n"
+        "  GenericStage(name='third')\n"
         ")"
     )
 
@@ -207,6 +207,7 @@ def test_pipeline_execute_populated():
     assert isinstance(request, ExecutePipelineRequest)
     assert request.structured_pipeline == ppl_1._to_pb()
     assert request.database == "projects/A/databases/B"
+    assert request.transaction == b""
 
     response = results[0]
     assert isinstance(response, PipelineResult)
@@ -266,3 +267,32 @@ def test_pipeline_execute_multiple():
     for idx, response in enumerate(results):
         assert isinstance(response, PipelineResult)
         assert response.data() == {"key": idx}
+
+def test_pipeline_execute_with_transaction():
+    """
+    test execute pipeline with fully populated doc ref
+    """
+    from google.cloud.firestore_v1.types import ExecutePipelineResponse
+    from google.cloud.firestore_v1.types import ExecutePipelineRequest
+    from google.cloud.firestore_v1.transaction import Transaction
+
+    client = mock.Mock()
+    client.project = "A"
+    client._database = "B"
+    mock_rpc = client._firestore_api.execute_pipeline
+
+    transaction = Transaction(client)
+    transaction._id = b"123"
+
+    mock_rpc.return_value = [
+        ExecutePipelineResponse()
+    ]
+    ppl_1 = _make_pipeline(client=client)
+
+    list(ppl_1.execute(transaction=transaction))
+    assert mock_rpc.call_count == 1
+    request = mock_rpc.call_args[0][0]
+    assert isinstance(request, ExecutePipelineRequest)
+    assert request.structured_pipeline == ppl_1._to_pb()
+    assert request.database == "projects/A/databases/B"
+    assert request.transaction == b"123"

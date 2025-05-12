@@ -20,11 +20,13 @@ from google.cloud.firestore_v1.types.pipeline import (
 )
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
+from google.cloud.firestore_v1 import _helpers
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
+    from google.cloud.firestore_v1.transaction import BaseTransaction
 
 
 class _BasePipeline:
@@ -69,15 +71,17 @@ class _BasePipeline:
         """
         return self.__class__(self._client, *self.stages, new_stage)
 
-    def _execute_request_helper(self) -> ExecutePipelineRequest:
+    def _prep_execute_request(self, transaction: BaseTransaction | None) -> ExecutePipelineRequest:
         """
         shared logic for creating an ExecutePipelineRequest
         """
         database_name = (
             f"projects/{self._client.project}/databases/{self._client._database}"
         )
+        transaction_id = _helpers.get_transaction_id(transaction) if transaction is not None else None
         request = ExecutePipelineRequest(
             database=database_name,
+            transaction=transaction_id,
             structured_pipeline=self._to_pb(),
         )
         return request

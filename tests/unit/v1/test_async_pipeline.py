@@ -64,8 +64,8 @@ def test_async_pipeline_repr_multiple_stage():
     assert repr_str == (
         "AsyncPipeline(\n"
         "  Collection(path='/path'),\n"
-        "  GenericStage(params=[2]),\n"
-        "  GenericStage(params=[3])\n"
+        "  GenericStage(name='second'),\n"
+        "  GenericStage(name='third')\n"
         ")"
     )
 
@@ -165,6 +165,7 @@ async def test_async_pipeline_execute_no_doc_ref():
     assert isinstance(request, ExecutePipelineRequest)
     assert request.structured_pipeline == ppl_1._to_pb()
     assert request.database == "projects/A/databases/B"
+    assert request.transaction == b''
 
     response = results[0]
     assert isinstance(response, PipelineResult)
@@ -284,3 +285,35 @@ async def test_async_pipeline_execute_multiple():
     for idx, response in enumerate(results):
         assert isinstance(response, PipelineResult)
         assert response.data() == {"key": idx}
+
+
+@pytest.mark.asyncio
+async def test_async_pipeline_execute_with_transaction():
+    """
+    test execute pipeline with transaction context
+    """
+    from google.cloud.firestore_v1.types import ExecutePipelineResponse
+    from google.cloud.firestore_v1.types import ExecutePipelineRequest
+    from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+
+    client = mock.Mock()
+    client.project = "A"
+    client._database = "B"
+    mock_rpc = mock.AsyncMock()
+    client._firestore_api.execute_pipeline = mock_rpc
+
+    transaction = AsyncTransaction(client)
+    transaction._id = b"123"
+
+    mock_rpc.return_value =  _async_it([
+        ExecutePipelineResponse()
+    ])
+    ppl_1 = _make_async_pipeline(client=client)
+
+    [r async for r in ppl_1.execute(transaction=transaction)]
+    assert mock_rpc.call_count == 1
+    request = mock_rpc.call_args[0][0]
+    assert isinstance(request, ExecutePipelineRequest)
+    assert request.structured_pipeline == ppl_1._to_pb()
+    assert request.database == "projects/A/databases/B"
+    assert request.transaction == b"123"

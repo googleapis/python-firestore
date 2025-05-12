@@ -20,6 +20,7 @@ from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.pipeline_result import PipelineResult
+    from google.cloud.firestore_v1.transaction import Transaction
 
 
 class Pipeline(_BasePipeline):
@@ -52,6 +53,21 @@ class Pipeline(_BasePipeline):
         """
         super().__init__(client, *stages)
 
-    def execute(self) -> Iterable[PipelineResult]:
-        for response in self._client._firestore_api.execute_pipeline(self._execute_request_helper()):
+    def execute(
+        self,
+        transaction: "Transaction" | None=None,
+    ) -> Iterable[PipelineResult]:
+        """
+        Executes this pipeline, providing results through an Iterable
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+                If a ``transaction`` is used and it already has write operations
+                added, this method cannot be used (i.e. read-after-write is not
+                allowed).
+        """
+        request = self._prep_execute_request(transaction)
+        for response in self._client._firestore_api.execute_pipeline(request):
             yield from self._execute_response_helper(response)
