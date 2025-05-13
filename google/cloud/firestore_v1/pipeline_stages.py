@@ -13,15 +13,12 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, Dict, Iterable, List, Optional, Sequence, TYPE_CHECKING
+from typing import Optional, Sequence, TYPE_CHECKING
 from abc import ABC
 from abc import abstractmethod
-from enum import Enum
-from enum import auto
 
 from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
 from google.cloud.firestore_v1.types.document import Value
-from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.pipeline_expressions import (
@@ -277,6 +274,9 @@ class GenericStage(Stage):
 
     def _pb_args(self):
         return self.params
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(name='{self.name}')"
 
 
 class Limit(Stage):
