@@ -41,6 +41,29 @@ class TestExpr:
         with pytest.raises(TypeError):
             expr.Expr()
 
+    @pytest.mark.parametrize("method,args,result_cls", [
+        ("eq", (None,), expr.Eq),
+        ("neq", (None,), expr.Neq),
+        ("lt", (None,), expr.Lt),
+        ("lte", (None,), expr.Lte),
+        ("gt", (None,), expr.Gt),
+        ("gte", (None,), expr.Gte),
+        ("in_any", ([None],), expr.In),
+        ("not_in_any", ([None],),expr.Not),
+        ("array_contains", (None,), expr.ArrayContains),
+        ("array_contains_any", ([None],), expr.ArrayContainsAny),
+        ("is_nan", (), expr.IsNaN),
+        ("exists", (), expr.Exists),
+    ])
+    def test_methods(self, method, args, result_cls):
+        """
+        base expr should have methods for certain stages
+        """
+        method_ptr = getattr(expr.Expr, method)
+        result = method_ptr(mock.Mock(), *args)
+        assert isinstance(result, result_cls)
+
+
 
 class TestConstant:
     @pytest.mark.parametrize(
