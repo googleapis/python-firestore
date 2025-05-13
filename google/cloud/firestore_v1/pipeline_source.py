@@ -20,6 +20,7 @@ from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
+    from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 
 PipelineType = TypeVar("PipelineType", bound=_BasePipeline)
@@ -64,3 +65,21 @@ class PipelineSource(Generic[PipelineType]):
             a new pipeline instance targeting the specified collection group
         """
         return self._create_pipeline(stages.CollectionGroup(collection_id))
+
+    def database(self) -> PipelineType:
+        """
+        Creates a new Pipeline that operates on all documents in the Firestore database.
+        Returns:
+            a new pipeline instance targeting the specified collection
+        """
+        return self._create_pipeline(stages.Database())
+
+    def documents(self, *docs: "BaseDocumentReference") -> PipelineType:
+        """
+        Creates a new Pipeline that operates on a specific set of Firestore documents.
+        Args:
+            docs: The DocumentReference instances representing the documents to include in the pipeline.
+        Returns:
+            a new pipeline instance targeting the specified documents
+        """
+        return self._create_pipeline(stages.Documents.of(*docs))
