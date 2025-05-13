@@ -66,10 +66,6 @@ class Expr(ABC):
     def _to_pb(self) -> Value:
         raise NotImplementedError
 
-    @staticmethod
-    def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
-        return o if isinstance(o, Expr) else Constant(o)
-
 
 class Constant(Expr, Generic[CONSTANT_TYPE]):
     """Represents a constant literal value in an expression."""

@@ -17,7 +17,7 @@ from typing import Iterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.pipeline_result import PipelineResult
     from google.cloud.firestore_v1.transaction import Transaction
