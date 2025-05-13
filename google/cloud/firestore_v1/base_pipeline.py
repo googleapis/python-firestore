@@ -13,18 +13,15 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Optional, Sequence
-from typing_extensions import Self
-from typing import TYPE_CHECKING
+from typing import Iterable, Sequence, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
-from google.cloud.firestore_v1.document import DocumentReference
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
-from google.cloud.firestore_v1 import _helpers, document
 from google.cloud.firestore_v1.pipeline_expressions import (
     Accumulator,
     Expr,
@@ -34,10 +31,13 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Selectable,
     SampleOptions,
 )
+from google.cloud.firestore_v1 import _helpers
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
+    from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
+    from google.cloud.firestore_v1.transaction import BaseTransaction
 
 
 class _BasePipeline:
@@ -62,13 +62,14 @@ class _BasePipeline:
         self.stages = tuple(stages)
 
     def __repr__(self):
+        cls_str = type(self).__name__
         if not self.stages:
-            return "Pipeline()"
+            return f"{cls_str}()"
         elif len(self.stages) == 1:
-            return f"Pipeline({self.stages[0]!r})"
+            return f"{cls_str}({self.stages[0]!r})"
         else:
             stages_str = ",\n  ".join([repr(s) for s in self.stages])
-            return f"Pipeline(\n  {stages_str}\n)"
+            return f"{cls_str}(\n  {stages_str}\n)"
 
     def _to_pb(self) -> StructuredPipeline_pb:
         return StructuredPipeline_pb(
@@ -81,20 +82,45 @@ class _BasePipeline:
         """
         return self.__class__(self._client, *self.stages, new_stage)
 
-    @staticmethod
-    def _parse_response(response_pb, client):
-        for doc in response_pb.results:
-            data = _helpers.decode_dict(doc.fields, client)
-            yield document.DocumentSnapshot(
-                None,
-                data,
-                exists=True,
-                read_time=response_pb._pb.execution_time,
-                create_time=doc.create_time,
-                update_time=doc.update_time,
+    def _prep_execute_request(
+        self, transaction: BaseTransaction | None
+    ) -> ExecutePipelineRequest:
+        """
+        shared logic for creating an ExecutePipelineRequest
+        """
+        database_name = (
+            f"projects/{self._client.project}/databases/{self._client._database}"
+        )
+        transaction_id = (
+            _helpers.get_transaction_id(transaction)
+            if transaction is not None
+            else None
+        )
+        request = ExecutePipelineRequest(
+            database=database_name,
+            transaction=transaction_id,
+            structured_pipeline=self._to_pb(),
+        )
+        return request
+
+    def _execute_response_helper(
+        self, response: ExecutePipelineResponse
+    ) -> Iterable[PipelineResult]:
+        """
+        shared logic for unpacking an ExecutePipelineReponse into PipelineResults
+        """
+        for doc in response.results:
+            ref = self._client.document(doc.name) if doc.name else None
+            yield PipelineResult(
+                self._client,
+                doc.fields,
+                ref,
+                response._pb.execution_time,
+                doc._pb.create_time if doc.create_time else None,
+                doc._pb.update_time if doc.update_time else None,
             )
 
-    def add_fields(self, *fields: Selectable) -> Self:
+    def add_fields(self, *fields: Selectable) -> "_BasePipeline":
         """
         Adds new fields to outputs from previous stages.
 
@@ -124,7 +150,7 @@ class _BasePipeline:
         """
         return self._append(stages.AddFields(*fields))
 
-    def remove_fields(self, *fields: Field | str) -> Self:
+    def remove_fields(self, *fields: Field | str) -> "_BasePipeline":
         """
         Removes fields from outputs of previous stages.
 
@@ -146,7 +172,7 @@ class _BasePipeline:
         """
         return self._append(stages.RemoveFields(*fields))
 
-    def select(self, *selections: str | Selectable) -> Self:
+    def select(self, *selections: str | Selectable) -> "_BasePipeline":
         """
         Selects or creates a set of fields from the outputs of previous stages.
 
@@ -179,7 +205,7 @@ class _BasePipeline:
         """
         return self._append(stages.Select(*selections))
 
-    def where(self, condition: FilterCondition) -> Self:
+    def where(self, condition: FilterCondition) -> "_BasePipeline":
         """
         Filters the documents from previous stages to only include those matching
         the specified `FilterCondition`.
@@ -223,8 +249,8 @@ class _BasePipeline:
         field: str | Expr,
         vector: Sequence[float] | "Vector",
         distance_measure: "DistanceMeasure",
-        options: Optional[stages.FindNearestOptions] = None,
-    ) -> Self:
+        options: stages.FindNearestOptions | None = None,
+    ) -> "_BasePipeline":
         """
         Performs vector distance (similarity) search with given parameters on the
         stage inputs.
@@ -274,7 +300,7 @@ class _BasePipeline:
             stages.FindNearest(field, vector, distance_measure, options)
         )
 
-    def sort(self, *orders: stages.Ordering) -> Self:
+    def sort(self, *orders: stages.Ordering) -> "_BasePipeline":
         """
         Sorts the documents from previous stages based on one or more `Ordering` criteria.
 
@@ -306,7 +332,7 @@ class _BasePipeline:
         self,
         field: Selectable,
         mode: stages.Replace.Mode = stages.Replace.Mode.FULL_REPLACE,
-    ) -> Self:
+    ) -> "_BasePipeline":
         """
         Replaces the entire document content with the value of a specified field,
         typically a map.
@@ -350,7 +376,7 @@ class _BasePipeline:
         """
         return self._append(stages.Replace(field, mode))
 
-    def sample(self, limit_or_options: int | SampleOptions) -> Self:
+    def sample(self, limit_or_options: int | SampleOptions) -> "_BasePipeline":
         """
         Performs a pseudo-random sampling of the documents from the previous stage.
 
@@ -379,7 +405,7 @@ class _BasePipeline:
         """
         return self._append(stages.Sample(limit_or_options))
 
-    def union(self, other: Self) -> Self:
+    def union(self, other: "_BasePipeline") -> "_BasePipeline":
         """
         Performs a union of all documents from this pipeline and another pipeline,
         including duplicates.
@@ -406,8 +432,8 @@ class _BasePipeline:
         self,
         field: str | Selectable,
         alias: str | Field | None = None,
-        options: Optional[stages.UnnestOptions] = None,
-    ) -> Self:
+        options: stages.UnnestOptions | None = None,
+    ) -> "_BasePipeline":
         """
         Produces a document for each element in an array field from the previous stage document.
 
@@ -465,7 +491,7 @@ class _BasePipeline:
         """
         return self._append(stages.Unnest(field, alias, options))
 
-    def generic_stage(self, name: str, *params: Expr) -> Self:
+    def generic_stage(self, name: str, *params: Expr) -> "_BasePipeline":
         """
         Adds a generic, named stage to the pipeline with specified parameters.
 
@@ -488,7 +514,7 @@ class _BasePipeline:
         """
         return self._append(stages.GenericStage(name, *params))
 
-    def offset(self, offset: int) -> Self:
+    def offset(self, offset: int) -> "_BasePipeline":
         """
         Skips the first `offset` number of documents from the results of previous stages.
 
@@ -512,7 +538,7 @@ class _BasePipeline:
         """
         return self._append(stages.Offset(offset))
 
-    def limit(self, limit: int) -> Self:
+    def limit(self, limit: int) -> "_BasePipeline":
         """
         Limits the maximum number of documents returned by previous stages to `limit`.
 
@@ -540,7 +566,7 @@ class _BasePipeline:
         self,
         *accumulators: ExprWithAlias[Accumulator],
         groups: Sequence[str | Selectable] = (),
-    ) -> Self:
+    ) -> "_BasePipeline":
         """
         Performs aggregation operations on the documents from previous stages,
         optionally grouped by specified fields or expressions.
@@ -586,7 +612,7 @@ class _BasePipeline:
         """
         return self._append(stages.Aggregate(*accumulators, groups=groups))
 
-    def distinct(self, *fields: str | Selectable) -> Self:
+    def distinct(self, *fields: str | Selectable) -> "_BasePipeline":
         """
         Returns documents with distinct combinations of values for the specified
         fields or expressions.

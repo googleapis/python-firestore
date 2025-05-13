@@ -13,20 +13,17 @@
 # limitations under the License.
 
 from __future__ import annotations
-import sys
 import os
 import pytest
 import yaml
 import re
 from typing import Any
-from contextlib import nullcontext
 
 from google.protobuf.json_format import MessageToDict
 
 # from google.cloud.firestore_v1.pipeline_stages import *
 from google.cloud.firestore_v1 import pipeline_stages
 from google.cloud.firestore_v1 import pipeline_expressions
-from google.cloud.firestore_v1.pipeline import Pipeline
 from google.api_core.exceptions import GoogleAPIError
 
 from google.cloud.firestore import Client, AsyncClient
