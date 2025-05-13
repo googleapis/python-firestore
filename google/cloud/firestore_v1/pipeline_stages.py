@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Optional, Sequence, TYPE_CHECKING
 from abc import ABC
 from abc import abstractmethod
+from enum import Enum
 
 from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
 from google.cloud.firestore_v1.types.document import Value
@@ -310,6 +311,23 @@ class RemoveFields(Stage):
 
     def _pb_args(self) -> list[Value]:
         return [f._to_pb() for f in self.fields]
+
+
+class Replace(Stage):
+    """Replaces the document content with the value of a specified field."""
+
+    class Mode(Enum):
+        FULL_REPLACE = "full_replace"
+        MERGE_PREFER_NEXT = "merge_prefer_nest"
+        MERGE_PREFER_PARENT = "merge_prefer_parent"
+
+    def __init__(self, field: Selectable | str, mode: Mode | str = Mode.FULL_REPLACE):
+        super().__init__()
+        self.field = Field(field) if isinstance(field, str) else field
+        self.mode = self.Mode[mode] if isinstance(mode, str) else mode
+
+    def _pb_args(self):
+        return [self.field._to_pb(), Value(string_value=self.mode.value)]
 
 
 class Sample(Stage):
