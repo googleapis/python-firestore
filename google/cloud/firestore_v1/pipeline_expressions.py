@@ -436,7 +436,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the concatenated array.
         """
-        return ArrayConcat(self, [self._cast_to_expr_or_convert_to_constant(o) for o in array])
+        return ArrayConcat(
+            self, [self._cast_to_expr_or_convert_to_constant(o) for o in array]
+        )
 
     def array_contains(self, element: Expr | CONSTANT_TYPE) -> "ArrayContains":
         """Creates an expression that checks if an array contains a specific element or value.
@@ -817,7 +819,11 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the string with the first occurrence replaced.
         """
-        return ReplaceFirst(self, self._cast_to_expr_or_convert_to_constant(find), self._cast_to_expr_or_convert_to_constant(replace))
+        return ReplaceFirst(
+            self,
+            self._cast_to_expr_or_convert_to_constant(find),
+            self._cast_to_expr_or_convert_to_constant(replace),
+        )
 
     def replace_all(self, find: Expr | str, replace: Expr | str) -> "ReplaceAll":
         """Creates an expression that replaces all occurrences of a substring within a string with another
@@ -836,7 +842,11 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the string with all occurrences replaced.
         """
-        return ReplaceAll(self, self._cast_to_expr_or_convert_to_constant(find), self._cast_to_expr_or_convert_to_constant(replace))
+        return ReplaceAll(
+            self,
+            self._cast_to_expr_or_convert_to_constant(find),
+            self._cast_to_expr_or_convert_to_constant(replace),
+        )
 
     def map_get(self, key: str) -> "MapGet":
         """Accesses a value from a map (object) field using the provided key.
@@ -871,7 +881,9 @@ class Expr(ABC):
         """
         return CosineDistance(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def euclidean_distance(self, other: Expr | list[float] | Vector) -> "EuclideanDistance":
+    def euclidean_distance(
+        self, other: Expr | list[float] | Vector
+    ) -> "EuclideanDistance":
         """Calculates the Euclidean distance between two vectors.
 
         Example:
@@ -1152,12 +1164,14 @@ class Divide(Function):
 
 class DotProduct(Function):
     """Represents the vector dot product function."""
+
     def __init__(self, vector1: Expr, vector2: Expr):
         super().__init__("dot_product", [vector1, vector2])
 
 
 class EuclideanDistance(Function):
     """Represents the vector Euclidean distance function."""
+
     def __init__(self, vector1: Expr, vector2: Expr):
         super().__init__("euclidean_distance", [vector1, vector2])
 
@@ -1206,18 +1220,21 @@ class Parent(Function):
 
 class ReplaceAll(Function):
     """Represents replacing all occurrences of a substring."""
+
     def __init__(self, value: Expr, pattern: Expr, replacement: Expr):
         super().__init__("replace_all", [value, pattern, replacement])
 
 
 class ReplaceFirst(Function):
     """Represents replacing the first occurrence of a substring."""
+
     def __init__(self, value: Expr, pattern: Expr, replacement: Expr):
         super().__init__("replace_first", [value, pattern, replacement])
 
 
 class Reverse(Function):
     """Represents reversing a string."""
+
     def __init__(self, expr: Expr):
         super().__init__("reverse", [expr])
 
@@ -1273,18 +1290,21 @@ class TimestampToUnixSeconds(Function):
 
 class ToLower(Function):
     """Represents converting a string to lowercase."""
+
     def __init__(self, value: Expr):
         super().__init__("to_lower", [value])
 
 
 class ToUpper(Function):
     """Represents converting a string to uppercase."""
+
     def __init__(self, value: Expr):
         super().__init__("to_upper", [value])
 
 
 class Trim(Function):
     """Represents trimming whitespace from a string."""
+
     def __init__(self, expr: Expr):
         super().__init__("trim", [expr])
 
@@ -1326,6 +1346,7 @@ class Add(Function):
 
 class ArrayConcat(Function):
     """Represents concatenating multiple arrays."""
+
     def __init__(self, array: Expr, rest: List[Expr]):
         super().__init__("array_concat", [array] + rest)
 
@@ -1388,6 +1409,7 @@ class CollectionId(Function):
 
 class CosineDistance(Function):
     """Represents the vector cosine distance function."""
+
     def __init__(self, vector1: Expr, vector2: Expr):
         super().__init__("cosine_distance", [vector1, vector2])
 
