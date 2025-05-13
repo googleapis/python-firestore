@@ -357,7 +357,7 @@ class _BasePipeline:
         """
         return self._append(stages.Sample(limit_or_options))
 
-    def union(self, other: Self) -> "_BasePipeline":
+    def union(self, other: "_BasePipeline") -> "_BasePipeline":
         """
         Performs a union of all documents from this pipeline and another pipeline,
         including duplicates.
@@ -384,7 +384,7 @@ class _BasePipeline:
         self,
         field: str | Selectable,
         alias: str | Field | None = None,
-        options: Optional[stages.UnnestOptions] = None,
+        options: stages.UnnestOptions | None = None,
     ) -> "_BasePipeline":
         """
         Produces a document for each element in an array field from the previous stage document.

@@ -33,7 +33,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
 )
 
 if TYPE_CHECKING:
-    from google.cloud.firestore_v1.pipeline import Pipeline
+    from google.cloud.firestore_v1.base_pipeline import _BasePipeline
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 
@@ -369,7 +369,7 @@ class Sort(Stage):
 class Union(Stage):
     """Performs a union of documents from two pipelines."""
 
-    def __init__(self, other: Pipeline):
+    def __init__(self, other: _BasePipeline):
         super().__init__()
         self.other = other
 

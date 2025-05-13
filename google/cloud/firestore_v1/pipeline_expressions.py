@@ -15,23 +15,16 @@
 from __future__ import annotations
 from typing import (
     Any,
-    Iterable,
     List,
-    Mapping,
-    Union,
     Generic,
     TypeVar,
-    List,
     Dict,
-    Tuple,
     Sequence,
 )
 from abc import ABC
 from abc import abstractmethod
 from enum import Enum
-from enum import auto
 import datetime
-from dataclasses import dataclass
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.types.query import StructuredQuery as Query_pb
 from google.cloud.firestore_v1.vector import Vector
