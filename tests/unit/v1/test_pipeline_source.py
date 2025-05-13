@@ -44,6 +44,14 @@ class TestPipelineSource:
         assert isinstance(first_stage, stages.Collection)
         assert first_stage.path == "/path"
 
+    def test_collection_group(self):
+        instance = self._make_client().pipeline()
+        ppl = instance.collection_group("id")
+        assert isinstance(ppl, self._expected_pipeline_type)
+        assert len(ppl.stages) == 1
+        first_stage = ppl.stages[0]
+        assert isinstance(first_stage, stages.CollectionGroup)
+        assert first_stage.collection_id == "id"
 
 class TestPipelineSourceWithAsyncClient(TestPipelineSource):
     """
