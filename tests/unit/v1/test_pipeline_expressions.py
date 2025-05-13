@@ -19,10 +19,10 @@ import datetime
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import document as document_pb
 from google.cloud.firestore_v1.types import query as query_pb
-from google.cloud.firestore_v1.pipeline_expressions import FilterCondition
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1._helpers import GeoPoint
+from google.cloud.firestore_v1.pipeline_expressions import FilterCondition
 import google.cloud.firestore_v1.pipeline_expressions as expr
 
 
@@ -111,7 +111,7 @@ class TestConstant:
         ],
     )
     def test_repr(self, input_val, expected):
-        instance = expressions.Constant.of(input_val)
+        instance = expr.Constant.of(input_val)
         repr_string = repr(instance)
         assert repr_string == expected
 

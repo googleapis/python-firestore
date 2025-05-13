@@ -13,7 +13,6 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing_extensions import Self
 from typing import Iterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import (
@@ -114,7 +113,7 @@ class _BasePipeline:
                 doc._pb.update_time if doc.update_time else None,
             )
 
-    def select(self, *selections: str | Selectable) -> Self:
+    def select(self, *selections: str | Selectable) -> "_BasePipeline":
         """
         Selects or creates a set of fields from the outputs of previous stages.
         The selected fields are defined using `Selectable` expressions or field names:
@@ -142,7 +141,7 @@ class _BasePipeline:
         """
         return self._append(stages.Select(*selections))
 
-    def where(self, condition: FilterCondition) -> Self:
+    def where(self, condition: FilterCondition) -> "_BasePipeline":
         """
         Filters the documents from previous stages to only include those matching
         the specified `FilterCondition`.
@@ -176,7 +175,7 @@ class _BasePipeline:
         """
         return self._append(stages.Where(condition))
 
-    def sort(self, *orders: stages.Ordering) -> Self:
+    def sort(self, *orders: stages.Ordering) -> "_BasePipeline":
         """
         Sorts the documents from previous stages based on one or more `Ordering` criteria.
         This stage allows you to order the results of your pipeline. You can specify
@@ -200,7 +199,7 @@ class _BasePipeline:
         """
         return self._append(stages.Sort(*orders))
 
-    def offset(self, offset: int) -> Self:
+    def offset(self, offset: int) -> "_BasePipeline":
         """
         Skips the first `offset` number of documents from the results of previous stages.
         This stage is useful for implementing pagination, allowing you to retrieve
@@ -220,7 +219,7 @@ class _BasePipeline:
         """
         return self._append(stages.Offset(offset))
 
-    def limit(self, limit: int) -> Self:
+    def limit(self, limit: int) -> "_BasePipeline":
         """
         Limits the maximum number of documents returned by previous stages to `limit`.
         This stage is useful for controlling the size of the result set, often used for:

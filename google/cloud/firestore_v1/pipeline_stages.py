@@ -26,7 +26,6 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Selectable,
     Ordering,
 )
-from google.cloud.firestore_v1.pipeline_expressions import Expr
 
 
 class Stage(ABC):
