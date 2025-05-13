@@ -477,7 +477,9 @@ def _aggregation_query_get_helper(
     aggregation_query.count(alias="all")
 
     aggregation_result = AggregationResult(
-        alias="total", value=5, read_time=response_read_time,
+        alias="total",
+        value=5,
+        read_time=response_read_time,
     )
 
     if explain_options is not None:
@@ -704,7 +706,7 @@ def _aggregation_query_stream_w_retriable_exc_helper(
         expected_transaction_id = transaction.id
     else:
         expected_transaction_id = None
-    
+
     expected_request = {
         "parent": parent_path,
         "structured_aggregation_query": aggregation_query._to_protobuf(),

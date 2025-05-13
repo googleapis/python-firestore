@@ -247,15 +247,11 @@ class Query(BaseQuery):
                 return
 
     def _get_stream_iterator(
-            self, transaction, retry, timeout, explain_options=None, read_time=None
-        ):
+        self, transaction, retry, timeout, explain_options=None, read_time=None
+    ):
         """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
-            transaction,
-            retry,
-            timeout,
-            explain_options,
-            read_time
+            transaction, retry, timeout, explain_options, read_time
         )
 
         response_iterator = self._client._firestore_api.run_query(

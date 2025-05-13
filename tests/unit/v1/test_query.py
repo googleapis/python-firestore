@@ -837,7 +837,7 @@ def _query_stream_w_retriable_exc_helper(
         expected_transaction_id = transaction.id
     else:
         expected_transaction_id = None
-    
+
     expected_request = {
         "parent": parent_path,
         "structured_query": query._to_protobuf(),
@@ -930,8 +930,8 @@ def test_collection_group_constructor_all_descendents_is_false():
 
 
 def _collection_group_get_partitions_helper(
-        retry=None, timeout=None, database=None, read_time=None
-    ):
+    retry=None, timeout=None, database=None, read_time=None
+):
     from google.cloud.firestore_v1 import _helpers
 
     # Create a minimal fake GAPIC.

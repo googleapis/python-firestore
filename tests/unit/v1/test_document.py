@@ -473,7 +473,7 @@ def _get_helper(
         expected_transaction_id = transaction_id
     else:
         expected_transaction_id = None
-    
+
     expected_request = {
         "database": client._database_string,
         "documents": [document_reference._document_path],
@@ -575,7 +575,7 @@ def _collections_helper(
         assert isinstance(collection, CollectionReference)
         assert collection.parent == document
         assert collection.id == collection_id
-    
+
     expected_result = {
         "parent": document._document_path,
         "page_size": page_size,
