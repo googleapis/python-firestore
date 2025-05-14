@@ -381,6 +381,28 @@ class Field(Selectable):
 class FilterCondition(Function):
     """Filters the given data in some way."""
 
+    def __init__(
+        self,
+        *args,
+        use_infix_repr:bool = True,
+        **kwargs,
+    ):
+        self._use_infix_repr = use_infix_repr
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        """
+        Most FilterConditions can be triggered infix. Eg: Field.of('age').gte(18).
+
+        Display them this way in the repr string where possible
+        """
+        if self._use_infix_repr:
+            if len(self.params) == 1:
+                return f"{self.params[0]!r}.{self.name}()"
+            elif len(self.params) == 2:
+                return f"{self.params[0]!r}.{self.name}({self.params[1]!r})"
+        return super().__repr__()
+
     @staticmethod
     def _from_query_filter_pb(filter_pb, client):
         if isinstance(filter_pb, Query_pb.CompositeFilter):
@@ -447,7 +469,7 @@ class FilterCondition(Function):
 
 class And(FilterCondition):
     def __init__(self, *conditions: "FilterCondition"):
-        super().__init__("and", conditions)
+        super().__init__("and", conditions, use_infix_repr=False)
 
 
 class ArrayContains(FilterCondition):
@@ -531,11 +553,11 @@ class Not(FilterCondition):
     """Represents the logical NOT of a filter condition."""
 
     def __init__(self, condition: Expr):
-        super().__init__("not", [condition])
+        super().__init__("not", [condition], use_infix_repr=False)
 
 
 class Or(FilterCondition):
     """Represents the logical OR of multiple filter conditions."""
 
     def __init__(self, *conditions: "FilterCondition"):
-        super().__init__("or", conditions)
+        super().__init__("or", conditions, use_infix_repr=False)
