@@ -385,9 +385,11 @@ class FilterCondition(Function):
         self,
         *args,
         use_infix_repr:bool = True,
+        infix_name_override:str | None= None,
         **kwargs,
     ):
         self._use_infix_repr = use_infix_repr
+        self._infix_name_override = infix_name_override
         super().__init__(*args, **kwargs)
 
     def __repr__(self):
@@ -397,10 +399,11 @@ class FilterCondition(Function):
         Display them this way in the repr string where possible
         """
         if self._use_infix_repr:
+            infix_name = self._infix_name_override or self.name
             if len(self.params) == 1:
-                return f"{self.params[0]!r}.{self.name}()"
+                return f"{self.params[0]!r}.{infix_name}()"
             elif len(self.params) == 2:
-                return f"{self.params[0]!r}.{self.name}({self.params[1]!r})"
+                return f"{self.params[0]!r}.{infix_name}({self.params[1]!r})"
         return super().__repr__()
 
     @staticmethod
@@ -518,7 +521,7 @@ class In(FilterCondition):
     """Represents checking if an expression's value is within a list of values."""
 
     def __init__(self, left: Expr, others: List[Expr]):
-        super().__init__("in", [left, ListOfExprs(others)])
+        super().__init__("in", [left, ListOfExprs(others)], infix_name_override="in_any")
 
 
 class IsNaN(FilterCondition):
