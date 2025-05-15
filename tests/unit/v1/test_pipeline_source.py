@@ -53,7 +53,6 @@ class TestPipelineSource:
         assert isinstance(first_stage, stages.Collection)
         assert first_stage.path == "/a/b/c"
 
-
     def test_collection_group(self):
         instance = self._make_client().pipeline()
         ppl = instance.collection_group("id")
