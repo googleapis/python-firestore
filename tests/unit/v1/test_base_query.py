@@ -2005,7 +2005,8 @@ def test__query_pipeline_no_decendants(in_path, out_path):
     from google.cloud.firestore_v1 import pipeline_stages
 
     client = make_client()
-    query = client.collection(in_path)
+    collection = client.collection(in_path)
+    query = collection._query()
     pipeline = query.pipeline()
 
     assert len(pipeline.stages) == 1
@@ -2113,7 +2114,7 @@ def test__query_pipeline_order_sorts():
     assert sort_stage.orders[1].order_dir == expr.Ordering.Direction.DESCENDING
 
 
-def test__query_pipeline_cursor():
+def test__query_pipeline_unsupported():
     client = make_client()
     query_start = client.collection("my_col").start_at({"field_a": "value"})
     with pytest.raises(NotImplementedError, match="cursors"):
