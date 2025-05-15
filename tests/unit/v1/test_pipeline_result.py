@@ -86,6 +86,11 @@ class TestPipelineResult:
         second_obj = self._make_one(*second)
         assert (first_obj == second_obj) is result
 
+    def test_eq_wrong_type(self):
+        instance = self._make_one()
+        result = instance == object()
+        assert result is False
+
     def test_data(self):
         from google.cloud.firestore_v1.types.document import Value
 

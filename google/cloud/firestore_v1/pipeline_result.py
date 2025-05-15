@@ -18,7 +18,7 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_client import BaseClient
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
     from google.protobuf.timestamp_pb2 import Timestamp
