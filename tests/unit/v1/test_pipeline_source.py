@@ -53,6 +53,7 @@ class TestPipelineSource:
         assert isinstance(first_stage, stages.CollectionGroup)
         assert first_stage.collection_id == "id"
 
+
 class TestPipelineSourceWithAsyncClient(TestPipelineSource):
     """
     When an async client is used, it should produce async pipelines

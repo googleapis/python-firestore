@@ -340,8 +340,22 @@ class Selectable(Expr):
     """Base class for expressions that can be selected or aliased in projection stages."""
 
     @abstractmethod
-    def _to_map(self):
+    def _to_map(self) -> tuple[str, Value]:
+        """
+        Returns a str: Value representation of the Selectable
+        """
         raise NotImplementedError
+
+    @classmethod
+    def _value_from_selectables(cls, *selectables: Selectable) -> Value:
+        """
+        Returns a Value representing a map of Selectables
+        """
+        return Value(
+            map_value={
+                "fields": {m[0]: m[1] for m in [s._to_map() for s in selectables]}
+            }
+        )
 
 
 class Field(Selectable):
@@ -384,8 +398,8 @@ class FilterCondition(Function):
     def __init__(
         self,
         *args,
-        use_infix_repr:bool = True,
-        infix_name_override:str | None= None,
+        use_infix_repr: bool = True,
+        infix_name_override: str | None = None,
         **kwargs,
     ):
         self._use_infix_repr = use_infix_repr
@@ -521,7 +535,9 @@ class In(FilterCondition):
     """Represents checking if an expression's value is within a list of values."""
 
     def __init__(self, left: Expr, others: List[Expr]):
-        super().__init__("in", [left, ListOfExprs(others)], infix_name_override="in_any")
+        super().__init__(
+            "in", [left, ListOfExprs(others)], infix_name_override="in_any"
+        )
 
 
 class IsNaN(FilterCondition):

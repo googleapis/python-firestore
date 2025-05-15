@@ -33,6 +33,47 @@ def mock_client():
     return client
 
 
+class TestOrdering:
+    @pytest.mark.parametrize(
+        "direction_arg,expected_direction",
+        [
+            ("ASCENDING", expr.Ordering.Direction.ASCENDING),
+            ("DESCENDING", expr.Ordering.Direction.DESCENDING),
+            ("ascending", expr.Ordering.Direction.ASCENDING),
+            ("descending", expr.Ordering.Direction.DESCENDING),
+            (expr.Ordering.Direction.ASCENDING, expr.Ordering.Direction.ASCENDING),
+            (expr.Ordering.Direction.DESCENDING, expr.Ordering.Direction.DESCENDING),
+        ],
+    )
+    def test_ctor(self, direction_arg, expected_direction):
+        instance = expr.Ordering("field1", direction_arg)
+        assert isinstance(instance.expr, expr.Field)
+        assert instance.expr.path == "field1"
+        assert instance.order_dir == expected_direction
+
+    def test_repr(self):
+        field_expr = expr.Field.of("field1")
+        instance = expr.Ordering(field_expr, "ASCENDING")
+        repr_str = repr(instance)
+        assert repr_str == "Field.of('field1').ascending()"
+
+        instance = expr.Ordering(field_expr, "DESCENDING")
+        repr_str = repr(instance)
+        assert repr_str == "Field.of('field1').descending()"
+
+    def test_to_pb(self):
+        field_expr = expr.Field.of("field1")
+        instance = expr.Ordering(field_expr, "ASCENDING")
+        result = instance._to_pb()
+        assert result.map_value.fields["expression"].field_reference_value == "field1"
+        assert result.map_value.fields["direction"].string_value == "ascending"
+
+        instance = expr.Ordering(field_expr, "DESCENDING")
+        result = instance._to_pb()
+        assert result.map_value.fields["expression"].field_reference_value == "field1"
+        assert result.map_value.fields["direction"].string_value == "descending"
+
+
 class TestExpr:
     def test_ctor(self):
         """
@@ -114,6 +155,65 @@ class TestConstant:
         instance = expr.Constant.of(input_val)
         repr_string = repr(instance)
         assert repr_string == expected
+
+
+class TestListOfExprs:
+    def test_to_pb(self):
+        instance = expr.ListOfExprs([expr.Constant(1), expr.Constant(2)])
+        result = instance._to_pb()
+        assert len(result.array_value.values) == 2
+        assert result.array_value.values[0].integer_value == 1
+        assert result.array_value.values[1].integer_value == 2
+
+    def test_empty_to_pb(self):
+        instance = expr.ListOfExprs([])
+        result = instance._to_pb()
+        assert len(result.array_value.values) == 0
+
+    def test_repr(self):
+        instance = expr.ListOfExprs([expr.Constant(1), expr.Constant(2)])
+        repr_string = repr(instance)
+        assert repr_string == "ListOfExprs([Constant.of(1), Constant.of(2)])"
+        empty_instance = expr.ListOfExprs([])
+        empty_repr_string = repr(empty_instance)
+        assert empty_repr_string == "ListOfExprs([])"
+
+
+class TestSelectable:
+    def test_ctor(self):
+        """
+        Base class should be abstract
+        """
+        with pytest.raises(TypeError):
+            expr.Selectable()
+
+    def test_value_from_selectables(self):
+        selectable_list = [expr.Field.of("field1"), expr.Field.of("field2")]
+        result = expr.Selectable._value_from_selectables(*selectable_list)
+        assert len(result.map_value.fields) == 2
+        assert result.map_value.fields["field1"].field_reference_value == "field1"
+        assert result.map_value.fields["field2"].field_reference_value == "field2"
+
+    class TestField:
+        def test_repr(self):
+            instance = expr.Field.of("field1")
+            repr_string = repr(instance)
+            assert repr_string == "Field.of('field1')"
+
+        def test_of(self):
+            instance = expr.Field.of("field1")
+            assert instance.path == "field1"
+
+        def test_to_pb(self):
+            instance = expr.Field.of("field1")
+            result = instance._to_pb()
+            assert result.field_reference_value == "field1"
+
+        def test_to_map(self):
+            instance = expr.Field.of("field1")
+            result = instance._to_map()
+            assert result[0] == "field1"
+            assert result[1] == Value(field_reference_value="field1")
 
 
 class TestFilterCondition:
@@ -420,21 +520,23 @@ class TestFilterCondition:
         with pytest.raises(TypeError, match="Unexpected filter type"):
             FilterCondition._from_query_filter_pb(document_pb.Value(), mock_client)
 
-
-    @pytest.mark.parametrize("method,args,result_cls", [
-        ("eq", (2,), expr.Eq),
-        ("neq", (2,), expr.Neq),
-        ("lt", (2,), expr.Lt),
-        ("lte", (2,), expr.Lte),
-        ("gt", (2,), expr.Gt),
-        ("gte", (2,), expr.Gte),
-        ("in_any", ([None],), expr.In),
-        ("not_in_any", ([None],), expr.Not),
-        ("array_contains", (None,), expr.ArrayContains),
-        ("array_contains_any", ([None],), expr.ArrayContainsAny),
-        ("is_nan", (), expr.IsNaN),
-        ("exists", (), expr.Exists),
-    ])
+    @pytest.mark.parametrize(
+        "method,args,result_cls",
+        [
+            ("eq", (2,), expr.Eq),
+            ("neq", (2,), expr.Neq),
+            ("lt", (2,), expr.Lt),
+            ("lte", (2,), expr.Lte),
+            ("gt", (2,), expr.Gt),
+            ("gte", (2,), expr.Gte),
+            ("in_any", ([None],), expr.In),
+            ("not_in_any", ([None],), expr.Not),
+            ("array_contains", (None,), expr.ArrayContains),
+            ("array_contains_any", ([None],), expr.ArrayContainsAny),
+            ("is_nan", (), expr.IsNaN),
+            ("exists", (), expr.Exists),
+        ],
+    )
     def test_infix_call(self, method, args, result_cls):
         """
         most FilterExpressions should support infix execution
@@ -483,7 +585,10 @@ class TestFilterCondition:
         assert isinstance(instance.params[1], ListOfExprs)
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
-        assert repr(instance) == "ArrayField.array_contains_any(ListOfExprs([Element1, Element2]))"
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_any(ListOfExprs([Element1, Element2]))"
+        )
 
     def test_exists(self):
         arg1 = self._make_arg("Field")

@@ -168,7 +168,9 @@ class TestSelect:
     def test_repr(self):
         instance = self._make_one("field1", Field.of("field2"))
         repr_str = repr(instance)
-        assert repr_str == "Select(projections=[Field.of('field1'), Field.of('field2')])"
+        assert (
+            repr_str == "Select(projections=[Field.of('field1'), Field.of('field2')])"
+        )
 
     def test_to_pb(self):
         instance = self._make_one("field1", "field2.subfield", Field.of("field3"))

@@ -290,14 +290,17 @@ def test_pipeline_execute_with_transaction():
     assert request.database == "projects/A/databases/B"
     assert request.transaction == b"123"
 
-@pytest.mark.parametrize("method,args,result_cls", [
-    ("select", (), stages.Select),
-    ("where", (mock.Mock(),), stages.Where),
-    ("sort", (), stages.Sort),
-    ("offset", (1,), stages.Offset),
-    ("limit", (1,), stages.Limit),
 
-])
+@pytest.mark.parametrize(
+    "method,args,result_cls",
+    [
+        ("select", (), stages.Select),
+        ("where", (mock.Mock(),), stages.Where),
+        ("sort", (), stages.Sort),
+        ("offset", (1,), stages.Offset),
+        ("limit", (1,), stages.Limit),
+    ],
+)
 def test_pipeline_methods(method, args, result_cls):
     start_ppl = _make_pipeline()
     method_ptr = getattr(start_ppl, method)
