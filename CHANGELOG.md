@@ -5,6 +5,36 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.20.2](https://github.com/googleapis/python-firestore/compare/v2.20.1...v2.20.2) (2025-04-14)
+
+
+### Bug Fixes
+
+* Allow Protobuf 6.x ([#1028](https://github.com/googleapis/python-firestore/issues/1028)) ([13d5c6d](https://github.com/googleapis/python-firestore/commit/13d5c6d18a3836e3c90b0b63360cb0394fa0375b))
+* Remove setup.cfg configuration for creating universal wheels ([#1030](https://github.com/googleapis/python-firestore/issues/1030)) ([727098b](https://github.com/googleapis/python-firestore/commit/727098b4abf4a616f3ccce4b2476ab930fd5bf5c))
+
+## [2.20.1](https://github.com/googleapis/python-firestore/compare/v2.20.0...v2.20.1) (2025-02-26)
+
+
+### Bug Fixes
+
+* Bump default deadline on CreateDatabase and RestoreDatabase to 2 minutes ([#975](https://github.com/googleapis/python-firestore/issues/975)) ([995fad6](https://github.com/googleapis/python-firestore/commit/995fad68d7e0da84cc67219d8990397d8329421b))
+* Client-side path validation for batch.update ([#1021](https://github.com/googleapis/python-firestore/issues/1021)) ([3b7595b](https://github.com/googleapis/python-firestore/commit/3b7595b9e3ba4eab1c5a68dd6be3c330247ee18d))
+* Watch thread deadlock on exit ([#1014](https://github.com/googleapis/python-firestore/issues/1014)) ([c47677a](https://github.com/googleapis/python-firestore/commit/c47677a190fcbca88e8c14c81ffb0c40d806f511))
+
+## [2.20.0](https://github.com/googleapis/python-firestore/compare/v2.19.0...v2.20.0) (2025-01-13)
+
+
+### Features
+
+* Support not_equal queries for none and nan ([#988](https://github.com/googleapis/python-firestore/issues/988)) ([cbaf4ae](https://github.com/googleapis/python-firestore/commit/cbaf4ae479a4ac3a0174d0f8b6f326e218e6eacb))
+
+
+### Bug Fixes
+
+* Clean up resources on Watch close ([#1004](https://github.com/googleapis/python-firestore/issues/1004)) ([6d68dcd](https://github.com/googleapis/python-firestore/commit/6d68dcd44ad5f8be1c555deb0efa0d644a4a7e9d))
+* Populate transaction attributes after commit ([#977](https://github.com/googleapis/python-firestore/issues/977)) ([aa3c0a3](https://github.com/googleapis/python-firestore/commit/aa3c0a384efceed6bb4b368559bd8875593bccc1))
+
 ## [2.19.0](https://github.com/googleapis/python-firestore/compare/v2.18.0...v2.19.0) (2024-09-20)
 
 

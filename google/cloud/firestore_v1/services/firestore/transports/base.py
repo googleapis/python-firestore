@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -388,6 +388,26 @@ class FirestoreTransport(abc.ABC):
                     deadline=60.0,
                 ),
                 default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.cancel_operation: gapic_v1.method.wrap_method(
+                self.cancel_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.delete_operation: gapic_v1.method.wrap_method(
+                self.delete_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.get_operation: gapic_v1.method.wrap_method(
+                self.get_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.list_operations: gapic_v1.method.wrap_method(
+                self.list_operations,
+                default_timeout=None,
                 client_info=client_info,
             ),
         }
