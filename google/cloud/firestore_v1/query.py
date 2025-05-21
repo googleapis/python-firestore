@@ -20,7 +20,17 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Sequence, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generator,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+)
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries

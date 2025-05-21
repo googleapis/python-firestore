@@ -25,10 +25,10 @@ from typing import (
     Generator,
     Generic,
     Iterable,
-    NoReturn,
     Sequence,
     Tuple,
     Union,
+    Optional,
 )
 
 from google.api_core import retry as retries
