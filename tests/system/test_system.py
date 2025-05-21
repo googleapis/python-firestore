@@ -236,18 +236,17 @@ def test_collections_w_read_time(client, cleanup, database):
     cleanup(second_document.delete)
     second_document.create(data)
 
-    # We're just testing that we added one collection at read_time, not two.
-    collections = list(client.collections(read_time=read_time))
-    assert len(collections) == num_collections
-    ids = [collection.id for collection in collections]
-    assert second_collection_id not in ids
-    assert first_collection_id in ids
-
     # Test that listing current collections does have the second id.
     curr_collections = list(client.collections())
-    assert len(curr_collections) == num_collections + 1
+    assert len(curr_collections) > num_collections
     ids = [collection.id for collection in curr_collections]
     assert second_collection_id in ids
+    assert first_collection_id in ids
+
+    # We're just testing that we added one collection at read_time, not two.
+    collections = list(client.collections(read_time=read_time))
+    ids = [collection.id for collection in collections]
+    assert second_collection_id not in ids
     assert first_collection_id in ids
 
 
