@@ -676,7 +676,7 @@ def _aggregation_query_stream_w_retriable_exc_helper(
     query = make_query(parent)
     aggregation_query = make_aggregation_query(query)
 
-    get_response = aggregation_query.stream(transaction=transaction, **kwargs)
+    get_response = aggregation_query.stream(transaction=transaction, **kwargs, read_time=read_time)
 
     assert isinstance(get_response, stream_generator.StreamGenerator)
     if expect_retry:
@@ -728,7 +728,8 @@ def _aggregation_query_stream_w_retriable_exc_helper(
             "transaction": None,
         }
         if read_time is not None:
-            expected_request["read_time"] = None
+            expected_request["read_time"] = read_time
+
         assert calls[1] == mock.call(
             request=expected_request,
             metadata=client._rpc_metadata,
@@ -744,6 +745,10 @@ def test_aggregation_query_stream_w_retriable_exc_w_retry():
     retry = mock.Mock(spec=["_predicate"])
     retry._predicate = lambda exc: False
     _aggregation_query_stream_w_retriable_exc_helper(retry=retry, expect_retry=False)
+
+
+def test_aggregation_query_stream_w_retriable_exc_w_read_time():
+    _aggregation_query_stream_w_retriable_exc_helper(read_time=datetime.now(tz=timezone.utc))
 
 
 def test_aggregation_query_stream_w_retriable_exc_w_transaction():

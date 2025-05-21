@@ -399,7 +399,7 @@ def test_transaction_get_w_document_ref_w_explain_options():
         )
 
 
-def test_transaction_get_w_document_ref():
+def test_transaction_get_w_document_ref_w_read_time():
     _transaction_get_w_document_ref_helper(
         read_time=datetime.datetime.now(tz=datetime.timezone.utc)
     )
