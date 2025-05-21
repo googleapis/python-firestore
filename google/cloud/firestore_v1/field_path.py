@@ -13,12 +13,10 @@
 # limitations under the License.
 
 """Utilities for managing / converting field paths to / from strings."""
-
-from collections import abc
-
+from __future__ import annotations
 import re
-from typing import Iterable
-
+from collections import abc
+from typing import Iterable, cast
 
 _FIELD_PATH_MISSING_TOP = "{!r} is not contained in the data"
 _FIELD_PATH_MISSING_KEY = "{!r} is not contained in the data for the key {!r}"
@@ -33,7 +31,7 @@ _BACKTICK = "`"
 _ESCAPED_BACKTICK = _BACKSLASH + _BACKTICK
 
 _SIMPLE_FIELD_NAME = re.compile("^[_a-zA-Z][_a-zA-Z0-9]*$")
-_LEADING_ALPHA_INVALID = re.compile("^[_a-zA-Z][_a-zA-Z0-9]*[^_a-zA-Z0-9]")
+_LEADING_ALPHA_INVALID = re.compile(r"^[_a-zA-Z][_a-zA-Z0-9]*[~*/\[\]]")
 PATH_ELEMENT_TOKENS = [
     ("SIMPLE", r"[_a-zA-Z][_a-zA-Z0-9]*"),  # unquoted elements
     ("QUOTED", r"`(?:\\`|[^`])*?`"),  # quoted elements, unquoted
@@ -55,7 +53,7 @@ def _tokenize_field_path(path: str):
     get_token = TOKENS_REGEX.match
     match = get_token(path)
     while match is not None:
-        type_ = match.lastgroup
+        type_ = cast(str, match.lastgroup)
         value = match.group(type_)
         yield value
         pos = match.end()
@@ -64,7 +62,7 @@ def _tokenize_field_path(path: str):
         raise ValueError("Path {} not consumed, residue: {}".format(path, path[pos:]))
 
 
-def split_field_path(path: str):
+def split_field_path(path: str | None):
     """Split a field path into valid elements (without dots).
 
     Args:
@@ -313,9 +311,7 @@ class FieldPath(object):
                     raise ValueError("Empty element")
                 if _LEADING_ALPHA_INVALID.match(element):
                     raise ValueError(
-                        "Non-alphanum char in element with leading alpha: {}".format(
-                            element
-                        )
+                        "Invalid char in element with leading alpha: {}".format(element)
                     )
             return FieldPath(*elements)
 

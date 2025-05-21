@@ -13,40 +13,42 @@
 # limitations under the License.
 
 """Common helpers shared across Google Cloud Firestore modules."""
-
+from __future__ import annotations
 import datetime
 import json
-
-import google
-from google.api_core.datetime_helpers import DatetimeWithNanoseconds
-from google.api_core import gapic_v1
-from google.protobuf import struct_pb2
-from google.type import latlng_pb2  # type: ignore
-import grpc  # type: ignore
-
-from google.cloud import exceptions  # type: ignore
-from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
-from google.cloud.firestore_v1.vector import Vector
-from google.cloud.firestore_v1.types.write import DocumentTransform
-from google.cloud.firestore_v1 import transforms
-from google.cloud.firestore_v1 import types
-from google.cloud.firestore_v1.field_path import FieldPath
-from google.cloud.firestore_v1.field_path import parse_field_path
-from google.cloud.firestore_v1.types import common
-from google.cloud.firestore_v1.types import document
-from google.cloud.firestore_v1.types import write
-from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 from typing import (
     Any,
     Dict,
     Generator,
     Iterator,
     List,
-    NoReturn,
     Optional,
+    Sequence,
     Tuple,
     Union,
+    cast,
+    TYPE_CHECKING,
 )
+
+import grpc  # type: ignore
+from google.api_core import gapic_v1
+from google.api_core import retry as retries
+from google.api_core.datetime_helpers import DatetimeWithNanoseconds
+from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
+from google.protobuf import struct_pb2
+from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
+from google.type import latlng_pb2  # type: ignore
+
+import google
+from google.cloud import exceptions  # type: ignore
+from google.cloud.firestore_v1 import transforms, types
+from google.cloud.firestore_v1.field_path import FieldPath, parse_field_path
+from google.cloud.firestore_v1.types import common, document, write
+from google.cloud.firestore_v1.types.write import DocumentTransform
+from google.cloud.firestore_v1.vector import Vector
+
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1 import DocumentSnapshot
 
 _EmptyDict: transforms.Sentinel
 _GRPC_ERROR_MAPPING: dict
@@ -238,7 +240,9 @@ def encode_dict(values_dict) -> dict:
     return {key: encode_value(value) for key, value in values_dict.items()}
 
 
-def document_snapshot_to_protobuf(snapshot: "google.cloud.firestore_v1.base_document.DocumentSnapshot") -> Optional["google.cloud.firestore_v1.types.Document"]:  # type: ignore
+def document_snapshot_to_protobuf(
+    snapshot: "DocumentSnapshot",
+) -> Optional["google.cloud.firestore_v1.types.Document"]:
     from google.cloud.firestore_v1.types import Document
 
     if not snapshot.exists:
@@ -409,7 +413,8 @@ def decode_dict(value_fields, client) -> Union[dict, Vector]:
     if res.get("__type__", None) == "__vector__":
         # Vector data type is represented as mapping.
         # {"__type__":"__vector__", "value": [1.0, 2.0, 3.0]}.
-        return Vector(res["value"])
+        values = cast(Sequence[float], res["value"])
+        return Vector(values)
 
     return res
 
@@ -418,7 +423,7 @@ def get_doc_id(document_pb, expected_prefix) -> str:
     """Parse a document ID from a document protobuf.
 
     Args:
-        document_pb (google.cloud.proto.firestore.v1.\
+        document_pb (google.cloud.firestore_v1.\
             document.Document): A protobuf for a document that
             was created in a ``CreateDocument`` RPC.
         expected_prefix (str): The expected collection prefix for the
@@ -508,7 +513,7 @@ class DocumentExtractor(object):
         self.increments = {}
         self.minimums = {}
         self.maximums = {}
-        self.set_fields = {}
+        self.set_fields: dict = {}
         self.empty_document = False
 
         prefix_path = FieldPath()
@@ -570,7 +575,9 @@ class DocumentExtractor(object):
             + list(self.minimums)
         )
 
-    def _get_update_mask(self, allow_empty_mask=False) -> None:
+    def _get_update_mask(
+        self, allow_empty_mask=False
+    ) -> Optional[types.common.DocumentMask]:
         return None
 
     def get_update_pb(
@@ -734,9 +741,9 @@ class DocumentExtractorForMerge(DocumentExtractor):
 
     def __init__(self, document_data) -> None:
         super(DocumentExtractorForMerge, self).__init__(document_data)
-        self.data_merge = []
-        self.transform_merge = []
-        self.merge = []
+        self.data_merge: list = []
+        self.transform_merge: list = []
+        self.merge: list = []
 
     def _apply_merge_all(self) -> None:
         self.data_merge = sorted(self.field_paths + self.deleted_fields)
@@ -790,7 +797,7 @@ class DocumentExtractorForMerge(DocumentExtractor):
                     self.data_merge.append(field_path)
 
         # Clear out data for fields not merged.
-        merged_set_fields = {}
+        merged_set_fields: dict = {}
         for field_path in self.data_merge:
             value = get_field_value(self.document_data, field_path)
             set_field_value(merged_set_fields, field_path, value)
@@ -1023,7 +1030,7 @@ def metadata_with_prefix(prefix: str, **kw) -> List[Tuple[str, str]]:
 class WriteOption(object):
     """Option used to assert a condition on a write operation."""
 
-    def modify_write(self, write, no_create_msg=None) -> NoReturn:
+    def modify_write(self, write, no_create_msg=None) -> None:
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         This is a virtual method intended to be implemented by subclasses.
@@ -1063,7 +1070,7 @@ class LastUpdateOption(WriteOption):
             return NotImplemented
         return self._last_update_time == other._last_update_time
 
-    def modify_write(self, write, **unused_kwargs) -> None:
+    def modify_write(self, write, *unused_args, **unused_kwargs) -> None:
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         The ``last_update_time`` is added to ``write_pb`` as an "update time"
@@ -1100,7 +1107,7 @@ class ExistsOption(WriteOption):
             return NotImplemented
         return self._exists == other._exists
 
-    def modify_write(self, write, **unused_kwargs) -> None:
+    def modify_write(self, write, *unused_args, **unused_kwargs) -> None:
         """Modify a ``Write`` protobuf based on the state of this write option.
 
         If:
@@ -1119,7 +1126,9 @@ class ExistsOption(WriteOption):
         write._pb.current_document.CopyFrom(current_doc._pb)
 
 
-def make_retry_timeout_kwargs(retry, timeout) -> dict:
+def make_retry_timeout_kwargs(
+    retry: retries.Retry | retries.AsyncRetry | object | None, timeout: float | None
+) -> dict:
     """Helper fo API methods which take optional 'retry' / 'timeout' args."""
     kwargs = {}
 
@@ -1156,8 +1165,8 @@ def compare_timestamps(
 
 def deserialize_bundle(
     serialized: Union[str, bytes],
-    client: "google.cloud.firestore_v1.client.BaseClient",  # type: ignore
-) -> "google.cloud.firestore_bundle.FirestoreBundle":  # type: ignore
+    client: "google.cloud.firestore_v1.client.BaseClient",
+) -> "google.cloud.firestore_bundle.FirestoreBundle":
     """Inverse operation to a `FirestoreBundle` instance's `build()` method.
 
     Args:
@@ -1215,7 +1224,7 @@ def deserialize_bundle(
         # Create and add our BundleElement
         bundle_element: BundleElement
         try:
-            bundle_element: BundleElement = BundleElement.from_json(json.dumps(data))  # type: ignore
+            bundle_element = BundleElement.from_json(json.dumps(data))
         except AttributeError as e:
             # Some bad serialization formats cannot be universally deserialized.
             if e.args[0] == "'dict' object has no attribute 'find'":  # pragma: NO COVER
@@ -1239,18 +1248,22 @@ def deserialize_bundle(
 
     if "__end__" not in allowed_next_element_types:
         raise ValueError("Unexpected end to serialized FirestoreBundle")
-
+    # state machine guarantees bundle and metadata have been populated
+    bundle = cast(FirestoreBundle, bundle)
+    metadata_bundle_element = cast(BundleElement, metadata_bundle_element)
     # Now, finally add the metadata element
     bundle._add_bundle_element(
         metadata_bundle_element,
         client=client,
-        type="metadata",  # type: ignore
+        type="metadata",
     )
 
     return bundle
 
 
-def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict, None, None]:  # type: ignore
+def _parse_bundle_elements_data(
+    serialized: Union[str, bytes]
+) -> Generator[Dict, None, None]:
     """Reads through a serialized FirestoreBundle and yields JSON chunks that
     were created via `BundleElement.to_json(bundle_element)`.
 
@@ -1294,7 +1307,7 @@ def _parse_bundle_elements_data(serialized: Union[str, bytes]) -> Generator[Dict
 
 def _get_documents_from_bundle(
     bundle, *, query_name: Optional[str] = None
-) -> Generator["google.cloud.firestore.DocumentSnapshot", None, None]:  # type: ignore
+) -> Generator["DocumentSnapshot", None, None]:
     from google.cloud.firestore_bundle.bundle import _BundledDocument
 
     bundled_doc: _BundledDocument
@@ -1308,7 +1321,9 @@ def _get_document_from_bundle(
     bundle,
     *,
     document_id: str,
-) -> Optional["google.cloud.firestore.DocumentSnapshot"]:  # type: ignore
+) -> Optional["DocumentSnapshot"]:
     bundled_doc = bundle.documents.get(document_id)
     if bundled_doc:
         return bundled_doc.snapshot
+    else:
+        return None

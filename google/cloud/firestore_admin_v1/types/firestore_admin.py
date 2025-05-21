@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ from google.cloud.firestore_admin_v1.types import database as gfa_database
 from google.cloud.firestore_admin_v1.types import field as gfa_field
 from google.cloud.firestore_admin_v1.types import index as gfa_index
 from google.cloud.firestore_admin_v1.types import schedule
+from google.cloud.firestore_admin_v1.types import user_creds as gfa_user_creds
 from google.protobuf import field_mask_pb2  # type: ignore
 from google.protobuf import timestamp_pb2  # type: ignore
 
@@ -40,6 +41,14 @@ __protobuf__ = proto.module(
         "UpdateDatabaseMetadata",
         "DeleteDatabaseRequest",
         "DeleteDatabaseMetadata",
+        "CreateUserCredsRequest",
+        "GetUserCredsRequest",
+        "ListUserCredsRequest",
+        "ListUserCredsResponse",
+        "EnableUserCredsRequest",
+        "DisableUserCredsRequest",
+        "ResetUserPasswordRequest",
+        "DeleteUserCredsRequest",
         "CreateBackupScheduleRequest",
         "GetBackupScheduleRequest",
         "UpdateBackupScheduleRequest",
@@ -57,6 +66,8 @@ __protobuf__ = proto.module(
         "ListFieldsResponse",
         "ExportDocumentsRequest",
         "ImportDocumentsRequest",
+        "BulkDeleteDocumentsRequest",
+        "BulkDeleteDocumentsResponse",
         "GetBackupRequest",
         "ListBackupsRequest",
         "ListBackupsResponse",
@@ -74,11 +85,17 @@ class ListDatabasesRequest(proto.Message):
         parent (str):
             Required. A parent name of the form
             ``projects/{project_id}``
+        show_deleted (bool):
+            If true, also returns deleted resources.
     """
 
     parent: str = proto.Field(
         proto.STRING,
         number=1,
+    )
+    show_deleted: bool = proto.Field(
+        proto.BOOL,
+        number=4,
     )
 
 
@@ -101,7 +118,7 @@ class CreateDatabaseRequest(proto.Message):
             letter or a number. Must not be UUID-like
             /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
 
-            "(default)" database id is also valid.
+            "(default)" database ID is also valid.
     """
 
     parent: str = proto.Field(
@@ -224,6 +241,154 @@ class DeleteDatabaseRequest(proto.Message):
 
 class DeleteDatabaseMetadata(proto.Message):
     r"""Metadata related to the delete database operation."""
+
+
+class CreateUserCredsRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.CreateUserCreds][google.firestore.admin.v1.FirestoreAdmin.CreateUserCreds].
+
+    Attributes:
+        parent (str):
+            Required. A parent name of the form
+            ``projects/{project_id}/databases/{database_id}``
+        user_creds (google.cloud.firestore_admin_v1.types.UserCreds):
+            Required. The user creds to create.
+        user_creds_id (str):
+            Required. The ID to use for the user creds, which will
+            become the final component of the user creds's resource
+            name.
+
+            This value should be 4-63 characters. Valid characters are
+            /[a-z][0-9]-/ with first character a letter and the last a
+            letter or a number. Must not be UUID-like
+            /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
+    """
+
+    parent: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+    user_creds: gfa_user_creds.UserCreds = proto.Field(
+        proto.MESSAGE,
+        number=2,
+        message=gfa_user_creds.UserCreds,
+    )
+    user_creds_id: str = proto.Field(
+        proto.STRING,
+        number=3,
+    )
+
+
+class GetUserCredsRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.GetUserCreds][google.firestore.admin.v1.FirestoreAdmin.GetUserCreds].
+
+    Attributes:
+        name (str):
+            Required. A name of the form
+            ``projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}``
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class ListUserCredsRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.ListUserCreds][google.firestore.admin.v1.FirestoreAdmin.ListUserCreds].
+
+    Attributes:
+        parent (str):
+            Required. A parent database name of the form
+            ``projects/{project_id}/databases/{database_id}``
+    """
+
+    parent: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class ListUserCredsResponse(proto.Message):
+    r"""The response for
+    [FirestoreAdmin.ListUserCreds][google.firestore.admin.v1.FirestoreAdmin.ListUserCreds].
+
+    Attributes:
+        user_creds (MutableSequence[google.cloud.firestore_admin_v1.types.UserCreds]):
+            The user creds for the database.
+    """
+
+    user_creds: MutableSequence[gfa_user_creds.UserCreds] = proto.RepeatedField(
+        proto.MESSAGE,
+        number=1,
+        message=gfa_user_creds.UserCreds,
+    )
+
+
+class EnableUserCredsRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.EnableUserCreds][google.firestore.admin.v1.FirestoreAdmin.EnableUserCreds].
+
+    Attributes:
+        name (str):
+            Required. A name of the form
+            ``projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}``
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class DisableUserCredsRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.DisableUserCreds][google.firestore.admin.v1.FirestoreAdmin.DisableUserCreds].
+
+    Attributes:
+        name (str):
+            Required. A name of the form
+            ``projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}``
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class ResetUserPasswordRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.ResetUserPassword][google.firestore.admin.v1.FirestoreAdmin.ResetUserPassword].
+
+    Attributes:
+        name (str):
+            Required. A name of the form
+            ``projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}``
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+
+
+class DeleteUserCredsRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.DeleteUserCreds][google.firestore.admin.v1.FirestoreAdmin.DeleteUserCreds].
+
+    Attributes:
+        name (str):
+            Required. A name of the form
+            ``projects/{project_id}/databases/{database_id}/userCreds/{user_creds_id}``
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
 
 
 class CreateBackupScheduleRequest(proto.Message):
@@ -516,7 +681,7 @@ class ListFieldsRequest(proto.Message):
             overridden. To issue this query, call
             [FirestoreAdmin.ListFields][google.firestore.admin.v1.FirestoreAdmin.ListFields]
             with a filter that includes
-            ``indexConfig.usesAncestorConfig:false`` .
+            ``indexConfig.usesAncestorConfig:false`` or ``ttlConfig:*``.
         page_size (int):
             The number of results to return.
         page_token (str):
@@ -580,8 +745,9 @@ class ExportDocumentsRequest(proto.Message):
             Required. Database to export. Should be of the form:
             ``projects/{project_id}/databases/{database_id}``.
         collection_ids (MutableSequence[str]):
-            Which collection ids to export. Unspecified
-            means all collections.
+            Which collection IDs to export. Unspecified
+            means all collections. Each collection ID in
+            this list must be unique.
         output_uri_prefix (str):
             The output URI. Currently only supports Google Cloud Storage
             URIs of the form: ``gs://BUCKET_NAME[/NAMESPACE_PATH]``,
@@ -645,8 +811,9 @@ class ImportDocumentsRequest(proto.Message):
             Required. Database to import into. Should be of the form:
             ``projects/{project_id}/databases/{database_id}``.
         collection_ids (MutableSequence[str]):
-            Which collection ids to import. Unspecified
+            Which collection IDs to import. Unspecified
             means all collections included in the import.
+            Each collection ID in this list must be unique.
         input_uri_prefix (str):
             Location of the exported files. This must match the
             output_uri_prefix of an ExportDocumentsResponse from an
@@ -682,6 +849,64 @@ class ImportDocumentsRequest(proto.Message):
     )
 
 
+class BulkDeleteDocumentsRequest(proto.Message):
+    r"""The request for
+    [FirestoreAdmin.BulkDeleteDocuments][google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocuments].
+
+    When both collection_ids and namespace_ids are set, only documents
+    satisfying both conditions will be deleted.
+
+    Requests with namespace_ids and collection_ids both empty will be
+    rejected. Please use
+    [FirestoreAdmin.DeleteDatabase][google.firestore.admin.v1.FirestoreAdmin.DeleteDatabase]
+    instead.
+
+    Attributes:
+        name (str):
+            Required. Database to operate. Should be of the form:
+            ``projects/{project_id}/databases/{database_id}``.
+        collection_ids (MutableSequence[str]):
+            Optional. IDs of the collection groups to
+            delete. Unspecified means all collection groups.
+
+            Each collection group in this list must be
+            unique.
+        namespace_ids (MutableSequence[str]):
+            Optional. Namespaces to delete.
+
+            An empty list means all namespaces. This is the
+            recommended usage for databases that don't use
+            namespaces.
+
+            An empty string element represents the default
+            namespace. This should be used if the database
+            has data in non-default namespaces, but doesn't
+            want to delete from them.
+
+            Each namespace in this list must be unique.
+    """
+
+    name: str = proto.Field(
+        proto.STRING,
+        number=1,
+    )
+    collection_ids: MutableSequence[str] = proto.RepeatedField(
+        proto.STRING,
+        number=2,
+    )
+    namespace_ids: MutableSequence[str] = proto.RepeatedField(
+        proto.STRING,
+        number=3,
+    )
+
+
+class BulkDeleteDocumentsResponse(proto.Message):
+    r"""The response for
+    [FirestoreAdmin.BulkDeleteDocuments][google.firestore.admin.v1.FirestoreAdmin.BulkDeleteDocuments].
+
+    """
+
+
 class GetBackupRequest(proto.Message):
     r"""The request for
     [FirestoreAdmin.GetBackup][google.firestore.admin.v1.FirestoreAdmin.GetBackup].
@@ -712,11 +937,30 @@ class ListBackupsRequest(proto.Message):
             ``{location} = '-'`` to list backups from all locations for
             the given project. This allows listing backups from a single
             location or from all locations.
+        filter (str):
+            An expression that filters the list of returned backups.
+
+            A filter expression consists of a field name, a comparison
+            operator, and a value for filtering. The value must be a
+            string, a number, or a boolean. The comparison operator must
+            be one of: ``<``, ``>``, ``<=``, ``>=``, ``!=``, ``=``, or
+            ``:``. Colon ``:`` is the contains operator. Filter rules
+            are not case sensitive.
+
+            The following fields in the
+            [Backup][google.firestore.admin.v1.Backup] are eligible for
+            filtering:
+
+            -  ``database_uid`` (supports ``=`` only)
     """
 
     parent: str = proto.Field(
         proto.STRING,
         number=1,
+    )
+    filter: str = proto.Field(
+        proto.STRING,
+        number=2,
     )
 
 
@@ -769,7 +1013,7 @@ class DeleteBackupRequest(proto.Message):
 
 class RestoreDatabaseRequest(proto.Message):
     r"""The request message for
-    [FirestoreAdmin.RestoreDatabase][google.firestore.admin.v1.RestoreDatabase].
+    [FirestoreAdmin.RestoreDatabase][google.firestore.admin.v1.FirestoreAdmin.RestoreDatabase].
 
     Attributes:
         parent (str):
@@ -778,7 +1022,7 @@ class RestoreDatabaseRequest(proto.Message):
         database_id (str):
             Required. The ID to use for the database, which will become
             the final component of the database's resource name. This
-            database id must not be associated with an existing
+            database ID must not be associated with an existing
             database.
 
             This value should be 4-63 characters. Valid characters are
@@ -786,13 +1030,23 @@ class RestoreDatabaseRequest(proto.Message):
             letter or a number. Must not be UUID-like
             /[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}/.
 
-            "(default)" database id is also valid.
+            "(default)" database ID is also valid.
         backup (str):
             Required. Backup to restore from. Must be from the same
             project as the parent.
 
+            The restored database will be created in the same location
+            as the source backup.
+
             Format is:
             ``projects/{project_id}/locations/{location}/backups/{backup}``
+        encryption_config (google.cloud.firestore_admin_v1.types.Database.EncryptionConfig):
+            Optional. Encryption configuration for the restored
+            database.
+
+            If this field is not specified, the restored database will
+            use the same encryption configuration as the backup, namely
+            [use_source_encryption][google.firestore.admin.v1.Database.EncryptionConfig.use_source_encryption].
     """
 
     parent: str = proto.Field(
@@ -806,6 +1060,11 @@ class RestoreDatabaseRequest(proto.Message):
     backup: str = proto.Field(
         proto.STRING,
         number=3,
+    )
+    encryption_config: gfa_database.Database.EncryptionConfig = proto.Field(
+        proto.MESSAGE,
+        number=9,
+        message=gfa_database.Database.EncryptionConfig,
     )
 
 

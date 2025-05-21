@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -43,12 +43,12 @@ class Index(proto.Message):
             specified allow queries against a collection
             that is the child of a specific document,
             specified at query time, and that has the same
-            collection id.
+            collection ID.
 
             Indexes with a collection group query scope
             specified allow queries against all collections
             descended from a specific document, specified at
-            query time, and that have the same collection id
+            query time, and that have the same collection ID
             as this index.
         api_scope (google.cloud.firestore_admin_v1.types.Index.ApiScope):
             The API scope supported by this index.
@@ -69,6 +69,22 @@ class Index(proto.Message):
             associated field.
         state (google.cloud.firestore_admin_v1.types.Index.State):
             Output only. The serving state of the index.
+        density (google.cloud.firestore_admin_v1.types.Index.Density):
+            Immutable. The density configuration of the
+            index.
+        multikey (bool):
+            Optional. Whether the index is multikey. By default, the
+            index is not multikey. For non-multikey indexes, none of the
+            paths in the index definition reach or traverse an array,
+            except via an explicit array index. For multikey indexes, at
+            most one of the paths in the index definition reach or
+            traverse an array, except via an explicit array index.
+            Violations will result in errors.
+
+            Note this field only applies to index with
+            MONGODB_COMPATIBLE_API ApiScope.
+        shard_count (int):
+            Optional. The number of shards for the index.
     """
 
     class QueryScope(proto.Enum):
@@ -84,11 +100,11 @@ class Index(proto.Message):
                 specified allow queries against a collection
                 that is the child of a specific document,
                 specified at query time, and that has the
-                collection id specified by the index.
+                collection ID specified by the index.
             COLLECTION_GROUP (2):
                 Indexes with a collection group query scope
                 specified allow queries against all collections
-                that has the collection id specified by the
+                that has the collection ID specified by the
                 index.
             COLLECTION_RECURSIVE (3):
                 Include all the collections's ancestor in the
@@ -111,9 +127,12 @@ class Index(proto.Message):
             DATASTORE_MODE_API (1):
                 The index can only be used by the Firestore
                 in Datastore Mode query API.
+            MONGODB_COMPATIBLE_API (2):
+                The index can only be used by the MONGODB_COMPATIBLE_API.
         """
         ANY_API = 0
         DATASTORE_MODE_API = 1
+        MONGODB_COMPATIBLE_API = 2
 
     class State(proto.Enum):
         r"""The state of an index. During index creation, an index will be in
@@ -152,6 +171,37 @@ class Index(proto.Message):
         READY = 2
         NEEDS_REPAIR = 3
 
+    class Density(proto.Enum):
+        r"""The density configuration for the index.
+
+        Values:
+            DENSITY_UNSPECIFIED (0):
+                Unspecified. It will use database default
+                setting. This value is input only.
+            SPARSE_ALL (1):
+                In order for an index entry to be added, the document must
+                contain all fields specified in the index.
+
+                This is the only allowed value for indexes having ApiScope
+                ``ANY_API`` and ``DATASTORE_MODE_API``.
+            SPARSE_ANY (2):
+                In order for an index entry to be added, the
+                document must contain at least one of the fields
+                specified in the index. Non-existent fields are
+                treated as having a NULL value when generating
+                index entries.
+            DENSE (3):
+                An index entry will be added regardless of
+                whether the document contains any of the fields
+                specified in the index. Non-existent fields are
+                treated as having a NULL value when generating
+                index entries.
+        """
+        DENSITY_UNSPECIFIED = 0
+        SPARSE_ALL = 1
+        SPARSE_ANY = 2
+        DENSE = 3
+
     class IndexField(proto.Message):
         r"""A field in an index. The field_path describes which field is
         indexed, the value_mode describes how the field value is indexed.
@@ -180,7 +230,7 @@ class Index(proto.Message):
                 This field is a member of `oneof`_ ``value_mode``.
             vector_config (google.cloud.firestore_admin_v1.types.Index.IndexField.VectorConfig):
                 Indicates that this field supports nearest
-                neighbors and distance operations on vector.
+                neighbor and distance operations on vector.
 
                 This field is a member of `oneof`_ ``value_mode``.
         """
@@ -297,6 +347,19 @@ class Index(proto.Message):
         proto.ENUM,
         number=4,
         enum=State,
+    )
+    density: Density = proto.Field(
+        proto.ENUM,
+        number=6,
+        enum=Density,
+    )
+    multikey: bool = proto.Field(
+        proto.BOOL,
+        number=7,
+    )
+    shard_count: int = proto.Field(
+        proto.INT32,
+        number=8,
     )
 
 

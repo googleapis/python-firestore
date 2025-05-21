@@ -14,19 +14,18 @@
 
 import concurrent.futures
 import datetime
-import mock
 import typing
 
-import google
-
-from google.cloud.firestore_v1.async_client import AsyncClient
-from google.cloud.firestore_v1.base_client import BaseClient
-from google.cloud.firestore_v1.document import DocumentReference, DocumentSnapshot
-from google.cloud._helpers import _datetime_to_pb_timestamp, UTC  # type: ignore
-from google.cloud.firestore_v1._helpers import build_timestamp
-from google.cloud.firestore_v1.client import Client
+import mock
+from google.cloud._helpers import UTC, _datetime_to_pb_timestamp  # type: ignore
 from google.protobuf.timestamp_pb2 import Timestamp  # type: ignore
 
+import google
+from google.cloud.firestore_v1._helpers import build_timestamp
+from google.cloud.firestore_v1.async_client import AsyncClient
+from google.cloud.firestore_v1.base_client import BaseClient
+from google.cloud.firestore_v1.client import Client
+from google.cloud.firestore_v1.document import DocumentReference, DocumentSnapshot
 
 DEFAULT_TEST_PROJECT = "project-project"
 
@@ -77,11 +76,20 @@ def make_async_aggregation_query(*args, **kw):
     return AsyncAggregationQuery(*args, **kw)
 
 
-def make_aggregation_query_response(aggregations, read_time=None, transaction=None):
-    from google.cloud.firestore_v1.types import firestore
+def make_aggregation_query_response(
+    aggregations,
+    read_time=None,
+    transaction=None,
+    explain_metrics=None,
+):
     from google.cloud._helpers import _datetime_to_pb_timestamp
+
     from google.cloud.firestore_v1 import _helpers
-    from google.cloud.firestore_v1.types import aggregation_result
+    from google.cloud.firestore_v1.types import (
+        aggregation_result,
+        firestore,
+        query_profile,
+    )
 
     if read_time is None:
         now = datetime.datetime.now(tz=datetime.timezone.utc)
@@ -100,6 +108,9 @@ def make_aggregation_query_response(aggregations, read_time=None, transaction=No
     if transaction is not None:
         kwargs["transaction"] = transaction
 
+    if explain_metrics is not None:
+        kwargs["explain_metrics"] = query_profile.ExplainMetrics(explain_metrics)
+
     return firestore.RunAggregationQueryResponse(**kwargs)
 
 
@@ -107,6 +118,12 @@ def make_vector_query(*args, **kw):
     from google.cloud.firestore_v1.vector_query import VectorQuery
 
     return VectorQuery(*args, **kw)
+
+
+def make_async_vector_query(*args, **kw):
+    from google.cloud.firestore_v1.async_vector_query import AsyncVectorQuery
+
+    return AsyncVectorQuery(*args, **kw)
 
 
 def build_test_timestamp(

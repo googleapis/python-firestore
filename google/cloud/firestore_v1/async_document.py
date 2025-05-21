@@ -13,23 +13,23 @@
 # limitations under the License.
 
 """Classes for representing documents for the Google Cloud Firestore API."""
+from __future__ import annotations
 import datetime
 import logging
+from typing import AsyncGenerator, Iterable
 
 from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
 from google.cloud._helpers import _datetime_to_pb_timestamp  # type: ignore
+from google.protobuf.timestamp_pb2 import Timestamp
 
+from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.base_document import (
     BaseDocumentReference,
     DocumentSnapshot,
     _first_write_result,
 )
-from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.types import write
-from google.protobuf.timestamp_pb2 import Timestamp
-from typing import AsyncGenerator, Iterable
-
 
 logger = logging.getLogger(__name__)
 
@@ -65,8 +65,8 @@ class AsyncDocumentReference(BaseDocumentReference):
     async def create(
         self,
         document_data: dict,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Create the current document in the Firestore database.
 
@@ -95,8 +95,8 @@ class AsyncDocumentReference(BaseDocumentReference):
         self,
         document_data: dict,
         merge: bool = False,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Replace the current document in the Firestore database.
 
@@ -134,9 +134,9 @@ class AsyncDocumentReference(BaseDocumentReference):
     async def update(
         self,
         field_updates: dict,
-        option: _helpers.WriteOption = None,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        option: _helpers.WriteOption | None = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> write.WriteResult:
         """Update an existing document in the Firestore database.
 
@@ -291,9 +291,9 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def delete(
         self,
-        option: _helpers.WriteOption = None,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        option: _helpers.WriteOption | None = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> Timestamp:
         """Delete the current document in the Firestore database.
 
@@ -325,10 +325,10 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def get(
         self,
-        field_paths: Iterable[str] = None,
+        field_paths: Iterable[str] | None = None,
         transaction=None,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
@@ -394,9 +394,9 @@ class AsyncDocumentReference(BaseDocumentReference):
 
     async def collections(
         self,
-        page_size: int = None,
-        retry: retries.AsyncRetry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
+        page_size: int | None = None,
+        retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
+        timeout: float | None = None,
     ) -> AsyncGenerator:
         """List subcollections of the current document.
 

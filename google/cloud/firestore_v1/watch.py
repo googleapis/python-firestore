@@ -13,21 +13,21 @@
 # limitations under the License.
 
 import collections
-from enum import Enum
 import functools
 import logging
 import threading
+from enum import Enum
 
-from google.api_core.bidi import ResumableBidiRpc
-from google.api_core.bidi import BackgroundConsumer
-from google.api_core import exceptions
 import grpc  # type: ignore
+from google.api_core import exceptions
+from google.api_core.bidi import BackgroundConsumer, ResumableBidiRpc
 
-from google.cloud.firestore_v1.types.firestore import ListenRequest
-from google.cloud.firestore_v1.types.firestore import Target
-from google.cloud.firestore_v1.types.firestore import TargetChange
 from google.cloud.firestore_v1 import _helpers
-
+from google.cloud.firestore_v1.types.firestore import (
+    ListenRequest,
+    Target,
+    TargetChange,
+)
 
 TargetChangeType = TargetChange.TargetChangeType
 
@@ -333,9 +333,13 @@ class Watch(object):
             if self.is_active:
                 _LOGGER.debug("Stopping consumer.")
                 self._consumer.stop()
+            self._consumer._on_response = None
             self._consumer = None
 
+            self._snapshot_callback = None
             self._rpc.close()
+            self._rpc._initial_request = None
+            self._rpc._callbacks = []
             self._rpc = None
             self._closed = True
             _LOGGER.debug("Finished stopping manager.")
@@ -436,6 +440,9 @@ class Watch(object):
             proto(`google.cloud.firestore_v1.types.ListenResponse`):
                 Callback method that receives a object to
         """
+        if self._closing.locked():
+            # don't process on_snapshot responses while spinning down, to prevent deadlock
+            return
         if proto is None:
             self.close()
             return

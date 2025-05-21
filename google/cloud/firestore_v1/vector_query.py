@@ -14,18 +14,29 @@
 
 """Classes for representing vector queries for the Google Cloud Firestore API.
 """
+from __future__ import annotations
 
-from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from typing import Iterable, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Generator, Optional, TypeVar, Union
+
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
-from google.cloud.firestore_v1.base_document import DocumentSnapshot
-from google.cloud.firestore_v1 import document
+
+from google.cloud.firestore_v1.query_results import QueryResultsList
 from google.cloud.firestore_v1.base_query import (
     BaseQuery,
-    _query_response_to_snapshot,
     _collection_group_query_response_to_snapshot,
+    _query_response_to_snapshot,
 )
+from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
+from google.cloud.firestore_v1.stream_generator import StreamGenerator
+
+# Types needed only for Type Hints
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1 import transaction
+    from google.cloud.firestore_v1.base_document import DocumentSnapshot
+    from google.cloud.firestore_v1.query_profile import ExplainMetrics
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
 
 TVectorQuery = TypeVar("TVectorQuery", bound="VectorQuery")
 
@@ -46,9 +57,11 @@ class VectorQuery(BaseVectorQuery):
     def get(
         self,
         transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
+        retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
-    ) -> Iterable[DocumentSnapshot]:
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> QueryResultsList[DocumentSnapshot]:
         """Runs the vector query.
 
         This sends a ``RunQuery`` RPC and returns a list of document messages.
@@ -64,20 +77,38 @@ class VectorQuery(BaseVectorQuery):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Returns:
-            list: The vector query results.
+            QueryResultsList[DocumentSnapshot]: The vector query results.
         """
-        result = self.stream(transaction=transaction, retry=retry, timeout=timeout)
+        explain_metrics: ExplainMetrics | None = None
 
-        return list(result)
+        result = self.stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+            explain_options=explain_options,
+        )
+        result_list = list(result)
 
-    def _get_stream_iterator(self, transaction, retry, timeout):
+        if explain_options is None:
+            explain_metrics = None
+        else:
+            explain_metrics = result.get_explain_metrics()
+
+        return QueryResultsList(result_list, explain_options, explain_metrics)
+
+    def _get_stream_iterator(self, transaction, retry, timeout, explain_options=None):
         """Helper method for :meth:`stream`."""
         request, expected_prefix, kwargs = self._prep_stream(
             transaction,
             retry,
             timeout,
+            explain_options,
         )
 
         response_iterator = self._client._firestore_api.run_query(
@@ -88,15 +119,16 @@ class VectorQuery(BaseVectorQuery):
 
         return response_iterator, expected_prefix
 
-    def stream(
+    def _make_stream(
         self,
-        transaction=None,
-        retry: retries.Retry = gapic_v1.method.DEFAULT,
-        timeout: float = None,
-    ) -> Iterable[document.DocumentSnapshot]:
+        transaction: Optional["transaction.Transaction"] = None,
+        retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> Generator[DocumentSnapshot, Any, Optional[ExplainMetrics]]:
         """Reads the documents in the collection that match this query.
 
-        This sends a ``RunQuery`` RPC and then returns an iterator which
+        This sends a ``RunQuery`` RPC and then returns a generator which
         consumes each document returned in the stream of ``RunQueryResponse``
         messages.
 
@@ -108,19 +140,31 @@ class VectorQuery(BaseVectorQuery):
             transaction
                 (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
-            retry (google.api_core.retry.Retry): Designation of what errors, if any,
-                should be retried.  Defaults to a system-specified policy.
-            timeout (float): The timeout for this request.  Defaults to a
-                system-specified value.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optional[float]): The timeout for this request.  Defaults
+            to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
 
         Yields:
-            :class:`~google.cloud.firestore_v1.document.DocumentSnapshot`:
+            DocumentSnapshot:
             The next document that fulfills the query.
+
+        Returns:
+            ([google.cloud.firestore_v1.types.query_profile.ExplainMetrtics | None]):
+            The results of query profiling, if received from the service.
         """
+        metrics: ExplainMetrics | None = None
+
         response_iterator, expected_prefix = self._get_stream_iterator(
             transaction,
             retry,
             timeout,
+            explain_options,
         )
 
         while True:
@@ -128,6 +172,9 @@ class VectorQuery(BaseVectorQuery):
 
             if response is None:  # EOI
                 break
+
+            if metrics is None and response.explain_metrics:
+                metrics = response.explain_metrics
 
             if self._nested_query._all_descendants:
                 snapshot = _collection_group_query_response_to_snapshot(
@@ -139,3 +186,48 @@ class VectorQuery(BaseVectorQuery):
                 )
             if snapshot is not None:
                 yield snapshot
+
+        return metrics
+
+    def stream(
+        self,
+        transaction: Optional["transaction.Transaction"] = None,
+        retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
+        timeout: Optional[float] = None,
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> StreamGenerator[DocumentSnapshot]:
+        """Reads the documents in the collection that match this query.
+
+        This sends a ``RunQuery`` RPC and then returns a generator which
+        consumes each document returned in the stream of ``RunQueryResponse``
+        messages.
+
+        If a ``transaction`` is used and it already has write operations
+        added, this method cannot be used (i.e. read-after-write is not
+        allowed).
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+            retry (Optional[google.api_core.retry.Retry]): Designation of what
+                errors, if any, should be retried.  Defaults to a
+                system-specified policy.
+            timeout (Optinal[float]): The timeout for this request.  Defaults
+            to a system-specified value.
+            explain_options
+                (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
+
+        Returns:
+            `StreamGenerator[DocumentSnapshot]`: A generator of the query results.
+        """
+        inner_generator = self._make_stream(
+            transaction=transaction,
+            retry=retry,
+            timeout=timeout,
+            explain_options=explain_options,
+        )
+        return StreamGenerator(inner_generator, explain_options)

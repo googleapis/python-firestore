@@ -5,6 +5,92 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.20.2](https://github.com/googleapis/python-firestore/compare/v2.20.1...v2.20.2) (2025-04-14)
+
+
+### Bug Fixes
+
+* Allow Protobuf 6.x ([#1028](https://github.com/googleapis/python-firestore/issues/1028)) ([13d5c6d](https://github.com/googleapis/python-firestore/commit/13d5c6d18a3836e3c90b0b63360cb0394fa0375b))
+* Remove setup.cfg configuration for creating universal wheels ([#1030](https://github.com/googleapis/python-firestore/issues/1030)) ([727098b](https://github.com/googleapis/python-firestore/commit/727098b4abf4a616f3ccce4b2476ab930fd5bf5c))
+
+## [2.20.1](https://github.com/googleapis/python-firestore/compare/v2.20.0...v2.20.1) (2025-02-26)
+
+
+### Bug Fixes
+
+* Bump default deadline on CreateDatabase and RestoreDatabase to 2 minutes ([#975](https://github.com/googleapis/python-firestore/issues/975)) ([995fad6](https://github.com/googleapis/python-firestore/commit/995fad68d7e0da84cc67219d8990397d8329421b))
+* Client-side path validation for batch.update ([#1021](https://github.com/googleapis/python-firestore/issues/1021)) ([3b7595b](https://github.com/googleapis/python-firestore/commit/3b7595b9e3ba4eab1c5a68dd6be3c330247ee18d))
+* Watch thread deadlock on exit ([#1014](https://github.com/googleapis/python-firestore/issues/1014)) ([c47677a](https://github.com/googleapis/python-firestore/commit/c47677a190fcbca88e8c14c81ffb0c40d806f511))
+
+## [2.20.0](https://github.com/googleapis/python-firestore/compare/v2.19.0...v2.20.0) (2025-01-13)
+
+
+### Features
+
+* Support not_equal queries for none and nan ([#988](https://github.com/googleapis/python-firestore/issues/988)) ([cbaf4ae](https://github.com/googleapis/python-firestore/commit/cbaf4ae479a4ac3a0174d0f8b6f326e218e6eacb))
+
+
+### Bug Fixes
+
+* Clean up resources on Watch close ([#1004](https://github.com/googleapis/python-firestore/issues/1004)) ([6d68dcd](https://github.com/googleapis/python-firestore/commit/6d68dcd44ad5f8be1c555deb0efa0d644a4a7e9d))
+* Populate transaction attributes after commit ([#977](https://github.com/googleapis/python-firestore/issues/977)) ([aa3c0a3](https://github.com/googleapis/python-firestore/commit/aa3c0a384efceed6bb4b368559bd8875593bccc1))
+
+## [2.19.0](https://github.com/googleapis/python-firestore/compare/v2.18.0...v2.19.0) (2024-09-20)
+
+
+### Features
+
+* Add Database.SourceInfo and Database.source_info (information about database provenance, specifically for restored databases) ([#963](https://github.com/googleapis/python-firestore/issues/963)) ([4e15714](https://github.com/googleapis/python-firestore/commit/4e15714cd70b0577d1450b081ad26a8678fe1a9e))
+* Query profiling part 1: synchronous ([#938](https://github.com/googleapis/python-firestore/issues/938)) ([1614b3f](https://github.com/googleapis/python-firestore/commit/1614b3f15311f9eee39c8b72b8dc81f259498dcb))
+* Query profiling part 2: asynchronous ([#961](https://github.com/googleapis/python-firestore/issues/961)) ([060a3ef](https://github.com/googleapis/python-firestore/commit/060a3efa7df4eb6b4ef0701a246ff630dde432c7))
+
+## [2.18.0](https://github.com/googleapis/python-firestore/compare/v2.17.2...v2.18.0) (2024-08-26)
+
+
+### Features
+
+* Support returning computed distance and set distance thresholds on VectorQueries ([#960](https://github.com/googleapis/python-firestore/issues/960)) ([5c2192d](https://github.com/googleapis/python-firestore/commit/5c2192d3c66f6b6a11f122affbfb29556a77a535))
+
+
+### Bug Fixes
+
+* Remove custom retry loop ([#948](https://github.com/googleapis/python-firestore/issues/948)) ([04bb206](https://github.com/googleapis/python-firestore/commit/04bb20628a8e68a0ad86433c18c37734b6f282c8))
+
+## [2.17.2](https://github.com/googleapis/python-firestore/compare/v2.17.1...v2.17.2) (2024-08-13)
+
+
+### Bug Fixes
+
+* Allow protobuf 5.x; require protobuf &gt;=3.20.2 ([#950](https://github.com/googleapis/python-firestore/issues/950)) ([6f86506](https://github.com/googleapis/python-firestore/commit/6f86506030ba02b8d9b3699cf9d66d6fa7df1e91))
+* Support async vector search from a collection ([#949](https://github.com/googleapis/python-firestore/issues/949)) ([6446e29](https://github.com/googleapis/python-firestore/commit/6446e294b83fe202c83e3da1a66b9981f8bbe66a))
+
+## [2.17.1](https://github.com/googleapis/python-firestore/compare/v2.17.0...v2.17.1) (2024-08-09)
+
+
+### Bug Fixes
+
+* Allow protobuf 5.x ([#919](https://github.com/googleapis/python-firestore/issues/919)) ([3a13bf9](https://github.com/googleapis/python-firestore/commit/3a13bf960cc1f463843b6372d2e5eb0ab4c2e75f))
+
+## [2.17.0](https://github.com/googleapis/python-firestore/compare/v2.16.1...v2.17.0) (2024-07-12)
+
+
+### Features
+
+* Support async Vector Search ([#901](https://github.com/googleapis/python-firestore/issues/901)) ([2de1620](https://github.com/googleapis/python-firestore/commit/2de16209409c9d9ba41d3444400e6a39ee1b2936))
+* Use generator for stream results ([#926](https://github.com/googleapis/python-firestore/issues/926)) ([3e5df35](https://github.com/googleapis/python-firestore/commit/3e5df3565c9fc6f73f60207a46ebe1cd70c4df8d))
+
+## [2.16.1](https://github.com/googleapis/python-firestore/compare/v2.16.0...v2.16.1) (2024-04-17)
+
+
+### Bug Fixes
+
+* __repr__ method in vector.py ([#903](https://github.com/googleapis/python-firestore/issues/903)) ([6886f2b](https://github.com/googleapis/python-firestore/commit/6886f2bbfb8e2320be58ba1b129733c8f2c5f8ba))
+
+
+### Documentation
+
+* Allow 14 week backup retention for Firestore daily backups ([#899](https://github.com/googleapis/python-firestore/issues/899)) ([9521ded](https://github.com/googleapis/python-firestore/commit/9521deddc5a4b16956f37136f84928ac99688022))
+
 ## [2.16.0](https://github.com/googleapis/python-firestore/compare/v2.15.0...v2.16.0) (2024-04-02)
 
 

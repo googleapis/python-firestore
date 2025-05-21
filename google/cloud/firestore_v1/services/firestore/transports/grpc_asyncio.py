@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,15 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+import inspect
+import json
+import pickle
+import logging as std_logging
 import warnings
 from typing import Awaitable, Callable, Dict, Optional, Sequence, Tuple, Union
 
 from google.api_core import gapic_v1
 from google.api_core import grpc_helpers_async
+from google.api_core import exceptions as core_exceptions
+from google.api_core import retry_async as retries
 from google.auth import credentials as ga_credentials  # type: ignore
 from google.auth.transport.grpc import SslCredentials  # type: ignore
+from google.protobuf.json_format import MessageToJson
+import google.protobuf.message
 
 import grpc  # type: ignore
+import proto  # type: ignore
 from grpc.experimental import aio  # type: ignore
 
 from google.cloud.firestore_v1.types import document
@@ -32,6 +41,82 @@ from google.longrunning import operations_pb2  # type: ignore
 from google.protobuf import empty_pb2  # type: ignore
 from .base import FirestoreTransport, DEFAULT_CLIENT_INFO
 from .grpc import FirestoreGrpcTransport
+
+try:
+    from google.api_core import client_logging  # type: ignore
+
+    CLIENT_LOGGING_SUPPORTED = True  # pragma: NO COVER
+except ImportError:  # pragma: NO COVER
+    CLIENT_LOGGING_SUPPORTED = False
+
+_LOGGER = std_logging.getLogger(__name__)
+
+
+class _LoggingClientAIOInterceptor(
+    grpc.aio.UnaryUnaryClientInterceptor
+):  # pragma: NO COVER
+    async def intercept_unary_unary(self, continuation, client_call_details, request):
+        logging_enabled = CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+            std_logging.DEBUG
+        )
+        if logging_enabled:  # pragma: NO COVER
+            request_metadata = client_call_details.metadata
+            if isinstance(request, proto.Message):
+                request_payload = type(request).to_json(request)
+            elif isinstance(request, google.protobuf.message.Message):
+                request_payload = MessageToJson(request)
+            else:
+                request_payload = f"{type(request).__name__}: {pickle.dumps(request)}"
+
+            request_metadata = {
+                key: value.decode("utf-8") if isinstance(value, bytes) else value
+                for key, value in request_metadata
+            }
+            grpc_request = {
+                "payload": request_payload,
+                "requestMethod": "grpc",
+                "metadata": dict(request_metadata),
+            }
+            _LOGGER.debug(
+                f"Sending request for {client_call_details.method}",
+                extra={
+                    "serviceName": "google.firestore.v1.Firestore",
+                    "rpcName": str(client_call_details.method),
+                    "request": grpc_request,
+                    "metadata": grpc_request["metadata"],
+                },
+            )
+        response = await continuation(client_call_details, request)
+        if logging_enabled:  # pragma: NO COVER
+            response_metadata = await response.trailing_metadata()
+            # Convert gRPC metadata `<class 'grpc.aio._metadata.Metadata'>` to list of tuples
+            metadata = (
+                dict([(k, str(v)) for k, v in response_metadata])
+                if response_metadata
+                else None
+            )
+            result = await response
+            if isinstance(result, proto.Message):
+                response_payload = type(result).to_json(result)
+            elif isinstance(result, google.protobuf.message.Message):
+                response_payload = MessageToJson(result)
+            else:
+                response_payload = f"{type(result).__name__}: {pickle.dumps(result)}"
+            grpc_response = {
+                "payload": response_payload,
+                "metadata": metadata,
+                "status": "OK",
+            }
+            _LOGGER.debug(
+                f"Received response to rpc {client_call_details.method}.",
+                extra={
+                    "serviceName": "google.firestore.v1.Firestore",
+                    "rpcName": str(client_call_details.method),
+                    "response": grpc_response,
+                    "metadata": grpc_response["metadata"],
+                },
+            )
+        return response
 
 
 class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
@@ -78,7 +163,6 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 the credentials from the environment.
             credentials_file (Optional[str]): A file with credentials that can
                 be loaded with :func:`google.auth.load_credentials_from_file`.
-                This argument is ignored if ``channel`` is provided.
             scopes (Optional[Sequence[str]]): A optional list of scopes needed for this
                 service. These are only used when credentials are not specified and
                 are passed to :func:`google.auth.default`.
@@ -108,7 +192,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         credentials: Optional[ga_credentials.Credentials] = None,
         credentials_file: Optional[str] = None,
         scopes: Optional[Sequence[str]] = None,
-        channel: Optional[aio.Channel] = None,
+        channel: Optional[Union[aio.Channel, Callable[..., aio.Channel]]] = None,
         api_mtls_endpoint: Optional[str] = None,
         client_cert_source: Optional[Callable[[], Tuple[bytes, bytes]]] = None,
         ssl_channel_credentials: Optional[grpc.ChannelCredentials] = None,
@@ -128,15 +212,18 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 credentials identify the application to the service; if none
                 are specified, the client will attempt to ascertain the
                 credentials from the environment.
-                This argument is ignored if ``channel`` is provided.
+                This argument is ignored if a ``channel`` instance is provided.
             credentials_file (Optional[str]): A file with credentials that can
                 be loaded with :func:`google.auth.load_credentials_from_file`.
-                This argument is ignored if ``channel`` is provided.
+                This argument is ignored if a ``channel`` instance is provided.
             scopes (Optional[Sequence[str]]): A optional list of scopes needed for this
                 service. These are only used when credentials are not specified and
                 are passed to :func:`google.auth.default`.
-            channel (Optional[aio.Channel]): A ``Channel`` instance through
-                which to make calls.
+            channel (Optional[Union[aio.Channel, Callable[..., aio.Channel]]]):
+                A ``Channel`` instance through which to make calls, or a Callable
+                that constructs and returns one. If set to None, ``self.create_channel``
+                is used to create the channel. If a Callable is given, it will be called
+                with the same arguments as used in ``self.create_channel``.
             api_mtls_endpoint (Optional[str]): Deprecated. The mutual TLS endpoint.
                 If provided, it overrides the ``host`` argument and tries to create
                 a mutual TLS channel with client SSL credentials from
@@ -146,11 +233,11 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 private key bytes, both in PEM format. It is ignored if
                 ``api_mtls_endpoint`` is None.
             ssl_channel_credentials (grpc.ChannelCredentials): SSL credentials
-                for the grpc channel. It is ignored if ``channel`` is provided.
+                for the grpc channel. It is ignored if a ``channel`` instance is provided.
             client_cert_source_for_mtls (Optional[Callable[[], Tuple[bytes, bytes]]]):
                 A callback to provide client certificate bytes and private key bytes,
                 both in PEM format. It is used to configure a mutual TLS channel. It is
-                ignored if ``channel`` or ``ssl_channel_credentials`` is provided.
+                ignored if a ``channel`` instance or ``ssl_channel_credentials`` is provided.
             quota_project_id (Optional[str]): An optional project to use for billing
                 and quota.
             client_info (google.api_core.gapic_v1.client_info.ClientInfo):
@@ -176,9 +263,10 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         if client_cert_source:
             warnings.warn("client_cert_source is deprecated", DeprecationWarning)
 
-        if channel:
+        if isinstance(channel, aio.Channel):
             # Ignore credentials if a channel was passed.
-            credentials = False
+            credentials = None
+            self._ignore_credentials = True
             # If a channel was explicitly provided, set it.
             self._grpc_channel = channel
             self._ssl_channel_credentials = None
@@ -216,7 +304,9 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         )
 
         if not self._grpc_channel:
-            self._grpc_channel = type(self).create_channel(
+            # initialize with the provided callable or the default channel
+            channel_init = channel or type(self).create_channel
+            self._grpc_channel = channel_init(
                 self._host,
                 # use the credentials which are saved
                 credentials=self._credentials,
@@ -232,7 +322,13 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
                 ],
             )
 
-        # Wrap messages. This must be done after self._grpc_channel exists
+        self._interceptor = _LoggingClientAIOInterceptor()
+        self._grpc_channel._unary_unary_interceptors.append(self._interceptor)
+        self._logged_channel = self._grpc_channel
+        self._wrap_with_kind = (
+            "kind" in inspect.signature(gapic_v1.method_async.wrap_method).parameters
+        )
+        # Wrap messages. This must be done after self._logged_channel exists
         self._prep_wrapped_messages(client_info)
 
     @property
@@ -264,7 +360,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "get_document" not in self._stubs:
-            self._stubs["get_document"] = self.grpc_channel.unary_unary(
+            self._stubs["get_document"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/GetDocument",
                 request_serializer=firestore.GetDocumentRequest.serialize,
                 response_deserializer=document.Document.deserialize,
@@ -292,7 +388,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "list_documents" not in self._stubs:
-            self._stubs["list_documents"] = self.grpc_channel.unary_unary(
+            self._stubs["list_documents"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/ListDocuments",
                 request_serializer=firestore.ListDocumentsRequest.serialize,
                 response_deserializer=firestore.ListDocumentsResponse.deserialize,
@@ -318,7 +414,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "update_document" not in self._stubs:
-            self._stubs["update_document"] = self.grpc_channel.unary_unary(
+            self._stubs["update_document"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/UpdateDocument",
                 request_serializer=firestore.UpdateDocumentRequest.serialize,
                 response_deserializer=gf_document.Document.deserialize,
@@ -344,7 +440,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "delete_document" not in self._stubs:
-            self._stubs["delete_document"] = self.grpc_channel.unary_unary(
+            self._stubs["delete_document"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/DeleteDocument",
                 request_serializer=firestore.DeleteDocumentRequest.serialize,
                 response_deserializer=empty_pb2.Empty.FromString,
@@ -376,7 +472,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "batch_get_documents" not in self._stubs:
-            self._stubs["batch_get_documents"] = self.grpc_channel.unary_stream(
+            self._stubs["batch_get_documents"] = self._logged_channel.unary_stream(
                 "/google.firestore.v1.Firestore/BatchGetDocuments",
                 request_serializer=firestore.BatchGetDocumentsRequest.serialize,
                 response_deserializer=firestore.BatchGetDocumentsResponse.deserialize,
@@ -405,7 +501,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "begin_transaction" not in self._stubs:
-            self._stubs["begin_transaction"] = self.grpc_channel.unary_unary(
+            self._stubs["begin_transaction"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/BeginTransaction",
                 request_serializer=firestore.BeginTransactionRequest.serialize,
                 response_deserializer=firestore.BeginTransactionResponse.deserialize,
@@ -432,7 +528,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "commit" not in self._stubs:
-            self._stubs["commit"] = self.grpc_channel.unary_unary(
+            self._stubs["commit"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/Commit",
                 request_serializer=firestore.CommitRequest.serialize,
                 response_deserializer=firestore.CommitResponse.deserialize,
@@ -458,7 +554,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "rollback" not in self._stubs:
-            self._stubs["rollback"] = self.grpc_channel.unary_unary(
+            self._stubs["rollback"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/Rollback",
                 request_serializer=firestore.RollbackRequest.serialize,
                 response_deserializer=empty_pb2.Empty.FromString,
@@ -484,7 +580,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "run_query" not in self._stubs:
-            self._stubs["run_query"] = self.grpc_channel.unary_stream(
+            self._stubs["run_query"] = self._logged_channel.unary_stream(
                 "/google.firestore.v1.Firestore/RunQuery",
                 request_serializer=firestore.RunQueryRequest.serialize,
                 response_deserializer=firestore.RunQueryResponse.deserialize,
@@ -527,7 +623,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "run_aggregation_query" not in self._stubs:
-            self._stubs["run_aggregation_query"] = self.grpc_channel.unary_stream(
+            self._stubs["run_aggregation_query"] = self._logged_channel.unary_stream(
                 "/google.firestore.v1.Firestore/RunAggregationQuery",
                 request_serializer=firestore.RunAggregationQueryRequest.serialize,
                 response_deserializer=firestore.RunAggregationQueryResponse.deserialize,
@@ -559,7 +655,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "partition_query" not in self._stubs:
-            self._stubs["partition_query"] = self.grpc_channel.unary_unary(
+            self._stubs["partition_query"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/PartitionQuery",
                 request_serializer=firestore.PartitionQueryRequest.serialize,
                 response_deserializer=firestore.PartitionQueryResponse.deserialize,
@@ -587,7 +683,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "write" not in self._stubs:
-            self._stubs["write"] = self.grpc_channel.stream_stream(
+            self._stubs["write"] = self._logged_channel.stream_stream(
                 "/google.firestore.v1.Firestore/Write",
                 request_serializer=firestore.WriteRequest.serialize,
                 response_deserializer=firestore.WriteResponse.deserialize,
@@ -614,7 +710,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "listen" not in self._stubs:
-            self._stubs["listen"] = self.grpc_channel.stream_stream(
+            self._stubs["listen"] = self._logged_channel.stream_stream(
                 "/google.firestore.v1.Firestore/Listen",
                 request_serializer=firestore.ListenRequest.serialize,
                 response_deserializer=firestore.ListenResponse.deserialize,
@@ -643,7 +739,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "list_collection_ids" not in self._stubs:
-            self._stubs["list_collection_ids"] = self.grpc_channel.unary_unary(
+            self._stubs["list_collection_ids"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/ListCollectionIds",
                 request_serializer=firestore.ListCollectionIdsRequest.serialize,
                 response_deserializer=firestore.ListCollectionIdsResponse.deserialize,
@@ -681,7 +777,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "batch_write" not in self._stubs:
-            self._stubs["batch_write"] = self.grpc_channel.unary_unary(
+            self._stubs["batch_write"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/BatchWrite",
                 request_serializer=firestore.BatchWriteRequest.serialize,
                 response_deserializer=firestore.BatchWriteResponse.deserialize,
@@ -707,15 +803,302 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "create_document" not in self._stubs:
-            self._stubs["create_document"] = self.grpc_channel.unary_unary(
+            self._stubs["create_document"] = self._logged_channel.unary_unary(
                 "/google.firestore.v1.Firestore/CreateDocument",
                 request_serializer=firestore.CreateDocumentRequest.serialize,
                 response_deserializer=document.Document.deserialize,
             )
         return self._stubs["create_document"]
 
+    def _prep_wrapped_messages(self, client_info):
+        """Precompute the wrapped methods, overriding the base class method to use async wrappers."""
+        self._wrapped_methods = {
+            self.get_document: self._wrap_method(
+                self.get_document,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.list_documents: self._wrap_method(
+                self.list_documents,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.update_document: self._wrap_method(
+                self.update_document,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.delete_document: self._wrap_method(
+                self.delete_document,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.batch_get_documents: self._wrap_method(
+                self.batch_get_documents,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=300.0,
+                ),
+                default_timeout=300.0,
+                client_info=client_info,
+            ),
+            self.begin_transaction: self._wrap_method(
+                self.begin_transaction,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.commit: self._wrap_method(
+                self.commit,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.rollback: self._wrap_method(
+                self.rollback,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.run_query: self._wrap_method(
+                self.run_query,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=300.0,
+                ),
+                default_timeout=300.0,
+                client_info=client_info,
+            ),
+            self.run_aggregation_query: self._wrap_method(
+                self.run_aggregation_query,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=300.0,
+                ),
+                default_timeout=300.0,
+                client_info=client_info,
+            ),
+            self.partition_query: self._wrap_method(
+                self.partition_query,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=300.0,
+                ),
+                default_timeout=300.0,
+                client_info=client_info,
+            ),
+            self.write: self._wrap_method(
+                self.write,
+                default_timeout=86400.0,
+                client_info=client_info,
+            ),
+            self.listen: self._wrap_method(
+                self.listen,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=86400.0,
+                ),
+                default_timeout=86400.0,
+                client_info=client_info,
+            ),
+            self.list_collection_ids: self._wrap_method(
+                self.list_collection_ids,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.batch_write: self._wrap_method(
+                self.batch_write,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.Aborted,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.create_document: self._wrap_method(
+                self.create_document,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=60.0,
+                ),
+                default_timeout=60.0,
+                client_info=client_info,
+            ),
+            self.cancel_operation: self._wrap_method(
+                self.cancel_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.delete_operation: self._wrap_method(
+                self.delete_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.get_operation: self._wrap_method(
+                self.get_operation,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+            self.list_operations: self._wrap_method(
+                self.list_operations,
+                default_timeout=None,
+                client_info=client_info,
+            ),
+        }
+
+    def _wrap_method(self, func, *args, **kwargs):
+        if self._wrap_with_kind:  # pragma: NO COVER
+            kwargs["kind"] = self.kind
+        return gapic_v1.method_async.wrap_method(func, *args, **kwargs)
+
     def close(self):
-        return self.grpc_channel.close()
+        return self._logged_channel.close()
+
+    @property
+    def kind(self) -> str:
+        return "grpc_asyncio"
 
     @property
     def delete_operation(
@@ -727,7 +1110,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "delete_operation" not in self._stubs:
-            self._stubs["delete_operation"] = self.grpc_channel.unary_unary(
+            self._stubs["delete_operation"] = self._logged_channel.unary_unary(
                 "/google.longrunning.Operations/DeleteOperation",
                 request_serializer=operations_pb2.DeleteOperationRequest.SerializeToString,
                 response_deserializer=None,
@@ -744,7 +1127,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "cancel_operation" not in self._stubs:
-            self._stubs["cancel_operation"] = self.grpc_channel.unary_unary(
+            self._stubs["cancel_operation"] = self._logged_channel.unary_unary(
                 "/google.longrunning.Operations/CancelOperation",
                 request_serializer=operations_pb2.CancelOperationRequest.SerializeToString,
                 response_deserializer=None,
@@ -761,7 +1144,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "get_operation" not in self._stubs:
-            self._stubs["get_operation"] = self.grpc_channel.unary_unary(
+            self._stubs["get_operation"] = self._logged_channel.unary_unary(
                 "/google.longrunning.Operations/GetOperation",
                 request_serializer=operations_pb2.GetOperationRequest.SerializeToString,
                 response_deserializer=operations_pb2.Operation.FromString,
@@ -780,7 +1163,7 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         # gRPC handles serialization and deserialization, so we just need
         # to pass in the functions for each.
         if "list_operations" not in self._stubs:
-            self._stubs["list_operations"] = self.grpc_channel.unary_unary(
+            self._stubs["list_operations"] = self._logged_channel.unary_unary(
                 "/google.longrunning.Operations/ListOperations",
                 request_serializer=operations_pb2.ListOperationsRequest.SerializeToString,
                 response_deserializer=operations_pb2.ListOperationsResponse.FromString,

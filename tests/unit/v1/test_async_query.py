@@ -17,15 +17,15 @@ import types
 import mock
 import pytest
 
-from tests.unit.v1.test__helpers import AsyncIter
-from tests.unit.v1.test__helpers import AsyncMock
-from tests.unit.v1.test_base_query import _make_query_response
-from tests.unit.v1.test_base_query import _make_cursor_pb
+from google.cloud.firestore_v1.query_profile import ExplainMetrics, QueryExplainError
+from google.cloud.firestore_v1.query_results import QueryResultsList
 from tests.unit.v1._test_helpers import (
     DEFAULT_TEST_PROJECT,
     make_async_client,
     make_async_query,
 )
+from tests.unit.v1.test__helpers import AsyncIter, AsyncMock
+from tests.unit.v1.test_base_query import _make_cursor_pb, _make_query_response
 
 
 def test_asyncquery_constructor():
@@ -41,7 +41,7 @@ def test_asyncquery_constructor():
     assert not query._all_descendants
 
 
-async def _get_helper(retry=None, timeout=None):
+async def _get_helper(retry=None, timeout=None, explain_options=None):
     from google.cloud.firestore_v1 import _helpers
 
     # Create a minimal fake GAPIC.
@@ -58,30 +58,46 @@ async def _get_helper(retry=None, timeout=None):
     _, expected_prefix = parent._parent_info()
     name = "{}/sleep".format(expected_prefix)
     data = {"snooze": 10}
+    explain_metrics = {"execution_stats": {"results_returned": 1}}
 
-    response_pb = _make_query_response(name=name, data=data)
+    response_pb = _make_query_response(
+        name=name, data=data, explain_metrics=explain_metrics
+    )
     firestore_api.run_query.return_value = AsyncIter([response_pb])
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     # Execute the query and check the response.
     query = make_async_query(parent)
-    returned = await query.get(**kwargs)
+    returned = await query.get(**kwargs, explain_options=explain_options)
 
-    assert isinstance(returned, list)
+    assert isinstance(returned, QueryResultsList)
     assert len(returned) == 1
 
     snapshot = returned[0]
     assert snapshot.reference._path == ("dee", "sleep")
     assert snapshot.to_dict() == data
 
-    # Verify the mock call.
+    if explain_options is None:
+        with pytest.raises(QueryExplainError, match="explain_options not set"):
+            returned.get_explain_metrics()
+    else:
+        actual_explain_metrics = returned.get_explain_metrics()
+        assert isinstance(actual_explain_metrics, ExplainMetrics)
+        assert actual_explain_metrics.execution_stats.results_returned == 1
+
+    # Create expected request body.
     parent_path, _ = parent._parent_info()
+    request = {
+        "parent": parent_path,
+        "structured_query": query._to_protobuf(),
+        "transaction": None,
+    }
+    if explain_options:
+        request["explain_options"] = explain_options._to_dict()
+
+    # Verify the mock call.
     firestore_api.run_query.assert_called_once_with(
-        request={
-            "parent": parent_path,
-            "structured_query": query._to_protobuf(),
-            "transaction": None,
-        },
+        request=request,
         metadata=client._rpc_metadata,
         **kwargs,
     )
@@ -160,9 +176,17 @@ async def test_asyncquery_get_limit_to_last():
     )
 
 
+@pytest.mark.asyncio
+async def test_asyncquery_get_w_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    explain_options = ExplainOptions(analyze=True)
+    await _get_helper(explain_options=explain_options)
+
+
 def test_asyncquery_sum():
-    from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.base_aggregation import SumAggregation
+    from google.cloud.firestore_v1.field_path import FieldPath
 
     client = make_async_client()
     parent = client.collection("dee")
@@ -190,8 +214,8 @@ def test_asyncquery_sum():
 
 
 def test_asyncquery_avg():
-    from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.base_aggregation import AvgAggregation
+    from google.cloud.firestore_v1.field_path import FieldPath
 
     client = make_async_client()
     parent = client.collection("dee")
@@ -235,8 +259,7 @@ async def test_asyncquery_chunkify_w_empty():
 
 @pytest.mark.asyncio
 async def test_asyncquery_chunkify_w_chunksize_lt_limit():
-    from google.cloud.firestore_v1.types import document
-    from google.cloud.firestore_v1.types import firestore
+    from google.cloud.firestore_v1.types import document, firestore
 
     client = make_async_client()
     firestore_api = AsyncMock(spec=["run_query"])
@@ -283,8 +306,7 @@ async def test_asyncquery_chunkify_w_chunksize_lt_limit():
 
 @pytest.mark.asyncio
 async def test_asyncquery_chunkify_w_chunksize_gt_limit():
-    from google.cloud.firestore_v1.types import document
-    from google.cloud.firestore_v1.types import firestore
+    from google.cloud.firestore_v1.types import document, firestore
 
     client = make_async_client()
 
@@ -314,8 +336,9 @@ async def test_asyncquery_chunkify_w_chunksize_gt_limit():
     assert [snapshot.id for snapshot in chunks[0]] == expected_ids
 
 
-async def _stream_helper(retry=None, timeout=None):
+async def _stream_helper(retry=None, timeout=None, explain_options=None):
     from google.cloud.firestore_v1 import _helpers
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
@@ -331,30 +354,51 @@ async def _stream_helper(retry=None, timeout=None):
     _, expected_prefix = parent._parent_info()
     name = "{}/sleep".format(expected_prefix)
     data = {"snooze": 10}
-    response_pb = _make_query_response(name=name, data=data)
+    if explain_options is not None:
+        explain_metrics = {"execution_stats": {"results_returned": 1}}
+    else:
+        explain_metrics = None
+    response_pb = _make_query_response(
+        name=name, data=data, explain_metrics=explain_metrics
+    )
     firestore_api.run_query.return_value = AsyncIter([response_pb])
     kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
     # Execute the query and check the response.
     query = make_async_query(parent)
 
-    get_response = query.stream(**kwargs)
+    stream_response = query.stream(**kwargs, explain_options=explain_options)
+    assert isinstance(stream_response, AsyncStreamGenerator)
 
-    assert isinstance(get_response, types.AsyncGeneratorType)
-    returned = [x async for x in get_response]
+    returned = [x async for x in stream_response]
+    await stream_response.aclose()
     assert len(returned) == 1
     snapshot = returned[0]
     assert snapshot.reference._path == ("dee", "sleep")
     assert snapshot.to_dict() == data
 
-    # Verify the mock call.
+    # Verify explain_metrics.
+    if explain_options is None:
+        with pytest.raises(QueryExplainError, match="explain_options not set"):
+            await stream_response.get_explain_metrics()
+    else:
+        explain_metrics = await stream_response.get_explain_metrics()
+        assert isinstance(explain_metrics, ExplainMetrics)
+        assert explain_metrics.execution_stats.results_returned == 1
+
+    # Create expected request body.
     parent_path, _ = parent._parent_info()
+    request = {
+        "parent": parent_path,
+        "structured_query": query._to_protobuf(),
+        "transaction": None,
+    }
+    if explain_options is not None:
+        request["explain_options"] = explain_options._to_dict()
+
+    # Verify the mock call.
     firestore_api.run_query.assert_called_once_with(
-        request={
-            "parent": parent_path,
-            "structured_query": query._to_protobuf(),
-            "transaction": None,
-        },
+        request=request,
         metadata=client._rpc_metadata,
         **kwargs,
     )
@@ -392,6 +436,8 @@ async def test_asyncquery_stream_with_limit_to_last():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_with_transaction():
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
 
@@ -417,7 +463,7 @@ async def test_asyncquery_stream_with_transaction():
     # Execute the query and check the response.
     query = make_async_query(parent)
     get_response = query.stream(transaction=transaction)
-    assert isinstance(get_response, types.AsyncGeneratorType)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]
@@ -437,6 +483,8 @@ async def test_asyncquery_stream_with_transaction():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_no_results():
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+
     # Create a minimal fake GAPIC with a dummy response.
     firestore_api = AsyncMock(spec=["run_query"])
     empty_response = _make_query_response()
@@ -452,7 +500,7 @@ async def test_asyncquery_stream_no_results():
     query = make_async_query(parent)
 
     get_response = query.stream()
-    assert isinstance(get_response, types.AsyncGeneratorType)
+    assert isinstance(get_response, AsyncStreamGenerator)
     assert [x async for x in get_response] == []
 
     # Verify the mock call.
@@ -469,6 +517,8 @@ async def test_asyncquery_stream_no_results():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_second_response_in_empty_stream():
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+
     # Create a minimal fake GAPIC with a dummy response.
     firestore_api = AsyncMock(spec=["run_query"])
     empty_response1 = _make_query_response()
@@ -485,7 +535,7 @@ async def test_asyncquery_stream_second_response_in_empty_stream():
     query = make_async_query(parent)
 
     get_response = query.stream()
-    assert isinstance(get_response, types.AsyncGeneratorType)
+    assert isinstance(get_response, AsyncStreamGenerator)
     assert [x async for x in get_response] == []
 
     # Verify the mock call.
@@ -502,6 +552,8 @@ async def test_asyncquery_stream_second_response_in_empty_stream():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_with_skipped_results():
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
 
@@ -523,7 +575,7 @@ async def test_asyncquery_stream_with_skipped_results():
     # Execute the query and check the response.
     query = make_async_query(parent)
     get_response = query.stream()
-    assert isinstance(get_response, types.AsyncGeneratorType)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]
@@ -544,6 +596,8 @@ async def test_asyncquery_stream_with_skipped_results():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_empty_after_first_response():
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
 
@@ -565,7 +619,7 @@ async def test_asyncquery_stream_empty_after_first_response():
     # Execute the query and check the response.
     query = make_async_query(parent)
     get_response = query.stream()
-    assert isinstance(get_response, types.AsyncGeneratorType)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]
@@ -586,6 +640,8 @@ async def test_asyncquery_stream_empty_after_first_response():
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_w_collection_group():
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+
     # Create a minimal fake GAPIC.
     firestore_api = AsyncMock(spec=["run_query"])
 
@@ -609,7 +665,7 @@ async def test_asyncquery_stream_w_collection_group():
     query = make_async_query(parent)
     query._all_descendants = True
     get_response = query.stream()
-    assert isinstance(get_response, types.AsyncGeneratorType)
+    assert isinstance(get_response, AsyncStreamGenerator)
     returned = [x async for x in get_response]
     assert len(returned) == 1
     snapshot = returned[0]
@@ -627,6 +683,14 @@ async def test_asyncquery_stream_w_collection_group():
         },
         metadata=client._rpc_metadata,
     )
+
+
+@pytest.mark.asyncio
+async def test_asyncquery_stream_w_explain_options():
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    explain_options = ExplainOptions(analyze=True)
+    await _stream_helper(explain_options=explain_options)
 
 
 def _make_async_collection_group(*args, **kwargs):

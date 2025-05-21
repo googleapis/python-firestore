@@ -14,43 +14,44 @@
 
 """Classes for representing collections for the Google Cloud Firestore API."""
 from __future__ import annotations
+
 import random
-
-from google.api_core import retry as retries
-
-from google.cloud.firestore_v1 import _helpers
-from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
-from google.cloud.firestore_v1.document import DocumentReference
-from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
-from google.cloud.firestore_v1.base_vector_query import BaseVectorQuery
-from google.cloud.firestore_v1.base_query import QueryType
-from google.cloud.firestore_v1.vector import Vector
-
-
 from typing import (
-    Optional,
+    TYPE_CHECKING,
     Any,
     AsyncGenerator,
+    AsyncIterator,
     Coroutine,
     Generator,
     Generic,
-    AsyncIterator,
-    Iterator,
     Iterable,
     NoReturn,
     Sequence,
     Tuple,
     Union,
-    TYPE_CHECKING,
 )
 
+from google.api_core import retry as retries
+
+from google.cloud.firestore_v1 import _helpers
+from google.cloud.firestore_v1.base_query import QueryType
 
 if TYPE_CHECKING:  # pragma: NO COVER
     # Types needed only for Type Hints
+    from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
-    from google.cloud.firestore_v1.transaction import Transaction
+    from google.cloud.firestore_v1.base_vector_query import (
+        BaseVectorQuery,
+        DistanceMeasure,
+    )
+    from google.cloud.firestore_v1.document import DocumentReference
     from google.cloud.firestore_v1.field_path import FieldPath
-    from firestore_v1.vector_query import VectorQuery
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_results import QueryResultsList
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
+    from google.cloud.firestore_v1.transaction import Transaction
+    from google.cloud.firestore_v1.vector import Vector
+    from google.cloud.firestore_v1.vector_query import VectorQuery
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -176,7 +177,7 @@ class BaseCollectionReference(Generic[QueryType]):
         self,
         document_data: dict,
         document_id: Optional[str] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Tuple[DocumentReference, dict]:
         """Shared setup for async / sync :method:`add`"""
@@ -192,7 +193,7 @@ class BaseCollectionReference(Generic[QueryType]):
         self,
         document_data: dict,
         document_id: Optional[str] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Union[Tuple[Any, Any], Coroutine[Any, Any, Tuple[Any, Any]]]:
         raise NotImplementedError
@@ -200,7 +201,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def _prep_list_documents(
         self,
         page_size: Optional[int] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async / sync :method:`list_documents`"""
@@ -222,7 +223,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def list_documents(
         self,
         page_size: Optional[int] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Union[
         Generator[DocumentReference, Any, Any], AsyncGenerator[DocumentReference, Any]
@@ -481,7 +482,7 @@ class BaseCollectionReference(Generic[QueryType]):
 
     def _prep_get_or_stream(
         self,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Tuple[Any, dict]:
         """Shared setup for async / sync :meth:`get` / :meth:`stream`"""
@@ -493,22 +494,27 @@ class BaseCollectionReference(Generic[QueryType]):
     def get(
         self,
         transaction: Optional[Transaction] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
-    ) -> Union[
-        Generator[DocumentSnapshot, Any, Any], AsyncGenerator[DocumentSnapshot, Any]
-    ]:
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> (
+        QueryResultsList[DocumentSnapshot]
+        | Coroutine[Any, Any, QueryResultsList[DocumentSnapshot]]
+    ):
         raise NotImplementedError
 
     def stream(
         self,
         transaction: Optional[Transaction] = None,
-        retry: Optional[retries.Retry] = None,
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
-    ) -> Union[Iterator[DocumentSnapshot], AsyncIterator[DocumentSnapshot]]:
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> StreamGenerator[DocumentSnapshot] | AsyncIterator[DocumentSnapshot]:
         raise NotImplementedError
 
-    def on_snapshot(self, callback) -> NoReturn:
+    def on_snapshot(self, callback):
         raise NotImplementedError
 
     def count(self, alias=None):
@@ -553,23 +559,35 @@ class BaseCollectionReference(Generic[QueryType]):
         query_vector: Union[Vector, Sequence[float]],
         limit: int,
         distance_measure: DistanceMeasure,
+        *,
+        distance_result_field: Optional[str] = None,
+        distance_threshold: Optional[float] = None,
     ) -> VectorQuery:
         """
         Finds the closest vector embeddings to the given query vector.
 
         Args:
-            vector_field(str): An indexed vector field to search upon. Only documents which contain
+            vector_field (str): An indexed vector field to search upon. Only documents which contain
                 vectors whose dimensionality match the query_vector can be returned.
             query_vector(Union[Vector, Sequence[float]]): The query vector that we are searching on. Must be a vector of no more
                 than 2048 dimensions.
             limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
-            distance_measure(:class:`DistanceMeasure`): The Distance Measure to use.
+            distance_measure (:class:`DistanceMeasure`): The Distance Measure to use.
+            distance_result_field (Optional[str]):
+                Name of the field to output the result of the vector distance calculation
+            distance_threshold (Optional[float]):
+                A threshold for which no less similar documents will be returned.
 
         Returns:
             :class`~firestore_v1.vector_query.VectorQuery`: the vector query.
         """
         return self._vector_query().find_nearest(
-            vector_field, query_vector, limit, distance_measure
+            vector_field,
+            query_vector,
+            limit,
+            distance_measure,
+            distance_result_field=distance_result_field,
+            distance_threshold=distance_threshold,
         )
 
 

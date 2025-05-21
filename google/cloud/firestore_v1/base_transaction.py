@@ -13,22 +13,29 @@
 # limitations under the License.
 
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
+from __future__ import annotations
+
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AsyncGenerator,
+    Coroutine,
+    Generator,
+    Optional,
+    Union,
+)
 
 from google.api_core import retry as retries
 
 from google.cloud.firestore_v1 import types
-from typing import Any, Coroutine, NoReturn, Optional, Union
 
-_CANT_BEGIN: str
-_CANT_COMMIT: str
-_CANT_RETRY_READ_ONLY: str
-_CANT_ROLLBACK: str
-_EXCEED_ATTEMPTS_TEMPLATE: str
-_INITIAL_SLEEP: float
-_MAX_SLEEP: float
-_MISSING_ID_TEMPLATE: str
-_MULTIPLIER: float
-_WRITE_READ_ONLY: str
+# Types needed only for Type Hints
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
+    from google.cloud.firestore_v1.document import DocumentSnapshot
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.stream_generator import StreamGenerator
+    from google.cloud.firestore_v1.types import write as write_pb
 
 
 MAX_ATTEMPTS = 5
@@ -38,12 +45,6 @@ _MISSING_ID_TEMPLATE: str = "The transaction has no transaction ID, so it cannot
 _CANT_ROLLBACK: str = _MISSING_ID_TEMPLATE.format("rolled back")
 _CANT_COMMIT: str = _MISSING_ID_TEMPLATE.format("committed")
 _WRITE_READ_ONLY: str = "Cannot perform write operation in read-only transaction."
-_INITIAL_SLEEP: float = 1.0
-"""float: Initial "max" for sleep interval. To be used in :func:`_sleep`."""
-_MAX_SLEEP: float = 30.0
-"""float: Eventual "max" sleep time. To be used in :func:`_sleep`."""
-_MULTIPLIER: float = 2.0
-"""float: Multiplier for exponential backoff. To be used in :func:`_sleep`."""
 _EXCEED_ATTEMPTS_TEMPLATE: str = "Failed to commit transaction in {:d} attempts."
 _CANT_RETRY_READ_ONLY: str = "Only read-write transactions can be retried."
 
@@ -65,7 +66,7 @@ class BaseTransaction(object):
         self._read_only = read_only
         self._id = None
 
-    def _add_write_pbs(self, write_pbs) -> NoReturn:
+    def _add_write_pbs(self, write_pbs: list[write_pb.Write]):
         raise NotImplementedError
 
     def _options_protobuf(
@@ -130,13 +131,13 @@ class BaseTransaction(object):
 
         This intended to occur on success or failure of the associated RPCs.
         """
-        self._write_pbs = []
+        self._write_pbs: list[write_pb.Write] = []
         self._id = None
 
-    def _begin(self, retry_id=None) -> NoReturn:
+    def _begin(self, retry_id=None):
         raise NotImplementedError
 
-    def _rollback(self) -> NoReturn:
+    def _rollback(self):
         raise NotImplementedError
 
     def _commit(self) -> Union[list, Coroutine[Any, Any, list]]:
@@ -145,17 +146,27 @@ class BaseTransaction(object):
     def get_all(
         self,
         references: list,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
+    ) -> (
+        Generator[DocumentSnapshot, Any, None]
+        | Coroutine[Any, Any, AsyncGenerator[DocumentSnapshot, Any]]
+    ):
         raise NotImplementedError
 
     def get(
         self,
         ref_or_query,
-        retry: retries.Retry = None,
-        timeout: float = None,
-    ) -> NoReturn:
+        retry: retries.Retry | retries.AsyncRetry | object | None = None,
+        timeout: float | None = None,
+        *,
+        explain_options: Optional[ExplainOptions] = None,
+    ) -> (
+        StreamGenerator[DocumentSnapshot]
+        | Generator[DocumentSnapshot, Any, None]
+        | Coroutine[Any, Any, AsyncGenerator[DocumentSnapshot, Any]]
+        | Coroutine[Any, Any, AsyncStreamGenerator[DocumentSnapshot]]
+    ):
         raise NotImplementedError
 
 
@@ -182,7 +193,7 @@ class _BaseTransactional(object):
         self.current_id = None
         self.retry_id = None
 
-    def _pre_commit(self, transaction, *args, **kwargs) -> NoReturn:
+    def _pre_commit(self, transaction, *args, **kwargs):
         raise NotImplementedError
 
     def __call__(self, transaction, *args, **kwargs):

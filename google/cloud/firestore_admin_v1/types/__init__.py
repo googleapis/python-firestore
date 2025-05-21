@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Copyright 2024 Google LLC
+# Copyright 2025 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,21 +23,28 @@ from .field import (
     Field,
 )
 from .firestore_admin import (
+    BulkDeleteDocumentsRequest,
+    BulkDeleteDocumentsResponse,
     CreateBackupScheduleRequest,
     CreateDatabaseMetadata,
     CreateDatabaseRequest,
     CreateIndexRequest,
+    CreateUserCredsRequest,
     DeleteBackupRequest,
     DeleteBackupScheduleRequest,
     DeleteDatabaseMetadata,
     DeleteDatabaseRequest,
     DeleteIndexRequest,
+    DeleteUserCredsRequest,
+    DisableUserCredsRequest,
+    EnableUserCredsRequest,
     ExportDocumentsRequest,
     GetBackupRequest,
     GetBackupScheduleRequest,
     GetDatabaseRequest,
     GetFieldRequest,
     GetIndexRequest,
+    GetUserCredsRequest,
     ImportDocumentsRequest,
     ListBackupSchedulesRequest,
     ListBackupSchedulesResponse,
@@ -49,6 +56,9 @@ from .firestore_admin import (
     ListFieldsResponse,
     ListIndexesRequest,
     ListIndexesResponse,
+    ListUserCredsRequest,
+    ListUserCredsResponse,
+    ResetUserPasswordRequest,
     RestoreDatabaseRequest,
     UpdateBackupScheduleRequest,
     UpdateDatabaseMetadata,
@@ -62,6 +72,7 @@ from .location import (
     LocationMetadata,
 )
 from .operation import (
+    BulkDeleteDocumentsMetadata,
     ExportDocumentsMetadata,
     ExportDocumentsResponse,
     FieldOperationMetadata,
@@ -76,26 +87,36 @@ from .schedule import (
     DailyRecurrence,
     WeeklyRecurrence,
 )
+from .user_creds import (
+    UserCreds,
+)
 
 __all__ = (
     "Backup",
     "Database",
     "Field",
+    "BulkDeleteDocumentsRequest",
+    "BulkDeleteDocumentsResponse",
     "CreateBackupScheduleRequest",
     "CreateDatabaseMetadata",
     "CreateDatabaseRequest",
     "CreateIndexRequest",
+    "CreateUserCredsRequest",
     "DeleteBackupRequest",
     "DeleteBackupScheduleRequest",
     "DeleteDatabaseMetadata",
     "DeleteDatabaseRequest",
     "DeleteIndexRequest",
+    "DeleteUserCredsRequest",
+    "DisableUserCredsRequest",
+    "EnableUserCredsRequest",
     "ExportDocumentsRequest",
     "GetBackupRequest",
     "GetBackupScheduleRequest",
     "GetDatabaseRequest",
     "GetFieldRequest",
     "GetIndexRequest",
+    "GetUserCredsRequest",
     "ImportDocumentsRequest",
     "ListBackupSchedulesRequest",
     "ListBackupSchedulesResponse",
@@ -107,6 +128,9 @@ __all__ = (
     "ListFieldsResponse",
     "ListIndexesRequest",
     "ListIndexesResponse",
+    "ListUserCredsRequest",
+    "ListUserCredsResponse",
+    "ResetUserPasswordRequest",
     "RestoreDatabaseRequest",
     "UpdateBackupScheduleRequest",
     "UpdateDatabaseMetadata",
@@ -114,6 +138,7 @@ __all__ = (
     "UpdateFieldRequest",
     "Index",
     "LocationMetadata",
+    "BulkDeleteDocumentsMetadata",
     "ExportDocumentsMetadata",
     "ExportDocumentsResponse",
     "FieldOperationMetadata",
@@ -125,4 +150,5 @@ __all__ = (
     "BackupSchedule",
     "DailyRecurrence",
     "WeeklyRecurrence",
+    "UserCreds",
 )
