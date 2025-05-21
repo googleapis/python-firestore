@@ -676,7 +676,9 @@ def _aggregation_query_stream_w_retriable_exc_helper(
     query = make_query(parent)
     aggregation_query = make_aggregation_query(query)
 
-    get_response = aggregation_query.stream(transaction=transaction, **kwargs, read_time=read_time)
+    get_response = aggregation_query.stream(
+        transaction=transaction, **kwargs, read_time=read_time
+    )
 
     assert isinstance(get_response, stream_generator.StreamGenerator)
     if expect_retry:
@@ -748,7 +750,9 @@ def test_aggregation_query_stream_w_retriable_exc_w_retry():
 
 
 def test_aggregation_query_stream_w_retriable_exc_w_read_time():
-    _aggregation_query_stream_w_retriable_exc_helper(read_time=datetime.now(tz=timezone.utc))
+    _aggregation_query_stream_w_retriable_exc_helper(
+        read_time=datetime.now(tz=timezone.utc)
+    )
 
 
 def test_aggregation_query_stream_w_retriable_exc_w_transaction():
