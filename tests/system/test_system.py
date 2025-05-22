@@ -1142,10 +1142,10 @@ def test_collection_add(client, cleanup, database):
 
 
 @pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
-@pytest.mark.parametrize(
-    "use_python_datetime", [True, False]
-)
-def test_list_collections_with_read_time(client, cleanup, database, use_python_datetime):
+@pytest.mark.parametrize("use_python_datetime", [True, False])
+def test_list_collections_with_read_time(
+    client, cleanup, database, use_python_datetime
+):
     # TODO(microgen): list_documents is returning a generator, not a list.
     # Consider if this is desired. Also, Document isn't hashable.
     collection_id = "coll-add" + UNIQUE_RESOURCE_ID
