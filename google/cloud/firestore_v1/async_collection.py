@@ -139,9 +139,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         write_result = await document_ref.create(document_data, **kwargs)
         return write_result.update_time, document_ref
 
-    def document(
-        self, document_id: str | None = None
-    ) -> AsyncDocumentReference:
+    def document(self, document_id: str | None = None) -> AsyncDocumentReference:
         """Create a sub-document underneath the current collection.
 
         Args:
