@@ -244,7 +244,9 @@ class Watch(object):
         self._rpc.add_done_callback(self._on_rpc_done)
 
         # The server assigns and updates the resume token.
-        self._consumer: BackgroundConsumer | None = BackgroundConsumer(self._rpc, self.on_snapshot)
+        self._consumer: BackgroundConsumer | None = BackgroundConsumer(
+            self._rpc, self.on_snapshot
+        )
         self._consumer.start()
 
     @classmethod

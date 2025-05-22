@@ -89,7 +89,9 @@ class CountAggregation(BaseAggregation):
 class SumAggregation(BaseAggregation):
     def __init__(self, field_ref: str | FieldPath, alias: str | None = None):
         # convert field path to string if needed
-        field_str = field_ref.to_api_repr() if isinstance(field_ref, FieldPath) else field_ref
+        field_str = (
+            field_ref.to_api_repr() if isinstance(field_ref, FieldPath) else field_ref
+        )
         self.field_ref: str = field_str
         super(SumAggregation, self).__init__(alias=alias)
 
@@ -106,7 +108,9 @@ class SumAggregation(BaseAggregation):
 class AvgAggregation(BaseAggregation):
     def __init__(self, field_ref: str | FieldPath, alias: str | None = None):
         # convert field path to string if needed
-        field_str = field_ref.to_api_repr() if isinstance(field_ref, FieldPath) else field_ref
+        field_str = (
+            field_ref.to_api_repr() if isinstance(field_ref, FieldPath) else field_ref
+        )
         self.field_ref: str = field_str
         super(AvgAggregation, self).__init__(alias=alias)
 

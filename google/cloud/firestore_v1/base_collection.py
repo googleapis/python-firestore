@@ -43,7 +43,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
         BaseVectorQuery,
         DistanceMeasure,
     )
-    from google.cloud.firestore_v1.base_document import BaseDocumentReference
+    from google.cloud.firestore_v1.async_document import AsyncDocumentReference
+    from google.cloud.firestore_v1.document import DocumentReference
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.query_results import QueryResultsList
@@ -225,7 +226,8 @@ class BaseCollectionReference(Generic[QueryType]):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Union[
-        Generator[BaseDocumentReference, Any, Any], AsyncGenerator[BaseDocumentReference, Any]
+        Generator[DocumentReference, Any, Any],
+        AsyncGenerator[AsyncDocumentReference, Any],
     ]:
         raise NotImplementedError
 
