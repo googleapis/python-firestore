@@ -151,7 +151,7 @@ class BaseTransaction(object):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> (
         Generator[DocumentSnapshot, Any, None]
         | Coroutine[Any, Any, AsyncGenerator[DocumentSnapshot, Any]]

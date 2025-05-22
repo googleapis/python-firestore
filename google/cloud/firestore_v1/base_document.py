@@ -292,7 +292,7 @@ class BaseDocumentReference(object):
         transaction=None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | None = None,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`get`."""
         if isinstance(field_paths, str):
@@ -322,7 +322,7 @@ class BaseDocumentReference(object):
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> "DocumentSnapshot" | Awaitable["DocumentSnapshot"]:
         raise NotImplementedError
 
@@ -331,7 +331,7 @@ class BaseDocumentReference(object):
         page_size: int | None = None,
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | None = None,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {
@@ -350,7 +350,7 @@ class BaseDocumentReference(object):
         retry: retries.Retry | retries.AsyncRetry | None | object = None,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ):
         raise NotImplementedError
 

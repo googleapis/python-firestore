@@ -366,7 +366,7 @@ class DocumentReference(BaseDocumentReference):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> DocumentSnapshot:
         """Retrieve a snapshot of the current document.
 
@@ -443,7 +443,7 @@ class DocumentReference(BaseDocumentReference):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Generator[Any, Any, None]:
         """List subcollections of the current document.
 

@@ -208,7 +208,7 @@ class Client(BaseClient):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieve a batch of documents.
 
@@ -270,7 +270,7 @@ class Client(BaseClient):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Generator[Any, Any, None]:
         """List top-level collections of the client's database.
 

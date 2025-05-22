@@ -157,7 +157,7 @@ class Transaction(batch.WriteBatch, BaseTransaction):
         retry: retries.Retry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Generator[DocumentSnapshot, Any, None]:
         """Retrieves multiple documents from Firestore.
 

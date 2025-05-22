@@ -1433,7 +1433,7 @@ class BaseCollectionGroup(BaseQuery):
         partition_count,
         retry: retries.Retry | object | None = None,
         timeout: float | None = None,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Tuple[dict, dict]:
         self._validate_partition_query()
         parent_path, expected_prefix = self._parent._parent_info()

@@ -438,7 +438,7 @@ class BaseClient(ClientWithProject):
         transaction: BaseTransaction | None = None,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Tuple[dict, dict, dict]:
         """Shared setup for async/sync :meth:`get_all`."""
         document_paths, reference_map = _reference_info(references)
@@ -463,7 +463,7 @@ class BaseClient(ClientWithProject):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Union[
         AsyncGenerator[DocumentSnapshot, Any], Generator[DocumentSnapshot, Any, Any]
     ]:
@@ -473,7 +473,7 @@ class BaseClient(ClientWithProject):
         self,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async/sync :meth:`collections`."""
         request = {
@@ -490,7 +490,7 @@ class BaseClient(ClientWithProject):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: float | None = None,
         *,
-        read_time: Optional[datetime.datetime] = None,
+        read_time: datetime.datetime | None = None,
     ):
         raise NotImplementedError
 
