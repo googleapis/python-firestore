@@ -24,9 +24,13 @@ from typing import (
     Coroutine,
     Optional,
     TypeVar,
-    ParamSpec,
     Concatenate,
 )
+
+try:
+    from typing import ParamSpec
+except ImportError:
+    from typing_extensions import ParamSpec
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry_async as retries
