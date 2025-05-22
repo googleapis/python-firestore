@@ -16,7 +16,7 @@
 from __future__ import annotations
 import datetime
 import logging
-from typing import Any, Callable, Generator, Iterable, Optional
+from typing import Any, Callable, Generator, Iterable
 
 from google.api_core import gapic_v1
 from google.api_core import retry as retries
