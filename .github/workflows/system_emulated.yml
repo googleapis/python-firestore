@@ -19,7 +19,7 @@ jobs:
       with:
         python-version: '3.7'
 
-    # firestore sdk requires java 21+
+    # firestore emulator requires java 21+
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
