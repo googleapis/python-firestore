@@ -23,6 +23,7 @@ jobs:
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
+        distribution: temurin
         java-version: '21'
 
     - name: Setup GCloud SDK
