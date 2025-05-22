@@ -31,9 +31,9 @@ from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1.document import DocumentReference
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.async_document import AsyncDocumentReference
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
@@ -162,7 +162,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         page_size: int | None = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
-    ) -> AsyncGenerator[DocumentReference, None]:
+    ) -> AsyncGenerator[AsyncDocumentReference, None]:
         """List all subdocuments of the current collection.
 
         Args:
