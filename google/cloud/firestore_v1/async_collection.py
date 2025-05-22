@@ -22,7 +22,6 @@ from google.api_core import retry_async as retries
 
 from google.cloud.firestore_v1 import (
     async_aggregation,
-    async_document,
     async_query,
     async_vector_query,
     transaction,
@@ -142,7 +141,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
 
     def document(
         self, document_id: str | None = None
-    ) -> async_document.AsyncDocumentReference:
+    ) -> AsyncDocumentReference:
         """Create a sub-document underneath the current collection.
 
         Args:
