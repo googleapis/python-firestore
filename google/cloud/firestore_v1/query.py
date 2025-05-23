@@ -22,7 +22,17 @@ from __future__ import annotations
 
 import datetime
 
-from typing import TYPE_CHECKING, Any, Callable, Generator, List, Optional, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Generator,
+    List,
+    Optional,
+    Sequence,
+    Type,
+    Union,
+)
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry as retries
@@ -276,7 +286,7 @@ class Query(BaseQuery):
     def find_nearest(
         self,
         vector_field: str,
-        query_vector: Vector,
+        query_vector: Union[Vector, Sequence[float]],
         limit: int,
         distance_measure: DistanceMeasure,
         *,
@@ -289,7 +299,7 @@ class Query(BaseQuery):
         Args:
             vector_field (str): An indexed vector field to search upon. Only documents which contain
                 vectors whose dimensionality match the query_vector can be returned.
-            query_vector (Vector): The query vector that we are searching on. Must be a vector of no more
+            query_vector(Vector | Sequence[float]): The query vector that we are searching on. Must be a vector of no more
                 than 2048 dimensions.
             limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
             distance_measure (:class:`DistanceMeasure`): The Distance Measure to use.
