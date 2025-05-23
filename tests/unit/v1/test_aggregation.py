@@ -114,8 +114,6 @@ def test_avg_aggregation_to_pb():
 
 
 def test_avg_aggregation_no_alias_to_pb():
-    from google.cloud.firestore_v1.types import query as query_pb2
-
     avg_aggregation = AvgAggregation("someref", alias=None)
     got_pb = avg_aggregation._to_protobuf()
     assert got_pb.alias == ""
