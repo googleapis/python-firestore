@@ -39,6 +39,7 @@ dependencies = [
     "proto-plus >= 1.22.2, <2.0.0; python_version>='3.11'",
     "proto-plus >= 1.25.0, <2.0.0; python_version>='3.13'",
     "protobuf>=3.20.2,<7.0.0dev,!=3.20.0,!=3.20.1,!=4.21.0,!=4.21.1,!=4.21.2,!=4.21.3,!=4.21.4,!=4.21.5",
+    "typing_extensions>=4.13, <5; python_version<'3.10'",
 ]
 extras = {}
 
