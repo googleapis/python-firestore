@@ -20,6 +20,8 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
+import datetime
+
 from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
 
 from google.api_core import gapic_v1
@@ -55,6 +57,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> QueryResultsList[List[AggregationResult]]:
         """Runs the aggregation query.
 
@@ -75,6 +78,10 @@ class AsyncAggregationQuery(BaseAggregationQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             QueryResultsList[List[AggregationResult]]: The aggregation query results.
@@ -87,6 +94,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             retry=retry,
             timeout=timeout,
             explain_options=explain_options,
+            read_time=read_time,
         )
         try:
             result = [aggregation async for aggregation in stream_result]
@@ -106,6 +114,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> AsyncGenerator[List[AggregationResult] | query_profile_pb.ExplainMetrics, Any]:
         """Internal method for stream(). Runs the aggregation query.
 
@@ -130,6 +139,10 @@ class AsyncAggregationQuery(BaseAggregationQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Yields:
             List[AggregationResult] | query_profile_pb.ExplainMetrics:
@@ -143,6 +156,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             retry,
             timeout,
             explain_options,
+            read_time,
         )
 
         response_iterator = await self._client._firestore_api.run_aggregation_query(
@@ -167,6 +181,7 @@ class AsyncAggregationQuery(BaseAggregationQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> AsyncStreamGenerator[List[AggregationResult]]:
         """Runs the aggregation query.
 
@@ -190,6 +205,10 @@ class AsyncAggregationQuery(BaseAggregationQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             `AsyncStreamGenerator[List[AggregationResult]]`:
@@ -201,5 +220,6 @@ class AsyncAggregationQuery(BaseAggregationQuery):
             retry=retry,
             timeout=timeout,
             explain_options=explain_options,
+            read_time=read_time,
         )
         return AsyncStreamGenerator(inner_generator, explain_options)
