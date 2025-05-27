@@ -392,7 +392,7 @@ async def test_asynccollectionreference_list_documents_w_page_size():
 
 @pytest.mark.asyncio
 async def test_asynccollectionreference_list_documents_w_read_time():
-    _list_documents_helper(read_time=datetime.now(tz=timezone.utc))
+    await _list_documents_helper(read_time=datetime.now(tz=timezone.utc))
 
 
 @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)

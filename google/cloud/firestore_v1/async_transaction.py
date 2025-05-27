@@ -15,8 +15,6 @@
 """Helpers for applying Google Cloud Firestore changes in a transaction."""
 from __future__ import annotations
 
-import datetime
-
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Callable, Coroutine, Optional
 
 from google.api_core import exceptions, gapic_v1
@@ -38,6 +36,8 @@ from google.cloud.firestore_v1.base_transaction import (
 
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
+
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions

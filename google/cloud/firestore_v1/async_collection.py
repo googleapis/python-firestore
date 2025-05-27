@@ -15,8 +15,6 @@
 """Classes for representing collections for the Google Cloud Firestore API."""
 from __future__ import annotations
 
-import datetime
-
 from typing import TYPE_CHECKING, Any, AsyncGenerator, Optional, Tuple
 
 from google.api_core import gapic_v1
@@ -36,6 +34,8 @@ from google.cloud.firestore_v1.base_collection import (
 from google.cloud.firestore_v1.document import DocumentReference
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
+
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions

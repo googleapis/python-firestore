@@ -20,8 +20,6 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-import datetime
-
 from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Union
 
 from google.api_core import gapic_v1
@@ -36,10 +34,11 @@ from google.cloud.firestore_v1.base_aggregation import (
 from google.cloud.firestore_v1.query_results import QueryResultsList
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
+
     from google.cloud.firestore_v1.base_aggregation import AggregationResult
     from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
     import google.cloud.firestore_v1.types.query_profile as query_profile_pb
-
 
 class AsyncAggregationQuery(BaseAggregationQuery):
     """Represents an aggregation query to the Firestore API."""

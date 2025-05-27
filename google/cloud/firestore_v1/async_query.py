@@ -20,8 +20,6 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-import datetime
-
 from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Type
 
 from google.api_core import gapic_v1
@@ -42,6 +40,8 @@ from google.cloud.firestore_v1.base_query import (
 from google.cloud.firestore_v1.query_results import QueryResultsList
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
+
     # Types needed only for Type Hints
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
