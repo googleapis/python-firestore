@@ -261,7 +261,9 @@ async def test_collections_w_read_time(client, cleanup, database):
     assert first_collection_id in ids
 
     # We're just testing that we added one collection at read_time, not two.
-    collections = [x async for x in client.collections(retry=RETRIES, read_time=read_time)]
+    collections = [
+        x async for x in client.collections(retry=RETRIES, read_time=read_time)
+    ]
     ids = [collection.id for collection in collections]
     assert second_collection_id not in ids
     assert first_collection_id in ids
@@ -1148,9 +1150,16 @@ async def test_list_collections_with_read_time(client, cleanup, database):
     data2 = {"bar": "baz"}
     update_time2, document_ref2 = await collection.add(data2)
     cleanup(document_ref2.delete)
-    assert set([i async for i in collection.list_documents()]) == {document_ref1, document_ref2}
-    assert set([i async for i in collection.list_documents(read_time=update_time1)]) == {document_ref1}
-    assert set([i async for i in collection.list_documents(read_time=update_time2)]) == {
+    assert set([i async for i in collection.list_documents()]) == {
+        document_ref1,
+        document_ref2,
+    }
+    assert set(
+        [i async for i in collection.list_documents(read_time=update_time1)]
+    ) == {document_ref1}
+    assert set(
+        [i async for i in collection.list_documents(read_time=update_time2)]
+    ) == {
         document_ref1,
         document_ref2,
     }
@@ -1506,8 +1515,8 @@ async def test_query_stream_w_read_time(query_docs, cleanup, database):
     # Compare query at read_time to query at current time.
     query = collection.where(filter=FieldFilter("b", "==", 1))
     values = {
-        snapshot.id: snapshot.to_dict() async
-        for snapshot in query.stream(read_time=read_time)
+        snapshot.id: snapshot.to_dict()
+        async for snapshot in query.stream(read_time=read_time)
     }
     assert len(values) == num_vals
     assert new_ref.id not in values
@@ -2033,8 +2042,11 @@ async def test_get_all(client, cleanup, database):
     await document2.create(new_data)
     await document3.update(new_data)
 
-    snapshots = [i async for i in 
-        client.get_all([document1, document2, document3], read_time=read_time)
+    snapshots = [
+        i
+        async for i in client.get_all(
+            [document1, document2, document3], read_time=read_time
+        )
     ]
     assert snapshots[0].exists
     assert snapshots[1].exists
@@ -3384,9 +3396,7 @@ async def test_query_in_transaction_with_read_time(client, cleanup, database):
     await doc_refs[0].create({"a": 1, "b": 2})
     await doc_refs[1].create({"a": 1, "b": 1})
 
-    read_time = max(
-        [(await docref.get()).read_time for docref in doc_refs]
-    )
+    read_time = max([(await docref.get()).read_time for docref in doc_refs])
     await doc_refs[2].create({"a": 1, "b": 3})
 
     collection = client.collection(collection_id)
@@ -3394,12 +3404,14 @@ async def test_query_in_transaction_with_read_time(client, cleanup, database):
 
     # should work when transaction is initiated through transactional decorator
     async with client.transaction() as transaction:
+
         @firestore.async_transactional
         async def in_transaction(transaction):
             global inner_fn_ran
 
             new_b_values = [
-                docs.get("b") async for docs in await transaction.get(query, read_time=read_time)
+                docs.get("b")
+                async for docs in await transaction.get(query, read_time=read_time)
             ]
             assert len(new_b_values) == 2
             assert 1 in new_b_values

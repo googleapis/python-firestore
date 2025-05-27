@@ -480,7 +480,7 @@ async def _get_helper(
         expected_transaction_id = transaction_id
     else:
         expected_transaction_id = None
-    
+
     expected_request = {
         "database": client._database_string,
         "documents": [document_reference._document_path],
@@ -571,10 +571,15 @@ async def _collections_helper(page_size=None, retry=None, timeout=None, read_tim
     document = _make_async_document_reference("where", "we-are", client=client)
     if page_size is not None:
         collections = [
-            c async for c in document.collections(page_size=page_size, **kwargs, read_time=read_time)
+            c
+            async for c in document.collections(
+                page_size=page_size, **kwargs, read_time=read_time
+            )
         ]
     else:
-        collections = [c async for c in document.collections(**kwargs, read_time=read_time)]
+        collections = [
+            c async for c in document.collections(**kwargs, read_time=read_time)
+        ]
 
     # Verify the response and the mocks.
     assert len(collections) == len(collection_ids)
@@ -582,7 +587,7 @@ async def _collections_helper(page_size=None, retry=None, timeout=None, read_tim
         assert isinstance(collection, AsyncCollectionReference)
         assert collection.parent == document
         assert collection.id == collection_id
-    
+
     expected_result = {
         "parent": document._document_path,
         "page_size": page_size,

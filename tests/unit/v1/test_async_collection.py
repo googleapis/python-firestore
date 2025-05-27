@@ -303,7 +303,9 @@ async def test_asynccollectionreference_chunkify():
 
 
 @pytest.mark.asyncio
-async def _list_documents_helper(page_size=None, retry=None, timeout=None, read_time=None):
+async def _list_documents_helper(
+    page_size=None, retry=None, timeout=None, read_time=None
+):
     from google.api_core.page_iterator import Page
     from google.api_core.page_iterator_async import AsyncIterator
 
@@ -339,13 +341,13 @@ async def _list_documents_helper(page_size=None, retry=None, timeout=None, read_
         documents = [
             i
             async for i in collection.list_documents(
-                page_size=page_size,
-                **kwargs,
-                read_time=read_time
+                page_size=page_size, **kwargs, read_time=read_time
             )
         ]
     else:
-        documents = [i async for i in collection.list_documents(**kwargs, read_time=read_time)]
+        documents = [
+            i async for i in collection.list_documents(**kwargs, read_time=read_time)
+        ]
 
     # Verify the response and the mocks.
     assert len(documents) == len(document_ids)
@@ -458,6 +460,7 @@ async def test_asynccollectionreference_get_w_explain_options(query_class):
     query_instance.get.assert_called_once_with(
         transaction=None, explain_options=explain_options
     )
+
 
 @mock.patch("google.cloud.firestore_v1.async_query.AsyncQuery", autospec=True)
 @pytest.mark.asyncio

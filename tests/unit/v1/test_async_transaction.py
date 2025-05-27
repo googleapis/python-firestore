@@ -335,7 +335,9 @@ async def test_asynctransaction_get_all_w_read_time():
     await _get_all_helper(read_time=read_time)
 
 
-async def _get_w_document_ref_helper(retry=None, timeout=None, explain_options=None, read_time=None):
+async def _get_w_document_ref_helper(
+    retry=None, timeout=None, explain_options=None, read_time=None
+):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.async_document import AsyncDocumentReference
 
@@ -386,7 +388,9 @@ async def test_asynctransaction_get_w_document_ref_w_read_time():
     )
 
 
-async def _get_w_query_helper(retry=None, timeout=None, explain_options=None, read_time=None):
+async def _get_w_query_helper(
+    retry=None, timeout=None, explain_options=None, read_time=None
+):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.async_query import AsyncQuery
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator

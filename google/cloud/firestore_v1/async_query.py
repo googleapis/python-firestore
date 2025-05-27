@@ -472,7 +472,7 @@ class AsyncQuery(BaseQuery):
             retry=retry,
             timeout=timeout,
             explain_options=explain_options,
-            read_time=read_time
+            read_time=read_time,
         )
         return AsyncStreamGenerator(inner_generator, explain_options)
 

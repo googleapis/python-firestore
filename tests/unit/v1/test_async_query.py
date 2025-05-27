@@ -69,7 +69,9 @@ async def _get_helper(retry=None, timeout=None, explain_options=None, read_time=
 
     # Execute the query and check the response.
     query = make_async_query(parent)
-    returned = await query.get(**kwargs, explain_options=explain_options, read_time=read_time)
+    returned = await query.get(
+        **kwargs, explain_options=explain_options, read_time=read_time
+    )
 
     assert isinstance(returned, QueryResultsList)
     assert len(returned) == 1
@@ -345,7 +347,9 @@ async def test_asyncquery_chunkify_w_chunksize_gt_limit():
     assert [snapshot.id for snapshot in chunks[0]] == expected_ids
 
 
-async def _stream_helper(retry=None, timeout=None, explain_options=None, read_time=None):
+async def _stream_helper(
+    retry=None, timeout=None, explain_options=None, read_time=None
+):
     from google.cloud.firestore_v1 import _helpers
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
 
@@ -430,10 +434,12 @@ async def test_asyncquery_stream_w_retry_timeout():
     timeout = 123.0
     await _stream_helper(retry=retry, timeout=timeout)
 
+
 @pytest.mark.asyncio
 async def test_asyncquery_stream_w_read_time():
     read_time = datetime.datetime.now(tz=datetime.timezone.utc)
     await _stream_helper(read_time=read_time)
+
 
 @pytest.mark.asyncio
 async def test_asyncquery_stream_with_limit_to_last():

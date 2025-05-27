@@ -626,7 +626,9 @@ async def _async_aggregation_query_stream_helper(
 
     # Execute the query and check the response.
     returned = aggregation_query.stream(
-        **kwargs, explain_options=explain_options, read_time=read_time,
+        **kwargs,
+        explain_options=explain_options,
+        read_time=read_time,
     )
     assert isinstance(returned, AsyncStreamGenerator)
 
