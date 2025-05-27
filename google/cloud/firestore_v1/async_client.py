@@ -48,7 +48,7 @@ from google.cloud.firestore_v1.services.firestore.transports import (
     grpc_asyncio as firestore_grpc_transport,
 )
 
-if TYPE_CHECKING: # pragma: NO COVER
+if TYPE_CHECKING:  # pragma: NO COVER
     import datetime
 
     from google.cloud.firestore_v1.bulk_writer import BulkWriter
