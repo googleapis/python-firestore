@@ -44,6 +44,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
         BaseVectorQuery,
         DistanceMeasure,
     )
+    from google.cloud.firestore_v1.async_document import AsyncDocumentReference
     from google.cloud.firestore_v1.document import DocumentReference
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainOptions
@@ -129,7 +130,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def _vector_query(self) -> BaseVectorQuery:
         raise NotImplementedError
 
-    def document(self, document_id: Optional[str] = None) -> DocumentReference:
+    def document(self, document_id: Optional[str] = None):
         """Create a sub-document underneath the current collection.
 
         Args:
@@ -139,7 +140,7 @@ class BaseCollectionReference(Generic[QueryType]):
                 uppercase and lowercase and letters.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.document.DocumentReference`:
+            :class:`~google.cloud.firestore_v1.base_document.BaseDocumentReference`:
             The child document.
         """
         if document_id is None:
@@ -179,7 +180,7 @@ class BaseCollectionReference(Generic[QueryType]):
         document_id: Optional[str] = None,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
-    ) -> Tuple[DocumentReference, dict]:
+    ):
         """Shared setup for async / sync :method:`add`"""
         if document_id is None:
             document_id = _auto_id()
@@ -226,7 +227,8 @@ class BaseCollectionReference(Generic[QueryType]):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
     ) -> Union[
-        Generator[DocumentReference, Any, Any], AsyncGenerator[DocumentReference, Any]
+        Generator[DocumentReference, Any, Any],
+        AsyncGenerator[AsyncDocumentReference, Any],
     ]:
         raise NotImplementedError
 
@@ -602,13 +604,17 @@ def _auto_id() -> str:
     return "".join(random.choice(_AUTO_ID_CHARS) for _ in range(20))
 
 
-def _item_to_document_ref(collection_reference, item) -> DocumentReference:
+def _item_to_document_ref(collection_reference, item):
     """Convert Document resource to document ref.
 
     Args:
         collection_reference (google.api_core.page_iterator.GRPCIterator):
             iterator response
         item (dict): document resource
+
+    Returns:
+            :class:`~google.cloud.firestore_v1.base_document.BaseDocumentReference`:
+            The child document
     """
     document_id = item.name.split(_helpers.DOCUMENT_PATH_DELIMITER)[-1]
     return collection_reference.document(document_id)

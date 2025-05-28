@@ -22,7 +22,6 @@ from google.api_core import retry_async as retries
 
 from google.cloud.firestore_v1 import (
     async_aggregation,
-    async_document,
     async_query,
     async_vector_query,
     transaction,
@@ -31,9 +30,9 @@ from google.cloud.firestore_v1.base_collection import (
     BaseCollectionReference,
     _item_to_document_ref,
 )
-from google.cloud.firestore_v1.document import DocumentReference
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.async_document import AsyncDocumentReference
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
@@ -140,9 +139,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         write_result = await document_ref.create(document_data, **kwargs)
         return write_result.update_time, document_ref
 
-    def document(
-        self, document_id: str | None = None
-    ) -> async_document.AsyncDocumentReference:
+    def document(self, document_id: str | None = None) -> AsyncDocumentReference:
         """Create a sub-document underneath the current collection.
 
         Args:
@@ -162,7 +159,7 @@ class AsyncCollectionReference(BaseCollectionReference[async_query.AsyncQuery]):
         page_size: int | None = None,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
-    ) -> AsyncGenerator[DocumentReference, None]:
+    ) -> AsyncGenerator[AsyncDocumentReference, None]:
         """List all subdocuments of the current collection.
 
         Args:
