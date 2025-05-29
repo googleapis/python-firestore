@@ -24,13 +24,8 @@ from typing import (
     Coroutine,
     Optional,
     TypeVar,
-    Concatenate,
+    Protocol,
 )
-
-try:
-    from typing import ParamSpec
-except ImportError:
-    from typing_extensions import ParamSpec
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry_async as retries
@@ -56,8 +51,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
-T = TypeVar("T")
-P = ParamSpec("P")
+T = TypeVar("T", bound=Callable[..., Any])
 
 
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
@@ -256,12 +250,12 @@ class _AsyncTransactional(_BaseTransactional):
     """
 
     def __init__(
-        self, to_wrap: Callable[Concatenate[AsyncTransaction, P], Awaitable[T]]
+        self, to_wrap: Callable[..., Awaitable[T]]
     ) -> None:
         super(_AsyncTransactional, self).__init__(to_wrap)
 
     async def _pre_commit(
-        self, transaction: AsyncTransaction, *args: P.args, **kwargs: P.kwargs
+        self, transaction: AsyncTransaction, *args: Any, **kwargs: Any
     ) -> Coroutine:
         """Begin transaction and call the wrapped coroutine.
 
@@ -291,7 +285,7 @@ class _AsyncTransactional(_BaseTransactional):
         return await self.to_wrap(transaction, *args, **kwargs)
 
     async def __call__(
-        self, transaction: AsyncTransaction, *args: P.args, **kwargs: P.kwargs
+        self, transaction: AsyncTransaction, *args: Any, **kwargs: Any
     ) -> T:
         """Execute the wrapped callable within a transaction.
 
@@ -343,9 +337,12 @@ class _AsyncTransactional(_BaseTransactional):
             raise
 
 
+class WithAsyncTransaction(Protocol[T]):
+    def __call__(self, transaction: AsyncTransaction, *args: Any, **kwargs: Any) -> Awaitable[T]: ...
+
 def async_transactional(
-    to_wrap: Callable[Concatenate[AsyncTransaction, P], Awaitable[T]]
-) -> Callable[Concatenate[AsyncTransaction, P], Awaitable[T]]:
+    to_wrap: Callable[..., Awaitable[T]]
+) -> WithAsyncTransaction[T]:
     """Decorate a callable so that it runs in a transaction.
 
     Args:
