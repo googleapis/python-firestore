@@ -520,6 +520,8 @@ def prerelease_deps(session, protobuf_implementation):
     ]
     session.install(*other_deps)
 
+    session.install("https://github.com/googleapis/python-api-core/archive/fix-background-consumer-error-closures.zip", "--ignore-installed")
+
     # Print out prerelease package versions
     session.run(
         "python", "-c", "import google.protobuf; print(google.protobuf.__version__)"
