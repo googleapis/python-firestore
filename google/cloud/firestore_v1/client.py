@@ -50,9 +50,8 @@ from google.cloud.firestore_v1.services.firestore.transports import (
 )
 from google.cloud.firestore_v1.transaction import Transaction
 
-if TYPE_CHECKING:
-    from google.cloud.firestore_v1.bulk_writer import BulkWriter  # pragma: NO COVER
-
+if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.bulk_writer import BulkWriter
     import datetime
 
 
