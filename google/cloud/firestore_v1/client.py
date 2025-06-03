@@ -25,8 +25,6 @@ In the hierarchy of API concepts
 """
 from __future__ import annotations
 
-import datetime
-
 from typing import TYPE_CHECKING, Any, Generator, Iterable, List, Optional, Union
 
 from google.api_core import gapic_v1
@@ -54,6 +52,8 @@ from google.cloud.firestore_v1.transaction import Transaction
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.bulk_writer import BulkWriter  # pragma: NO COVER
+
+    import datetime
 
 
 class Client(BaseClient):

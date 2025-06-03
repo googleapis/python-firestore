@@ -15,7 +15,6 @@
 """Classes for representing collections for the Google Cloud Firestore API."""
 from __future__ import annotations
 
-import datetime
 import random
 
 from typing import (
@@ -54,6 +53,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.vector import Vector
     from google.cloud.firestore_v1.vector_query import VectorQuery
+
+    import datetime
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 

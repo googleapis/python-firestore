@@ -22,7 +22,6 @@ from __future__ import annotations
 
 import abc
 import copy
-import datetime
 import math
 import warnings
 
@@ -67,6 +66,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.query_results import QueryResultsList
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
+
+    import datetime
 
 
 _BAD_DIR_STRING: str

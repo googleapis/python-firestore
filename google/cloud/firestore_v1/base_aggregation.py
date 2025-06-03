@@ -21,7 +21,6 @@ a more common way to create an aggregation query than direct usage of the constr
 from __future__ import annotations
 
 import abc
-import datetime
 
 from abc import ABC
 from typing import TYPE_CHECKING, Any, Coroutine, List, Optional, Tuple, Union
@@ -44,6 +43,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.stream_generator import (
         StreamGenerator,
     )
+
+    import datetime
 
 
 class AggregationResult(object):

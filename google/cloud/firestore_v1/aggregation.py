@@ -20,8 +20,6 @@ a more common way to create an aggregation query than direct usage of the constr
 """
 from __future__ import annotations
 
-import datetime
-
 from typing import TYPE_CHECKING, Any, Generator, List, Optional, Union
 
 from google.api_core import exceptions, gapic_v1
@@ -40,6 +38,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1 import transaction
     from google.cloud.firestore_v1.query_profile import ExplainMetrics
     from google.cloud.firestore_v1.query_profile import ExplainOptions
+
+    import datetime
 
 
 class AggregationQuery(BaseAggregationQuery):

@@ -20,8 +20,6 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-import datetime
-
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -60,6 +58,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainMetrics, ExplainOptions
+
+    import datetime
 
 
 class Query(BaseQuery):
