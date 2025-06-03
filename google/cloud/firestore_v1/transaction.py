@@ -42,6 +42,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
 
     import datetime
 
+
 class Transaction(batch.WriteBatch, BaseTransaction):
     """Accumulate read-and-write operations to be sent in a transaction.
 
