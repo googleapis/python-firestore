@@ -304,7 +304,7 @@ async def test_document_collections_w_read_time(client, cleanup, database):
     cleanup(document.delete)
 
     data = {"now": firestore.SERVER_TIMESTAMP}
-    document.create(data)
+    await document.create(data)
 
     original_child_ids = ["child1", "child2"]
     read_time = None
