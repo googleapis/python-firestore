@@ -21,6 +21,7 @@ a more common way to create an aggregation query than direct usage of the constr
 from __future__ import annotations
 
 import abc
+
 from abc import ABC
 from typing import TYPE_CHECKING, Any, Coroutine, List, Optional, Tuple, Union
 
@@ -42,6 +43,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.stream_generator import (
         StreamGenerator,
     )
+
+    import datetime
 
 
 class AggregationResult(object):
@@ -210,6 +213,7 @@ class BaseAggregationQuery(ABC):
         retry: Union[retries.Retry, retries.AsyncRetry, None, object] = None,
         timeout: float | None = None,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, dict]:
         parent_path, expected_prefix = self._collection_ref._parent_info()
         request = {
@@ -219,6 +223,8 @@ class BaseAggregationQuery(ABC):
         }
         if explain_options:
             request["explain_options"] = explain_options._to_dict()
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
@@ -233,6 +239,7 @@ class BaseAggregationQuery(ABC):
         timeout: float | None = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         QueryResultsList[AggregationResult]
         | Coroutine[Any, Any, List[List[AggregationResult]]]
@@ -258,6 +265,10 @@ class BaseAggregationQuery(ABC):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             (QueryResultsList[List[AggregationResult]] | Coroutine[Any, Any, List[List[AggregationResult]]]):
@@ -275,6 +286,7 @@ class BaseAggregationQuery(ABC):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         StreamGenerator[List[AggregationResult]]
         | AsyncStreamGenerator[List[AggregationResult]]
@@ -296,6 +308,10 @@ class BaseAggregationQuery(ABC):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a timestamp within the past one hour, or if Point-in-Time Recovery
+                is enabled, can additionally be a whole minute timestamp within the past 7 days. If no
+                timezone is specified in the :class:`datetime.datetime` object, it is assumed to be UTC.
 
         Returns:
             StreamGenerator[List[AggregationResult]] | AsyncStreamGenerator[List[AggregationResult]]:
