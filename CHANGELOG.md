@@ -5,6 +5,13 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.22.0](https://github.com/googleapis/python-firestore/compare/v2.21.0...v2.22.0) (2025-06-06)
+
+
+### Features
+
+* Added read_time as a parameter to various calls (synchronous/base classes) ([#1050](https://github.com/googleapis/python-firestore/issues/1050)) ([d8e3af1](https://github.com/googleapis/python-firestore/commit/d8e3af1f9dbdfaf5df0d993a0a7e28883472c621))
+
 ## [2.21.0](https://github.com/googleapis/python-firestore/compare/v2.20.2...v2.21.0) (2025-05-23)
 
 
