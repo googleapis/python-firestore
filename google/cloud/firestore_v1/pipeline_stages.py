@@ -16,6 +16,7 @@ from __future__ import annotations
 from typing import Optional, Sequence, TYPE_CHECKING
 from abc import ABC
 from abc import abstractmethod
+from enum import Enum
 
 from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
 from google.cloud.firestore_v1.types.document import Value
@@ -28,7 +29,6 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Field,
     FilterCondition,
     Selectable,
-    SampleOptions,
     Ordering,
 )
 from google.cloud.firestore_v1._helpers import encode_value
@@ -63,6 +63,44 @@ class FindNearestOptions:
             args.append(f"distance_field={self.distance_field}")
         return f"{self.__class__.__name__}({', '.join(args)})"
 
+
+class SampleOptions:
+    """Options for the 'sample' pipeline stage."""
+
+    class Mode(Enum):
+        DOCUMENTS = "documents"
+        PERCENT = "percent"
+
+    def __init__(self, value: int | float, mode: Mode | str):
+        self.value = value
+        self.mode = SampleOptions.Mode[mode.upper()] if isinstance(mode, str) else mode
+
+    def __repr__(self):
+        if self.mode == SampleOptions.Mode.DOCUMENTS:
+            mode_str = "doc_limit"
+        else:
+            mode_str = "percentage"
+        return f"SampleOptions.{mode_str}({self.value})"
+
+    @staticmethod
+    def doc_limit(value: int):
+        """
+        Sample a set number of documents
+
+        Args:
+            value: number of documents to sample
+        """
+        return SampleOptions(value, mode=SampleOptions.Mode.DOCUMENTS)
+
+    @staticmethod
+    def percentage(value: float):
+        """
+        Sample a percentage of documents
+
+        Args:
+            value: percentage of documents to return
+        """
+        return SampleOptions(value, mode=SampleOptions.Mode.PERCENT)
 
 class UnnestOptions:
     """Options for configuring the `Unnest` pipeline stage.

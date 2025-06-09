@@ -90,45 +90,6 @@ class Ordering:
         )
 
 
-class SampleOptions:
-    """Options for the 'sample' pipeline stage."""
-
-    class Mode(Enum):
-        DOCUMENTS = "documents"
-        PERCENT = "percent"
-
-    def __init__(self, value: int | float, mode: Mode | str):
-        self.value = value
-        self.mode = SampleOptions.Mode[mode.upper()] if isinstance(mode, str) else mode
-
-    def __repr__(self):
-        if self.mode == SampleOptions.Mode.DOCUMENTS:
-            mode_str = "doc_limit"
-        else:
-            mode_str = "percentage"
-        return f"SampleOptions.{mode_str}({self.value})"
-
-    @staticmethod
-    def doc_limit(value: int):
-        """
-        Sample a set number of documents
-
-        Args:
-            value: number of documents to sample
-        """
-        return SampleOptions(value, mode=SampleOptions.Mode.DOCUMENTS)
-
-    @staticmethod
-    def percentage(value: float):
-        """
-        Sample a percentage of documents
-
-        Args:
-            value: percentage of documents to return
-        """
-        return SampleOptions(value, mode=SampleOptions.Mode.PERCENT)
-
-
 class Expr(ABC):
     """Represents an expression that can be evaluated to a value within the
     execution of a pipeline.

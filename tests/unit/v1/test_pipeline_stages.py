@@ -23,7 +23,6 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Ordering,
     Sum,
     Count,
-    SampleOptions,
 )
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.types.pipeline import (
@@ -537,18 +536,49 @@ class TestRemoveFields:
 
 
 class TestSample:
+
+    class TestSampleOptions:
+        def test_ctor_percent(self):
+            instance = stages.SampleOptions(0.25, stages.SampleOptions.Mode.PERCENT)
+            assert instance.value == 0.25
+            assert instance.mode == stages.SampleOptions.Mode.PERCENT
+
+        def test_ctor_documents(self):
+            instance = stages.SampleOptions(10, stages.SampleOptions.Mode.DOCUMENTS)
+            assert instance.value == 10
+            assert instance.mode == stages.SampleOptions.Mode.DOCUMENTS
+
+        def test_percentage(self):
+            instance = stages.SampleOptions.percentage(1)
+            assert instance.value == 1
+            assert instance.mode == stages.SampleOptions.Mode.PERCENT
+
+        def test_doc_limit(self):
+            instance = stages.SampleOptions.doc_limit(2)
+            assert instance.value == 2
+            assert instance.mode == stages.SampleOptions.Mode.DOCUMENTS
+
+        def test_repr_percentage(self):
+            instance = stages.SampleOptions.percentage(0.5)
+            assert repr(instance) == "SampleOptions.percentage(0.5)"
+
+        def test_repr_documents(self):
+            instance = stages.SampleOptions.doc_limit(10)
+            assert repr(instance) == "SampleOptions.doc_limit(10)"
+
+
     def _make_one(self, *args, **kwargs):
         return stages.Sample(*args, **kwargs)
 
     def test_ctor_w_int(self):
         instance_int = self._make_one(10)
-        assert isinstance(instance_int.options, SampleOptions)
+        assert isinstance(instance_int.options, stages.SampleOptions)
         assert instance_int.options.value == 10
-        assert instance_int.options.mode == SampleOptions.Mode.DOCUMENTS
+        assert instance_int.options.mode == stages.SampleOptions.Mode.DOCUMENTS
         assert instance_int.name == "sample"
 
     def test_ctor_w_options(self):
-        options = SampleOptions.percentage(0.5)
+        options = stages.SampleOptions.percentage(0.5)
         instance_options = self._make_one(options)
         assert instance_options.options == options
         assert instance_options.name == "sample"
@@ -558,7 +588,7 @@ class TestSample:
         repr_str_int = repr(instance_int)
         assert repr_str_int == "Sample(options=SampleOptions.doc_limit(10))"
 
-        options = SampleOptions.percentage(0.5)
+        options = stages.SampleOptions.percentage(0.5)
         instance_options = self._make_one(options)
         repr_str_options = repr(instance_options)
         assert repr_str_options == "Sample(options=SampleOptions.percentage(0.5))"
@@ -573,7 +603,7 @@ class TestSample:
         assert len(result_docs.options) == 0
 
     def test_to_pb_percent_mode(self):
-        options_percent = SampleOptions.percentage(0.25)
+        options_percent = stages.SampleOptions.percentage(0.25)
         instance_percent = self._make_one(options_percent)
         result_percent = instance_percent._to_pb()
         assert result_percent.name == "sample"
