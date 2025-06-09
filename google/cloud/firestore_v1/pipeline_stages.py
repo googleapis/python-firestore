@@ -241,7 +241,9 @@ class Documents(Stage):
     def _pb_args(self):
         return [
             Value(
-                array_value={"values": [Value(string_value=path) for path in self.paths]}
+                array_value={
+                    "values": [Value(string_value=path) for path in self.paths]
+                }
             )
         ]
 

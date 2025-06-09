@@ -73,7 +73,11 @@ class TestPipelineSource:
 
     def test_documents(self):
         instance = self._make_client().pipeline()
-        test_documents = [BaseDocumentReference("a", "1"), BaseDocumentReference("a", "2"), BaseDocumentReference("a", "3")]
+        test_documents = [
+            BaseDocumentReference("a", "1"),
+            BaseDocumentReference("a", "2"),
+            BaseDocumentReference("a", "3"),
+        ]
         ppl = instance.documents(*test_documents)
         assert isinstance(ppl, self._expected_pipeline_type)
         assert len(ppl.stages) == 1

@@ -95,7 +95,9 @@ class TestAggregate:
         sum_total = Sum(Field.of("total")).as_("sum_total")
         avg_price = Field.of("price").avg().as_("avg_price")
         group_category = Field.of("category")
-        instance = self._make_one(accumulators=[avg_price, sum_total], groups=[group_category, "city"])
+        instance = self._make_one(
+            accumulators=[avg_price, sum_total], groups=[group_category, "city"]
+        )
         assert instance.accumulators == [avg_price, sum_total]
         assert len(instance.groups) == 2
         assert instance.groups[0] == group_category
@@ -116,7 +118,10 @@ class TestAggregate:
         group_category = Field.of("category")
         instance = self._make_one(sum_total, groups=[group_category])
         repr_str = repr(instance)
-        assert repr_str == "Aggregate(Sum(Field.of('total')).as_('sum_total'), groups=[Field.of('category')])"
+        assert (
+            repr_str
+            == "Aggregate(Sum(Field.of('total')).as_('sum_total'), groups=[Field.of('category')])"
+        )
 
     def test_to_pb(self):
         sum_total = Sum(Field.of("total")).as_("sum_total")
@@ -128,15 +133,18 @@ class TestAggregate:
 
         expected_accumulators_map = {
             "fields": {
-                "sum_total": Value(function_value={"name": "sum", "args": [Value(field_reference_value="total")]})
+                "sum_total": Value(
+                    function_value={
+                        "name": "sum",
+                        "args": [Value(field_reference_value="total")],
+                    }
+                )
             }
         }
         assert result.args[0].map_value.fields == expected_accumulators_map["fields"]
 
         expected_groups_map = {
-            "fields": {
-                "category": Value(field_reference_value="category")
-            }
+            "fields": {"category": Value(field_reference_value="category")}
         }
         assert result.args[1].map_value.fields == expected_groups_map["fields"]
         assert len(result.options) == 0
@@ -235,7 +243,7 @@ class TestDocuments:
         mock_doc_ref1 = mock.Mock()
         mock_doc_ref1.path = "projects/p/databases/d/documents/c/doc1"
         mock_doc_ref2 = mock.Mock()
-        mock_doc_ref2.path = "c/doc2" # Test relative path as well
+        mock_doc_ref2.path = "c/doc2"  # Test relative path as well
         instance = stages.Documents.of(mock_doc_ref1, mock_doc_ref2)
         assert instance.paths == (
             "/projects/p/databases/d/documents/c/doc1",
@@ -252,13 +260,15 @@ class TestDocuments:
         result = instance._to_pb()
         assert result.name == "documents"
         assert len(result.args) == 1
-        assert result.args[0].array_value.values[0].string_value == "/projects/p/databases/d/documents/c/doc1"
+        assert (
+            result.args[0].array_value.values[0].string_value
+            == "/projects/p/databases/d/documents/c/doc1"
+        )
         assert result.args[0].array_value.values[1].string_value == "/c/doc2"
         assert len(result.options) == 0
 
 
 class TestFindNearest:
-
     class TestFindNearestOptions:
         def _make_one_options(self, *args, **kwargs):
             return stages.FindNearestOptions(*args, **kwargs)
@@ -266,7 +276,9 @@ class TestFindNearest:
         def test_ctor_options(self):
             limit_val = 10
             distance_field_val = Field.of("dist")
-            instance = self._make_one_options(limit=limit_val, distance_field=distance_field_val)
+            instance = self._make_one_options(
+                limit=limit_val, distance_field=distance_field_val
+            )
             assert instance.limit == limit_val
             assert instance.distance_field == distance_field_val
 
@@ -281,10 +293,17 @@ class TestFindNearest:
             instance_limit = self._make_one_options(limit=5)
             assert repr(instance_limit) == "FindNearestOptions(limit=5)"
             instance_distance = self._make_one_options(distance_field=Field.of("dist"))
-            assert repr(instance_distance) == "FindNearestOptions(distance_field=Field.of('dist'))"
-            instance_full = self._make_one_options(limit=5, distance_field=Field.of("dist"))
-            assert repr(instance_full) == "FindNearestOptions(limit=5, distance_field=Field.of('dist'))"
-
+            assert (
+                repr(instance_distance)
+                == "FindNearestOptions(distance_field=Field.of('dist'))"
+            )
+            instance_full = self._make_one_options(
+                limit=5, distance_field=Field.of("dist")
+            )
+            assert (
+                repr(instance_full)
+                == "FindNearestOptions(limit=5, distance_field=Field.of('dist'))"
+            )
 
     def _make_one(self, *args, **kwargs):
         return stages.FindNearest(*args, **kwargs)
@@ -293,9 +312,13 @@ class TestFindNearest:
         field_path = "embedding_field"
         vector_val = Vector([1.0, 2.0, 3.0])
         distance_measure_val = DistanceMeasure.EUCLIDEAN
-        options_val = stages.FindNearestOptions(limit=5, distance_field=Field.of("distance"))
+        options_val = stages.FindNearestOptions(
+            limit=5, distance_field=Field.of("distance")
+        )
 
-        instance_str_field = self._make_one(field_path, vector_val, distance_measure_val, options=options_val)
+        instance_str_field = self._make_one(
+            field_path, vector_val, distance_measure_val, options=options_val
+        )
         assert isinstance(instance_str_field.field, Field)
         assert instance_str_field.field.path == field_path
         assert instance_str_field.vector == vector_val
@@ -310,7 +333,7 @@ class TestFindNearest:
         distance_measure_val = DistanceMeasure.EUCLIDEAN
         instance_field_obj = self._make_one(field_obj, vector_val, distance_measure_val)
         assert instance_field_obj.field == field_obj
-        assert instance_field_obj.options.limit is None # Default options
+        assert instance_field_obj.options.limit is None  # Default options
         assert instance_field_obj.options.distance_field is None
 
     def test_ctor_w_vector_list(self):
@@ -318,7 +341,9 @@ class TestFindNearest:
         distance_measure_val = DistanceMeasure.EUCLIDEAN
 
         vector_list = [4.0, 5.0]
-        instance_list_vector = self._make_one(field_path, vector_list, distance_measure_val)
+        instance_list_vector = self._make_one(
+            field_path, vector_list, distance_measure_val
+        )
         assert isinstance(instance_list_vector.vector, Vector)
         assert instance_list_vector.vector == Vector(vector_list)
 
@@ -327,19 +352,30 @@ class TestFindNearest:
         vector_val = Vector([1.0, 2.0])
         distance_measure_val = DistanceMeasure.EUCLIDEAN
         options_val = stages.FindNearestOptions(limit=5)
-        instance = self._make_one(field_path, vector_val, distance_measure_val, options=options_val)
+        instance = self._make_one(
+            field_path, vector_val, distance_measure_val, options=options_val
+        )
         repr_str = repr(instance)
         expected_repr = "FindNearest(field=Field.of('embedding_field'), vector=Vector<1.0, 2.0>, distance_measure=<DistanceMeasure.EUCLIDEAN: 1>, options=FindNearestOptions(limit=5))"
         assert repr_str == expected_repr
 
-    @pytest.mark.parametrize("distance_measure_val, expected_str", [
-        (DistanceMeasure.COSINE, "cosine"), (DistanceMeasure.DOT_PRODUCT, "dot_product"), (DistanceMeasure.EUCLIDEAN, "euclidean"),
-    ])
+    @pytest.mark.parametrize(
+        "distance_measure_val, expected_str",
+        [
+            (DistanceMeasure.COSINE, "cosine"),
+            (DistanceMeasure.DOT_PRODUCT, "dot_product"),
+            (DistanceMeasure.EUCLIDEAN, "euclidean"),
+        ],
+    )
     def test_to_pb(self, distance_measure_val, expected_str):
         field_path = "embedding"
         vector_val = Vector([0.1, 0.2])
-        options_val = stages.FindNearestOptions(limit=7, distance_field=Field.of("dist_val"))
-        instance = self._make_one(field_path, vector_val, distance_measure_val, options=options_val)
+        options_val = stages.FindNearestOptions(
+            limit=7, distance_field=Field.of("dist_val")
+        )
+        instance = self._make_one(
+            field_path, vector_val, distance_measure_val, options=options_val
+        )
 
         result = instance._to_pb()
         assert result.name == "find_nearest"
@@ -348,8 +384,14 @@ class TestFindNearest:
         assert result.args[0].field_reference_value == field_path
         # test for vector arg
         assert result.args[1].map_value.fields["__type__"].string_value == "__vector__"
-        assert result.args[1].map_value.fields["value"].array_value.values[0].double_value == 0.1
-        assert result.args[1].map_value.fields["value"].array_value.values[1].double_value == 0.2
+        assert (
+            result.args[1].map_value.fields["value"].array_value.values[0].double_value
+            == 0.1
+        )
+        assert (
+            result.args[1].map_value.fields["value"].array_value.values[1].double_value
+            == 0.2
+        )
         # test for distance measure arg
         assert result.args[2].string_value == expected_str
         # test options
@@ -616,7 +658,6 @@ class TestUnion:
 
 
 class TestUnnest:
-
     class TestUnnestOptions:
         def _make_one_options(self, *args, **kwargs):
             return stages.UnnestOptions(*args, **kwargs)
@@ -659,12 +700,20 @@ class TestUnnest:
     def test_repr(self):
         instance_simple = self._make_one("my_field")
         repr_str_simple = repr(instance_simple)
-        assert repr_str_simple == "Unnest(field=Field.of('my_field'), alias=Field.of('my_field'), options=None)"
+        assert (
+            repr_str_simple
+            == "Unnest(field=Field.of('my_field'), alias=Field.of('my_field'), options=None)"
+        )
 
         options = stages.UnnestOptions(index_field="item_idx")
-        instance_full = self._make_one(Field.of("items"), Field.of("alias"), options=options)
+        instance_full = self._make_one(
+            Field.of("items"), Field.of("alias"), options=options
+        )
         repr_str_full = repr(instance_full)
-        assert repr_str_full == "Unnest(field=Field.of('items'), alias=Field.of('alias'), options=UnnestOptions(index_field='item_idx'))"
+        assert (
+            repr_str_full
+            == "Unnest(field=Field.of('items'), alias=Field.of('alias'), options=UnnestOptions(index_field='item_idx'))"
+        )
 
     def test_to_pb(self):
         instance = self._make_one(Field.of("dataPoints"))
@@ -674,7 +723,6 @@ class TestUnnest:
         assert result.args[0].field_reference_value == "dataPoints"
         assert result.args[1].field_reference_value == "dataPoints"
         assert len(result.options) == 0
-
 
     def test_to_pb_full(self):
         field_str = "items"
@@ -690,6 +738,7 @@ class TestUnnest:
 
         assert len(result.options) == 1
         assert result.options["index_field"].string_value == "item_index"
+
 
 class TestWhere:
     def _make_one(self, *args, **kwargs):
