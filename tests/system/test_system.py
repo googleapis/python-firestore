@@ -3275,7 +3275,13 @@ def test_query_with_or_composite_filter(collection, database, verify_pipeline):
     "aggregation_type,expected_value", [("count", 5), ("sum", 100), ("avg", 4.0)]
 )
 def test_aggregation_queries_with_read_time(
-    collection, query, cleanup, database, aggregation_type, expected_value, verify_pipeline
+    collection,
+    query,
+    cleanup,
+    database,
+    aggregation_type,
+    expected_value,
+    verify_pipeline,
 ):
     """
     Ensure that all aggregation queries work when read_time is passed into
