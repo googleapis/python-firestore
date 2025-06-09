@@ -22,7 +22,7 @@ from google.cloud.firestore_v1.types import query as query_pb
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1._helpers import GeoPoint
-from google.cloud.firestore_v1.pipeline_expressions import FilterCondition
+from google.cloud.firestore_v1.pipeline_expressions import FilterCondition, ListOfExprs
 import google.cloud.firestore_v1.pipeline_expressions as expr
 
 
@@ -31,6 +31,47 @@ def mock_client():
     client = mock.Mock(spec=["_database_string", "collection"])
     client._database_string = "projects/p/databases/d"
     return client
+
+
+class TestOrdering:
+    @pytest.mark.parametrize(
+        "direction_arg,expected_direction",
+        [
+            ("ASCENDING", expr.Ordering.Direction.ASCENDING),
+            ("DESCENDING", expr.Ordering.Direction.DESCENDING),
+            ("ascending", expr.Ordering.Direction.ASCENDING),
+            ("descending", expr.Ordering.Direction.DESCENDING),
+            (expr.Ordering.Direction.ASCENDING, expr.Ordering.Direction.ASCENDING),
+            (expr.Ordering.Direction.DESCENDING, expr.Ordering.Direction.DESCENDING),
+        ],
+    )
+    def test_ctor(self, direction_arg, expected_direction):
+        instance = expr.Ordering("field1", direction_arg)
+        assert isinstance(instance.expr, expr.Field)
+        assert instance.expr.path == "field1"
+        assert instance.order_dir == expected_direction
+
+    def test_repr(self):
+        field_expr = expr.Field.of("field1")
+        instance = expr.Ordering(field_expr, "ASCENDING")
+        repr_str = repr(instance)
+        assert repr_str == "Field.of('field1').ascending()"
+
+        instance = expr.Ordering(field_expr, "DESCENDING")
+        repr_str = repr(instance)
+        assert repr_str == "Field.of('field1').descending()"
+
+    def test_to_pb(self):
+        field_expr = expr.Field.of("field1")
+        instance = expr.Ordering(field_expr, "ASCENDING")
+        result = instance._to_pb()
+        assert result.map_value.fields["expression"].field_reference_value == "field1"
+        assert result.map_value.fields["direction"].string_value == "ascending"
+
+        instance = expr.Ordering(field_expr, "DESCENDING")
+        result = instance._to_pb()
+        assert result.map_value.fields["expression"].field_reference_value == "field1"
+        assert result.map_value.fields["direction"].string_value == "descending"
 
 
 class TestExpr:
@@ -114,6 +155,65 @@ class TestConstant:
         instance = expr.Constant.of(input_val)
         repr_string = repr(instance)
         assert repr_string == expected
+
+
+class TestListOfExprs:
+    def test_to_pb(self):
+        instance = expr.ListOfExprs([expr.Constant(1), expr.Constant(2)])
+        result = instance._to_pb()
+        assert len(result.array_value.values) == 2
+        assert result.array_value.values[0].integer_value == 1
+        assert result.array_value.values[1].integer_value == 2
+
+    def test_empty_to_pb(self):
+        instance = expr.ListOfExprs([])
+        result = instance._to_pb()
+        assert len(result.array_value.values) == 0
+
+    def test_repr(self):
+        instance = expr.ListOfExprs([expr.Constant(1), expr.Constant(2)])
+        repr_string = repr(instance)
+        assert repr_string == "ListOfExprs([Constant.of(1), Constant.of(2)])"
+        empty_instance = expr.ListOfExprs([])
+        empty_repr_string = repr(empty_instance)
+        assert empty_repr_string == "ListOfExprs([])"
+
+
+class TestSelectable:
+    def test_ctor(self):
+        """
+        Base class should be abstract
+        """
+        with pytest.raises(TypeError):
+            expr.Selectable()
+
+    def test_value_from_selectables(self):
+        selectable_list = [expr.Field.of("field1"), expr.Field.of("field2")]
+        result = expr.Selectable._value_from_selectables(*selectable_list)
+        assert len(result.map_value.fields) == 2
+        assert result.map_value.fields["field1"].field_reference_value == "field1"
+        assert result.map_value.fields["field2"].field_reference_value == "field2"
+
+    class TestField:
+        def test_repr(self):
+            instance = expr.Field.of("field1")
+            repr_string = repr(instance)
+            assert repr_string == "Field.of('field1')"
+
+        def test_of(self):
+            instance = expr.Field.of("field1")
+            assert instance.path == "field1"
+
+        def test_to_pb(self):
+            instance = expr.Field.of("field1")
+            result = instance._to_pb()
+            assert result.field_reference_value == "field1"
+
+        def test_to_map(self):
+            instance = expr.Field.of("field1")
+            result = instance._to_map()
+            assert result[0] == "field1"
+            assert result[1] == Value(field_reference_value="field1")
 
 
 class TestFilterCondition:
@@ -419,3 +519,153 @@ class TestFilterCondition:
         # Test with an unexpected protobuf type
         with pytest.raises(TypeError, match="Unexpected filter type"):
             FilterCondition._from_query_filter_pb(document_pb.Value(), mock_client)
+
+    @pytest.mark.parametrize(
+        "method,args,result_cls",
+        [
+            ("eq", (2,), expr.Eq),
+            ("neq", (2,), expr.Neq),
+            ("lt", (2,), expr.Lt),
+            ("lte", (2,), expr.Lte),
+            ("gt", (2,), expr.Gt),
+            ("gte", (2,), expr.Gte),
+            ("in_any", ([None],), expr.In),
+            ("not_in_any", ([None],), expr.Not),
+            ("array_contains", (None,), expr.ArrayContains),
+            ("array_contains_any", ([None],), expr.ArrayContainsAny),
+            ("is_nan", (), expr.IsNaN),
+            ("exists", (), expr.Exists),
+        ],
+    )
+    def test_infix_call(self, method, args, result_cls):
+        """
+        most FilterExpressions should support infix execution
+        """
+        base_instance = expr.Constant(1)
+        method_ptr = getattr(base_instance, method)
+
+        result = method_ptr(*args)
+        assert isinstance(result, result_cls)
+
+    def _make_arg(self, name="Mock"):
+        arg = mock.Mock()
+        arg.__repr__ = lambda x: name
+        return arg
+
+    def test_and(self):
+        arg1 = self._make_arg()
+        arg2 = self._make_arg()
+        instance = expr.And(arg1, arg2)
+        assert instance.name == "and"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "And(Mock, Mock)"
+
+    def test_or(self):
+        arg1 = self._make_arg("Arg1")
+        arg2 = self._make_arg("Arg2")
+        instance = expr.Or(arg1, arg2)
+        assert instance.name == "or"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Or(Arg1, Arg2)"
+
+    def test_array_contains(self):
+        arg1 = self._make_arg("ArrayField")
+        arg2 = self._make_arg("Element")
+        instance = expr.ArrayContains(arg1, arg2)
+        assert instance.name == "array_contains"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "ArrayField.array_contains(Element)"
+
+    def test_array_contains_any(self):
+        arg1 = self._make_arg("ArrayField")
+        arg2 = self._make_arg("Element1")
+        arg3 = self._make_arg("Element2")
+        instance = expr.ArrayContainsAny(arg1, [arg2, arg3])
+        assert instance.name == "array_contains_any"
+        assert isinstance(instance.params[1], ListOfExprs)
+        assert instance.params[0] == arg1
+        assert instance.params[1].exprs == [arg2, arg3]
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_any(ListOfExprs([Element1, Element2]))"
+        )
+
+    def test_exists(self):
+        arg1 = self._make_arg("Field")
+        instance = expr.Exists(arg1)
+        assert instance.name == "exists"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Field.exists()"
+
+    def test_eq(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Eq(arg1, arg2)
+        assert instance.name == "eq"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Left.eq(Right)"
+
+    def test_gte(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Gte(arg1, arg2)
+        assert instance.name == "gte"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Left.gte(Right)"
+
+    def test_gt(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Gt(arg1, arg2)
+        assert instance.name == "gt"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Left.gt(Right)"
+
+    def test_lte(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Lte(arg1, arg2)
+        assert instance.name == "lte"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Left.lte(Right)"
+
+    def test_lt(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Lt(arg1, arg2)
+        assert instance.name == "lt"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Left.lt(Right)"
+
+    def test_neq(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Neq(arg1, arg2)
+        assert instance.name == "neq"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Left.neq(Right)"
+
+    def test_in(self):
+        arg1 = self._make_arg("Field")
+        arg2 = self._make_arg("Value1")
+        arg3 = self._make_arg("Value2")
+        instance = expr.In(arg1, [arg2, arg3])
+        assert instance.name == "in"
+        assert isinstance(instance.params[1], ListOfExprs)
+        assert instance.params[0] == arg1
+        assert instance.params[1].exprs == [arg2, arg3]
+        assert repr(instance) == "Field.in_any(ListOfExprs([Value1, Value2]))"
+
+    def test_is_nan(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.IsNaN(arg1)
+        assert instance.name == "is_nan"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.is_nan()"
+
+    def test_not(self):
+        arg1 = self._make_arg("Condition")
+        instance = expr.Not(arg1)
+        assert instance.name == "not"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Not(Condition)"

@@ -16,8 +16,9 @@ from __future__ import annotations
 from typing import Generic, TypeVar, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
+from google.cloud.firestore_v1._helpers import DOCUMENT_PATH_DELIMITER
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
@@ -45,15 +46,19 @@ class PipelineSource(Generic[PipelineType]):
     def _create_pipeline(self, source_stage):
         return self.client._pipeline_cls(self.client, source_stage)
 
-    def collection(self, path: str) -> PipelineType:
+    def collection(self, path: str | tuple[str]) -> PipelineType:
         """
         Creates a new Pipeline that operates on a specified Firestore collection.
 
         Args:
-            path: The path to the Firestore collection (e.g., "users")
+            path: The path to the Firestore collection (e.g., "users"). Can either be:
+                * A single ``/``-delimited path to a collection
+                * A tuple of collection path segment
         Returns:
             a new pipeline instance targeting the specified collection
         """
+        if isinstance(path, tuple):
+            path = DOCUMENT_PATH_DELIMITER.join(path)
         return self._create_pipeline(stages.Collection(path))
 
     def collection_group(self, collection_id: str) -> PipelineType:

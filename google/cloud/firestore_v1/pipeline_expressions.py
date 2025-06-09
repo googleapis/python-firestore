@@ -1230,8 +1230,22 @@ class Selectable(Expr):
     """Base class for expressions that can be selected or aliased in projection stages."""
 
     @abstractmethod
-    def _to_map(self):
+    def _to_map(self) -> tuple[str, Value]:
+        """
+        Returns a str: Value representation of the Selectable
+        """
         raise NotImplementedError
+
+    @classmethod
+    def _value_from_selectables(cls, *selectables: Selectable) -> Value:
+        """
+        Returns a Value representing a map of Selectables
+        """
+        return Value(
+            map_value={
+                "fields": {m[0]: m[1] for m in [s._to_map() for s in selectables]}
+            }
+        )
 
 
 T = TypeVar("T", bound=Expr)
@@ -1293,6 +1307,31 @@ class Field(Selectable):
 
 class FilterCondition(Function):
     """Filters the given data in some way."""
+
+    def __init__(
+        self,
+        *args,
+        use_infix_repr: bool = True,
+        infix_name_override: str | None = None,
+        **kwargs,
+    ):
+        self._use_infix_repr = use_infix_repr
+        self._infix_name_override = infix_name_override
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        """
+        Most FilterConditions can be triggered infix. Eg: Field.of('age').gte(18).
+
+        Display them this way in the repr string where possible
+        """
+        if self._use_infix_repr:
+            infix_name = self._infix_name_override or self.name
+            if len(self.params) == 1:
+                return f"{self.params[0]!r}.{infix_name}()"
+            elif len(self.params) == 2:
+                return f"{self.params[0]!r}.{infix_name}({self.params[1]!r})"
+        return super().__repr__()
 
     @staticmethod
     def _from_query_filter_pb(filter_pb, client):
@@ -1360,7 +1399,7 @@ class FilterCondition(Function):
 
 class And(FilterCondition):
     def __init__(self, *conditions: "FilterCondition"):
-        super().__init__("and", conditions)
+        super().__init__("and", conditions, use_infix_repr=False)
 
 
 class ArrayContains(FilterCondition):
@@ -1432,7 +1471,9 @@ class In(FilterCondition):
     """Represents checking if an expression's value is within a list of values."""
 
     def __init__(self, left: Expr, others: List[Expr]):
-        super().__init__("in", [left, ListOfExprs(others)])
+        super().__init__(
+            "in", [left, ListOfExprs(others)], infix_name_override="in_any"
+        )
 
 
 class IsNaN(FilterCondition):
@@ -1474,7 +1515,7 @@ class Not(FilterCondition):
     """Represents the logical NOT of a filter condition."""
 
     def __init__(self, condition: Expr):
-        super().__init__("not", [condition])
+        super().__init__("not", [condition], use_infix_repr=False)
 
 
 class Or(FilterCondition):
@@ -1516,4 +1557,4 @@ class Xor(FilterCondition):
     """Represents the logical XOR of multiple filter conditions."""
 
     def __init__(self, conditions: List["FilterCondition"]):
-        super().__init__("xor", conditions)
+        super().__init__("or", conditions, use_infix_repr=False)

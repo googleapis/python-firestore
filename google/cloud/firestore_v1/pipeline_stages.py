@@ -344,15 +344,7 @@ class Select(Stage):
         self.projections = [Field(s) if isinstance(s, str) else s for s in selections]
 
     def _pb_args(self) -> list[Value]:
-        return [
-            Value(
-                map_value={
-                    "fields": {
-                        m[0]: m[1] for m in [f._to_map() for f in self.projections]
-                    }
-                }
-            )
-        ]
+        return [Selectable._value_from_selectables(*self.projections)]
 
 
 class Sort(Stage):
