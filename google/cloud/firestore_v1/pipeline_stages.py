@@ -31,6 +31,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     SampleOptions,
     Ordering,
 )
+from google.cloud.firestore_v1._helpers import encode_value
 
 if TYPE_CHECKING:
     from google.cloud.firestore_v1.base_pipeline import _BasePipeline
@@ -54,6 +55,14 @@ class FindNearestOptions:
         self.limit = limit
         self.distance_field = distance_field
 
+    def __repr__(self):
+        args = []
+        if self.limit is not None:
+            args.append(f"limit={self.limit}")
+        if self.distance_field is not None:
+            args.append(f"distance_field={self.distance_field}")
+        return f"{self.__class__.__name__}({', '.join(args)})"
+
 
 class UnnestOptions:
     """Options for configuring the `Unnest` pipeline stage.
@@ -65,6 +74,9 @@ class UnnestOptions:
 
     def __init__(self, index_field: str):
         self.index_field = index_field
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}(index_field={self.index_field!r})"
 
 
 class Stage(ABC):
@@ -128,8 +140,8 @@ class Aggregate(Stage):
             Field(f) if isinstance(f, str) else f for f in groups
         ]
         self.accumulators: list[ExprWithAlias[Accumulator]] = [
-            *accumulators,
             *extra_accumulators,
+            *accumulators,
         ]
 
     def _pb_args(self):
@@ -218,6 +230,9 @@ class Documents(Stage):
         super().__init__()
         self.paths = paths
 
+    def __repr__(self):
+        return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.paths])})"
+
     @staticmethod
     def of(*documents: "BaseDocumentReference") -> "Documents":
         doc_paths = ["/" + doc.path for doc in documents]
@@ -226,7 +241,7 @@ class Documents(Stage):
     def _pb_args(self):
         return [
             Value(
-                list_value={"values": [Value(string_value=path) for path in self.paths]}
+                array_value={"values": [Value(string_value=path) for path in self.paths]}
             )
         ]
 
@@ -250,8 +265,8 @@ class FindNearest(Stage):
     def _pb_args(self):
         return [
             self.field._to_pb(),
-            Value(array_value={"values": self.vector}),
-            Value(string_value=self.distance_measure.value),
+            encode_value(self.vector),
+            Value(string_value=self.distance_measure.name.lower()),
         ]
 
     def _pb_options(self) -> dict[str, Value]:
@@ -307,6 +322,9 @@ class RemoveFields(Stage):
     def __init__(self, *fields: str | Field):
         super().__init__("remove_fields")
         self.fields = [Field(f) if isinstance(f, str) else f for f in fields]
+
+    def __repr__(self):
+        return f"{self.__class__.__name__}({', '.join(repr(f) for f in self.fields)})"
 
     def _pb_args(self) -> list[Value]:
         return [f._to_pb() for f in self.fields]
