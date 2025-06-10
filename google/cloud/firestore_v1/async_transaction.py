@@ -21,10 +21,7 @@ from typing import (
     AsyncGenerator,
     Awaitable,
     Callable,
-    Coroutine,
     Optional,
-    TypeVar,
-    Protocol,
 )
 
 from google.api_core import exceptions, gapic_v1
@@ -47,13 +44,14 @@ from google.cloud.firestore_v1.base_transaction import (
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
     import datetime
+    from typing_extensions import TypeVar, ParamSpec, Concatenate
 
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
-
-T = TypeVar("T", bound=Callable[..., Any])
+    T = TypeVar("T")
+    P = ParamSpec("P")
 
 
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
@@ -267,13 +265,13 @@ class _AsyncTransactional(_BaseTransactional):
     """
 
     def __init__(
-        self, to_wrap: Callable[..., Awaitable[T]]
+        self, to_wrap: Callable[Concatenate[AsyncTransaction, P], Awaitable[T]]
     ) -> None:
         super(_AsyncTransactional, self).__init__(to_wrap)
 
     async def _pre_commit(
-        self, transaction: AsyncTransaction, *args: Any, **kwargs: Any
-    ) -> Coroutine:
+        self, transaction: AsyncTransaction, *args: P.args, **kwargs: P.kwargs
+    ) -> T:
         """Begin transaction and call the wrapped coroutine.
 
         Args:
@@ -301,9 +299,7 @@ class _AsyncTransactional(_BaseTransactional):
             self.retry_id = self.current_id
         return await self.to_wrap(transaction, *args, **kwargs)
 
-    async def __call__(
-        self, transaction: AsyncTransaction, *args: Any, **kwargs: Any
-    ) -> T:
+    async def __call__(self, transaction, *args: P.args, **kwargs: P.kwargs) -> T:
         """Execute the wrapped callable within a transaction.
 
         Args:
@@ -330,7 +326,7 @@ class _AsyncTransactional(_BaseTransactional):
 
         try:
             for attempt in range(transaction._max_attempts):
-                result = await self._pre_commit(transaction, *args, **kwargs)
+                result: T = await self._pre_commit(transaction, *args, **kwargs)
                 try:
                     await transaction._commit()
                     return result
@@ -354,12 +350,9 @@ class _AsyncTransactional(_BaseTransactional):
             raise
 
 
-class WithAsyncTransaction(Protocol[T]):
-    def __call__(self, transaction: AsyncTransaction, *args: Any, **kwargs: Any) -> Awaitable[T]: ...
-
 def async_transactional(
-    to_wrap: Callable[..., Awaitable[T]]
-) -> WithAsyncTransaction[T]:
+    to_wrap: Callable[Concatenate[AsyncTransaction, P], Awaitable[T]]
+) -> Callable[Concatenate[AsyncTransaction, P], Awaitable[T]]:
     """Decorate a callable so that it runs in a transaction.
 
     Args:
