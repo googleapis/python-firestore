@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import random
+
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -44,6 +45,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
         BaseVectorQuery,
         DistanceMeasure,
     )
+    from google.cloud.firestore_v1.async_document import AsyncDocumentReference
     from google.cloud.firestore_v1.document import DocumentReference
     from google.cloud.firestore_v1.field_path import FieldPath
     from google.cloud.firestore_v1.query_profile import ExplainOptions
@@ -52,6 +54,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.vector import Vector
     from google.cloud.firestore_v1.vector_query import VectorQuery
+
+    import datetime
 
 _AUTO_ID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
@@ -129,7 +133,7 @@ class BaseCollectionReference(Generic[QueryType]):
     def _vector_query(self) -> BaseVectorQuery:
         raise NotImplementedError
 
-    def document(self, document_id: Optional[str] = None) -> DocumentReference:
+    def document(self, document_id: Optional[str] = None):
         """Create a sub-document underneath the current collection.
 
         Args:
@@ -139,7 +143,7 @@ class BaseCollectionReference(Generic[QueryType]):
                 uppercase and lowercase and letters.
 
         Returns:
-            :class:`~google.cloud.firestore_v1.document.DocumentReference`:
+            :class:`~google.cloud.firestore_v1.base_document.BaseDocumentReference`:
             The child document.
         """
         if document_id is None:
@@ -179,7 +183,7 @@ class BaseCollectionReference(Generic[QueryType]):
         document_id: Optional[str] = None,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
-    ) -> Tuple[DocumentReference, dict]:
+    ):
         """Shared setup for async / sync :method:`add`"""
         if document_id is None:
             document_id = _auto_id()
@@ -203,6 +207,7 @@ class BaseCollectionReference(Generic[QueryType]):
         page_size: Optional[int] = None,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, dict]:
         """Shared setup for async / sync :method:`list_documents`"""
         parent, _ = self._parent_info()
@@ -216,6 +221,8 @@ class BaseCollectionReference(Generic[QueryType]):
             # to include no fields
             "mask": {"field_paths": None},
         }
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
@@ -225,8 +232,11 @@ class BaseCollectionReference(Generic[QueryType]):
         page_size: Optional[int] = None,
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
+        *,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Union[
-        Generator[DocumentReference, Any, Any], AsyncGenerator[DocumentReference, Any]
+        Generator[DocumentReference, Any, Any],
+        AsyncGenerator[AsyncDocumentReference, Any],
     ]:
         raise NotImplementedError
 
@@ -498,6 +508,7 @@ class BaseCollectionReference(Generic[QueryType]):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         QueryResultsList[DocumentSnapshot]
         | Coroutine[Any, Any, QueryResultsList[DocumentSnapshot]]
@@ -511,6 +522,7 @@ class BaseCollectionReference(Generic[QueryType]):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> StreamGenerator[DocumentSnapshot] | AsyncIterator[DocumentSnapshot]:
         raise NotImplementedError
 
@@ -602,13 +614,17 @@ def _auto_id() -> str:
     return "".join(random.choice(_AUTO_ID_CHARS) for _ in range(20))
 
 
-def _item_to_document_ref(collection_reference, item) -> DocumentReference:
+def _item_to_document_ref(collection_reference, item):
     """Convert Document resource to document ref.
 
     Args:
         collection_reference (google.api_core.page_iterator.GRPCIterator):
             iterator response
         item (dict): document resource
+
+    Returns:
+            :class:`~google.cloud.firestore_v1.base_document.BaseDocumentReference`:
+            The child document
     """
     document_id = item.name.split(_helpers.DOCUMENT_PATH_DELIMITER)[-1]
     return collection_reference.document(document_id)

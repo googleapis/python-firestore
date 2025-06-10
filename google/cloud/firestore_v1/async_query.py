@@ -20,7 +20,16 @@ a more common way to create a query than direct usage of the constructor.
 """
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, AsyncGenerator, List, Optional, Type
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    AsyncGenerator,
+    List,
+    Optional,
+    Type,
+    Union,
+    Sequence,
+)
 
 from google.api_core import gapic_v1
 from google.api_core import retry_async as retries
@@ -40,6 +49,8 @@ from google.cloud.firestore_v1.base_query import (
 from google.cloud.firestore_v1.query_results import QueryResultsList
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
+
     # Types needed only for Type Hints
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
@@ -182,6 +193,7 @@ class AsyncQuery(BaseQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> QueryResultsList[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
@@ -201,6 +213,10 @@ class AsyncQuery(BaseQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
 
         If a ``transaction`` is used and it already has write operations
         added, this method cannot be used (i.e. read-after-write is not
@@ -230,6 +246,7 @@ class AsyncQuery(BaseQuery):
             retry=retry,
             timeout=timeout,
             explain_options=explain_options,
+            read_time=read_time,
         )
         try:
             result_list = [d async for d in result]
@@ -248,7 +265,7 @@ class AsyncQuery(BaseQuery):
     def find_nearest(
         self,
         vector_field: str,
-        query_vector: Vector,
+        query_vector: Union[Vector, Sequence[float]],
         limit: int,
         distance_measure: DistanceMeasure,
         *,
@@ -261,7 +278,7 @@ class AsyncQuery(BaseQuery):
         Args:
             vector_field (str): An indexed vector field to search upon. Only documents which contain
                 vectors whose dimensionality match the query_vector can be returned.
-            query_vector (Vector): The query vector that we are searching on. Must be a vector of no more
+            query_vector (Vector | Sequence[float]): The query vector that we are searching on. Must be a vector of no more
                 than 2048 dimensions.
             limit (int): The number of nearest neighbors to return. Must be a positive integer of no more than 1000.
             distance_measure (:class:`DistanceMeasure`): The Distance Measure to use.
@@ -336,6 +353,7 @@ class AsyncQuery(BaseQuery):
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> AsyncGenerator[DocumentSnapshot | query_profile_pb.ExplainMetrics, Any]:
         """Internal method for stream(). Read the documents in the collection
         that match this query.
@@ -368,6 +386,10 @@ class AsyncQuery(BaseQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
 
         Yields:
             [:class:`~google.cloud.firestore_v1.base_document.DocumentSnapshot` \
@@ -381,6 +403,7 @@ class AsyncQuery(BaseQuery):
             retry,
             timeout,
             explain_options,
+            read_time,
         )
 
         response_iterator = await self._client._firestore_api.run_query(
@@ -412,6 +435,7 @@ class AsyncQuery(BaseQuery):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> AsyncStreamGenerator[DocumentSnapshot]:
         """Read the documents in the collection that match this query.
 
@@ -443,6 +467,10 @@ class AsyncQuery(BaseQuery):
                 (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
 
         Returns:
             `AsyncStreamGenerator[DocumentSnapshot]`:
@@ -453,6 +481,7 @@ class AsyncQuery(BaseQuery):
             retry=retry,
             timeout=timeout,
             explain_options=explain_options,
+            read_time=read_time,
         )
         return AsyncStreamGenerator(inner_generator, explain_options)
 
@@ -514,6 +543,8 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
         partition_count,
         retry: retries.AsyncRetry | object | None = gapic_v1.method.DEFAULT,
         timeout: float | None = None,
+        *,
+        read_time: Optional[datetime.datetime] = None,
     ) -> AsyncGenerator[QueryPartition, None]:
         """Partition a query for parallelization.
 
@@ -529,8 +560,15 @@ class AsyncCollectionGroup(AsyncQuery, BaseCollectionGroup):
                 should be retried.  Defaults to a system-specified policy.
             timeout (float): The timeout for this request.  Defaults to a
                 system-specified value.
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
         """
-        request, kwargs = self._prep_get_partitions(partition_count, retry, timeout)
+        request, kwargs = self._prep_get_partitions(
+            partition_count, retry, timeout, read_time
+        )
+
         pager = await self._client._firestore_api.partition_query(
             request=request,
             metadata=self._client._rpc_metadata,
