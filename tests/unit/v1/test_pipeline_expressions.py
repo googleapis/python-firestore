@@ -82,6 +82,70 @@ class TestExpr:
         with pytest.raises(TypeError):
             expr.Expr()
 
+    @pytest.mark.parametrize(
+        "method,args,result_cls",
+        [
+            ("add", (2,), expr.Add),
+            ("subtract", (2,), expr.Subtract),
+            ("multiply", (2,), expr.Multiply),
+            ("divide", (2,), expr.Divide),
+            ("mod", (2,), expr.Mod),
+            ("logical_max", (2,), expr.LogicalMax),
+            ("logical_min", (2,), expr.LogicalMin),
+            ("eq", (2,), expr.Eq),
+            ("neq", (2,), expr.Neq),
+            ("lt", (2,), expr.Lt),
+            ("lte", (2,), expr.Lte),
+            ("gt", (2,), expr.Gt),
+            ("gte", (2,), expr.Gte),
+            ("in_any", ([None],), expr.In),
+            ("not_in_any", ([None],), expr.Not),
+            ("array_contains", (None,), expr.ArrayContains),
+            ("array_contains_all", ([None],), expr.ArrayContainsAll),
+            ("array_contains_any", ([None],), expr.ArrayContainsAny),
+            ("array_length", (), expr.ArrayLength),
+            ("array_reverse", (), expr.ArrayReverse),
+            ("is_nan", (), expr.IsNaN),
+            ("exists", (), expr.Exists),
+            ("sum", (), expr.Sum),
+            ("avg", (), expr.Avg),
+            ("count", (), expr.Count),
+            ("min", (), expr.Min),
+            ("max", (), expr.Max),
+            ("char_length", (), expr.CharLength),
+            ("byte_length", (), expr.ByteLength),
+            ("like", ("pattern",), expr.Like),
+            ("regex_contains", ("regex",), expr.RegexContains),
+            ("regex_matches", ("regex",), expr.RegexMatch),
+            ("str_contains", ("substring",), expr.StrContains),
+            ("starts_with", ("prefix",), expr.StartsWith),
+            ("ends_with", ("postfix",), expr.EndsWith),
+            ("str_concat", ("elem1", expr.Constant("elem2")), expr.StrConcat),
+            ("map_get", ("key",), expr.MapGet),
+            ("vector_length", (), expr.VectorLength),
+            ("timestamp_to_unix_micros", (), expr.TimestampToUnixMicros),
+            ("unix_micros_to_timestamp", (), expr.UnixMicrosToTimestamp),
+            ("timestamp_to_unix_millis", (), expr.TimestampToUnixMillis),
+            ("unix_millis_to_timestamp", (), expr.UnixMillisToTimestamp),
+            ("timestamp_to_unix_seconds", (), expr.TimestampToUnixSeconds),
+            ("unix_seconds_to_timestamp", (), expr.UnixSecondsToTimestamp),
+            ("timestamp_add", ("day", 1), expr.TimestampAdd),
+            ("timestamp_sub", ("hour", 2.5), expr.TimestampSub),
+            ("ascending", (), expr.Ordering),
+            ("descending", (), expr.Ordering),
+            ("as_", ("alias",), expr.ExprWithAlias),
+        ],
+    )
+    def test_infix_call(self, method, args, result_cls):
+        """
+        many FilterCondition expressions support infix execution, and are exposed as methods on Expr. Test calling them
+        """
+        base_instance = expr.Constant(1)
+        method_ptr = getattr(base_instance, method)
+
+        result = method_ptr(*args)
+        assert isinstance(result, result_cls)
+
 
 class TestConstant:
     @pytest.mark.parametrize(
@@ -520,33 +584,6 @@ class TestFilterCondition:
         with pytest.raises(TypeError, match="Unexpected filter type"):
             FilterCondition._from_query_filter_pb(document_pb.Value(), mock_client)
 
-    @pytest.mark.parametrize(
-        "method,args,result_cls",
-        [
-            ("eq", (2,), expr.Eq),
-            ("neq", (2,), expr.Neq),
-            ("lt", (2,), expr.Lt),
-            ("lte", (2,), expr.Lte),
-            ("gt", (2,), expr.Gt),
-            ("gte", (2,), expr.Gte),
-            ("in_any", ([None],), expr.In),
-            ("not_in_any", ([None],), expr.Not),
-            ("array_contains", (None,), expr.ArrayContains),
-            ("array_contains_any", ([None],), expr.ArrayContainsAny),
-            ("is_nan", (), expr.IsNaN),
-            ("exists", (), expr.Exists),
-        ],
-    )
-    def test_infix_call(self, method, args, result_cls):
-        """
-        most FilterExpressions should support infix execution
-        """
-        base_instance = expr.Constant(1)
-        method_ptr = getattr(base_instance, method)
-
-        result = method_ptr(*args)
-        assert isinstance(result, result_cls)
-
     def _make_arg(self, name="Mock"):
         arg = mock.Mock()
         arg.__repr__ = lambda x: name
@@ -566,7 +603,7 @@ class TestFilterCondition:
         instance = expr.Or(arg1, arg2)
         assert instance.name == "or"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Or(Arg1, Arg2)"
+        assert repr(instance) == "Arg1.or(Arg2)"
 
     def test_array_contains(self):
         arg1 = self._make_arg("ArrayField")
