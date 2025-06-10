@@ -244,6 +244,11 @@ class TestListOfExprs:
 
 
 class TestSelectable:
+    """
+    contains tests for each Expr class that derives from Selectable
+    """
+
+
     def test_ctor(self):
         """
         Base class should be abstract
@@ -609,6 +614,11 @@ class TestFilterCondition:
         with pytest.raises(TypeError, match="Unexpected filter type"):
             FilterCondition._from_query_filter_pb(document_pb.Value(), mock_client)
 
+class TestFilterConditionClasses:
+    """
+    contains test methods for each Expr class that derives from FilterCondition
+    """
+
     def _make_arg(self, name="Mock"):
         arg = mock.Mock()
         arg.__repr__ = lambda x: name
@@ -731,3 +741,117 @@ class TestFilterCondition:
         assert instance.name == "not"
         assert instance.params == [arg1]
         assert repr(instance) == "Not(Condition)"
+
+    def test_divide(self):
+        pass
+
+    def test_logical_max(self):
+        pass
+
+    def test_logical_min(self):
+        pass
+
+    def test_map_get(self):
+        pass
+
+    def test_mod(self):
+        pass
+
+    def test_multiply(self):
+        pass
+
+    def test_parent(self):
+        pass
+
+    def test_str_concat(self):
+        pass
+
+    def test_subtract(self):
+        pass
+
+    def test_timestamp_add(self):
+        pass
+
+    def test_timestamp_sub(self):
+        pass
+
+    def test_timestamp_to_unix_micros(self):
+        pass
+
+    def test_timestamp_to_unix_millis(self):
+        pass
+
+    def test_timestamp_to_unix_seconds(self):
+        pass
+
+    def test_unix_micros_to_timestamp(self):
+        pass
+
+    def test_unix_millis_to_timestamp(self):
+        pass
+
+    def test_unix_seconds_to_timestamp(self):
+        pass
+
+    def test_vector_length(self):
+        pass
+
+    def test_add(self):
+        pass
+
+    def test_array_element(self):
+        pass
+
+    def test_array_filter(self):
+        pass
+
+    def test_array_length(self):
+        pass
+
+    def test_array_reverse(self):
+        pass
+
+    def test_array_transform(self):
+        pass
+
+    def test_byte_length(self):
+        pass
+
+    def test_char_length(self):
+        pass
+
+    def test_collection_id(self):
+        pass
+
+    def test_accumulator(self):
+        pass
+
+    def test_max(self):
+        pass
+
+    def test_array_contains_all(self):
+        pass
+
+    def test_ends_with(self):
+        pass
+
+    def test_if(self):
+        pass
+
+    def test_like(self):
+        pass
+
+    def test_regex_contains(self):
+        pass
+
+    def test_regex_match(self):
+        pass
+
+    def test_starts_with(self):
+        pass
+
+    def test_str_contains(self):
+        pass
+
+    def test_xor(self):
+        pass
