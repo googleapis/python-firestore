@@ -1518,4 +1518,4 @@ class Xor(FilterCondition):
     """Represents the logical XOR of multiple filter conditions."""
 
     def __init__(self, conditions: List["FilterCondition"]):
-        super().__init__("or", conditions, use_infix_repr=False)
+        super().__init__("xor", conditions, use_infix_repr=False)

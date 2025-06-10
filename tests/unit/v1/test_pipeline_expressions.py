@@ -743,115 +743,290 @@ class TestFilterConditionClasses:
         assert repr(instance) == "Not(Condition)"
 
     def test_divide(self):
-        pass
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Divide(arg1, arg2)
+        assert instance.name == "divide"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Divide(Left, Right)"
 
     def test_logical_max(self):
-        pass
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.LogicalMax(arg1, arg2)
+        assert instance.name == "logical_maximum"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "LogicalMax(Left, Right)"
 
     def test_logical_min(self):
-        pass
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.LogicalMin(arg1, arg2)
+        assert instance.name == "logical_minimum"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "LogicalMin(Left, Right)"
 
     def test_map_get(self):
-        pass
+        arg1 = self._make_arg("Map")
+        arg2 = expr.Constant("Key")
+        instance = expr.MapGet(arg1, arg2)
+        assert instance.name == "map_get"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "MapGet(Map, Constant.of('Key'))"
 
     def test_mod(self):
-        pass
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Mod(arg1, arg2)
+        assert instance.name == "mod"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Mod(Left, Right)"
 
     def test_multiply(self):
-        pass
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Multiply(arg1, arg2)
+        assert instance.name == "multiply"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Multiply(Left, Right)"
 
     def test_parent(self):
-        pass
+        arg1 = self._make_arg("Value")
+        instance = expr.Parent(arg1)
+        assert instance.name == "parent"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Parent(Value)"
 
     def test_str_concat(self):
-        pass
+        arg1 = self._make_arg("Str1")
+        arg2 = self._make_arg("Str2")
+        instance = expr.StrConcat(arg1, arg2)
+        assert instance.name == "str_concat"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "StrConcat(Str1, Str2)"
 
     def test_subtract(self):
-        pass
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Subtract(arg1, arg2)
+        assert instance.name == "subtract"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Subtract(Left, Right)"
 
     def test_timestamp_add(self):
-        pass
+        arg1 = self._make_arg("Timestamp")
+        arg2 = self._make_arg("Unit")
+        arg3 = self._make_arg("Amount")
+        instance = expr.TimestampAdd(arg1, arg2, arg3)
+        assert instance.name == "timestamp_add"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "TimestampAdd(Timestamp, Unit, Amount)"
 
     def test_timestamp_sub(self):
-        pass
+        arg1 = self._make_arg("Timestamp")
+        arg2 = self._make_arg("Unit")
+        arg3 = self._make_arg("Amount")
+        instance = expr.TimestampSub(arg1, arg2, arg3)
+        assert instance.name == "timestamp_sub"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "TimestampSub(Timestamp, Unit, Amount)"
 
     def test_timestamp_to_unix_micros(self):
-        pass
+        arg1 = self._make_arg("Input")
+        instance = expr.TimestampToUnixMicros(arg1)
+        assert instance.name == "timestamp_to_unix_micros"
+        assert instance.params == [arg1]
+        assert repr(instance) == "TimestampToUnixMicros(Input)"
 
     def test_timestamp_to_unix_millis(self):
-        pass
+        arg1 = self._make_arg("Input")
+        instance = expr.TimestampToUnixMillis(arg1)
+        assert instance.name == "timestamp_to_unix_millis"
+        assert instance.params == [arg1]
+        assert repr(instance) == "TimestampToUnixMillis(Input)"
 
     def test_timestamp_to_unix_seconds(self):
-        pass
+        arg1 = self._make_arg("Input")
+        instance = expr.TimestampToUnixSeconds(arg1)
+        assert instance.name == "timestamp_to_unix_seconds"
+        assert instance.params == [arg1]
+        assert repr(instance) == "TimestampToUnixSeconds(Input)"
 
     def test_unix_micros_to_timestamp(self):
-        pass
+        arg1 = self._make_arg("Input")
+        instance = expr.UnixMicrosToTimestamp(arg1)
+        assert instance.name == "unix_micros_to_timestamp"
+        assert instance.params == [arg1]
+        assert repr(instance) == "UnixMicrosToTimestamp(Input)"
 
     def test_unix_millis_to_timestamp(self):
-        pass
+        arg1 = self._make_arg("Input")
+        instance = expr.UnixMillisToTimestamp(arg1)
+        assert instance.name == "unix_millis_to_timestamp"
+        assert instance.params == [arg1]
+        assert repr(instance) == "UnixMillisToTimestamp(Input)"
 
     def test_unix_seconds_to_timestamp(self):
-        pass
+        arg1 = self._make_arg("Input")
+        instance = expr.UnixSecondsToTimestamp(arg1)
+        assert instance.name == "unix_seconds_to_timestamp"
+        assert instance.params == [arg1]
+        assert repr(instance) == "UnixSecondsToTimestamp(Input)"
 
     def test_vector_length(self):
-        pass
+        arg1 = self._make_arg("Array")
+        instance = expr.VectorLength(arg1)
+        assert instance.name == "vector_length"
+        assert instance.params == [arg1]
+        assert repr(instance) == "VectorLength(Array)"
 
     def test_add(self):
-        pass
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.Add(arg1, arg2)
+        assert instance.name == "add"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Add(Left, Right)"
 
     def test_array_element(self):
-        pass
+        instance = expr.ArrayElement()
+        assert instance.name == "array_element"
+        assert instance.params == []
+        assert repr(instance) == "ArrayElement()"
 
     def test_array_filter(self):
-        pass
+        arg1 = self._make_arg("Array")
+        arg2 = self._make_arg("FilterCond")
+        instance = expr.ArrayFilter(arg1, arg2)
+        assert instance.name == "array_filter"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "ArrayFilter(Array, FilterCond)"
 
     def test_array_length(self):
-        pass
+        arg1 = self._make_arg("Array")
+        instance = expr.ArrayLength(arg1)
+        assert instance.name == "array_length"
+        assert instance.params == [arg1]
+        assert repr(instance) == "ArrayLength(Array)"
 
     def test_array_reverse(self):
-        pass
+        arg1 = self._make_arg("Array")
+        instance = expr.ArrayReverse(arg1)
+        assert instance.name == "array_reverse"
+        assert instance.params == [arg1]
+        assert repr(instance) == "ArrayReverse(Array)"
 
     def test_array_transform(self):
-        pass
+        arg1 = self._make_arg("Array")
+        arg2 = self._make_arg("TransformFunc")
+        instance = expr.ArrayTransform(arg1, arg2)
+        assert instance.name == "array_transform"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "ArrayTransform(Array, TransformFunc)"
 
     def test_byte_length(self):
-        pass
+        arg1 = self._make_arg("Expr")
+        instance = expr.ByteLength(arg1)
+        assert instance.name == "byte_length"
+        assert instance.params == [arg1]
+        assert repr(instance) == "ByteLength(Expr)"
 
     def test_char_length(self):
-        pass
+        arg1 = self._make_arg("Expr")
+        instance = expr.CharLength(arg1)
+        assert instance.name == "char_length"
+        assert instance.params == [arg1]
+        assert repr(instance) == "CharLength(Expr)"
 
     def test_collection_id(self):
-        pass
-
-    def test_accumulator(self):
-        pass
+        arg1 = self._make_arg("Value")
+        instance = expr.CollectionId(arg1)
+        assert instance.name == "collection_id"
+        assert instance.params == [arg1]
+        assert repr(instance) == "CollectionId(Value)"
 
     def test_max(self):
-        pass
+        arg1 = self._make_arg("Value")
+        instance = expr.Max(arg1)
+        assert instance.name == "maximum"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Max(Value)"
 
     def test_array_contains_all(self):
-        pass
+        arg1 = self._make_arg("ArrayField")
+        arg2 = self._make_arg("Element1")
+        arg3 = self._make_arg("Element2")
+        instance = expr.ArrayContainsAll(arg1, [arg2, arg3])
+        assert instance.name == "array_contains_all"
+        assert isinstance(instance.params[1], ListOfExprs)
+        assert instance.params[0] == arg1
+        assert instance.params[1].exprs == [arg2, arg3]
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_all(ListOfExprs([Element1, Element2]))"
+        )
 
     def test_ends_with(self):
-        pass
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Postfix")
+        instance = expr.EndsWith(arg1, arg2)
+        assert instance.name == "ends_with"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.ends_with(Postfix)"
 
     def test_if(self):
-        pass
+        arg1 = self._make_arg("Condition")
+        arg2 = self._make_arg("TrueExpr")
+        arg3 = self._make_arg("FalseExpr")
+        instance = expr.If(arg1, arg2, arg3)
+        assert instance.name == "if"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "If(Condition, TrueExpr, FalseExpr)"
 
     def test_like(self):
-        pass
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Pattern")
+        instance = expr.Like(arg1, arg2)
+        assert instance.name == "like"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.like(Pattern)"
 
     def test_regex_contains(self):
-        pass
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Regex")
+        instance = expr.RegexContains(arg1, arg2)
+        assert instance.name == "regex_contains"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.regex_contains(Regex)"
 
     def test_regex_match(self):
-        pass
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Regex")
+        instance = expr.RegexMatch(arg1, arg2)
+        assert instance.name == "regex_match"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.regex_match(Regex)"
 
     def test_starts_with(self):
-        pass
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Prefix")
+        instance = expr.StartsWith(arg1, arg2)
+        assert instance.name == "starts_with"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.starts_with(Prefix)"
 
     def test_str_contains(self):
-        pass
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Substring")
+        instance = expr.StrContains(arg1, arg2)
+        assert instance.name == "str_contains"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.str_contains(Substring)"
 
     def test_xor(self):
-        pass
+        arg1 = self._make_arg("Condition1")
+        arg2 = self._make_arg("Condition2")
+        instance = expr.Xor([arg1, arg2])
+        assert instance.name == "xor"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Xor(Condition1, Condition2)"
