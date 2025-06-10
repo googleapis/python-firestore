@@ -16,3 +16,7 @@ EMULATOR_CREDS = EmulatorCreds()
 FIRESTORE_EMULATOR = os.environ.get(_FIRESTORE_EMULATOR_HOST) is not None
 FIRESTORE_OTHER_DB = os.environ.get("SYSTEM_TESTS_DATABASE", "system-tests-named-db")
 FIRESTORE_ENTERPRISE_DB = os.environ.get("ENTERPRISE_DATABASE", "enterprise-db")
+
+# run all tests against default database, and a named database
+# TODO: add enterprise mode when GA (RunQuery not currently supported)
+TEST_DATABASES = [None, FIRESTORE_OTHER_DB]
