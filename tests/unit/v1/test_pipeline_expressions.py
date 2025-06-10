@@ -252,11 +252,11 @@ class TestSelectable:
             expr.Selectable()
 
     def test_value_from_selectables(self):
-        selectable_list = [expr.Field.of("field1"), expr.Field.of("field2")]
+        selectable_list = [expr.Field.of("field1"), expr.Field.of("field2").as_("alias2")]
         result = expr.Selectable._value_from_selectables(*selectable_list)
         assert len(result.map_value.fields) == 2
         assert result.map_value.fields["field1"].field_reference_value == "field1"
-        assert result.map_value.fields["field2"].field_reference_value == "field2"
+        assert result.map_value.fields["alias2"].field_reference_value == "field2"
 
     class TestField:
         def test_repr(self):
@@ -277,6 +277,31 @@ class TestSelectable:
             instance = expr.Field.of("field1")
             result = instance._to_map()
             assert result[0] == "field1"
+            assert result[1] == Value(field_reference_value="field1")
+
+    class TestExprWithAlias:
+        def test_repr(self):
+            instance = expr.Field.of("field1").as_("alias1")
+            assert repr(instance) == "Field.of('field1').as_('alias1')"
+
+        def test_ctor(self):
+            arg = expr.Field.of("field1")
+            alias = "alias1"
+            instance = expr.ExprWithAlias(arg, alias)
+            assert instance.expr == arg
+            assert instance.alias == alias
+
+        def test_to_pb(self):
+            arg = expr.Field.of("field1")
+            alias = "alias1"
+            instance = expr.ExprWithAlias(arg, alias)
+            result = instance._to_pb()
+            assert result.map_value.fields.get("alias1") == arg._to_pb()
+
+        def test_to_map(self):
+            instance = expr.Field.of("field1").as_("alias1")
+            result = instance._to_map()
+            assert result[0] == "alias1"
             assert result[1] == Value(field_reference_value="field1")
 
 
