@@ -80,6 +80,7 @@ def cleanup():
     for operation in operations:
         operation()
 
+
 def verify_pipeline(query):
     """
     This function ensures a pipeline produces the same
@@ -137,9 +138,7 @@ def test_collections_w_import(database):
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
-def test_collection_stream_or_get_w_no_explain_options(
-    database, query_docs, method
-):
+def test_collection_stream_or_get_w_no_explain_options(database, query_docs, method):
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
     collection, _, _ = query_docs
@@ -1298,9 +1297,7 @@ def test_query_stream_w_simple_field_eq_op(query_docs, database):
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
-def test_query_stream_w_simple_field_array_contains_op(
-    query_docs, database
-):
+def test_query_stream_w_simple_field_array_contains_op(query_docs, database):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("c", "array_contains", 1))
     values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
@@ -1361,9 +1358,7 @@ def test_query_stream_w_simple_not_in_op(query_docs, database):
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
-def test_query_stream_w_simple_field_array_contains_any_op(
-    query_docs, database
-):
+def test_query_stream_w_simple_field_array_contains_any_op(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
     query = collection.where(
@@ -1797,9 +1792,7 @@ def test_collection_group_queries(client, cleanup, database):
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
-def test_collection_group_queries_startat_endat(
-    client, cleanup, database
-):
+def test_collection_group_queries_startat_endat(client, cleanup, database):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
     doc_paths = [
@@ -3493,9 +3486,7 @@ def test_transaction_w_uuid(client, cleanup, database):
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
-def test_query_in_transaction_with_explain_options(
-    client, cleanup, database
-):
+def test_query_in_transaction_with_explain_options(client, cleanup, database):
     """
     Test query profiling in transactions.
     """
@@ -3613,9 +3604,7 @@ def test_update_w_uuid(client, cleanup, database):
 
 @pytest.mark.parametrize("with_rollback,expected", [(True, 2), (False, 3)])
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
-def test_transaction_rollback(
-    client, cleanup, database, with_rollback, expected
-):
+def test_transaction_rollback(client, cleanup, database, with_rollback, expected):
     """
     Create a document in a transaction that is rolled back
     Document should not show up in later queries
