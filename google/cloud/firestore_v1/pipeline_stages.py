@@ -169,7 +169,7 @@ class Aggregate(Stage):
 
     def __init__(
         self,
-        *extra_accumulators: ExprWithAlias[Accumulator],
+        *positional_accumulators: ExprWithAlias[Accumulator],
         accumulators: Sequence[ExprWithAlias[Accumulator]] = (),
         groups: Sequence[str | Selectable] = (),
     ):
@@ -177,10 +177,12 @@ class Aggregate(Stage):
         self.groups: list[Selectable] = [
             Field(f) if isinstance(f, str) else f for f in groups
         ]
-        self.accumulators: list[ExprWithAlias[Accumulator]] = [
-            *extra_accumulators,
-            *accumulators,
-        ]
+        if positional_accumulators and accumulators:
+            call_str = f"Aggregate({', '.join(positional_accumulators)}, accumulators={accumulators}, groups={groups})"
+            raise ValueError(
+                f"Aggregate stage contains both positional and keyword accumulators. (Received {call_str})"
+            )
+        self.accumulators: list[ExprWithAlias[Accumulator]] = positional_accumulators or accumulators
 
     def _pb_args(self):
         return [
