@@ -40,7 +40,7 @@ class AsyncPipeline(_BasePipeline):
         ...                      .collection("books")
         ...                      .where(Field.of("published").gt(1980))
         ...                      .select("title", "author")
-        ...     async for result in pipeline.execute_async():
+        ...     async for result in pipeline.execute():
         ...         print(result)
 
     Use `client.pipeline()` to create instances of this class.
