@@ -1980,6 +1980,16 @@ def test__collection_group_query_response_to_snapshot_response():
     assert snapshot.update_time == response_pb._pb.document.update_time
 
 
+def test__query_pipeline_no_client():
+    from google.cloud.firestore_v1 import pipeline_stages
+
+    mock_parent = mock.Mock()
+    mock_parent._client = None
+    query = _make_base_query(mock_parent)
+    with pytest.raises(ValueError, match="client"):
+        query.pipeline()
+
+
 def test__query_pipeline_decendants():
     from google.cloud.firestore_v1 import pipeline_stages
 
@@ -2125,7 +2135,7 @@ def test__query_pipeline_unsupported():
         query_end.pipeline()
 
     query_limit_last = client.collection("my_col").limit_to_last(10)
-    with pytest.raises(NotImplementedError, match="limitToLast"):
+    with pytest.raises(NotImplementedError, match="limit_to_last"):
         query_limit_last.pipeline()
 
 

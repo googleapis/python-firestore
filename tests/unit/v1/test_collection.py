@@ -15,6 +15,7 @@
 import types
 
 import mock
+import pytest
 
 from datetime import datetime, timezone
 from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT
@@ -508,6 +509,25 @@ def test_stream_w_read_time(query_class):
         transaction=None,
         read_time=read_time,
     )
+
+def test_collectionreference_pipeline():
+    from tests.unit.v1 import _test_helpers
+    from google.cloud.firestore_v1.pipeline import Pipeline
+    from google.cloud.firestore_v1.pipeline_stages import Collection
+
+    client = _test_helpers.make_client()
+    collection = _make_collection_reference("collection", client=client)
+    pipeline = collection.pipeline()
+    assert isinstance(pipeline, Pipeline)
+    # should have single "Collection" stage
+    assert len(pipeline.stages) == 1
+    assert isinstance(pipeline.stages[0], Collection)
+    assert pipeline.stages[0].path == "/collection"
+
+def test_collectionreference_pipeline_no_client():
+    collection = _make_collection_reference("collection")
+    with pytest.raises(ValueError, match="client"):
+        collection.pipeline()
 
 
 @mock.patch("google.cloud.firestore_v1.collection.Watch", autospec=True)
