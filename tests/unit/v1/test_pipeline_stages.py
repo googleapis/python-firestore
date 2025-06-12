@@ -85,7 +85,7 @@ class TestAggregate:
         sum_total = Sum(Field.of("total")).as_("sum_total")
         avg_price = Field.of("price").avg().as_("avg_price")
         instance = self._make_one(sum_total, avg_price)
-        assert instance.accumulators == [sum_total, avg_price]
+        assert list(instance.accumulators) == [sum_total, avg_price]
         assert len(instance.groups) == 0
         assert instance.name == "aggregate"
 
@@ -109,8 +109,8 @@ class TestAggregate:
         sum_total = Sum(Field.of("total")).as_("sum_total")
         avg_price = Field.of("price").avg().as_("avg_price")
         count = Count(Field.of("total")).as_("count")
-        instance = self._make_one(sum_total, accumulators=[avg_price, count])
-        assert instance.accumulators == [sum_total, avg_price, count]
+        with pytest.raises(ValueError):
+            self._make_one(sum_total, accumulators=[avg_price, count])
 
     def test_repr(self):
         sum_total = Sum(Field.of("total")).as_("sum_total")
