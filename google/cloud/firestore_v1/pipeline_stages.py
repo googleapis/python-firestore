@@ -180,7 +180,7 @@ class Aggregate(Stage):
         ]
         if args and accumulators:
             raise ValueError(
-                f"Aggregate stage contains both positional and keyword accumulators"
+                "Aggregate stage contains both positional and keyword accumulators"
             )
         self.accumulators = args or accumulators
 
