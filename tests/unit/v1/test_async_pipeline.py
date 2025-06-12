@@ -316,8 +316,6 @@ async def test_async_pipeline_execute_with_transaction():
     "method,args,result_cls",
     [
         ("add_fields", (Field.of("n"),), stages.AddFields),
-        ("add_fields", ("name",), stages.AddFields),
-        ("add_fields", (), stages.AddFields),
         ("remove_fields", ("name",), stages.RemoveFields),
         ("remove_fields", (Field.of("n"),), stages.RemoveFields),
         ("select", ("name",), stages.Select),

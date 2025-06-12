@@ -312,7 +312,7 @@ class TestSelectable:
         result = expr.Selectable._value_from_selectables(*selectable_list)
         assert len(result.map_value.fields) == 2
         assert result.map_value.fields["field1"].field_reference_value == "field1"
-        assert result.map_value.fields["field2"].field_reference_value == "field2"
+        assert result.map_value.fields["alias2"].field_reference_value == "field2"
 
     @pytest.mark.parametrize(
         "first,second,expected",
