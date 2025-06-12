@@ -215,7 +215,7 @@ class TestWhere:
         condition = Field.of("age").gt(30)
         instance = self._make_one(condition)
         repr_str = repr(instance)
-        assert repr_str == "Where(condition=Gt(Field.of('age'), Constant.of(30)))"
+        assert repr_str == "Where(condition=Field.of('age').gt(Constant.of(30)))"
 
     def test_to_pb(self):
         condition = Field.of("city").eq("SF")
