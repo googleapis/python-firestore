@@ -1130,6 +1130,19 @@ class BaseQuery(object):
         return copied
 
     def pipeline(self):
+        """
+        Convert this query into a Pipeline
+
+        Queries containing a `cursor` or `limit_to_last` are not currently supported
+
+        Raises:
+            - ValueError: raised if Query wasn't created with an associated client
+            - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
+        Returns:
+            a Pipeline representing the query
+        """
+        if not self._client:
+            raise ValueError("Query does not have an associated client")
         if self._all_descendants:
             ppl = self._client.pipeline().collection_group(self._parent.id)
         else:
@@ -1174,7 +1187,7 @@ class BaseQuery(object):
         # Cursors, Limit and Offset
         if self._start_at or self._end_at or self._limit_to_last:
             raise NotImplementedError(
-                "Query to Pipeline conversion: cursors and limitToLast is not supported yet."
+                "Query to Pipeline conversion: cursors and limit_to_last is not supported yet."
             )
         else:  # Limit & Offset without cursors
             if self._offset:
