@@ -90,45 +90,6 @@ class Ordering:
         )
 
 
-class SampleOptions:
-    """Options for the 'sample' pipeline stage."""
-
-    class Mode(Enum):
-        DOCUMENTS = "documents"
-        PERCENT = "percent"
-
-    def __init__(self, value: int | float, mode: Mode | str):
-        self.value = value
-        self.mode = SampleOptions.Mode[mode.upper()] if isinstance(mode, str) else mode
-
-    def __repr__(self):
-        if self.mode == SampleOptions.Mode.DOCUMENTS:
-            mode_str = "doc_limit"
-        else:
-            mode_str = "percentage"
-        return f"SampleOptions.{mode_str}({self.value})"
-
-    @staticmethod
-    def doc_limit(value: int):
-        """
-        Sample a set number of documents
-
-        Args:
-            value: number of documents to sample
-        """
-        return SampleOptions(value, mode=SampleOptions.Mode.DOCUMENTS)
-
-    @staticmethod
-    def percentage(value: float):
-        """
-        Sample a percentage of documents
-
-        Args:
-            value: percentage of documents to return
-        """
-        return SampleOptions(value, mode=SampleOptions.Mode.PERCENT)
-
-
 class Expr(ABC):
     """Represents an expression that can be evaluated to a value within the
     execution of a pipeline.
@@ -1111,6 +1072,12 @@ class Constant(Expr, Generic[CONSTANT_TYPE]):
     def __init__(self, value: CONSTANT_TYPE):
         self.value: CONSTANT_TYPE = value
 
+    def __eq__(self, other):
+        if not isinstance(other, Constant):
+            return other == self.value
+        else:
+            return other.value == self.value
+
     @staticmethod
     def of(value: CONSTANT_TYPE) -> Constant[CONSTANT_TYPE]:
         """Creates a constant expression from a Python value."""
@@ -1129,6 +1096,12 @@ class ListOfExprs(Expr):
     def __init__(self, exprs: List[Expr]):
         self.exprs: list[Expr] = exprs
 
+    def __eq__(self, other):
+        if not isinstance(other, ListOfExprs):
+            return False
+        else:
+            return other.exprs == self.exprs
+
     def __repr__(self):
         return f"{self.__class__.__name__}({self.exprs})"
 
@@ -1142,6 +1115,12 @@ class Function(Expr):
     def __init__(self, name: str, params: Sequence[Expr]):
         self.name = name
         self.params = list(params)
+
+    def __eq__(self, other):
+        if not isinstance(other, Function):
+            return False
+        else:
+            return other.name == self.name and other.params == self.params
 
     def __repr__(self):
         return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
@@ -1463,9 +1442,29 @@ class CountIf(Function):
 class Selectable(Expr):
     """Base class for expressions that can be selected or aliased in projection stages."""
 
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        else:
+            return other._to_map() == self._to_map()
+
     @abstractmethod
-    def _to_map(self):
+    def _to_map(self) -> tuple[str, Value]:
+        """
+        Returns a str: Value representation of the Selectable
+        """
         raise NotImplementedError
+
+    @classmethod
+    def _value_from_selectables(cls, *selectables: Selectable) -> Value:
+        """
+        Returns a Value representing a map of Selectables
+        """
+        return Value(
+            map_value={
+                "fields": {m[0]: m[1] for m in [s._to_map() for s in selectables]}
+            }
+        )
 
 
 T = TypeVar("T", bound=Expr)
@@ -1527,6 +1526,31 @@ class Field(Selectable):
 
 class FilterCondition(Function):
     """Filters the given data in some way."""
+
+    def __init__(
+        self,
+        *args,
+        use_infix_repr: bool = True,
+        infix_name_override: str | None = None,
+        **kwargs,
+    ):
+        self._use_infix_repr = use_infix_repr
+        self._infix_name_override = infix_name_override
+        super().__init__(*args, **kwargs)
+
+    def __repr__(self):
+        """
+        Most FilterConditions can be triggered infix. Eg: Field.of('age').gte(18).
+
+        Display them this way in the repr string where possible
+        """
+        if self._use_infix_repr:
+            infix_name = self._infix_name_override or self.name
+            if len(self.params) == 1:
+                return f"{self.params[0]!r}.{infix_name}()"
+            elif len(self.params) == 2:
+                return f"{self.params[0]!r}.{infix_name}({self.params[1]!r})"
+        return super().__repr__()
 
     @staticmethod
     def _from_query_filter_pb(filter_pb, client):
@@ -1594,7 +1618,7 @@ class FilterCondition(Function):
 
 class And(FilterCondition):
     def __init__(self, *conditions: "FilterCondition"):
-        super().__init__("and", conditions)
+        super().__init__("and", conditions, use_infix_repr=False)
 
 
 class ArrayContains(FilterCondition):
@@ -1666,7 +1690,9 @@ class In(FilterCondition):
     """Represents checking if an expression's value is within a list of values."""
 
     def __init__(self, left: Expr, others: List[Expr]):
-        super().__init__("in", [left, ListOfExprs(others)])
+        super().__init__(
+            "in", [left, ListOfExprs(others)], infix_name_override="in_any"
+        )
 
 
 class IsNaN(FilterCondition):
@@ -1708,7 +1734,7 @@ class Not(FilterCondition):
     """Represents the logical NOT of a filter condition."""
 
     def __init__(self, condition: Expr):
-        super().__init__("not", [condition])
+        super().__init__("not", [condition], use_infix_repr=False)
 
 
 class Or(FilterCondition):
@@ -1750,4 +1776,4 @@ class Xor(FilterCondition):
     """Represents the logical XOR of multiple filter conditions."""
 
     def __init__(self, conditions: List["FilterCondition"]):
-        super().__init__("xor", conditions)
+        super().__init__("xor", conditions, use_infix_repr=False)

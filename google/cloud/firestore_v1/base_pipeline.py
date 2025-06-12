@@ -29,11 +29,10 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Field,
     FilterCondition,
     Selectable,
-    SampleOptions,
 )
 from google.cloud.firestore_v1 import _helpers
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
@@ -376,7 +375,7 @@ class _BasePipeline:
         """
         return self._append(stages.Replace(field, mode))
 
-    def sample(self, limit_or_options: int | SampleOptions) -> "_BasePipeline":
+    def sample(self, limit_or_options: int | stages.SampleOptions) -> "_BasePipeline":
         """
         Performs a pseudo-random sampling of the documents from the previous stage.
 

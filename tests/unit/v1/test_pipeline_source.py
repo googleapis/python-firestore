@@ -18,6 +18,7 @@ from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
 from google.cloud.firestore_v1.client import Client
 from google.cloud.firestore_v1.async_client import AsyncClient
 from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 
 class TestPipelineSource:
@@ -43,6 +44,49 @@ class TestPipelineSource:
         first_stage = ppl.stages[0]
         assert isinstance(first_stage, stages.Collection)
         assert first_stage.path == "/path"
+
+    def test_collection_w_tuple(self):
+        instance = self._make_client().pipeline()
+        ppl = instance.collection(("a", "b", "c"))
+        assert isinstance(ppl, self._expected_pipeline_type)
+        assert len(ppl.stages) == 1
+        first_stage = ppl.stages[0]
+        assert isinstance(first_stage, stages.Collection)
+        assert first_stage.path == "/a/b/c"
+
+    def test_collection_group(self):
+        instance = self._make_client().pipeline()
+        ppl = instance.collection_group("id")
+        assert isinstance(ppl, self._expected_pipeline_type)
+        assert len(ppl.stages) == 1
+        first_stage = ppl.stages[0]
+        assert isinstance(first_stage, stages.CollectionGroup)
+        assert first_stage.collection_id == "id"
+
+    def test_database(self):
+        instance = self._make_client().pipeline()
+        ppl = instance.database()
+        assert isinstance(ppl, self._expected_pipeline_type)
+        assert len(ppl.stages) == 1
+        first_stage = ppl.stages[0]
+        assert isinstance(first_stage, stages.Database)
+
+    def test_documents(self):
+        instance = self._make_client().pipeline()
+        test_documents = [
+            BaseDocumentReference("a", "1"),
+            BaseDocumentReference("a", "2"),
+            BaseDocumentReference("a", "3"),
+        ]
+        ppl = instance.documents(*test_documents)
+        assert isinstance(ppl, self._expected_pipeline_type)
+        assert len(ppl.stages) == 1
+        first_stage = ppl.stages[0]
+        assert isinstance(first_stage, stages.Documents)
+        assert len(first_stage.paths) == 3
+        assert first_stage.paths[0] == "/a/1"
+        assert first_stage.paths[1] == "/a/2"
+        assert first_stage.paths[2] == "/a/3"
 
 
 class TestPipelineSourceWithAsyncClient(TestPipelineSource):

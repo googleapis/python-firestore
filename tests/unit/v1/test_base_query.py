@@ -1980,6 +1980,14 @@ def test__collection_group_query_response_to_snapshot_response():
     assert snapshot.update_time == response_pb._pb.document.update_time
 
 
+def test__query_pipeline_no_client():
+    mock_parent = mock.Mock()
+    mock_parent._client = None
+    query = _make_base_query(mock_parent)
+    with pytest.raises(ValueError, match="client"):
+        query.pipeline()
+
+
 def test__query_pipeline_decendants():
     from google.cloud.firestore_v1 import pipeline_stages
 
@@ -2005,7 +2013,8 @@ def test__query_pipeline_no_decendants(in_path, out_path):
     from google.cloud.firestore_v1 import pipeline_stages
 
     client = make_client()
-    query = client.collection(in_path)
+    collection = client.collection(in_path)
+    query = collection._query()
     pipeline = query.pipeline()
 
     assert len(pipeline.stages) == 1
@@ -2113,7 +2122,7 @@ def test__query_pipeline_order_sorts():
     assert sort_stage.orders[1].order_dir == expr.Ordering.Direction.DESCENDING
 
 
-def test__query_pipeline_cursor():
+def test__query_pipeline_unsupported():
     client = make_client()
     query_start = client.collection("my_col").start_at({"field_a": "value"})
     with pytest.raises(NotImplementedError, match="cursors"):
@@ -2124,7 +2133,7 @@ def test__query_pipeline_cursor():
         query_end.pipeline()
 
     query_limit_last = client.collection("my_col").limit_to_last(10)
-    with pytest.raises(NotImplementedError, match="limitToLast"):
+    with pytest.raises(NotImplementedError, match="limit_to_last"):
         query_limit_last.pipeline()
 
 

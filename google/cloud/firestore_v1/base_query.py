@@ -24,6 +24,7 @@ import abc
 import copy
 import math
 import warnings
+
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -32,6 +33,7 @@ from typing import (
     Iterable,
     List,
     Optional,
+    Sequence,
     Tuple,
     Type,
     Union,
@@ -65,6 +67,8 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.query_results import QueryResultsList
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
+
+    import datetime
 
 
 _BAD_DIR_STRING: str
@@ -179,7 +183,7 @@ def _validate_opation(op_string, value):
 class FieldFilter(BaseFilter):
     """Class representation of a Field Filter."""
 
-    def __init__(self, field_path, op_string, value=None):
+    def __init__(self, field_path: str, op_string: str, value: Any | None = None):
         self.field_path = field_path
         self.value = value
         self.op_string = _validate_opation(op_string, value)
@@ -205,8 +209,8 @@ class BaseCompositeFilter(BaseFilter):
 
     def __init__(
         self,
-        operator=StructuredQuery.CompositeFilter.Operator.OPERATOR_UNSPECIFIED,
-        filters=None,
+        operator: int = StructuredQuery.CompositeFilter.Operator.OPERATOR_UNSPECIFIED,
+        filters: list[BaseFilter] | None = None,
     ):
         self.operator = operator
         if filters is None:
@@ -238,7 +242,7 @@ class BaseCompositeFilter(BaseFilter):
 class Or(BaseCompositeFilter):
     """Class representation of an OR Filter."""
 
-    def __init__(self, filters):
+    def __init__(self, filters: list[BaseFilter]):
         super().__init__(
             operator=StructuredQuery.CompositeFilter.Operator.OR, filters=filters
         )
@@ -247,7 +251,7 @@ class Or(BaseCompositeFilter):
 class And(BaseCompositeFilter):
     """Class representation of an AND Filter."""
 
-    def __init__(self, filters):
+    def __init__(self, filters: list[BaseFilter]):
         super().__init__(
             operator=StructuredQuery.CompositeFilter.Operator.AND, filters=filters
         )
@@ -1001,7 +1005,7 @@ class BaseQuery(object):
     def find_nearest(
         self,
         vector_field: str,
-        query_vector: Vector,
+        query_vector: Union[Vector, Sequence[float]],
         limit: int,
         distance_measure: DistanceMeasure,
         *,
@@ -1032,6 +1036,7 @@ class BaseQuery(object):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         QueryResultsList[DocumentSnapshot]
         | Coroutine[Any, Any, QueryResultsList[DocumentSnapshot]]
@@ -1044,6 +1049,7 @@ class BaseQuery(object):
         retry: retries.Retry | retries.AsyncRetry | object | None = None,
         timeout: Optional[float] = None,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> Tuple[dict, str, dict]:
         """Shared setup for async / sync :meth:`stream`"""
         if self._limit_to_last:
@@ -1060,6 +1066,8 @@ class BaseQuery(object):
         }
         if explain_options is not None:
             request["explain_options"] = explain_options._to_dict()
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, expected_prefix, kwargs
@@ -1071,6 +1079,7 @@ class BaseQuery(object):
         timeout: Optional[float] = None,
         *,
         explain_options: Optional[ExplainOptions] = None,
+        read_time: Optional[datetime.datetime] = None,
     ) -> (
         StreamGenerator[document.DocumentSnapshot]
         | AsyncStreamGenerator[DocumentSnapshot]
@@ -1121,6 +1130,19 @@ class BaseQuery(object):
         return copied
 
     def pipeline(self):
+        """
+        Convert this query into a Pipeline
+
+        Queries containing a `cursor` or `limit_to_last` are not currently supported
+
+        Raises:
+            - ValueError: raised if Query wasn't created with an associated client
+            - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
+        Returns:
+            a Pipeline representing the query
+        """
+        if not self._client:
+            raise ValueError("Query does not have an associated client")
         if self._all_descendants:
             ppl = self._client.pipeline().collection_group(self._parent.id)
         else:
@@ -1165,7 +1187,7 @@ class BaseQuery(object):
         # Cursors, Limit and Offset
         if self._start_at or self._end_at or self._limit_to_last:
             raise NotImplementedError(
-                "Query to Pipeline conversion: cursors and limitToLast is not supported yet."
+                "Query to Pipeline conversion: cursors and limit_to_last is not supported yet."
             )
         else:  # Limit & Offset without cursors
             if self._offset:
@@ -1482,6 +1504,7 @@ class BaseCollectionGroup(BaseQuery):
         partition_count,
         retry: retries.Retry | object | None = None,
         timeout: float | None = None,
+        read_time: datetime.datetime | None = None,
     ) -> Tuple[dict, dict]:
         self._validate_partition_query()
         parent_path, expected_prefix = self._parent._parent_info()
@@ -1498,6 +1521,8 @@ class BaseCollectionGroup(BaseQuery):
             "structured_query": query._to_protobuf(),
             "partition_count": partition_count,
         }
+        if read_time is not None:
+            request["read_time"] = read_time
         kwargs = _helpers.make_retry_timeout_kwargs(retry, timeout)
 
         return request, kwargs
@@ -1507,6 +1532,8 @@ class BaseCollectionGroup(BaseQuery):
         partition_count,
         retry: Optional[retries.Retry] = None,
         timeout: Optional[float] = None,
+        *,
+        read_time: Optional[datetime.datetime] = None,
     ):
         raise NotImplementedError
 
