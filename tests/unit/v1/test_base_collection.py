@@ -421,6 +421,7 @@ def test_basecollectionreference_end_at(mock_query):
         mock_query.end_at.assert_called_once_with(doc_fields)
         assert query == mock_query.end_at.return_value
 
+
 @mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
 def test_basecollectionreference_pipeline(mock_query):
     from google.cloud.firestore_v1.base_collection import BaseCollectionReference

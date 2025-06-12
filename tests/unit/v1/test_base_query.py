@@ -1981,8 +1981,6 @@ def test__collection_group_query_response_to_snapshot_response():
 
 
 def test__query_pipeline_no_client():
-    from google.cloud.firestore_v1 import pipeline_stages
-
     mock_parent = mock.Mock()
     mock_parent._client = None
     query = _make_base_query(mock_parent)

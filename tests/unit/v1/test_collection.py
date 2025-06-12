@@ -510,6 +510,7 @@ def test_stream_w_read_time(query_class):
         read_time=read_time,
     )
 
+
 def test_collectionreference_pipeline():
     from tests.unit.v1 import _test_helpers
     from google.cloud.firestore_v1.pipeline import Pipeline
@@ -523,6 +524,7 @@ def test_collectionreference_pipeline():
     assert len(pipeline.stages) == 1
     assert isinstance(pipeline.stages[0], Collection)
     assert pipeline.stages[0].path == "/collection"
+
 
 def test_collectionreference_pipeline_no_client():
     collection = _make_collection_reference("collection")
