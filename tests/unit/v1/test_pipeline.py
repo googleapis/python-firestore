@@ -16,6 +16,9 @@ import mock
 import pytest
 
 from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1.pipeline_expressions import Field
+from google.cloud.firestore_v1.pipeline_expressions import Exists
+from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 
 
 def _make_pipeline(*args, client=mock.Mock()):
@@ -294,11 +297,31 @@ def test_pipeline_execute_with_transaction():
 @pytest.mark.parametrize(
     "method,args,result_cls",
     [
-        ("select", (), stages.Select),
-        ("where", (mock.Mock(),), stages.Where),
-        ("sort", (), stages.Sort),
+        ("add_fields", (Field.of("n"),), stages.AddFields),
+        ("add_fields", ("name",), stages.AddFields),
+        ("remove_fields", ("name",), stages.RemoveFields),
+        ("remove_fields", (Field.of("n"),), stages.RemoveFields),
+        ("select", ("name", ), stages.Select),
+        ("select", (Field.of("n"), ), stages.Select),
+        ("where", (Exists(Field.of("n")),), stages.Where),
+        ("find_nearest", ("name", [0.1], 0),stages.FindNearest),
+        ("find_nearest", ("name", [0.1], 0, stages.FindNearestOptions(10)),stages.FindNearest),
+        ("sort", (Field.of("n").descending(),), stages.Sort),
+        ("sort", (Field.of("n").descending(), Field.of("m").ascending()), stages.Sort),
+        ("sample", (10,), stages.Sample),
+        ("sample", (stages.SampleOptions.doc_limit(10),), stages.Sample),
+        ("union", (_make_pipeline(),), stages.Union),
+        ("unnest", ("field_name",), stages.Unnest),
+        ("unnest", ("field_name", "alias"), stages.Unnest),
+        ("unnest", (Field.of("n"), Field.of("alias")), stages.Unnest),
+        ("unnest", ("n", "a", stages.UnnestOptions("idx")), stages.Unnest),
+        ("generic_stage", ("stage_name",), stages.GenericStage),
+        ("generic_stage", ("stage_name", Field.of("n")), stages.GenericStage),
         ("offset", (1,), stages.Offset),
         ("limit", (1,), stages.Limit),
+        ("aggregate", (Field.of("n").as_("alias"),), stages.Aggregate),
+        ("distinct", ("field_name",), stages.Distinct),
+        ("distinct", (Field.of("n"), "second"), stages.Distinct),
     ],
 )
 def test_pipeline_methods(method, args, result_cls):
@@ -309,3 +332,12 @@ def test_pipeline_methods(method, args, result_cls):
     assert len(start_ppl.stages) == 0
     assert len(result_ppl.stages) == 1
     assert isinstance(result_ppl.stages[0], result_cls)
+
+def test_pipeline_aggregate_with_groups():
+    start_ppl = _make_pipeline()
+    result_ppl = start_ppl.aggregate(Field.of("title"), groups=[Field.of("author")])
+    assert len(start_ppl.stages) == 0
+    assert len(result_ppl.stages) == 1
+    assert isinstance(result_ppl.stages[0], stages.Aggregate)
+    assert list(result_ppl.stages[0].groups) == [Field.of("author")]
+    assert list(result_ppl.stages[0].accumulators) == [Field.of("title")]
