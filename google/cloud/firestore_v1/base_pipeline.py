@@ -119,7 +119,7 @@ class _BasePipeline:
                 doc._pb.update_time if doc.update_time else None,
             )
 
-    def add_fields(self, *fields: Selectable) -> "_BasePipeline":
+    def add_fields(self, *fields: Selectable | str) -> "_BasePipeline":
         """
         Adds new fields to outputs from previous stages.
 
