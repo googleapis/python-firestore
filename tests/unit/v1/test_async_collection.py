@@ -601,3 +601,23 @@ def test_asynccollectionreference_recursive():
 
     col = _make_async_collection_reference("collection")
     assert isinstance(col.recursive(), AsyncQuery)
+
+
+def test_asynccollectionreference_pipeline():
+    from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
+    from google.cloud.firestore_v1.pipeline_stages import Collection
+
+    client = make_async_client()
+    collection = _make_async_collection_reference("collection", client=client)
+    pipeline = collection.pipeline()
+    assert isinstance(pipeline, AsyncPipeline)
+    # should have single "Collection" stage
+    assert len(pipeline.stages) == 1
+    assert isinstance(pipeline.stages[0], Collection)
+    assert pipeline.stages[0].path == "/collection"
+
+
+def test_asynccollectionreference_pipeline_no_client():
+    collection = _make_async_collection_reference("collection")
+    with pytest.raises(ValueError, match="client"):
+        collection.pipeline()
