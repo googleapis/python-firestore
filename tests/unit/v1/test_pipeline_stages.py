@@ -25,9 +25,6 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Count,
 )
 from google.cloud.firestore_v1.types.document import Value
-from google.cloud.firestore_v1.types.pipeline import (
-    StructuredPipeline as StructuredPipeline_pb,
-)
 from google.cloud.firestore_v1._helpers import GeoPoint
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
@@ -536,7 +533,6 @@ class TestRemoveFields:
 
 
 class TestSample:
-
     class TestSampleOptions:
         def test_ctor_percent(self):
             instance = stages.SampleOptions(0.25, stages.SampleOptions.Mode.PERCENT)
@@ -565,7 +561,6 @@ class TestSample:
         def test_repr_documents(self):
             instance = stages.SampleOptions.doc_limit(10)
             assert repr(instance) == "SampleOptions.doc_limit(10)"
-
 
     def _make_one(self, *args, **kwargs):
         return stages.Sample(*args, **kwargs)

@@ -221,6 +221,24 @@ class TestConstant:
         assert repr_string == expected
 
 
+    @pytest.mark.parametrize("first,second,expected", [
+        (expr.Constant.of(1), expr.Constant.of(2), False),
+        (expr.Constant.of(1), expr.Constant.of(1), True),
+        (expr.Constant.of(1), 1, True),
+        (expr.Constant.of(1), 2, False),
+        (expr.Constant.of("1"), 1, False),
+        (expr.Constant.of("1"), "1", True),
+        (expr.Constant.of(None), expr.Constant.of(0), False),
+        (expr.Constant.of(None), expr.Constant.of(None), True),
+        (expr.Constant.of([1,2,3]), expr.Constant.of([1,2,3]), True),
+        (expr.Constant.of([1,2,3]), expr.Constant.of([1,2]), False),
+        (expr.Constant.of([1,2,3]), [1,2,3], True),
+        (expr.Constant.of([1,2,3]), object(), False),
+    ])
+    def test_equality(self, first, second, expected):
+        assert (first == second) is expected
+
+
 class TestListOfExprs:
     def test_to_pb(self):
         instance = expr.ListOfExprs([expr.Constant(1), expr.Constant(2)])
@@ -242,12 +260,25 @@ class TestListOfExprs:
         empty_repr_string = repr(empty_instance)
         assert empty_repr_string == "ListOfExprs([])"
 
+    @pytest.mark.parametrize("first,second,expected", [
+        (expr.ListOfExprs([]), expr.ListOfExprs([]), True),
+        (expr.ListOfExprs([]), expr.ListOfExprs([expr.Constant(1)]), False),
+        (expr.ListOfExprs([expr.Constant(1)]), expr.ListOfExprs([]), False),
+        (expr.ListOfExprs([expr.Constant(1)]), expr.ListOfExprs([expr.Constant(1)]), True),
+        (expr.ListOfExprs([expr.Constant(1)]), expr.ListOfExprs([expr.Constant(2)]), False),
+        (expr.ListOfExprs([expr.Constant(1), expr.Constant(2)]), expr.ListOfExprs([expr.Constant(1), expr.Constant(2)]), True),
+        (expr.ListOfExprs([expr.Constant(1)]), [expr.Constant(1)], False),
+        (expr.ListOfExprs([expr.Constant(1)]), [1], False),
+        (expr.ListOfExprs([expr.Constant(1)]), object(), False),
+    ])
+    def test_equality(self, first, second, expected):
+        assert (first == second) is expected
+
 
 class TestSelectable:
     """
     contains tests for each Expr class that derives from Selectable
     """
-
 
     def test_ctor(self):
         """
@@ -257,11 +288,21 @@ class TestSelectable:
             expr.Selectable()
 
     def test_value_from_selectables(self):
-        selectable_list = [expr.Field.of("field1"), expr.Field.of("field2").as_("alias2")]
+        selectable_list = [
+            expr.Field.of("field1"),
+            expr.Field.of("field2").as_("alias2"),
+        ]
         result = expr.Selectable._value_from_selectables(*selectable_list)
         assert len(result.map_value.fields) == 2
         assert result.map_value.fields["field1"].field_reference_value == "field1"
         assert result.map_value.fields["alias2"].field_reference_value == "field2"
+
+    @pytest.mark.parametrize("first,second,expected", [
+        (expr.Field.of("field1"), expr.Field.of("field1"), True),
+        (expr.Field.of("field1"), expr.Field.of("field2"), False),
+    ])
+    def test_equality(self, first, second, expected):
+        assert (first == second) is expected
 
     class TestField:
         def test_repr(self):
@@ -311,6 +352,17 @@ class TestSelectable:
 
 
 class TestFilterCondition:
+
+    @pytest.mark.parametrize("first,second,expected", [
+        (expr.IsNaN(expr.Field.of("field1")), expr.IsNaN(expr.Field.of("field1")), True),
+        (expr.IsNaN(expr.Field.of("real")), expr.IsNaN(expr.Field.of("fale")), False),
+        (expr.Gt(0, 1), expr.Gt(0, 1), True),
+        (expr.Gt(0, 1), expr.Gt(1, 0), False),
+        (expr.Gt(0, 1), expr.Lt(0, 1), False),
+    ])
+    def test_equality(self, first, second, expected):
+        assert (first == second) is expected
+
     def test__from_query_filter_pb_composite_filter_or(self, mock_client):
         """
         test composite OR filters
@@ -613,6 +665,7 @@ class TestFilterCondition:
         # Test with an unexpected protobuf type
         with pytest.raises(TypeError, match="Unexpected filter type"):
             FilterCondition._from_query_filter_pb(document_pb.Value(), mock_client)
+
 
 class TestFilterConditionClasses:
     """

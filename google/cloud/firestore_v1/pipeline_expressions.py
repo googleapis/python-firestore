@@ -908,6 +908,12 @@ class Constant(Expr, Generic[CONSTANT_TYPE]):
     def __init__(self, value: CONSTANT_TYPE):
         self.value: CONSTANT_TYPE = value
 
+    def __eq__(self, other):
+        if not isinstance(other, Constant):
+            return other == self.value
+        else:
+            return other.value == self.value
+
     @staticmethod
     def of(value: CONSTANT_TYPE) -> Constant[CONSTANT_TYPE]:
         """Creates a constant expression from a Python value."""
@@ -926,6 +932,12 @@ class ListOfExprs(Expr):
     def __init__(self, exprs: List[Expr]):
         self.exprs: list[Expr] = exprs
 
+    def __eq__(self, other):
+        if not isinstance(other, ListOfExprs):
+            return False
+        else:
+            return other.exprs == self.exprs
+
     def __repr__(self):
         return f"{self.__class__.__name__}({self.exprs})"
 
@@ -939,6 +951,12 @@ class Function(Expr):
     def __init__(self, name: str, params: Sequence[Expr]):
         self.name = name
         self.params = list(params)
+
+    def __eq__(self, other):
+        if not isinstance(other, Function):
+            return False
+        else:
+            return other.name == self.name and other.params == self.params
 
     def __repr__(self):
         return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
@@ -1189,6 +1207,12 @@ class CountIf(Function):
 
 class Selectable(Expr):
     """Base class for expressions that can be selected or aliased in projection stages."""
+
+    def __eq__(self, other):
+        if not isinstance(other, type(self)):
+            return False
+        else:
+            return other._to_map() == self._to_map()
 
     @abstractmethod
     def _to_map(self) -> tuple[str, Value]:

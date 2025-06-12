@@ -102,6 +102,7 @@ class SampleOptions:
         """
         return SampleOptions(value, mode=SampleOptions.Mode.PERCENT)
 
+
 class UnnestOptions:
     """Options for configuring the `Unnest` pipeline stage.
 
