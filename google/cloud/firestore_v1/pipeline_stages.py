@@ -381,7 +381,7 @@ class Replace(Stage):
         MERGE_PREFER_PARENT = 2
 
         def __repr__(self):
-            return f'Replace.Mode.{self.name.upper()}'
+            return f"Replace.Mode.{self.name.upper()}"
 
     def __init__(self, field: Selectable | str, mode: Mode | str = Mode.FULL_REPLACE):
         super().__init__()
