@@ -100,6 +100,7 @@ class TestExpr:
             ("gte", (2,), expr.Gte),
             ("in_any", ([None],), expr.In),
             ("not_in_any", ([None],), expr.Not),
+            ("array_concat", ([None],), expr.ArrayConcat),
             ("array_contains", (None,), expr.ArrayContains),
             ("array_contains_all", ([None],), expr.ArrayContainsAll),
             ("array_contains_any", ([None],), expr.ArrayContainsAny),
@@ -121,7 +122,16 @@ class TestExpr:
             ("starts_with", ("prefix",), expr.StartsWith),
             ("ends_with", ("postfix",), expr.EndsWith),
             ("str_concat", ("elem1", expr.Constant("elem2")), expr.StrConcat),
+            ("to_lower", (), expr.ToLower),
+            ("to_upper", (), expr.ToUpper),
+            ("trim", (), expr.Trim),
+            ("reverse", (), expr.Reverse),
+            ("replace_first", ("1", "2"), expr.ReplaceFirst),
+            ("replace_all", ("1", "2"), expr.ReplaceAll),
             ("map_get", ("key",), expr.MapGet),
+            ("cosine_distance", [1], expr.CosineDistance),
+            ("euclidean_distance", [1], expr.EuclideanDistance),
+            ("dot_product", [1], expr.DotProduct),
             ("vector_length", (), expr.VectorLength),
             ("timestamp_to_unix_micros", (), expr.TimestampToUnixMicros),
             ("unix_micros_to_timestamp", (), expr.UnixMicrosToTimestamp),
@@ -825,6 +835,96 @@ class TestFilterConditionClasses:
         assert instance.params == [arg1]
         assert repr(instance) == "Not(Condition)"
 
+    def test_array_contains_all(self):
+        arg1 = self._make_arg("ArrayField")
+        arg2 = self._make_arg("Element1")
+        arg3 = self._make_arg("Element2")
+        instance = expr.ArrayContainsAll(arg1, [arg2, arg3])
+        assert instance.name == "array_contains_all"
+        assert isinstance(instance.params[1], ListOfExprs)
+        assert instance.params[0] == arg1
+        assert instance.params[1].exprs == [arg2, arg3]
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_all(ListOfExprs([Element1, Element2]))"
+        )
+
+    def test_ends_with(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Postfix")
+        instance = expr.EndsWith(arg1, arg2)
+        assert instance.name == "ends_with"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.ends_with(Postfix)"
+
+    def test_if(self):
+        arg1 = self._make_arg("Condition")
+        arg2 = self._make_arg("TrueExpr")
+        arg3 = self._make_arg("FalseExpr")
+        instance = expr.If(arg1, arg2, arg3)
+        assert instance.name == "if"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "If(Condition, TrueExpr, FalseExpr)"
+
+    def test_like(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Pattern")
+        instance = expr.Like(arg1, arg2)
+        assert instance.name == "like"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.like(Pattern)"
+
+    def test_regex_contains(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Regex")
+        instance = expr.RegexContains(arg1, arg2)
+        assert instance.name == "regex_contains"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.regex_contains(Regex)"
+
+    def test_regex_match(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Regex")
+        instance = expr.RegexMatch(arg1, arg2)
+        assert instance.name == "regex_match"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.regex_match(Regex)"
+
+    def test_starts_with(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Prefix")
+        instance = expr.StartsWith(arg1, arg2)
+        assert instance.name == "starts_with"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.starts_with(Prefix)"
+
+    def test_str_contains(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Substring")
+        instance = expr.StrContains(arg1, arg2)
+        assert instance.name == "str_contains"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.str_contains(Substring)"
+
+    def test_xor(self):
+        arg1 = self._make_arg("Condition1")
+        arg2 = self._make_arg("Condition2")
+        instance = expr.Xor([arg1, arg2])
+        assert instance.name == "xor"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Xor(Condition1, Condition2)"
+
+
+class TestFunctionClasses:
+    """
+    contains test methods for each Expr class that derives from Function
+    """
+
+    def _make_arg(self, name="Mock"):
+        arg = mock.Mock()
+        arg.__repr__ = lambda x: name
+        return arg
+
     def test_divide(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
@@ -1035,81 +1135,80 @@ class TestFilterConditionClasses:
         assert instance.params == [arg1]
         assert repr(instance) == "Max(Value)"
 
-    def test_array_contains_all(self):
-        arg1 = self._make_arg("ArrayField")
-        arg2 = self._make_arg("Element1")
-        arg3 = self._make_arg("Element2")
-        instance = expr.ArrayContainsAll(arg1, [arg2, arg3])
-        assert instance.name == "array_contains_all"
-        assert isinstance(instance.params[1], ListOfExprs)
-        assert instance.params[0] == arg1
-        assert instance.params[1].exprs == [arg2, arg3]
-        assert (
-            repr(instance)
-            == "ArrayField.array_contains_all(ListOfExprs([Element1, Element2]))"
-        )
-
-    def test_ends_with(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Postfix")
-        instance = expr.EndsWith(arg1, arg2)
-        assert instance.name == "ends_with"
+    def test_dot_product(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.DotProduct(arg1, arg2)
+        assert instance.name == "dot_product"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.ends_with(Postfix)"
+        assert repr(instance) == "DotProduct(Left, Right)"
 
-    def test_if(self):
-        arg1 = self._make_arg("Condition")
-        arg2 = self._make_arg("TrueExpr")
-        arg3 = self._make_arg("FalseExpr")
-        instance = expr.If(arg1, arg2, arg3)
-        assert instance.name == "if"
+    def test_euclidean_distance(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.EuclideanDistance(arg1, arg2)
+        assert instance.name == "euclidean_distance"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "EuclideanDistance(Left, Right)"
+
+    def test_cosine_distance(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.CosineDistance(arg1, arg2)
+        assert instance.name == "cosine_distance"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "CosineDistance(Left, Right)"
+
+    def test_replace_all(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("OldValue")
+        arg3 = self._make_arg("NewValue")
+        instance = expr.ReplaceAll(arg1, arg2, arg3)
+        assert instance.name == "replace_all"
         assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "If(Condition, TrueExpr, FalseExpr)"
 
-    def test_like(self):
+    def test_replace_first(self):
         arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Pattern")
-        instance = expr.Like(arg1, arg2)
-        assert instance.name == "like"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.like(Pattern)"
+        arg2 = self._make_arg("OldValue")
+        arg3 = self._make_arg("NewValue")
+        instance = expr.ReplaceFirst(arg1, arg2, arg3)
+        assert instance.name == "replace_first"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "ReplaceFirst(Expr, OldValue, NewValue)"
 
-    def test_regex_contains(self):
+    def test_reverse(self):
         arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Regex")
-        instance = expr.RegexContains(arg1, arg2)
-        assert instance.name == "regex_contains"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.regex_contains(Regex)"
+        instance = expr.Reverse(arg1)
+        assert instance.name == "reverse"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Reverse(Expr)"
 
-    def test_regex_match(self):
+    def test_to_lower(self):
         arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Regex")
-        instance = expr.RegexMatch(arg1, arg2)
-        assert instance.name == "regex_match"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.regex_match(Regex)"
+        instance = expr.ToLower(arg1)
+        assert instance.name == "to_lower"
+        assert instance.params == [arg1]
+        assert repr(instance) == "ToLower(Expr)"
 
-    def test_starts_with(self):
+    def test_to_upper(self):
         arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Prefix")
-        instance = expr.StartsWith(arg1, arg2)
-        assert instance.name == "starts_with"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.starts_with(Prefix)"
+        instance = expr.ToUpper(arg1)
+        assert instance.name == "to_upper"
+        assert instance.params == [arg1]
+        assert repr(instance) == "ToUpper(Expr)"
 
-    def test_str_contains(self):
+    def test_trim(self):
         arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Substring")
-        instance = expr.StrContains(arg1, arg2)
-        assert instance.name == "str_contains"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.str_contains(Substring)"
+        instance = expr.Trim(arg1)
+        assert instance.name == "trim"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Trim(Expr)"
 
-    def test_xor(self):
-        arg1 = self._make_arg("Condition1")
-        arg2 = self._make_arg("Condition2")
-        instance = expr.Xor([arg1, arg2])
-        assert instance.name == "xor"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Xor(Condition1, Condition2)"
+    def test_array_concat(self):
+        arg1 = self._make_arg("1")
+        arg2 = self._make_arg("2")
+        arg3 = self._make_arg("3")
+        instance = expr.ArrayConcat(arg1, [arg2, arg3])
+        assert instance.name == "array_concat"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "ArrayConcat(1, 2, 3)"

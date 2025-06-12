@@ -532,6 +532,47 @@ class TestRemoveFields:
         assert len(result.options) == 0
 
 
+class TestReplace:
+    def _make_one(self, *args, **kwargs):
+        return stages.Replace(*args, **kwargs)
+
+    def test_ctor_default(self):
+        instance = self._make_one("field")
+        assert isinstance(instance.field, Field)
+        assert instance.field.path == "field"
+        # default mode is FULL_REPLACE
+        assert instance.mode == stages.Replace.Mode.FULL_REPLACE
+
+    @pytest.mark.parametrize("mode_str,expected_mode", [
+            ("full_replace", stages.Replace.Mode.FULL_REPLACE),
+            ("merge_prefer_next", stages.Replace.Mode.MERGE_PREFER_NEXT),
+            ("merge_prefer_parent", stages.Replace.Mode.MERGE_PREFER_PARENT),
+    ])
+    def test_ctor_str_mode(self, mode_str, expected_mode):
+        instance = self._make_one("field", mode_str)
+        assert instance.mode == expected_mode
+        assert repr(instance) == f"Replace(field=Field.of('field'), mode=Replace.Mode.{mode_str.upper()})"
+
+    def test_ctor_w_field(self):
+        field = Field.of("field")
+        instance = self._make_one(field)
+        assert isinstance(instance.field, Field)
+        assert instance.field == field
+
+    def test_repr(self):
+        instance = self._make_one("field", stages.Replace.Mode.MERGE_PREFER_NEXT)
+        repr_str = repr(instance)
+        assert repr_str == "Replace(field=Field.of('field'), mode=Replace.Mode.MERGE_PREFER_NEXT)"
+
+    def test_to_pb(self):
+        instance = self._make_one("field", stages.Replace.Mode.MERGE_PREFER_NEXT)
+        result = instance._to_pb()
+        assert result.name == "replace"
+        assert len(result.args) == 2
+        assert result.args[0].field_reference_value == "field"
+        assert result.args[1].string_value == "merge_prefer_next"
+
+
 class TestSample:
     class TestSampleOptions:
         def test_ctor_percent(self):
