@@ -382,27 +382,6 @@ class TestSelectable:
 
 
 class TestFilterCondition:
-    @pytest.mark.parametrize(
-        "first,second,expected",
-        [
-            (
-                expr.IsNaN(expr.Field.of("field1")),
-                expr.IsNaN(expr.Field.of("field1")),
-                True,
-            ),
-            (
-                expr.IsNaN(expr.Field.of("real")),
-                expr.IsNaN(expr.Field.of("fale")),
-                False,
-            ),
-            (expr.Gt(0, 1), expr.Gt(0, 1), True),
-            (expr.Gt(0, 1), expr.Gt(1, 0), False),
-            (expr.Gt(0, 1), expr.Lt(0, 1), False),
-        ],
-    )
-    def test_equality(self, first, second, expected):
-        assert (first == second) is expected
-
     def test__from_query_filter_pb_composite_filter_or(self, mock_client):
         """
         test composite OR filters
@@ -919,6 +898,22 @@ class TestFunctionClasses:
     """
     contains test methods for each Expr class that derives from Function
     """
+
+    @pytest.mark.parametrize(
+        "first,second,expected",
+        [
+            (expr.ArrayElement(), expr.ArrayElement(), True),
+            (expr.ArrayElement(), expr.CharLength(1), False),
+            (expr.ArrayElement(), object(), False),
+            (expr.ArrayElement(), None, False),
+            (expr.CharLength(1), expr.ArrayElement(), False),
+            (expr.CharLength(1), expr.CharLength(2), False),
+            (expr.CharLength(1), expr.CharLength(1), True),
+            (expr.CharLength(1), expr.ByteLength(1), False),
+        ],
+    )
+    def test_equality(self, first, second, expected):
+        assert (first == second) is expected
 
     def _make_arg(self, name="Mock"):
         arg = mock.Mock()
