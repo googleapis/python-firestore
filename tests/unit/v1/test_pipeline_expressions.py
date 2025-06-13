@@ -372,27 +372,6 @@ class TestSelectable:
 
 
 class TestFilterCondition:
-    @pytest.mark.parametrize(
-        "first,second,expected",
-        [
-            (
-                expr.IsNaN(expr.Field.of("field1")),
-                expr.IsNaN(expr.Field.of("field1")),
-                True,
-            ),
-            (
-                expr.IsNaN(expr.Field.of("real")),
-                expr.IsNaN(expr.Field.of("fale")),
-                False,
-            ),
-            (expr.Gt(0, 1), expr.Gt(0, 1), True),
-            (expr.Gt(0, 1), expr.Gt(1, 0), False),
-            (expr.Gt(0, 1), expr.Lt(0, 1), False),
-        ],
-    )
-    def test_equality(self, first, second, expected):
-        assert (first == second) is expected
-
     def test__from_query_filter_pb_composite_filter_or(self, mock_client):
         """
         test composite OR filters
@@ -825,6 +804,112 @@ class TestFilterConditionClasses:
         assert instance.params == [arg1]
         assert repr(instance) == "Not(Condition)"
 
+    def test_array_contains_all(self):
+        arg1 = self._make_arg("ArrayField")
+        arg2 = self._make_arg("Element1")
+        arg3 = self._make_arg("Element2")
+        instance = expr.ArrayContainsAll(arg1, [arg2, arg3])
+        assert instance.name == "array_contains_all"
+        assert isinstance(instance.params[1], ListOfExprs)
+        assert instance.params[0] == arg1
+        assert instance.params[1].exprs == [arg2, arg3]
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_all(ListOfExprs([Element1, Element2]))"
+        )
+
+    def test_ends_with(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Postfix")
+        instance = expr.EndsWith(arg1, arg2)
+        assert instance.name == "ends_with"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.ends_with(Postfix)"
+
+    def test_if(self):
+        arg1 = self._make_arg("Condition")
+        arg2 = self._make_arg("TrueExpr")
+        arg3 = self._make_arg("FalseExpr")
+        instance = expr.If(arg1, arg2, arg3)
+        assert instance.name == "if"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "If(Condition, TrueExpr, FalseExpr)"
+
+    def test_like(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Pattern")
+        instance = expr.Like(arg1, arg2)
+        assert instance.name == "like"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.like(Pattern)"
+
+    def test_regex_contains(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Regex")
+        instance = expr.RegexContains(arg1, arg2)
+        assert instance.name == "regex_contains"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.regex_contains(Regex)"
+
+    def test_regex_match(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Regex")
+        instance = expr.RegexMatch(arg1, arg2)
+        assert instance.name == "regex_match"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.regex_match(Regex)"
+
+    def test_starts_with(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Prefix")
+        instance = expr.StartsWith(arg1, arg2)
+        assert instance.name == "starts_with"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.starts_with(Prefix)"
+
+    def test_str_contains(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("Substring")
+        instance = expr.StrContains(arg1, arg2)
+        assert instance.name == "str_contains"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Expr.str_contains(Substring)"
+
+    def test_xor(self):
+        arg1 = self._make_arg("Condition1")
+        arg2 = self._make_arg("Condition2")
+        instance = expr.Xor([arg1, arg2])
+        assert instance.name == "xor"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Xor(Condition1, Condition2)"
+
+
+class TestFunctionClasses:
+    """
+    contains test methods for each Expr class that derives from Function
+    """
+
+    @pytest.mark.parametrize(
+        "first,second,expected",
+        [
+            (expr.ArrayElement(), expr.ArrayElement(), True),
+            (expr.ArrayElement(), expr.CharLength(1), False),
+            (expr.ArrayElement(), object(), False),
+            (expr.ArrayElement(), None, False),
+            (expr.CharLength(1), expr.ArrayElement(), False),
+            (expr.CharLength(1), expr.CharLength(2), False),
+            (expr.CharLength(1), expr.CharLength(1), True),
+            (expr.CharLength(1), expr.ByteLength(1), False),
+        ],
+    )
+    def test_equality(self, first, second, expected):
+        assert (first == second) is expected
+
+    def _make_arg(self, name="Mock"):
+        arg = mock.Mock()
+        arg.__repr__ = lambda x: name
+        return arg
+
     def test_divide(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
@@ -1034,82 +1119,3 @@ class TestFilterConditionClasses:
         assert instance.name == "maximum"
         assert instance.params == [arg1]
         assert repr(instance) == "Max(Value)"
-
-    def test_array_contains_all(self):
-        arg1 = self._make_arg("ArrayField")
-        arg2 = self._make_arg("Element1")
-        arg3 = self._make_arg("Element2")
-        instance = expr.ArrayContainsAll(arg1, [arg2, arg3])
-        assert instance.name == "array_contains_all"
-        assert isinstance(instance.params[1], ListOfExprs)
-        assert instance.params[0] == arg1
-        assert instance.params[1].exprs == [arg2, arg3]
-        assert (
-            repr(instance)
-            == "ArrayField.array_contains_all(ListOfExprs([Element1, Element2]))"
-        )
-
-    def test_ends_with(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Postfix")
-        instance = expr.EndsWith(arg1, arg2)
-        assert instance.name == "ends_with"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.ends_with(Postfix)"
-
-    def test_if(self):
-        arg1 = self._make_arg("Condition")
-        arg2 = self._make_arg("TrueExpr")
-        arg3 = self._make_arg("FalseExpr")
-        instance = expr.If(arg1, arg2, arg3)
-        assert instance.name == "if"
-        assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "If(Condition, TrueExpr, FalseExpr)"
-
-    def test_like(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Pattern")
-        instance = expr.Like(arg1, arg2)
-        assert instance.name == "like"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.like(Pattern)"
-
-    def test_regex_contains(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Regex")
-        instance = expr.RegexContains(arg1, arg2)
-        assert instance.name == "regex_contains"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.regex_contains(Regex)"
-
-    def test_regex_match(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Regex")
-        instance = expr.RegexMatch(arg1, arg2)
-        assert instance.name == "regex_match"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.regex_match(Regex)"
-
-    def test_starts_with(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Prefix")
-        instance = expr.StartsWith(arg1, arg2)
-        assert instance.name == "starts_with"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.starts_with(Prefix)"
-
-    def test_str_contains(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("Substring")
-        instance = expr.StrContains(arg1, arg2)
-        assert instance.name == "str_contains"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.str_contains(Substring)"
-
-    def test_xor(self):
-        arg1 = self._make_arg("Condition1")
-        arg2 = self._make_arg("Condition2")
-        instance = expr.Xor([arg1, arg2])
-        assert instance.name == "xor"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Xor(Condition1, Condition2)"
