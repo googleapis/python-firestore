@@ -310,6 +310,8 @@ def test_pipeline_execute_with_transaction():
         ),
         ("sort", (Field.of("n").descending(),), stages.Sort),
         ("sort", (Field.of("n").descending(), Field.of("m").ascending()), stages.Sort),
+        ("replace", (Field.of("n"),), stages.Replace),
+        ("replace", (Field.of("n"), stages.Replace.Mode.FULL_REPLACE), stages.Replace),
         ("sample", (10,), stages.Sample),
         ("sample", (stages.SampleOptions.doc_limit(10),), stages.Sample),
         ("union", (_make_pipeline(),), stages.Union),
