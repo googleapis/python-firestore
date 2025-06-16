@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Iterable, TYPE_CHECKING
+from typing import Iterable, Sequence, TYPE_CHECKING
 from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
@@ -49,7 +49,7 @@ class _BasePipeline:
             client: The client associated with the pipeline
         """
         self._client = client
-        self.stages = tuple()
+        self.stages: Sequence[stages.Stage] = tuple()
 
     @classmethod
     def _create_with_stages(
