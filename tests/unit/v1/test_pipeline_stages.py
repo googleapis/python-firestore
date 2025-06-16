@@ -14,7 +14,7 @@
 
 import pytest
 
-import google.cloud.firestore_v1.pipeline_stages as stages
+import google.cloud.firestore_v1._pipeline_stages as stages
 from google.cloud.firestore_v1.pipeline_expressions import Constant
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1._helpers import GeoPoint

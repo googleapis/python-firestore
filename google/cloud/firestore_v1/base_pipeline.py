@@ -14,12 +14,13 @@
 
 from __future__ import annotations
 from typing import Iterable, TYPE_CHECKING
-from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
+from google.cloud.firestore_v1.pipeline_expressions import Expr
 from google.cloud.firestore_v1 import _helpers
 
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -37,7 +38,23 @@ class _BasePipeline:
     Use `client.collection.("...").pipeline()` to create pipeline instances.
     """
 
-    def __init__(self, client: Client | AsyncClient, *stages: stages.Stage):
+    def __init__(self, client: Client | AsyncClient):
+        """
+        Initializes a new pipeline.
+
+        Pipelines should not be instantiated directly. Instead,
+        call client.pipeline() to create an instance
+
+        Args:
+            client: The client associated with the pipeline
+        """
+        self._client = client
+        self.stages = tuple()
+
+    @classmethod
+    def _create_with_stages(
+        cls, client: Client | AsyncClient, *stages
+    ) -> _BasePipeline:
         """
         Initializes a new pipeline with the given stages.
 
@@ -47,8 +64,9 @@ class _BasePipeline:
             client: The client associated with the pipeline
             *stages: Initial stages for the pipeline.
         """
-        self._client = client
-        self.stages = tuple(stages)
+        new_instance = cls(client)
+        new_instance.stages = tuple(stages)
+        return new_instance
 
     def __repr__(self):
         cls_str = type(self).__name__
@@ -69,7 +87,7 @@ class _BasePipeline:
         """
         Create a new Pipeline object with a new stage appended
         """
-        return self.__class__(self._client, *self.stages, new_stage)
+        return self.__class__._create_with_stages(self._client, *self.stages, new_stage)
 
     def _prep_execute_request(
         self, transaction: BaseTransaction | None

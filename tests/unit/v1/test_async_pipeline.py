@@ -19,7 +19,7 @@ import pytest
 def _make_async_pipeline(*args, client=mock.Mock()):
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
 
-    return AsyncPipeline(client, *args)
+    return AsyncPipeline._create_with_stages(client, *args)
 
 
 async def _async_it(list):
@@ -31,8 +31,17 @@ def test_ctor():
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
 
     client = object()
+    instance = AsyncPipeline(client)
+    assert instance._client == client
+    assert len(instance.stages) == 0
+
+
+def test_create():
+    from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
+
+    client = object()
     stages = [object() for i in range(10)]
-    instance = AsyncPipeline(client, *stages)
+    instance = AsyncPipeline._create_with_stages(client, *stages)
     assert instance._client == client
     assert len(instance.stages) == 10
     assert instance.stages[0] == stages[0]
@@ -54,7 +63,7 @@ def test_async_pipeline_repr_single_stage():
 
 
 def test_async_pipeline_repr_multiple_stage():
-    from google.cloud.firestore_v1.pipeline_stages import GenericStage, Collection
+    from google.cloud.firestore_v1._pipeline_stages import GenericStage, Collection
 
     stage_1 = Collection("path")
     stage_2 = GenericStage("second", 2)
@@ -71,7 +80,7 @@ def test_async_pipeline_repr_multiple_stage():
 
 
 def test_async_pipeline_repr_long():
-    from google.cloud.firestore_v1.pipeline_stages import GenericStage
+    from google.cloud.firestore_v1._pipeline_stages import GenericStage
 
     num_stages = 100
     stage_list = [GenericStage("custom", i) for i in range(num_stages)]
@@ -83,7 +92,7 @@ def test_async_pipeline_repr_long():
 
 def test_async_pipeline__to_pb():
     from google.cloud.firestore_v1.types.pipeline import StructuredPipeline
-    from google.cloud.firestore_v1.pipeline_stages import GenericStage
+    from google.cloud.firestore_v1._pipeline_stages import GenericStage
 
     stage_1 = GenericStage("first")
     stage_2 = GenericStage("second")
@@ -96,7 +105,7 @@ def test_async_pipeline__to_pb():
 
 def test_async_pipeline_append():
     """append should create a new pipeline with the additional stage"""
-    from google.cloud.firestore_v1.pipeline_stages import GenericStage
+    from google.cloud.firestore_v1._pipeline_stages import GenericStage
 
     stage_1 = GenericStage("first")
     ppl_1 = _make_async_pipeline(stage_1, client=object())
@@ -118,7 +127,7 @@ async def test_async_pipeline_stream_empty():
     """
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import ExecutePipelineRequest
-    from google.cloud.firestore_v1.pipeline_stages import GenericStage
+    from google.cloud.firestore_v1._pipeline_stages import GenericStage
 
     client = mock.Mock()
     client.project = "A"
@@ -145,7 +154,7 @@ async def test_async_pipeline_stream_no_doc_ref():
     from google.cloud.firestore_v1.types import Document
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import ExecutePipelineRequest
-    from google.cloud.firestore_v1.pipeline_stages import GenericStage
+    from google.cloud.firestore_v1._pipeline_stages import GenericStage
     from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
     client = mock.Mock()
