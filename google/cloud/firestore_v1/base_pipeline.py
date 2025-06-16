@@ -126,3 +126,26 @@ class _BasePipeline:
                 doc._pb.create_time if doc.create_time else None,
                 doc._pb.update_time if doc.update_time else None,
             )
+
+    def generic_stage(self, name: str, *params: Expr) -> "_BasePipeline":
+        """
+        Adds a generic, named stage to the pipeline with specified parameters.
+
+        This method provides a flexible way to extend the pipeline's functionality
+        by adding custom stages. Each generic stage is defined by a unique `name`
+        and a set of `params` that control its behavior.
+
+        Example:
+            >>> # Assume we don't have a built-in "where" stage
+            >>> pipeline = client.pipeline().collection("books")
+            >>> pipeline = pipeline.generic_stage("where", [Field.of("published").lt(900)])
+            >>> pipeline = pipeline.select("title", "author")
+
+        Args:
+            name: The name of the generic stage.
+            *params: A sequence of `Expr` objects representing the parameters for the stage.
+
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.GenericStage(name, *params))
