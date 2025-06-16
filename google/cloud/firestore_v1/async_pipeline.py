@@ -59,9 +59,26 @@ class AsyncPipeline(_BasePipeline):
     async def execute(
         self,
         transaction: "AsyncTransaction" | None = None,
+    ) -> list[PipelineResult]:
+        """
+        Executes this pipeline and returns results as a list
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+                If a ``transaction`` is used and it already has write operations
+                added, this method cannot be used (i.e. read-after-write is not
+                allowed).
+        """
+        return [result async for result in self.stream(transaction=transaction)]
+
+    async def stream(
+        self,
+        transaction: "AsyncTransaction" | None = None,
     ) -> AsyncIterable[PipelineResult]:
         """
-        Executes this pipeline, providing results through an Iterable
+        Process this pipeline as a stream, providing results through an Iterable
 
         Args:
             transaction
