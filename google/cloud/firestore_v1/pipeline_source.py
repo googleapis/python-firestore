@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 from typing import Generic, TypeVar, TYPE_CHECKING
-from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 from google.cloud.firestore_v1._helpers import DOCUMENT_PATH_DELIMITER
 
@@ -31,19 +31,16 @@ class PipelineSource(Generic[PipelineType]):
     A factory for creating Pipeline instances, which provide a framework for building data
     transformation and query pipelines for Firestore.
 
-    Start by calling client.pipeline() to obtain an instance of PipelineSource.
-    From there, you can use the provided methods .collection() to specify the
-    data source for your pipeline.
-
-    This class is typically used to start building Firestore pipelines. It allows you to define
-    the initial data source for a pipeline.
+    Not meant to be instantiated directly. Instead, start by calling client.pipeline()
+    to obtain an instance of PipelineSource. From there, you can use the provided
+    methods to specify the data source for your pipeline.
     """
 
     def __init__(self, client: Client | AsyncClient):
         self.client = client
 
     def _create_pipeline(self, source_stage):
-        return self.client._pipeline_cls(self.client, source_stage)
+        return self.client._pipeline_cls._create_with_stages(self.client, source_stage)
 
     def collection(self, path: str | tuple[str]) -> PipelineType:
         """

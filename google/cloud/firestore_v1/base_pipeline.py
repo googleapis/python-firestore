@@ -13,14 +13,15 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Iterable, TYPE_CHECKING
-from google.cloud.firestore_v1 import pipeline_stages as stages
+from typing import Iterable, Sequence, TYPE_CHECKING
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_expressions import (
+    Expr,
     FilterCondition,
     Selectable,
 )
@@ -41,7 +42,23 @@ class _BasePipeline:
     Use `client.pipeline()` to create pipeline instances.
     """
 
-    def __init__(self, client: Client | AsyncClient, *stages: stages.Stage):
+    def __init__(self, client: Client | AsyncClient):
+        """
+        Initializes a new pipeline.
+
+        Pipelines should not be instantiated directly. Instead,
+        call client.pipeline() to create an instance
+
+        Args:
+            client: The client associated with the pipeline
+        """
+        self._client = client
+        self.stages: Sequence[stages.Stage] = tuple()
+
+    @classmethod
+    def _create_with_stages(
+        cls, client: Client | AsyncClient, *stages
+    ) -> _BasePipeline:
         """
         Initializes a new pipeline with the given stages.
 
@@ -51,8 +68,9 @@ class _BasePipeline:
             client: The client associated with the pipeline
             *stages: Initial stages for the pipeline.
         """
-        self._client = client
-        self.stages = tuple(stages)
+        new_instance = cls(client)
+        new_instance.stages = tuple(stages)
+        return new_instance
 
     def __repr__(self):
         cls_str = type(self).__name__
@@ -73,7 +91,7 @@ class _BasePipeline:
         """
         Create a new Pipeline object with a new stage appended
         """
-        return self.__class__(self._client, *self.stages, new_stage)
+        return self.__class__._create_with_stages(self._client, *self.stages, new_stage)
 
     def _prep_execute_request(
         self, transaction: BaseTransaction | None
@@ -112,6 +130,29 @@ class _BasePipeline:
                 doc._pb.create_time if doc.create_time else None,
                 doc._pb.update_time if doc.update_time else None,
             )
+
+    def generic_stage(self, name: str, *params: Expr) -> "_BasePipeline":
+        """
+        Adds a generic, named stage to the pipeline with specified parameters.
+
+        This method provides a flexible way to extend the pipeline's functionality
+        by adding custom stages. Each generic stage is defined by a unique `name`
+        and a set of `params` that control its behavior.
+
+        Example:
+            >>> # Assume we don't have a built-in "where" stage
+            >>> pipeline = client.pipeline().collection("books")
+            >>> pipeline = pipeline.generic_stage("where", [Field.of("published").lt(900)])
+            >>> pipeline = pipeline.select("title", "author")
+
+        Args:
+            name: The name of the generic stage.
+            *params: A sequence of `Expr` objects representing the parameters for the stage.
+
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.GenericStage(name, *params))
 
     def select(self, *selections: str | Selectable) -> "_BasePipeline":
         """

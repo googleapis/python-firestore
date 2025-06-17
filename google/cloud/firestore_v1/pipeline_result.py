@@ -23,6 +23,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
     from google.protobuf.timestamp_pb2 import Timestamp
     from google.cloud.firestore_v1.types.document import Value as ValueProto
+    from google.cloud.firestore_v1.vector import Vector
 
 
 class PipelineResult:
@@ -109,16 +110,12 @@ class PipelineResult:
             return NotImplemented
         return (self._ref == other._ref) and (self._fields_pb == other._fields_pb)
 
-    def data(self) -> Any:
+    def data(self) -> dict | "Vector" | None:
         """
         Retrieves all fields in the result.
 
-        If a converter was provided to this `PipelineResult`, the result of the
-        converter's `from_firestore` method is returned.
-
         Returns:
-            The data, either as a custom object (if a converter is used) or a dictionary.
-            Returns `None` if the document doesn't exist.
+            The data in dictionary format, or `None` if the document doesn't exist.
         """
         if self._fields_pb is None:
             return None

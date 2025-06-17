@@ -15,21 +15,30 @@
 import mock
 import pytest
 
-from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 
 
 def _make_pipeline(*args, client=mock.Mock()):
     from google.cloud.firestore_v1.pipeline import Pipeline
 
-    return Pipeline(client, *args)
+    return Pipeline._create_with_stages(client, *args)
 
 
 def test_ctor():
     from google.cloud.firestore_v1.pipeline import Pipeline
 
     client = object()
+    instance = Pipeline(client)
+    assert instance._client == client
+    assert len(instance.stages) == 0
+
+
+def test_create():
+    from google.cloud.firestore_v1.pipeline import Pipeline
+
+    client = object()
     stages = [object() for i in range(10)]
-    instance = Pipeline(client, *stages)
+    instance = Pipeline._create_with_stages(client, *stages)
     assert instance._client == client
     assert len(instance.stages) == 10
     assert instance.stages[0] == stages[0]
@@ -88,6 +97,7 @@ def test_pipeline__to_pb():
 
 def test_pipeline_append():
     """append should create a new pipeline with the additional stage"""
+
     stage_1 = stages.GenericStage("first")
     ppl_1 = _make_pipeline(stage_1, client=object())
     stage_2 = stages.GenericStage("second")
@@ -101,9 +111,9 @@ def test_pipeline_append():
     assert isinstance(ppl_2, type(ppl_1))
 
 
-def test_pipeline_execute_empty():
+def test_pipeline_stream_empty():
     """
-    test execute pipeline with mocked empty response
+    test stream pipeline with mocked empty response
     """
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import ExecutePipelineRequest
@@ -115,7 +125,7 @@ def test_pipeline_execute_empty():
     mock_rpc.return_value = [ExecutePipelineResponse()]
     ppl_1 = _make_pipeline(stages.GenericStage("s"), client=client)
 
-    results = list(ppl_1.execute())
+    results = list(ppl_1.stream())
     assert results == []
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
@@ -124,9 +134,9 @@ def test_pipeline_execute_empty():
     assert request.database == "projects/A/databases/B"
 
 
-def test_pipeline_execute_no_doc_ref():
+def test_pipeline_stream_no_doc_ref():
     """
-    test execute pipeline with no doc ref
+    test stream pipeline with no doc ref
     """
     from google.cloud.firestore_v1.types import Document
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
@@ -142,7 +152,7 @@ def test_pipeline_execute_no_doc_ref():
     ]
     ppl_1 = _make_pipeline(stages.GenericStage("s"), client=client)
 
-    results = list(ppl_1.execute())
+    results = list(ppl_1.stream())
     assert len(results) == 1
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
@@ -160,9 +170,9 @@ def test_pipeline_execute_no_doc_ref():
     assert response.data() == {}
 
 
-def test_pipeline_execute_populated():
+def test_pipeline_stream_populated():
     """
-    test execute pipeline with fully populated doc ref
+    test stream pipeline with fully populated doc ref
     """
     from google.cloud.firestore_v1.types import Document
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
@@ -194,7 +204,7 @@ def test_pipeline_execute_populated():
     ]
     ppl_1 = _make_pipeline(client=client)
 
-    results = list(ppl_1.execute())
+    results = list(ppl_1.stream())
     assert len(results) == 1
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
@@ -214,9 +224,9 @@ def test_pipeline_execute_populated():
     assert response.data() == {"key": "str_val"}
 
 
-def test_pipeline_execute_multiple():
+def test_pipeline_stream_multiple():
     """
-    test execute pipeline with multiple docs and responses
+    test stream pipeline with multiple docs and responses
     """
     from google.cloud.firestore_v1.types import Document
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
@@ -250,7 +260,7 @@ def test_pipeline_execute_multiple():
     ]
     ppl_1 = _make_pipeline(client=client)
 
-    results = list(ppl_1.execute())
+    results = list(ppl_1.stream())
     assert len(results) == 4
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
@@ -263,9 +273,9 @@ def test_pipeline_execute_multiple():
         assert response.data() == {"key": idx}
 
 
-def test_pipeline_execute_with_transaction():
+def test_pipeline_stream_with_transaction():
     """
-    test execute pipeline with fully populated doc ref
+    test stream pipeline with fully populated doc ref
     """
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import ExecutePipelineRequest
@@ -282,7 +292,7 @@ def test_pipeline_execute_with_transaction():
     mock_rpc.return_value = [ExecutePipelineResponse()]
     ppl_1 = _make_pipeline(client=client)
 
-    list(ppl_1.execute(transaction=transaction))
+    list(ppl_1.stream(transaction=transaction))
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
     assert isinstance(request, ExecutePipelineRequest)
@@ -291,9 +301,63 @@ def test_pipeline_execute_with_transaction():
     assert request.transaction == b"123"
 
 
+def test_pipeline_execute_stream_equivalence():
+    """
+    Pipeline.execute should provide same results from pipeline.stream, as a list
+    """
+    from google.cloud.firestore_v1.types import Document
+    from google.cloud.firestore_v1.types import ExecutePipelineResponse
+    from google.cloud.firestore_v1.types import Value
+    from google.cloud.firestore_v1.client import Client
+
+    real_client = Client()
+    client = mock.Mock()
+    client.project = "A"
+    client._database = "B"
+    client.document = real_client.document
+    mock_rpc = client._firestore_api.execute_pipeline
+
+    mock_rpc.return_value = [
+        ExecutePipelineResponse(
+            results=[
+                Document(
+                    name="test/my_doc",
+                    fields={"key": Value(string_value="str_val")},
+                )
+            ],
+        )
+    ]
+    ppl_1 = _make_pipeline(client=client)
+
+    stream_results = list(ppl_1.stream())
+    execute_results = ppl_1.execute()
+    assert stream_results == execute_results
+    assert stream_results[0].data()["key"] == "str_val"
+    assert execute_results[0].data()["key"] == "str_val"
+
+
+def test_pipeline_execute_stream_equivalence_mocked():
+    """
+    pipeline.execute should call pipeline.stream internally
+    """
+    ppl_1 = _make_pipeline()
+    expected_data = [object(), object()]
+    expected_arg = object()
+    with mock.patch.object(ppl_1, "stream") as mock_stream:
+        mock_stream.return_value = expected_data
+        stream_results = ppl_1.execute(expected_arg)
+        assert mock_stream.call_count == 1
+        assert mock_stream.call_args[0] == ()
+        assert len(mock_stream.call_args[1]) == 1
+        assert mock_stream.call_args[1]["transaction"] == expected_arg
+        assert stream_results == expected_data
+
+
 @pytest.mark.parametrize(
     "method,args,result_cls",
     [
+        ("generic_stage", ("name",), stages.GenericStage),
+        ("generic_stage", ("name", mock.Mock()), stages.GenericStage),
         ("select", (), stages.Select),
         ("where", (mock.Mock(),), stages.Where),
         ("sort", (), stages.Sort),

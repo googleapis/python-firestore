@@ -15,13 +15,13 @@
 import mock
 import pytest
 
-from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 
 
 def _make_async_pipeline(*args, client=mock.Mock()):
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
 
-    return AsyncPipeline(client, *args)
+    return AsyncPipeline._create_with_stages(client, *args)
 
 
 async def _async_it(list):
@@ -33,8 +33,17 @@ def test_ctor():
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
 
     client = object()
+    instance = AsyncPipeline(client)
+    assert instance._client == client
+    assert len(instance.stages) == 0
+
+
+def test_create():
+    from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
+
+    client = object()
     stages = [object() for i in range(10)]
-    instance = AsyncPipeline(client, *stages)
+    instance = AsyncPipeline._create_with_stages(client, *stages)
     assert instance._client == client
     assert len(instance.stages) == 10
     assert instance.stages[0] == stages[0]
@@ -107,9 +116,9 @@ def test_async_pipeline_append():
 
 
 @pytest.mark.asyncio
-async def test_async_pipeline_execute_empty():
+async def test_async_pipeline_stream_empty():
     """
-    test execute pipeline with mocked empty response
+    test stream pipeline with mocked empty response
     """
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import ExecutePipelineRequest
@@ -122,7 +131,7 @@ async def test_async_pipeline_execute_empty():
     mock_rpc.return_value = _async_it([ExecutePipelineResponse()])
     ppl_1 = _make_async_pipeline(stages.GenericStage("s"), client=client)
 
-    results = [r async for r in ppl_1.execute()]
+    results = [r async for r in ppl_1.stream()]
     assert results == []
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
@@ -132,9 +141,9 @@ async def test_async_pipeline_execute_empty():
 
 
 @pytest.mark.asyncio
-async def test_async_pipeline_execute_no_doc_ref():
+async def test_async_pipeline_stream_no_doc_ref():
     """
-    test execute pipeline with no doc ref
+    test stream pipeline with no doc ref
     """
     from google.cloud.firestore_v1.types import Document
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
@@ -151,7 +160,7 @@ async def test_async_pipeline_execute_no_doc_ref():
     )
     ppl_1 = _make_async_pipeline(stages.GenericStage("s"), client=client)
 
-    results = [r async for r in ppl_1.execute()]
+    results = [r async for r in ppl_1.stream()]
     assert len(results) == 1
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
@@ -171,9 +180,9 @@ async def test_async_pipeline_execute_no_doc_ref():
 
 
 @pytest.mark.asyncio
-async def test_async_pipeline_execute_populated():
+async def test_async_pipeline_stream_populated():
     """
-    test execute pipeline with fully populated doc ref
+    test stream pipeline with fully populated doc ref
     """
     from google.cloud.firestore_v1.types import Document
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
@@ -208,7 +217,7 @@ async def test_async_pipeline_execute_populated():
     )
     ppl_1 = _make_async_pipeline(client=client)
 
-    results = [r async for r in ppl_1.execute()]
+    results = [r async for r in ppl_1.stream()]
     assert len(results) == 1
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
@@ -228,9 +237,9 @@ async def test_async_pipeline_execute_populated():
 
 
 @pytest.mark.asyncio
-async def test_async_pipeline_execute_multiple():
+async def test_async_pipeline_stream_multiple():
     """
-    test execute pipeline with multiple docs and responses
+    test stream pipeline with multiple docs and responses
     """
     from google.cloud.firestore_v1.types import Document
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
@@ -267,7 +276,7 @@ async def test_async_pipeline_execute_multiple():
     )
     ppl_1 = _make_async_pipeline(client=client)
 
-    results = [r async for r in ppl_1.execute()]
+    results = [r async for r in ppl_1.stream()]
     assert len(results) == 4
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
@@ -281,9 +290,9 @@ async def test_async_pipeline_execute_multiple():
 
 
 @pytest.mark.asyncio
-async def test_async_pipeline_execute_with_transaction():
+async def test_async_pipeline_stream_with_transaction():
     """
-    test execute pipeline with transaction context
+    test stream pipeline with transaction context
     """
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import ExecutePipelineRequest
@@ -301,7 +310,7 @@ async def test_async_pipeline_execute_with_transaction():
     mock_rpc.return_value = _async_it([ExecutePipelineResponse()])
     ppl_1 = _make_async_pipeline(client=client)
 
-    [r async for r in ppl_1.execute(transaction=transaction)]
+    [r async for r in ppl_1.stream(transaction=transaction)]
     assert mock_rpc.call_count == 1
     request = mock_rpc.call_args[0][0]
     assert isinstance(request, ExecutePipelineRequest)
@@ -310,9 +319,68 @@ async def test_async_pipeline_execute_with_transaction():
     assert request.transaction == b"123"
 
 
+@pytest.mark.asyncio
+async def test_async_pipeline_stream_stream_equivalence():
+    """
+    Pipeline.stream should provide same results from pipeline.stream, as a list
+    """
+    from google.cloud.firestore_v1.types import Document
+    from google.cloud.firestore_v1.types import ExecutePipelineResponse
+    from google.cloud.firestore_v1.types import Value
+    from google.cloud.firestore_v1.client import Client
+
+    real_client = Client()
+    client = mock.Mock()
+    client.project = "A"
+    client._database = "B"
+    client.document = real_client.document
+    mock_rpc = mock.AsyncMock()
+    client._firestore_api.execute_pipeline = mock_rpc
+    mock_response = [
+        ExecutePipelineResponse(
+            results=[
+                Document(
+                    name="test/my_doc",
+                    fields={"key": Value(string_value="str_val")},
+                )
+            ],
+        )
+    ]
+    mock_rpc.return_value = _async_it(mock_response)
+    ppl_1 = _make_async_pipeline(client=client)
+
+    stream_results = [r async for r in ppl_1.stream()]
+    # reset response
+    mock_rpc.return_value = _async_it(mock_response)
+    stream_results = await ppl_1.execute()
+    assert stream_results == stream_results
+    assert stream_results[0].data()["key"] == "str_val"
+    assert stream_results[0].data()["key"] == "str_val"
+
+
+@pytest.mark.asyncio
+async def test_async_pipeline_stream_stream_equivalence_mocked():
+    """
+    pipeline.stream should call pipeline.stream internally
+    """
+    ppl_1 = _make_async_pipeline()
+    expected_data = [object(), object()]
+    expected_arg = object()
+    with mock.patch.object(ppl_1, "stream") as mock_stream:
+        mock_stream.return_value = _async_it(expected_data)
+        stream_results = await ppl_1.execute(expected_arg)
+        assert mock_stream.call_count == 1
+        assert mock_stream.call_args[0] == ()
+        assert len(mock_stream.call_args[1]) == 1
+        assert mock_stream.call_args[1]["transaction"] == expected_arg
+        assert stream_results == expected_data
+
+
 @pytest.mark.parametrize(
     "method,args,result_cls",
     [
+        ("generic_stage", ("name",), stages.GenericStage),
+        ("generic_stage", ("name", mock.Mock()), stages.GenericStage),
         ("select", (), stages.Select),
         ("where", (mock.Mock(),), stages.Where),
         ("sort", (), stages.Sort),
