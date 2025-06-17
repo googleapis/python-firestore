@@ -299,7 +299,7 @@ class _AsyncTransactional(_BaseTransactional):
             self.retry_id = self.current_id
         return await self.to_wrap(transaction, *args, **kwargs)
 
-    async def __call__(self, transaction, *args: P.args, **kwargs: P.kwargs) -> T:
+    async def __call__(self, transaction: AsyncTransaction, *args: P.args, **kwargs: P.kwargs) -> T:
         """Execute the wrapped callable within a transaction.
 
         Args:
@@ -357,11 +357,11 @@ def async_transactional(
 
     Args:
         to_wrap
-            (Callable[[:class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction`, ...], Any]):
+            (Callable[[:class:`~google.cloud.firestore_v1.async_transaction.AsyncTransaction`, ...], Awaitable[Any]]):
             A callable that should be run (and retried) in a transaction.
 
     Returns:
-        Callable[[:class:`~google.cloud.firestore_v1.transaction.Transaction`, ...], Any]:
+        Callable[[:class:`~google.cloud.firestore_v1.transaction.Transaction`, ...], Awaitable[Any]]:
         the wrapped callable.
     """
     return _AsyncTransactional(to_wrap)
