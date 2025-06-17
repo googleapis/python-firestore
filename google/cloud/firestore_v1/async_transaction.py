@@ -299,7 +299,9 @@ class _AsyncTransactional(_BaseTransactional):
             self.retry_id = self.current_id
         return await self.to_wrap(transaction, *args, **kwargs)
 
-    async def __call__(self, transaction: AsyncTransaction, *args: P.args, **kwargs: P.kwargs) -> T:
+    async def __call__(
+        self, transaction: AsyncTransaction, *args: P.args, **kwargs: P.kwargs
+    ) -> T:
         """Execute the wrapped callable within a transaction.
 
         Args:
