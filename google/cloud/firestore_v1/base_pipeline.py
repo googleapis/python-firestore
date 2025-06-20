@@ -21,7 +21,9 @@ from google.cloud.firestore_v1.types.pipeline import (
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_expressions import (
+    Accumulator,
     Expr,
+    ExprWithAlias,
     FilterCondition,
     Selectable,
 )
@@ -279,3 +281,53 @@ class _BasePipeline:
             A new Pipeline object with this stage appended to the stage list
         """
         return self._append(stages.Limit(limit))
+
+    def aggregate(
+        self,
+        *accumulators: ExprWithAlias[Accumulator],
+        groups: Sequence[str | Selectable] = (),
+    ) -> "_BasePipeline":
+        """
+        Performs aggregation operations on the documents from previous stages,
+        optionally grouped by specified fields or expressions.
+
+        This stage allows you to calculate aggregate values (like sum, average, count,
+        min, max) over a set of documents.
+
+        - **Accumulators:** Define the aggregation calculations using `Accumulator`
+          expressions (e.g., `sum()`, `avg()`, `count()`, `min()`, `max()`) combined
+          with `as_()` to name the result field.
+        - **Groups:** Optionally specify fields (by name or `Selectable`) to group
+          the documents by. Aggregations are then performed within each distinct group.
+          If no groups are provided, the aggregation is performed over the entire input.
+
+        Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field, avg, count_all
+            >>> pipeline = client.pipeline().collection("books")
+            >>> # Calculate the average rating and total count for all books
+            >>> pipeline = pipeline.aggregate(
+            ...     Field.of("rating").avg().as_("averageRating"),
+            ...     Field.of("rating").count().as_("totalBooks")
+            ... )
+            >>> # Calculate the average rating for each genre
+            >>> pipeline = pipeline.aggregate(
+            ...     Field.of("rating").avg().as_("avg_rating"),
+            ...     groups=["genre"] # Group by the 'genre' field
+            ... )
+            >>> # Calculate the count for each author, grouping by Field object
+            >>> pipeline = pipeline.aggregate(
+            ...     Count().as_("bookCount"),
+            ...     groups=[Field.of("author")]
+            ... )
+
+
+        Args:
+            *accumulators: One or more `ExprWithAlias[Accumulator]` expressions defining
+                           the aggregations to perform and their output names.
+            groups: An optional sequence of field names (str) or `Selectable`
+                    expressions to group by before aggregating.
+
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.Aggregate(*accumulators, groups=groups))

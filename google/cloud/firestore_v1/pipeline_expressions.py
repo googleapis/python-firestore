@@ -285,6 +285,64 @@ class Expr(ABC):
         """
         return Exists(self)
 
+    def sum(self) -> "Sum":
+        """Creates an aggregation that calculates the sum of a numeric field across multiple stage inputs.
+
+        Example:
+            >>> # Calculate the total revenue from a set of orders
+            >>> Field.of("orderAmount").sum().as_("totalRevenue")
+
+        Returns:
+            A new `Accumulator` representing the 'sum' aggregation.
+        """
+        return Sum(self, False)
+
+    def avg(self) -> "Avg":
+        """Creates an aggregation that calculates the average (mean) of a numeric field across multiple
+        stage inputs.
+
+        Example:
+            >>> # Calculate the average age of users
+            >>> Field.of("age").avg().as_("averageAge")
+
+        Returns:
+            A new `Accumulator` representing the 'avg' aggregation.
+        """
+        return Avg(self, False)
+
+    def count(self) -> "Count":
+        """Creates an aggregation that counts the number of stage inputs with valid evaluations of the
+        expression or field.
+
+        Example:
+            >>> # Count the total number of products
+            >>> Field.of("productId").count().as_("totalProducts")
+
+        Returns:
+            A new `Accumulator` representing the 'count' aggregation.
+        """
+        return Count(self)
+
+    def as_(self, alias: str) -> "ExprWithAlias":
+        """Assigns an alias to this expression.
+
+        Aliases are useful for renaming fields in the output of a stage or for giving meaningful
+        names to calculated values.
+
+        Example:
+            >>> # Calculate the total price and assign it the alias "totalPrice" and add it to the output.
+            >>> firestore.pipeline().collection("items").add_fields(
+            ...     Field.of("price").multiply(Field.of("quantity")).as_("totalPrice")
+            ... )
+
+        Args:
+            alias: The alias to assign to this expression.
+
+        Returns:
+            A new `Selectable` (typically an `ExprWithAlias`) that wraps this
+            expression and associates it with the provided alias.
+        """
+        return ExprWithAlias(self, alias)
 
 class Constant(Expr, Generic[CONSTANT_TYPE]):
     """Represents a constant literal value in an expression."""
@@ -352,6 +410,31 @@ class Function(Expr):
                 "args": [p._to_pb() for p in self.params],
             }
         )
+ 
+
+class Accumulator(Function):
+    """A base class for aggregation functions that operate across multiple inputs."""
+
+
+class Sum(Accumulator):
+    """Represents the sum aggregation function."""
+
+    def __init__(self, value: Expr, distinct: bool = False):
+        super().__init__("sum", [value])
+
+
+class Avg(Accumulator):
+    """Represents the average aggregation function."""
+
+    def __init__(self, value: Expr, distinct: bool = False):
+        super().__init__("avg", [value])
+
+
+class Count(Accumulator):
+    """Represents an aggregation that counts the total number of inputs."""
+
+    def __init__(self, value: Expr | None = None):
+        super().__init__("count", [value] if value else [])
 
 
 class Selectable(Expr):
@@ -380,6 +463,25 @@ class Selectable(Expr):
                 "fields": {m[0]: m[1] for m in [s._to_map() for s in selectables]}
             }
         )
+
+
+T = TypeVar("T", bound=Expr)
+
+class ExprWithAlias(Selectable, Generic[T]):
+    """Wraps an expression with an alias."""
+
+    def __init__(self, expr: T, alias: str):
+        self.expr = expr
+        self.alias = alias
+
+    def _to_map(self):
+        return self.alias, self.expr._to_pb()
+
+    def __repr__(self):
+        return f"{self.expr}.as_('{self.alias}')"
+
+    def _to_pb(self):
+        return Value(map_value={"fields": {self.alias: self.expr._to_pb()}})
 
 
 class Field(Selectable):
