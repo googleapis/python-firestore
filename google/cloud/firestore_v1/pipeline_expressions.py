@@ -344,6 +344,7 @@ class Expr(ABC):
         """
         return ExprWithAlias(self, alias)
 
+
 class Constant(Expr, Generic[CONSTANT_TYPE]):
     """Represents a constant literal value in an expression."""
 
@@ -410,7 +411,7 @@ class Function(Expr):
                 "args": [p._to_pb() for p in self.params],
             }
         )
- 
+
 
 class Accumulator(Function):
     """A base class for aggregation functions that operate across multiple inputs."""
@@ -466,6 +467,7 @@ class Selectable(Expr):
 
 
 T = TypeVar("T", bound=Expr)
+
 
 class ExprWithAlias(Selectable, Generic[T]):
     """Wraps an expression with an alias."""

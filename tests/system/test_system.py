@@ -89,21 +89,29 @@ def verify_pipeline(query):
     It can be attached to existing query tests to check both
     modalities at the same time
     """
+    from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
+
     query_exception = None
     query_results = None
     try:
         try:
-            query_results = [s.to_dict() for s in query.get()]
+            if isinstance(query, BaseAggregationQuery):
+                # aggregation queries return a list of lists of aggregation results
+                query_results = [[a._to_dict() for a in s] for s in query.get()]
+            else:
+                # other qureies return a simple list of results
+                query_results = [s.to_dict() for s in query.get()]
         except Exception as e:
+            # if we expect the query to fail, capture the exception
             query_exception = e
         pipeline = query.pipeline()
         if query_exception:
             # ensure that the pipeline uses same error as query
-            with pytest.raises(query_exception):
+            with pytest.raises(query_exception.__class__):
                 pipeline.execute()
         else:
             # ensure results match query
-            pipeline_results = [s.to_dict() for s in pipeline.execute()]
+            pipeline_results = [s.data() for s in pipeline.execute()]
             assert query_results == pipeline_results
     except FailedPrecondition as e:
         # if testing against a non-enterprise db, skip this check
