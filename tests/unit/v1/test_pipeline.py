@@ -358,6 +358,11 @@ def test_pipeline_execute_stream_equivalence_mocked():
     [
         ("generic_stage", ("name",), stages.GenericStage),
         ("generic_stage", ("name", mock.Mock()), stages.GenericStage),
+        ("select", (), stages.Select),
+        ("where", (mock.Mock(),), stages.Where),
+        ("sort", (), stages.Sort),
+        ("offset", (1,), stages.Offset),
+        ("limit", (1,), stages.Limit),
     ],
 )
 def test_pipeline_methods(method, args, result_cls):

@@ -49,11 +49,11 @@ from test__helpers import (
     EMULATOR_CREDS,
     FIRESTORE_CREDS,
     FIRESTORE_EMULATOR,
-    FIRESTORE_OTHER_DB,
     FIRESTORE_PROJECT,
     MISSING_DOCUMENT,
     RANDOM_ID_REGEX,
     UNIQUE_RESOURCE_ID,
+    TEST_DATABASES,
 )
 
 RETRIES = retries.AsyncRetry(
@@ -169,13 +169,13 @@ def event_loop():
     loop.close()
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collections(client, database):
     collections = [x async for x in client.collections(retry=RETRIES)]
     assert isinstance(collections, list)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB])
+@pytest.mark.parametrize("database", TEST_DATABASES)
 async def test_collections_w_import(database):
     from google.cloud import firestore
 
@@ -188,7 +188,7 @@ async def test_collections_w_import(database):
     assert isinstance(collections, list)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_create_document(client, cleanup, database):
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
@@ -234,7 +234,7 @@ async def test_create_document(client, cleanup, database):
     assert stored_data == expected_data
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collections_w_read_time(client, cleanup, database):
     first_collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     first_document_id = "doc" + UNIQUE_RESOURCE_ID
@@ -269,7 +269,7 @@ async def test_collections_w_read_time(client, cleanup, database):
     assert first_collection_id in ids
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_create_document_w_subcollection(client, cleanup, database):
     collection_id = "doc-create-sub" + UNIQUE_RESOURCE_ID
     document_id = "doc" + UNIQUE_RESOURCE_ID
@@ -295,7 +295,7 @@ def assert_timestamp_less(timestamp_pb1, timestamp_pb2):
     assert timestamp_pb1 < timestamp_pb2
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_document_collections_w_read_time(client, cleanup, database):
     collection_id = "doc-create-sub" + UNIQUE_RESOURCE_ID
     document_id = "doc" + UNIQUE_RESOURCE_ID
@@ -331,7 +331,7 @@ async def test_document_collections_w_read_time(client, cleanup, database):
     )
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_no_document(client, database):
     document_id = "no_document" + UNIQUE_RESOURCE_ID
     document = client.document("abcde", document_id)
@@ -339,7 +339,7 @@ async def test_no_document(client, database):
     assert snapshot.to_dict() is None
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_document_set(client, cleanup, database):
     document_id = "for-set" + UNIQUE_RESOURCE_ID
     document = client.document("i-did-it", document_id)
@@ -369,7 +369,7 @@ async def test_document_set(client, cleanup, database):
     assert snapshot2.update_time == write_result2.update_time
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_document_integer_field(client, cleanup, database):
     document_id = "for-set" + UNIQUE_RESOURCE_ID
     document = client.document("i-did-it", document_id)
@@ -386,7 +386,7 @@ async def test_document_integer_field(client, cleanup, database):
     assert snapshot.to_dict() == expected
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_document_set_merge(client, cleanup, database):
     document_id = "for-set" + UNIQUE_RESOURCE_ID
     document = client.document("i-did-it", document_id)
@@ -419,7 +419,7 @@ async def test_document_set_merge(client, cleanup, database):
     assert snapshot2.update_time == write_result2.update_time
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_document_set_w_int_field(client, cleanup, database):
     document_id = "set-int-key" + UNIQUE_RESOURCE_ID
     document = client.document("i-did-it", document_id)
@@ -443,7 +443,7 @@ async def test_document_set_w_int_field(client, cleanup, database):
     assert snapshot1.to_dict() == data
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_document_update_w_int_field(client, cleanup, database):
     # Attempt to reproduce #5489.
     document_id = "update-int-key" + UNIQUE_RESOURCE_ID
@@ -471,7 +471,7 @@ async def test_document_update_w_int_field(client, cleanup, database):
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -499,7 +499,7 @@ async def test_vector_search_collection(client, database, distance_measure):
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -527,7 +527,7 @@ async def test_vector_search_collection_with_filter(client, database, distance_m
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_vector_search_collection_with_distance_parameters_euclid(
     client, database
 ):
@@ -559,7 +559,7 @@ async def test_vector_search_collection_with_distance_parameters_euclid(
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_vector_search_collection_with_distance_parameters_cosine(
     client, database
 ):
@@ -591,7 +591,7 @@ async def test_vector_search_collection_with_distance_parameters_cosine(
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -620,7 +620,7 @@ async def test_vector_search_collection_group(client, database, distance_measure
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -651,7 +651,7 @@ async def test_vector_search_collection_group_with_filter(
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_vector_search_collection_group_with_distance_parameters_euclid(
     client, database
 ):
@@ -683,7 +683,7 @@ async def test_vector_search_collection_group_with_distance_parameters_euclid(
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_vector_search_collection_group_with_distance_parameters_cosine(
     client, database
 ):
@@ -718,7 +718,7 @@ async def test_vector_search_collection_group_with_distance_parameters_cosine(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_vector_query_stream_or_get_w_no_explain_options(
     client, database, method
 ):
@@ -753,7 +753,7 @@ async def test_vector_query_stream_or_get_w_no_explain_options(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_vector_query_stream_or_get_w_explain_options_analyze_true(
     client, query_docs, database, method
 ):
@@ -832,7 +832,7 @@ async def test_vector_query_stream_or_get_w_explain_options_analyze_true(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_vector_query_stream_or_get_w_explain_options_analyze_false(
     client, query_docs, database, method
 ):
@@ -895,7 +895,7 @@ async def test_vector_query_stream_or_get_w_explain_options_analyze_false(
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Internal Issue b/137867104")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_update_document(client, cleanup, database):
     document_id = "for-update" + UNIQUE_RESOURCE_ID
     document = client.document("made", document_id)
@@ -968,7 +968,7 @@ def check_snapshot(snapshot, document, data, write_result):
     assert snapshot.update_time == write_result.update_time
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_document_get(client, cleanup, database):
     now = datetime.datetime.now(tz=datetime.timezone.utc)
     document_id = "for-get" + UNIQUE_RESOURCE_ID
@@ -994,7 +994,7 @@ async def test_document_get(client, cleanup, database):
     check_snapshot(snapshot, document, data, write_result)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_document_delete(client, cleanup, database):
     document_id = "deleted" + UNIQUE_RESOURCE_ID
     document = client.document("here-to-be", document_id)
@@ -1031,7 +1031,7 @@ async def test_document_delete(client, cleanup, database):
     assert_timestamp_less(delete_time3, delete_time4)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collection_add(client, cleanup, database):
     # TODO(microgen): list_documents is returning a generator, not a list.
     # Consider if this is desired. Also, Document isn't hashable.
@@ -1133,7 +1133,7 @@ async def test_collection_add(client, cleanup, database):
     assert set([i async for i in collection3.list_documents()]) == {document_ref5}
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_list_collections_with_read_time(client, cleanup, database):
     # TODO(microgen): list_documents is returning a generator, not a list.
     # Consider if this is desired. Also, Document isn't hashable.
@@ -1205,7 +1205,7 @@ async def async_query(collection):
     return collection.where(filter=FieldFilter("a", "==", 1))
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_legacy_where(query_docs, database):
     """Assert the legacy code still works and returns value, and shows UserWarning"""
     collection, stored, allowed_vals = query_docs
@@ -1221,7 +1221,7 @@ async def test_query_stream_legacy_where(query_docs, database):
             assert value["a"] == 1
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_simple_field_eq_op(query_docs, database):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("a", "==", 1))
@@ -1232,7 +1232,7 @@ async def test_query_stream_w_simple_field_eq_op(query_docs, database):
         assert value["a"] == 1
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_simple_field_array_contains_op(query_docs, database):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("c", "array_contains", 1))
@@ -1243,7 +1243,7 @@ async def test_query_stream_w_simple_field_array_contains_op(query_docs, databas
         assert value["a"] == 1
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_simple_field_in_op(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1255,7 +1255,7 @@ async def test_query_stream_w_simple_field_in_op(query_docs, database):
         assert value["a"] == 1
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_simple_field_array_contains_any_op(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1269,7 +1269,7 @@ async def test_query_stream_w_simple_field_array_contains_any_op(query_docs, dat
         assert value["a"] == 1
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_order_by(query_docs, database):
     collection, stored, allowed_vals = query_docs
     query = collection.order_by("b", direction=firestore.Query.DESCENDING)
@@ -1283,7 +1283,7 @@ async def test_query_stream_w_order_by(query_docs, database):
     assert sorted(b_vals, reverse=True) == b_vals
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_field_path(query_docs, database):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("stats.sum", ">", 4))
@@ -1305,7 +1305,7 @@ async def test_query_stream_w_field_path(query_docs, database):
     assert expected_ab_pairs == ab_pairs2
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_start_end_cursor(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1321,7 +1321,7 @@ async def test_query_stream_w_start_end_cursor(query_docs, database):
         assert value["a"] == num_vals - 2
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_wo_results(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1330,7 +1330,7 @@ async def test_query_stream_wo_results(query_docs, database):
     assert len(values) == 0
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_projection(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1347,7 +1347,7 @@ async def test_query_stream_w_projection(query_docs, database):
         assert expected == value
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_multiple_filters(query_docs, database):
     collection, stored, allowed_vals = query_docs
     query = collection.where(filter=FieldFilter("stats.product", ">", 5)).where(
@@ -1367,7 +1367,7 @@ async def test_query_stream_w_multiple_filters(query_docs, database):
         assert pair in matching_pairs
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_offset(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1387,7 +1387,7 @@ async def test_query_stream_w_offset(query_docs, database):
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_or_get_w_no_explain_options(query_docs, database, method):
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
@@ -1412,7 +1412,7 @@ async def test_query_stream_or_get_w_no_explain_options(query_docs, database, me
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_or_get_w_explain_options_analyze_true(
     query_docs, database, method
 ):
@@ -1457,7 +1457,7 @@ async def test_query_stream_or_get_w_explain_options_analyze_true(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_or_get_w_explain_options_analyze_false(
     query_docs, database, method
 ):
@@ -1492,7 +1492,7 @@ async def test_query_stream_or_get_w_explain_options_analyze_false(
     _verify_explain_metrics_analyze_false(explain_metrics)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_stream_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1532,7 +1532,7 @@ async def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert new_values[new_ref.id] == new_data
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_with_order_dot_key(client, cleanup, database):
     db = client
     collection_id = "collek" + UNIQUE_RESOURCE_ID
@@ -1572,7 +1572,7 @@ async def test_query_with_order_dot_key(client, cleanup, database):
     assert found_data == [snap.to_dict() for snap in cursor_with_key_data]
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_unary(client, cleanup, database):
     collection_name = "unary" + UNIQUE_RESOURCE_ID
     collection = client.collection(collection_name)
@@ -1627,7 +1627,7 @@ async def test_query_unary(client, cleanup, database):
     assert snapshot3.to_dict() == {field_name: 123}
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collection_group_queries(client, cleanup, database):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
@@ -1660,7 +1660,7 @@ async def test_collection_group_queries(client, cleanup, database):
     assert found == expected
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collection_group_queries_startat_endat(client, cleanup, database):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
@@ -1703,7 +1703,7 @@ async def test_collection_group_queries_startat_endat(client, cleanup, database)
     assert found == set(["cg-doc2"])
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collection_group_queries_filters(client, cleanup, database):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
@@ -1772,7 +1772,7 @@ async def test_collection_group_queries_filters(client, cleanup, database):
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collection_stream_or_get_w_no_explain_options(
     query_docs, database, method
 ):
@@ -1797,7 +1797,7 @@ async def test_collection_stream_or_get_w_no_explain_options(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collection_stream_or_get_w_explain_options_analyze_true(
     query_docs, database, method
 ):
@@ -1865,7 +1865,7 @@ async def test_collection_stream_or_get_w_explain_options_analyze_true(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("method", ["stream", "get"])
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_collection_stream_or_get_w_explain_options_analyze_false(
     query_docs, database, method
 ):
@@ -1919,7 +1919,7 @@ async def test_collection_stream_or_get_w_explain_options_analyze_false(
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="PartitionQuery not implemented in emulator"
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_partition_query_no_partitions(client, cleanup, database):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
@@ -1953,7 +1953,7 @@ async def test_partition_query_no_partitions(client, cleanup, database):
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="PartitionQuery not implemented in emulator"
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_partition_query(client, cleanup, database):
     collection_group = "b" + UNIQUE_RESOURCE_ID
     n_docs = 128 * 2 + 127  # Minimum partition size is 128
@@ -1980,7 +1980,7 @@ async def test_partition_query(client, cleanup, database):
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Internal Issue b/137865992")
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_get_all(client, cleanup, database):
     collection_name = "get-all" + UNIQUE_RESOURCE_ID
 
@@ -2053,7 +2053,7 @@ async def test_get_all(client, cleanup, database):
     assert not snapshots[2].exists
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_live_bulk_writer(client, cleanup, database):
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.bulk_writer import BulkWriter
@@ -2077,7 +2077,7 @@ async def test_live_bulk_writer(client, cleanup, database):
     assert len(await col.get()) == 50
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_batch(client, cleanup, database):
     collection_name = "batch" + UNIQUE_RESOURCE_ID
 
@@ -2244,7 +2244,7 @@ async def _do_recursive_delete(client, bulk_writer, empty_philosophers=False):
         ), f"Snapshot at Socrates{path} should have been deleted"
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_recursive_delete_parallelized(client, cleanup, database):
     from google.cloud.firestore_v1.bulk_writer import BulkWriterOptions, SendMode
 
@@ -2252,7 +2252,7 @@ async def test_async_recursive_delete_parallelized(client, cleanup, database):
     await _do_recursive_delete(client, bw)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_recursive_delete_serialized(client, cleanup, database):
     from google.cloud.firestore_v1.bulk_writer import BulkWriterOptions, SendMode
 
@@ -2260,7 +2260,7 @@ async def test_async_recursive_delete_serialized(client, cleanup, database):
     await _do_recursive_delete(client, bw)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_recursive_delete_parallelized_empty(client, cleanup, database):
     from google.cloud.firestore_v1.bulk_writer import BulkWriterOptions, SendMode
 
@@ -2268,7 +2268,7 @@ async def test_async_recursive_delete_parallelized_empty(client, cleanup, databa
     await _do_recursive_delete(client, bw, empty_philosophers=True)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_recursive_delete_serialized_empty(client, cleanup, database):
     from google.cloud.firestore_v1.bulk_writer import BulkWriterOptions, SendMode
 
@@ -2276,7 +2276,7 @@ async def test_async_recursive_delete_serialized_empty(client, cleanup, database
     await _do_recursive_delete(client, bw, empty_philosophers=True)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_recursive_query(client, cleanup, database):
     col_id: str = f"philosophers-recursive-async-query{UNIQUE_RESOURCE_ID}"
     await _persist_documents(client, col_id, philosophers_data_set, cleanup)
@@ -2315,7 +2315,7 @@ async def test_recursive_query(client, cleanup, database):
         assert ids[index] == expected_ids[index], error_msg
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_nested_recursive_query(client, cleanup, database):
     col_id: str = f"philosophers-nested-recursive-async-query{UNIQUE_RESOURCE_ID}"
     await _persist_documents(client, col_id, philosophers_data_set, cleanup)
@@ -2339,7 +2339,7 @@ async def test_nested_recursive_query(client, cleanup, database):
         assert ids[index] == expected_ids[index], error_msg
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_chunked_query(client, cleanup, database):
     col = client.collection(f"async-chunked-test{UNIQUE_RESOURCE_ID}")
     for index in range(10):
@@ -2355,7 +2355,7 @@ async def test_chunked_query(client, cleanup, database):
     assert lengths[3] == 1
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_chunked_query_smaller_limit(client, cleanup, database):
     col = client.collection(f"chunked-test-smaller-limit{UNIQUE_RESOURCE_ID}")
     for index in range(10):
@@ -2368,7 +2368,7 @@ async def test_chunked_query_smaller_limit(client, cleanup, database):
     assert lengths[0] == 5
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_chunked_and_recursive(client, cleanup, database):
     col_id = f"chunked-async-recursive-test{UNIQUE_RESOURCE_ID}"
     documents = [
@@ -2427,7 +2427,7 @@ async def _chain(*iterators):
             yield value
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_count_async_query_get_default_alias(async_query, database):
     count_query = async_query.count()
     result = await count_query.get()
@@ -2435,7 +2435,7 @@ async def test_count_async_query_get_default_alias(async_query, database):
         assert r.alias == "field_1"
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_get_with_alias(async_query, database):
     count_query = async_query.count(alias="total")
     result = await count_query.get()
@@ -2443,7 +2443,7 @@ async def test_async_count_query_get_with_alias(async_query, database):
         assert r.alias == "total"
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_get_with_limit(async_query, database):
     count_query = async_query.count(alias="total")
     result = await count_query.get()
@@ -2459,7 +2459,7 @@ async def test_async_count_query_get_with_limit(async_query, database):
         assert r.value == 2
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_get_multiple_aggregations(async_query, database):
     count_query = async_query.count(alias="total").count(alias="all")
 
@@ -2474,7 +2474,7 @@ async def test_async_count_query_get_multiple_aggregations(async_query, database
     assert found_alias == set(expected_aliases)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_get_multiple_aggregations_duplicated_alias(
     async_query, database
 ):
@@ -2486,7 +2486,7 @@ async def test_async_count_query_get_multiple_aggregations_duplicated_alias(
     assert "Aggregation aliases contain duplicate alias" in exc_info.value.message
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_get_empty_aggregation(async_query, database):
     from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 
@@ -2498,7 +2498,7 @@ async def test_async_count_query_get_empty_aggregation(async_query, database):
     assert "Aggregations can not be empty" in exc_info.value.message
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_stream_default_alias(async_query, database):
     count_query = async_query.count()
 
@@ -2507,7 +2507,7 @@ async def test_async_count_query_stream_default_alias(async_query, database):
             assert aggregation_result.alias == "field_1"
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_stream_with_alias(async_query, database):
     count_query = async_query.count(alias="total")
     async for result in count_query.stream():
@@ -2515,7 +2515,7 @@ async def test_async_count_query_stream_with_alias(async_query, database):
             assert aggregation_result.alias == "total"
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_stream_with_limit(async_query, database):
     # count without limit
     count_query = async_query.count(alias="total")
@@ -2530,7 +2530,7 @@ async def test_async_count_query_stream_with_limit(async_query, database):
             assert aggregation_result.value == 2
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_stream_multiple_aggregations(async_query, database):
     count_query = async_query.count(alias="total").count(alias="all")
 
@@ -2540,7 +2540,7 @@ async def test_async_count_query_stream_multiple_aggregations(async_query, datab
             assert aggregation_result.alias in ["total", "all"]
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_stream_multiple_aggregations_duplicated_alias(
     async_query, database
 ):
@@ -2553,7 +2553,7 @@ async def test_async_count_query_stream_multiple_aggregations_duplicated_alias(
     assert "Aggregation aliases contain duplicate alias" in exc_info.value.message
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_count_query_stream_empty_aggregation(async_query, database):
     from google.cloud.firestore_v1.async_aggregation import AsyncAggregationQuery
 
@@ -2566,7 +2566,7 @@ async def test_async_count_query_stream_empty_aggregation(async_query, database)
     assert "Aggregations can not be empty" in exc_info.value.message
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_sum_query_get_default_alias(collection, database):
     sum_query = collection.sum("stats.product")
     result = await sum_query.get()
@@ -2575,7 +2575,7 @@ async def test_async_sum_query_get_default_alias(collection, database):
         assert r.value == 100
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_sum_query_get_with_alias(collection, database):
     sum_query = collection.sum("stats.product", alias="total")
     result = await sum_query.get()
@@ -2584,7 +2584,7 @@ async def test_async_sum_query_get_with_alias(collection, database):
         assert r.value == 100
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_sum_query_get_with_limit(collection, database):
     sum_query = collection.sum("stats.product", alias="total")
     result = await sum_query.get()
@@ -2600,7 +2600,7 @@ async def test_async_sum_query_get_with_limit(collection, database):
         assert r.value == 5
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_sum_query_get_multiple_aggregations(collection, database):
     sum_query = collection.sum("stats.product", alias="total").sum(
         "stats.product", alias="all"
@@ -2617,7 +2617,7 @@ async def test_async_sum_query_get_multiple_aggregations(collection, database):
     assert found_alias == set(expected_aliases)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_sum_query_stream_default_alias(collection, database):
     sum_query = collection.sum("stats.product")
 
@@ -2627,7 +2627,7 @@ async def test_async_sum_query_stream_default_alias(collection, database):
             assert aggregation_result.value == 100
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_sum_query_stream_with_alias(collection, database):
     sum_query = collection.sum("stats.product", alias="total")
     async for result in sum_query.stream():
@@ -2635,7 +2635,7 @@ async def test_async_sum_query_stream_with_alias(collection, database):
             assert aggregation_result.alias == "total"
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_sum_query_stream_with_limit(collection, database):
     # sum without limit
     sum_query = collection.sum("stats.product", alias="total")
@@ -2650,7 +2650,7 @@ async def test_async_sum_query_stream_with_limit(collection, database):
             assert aggregation_result.value == 5
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_sum_query_stream_multiple_aggregations(collection, database):
     sum_query = collection.sum("stats.product", alias="total").sum(
         "stats.product", alias="all"
@@ -2662,7 +2662,7 @@ async def test_async_sum_query_stream_multiple_aggregations(collection, database
             assert aggregation_result.alias in ["total", "all"]
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_get_default_alias(collection, database):
     avg_query = collection.avg("stats.product")
     result = await avg_query.get()
@@ -2672,7 +2672,7 @@ async def test_async_avg_query_get_default_alias(collection, database):
         assert isinstance(r.value, float)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_get_with_alias(collection, database):
     avg_query = collection.avg("stats.product", alias="total")
     result = await avg_query.get()
@@ -2681,7 +2681,7 @@ async def test_async_avg_query_get_with_alias(collection, database):
         assert r.value == 4
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_get_with_limit(collection, database):
     avg_query = collection.avg("stats.product", alias="total")
     result = await avg_query.get()
@@ -2697,7 +2697,7 @@ async def test_async_avg_query_get_with_limit(collection, database):
         assert r.value == 5 / 12
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_get_multiple_aggregations(collection, database):
     avg_query = collection.avg("stats.product", alias="total").avg(
         "stats.product", alias="all"
@@ -2714,7 +2714,7 @@ async def test_async_avg_query_get_multiple_aggregations(collection, database):
     assert found_alias == set(expected_aliases)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_get_w_no_explain_options(collection, database):
     avg_query = collection.avg("stats.product", alias="total")
     results = await avg_query.get()
@@ -2725,7 +2725,7 @@ async def test_async_avg_query_get_w_no_explain_options(collection, database):
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_get_w_explain_options_analyze_true(collection, database):
     avg_query = collection.avg("stats.product", alias="total")
     results = await avg_query.get(explain_options=ExplainOptions(analyze=True))
@@ -2760,7 +2760,7 @@ async def test_async_avg_query_get_w_explain_options_analyze_true(collection, da
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_get_w_explain_options_analyze_false(
     collection, database
 ):
@@ -2791,7 +2791,7 @@ async def test_async_avg_query_get_w_explain_options_analyze_false(
         explain_metrics.execution_stats
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_stream_default_alias(collection, database):
     avg_query = collection.avg("stats.product")
 
@@ -2802,7 +2802,7 @@ async def test_async_avg_query_stream_default_alias(collection, database):
             assert isinstance(aggregation_result.value, float)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_stream_with_alias(collection, database):
     avg_query = collection.avg("stats.product", alias="total")
     async for result in avg_query.stream():
@@ -2810,7 +2810,7 @@ async def test_async_avg_query_stream_with_alias(collection, database):
             assert aggregation_result.alias == "total"
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_stream_with_limit(collection, database):
     # avg without limit
     avg_query = collection.avg("stats.product", alias="total")
@@ -2826,7 +2826,7 @@ async def test_async_avg_query_stream_with_limit(collection, database):
             assert isinstance(aggregation_result.value, float)
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_stream_multiple_aggregations(collection, database):
     avg_query = collection.avg("stats.product", alias="total").avg(
         "stats.product", alias="all"
@@ -2838,7 +2838,7 @@ async def test_async_avg_query_stream_multiple_aggregations(collection, database
             assert aggregation_result.alias in ["total", "all"]
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_stream_w_no_explain_options(collection, database):
     avg_query = collection.avg("stats.product", alias="total")
     results = avg_query.stream()
@@ -2849,7 +2849,7 @@ async def test_async_avg_query_stream_w_no_explain_options(collection, database)
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_stream_w_explain_options_analyze_true(
     collection, database
 ):
@@ -2894,7 +2894,7 @@ async def test_async_avg_query_stream_w_explain_options_analyze_true(
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_async_avg_query_stream_w_explain_options_analyze_false(
     collection, database
 ):
@@ -2926,7 +2926,7 @@ async def test_async_avg_query_stream_w_explain_options_analyze_false(
         explain_metrics.execution_stats
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 @pytest.mark.parametrize(
     "aggregation_type,expected_value", [("count", 5), ("sum", 100), ("avg", 4.0)]
 )
@@ -2989,7 +2989,7 @@ async def create_in_transaction_helper(
             raise ValueError("Collection can't have more than 2 docs")
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_count_query_in_transaction(client, cleanup, database):
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
@@ -3021,7 +3021,7 @@ async def test_count_query_in_transaction(client, cleanup, database):
         assert r.value == 2  # there are still only 2 docs
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_with_and_composite_filter(query_docs, database):
     collection, stored, allowed_vals = query_docs
     and_filter = And(
@@ -3037,7 +3037,7 @@ async def test_query_with_and_composite_filter(query_docs, database):
         assert result.get("stats.product") < 10
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_with_or_composite_filter(query_docs, database):
     collection, stored, allowed_vals = query_docs
     or_filter = Or(
@@ -3061,7 +3061,7 @@ async def test_query_with_or_composite_filter(query_docs, database):
     assert lt_10 > 0
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_with_complex_composite_filter(query_docs, database):
     collection, stored, allowed_vals = query_docs
     field_filter = FieldFilter("b", "==", 0)
@@ -3107,7 +3107,7 @@ async def test_query_with_complex_composite_filter(query_docs, database):
     assert b_not_3 is True
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_or_query_in_transaction(client, cleanup, database):
     collection_id = "doc-create" + UNIQUE_RESOURCE_ID
     document_id_1 = "doc1" + UNIQUE_RESOURCE_ID
@@ -3171,7 +3171,7 @@ async def _make_transaction_query(client, cleanup):
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_transaction_w_query_w_no_explain_options(client, cleanup, database):
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
@@ -3204,7 +3204,7 @@ async def test_transaction_w_query_w_no_explain_options(client, cleanup, databas
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_transaction_w_query_w_explain_options_analyze_true(
     client, cleanup, database
 ):
@@ -3246,7 +3246,7 @@ async def test_transaction_w_query_w_explain_options_analyze_true(
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_transaction_w_query_w_explain_options_analyze_false(
     client, cleanup, database
 ):
@@ -3283,7 +3283,7 @@ async def test_transaction_w_query_w_explain_options_analyze_false(
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_in_transaction_w_no_explain_options(client, cleanup, database):
     from google.cloud.firestore_v1.query_profile import QueryExplainError
 
@@ -3316,7 +3316,7 @@ async def test_query_in_transaction_w_no_explain_options(client, cleanup, databa
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_in_transaction_w_explain_options_analyze_true(
     client, cleanup, database
 ):
@@ -3350,7 +3350,7 @@ async def test_query_in_transaction_w_explain_options_analyze_true(
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_in_transaction_w_explain_options_analyze_false(
     client, cleanup, database
 ):
@@ -3383,7 +3383,7 @@ async def test_query_in_transaction_w_explain_options_analyze_false(
     assert inner_fn_ran is True
 
 
-@pytest.mark.parametrize("database", [None, FIRESTORE_OTHER_DB], indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_in_transaction_with_read_time(client, cleanup, database):
     """
     Test query profiling in transactions.

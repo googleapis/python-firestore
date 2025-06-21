@@ -20,7 +20,13 @@ from google.cloud.firestore_v1.types.pipeline import (
 )
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
-from google.cloud.firestore_v1.pipeline_expressions import Expr
+from google.cloud.firestore_v1.pipeline_expressions import (
+    Accumulator,
+    Expr,
+    ExprWithAlias,
+    FilterCondition,
+    Selectable,
+)
 from google.cloud.firestore_v1 import _helpers
 
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -35,7 +41,7 @@ class _BasePipeline:
     Base class for building Firestore data transformation and query pipelines.
 
     This class is not intended to be instantiated directly.
-    Use `client.collection.("...").pipeline()` to create pipeline instances.
+    Use `client.pipeline()` to create pipeline instances.
     """
 
     def __init__(self, client: Client | AsyncClient):
@@ -149,3 +155,179 @@ class _BasePipeline:
             A new Pipeline object with this stage appended to the stage list
         """
         return self._append(stages.GenericStage(name, *params))
+
+    def select(self, *selections: str | Selectable) -> "_BasePipeline":
+        """
+        Selects or creates a set of fields from the outputs of previous stages.
+        The selected fields are defined using `Selectable` expressions or field names:
+            - `Field`: References an existing document field.
+            - `Function`: Represents the result of a function with an assigned alias
+              name using `Expr.as_()`.
+            - `str`: The name of an existing field.
+        If no selections are provided, the output of this stage is empty. Use
+        `add_fields()` instead if only additions are desired.
+        Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field, to_upper
+            >>> pipeline = client.pipeline().collection("books")
+            >>> # Select by name
+            >>> pipeline = pipeline.select("name", "address")
+            >>> # Select using Field and Function expressions
+            >>> pipeline = pipeline.select(
+            ...     Field.of("name"),
+            ...     Field.of("address").to_upper().as_("upperAddress"),
+            ... )
+        Args:
+            *selections: The fields to include in the output documents, specified as
+                         field names (str) or `Selectable` expressions.
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.Select(*selections))
+
+    def where(self, condition: FilterCondition) -> "_BasePipeline":
+        """
+        Filters the documents from previous stages to only include those matching
+        the specified `FilterCondition`.
+        This stage allows you to apply conditions to the data, similar to a "WHERE"
+        clause in SQL. You can filter documents based on their field values, using
+        implementations of `FilterCondition`, typically including but not limited to:
+            - field comparators: `eq`, `lt` (less than), `gt` (greater than), etc.
+            - logical operators: `And`, `Or`, `Not`, etc.
+            - advanced functions: `regex_matches`, `array_contains`, etc.
+        Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field, And,
+            >>> pipeline = client.pipeline().collection("books")
+            >>> # Using static functions
+            >>> pipeline = pipeline.where(
+            ...     And(
+            ...         Field.of("rating").gt(4.0),   # Filter for ratings > 4.0
+            ...         Field.of("genre").eq("Science Fiction") # Filter for genre
+            ...     )
+            ... )
+            >>> # Using methods on expressions
+            >>> pipeline = pipeline.where(
+            ...     And(
+            ...         Field.of("rating").gt(4.0),
+            ...         Field.of("genre").eq("Science Fiction")
+            ...     )
+            ... )
+        Args:
+            condition: The `FilterCondition` to apply.
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.Where(condition))
+
+    def sort(self, *orders: stages.Ordering) -> "_BasePipeline":
+        """
+        Sorts the documents from previous stages based on one or more `Ordering` criteria.
+        This stage allows you to order the results of your pipeline. You can specify
+        multiple `Ordering` instances to sort by multiple fields or expressions in
+        ascending or descending order. If documents have the same value for a sorting
+        criterion, the next specified ordering will be used. If all orderings result
+        in equal comparison, the documents are considered equal and the relative order
+        is unspecified.
+        Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field
+            >>> pipeline = client.pipeline().collection("books")
+            >>> # Sort books by rating descending, then title ascending
+            >>> pipeline = pipeline.sort(
+            ...     Field.of("rating").descending(),
+            ...     Field.of("title").ascending()
+            ... )
+        Args:
+            *orders: One or more `Ordering` instances specifying the sorting criteria.
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.Sort(*orders))
+
+    def offset(self, offset: int) -> "_BasePipeline":
+        """
+        Skips the first `offset` number of documents from the results of previous stages.
+        This stage is useful for implementing pagination, allowing you to retrieve
+        results in chunks. It is typically used in conjunction with `limit()` to
+        control the size of each page.
+        Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field
+            >>> pipeline = client.pipeline().collection("books")
+            >>> # Retrieve the second page of 20 results (assuming sorted)
+            >>> pipeline = pipeline.sort(Field.of("published").descending())
+            >>> pipeline = pipeline.offset(20)  # Skip the first 20 results
+            >>> pipeline = pipeline.limit(20)   # Take the next 20 results
+        Args:
+            offset: The non-negative number of documents to skip.
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.Offset(offset))
+
+    def limit(self, limit: int) -> "_BasePipeline":
+        """
+        Limits the maximum number of documents returned by previous stages to `limit`.
+        This stage is useful for controlling the size of the result set, often used for:
+            - **Pagination:** In combination with `offset()` to retrieve specific pages.
+            - **Top-N queries:** To get a limited number of results after sorting.
+            - **Performance:** To prevent excessive data transfer.
+        Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field
+            >>> pipeline = client.pipeline().collection("books")
+            >>> # Limit the results to the top 10 highest-rated books
+            >>> pipeline = pipeline.sort(Field.of("rating").descending())
+            >>> pipeline = pipeline.limit(10)
+        Args:
+            limit: The non-negative maximum number of documents to return.
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.Limit(limit))
+
+    def aggregate(
+        self,
+        *accumulators: ExprWithAlias[Accumulator],
+        groups: Sequence[str | Selectable] = (),
+    ) -> "_BasePipeline":
+        """
+        Performs aggregation operations on the documents from previous stages,
+        optionally grouped by specified fields or expressions.
+
+        This stage allows you to calculate aggregate values (like sum, average, count,
+        min, max) over a set of documents.
+
+        - **Accumulators:** Define the aggregation calculations using `Accumulator`
+          expressions (e.g., `sum()`, `avg()`, `count()`, `min()`, `max()`) combined
+          with `as_()` to name the result field.
+        - **Groups:** Optionally specify fields (by name or `Selectable`) to group
+          the documents by. Aggregations are then performed within each distinct group.
+          If no groups are provided, the aggregation is performed over the entire input.
+
+        Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field, avg, count_all
+            >>> pipeline = client.pipeline().collection("books")
+            >>> # Calculate the average rating and total count for all books
+            >>> pipeline = pipeline.aggregate(
+            ...     Field.of("rating").avg().as_("averageRating"),
+            ...     Field.of("rating").count().as_("totalBooks")
+            ... )
+            >>> # Calculate the average rating for each genre
+            >>> pipeline = pipeline.aggregate(
+            ...     Field.of("rating").avg().as_("avg_rating"),
+            ...     groups=["genre"] # Group by the 'genre' field
+            ... )
+            >>> # Calculate the count for each author, grouping by Field object
+            >>> pipeline = pipeline.aggregate(
+            ...     Count().as_("bookCount"),
+            ...     groups=[Field.of("author")]
+            ... )
+
+
+        Args:
+            *accumulators: One or more `ExprWithAlias[Accumulator]` expressions defining
+                           the aggregations to perform and their output names.
+            groups: An optional sequence of field names (str) or `Selectable`
+                    expressions to group by before aggregating.
+
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.Aggregate(*accumulators, groups=groups))

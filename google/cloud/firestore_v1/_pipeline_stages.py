@@ -13,13 +13,21 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Optional
+from typing import Optional, Sequence
 from abc import ABC
 from abc import abstractmethod
 
 from google.cloud.firestore_v1.types.document import Pipeline as Pipeline_pb
 from google.cloud.firestore_v1.types.document import Value
-from google.cloud.firestore_v1.pipeline_expressions import Expr
+from google.cloud.firestore_v1.pipeline_expressions import (
+    Accumulator,
+    Expr,
+    ExprWithAlias,
+    Field,
+    FilterCondition,
+    Selectable,
+    Ordering,
+)
 
 
 class Stage(ABC):
@@ -52,6 +60,51 @@ class Stage(ABC):
         return f"{self.__class__.__name__}({', '.join(items)})"
 
 
+class Aggregate(Stage):
+    """Performs aggregation operations, optionally grouped."""
+
+    def __init__(
+        self,
+        *args: ExprWithAlias[Accumulator],
+        accumulators: Sequence[ExprWithAlias[Accumulator]] = (),
+        groups: Sequence[str | Selectable] = (),
+    ):
+        super().__init__()
+        self.groups: list[Selectable] = [
+            Field(f) if isinstance(f, str) else f for f in groups
+        ]
+        if args and accumulators:
+            raise ValueError(
+                "Aggregate stage contains both positional and keyword accumulators"
+            )
+        self.accumulators = args or accumulators
+
+    def _pb_args(self):
+        return [
+            Value(
+                map_value={
+                    "fields": {
+                        m[0]: m[1] for m in [f._to_map() for f in self.accumulators]
+                    }
+                }
+            ),
+            Value(
+                map_value={
+                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.groups]}
+                }
+            ),
+        ]
+
+    def __repr__(self):
+        accumulator_str = ", ".join(repr(v) for v in self.accumulators)
+        group_str = ""
+        if self.groups:
+            if self.accumulators:
+                group_str = ", "
+            group_str += f"groups={self.groups}"
+        return f"{self.__class__.__name__}({accumulator_str}{group_str})"
+
+
 class Collection(Stage):
     """Specifies a collection as the initial data source."""
 
@@ -63,6 +116,17 @@ class Collection(Stage):
 
     def _pb_args(self):
         return [Value(reference_value=self.path)]
+
+
+class CollectionGroup(Stage):
+    """Specifies a collection group as the initial data source."""
+
+    def __init__(self, collection_id: str):
+        super().__init__("collection_group")
+        self.collection_id = collection_id
+
+    def _pb_args(self):
+        return [Value(string_value=self.collection_id)]
 
 
 class GenericStage(Stage):
@@ -79,3 +143,58 @@ class GenericStage(Stage):
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}')"
+
+
+class Limit(Stage):
+    """Limits the maximum number of documents returned."""
+
+    def __init__(self, limit: int):
+        super().__init__()
+        self.limit = limit
+
+    def _pb_args(self):
+        return [Value(integer_value=self.limit)]
+
+
+class Offset(Stage):
+    """Skips a specified number of documents."""
+
+    def __init__(self, offset: int):
+        super().__init__()
+        self.offset = offset
+
+    def _pb_args(self):
+        return [Value(integer_value=self.offset)]
+
+
+class Select(Stage):
+    """Selects or creates a set of fields."""
+
+    def __init__(self, *selections: str | Selectable):
+        super().__init__()
+        self.projections = [Field(s) if isinstance(s, str) else s for s in selections]
+
+    def _pb_args(self) -> list[Value]:
+        return [Selectable._value_from_selectables(*self.projections)]
+
+
+class Sort(Stage):
+    """Sorts documents based on specified criteria."""
+
+    def __init__(self, *orders: "Ordering"):
+        super().__init__()
+        self.orders = list(orders)
+
+    def _pb_args(self):
+        return [o._to_pb() for o in self.orders]
+
+
+class Where(Stage):
+    """Filters documents based on a specified condition."""
+
+    def __init__(self, condition: FilterCondition):
+        super().__init__()
+        self.condition = condition
+
+    def _pb_args(self):
+        return [self.condition._to_pb()]
