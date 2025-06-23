@@ -605,7 +605,7 @@ def test_asynccollectionreference_recursive():
 
 def test_asynccollectionreference_pipeline():
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
-    from google.cloud.firestore_v1.pipeline_stages import Collection
+    from google.cloud.firestore_v1._pipeline_stages import Collection
 
     client = make_async_client()
     collection = _make_async_collection_reference("collection", client=client)

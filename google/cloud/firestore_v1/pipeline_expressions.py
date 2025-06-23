@@ -1192,7 +1192,7 @@ class Avg(Accumulator):
 
 
 class Count(Accumulator):
-    """Represents the count aggregation function."""
+    """Represents an aggregation that counts the total number of inputs."""
 
     def __init__(self, value: Expr | None = None):
         super().__init__("count", [value] if value else [])

@@ -18,6 +18,7 @@ import mock
 import pytest
 
 from tests.unit.v1._test_helpers import make_client
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 
 
 def _make_base_query(*args, **kwargs):
@@ -1989,15 +1990,13 @@ def test__query_pipeline_no_client():
 
 
 def test__query_pipeline_decendants():
-    from google.cloud.firestore_v1 import pipeline_stages
-
     client = make_client()
     query = client.collection_group("my_col")
     pipeline = query.pipeline()
 
     assert len(pipeline.stages) == 1
     stage = pipeline.stages[0]
-    assert isinstance(stage, pipeline_stages.CollectionGroup)
+    assert isinstance(stage, stages.CollectionGroup)
     assert stage.collection_id == "my_col"
 
 
@@ -2010,8 +2009,6 @@ def test__query_pipeline_decendants():
     ],
 )
 def test__query_pipeline_no_decendants(in_path, out_path):
-    from google.cloud.firestore_v1 import pipeline_stages
-
     client = make_client()
     collection = client.collection(in_path)
     query = collection._query()
@@ -2019,14 +2016,13 @@ def test__query_pipeline_no_decendants(in_path, out_path):
 
     assert len(pipeline.stages) == 1
     stage = pipeline.stages[0]
-    assert isinstance(stage, pipeline_stages.Collection)
+    assert isinstance(stage, stages.Collection)
     assert stage.path == out_path
 
 
 def test__query_pipeline_composite_filter():
     from google.cloud.firestore_v1 import FieldFilter
     from google.cloud.firestore_v1 import pipeline_expressions as expr
-    from google.cloud.firestore_v1 import pipeline_stages
 
     client = make_client()
     in_filter = FieldFilter("field_a", "==", "value_a")
@@ -2038,20 +2034,18 @@ def test__query_pipeline_composite_filter():
         convert_mock.assert_called_once_with(in_filter._to_pb(), client)
         assert len(pipeline.stages) == 2
         stage = pipeline.stages[1]
-        assert isinstance(stage, pipeline_stages.Where)
+        assert isinstance(stage, stages.Where)
         assert stage.condition == convert_mock.return_value
 
 
 def test__query_pipeline_projections():
-    from google.cloud.firestore_v1 import pipeline_stages
-
     client = make_client()
     query = client.collection("my_col").select(["field_a", "field_b.c"])
     pipeline = query.pipeline()
 
     assert len(pipeline.stages) == 2
     stage = pipeline.stages[1]
-    assert isinstance(stage, pipeline_stages.Select)
+    assert isinstance(stage, stages.Select)
     assert len(stage.projections) == 2
     assert stage.projections[0].path == "field_a"
     assert stage.projections[1].path == "field_b.c"
@@ -2059,7 +2053,6 @@ def test__query_pipeline_projections():
 
 def test__query_pipeline_order_exists_multiple():
     from google.cloud.firestore_v1 import pipeline_expressions as expr
-    from google.cloud.firestore_v1 import pipeline_stages
 
     client = make_client()
     query = client.collection("my_col").order_by("field_a").order_by("field_b")
@@ -2069,7 +2062,7 @@ def test__query_pipeline_order_exists_multiple():
     # we're interested in where
     assert len(pipeline.stages) == 3
     where_stage = pipeline.stages[1]
-    assert isinstance(where_stage, pipeline_stages.Where)
+    assert isinstance(where_stage, stages.Where)
     # should have and with both orderings
     assert isinstance(where_stage.condition, expr.And)
     assert len(where_stage.condition.params) == 2
@@ -2082,7 +2075,6 @@ def test__query_pipeline_order_exists_multiple():
 
 def test__query_pipeline_order_exists_single():
     from google.cloud.firestore_v1 import pipeline_expressions as expr
-    from google.cloud.firestore_v1 import pipeline_stages
 
     client = make_client()
     query_single = client.collection("my_col").order_by("field_c")
@@ -2092,14 +2084,13 @@ def test__query_pipeline_order_exists_single():
     # we're interested in where
     assert len(pipeline_single.stages) == 3
     where_stage_single = pipeline_single.stages[1]
-    assert isinstance(where_stage_single, pipeline_stages.Where)
+    assert isinstance(where_stage_single, stages.Where)
     assert isinstance(where_stage_single.condition, expr.Exists)
     assert where_stage_single.condition.params[0].path == "field_c"
 
 
 def test__query_pipeline_order_sorts():
     from google.cloud.firestore_v1 import pipeline_expressions as expr
-    from google.cloud.firestore_v1 import pipeline_stages
     from google.cloud.firestore_v1.base_query import BaseQuery
 
     client = make_client()
@@ -2112,7 +2103,7 @@ def test__query_pipeline_order_sorts():
 
     assert len(pipeline.stages) == 3
     sort_stage = pipeline.stages[2]
-    assert isinstance(sort_stage, pipeline_stages.Sort)
+    assert isinstance(sort_stage, stages.Sort)
     assert len(sort_stage.orders) == 2
     assert isinstance(sort_stage.orders[0], expr.Ordering)
     assert sort_stage.orders[0].expr.path == "field_a"
@@ -2138,28 +2129,24 @@ def test__query_pipeline_unsupported():
 
 
 def test__query_pipeline_limit():
-    from google.cloud.firestore_v1 import pipeline_stages
-
     client = make_client()
     query = client.collection("my_col").limit(15)
     pipeline = query.pipeline()
 
     assert len(pipeline.stages) == 2
     stage = pipeline.stages[1]
-    assert isinstance(stage, pipeline_stages.Limit)
+    assert isinstance(stage, stages.Limit)
     assert stage.limit == 15
 
 
 def test__query_pipeline_offset():
-    from google.cloud.firestore_v1 import pipeline_stages
-
     client = make_client()
     query = client.collection("my_col").offset(5)
     pipeline = query.pipeline()
 
     assert len(pipeline.stages) == 2
     stage = pipeline.stages[1]
-    assert isinstance(stage, pipeline_stages.Offset)
+    assert isinstance(stage, stages.Offset)
     assert stage.offset == 5
 
 

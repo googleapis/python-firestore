@@ -16,7 +16,7 @@ import pytest
 from unittest import mock
 
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
-import google.cloud.firestore_v1.pipeline_stages as stages
+import google.cloud.firestore_v1._pipeline_stages as stages
 from google.cloud.firestore_v1.pipeline_expressions import (
     Constant,
     Field,
