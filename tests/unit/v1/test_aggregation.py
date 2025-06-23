@@ -135,7 +135,7 @@ def test_count_aggregation_to_pipeline_expr(in_alias, expected_alias):
     assert isinstance(got, ExprWithAlias)
     assert got.alias == expected_alias
     assert isinstance(got.expr, Count)
-    assert got.expr.value is None
+    assert len(got.expr.params) == 0
 
 
 @pytest.mark.parametrize(
@@ -144,14 +144,14 @@ def test_count_aggregation_to_pipeline_expr(in_alias, expected_alias):
 )
 def test_sum_aggregation_to_pipeline_expr(in_alias, expected_path, expected_alias):
     from google.cloud.firestore_v1.pipeline_expressions import ExprWithAlias
-    from google.cloud.firestore_v1.pipeline_expressions import Field
+    from google.cloud.firestore_v1.pipeline_expressions import Sum
 
     count_aggregation = SumAggregation(expected_path, alias=in_alias)
     got = count_aggregation._to_pipeline_expr(iter([1]))
     assert isinstance(got, ExprWithAlias)
     assert got.alias == expected_alias
-    assert isinstance(got.expr, Field)
-    assert got.expr.path == expected_path
+    assert isinstance(got.expr, Sum)
+    assert got.expr.params[0].path == expected_path
 
 
 @pytest.mark.parametrize(
@@ -160,14 +160,14 @@ def test_sum_aggregation_to_pipeline_expr(in_alias, expected_path, expected_alia
 )
 def test_avg_aggregation_to_pipeline_expr(in_alias, expected_path, expected_alias):
     from google.cloud.firestore_v1.pipeline_expressions import ExprWithAlias
-    from google.cloud.firestore_v1.pipeline_expressions import Field
+    from google.cloud.firestore_v1.pipeline_expressions import Avg
 
     count_aggregation = AvgAggregation(expected_path, alias=in_alias)
     got = count_aggregation._to_pipeline_expr(iter([1]))
     assert isinstance(got, ExprWithAlias)
     assert got.alias == expected_alias
-    assert isinstance(got.expr, Field)
-    assert got.expr.path == expected_path
+    assert isinstance(got.expr, Avg)
+    assert got.expr.params[0].path == expected_path
 
 
 def test_aggregation__pipeline_alias_increment():
