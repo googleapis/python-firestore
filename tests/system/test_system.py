@@ -42,7 +42,6 @@ from test__helpers import (
     MISSING_DOCUMENT,
     RANDOM_ID_REGEX,
     UNIQUE_RESOURCE_ID,
-    ENTERPRISE_MODE_ERROR,
     TEST_DATABASES,
 )
 
@@ -79,47 +78,6 @@ def cleanup():
 
     for operation in operations:
         operation()
-
-
-def verify_pipeline(query):
-    """
-    This function ensures a pipeline produces the same
-    results as the query it is derived from
-
-    It can be attached to existing query tests to check both
-    modalities at the same time
-    """
-    from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
-
-    query_exception = None
-    query_results = None
-    try:
-        try:
-            if isinstance(query, BaseAggregationQuery):
-                # aggregation queries return a list of lists of aggregation results
-                query_results = [[a._to_dict() for a in s] for s in query.get()]
-            else:
-                # other qureies return a simple list of results
-                query_results = [s.to_dict() for s in query.get()]
-        except Exception as e:
-            # if we expect the query to fail, capture the exception
-            query_exception = e
-        pipeline = query.pipeline()
-        if query_exception:
-            # ensure that the pipeline uses same error as query
-            with pytest.raises(query_exception.__class__):
-                pipeline.execute()
-        else:
-            # ensure results match query
-            pipeline_results = [s.data() for s in pipeline.execute()]
-            assert query_results == pipeline_results
-    except FailedPrecondition as e:
-        # if testing against a non-enterprise db, skip this check
-        if ENTERPRISE_MODE_ERROR not in e.message:
-            raise e
-    except NotImplementedError:
-        # TODO: remove this when pipelines are GA
-        pass
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1289,7 +1247,6 @@ def test_query_stream_legacy_where(query_docs, database):
         for key, value in values.items():
             assert stored[key] == value
             assert value["a"] == 1
-        verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1301,7 +1258,6 @@ def test_query_stream_w_simple_field_eq_op(query_docs, database):
     for key, value in values.items():
         assert stored[key] == value
         assert value["a"] == 1
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1313,7 +1269,6 @@ def test_query_stream_w_simple_field_array_contains_op(query_docs, database):
     for key, value in values.items():
         assert stored[key] == value
         assert value["a"] == 1
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1326,7 +1281,6 @@ def test_query_stream_w_simple_field_in_op(query_docs, database):
     for key, value in values.items():
         assert stored[key] == value
         assert value["a"] == 1
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1349,7 +1303,6 @@ def test_query_stream_w_not_eq_op(query_docs, database):
         ]
     )
     assert expected_ab_pairs == ab_pairs2
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1362,7 +1315,6 @@ def test_query_stream_w_simple_not_in_op(query_docs, database):
     values = {snapshot.id: snapshot.to_dict() for snapshot in query.stream()}
 
     assert len(values) == 22
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1377,7 +1329,6 @@ def test_query_stream_w_simple_field_array_contains_any_op(query_docs, database)
     for key, value in values.items():
         assert stored[key] == value
         assert value["a"] == 1
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1392,7 +1343,6 @@ def test_query_stream_w_order_by(query_docs, database):
         b_vals.append(value["b"])
     # Make sure the ``b``-values are in DESCENDING order.
     assert sorted(b_vals, reverse=True) == b_vals
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1431,7 +1381,6 @@ def test_query_stream_w_start_end_cursor(query_docs, database):
     for key, value in values:
         assert stored[key] == value
         assert value["a"] == num_vals - 2
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1441,7 +1390,6 @@ def test_query_stream_wo_results(query_docs, database):
     query = collection.where(filter=FieldFilter("b", "==", num_vals + 100))
     values = list(query.stream())
     assert len(values) == 0
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1459,7 +1407,6 @@ def test_query_stream_w_projection(query_docs, database):
             "stats": {"product": stored[key]["stats"]["product"]},
         }
         assert expected == value
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1480,7 +1427,6 @@ def test_query_stream_w_multiple_filters(query_docs, database):
         assert stored[key] == value
         pair = (value["a"], value["b"])
         assert pair in matching_pairs
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1497,7 +1443,6 @@ def test_query_stream_w_offset(query_docs, database):
     for key, value in values.items():
         assert stored[key] == value
         assert value["b"] == 2
-    verify_pipeline(query)
 
 
 @pytest.mark.skipif(
@@ -1662,7 +1607,6 @@ def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert len(new_values) == num_vals + 1
     assert new_ref.id in new_values
     assert new_values[new_ref.id] == new_data
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1678,11 +1622,9 @@ def test_query_with_order_dot_key(client, cleanup, database):
     query = collection.order_by("wordcount.page1").limit(3)
     data = [doc.to_dict()["wordcount"]["page1"] for doc in query.stream()]
     assert [100, 110, 120] == data
-    verify_pipeline(query)
     query2 = collection.order_by("wordcount.page1").limit(3)
     for snapshot in query2.stream():
         last_value = snapshot.get("wordcount.page1")
-    verify_pipeline(query2)
     cursor_with_nested_keys = {"wordcount": {"page1": last_value}}
     query3 = (
         collection.order_by("wordcount.page1")
@@ -1696,7 +1638,6 @@ def test_query_with_order_dot_key(client, cleanup, database):
         {"count": 50, "wordcount": {"page1": 150}},
     ]
     assert found_data == [snap.to_dict() for snap in found]
-    verify_pipeline(query3)
     cursor_with_dotted_paths = {"wordcount.page1": last_value}
     query4 = (
         collection.order_by("wordcount.page1")
@@ -1705,7 +1646,6 @@ def test_query_with_order_dot_key(client, cleanup, database):
     )
     cursor_with_key_data = list(query4.stream())
     assert found_data == [snap.to_dict() for snap in cursor_with_key_data]
-    verify_pipeline(query4)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1734,7 +1674,6 @@ def test_query_unary(client, cleanup, database):
     snapshot0 = values0[0]
     assert snapshot0.reference._path == document0._path
     assert snapshot0.to_dict() == {field_name: None}
-    verify_pipeline(query0)
 
     # 1. Query for a NAN.
     query1 = collection.where(filter=FieldFilter(field_name, "==", nan_val))
@@ -1745,7 +1684,6 @@ def test_query_unary(client, cleanup, database):
     data1 = snapshot1.to_dict()
     assert len(data1) == 1
     assert math.isnan(data1[field_name])
-    verify_pipeline(query1)
 
     # 2. Query for not null
     query2 = collection.where(filter=FieldFilter(field_name, "!=", None))
@@ -1796,7 +1734,6 @@ def test_collection_group_queries(client, cleanup, database):
     found = [snapshot.id for snapshot in snapshots]
     expected = ["cg-doc1", "cg-doc2", "cg-doc3", "cg-doc4", "cg-doc5"]
     assert found == expected
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1830,7 +1767,6 @@ def test_collection_group_queries_startat_endat(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2", "cg-doc3", "cg-doc4"])
-    verify_pipeline(query)
 
     query = (
         client.collection_group(collection_group)
@@ -1841,7 +1777,6 @@ def test_collection_group_queries_startat_endat(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2"])
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1887,7 +1822,6 @@ def test_collection_group_queries_filters(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2", "cg-doc3", "cg-doc4"])
-    verify_pipeline(query)
 
     query = (
         client.collection_group(collection_group)
@@ -1909,7 +1843,6 @@ def test_collection_group_queries_filters(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2"])
-    verify_pipeline(query)
 
 
 @pytest.mark.skipif(
@@ -2219,7 +2152,6 @@ def test_watch_query(client, cleanup, database):
         query_ran_query = collection_ref.where(filter=FieldFilter("first", "==", "Ada"))
         query_ran = query_ran_query.stream()
         assert len(docs) == len([i for i in query_ran])
-        verify_pipeline(query_ran_query)
 
     on_snapshot.called_count = 0
 
@@ -2457,7 +2389,6 @@ def test_recursive_query(client, cleanup, database):
             f"Expected '{expected_ids[index]}' at spot {index}, " "got '{ids[index]}'"
         )
         assert ids[index] == expected_ids[index], error_msg
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -2483,7 +2414,6 @@ def test_nested_recursive_query(client, cleanup, database):
             f"Expected '{expected_ids[index]}' at spot {index}, " "got '{ids[index]}'"
         )
         assert ids[index] == expected_ids[index], error_msg
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -2599,7 +2529,6 @@ def test_watch_query_order(client, cleanup, database):
                 ), "expect the sort order to match, born"
             on_snapshot.called_count += 1
             on_snapshot.last_doc_count = len(docs)
-            verify_pipeline(query_ref)
         except Exception as e:
             on_snapshot.failed = e
 
@@ -2665,8 +2594,6 @@ def test_repro_429(client, cleanup, database):
 
     for snapshot in query2.stream():
         print(f"id: {snapshot.id}")
-    verify_pipeline(query)
-    verify_pipeline(query2)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -3248,7 +3175,6 @@ def test_query_with_and_composite_filter(collection, database):
     for result in query.stream():
         assert result.get("stats.product") > 5
         assert result.get("stats.product") < 10
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -3272,7 +3198,6 @@ def test_query_with_or_composite_filter(collection, database):
 
     assert gt_5 > 0
     assert lt_10 > 0
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -3320,7 +3245,6 @@ def test_aggregation_queries_with_read_time(
     assert len(old_result) == 1
     for r in old_result[0]:
         assert r.value == expected_value
-    verify_pipeline(aggregation_query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -3344,7 +3268,6 @@ def test_query_with_complex_composite_filter(collection, database):
 
     assert sum_0 > 0
     assert sum_4 > 0
-    verify_pipeline(query)
 
     # b == 3 || (stats.sum == 4  && a == 4)
     comp_filter = Or(
@@ -3367,7 +3290,6 @@ def test_query_with_complex_composite_filter(collection, database):
 
     assert b_3 is True
     assert b_not_3 is True
-    verify_pipeline(query)
 
 
 @pytest.mark.parametrize(
@@ -3415,7 +3337,6 @@ def test_aggregation_query_in_transaction(
             assert len(result[0]) == 1
             assert result[0][0].value == expected
             inner_fn_ran = True
-            verify_pipeline(aggregation_query)
 
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function
@@ -3461,7 +3382,6 @@ def test_or_query_in_transaction(client, cleanup, database):
                 result[0].get("b") == 2 and result[1].get("b") == 1
             )
             inner_fn_ran = True
-            verify_pipeline(query)
 
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function
@@ -3539,7 +3459,6 @@ def test_query_in_transaction_with_explain_options(client, cleanup, database):
             assert explain_metrics.execution_stats is not None
 
             inner_fn_ran = True
-            verify_pipeline(query)
 
         in_transaction(transaction)
         # make sure we didn't skip assertions in inner function

@@ -602,19 +602,6 @@ class BaseCollectionReference(Generic[QueryType]):
             distance_threshold=distance_threshold,
         )
 
-    def pipeline(self):
-        """
-        Convert this query into a Pipeline
-
-        Queries containing a `cursor` or `limit_to_last` are not currently supported
-
-        Raises:
-            - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
-        Returns:
-            a Pipeline representing the query
-        """
-        return self._query().pipeline()
-
 
 def _auto_id() -> str:
     """Generate a "random" automatically generated ID.

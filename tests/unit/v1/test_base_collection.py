@@ -422,20 +422,6 @@ def test_basecollectionreference_end_at(mock_query):
         assert query == mock_query.end_at.return_value
 
 
-@mock.patch("google.cloud.firestore_v1.base_query.BaseQuery", autospec=True)
-def test_basecollectionreference_pipeline(mock_query):
-    from google.cloud.firestore_v1.base_collection import BaseCollectionReference
-
-    with mock.patch.object(BaseCollectionReference, "_query") as _query:
-        _query.return_value = mock_query
-
-        collection = _make_base_collection_reference("collection")
-        pipeline = collection.pipeline()
-
-        mock_query.pipeline.assert_called_once_with()
-        assert pipeline == mock_query.pipeline.return_value
-
-
 @mock.patch("random.choice")
 def test__auto_id(mock_rand_choice):
     from google.cloud.firestore_v1.base_collection import _AUTO_ID_CHARS, _auto_id
