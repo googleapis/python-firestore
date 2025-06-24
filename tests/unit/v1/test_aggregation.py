@@ -955,6 +955,16 @@ def test_aggregation_query_stream_w_explain_options_analyze_false():
     _aggregation_query_stream_helper(explain_options=ExplainOptions(analyze=False))
 
 
+def test_aggretgation__to_dict():
+    expected_alias = "alias"
+    expected_value = "value"
+    instance = AggregationResult(alias=expected_alias, value=expected_value)
+    dict_result = instance._to_dict()
+    assert len(dict_result) == 1
+    assert next(iter(dict_result)) == expected_alias
+    assert dict_result[expected_alias] == expected_value
+
+
 def test_aggregation_from_query():
     from google.cloud.firestore_v1 import _helpers
 

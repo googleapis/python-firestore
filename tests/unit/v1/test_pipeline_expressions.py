@@ -319,6 +319,12 @@ class TestSelectable:
         [
             (expr.Field.of("field1"), expr.Field.of("field1"), True),
             (expr.Field.of("field1"), expr.Field.of("field2"), False),
+            (expr.Field.of(None), object(), False),
+            (expr.Field.of("f").as_("a"), expr.Field.of("f").as_("a"), True),
+            (expr.Field.of("one").as_("a"), expr.Field.of("two").as_("a"), False),
+            (expr.Field.of("f").as_("one"), expr.Field.of("f").as_("two"), False),
+            (expr.Field.of("field"), expr.Field.of("field").as_("alias"), False),
+            (expr.Field.of("field").as_("alias"), expr.Field.of("field"), False),
         ],
     )
     def test_equality(self, first, second, expected):
@@ -1112,6 +1118,39 @@ class TestFunctionClasses:
         assert instance.name == "collection_id"
         assert instance.params == [arg1]
         assert repr(instance) == "CollectionId(Value)"
+
+    def test_sum(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Sum(arg1)
+        assert instance.name == "sum"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Sum(Value)"
+
+    def test_avg(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Avg(arg1)
+        assert instance.name == "avg"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Avg(Value)"
+
+    def test_count(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Count(arg1)
+        assert instance.name == "count"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Count(Value)"
+
+    def test_count_empty(self):
+        instance = expr.Count()
+        assert instance.params == []
+        assert repr(instance) == "Count()"
+
+    def test_min(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Min(arg1)
+        assert instance.name == "minimum"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Min(Value)"
 
     def test_max(self):
         arg1 = self._make_arg("Value")

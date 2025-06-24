@@ -502,7 +502,7 @@ class Expr(ABC):
         Returns:
             A new `Accumulator` representing the 'sum' aggregation.
         """
-        return Sum(self, False)
+        return Sum(self)
 
     def avg(self) -> "Avg":
         """Creates an aggregation that calculates the average (mean) of a numeric field across multiple
@@ -515,7 +515,7 @@ class Expr(ABC):
         Returns:
             A new `Accumulator` representing the 'avg' aggregation.
         """
-        return Avg(self, False)
+        return Avg(self)
 
     def count(self) -> "Count":
         """Creates an aggregation that counts the number of stage inputs with valid evaluations of the
@@ -540,7 +540,7 @@ class Expr(ABC):
         Returns:
             A new `Accumulator` representing the 'min' aggregation.
         """
-        return Min(self, False)
+        return Min(self)
 
     def max(self) -> "Max":
         """Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
@@ -552,7 +552,7 @@ class Expr(ABC):
         Returns:
             A new `Accumulator` representing the 'max' aggregation.
         """
-        return Max(self, False)
+        return Max(self)
 
     def char_length(self) -> "CharLength":
         """Creates an expression that calculates the character length of a string.
@@ -1166,28 +1166,28 @@ class Accumulator(Function):
 class Max(Accumulator):
     """Represents the maximum aggregation function."""
 
-    def __init__(self, value: Expr, distinct: bool = False):
+    def __init__(self, value: Expr):
         super().__init__("maximum", [value])
 
 
 class Min(Accumulator):
     """Represents the minimum aggregation function."""
 
-    def __init__(self, value: Expr, distinct: bool = False):
+    def __init__(self, value: Expr):
         super().__init__("minimum", [value])
 
 
 class Sum(Accumulator):
     """Represents the sum aggregation function."""
 
-    def __init__(self, value: Expr, distinct: bool = False):
+    def __init__(self, value: Expr):
         super().__init__("sum", [value])
 
 
 class Avg(Accumulator):
     """Represents the average aggregation function."""
 
-    def __init__(self, value: Expr, distinct: bool = False):
+    def __init__(self, value: Expr):
         super().__init__("avg", [value])
 
 
@@ -1196,13 +1196,6 @@ class Count(Accumulator):
 
     def __init__(self, value: Expr | None = None):
         super().__init__("count", [value] if value else [])
-
-
-class CountIf(Function):
-    """Represents counting inputs where a condition is true (likely used internally or planned)."""
-
-    def __init__(self, value: Expr, distinct: bool = False):
-        super().__init__("countif", [value] if value else [])
 
 
 class Selectable(Expr):

@@ -172,6 +172,26 @@ class TestCollection:
         assert len(result.options) == 0
 
 
+class TestCollectionGroup:
+    def _make_one(self, *args, **kwargs):
+        return stages.CollectionGroup(*args, **kwargs)
+
+    def test_repr(self):
+        input_arg = "test"
+        instance = self._make_one(input_arg)
+        repr_str = repr(instance)
+        assert repr_str == "CollectionGroup(collection_id='test')"
+
+    def test_to_pb(self):
+        input_arg = "test"
+        instance = self._make_one(input_arg)
+        result = instance._to_pb()
+        assert result.name == "collection_group"
+        assert len(result.args) == 1
+        assert result.args[0].string_value == "test"
+        assert len(result.options) == 0
+
+
 class TestDatabase:
     def _make_one(self, *args, **kwargs):
         return stages.Database(*args, **kwargs)

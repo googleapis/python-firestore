@@ -549,7 +549,7 @@ class _BasePipeline:
           If no groups are provided, the aggregation is performed over the entire input.
 
         Example:
-            >>> from google.cloud.firestore_v1.pipeline_expressions import Field, avg, count_all
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field
             >>> pipeline = client.pipeline().collection("books")
             >>> # Calculate the average rating and total count for all books
             >>> pipeline = pipeline.aggregate(

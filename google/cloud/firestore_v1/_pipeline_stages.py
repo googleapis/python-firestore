@@ -33,7 +33,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
 )
 from google.cloud.firestore_v1._helpers import encode_value
 
-if TYPE_CHECKING:
+if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_pipeline import _BasePipeline
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
