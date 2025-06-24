@@ -3656,4 +3656,3 @@ def test_transaction_rollback(client, cleanup, database, with_rollback, expected
     assert len(result) == 1
     assert len(result[0]) == 1
     assert result[0][0].value == expected
-    Vector(query)
