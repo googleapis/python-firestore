@@ -43,14 +43,12 @@ def yaml_loader(field="tests"):
     return test_cases[field]
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def event_loop():
+    """Change event_loop fixture to module level."""
     import asyncio
-
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
+    policy = asyncio.get_event_loop_policy()
+    loop = policy.new_event_loop()
     yield loop
     loop.close()
 
