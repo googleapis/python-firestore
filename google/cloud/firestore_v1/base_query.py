@@ -1176,10 +1176,10 @@ class BaseQuery(object):
                 orderings.append(pipeline_expressions.Ordering(field, direction))
 
             # Add exists filters to match Query's implicit orderby semantics.
-            if len(exists) > 1:
-                ppl = ppl.where(pipeline_expressions.And(*exists))
-            elif len(exists) == 1:
+            if len(exists) == 1:
                 ppl = ppl.where(exists[0])
+            else:
+                ppl = ppl.where(pipeline_expressions.And(*exists))
 
             # Add sort orderings
             ppl = ppl.sort(*orderings)

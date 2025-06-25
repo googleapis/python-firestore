@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 from typing import Iterable, Sequence, TYPE_CHECKING
-from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
@@ -47,7 +47,23 @@ class _BasePipeline:
     Use `client.pipeline()` to create pipeline instances.
     """
 
-    def __init__(self, client: Client | AsyncClient, *stages: stages.Stage):
+    def __init__(self, client: Client | AsyncClient):
+        """
+        Initializes a new pipeline.
+
+        Pipelines should not be instantiated directly. Instead,
+        call client.pipeline() to create an instance
+
+        Args:
+            client: The client associated with the pipeline
+        """
+        self._client = client
+        self.stages: Sequence[stages.Stage] = tuple()
+
+    @classmethod
+    def _create_with_stages(
+        cls, client: Client | AsyncClient, *stages
+    ) -> _BasePipeline:
         """
         Initializes a new pipeline with the given stages.
 
@@ -57,8 +73,9 @@ class _BasePipeline:
             client: The client associated with the pipeline
             *stages: Initial stages for the pipeline.
         """
-        self._client = client
-        self.stages = tuple(stages)
+        new_instance = cls(client)
+        new_instance.stages = tuple(stages)
+        return new_instance
 
     def __repr__(self):
         cls_str = type(self).__name__
@@ -79,7 +96,7 @@ class _BasePipeline:
         """
         Create a new Pipeline object with a new stage appended
         """
-        return self.__class__(self._client, *self.stages, new_stage)
+        return self.__class__._create_with_stages(self._client, *self.stages, new_stage)
 
     def _prep_execute_request(
         self, transaction: BaseTransaction | None
@@ -143,7 +160,6 @@ class _BasePipeline:
         Args:
             *fields: The fields to add to the documents, specified as `Selectable`
                      expressions.
-
         Returns:
             A new Pipeline object with this stage appended to the stage list
         """
@@ -581,21 +597,21 @@ class _BasePipeline:
           If no groups are provided, the aggregation is performed over the entire input.
 
         Example:
-            >>> from google.cloud.firestore_v1.pipeline_expressions import Field, avg, count_all
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Field
             >>> pipeline = client.pipeline().collection("books")
             >>> # Calculate the average rating and total count for all books
             >>> pipeline = pipeline.aggregate(
-            ...     avg(Field.of("rating")).as_("averageRating"),
-            ...     count_all().as_("totalBooks")
+            ...     Field.of("rating").avg().as_("averageRating"),
+            ...     Field.of("rating").count().as_("totalBooks")
             ... )
             >>> # Calculate the average rating for each genre
             >>> pipeline = pipeline.aggregate(
-            ...     avg(Field.of("rating")).as_("avg_rating"),
+            ...     Field.of("rating").avg().as_("avg_rating"),
             ...     groups=["genre"] # Group by the 'genre' field
             ... )
             >>> # Calculate the count for each author, grouping by Field object
             >>> pipeline = pipeline.aggregate(
-            ...     count_all().as_("bookCount"),
+            ...     Count().as_("bookCount"),
             ...     groups=[Field.of("author")]
             ... )
 

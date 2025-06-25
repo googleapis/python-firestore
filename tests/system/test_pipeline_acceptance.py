@@ -21,14 +21,14 @@ from typing import Any
 
 from google.protobuf.json_format import MessageToDict
 
-# from google.cloud.firestore_v1.pipeline_stages import *
-from google.cloud.firestore_v1 import pipeline_stages
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1 import pipeline_expressions
 from google.api_core.exceptions import GoogleAPIError
 
 from google.cloud.firestore import Client, AsyncClient
 
-FIRESTORE_TEST_DB = os.environ.get("SYSTEM_TESTS_DATABASE", "system-tests-named-db")
+from test__helpers import FIRESTORE_ENTERPRISE_DB
+
 FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 
 test_dir_name = os.path.dirname(__file__)
@@ -57,7 +57,7 @@ def event_loop():
 
 @pytest.fixture(scope="module")
 def client():
-    client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_TEST_DB)
+    client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_ENTERPRISE_DB)
     data = yaml_loader("data")
     try:
         # setup data
@@ -84,6 +84,10 @@ def async_client(client):
 
 
 def _apply_yaml_args(cls, client, yaml_args):
+    """
+    Helper to instantiate a class with yaml arguments. The arguments will be applied
+    as positional or keyword arguments, based on type
+    """
     if isinstance(yaml_args, dict):
         return cls(**parse_expressions(client, yaml_args))
     elif isinstance(yaml_args, list):
@@ -96,14 +100,13 @@ def _apply_yaml_args(cls, client, yaml_args):
 
 def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
     """
-    parse a yaml list of pipeline stages into firestore.pipeline_stages.Stage classes
+    parse a yaml list of pipeline stages into firestore._pipeline_stages.Stage classes
     """
     result_list = []
     for stage in pipeline:
         # stage will be either a map of the stage_name and its args, or just the stage_name itself
         stage_name: str = stage if isinstance(stage, str) else list(stage.keys())[0]
-        stage_cls: type[pipeline_stages.Stage] = getattr(pipeline_stages, stage_name)
-        # breakpoint()
+        stage_cls: type[stages.Stage] = getattr(stages, stage_name)
         # find arguments if given
         if isinstance(stage, dict):
             stage_yaml_args = stage[stage_name]
@@ -112,10 +115,13 @@ def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
             # yaml has no arguments
             stage_obj = stage_cls()
         result_list.append(stage_obj)
-    return client.pipeline(*result_list)
+    return client._pipeline_cls._create_with_stages(client, *result_list)
 
 
 def _is_expr_string(yaml_str):
+    """
+    Returns true if a string represents a class in pipeline_expressions
+    """
     return (
         isinstance(yaml_str, str)
         and yaml_str[0].isupper()
@@ -123,14 +129,34 @@ def _is_expr_string(yaml_str):
     )
 
 
+def _is_stage_string(yaml_str):
+    """
+    Returns true if a string represents a class in pipeline_stages
+    """
+    return (
+        isinstance(yaml_str, str)
+        and yaml_str[0].isupper()
+        and hasattr(stages, yaml_str)
+    )
+
+
 def parse_expressions(client, yaml_element: Any):
+    """
+    Turn yaml objects into pipeline expressions or native python object arguments
+    """
     if isinstance(yaml_element, list):
         return [parse_expressions(client, v) for v in yaml_element]
     elif isinstance(yaml_element, dict):
-        if len(yaml_element) == 1 and _is_expr_string(list(yaml_element)[0]):
+        if len(yaml_element) == 1 and _is_expr_string(next(iter(yaml_element))):
             # build pipeline expressions if possible
-            cls_str = list(yaml_element)[0]
+            cls_str = next(iter(yaml_element))
             cls = getattr(pipeline_expressions, cls_str)
+            yaml_args = yaml_element[cls_str]
+            return _apply_yaml_args(cls, client, yaml_args)
+        elif len(yaml_element) == 1 and _is_stage_string(next(iter(yaml_element))):
+            # build pipeline stage if possible (eg, for SampleOptions)
+            cls_str = next(iter(yaml_element))
+            cls = getattr(stages, cls_str)
             yaml_args = yaml_element[cls_str]
             return _apply_yaml_args(cls, client, yaml_args)
         elif len(yaml_element) == 1 and list(yaml_element)[0] == "Pipeline":
@@ -179,7 +205,7 @@ def test_pipeline_expected_errors(test_dict, client):
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     # check if server responds as expected
     with pytest.raises(GoogleAPIError) as err:
-        [_ for _ in pipeline.execute()]
+        pipeline.execute()
     found_error = str(err.value)
     match = re.search(error_regex, found_error)
     assert match, f"error '{found_error}' does not match '{error_regex}'"
@@ -198,7 +224,7 @@ def test_pipeline_results(test_dict, client):
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     # check if server responds as expected
-    got_results = [snapshot.to_dict() for snapshot in pipeline.execute()]
+    got_results = [snapshot.data() for snapshot in pipeline.stream()]
     if expected_results:
         assert got_results == expected_results
     if expected_count is not None:
@@ -219,7 +245,7 @@ async def test_pipeline_expected_errors_async(test_dict, async_client):
     pipeline = parse_pipeline(async_client, test_dict["pipeline"])
     # check if server responds as expected
     with pytest.raises(GoogleAPIError) as err:
-        [_ async for _ in pipeline.execute()]
+        await pipeline.execute()
     found_error = str(err.value)
     match = re.search(error_regex, found_error)
     assert match, f"error '{found_error}' does not match '{error_regex}'"
@@ -239,7 +265,7 @@ async def test_pipeline_results_async(test_dict, async_client):
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(async_client, test_dict["pipeline"])
     # check if server responds as expected
-    got_results = [snapshot.to_dict() async for snapshot in pipeline.execute()]
+    got_results = [snapshot.data() async for snapshot in pipeline.stream()]
     if expected_results:
         assert got_results == expected_results
     if expected_count is not None:

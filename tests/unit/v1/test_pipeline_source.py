@@ -17,7 +17,7 @@ from google.cloud.firestore_v1.pipeline import Pipeline
 from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
 from google.cloud.firestore_v1.client import Client
 from google.cloud.firestore_v1.async_client import AsyncClient
-from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1.base_document import BaseDocumentReference
 
 

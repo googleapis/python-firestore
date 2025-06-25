@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 from typing import Iterable, TYPE_CHECKING
-from google.cloud.firestore_v1 import pipeline_stages as stages
+from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 
 if TYPE_CHECKING:  # pragma: NO COVER
@@ -56,9 +56,26 @@ class Pipeline(_BasePipeline):
     def execute(
         self,
         transaction: "Transaction" | None = None,
+    ) -> list[PipelineResult]:
+        """
+        Executes this pipeline and returns results as a list
+
+        Args:
+            transaction
+                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+                An existing transaction that this query will run in.
+                If a ``transaction`` is used and it already has write operations
+                added, this method cannot be used (i.e. read-after-write is not
+                allowed).
+        """
+        return [result for result in self.stream(transaction=transaction)]
+
+    def stream(
+        self,
+        transaction: "Transaction" | None = None,
     ) -> Iterable[PipelineResult]:
         """
-        Executes this pipeline, providing results through an Iterable
+        Process this pipeline as a stream, providing results through an Iterable
 
         Args:
             transaction
