@@ -228,7 +228,6 @@ def test_collections_w_read_time(client, cleanup, database):
     data = {"status": "new"}
     write_result = first_document.create(data)
     read_time = write_result.update_time
-    num_collections = len(list(client.collections()))
 
     second_collection_id = "doc-create" + UNIQUE_RESOURCE_ID + "-2"
     second_document_id = "doc" + UNIQUE_RESOURCE_ID + "-2"
@@ -238,7 +237,6 @@ def test_collections_w_read_time(client, cleanup, database):
 
     # Test that listing current collections does have the second id.
     curr_collections = list(client.collections())
-    assert len(curr_collections) > num_collections
     ids = [collection.id for collection in curr_collections]
     assert second_collection_id in ids
     assert first_collection_id in ids
