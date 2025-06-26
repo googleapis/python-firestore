@@ -117,9 +117,6 @@ def verify_pipeline(query):
         # if testing against a non-enterprise db, skip this check
         if ENTERPRISE_MODE_ERROR not in e.message:
             raise e
-    except NotImplementedError:
-        # TODO: remove this when pipelines are GA
-        pass
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
