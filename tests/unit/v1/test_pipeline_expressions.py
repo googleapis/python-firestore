@@ -100,6 +100,7 @@ class TestExpr:
             ("gte", (2,), expr.Gte),
             ("in_any", ([None],), expr.In),
             ("not_in_any", ([None],), expr.Not),
+            ("array_concat", ([None],), expr.ArrayConcat),
             ("array_contains", (None,), expr.ArrayContains),
             ("array_contains_all", ([None],), expr.ArrayContainsAll),
             ("array_contains_any", ([None],), expr.ArrayContainsAny),
@@ -121,7 +122,16 @@ class TestExpr:
             ("starts_with", ("prefix",), expr.StartsWith),
             ("ends_with", ("postfix",), expr.EndsWith),
             ("str_concat", ("elem1", expr.Constant("elem2")), expr.StrConcat),
+            ("to_lower", (), expr.ToLower),
+            ("to_upper", (), expr.ToUpper),
+            ("trim", (), expr.Trim),
+            ("reverse", (), expr.Reverse),
+            ("replace_first", ("1", "2"), expr.ReplaceFirst),
+            ("replace_all", ("1", "2"), expr.ReplaceAll),
             ("map_get", ("key",), expr.MapGet),
+            ("cosine_distance", [1], expr.CosineDistance),
+            ("euclidean_distance", [1], expr.EuclideanDistance),
+            ("dot_product", [1], expr.DotProduct),
             ("vector_length", (), expr.VectorLength),
             ("timestamp_to_unix_micros", (), expr.TimestampToUnixMicros),
             ("unix_micros_to_timestamp", (), expr.UnixMicrosToTimestamp),
@@ -1158,3 +1168,81 @@ class TestFunctionClasses:
         assert instance.name == "maximum"
         assert instance.params == [arg1]
         assert repr(instance) == "Max(Value)"
+
+    def test_dot_product(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.DotProduct(arg1, arg2)
+        assert instance.name == "dot_product"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "DotProduct(Left, Right)"
+
+    def test_euclidean_distance(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.EuclideanDistance(arg1, arg2)
+        assert instance.name == "euclidean_distance"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "EuclideanDistance(Left, Right)"
+
+    def test_cosine_distance(self):
+        arg1 = self._make_arg("Left")
+        arg2 = self._make_arg("Right")
+        instance = expr.CosineDistance(arg1, arg2)
+        assert instance.name == "cosine_distance"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "CosineDistance(Left, Right)"
+
+    def test_replace_all(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("OldValue")
+        arg3 = self._make_arg("NewValue")
+        instance = expr.ReplaceAll(arg1, arg2, arg3)
+        assert instance.name == "replace_all"
+        assert instance.params == [arg1, arg2, arg3]
+
+    def test_replace_first(self):
+        arg1 = self._make_arg("Expr")
+        arg2 = self._make_arg("OldValue")
+        arg3 = self._make_arg("NewValue")
+        instance = expr.ReplaceFirst(arg1, arg2, arg3)
+        assert instance.name == "replace_first"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "ReplaceFirst(Expr, OldValue, NewValue)"
+
+    def test_reverse(self):
+        arg1 = self._make_arg("Expr")
+        instance = expr.Reverse(arg1)
+        assert instance.name == "reverse"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Reverse(Expr)"
+
+    def test_to_lower(self):
+        arg1 = self._make_arg("Expr")
+        instance = expr.ToLower(arg1)
+        assert instance.name == "to_lower"
+        assert instance.params == [arg1]
+        assert repr(instance) == "ToLower(Expr)"
+
+    def test_to_upper(self):
+        arg1 = self._make_arg("Expr")
+        instance = expr.ToUpper(arg1)
+        assert instance.name == "to_upper"
+        assert instance.params == [arg1]
+        assert repr(instance) == "ToUpper(Expr)"
+
+    def test_trim(self):
+        arg1 = self._make_arg("Expr")
+        instance = expr.Trim(arg1)
+        assert instance.name == "trim"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Trim(Expr)"
+
+    def test_array_concat(self):
+        arg1 = self._make_arg("1")
+        arg2 = self._make_arg("2")
+        arg3 = self._make_arg("3")
+        instance = expr.ArrayConcat(arg1, [arg2, arg3])
+        assert instance.name == "array_concat"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "ArrayConcat(1, 2, 3)"
