@@ -1225,6 +1225,14 @@ class Selectable(Expr):
             }
         )
 
+    @staticmethod
+    def _to_value(field_list: Sequence[Selectable]) -> Value:
+        return Value(
+            map_value={
+                "fields": {m[0]: m[1] for m in [f._to_map() for f in field_list]}
+            }
+        )
+
 
 T = TypeVar("T", bound=Expr)
 
