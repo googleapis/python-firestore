@@ -15,7 +15,6 @@
 from __future__ import annotations
 from typing import (
     Any,
-    List,
     Generic,
     TypeVar,
     Dict,
@@ -352,7 +351,7 @@ class Expr(ABC):
         """
         return Lte(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def in_any(self, array: List[Expr | CONSTANT_TYPE]) -> "In":
+    def in_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "In":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
@@ -368,7 +367,7 @@ class Expr(ABC):
         """
         return In(self, [self._cast_to_expr_or_convert_to_constant(v) for v in array])
 
-    def not_in_any(self, array: List[Expr | CONSTANT_TYPE]) -> "Not":
+    def not_in_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "Not":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
@@ -377,7 +376,7 @@ class Expr(ABC):
             >>> Field.of("status").not_in_any(["pending", "cancelled"])
 
         Args:
-            *others: The values or expressions to check against.
+            *array: The values or expressions to check against.
 
         Returns:
             A new `Expr` representing the 'NOT IN' comparison.
@@ -402,7 +401,7 @@ class Expr(ABC):
         return ArrayContains(self, self._cast_to_expr_or_convert_to_constant(element))
 
     def array_contains_all(
-        self, elements: List[Expr | CONSTANT_TYPE]
+        self, elements: Sequence[Expr | CONSTANT_TYPE]
     ) -> "ArrayContainsAll":
         """Creates an expression that checks if an array contains all the specified elements.
 
@@ -423,7 +422,7 @@ class Expr(ABC):
         )
 
     def array_contains_any(
-        self, elements: List[Expr | CONSTANT_TYPE]
+        self, elements: Sequence[Expr | CONSTANT_TYPE]
     ) -> "ArrayContainsAny":
         """Creates an expression that checks if an array contains any of the specified elements.
 
@@ -929,8 +928,8 @@ class Constant(Expr, Generic[CONSTANT_TYPE]):
 class ListOfExprs(Expr):
     """Represents a list of expressions, typically used as an argument to functions like 'in' or array functions."""
 
-    def __init__(self, exprs: List[Expr]):
-        self.exprs: list[Expr] = exprs
+    def __init__(self, exprs: Sequence[Expr]):
+        self.exprs: list[Expr] = list(exprs)
 
     def __eq__(self, other):
         if not isinstance(other, ListOfExprs):
@@ -1225,6 +1224,14 @@ class Selectable(Expr):
             }
         )
 
+    @staticmethod
+    def _to_value(field_list: Sequence[Selectable]) -> Value:
+        return Value(
+            map_value={
+                "fields": {m[0]: m[1] for m in [f._to_map() for f in field_list]}
+            }
+        )
+
 
 T = TypeVar("T", bound=Expr)
 
@@ -1383,21 +1390,21 @@ class And(FilterCondition):
 class ArrayContains(FilterCondition):
     def __init__(self, array: Expr, element: Expr):
         super().__init__(
-            "array_contains", [array, element if element else Constant(None)]
+            "array_contains", [array, element]
         )
 
 
 class ArrayContainsAll(FilterCondition):
     """Represents checking if an array contains all specified elements."""
 
-    def __init__(self, array: Expr, elements: List[Expr]):
+    def __init__(self, array: Expr, elements: Sequence[Expr]):
         super().__init__("array_contains_all", [array, ListOfExprs(elements)])
 
 
 class ArrayContainsAny(FilterCondition):
     """Represents checking if an array contains any of the specified elements."""
 
-    def __init__(self, array: Expr, elements: List[Expr]):
+    def __init__(self, array: Expr, elements: Sequence[Expr]):
         super().__init__("array_contains_any", [array, ListOfExprs(elements)])
 
 
@@ -1412,7 +1419,7 @@ class Eq(FilterCondition):
     """Represents the equality comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("eq", [left, right if right else Constant(None)])
+        super().__init__("eq", [left, right])
 
 
 class Exists(FilterCondition):
@@ -1426,14 +1433,14 @@ class Gt(FilterCondition):
     """Represents the greater than comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("gt", [left, right if right else Constant(None)])
+        super().__init__("gt", [left, right])
 
 
 class Gte(FilterCondition):
     """Represents the greater than or equal to comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("gte", [left, right if right else Constant(None)])
+        super().__init__("gte", [left, right])
 
 
 class If(FilterCondition):
@@ -1441,14 +1448,14 @@ class If(FilterCondition):
 
     def __init__(self, condition: "FilterCondition", true_expr: Expr, false_expr: Expr):
         super().__init__(
-            "if", [condition, true_expr, false_expr if false_expr else Constant(None)]
+            "if", [condition, true_expr, false_expr]
         )
 
 
 class In(FilterCondition):
     """Represents checking if an expression's value is within a list of values."""
 
-    def __init__(self, left: Expr, others: List[Expr]):
+    def __init__(self, left: Expr, others: Sequence[Expr]):
         super().__init__(
             "in", [left, ListOfExprs(others)], infix_name_override="in_any"
         )
@@ -1472,21 +1479,21 @@ class Lt(FilterCondition):
     """Represents the less than comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("lt", [left, right if right else Constant(None)])
+        super().__init__("lt", [left, right])
 
 
 class Lte(FilterCondition):
     """Represents the less than or equal to comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("lte", [left, right if right else Constant(None)])
+        super().__init__("lte", [left, right])
 
 
 class Neq(FilterCondition):
     """Represents the inequality comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("neq", [left, right if right else Constant(None)])
+        super().__init__("neq", [left, right])
 
 
 class Not(FilterCondition):
@@ -1534,5 +1541,5 @@ class StrContains(FilterCondition):
 class Xor(FilterCondition):
     """Represents the logical XOR of multiple filter conditions."""
 
-    def __init__(self, conditions: List["FilterCondition"]):
+    def __init__(self, conditions: Sequence["FilterCondition"]):
         super().__init__("xor", conditions, use_infix_repr=False)
