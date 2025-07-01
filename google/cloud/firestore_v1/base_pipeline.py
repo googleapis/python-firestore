@@ -146,15 +146,15 @@ class _BasePipeline:
 
         The added fields are defined using `Selectable` expressions, which can be:
             - `Field`: References an existing document field.
-            - `Function`: Performs a calculation using functions like `add`,
-              `multiply` with assigned aliases using `Expr.as_()`.
+            - `ExprWithAlias`: References an existing expression with an alias,
+                assigned using `Expr.as_()`
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, add
             >>> pipeline = client.pipeline().collection("books")
             >>> pipeline = pipeline.add_fields(
             ...     Field.of("rating").as_("bookRating"), # Rename 'rating' to 'bookRating'
-            ...     add(5, Field.of("quantity")).as_("totalCost")  # Calculate 'totalCost'
+            ...     Field.of("quantity").add(5).as_("totalCost")  # Calculate 'totalCost'
             ... )
 
         Args:
