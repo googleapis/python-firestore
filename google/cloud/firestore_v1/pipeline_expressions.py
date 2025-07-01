@@ -376,7 +376,7 @@ class Expr(ABC):
             >>> Field.of("status").not_in_any(["pending", "cancelled"])
 
         Args:
-            *others: The values or expressions to check against.
+            *array: The values or expressions to check against.
 
         Returns:
             A new `Expr` representing the 'NOT IN' comparison.
@@ -1390,7 +1390,7 @@ class And(FilterCondition):
 class ArrayContains(FilterCondition):
     def __init__(self, array: Expr, element: Expr):
         super().__init__(
-            "array_contains", [array, element if element else Constant(None)]
+            "array_contains", [array, element]
         )
 
 
@@ -1419,7 +1419,7 @@ class Eq(FilterCondition):
     """Represents the equality comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("eq", [left, right if right else Constant(None)])
+        super().__init__("eq", [left, right])
 
 
 class Exists(FilterCondition):
@@ -1433,14 +1433,14 @@ class Gt(FilterCondition):
     """Represents the greater than comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("gt", [left, right if right else Constant(None)])
+        super().__init__("gt", [left, right])
 
 
 class Gte(FilterCondition):
     """Represents the greater than or equal to comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("gte", [left, right if right else Constant(None)])
+        super().__init__("gte", [left, right])
 
 
 class If(FilterCondition):
@@ -1448,7 +1448,7 @@ class If(FilterCondition):
 
     def __init__(self, condition: "FilterCondition", true_expr: Expr, false_expr: Expr):
         super().__init__(
-            "if", [condition, true_expr, false_expr if false_expr else Constant(None)]
+            "if", [condition, true_expr, false_expr]
         )
 
 
@@ -1479,21 +1479,21 @@ class Lt(FilterCondition):
     """Represents the less than comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("lt", [left, right if right else Constant(None)])
+        super().__init__("lt", [left, right])
 
 
 class Lte(FilterCondition):
     """Represents the less than or equal to comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("lte", [left, right if right else Constant(None)])
+        super().__init__("lte", [left, right])
 
 
 class Neq(FilterCondition):
     """Represents the inequality comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("neq", [left, right if right else Constant(None)])
+        super().__init__("neq", [left, right])
 
 
 class Not(FilterCondition):
