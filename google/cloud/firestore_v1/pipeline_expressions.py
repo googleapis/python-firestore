@@ -1478,7 +1478,9 @@ class Function(Expr):
         Returns:
             A new `Expr` representing the length of the vector.
         """
-        vector_val = Field.of(vector_expr) if isinstance(vector_expr, str) else vector_expr
+        vector_val = (
+            Field.of(vector_expr) if isinstance(vector_expr, str) else vector_expr
+        )
         return vector_val.vector_length()
 
     @staticmethod
@@ -1492,7 +1494,9 @@ class Function(Expr):
             A new `Expr` representing the number of microseconds since the epoch.
         """
         timestamp_val = (
-            Field.of(timestamp_expr) if isinstance(timestamp_expr, str) else timestamp_expr
+            Field.of(timestamp_expr)
+            if isinstance(timestamp_expr, str)
+            else timestamp_expr
         )
         return timestamp_val.timestamp_to_unix_micros()
 
@@ -1504,7 +1508,9 @@ class Function(Expr):
         Returns:
             A new `Expr` representing the timestamp.
         """
-        micros_val = Field.of(micros_expr) if isinstance(micros_expr, str) else micros_expr
+        micros_val = (
+            Field.of(micros_expr) if isinstance(micros_expr, str) else micros_expr
+        )
         return micros_val.unix_micros_to_timestamp()
 
     @staticmethod
@@ -1518,7 +1524,9 @@ class Function(Expr):
             A new `Expr` representing the number of milliseconds since the epoch.
         """
         timestamp_val = (
-            Field.of(timestamp_expr) if isinstance(timestamp_expr, str) else timestamp_expr
+            Field.of(timestamp_expr)
+            if isinstance(timestamp_expr, str)
+            else timestamp_expr
         )
         return timestamp_val.timestamp_to_unix_millis()
 
@@ -1530,11 +1538,15 @@ class Function(Expr):
         Returns:
             A new `Expr` representing the timestamp.
         """
-        millis_val = Field.of(millis_expr) if isinstance(millis_expr, str) else millis_expr
+        millis_val = (
+            Field.of(millis_expr) if isinstance(millis_expr, str) else millis_expr
+        )
         return millis_val.unix_millis_to_timestamp()
 
     @staticmethod
-    def timestamp_to_unix_seconds(timestamp_expr: Expr | str) -> "TimestampToUnixSeconds":
+    def timestamp_to_unix_seconds(
+        timestamp_expr: Expr | str,
+    ) -> "TimestampToUnixSeconds":
         """Creates an expression that converts a timestamp to the number of seconds since the epoch
         (1970-01-01 00:00:00 UTC).
 
@@ -1544,7 +1556,9 @@ class Function(Expr):
             A new `Expr` representing the number of seconds since the epoch.
         """
         timestamp_val = (
-            Field.of(timestamp_expr) if isinstance(timestamp_expr, str) else timestamp_expr
+            Field.of(timestamp_expr)
+            if isinstance(timestamp_expr, str)
+            else timestamp_expr
         )
         return timestamp_val.timestamp_to_unix_seconds()
 
@@ -1576,7 +1590,9 @@ class Function(Expr):
         Returns:
             A new `Expr` representing the resulting timestamp.
         """
-        timestamp_expr = Field.of(timestamp) if isinstance(timestamp, str) else timestamp
+        timestamp_expr = (
+            Field.of(timestamp) if isinstance(timestamp, str) else timestamp
+        )
         return timestamp_expr.timestamp_add(unit, amount)
 
     @staticmethod
@@ -1594,7 +1610,9 @@ class Function(Expr):
         Returns:
             A new `Expr` representing the resulting timestamp.
         """
-        timestamp_expr = Field.of(timestamp) if isinstance(timestamp, str) else timestamp
+        timestamp_expr = (
+            Field.of(timestamp) if isinstance(timestamp, str) else timestamp
+        )
         return timestamp_expr.timestamp_sub(unit, amount)
 
 

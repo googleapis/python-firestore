@@ -958,9 +958,6 @@ class TestFunctionClasses:
         result = method_ptr(*args)
         assert isinstance(result, result_cls)
 
-
-
-
     @pytest.mark.parametrize(
         "first,second,expected",
         [
