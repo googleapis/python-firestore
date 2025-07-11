@@ -136,11 +136,11 @@ class TestExpr:
             ("as_", ("alias",), expr.ExprWithAlias),
         ],
     )
-    def test_infix_call(self, method, args, result_cls):
+    @pytest.mark.parametrize("base_instance", [expr.Constant(1), expr.Function.add("1", 1), expr.Field.of("test"), expr.Constant(1).as_("one")])
+    def test_infix_call(self, method, args, result_cls, base_instance):
         """
         many FilterCondition expressions support infix execution, and are exposed as methods on Expr. Test calling them
         """
-        base_instance = expr.Constant(1)
         method_ptr = getattr(base_instance, method)
 
         result = method_ptr(*args)
@@ -949,7 +949,7 @@ class TestFunctionClasses:
             ("timestamp_sub", ("field", "hour", 2.5), expr.TimestampSub),
         ],
     )
-    def test_static_builder(self, method, args, result_cls):
+    def test_function_builder(self, method, args, result_cls):
         """
         Test building functions using methods exposed on base Function class.
         """
