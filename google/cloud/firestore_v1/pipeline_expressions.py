@@ -969,6 +969,634 @@ class Function(Expr):
             }
         )
 
+    @staticmethod
+    def add(left: Expr | str, right: Expr | float) -> "Add":
+        """Creates an expression that adds two expressions together.
+
+        Args:
+            left: The first expression or field path to add.
+            right: The second expression or constant value to add.
+
+        Returns:
+            A new `Expr` representing the addition operation.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.add(right)
+
+    @staticmethod
+    def subtract(left: Expr | str, right: Expr | float) -> "Subtract":
+        """Creates an expression that subtracts another expression or constant from this expression.
+
+        Args:
+            left: The expression or field path to subtract from.
+            right: The expression or constant value to subtract.
+
+        Returns:
+            A new `Expr` representing the subtraction operation.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.subtract(right)
+
+    @staticmethod
+    def multiply(left: Expr | str, right: Expr | float) -> "Multiply":
+        """Creates an expression that multiplies this expression by another expression or constant.
+
+        Args:
+            left: The expression or field path to multiply.
+            right: The expression or constant value to multiply by.
+
+        Returns:
+            A new `Expr` representing the multiplication operation.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.multiply(right)
+
+    @staticmethod
+    def divide(left: Expr | str, right: Expr | float) -> "Divide":
+        """Creates an expression that divides this expression by another expression or constant.
+
+        Args:
+            left: The expression or field path to be divided.
+            right: The expression or constant value to divide by.
+
+        Returns:
+            A new `Expr` representing the division operation.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.divide(right)
+
+    @staticmethod
+    def mod(left: Expr | str, right: Expr | float) -> "Mod":
+        """Creates an expression that calculates the modulo (remainder) to another expression or constant.
+
+        Args:
+            left: The dividend expression or field path.
+            right: The divisor expression or constant.
+
+        Returns:
+            A new `Expr` representing the modulo operation.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.mod(right)
+
+    @staticmethod
+    def logical_max(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "LogicalMax":
+        """Creates an expression that returns the larger value between this expression
+        and another expression or constant, based on Firestore's value type ordering.
+
+        Firestore's value type ordering is described here:
+        https://cloud.google.com/firestore/docs/concepts/data-types#value_type_ordering
+
+
+        Args:
+            left: The expression or field path to compare.
+            right: The other expression or constant value to compare with.
+
+        Returns:
+            A new `Expr` representing the logical max operation.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.logical_max(right)
+
+    @staticmethod
+    def logical_min(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "LogicalMin":
+        """Creates an expression that returns the smaller value between this expression
+        and another expression or constant, based on Firestore's value type ordering.
+
+        Firestore's value type ordering is described here:
+        https://cloud.google.com/firestore/docs/concepts/data-types#value_type_ordering
+
+        Args:
+            left: The expression or field path to compare.
+            right: The other expression or constant value to compare with.
+
+        Returns:
+            A new `Expr` representing the logical min operation.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.logical_min(right)
+
+    @staticmethod
+    def eq(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Eq":
+        """Creates an expression that checks if this expression is equal to another
+        expression or constant value.
+
+        Args:
+            left: The expression or field path to compare.
+            right: The expression or constant value to compare for equality.
+
+        Returns:
+            A new `Expr` representing the equality comparison.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.eq(right)
+
+    @staticmethod
+    def neq(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Neq":
+        """Creates an expression that checks if this expression is not equal to another
+        expression or constant value.
+
+        Args:
+            left: The expression or field path to compare.
+            right: The expression or constant value to compare for inequality.
+
+        Returns:
+            A new `Expr` representing the inequality comparison.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.neq(right)
+
+    @staticmethod
+    def gt(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Gt":
+        """Creates an expression that checks if this expression is greater than another
+        expression or constant value.
+
+        Args:
+            left: The expression or field path to compare.
+            right: The expression or constant value to compare for greater than.
+
+        Returns:
+            A new `Expr` representing the greater than comparison.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.gt(right)
+
+    @staticmethod
+    def gte(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Gte":
+        """Creates an expression that checks if this expression is greater than or equal
+        to another expression or constant value.
+
+        Args:
+            left: The expression or field path to compare.
+            right: The expression or constant value to compare for greater than or equal to.
+
+        Returns:
+            A new `Expr` representing the greater than or equal to comparison.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.gte(right)
+
+    @staticmethod
+    def lt(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Lt":
+        """Creates an expression that checks if this expression is less than another
+        expression or constant value.
+
+        Args:
+            left: The expression or field path to compare.
+            right: The expression or constant value to compare for less than.
+
+        Returns:
+            A new `Expr` representing the less than comparison.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.lt(right)
+
+    @staticmethod
+    def lte(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Lte":
+        """Creates an expression that checks if this expression is less than or equal to
+        another expression or constant value.
+
+        Args:
+            left: The expression or field path to compare.
+            right: The expression or constant value to compare for less than or equal to.
+
+        Returns:
+            A new `Expr` representing the less than or equal to comparison.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.lte(right)
+
+    @staticmethod
+    def in_any(left: Expr | str, array: List[Expr | CONSTANT_TYPE]) -> "In":
+        """Creates an expression that checks if this expression is equal to any of the
+        provided values or expressions.
+
+        Args:
+            left: The expression or field path to compare.
+            array: The values or expressions to check against.
+
+        Returns:
+            A new `Expr` representing the 'IN' comparison.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.in_any(array)
+
+    @staticmethod
+    def not_in_any(left: Expr | str, array: List[Expr | CONSTANT_TYPE]) -> "Not":
+        """Creates an expression that checks if this expression is not equal to any of the
+        provided values or expressions.
+
+        Args:
+            left: The expression or field path to compare.
+            array: The values or expressions to check against.
+
+        Returns:
+            A new `Expr` representing the 'NOT IN' comparison.
+        """
+        left_expr = Field.of(left) if isinstance(left, str) else left
+        return left_expr.not_in_any(array)
+
+    @staticmethod
+    def array_contains(
+        array: Expr | str, element: Expr | CONSTANT_TYPE
+    ) -> "ArrayContains":
+        """Creates an expression that checks if an array contains a specific element or value.
+
+        Args:
+            array: The array expression or field path to check.
+            element: The element (expression or constant) to search for in the array.
+
+        Returns:
+            A new `Expr` representing the 'array_contains' comparison.
+        """
+        array_expr = Field.of(array) if isinstance(array, str) else array
+        return array_expr.array_contains(element)
+
+    @staticmethod
+    def array_contains_all(
+        array: Expr | str, elements: List[Expr | CONSTANT_TYPE]
+    ) -> "ArrayContainsAll":
+        """Creates an expression that checks if an array contains all the specified elements.
+
+        Args:
+            array: The array expression or field path to check.
+            elements: The list of elements (expressions or constants) to check for in the array.
+
+        Returns:
+            A new `Expr` representing the 'array_contains_all' comparison.
+        """
+        array_expr = Field.of(array) if isinstance(array, str) else array
+        return array_expr.array_contains_all(elements)
+
+    @staticmethod
+    def array_contains_any(
+        array: Expr | str, elements: List[Expr | CONSTANT_TYPE]
+    ) -> "ArrayContainsAny":
+        """Creates an expression that checks if an array contains any of the specified elements.
+
+        Args:
+            array: The array expression or field path to check.
+            elements: The list of elements (expressions or constants) to check for in the array.
+
+        Returns:
+            A new `Expr` representing the 'array_contains_any' comparison.
+        """
+        array_expr = Field.of(array) if isinstance(array, str) else array
+        return array_expr.array_contains_any(elements)
+
+    @staticmethod
+    def array_length(array: Expr | str) -> "ArrayLength":
+        """Creates an expression that calculates the length of an array.
+
+        Returns:
+            A new `Expr` representing the length of the array.
+        """
+        array_expr = Field.of(array) if isinstance(array, str) else array
+        return array_expr.array_length()
+
+    @staticmethod
+    def array_reverse(array: Expr | str) -> "ArrayReverse":
+        """Creates an expression that returns the reversed content of an array.
+
+        Returns:
+            A new `Expr` representing the reversed array.
+        """
+        array_expr = Field.of(array) if isinstance(array, str) else array
+        return array_expr.array_reverse()
+
+    @staticmethod
+    def is_nan(expr: Expr | str) -> "IsNaN":
+        """Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
+
+        Returns:
+            A new `Expr` representing the 'isNaN' check.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.is_nan()
+
+    @staticmethod
+    def exists(expr: Expr | str) -> "Exists":
+        """Creates an expression that checks if a field exists in the document.
+
+        Returns:
+            A new `Expr` representing the 'exists' check.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.exists()
+
+    @staticmethod
+    def sum(expr: Expr | str) -> "Sum":
+        """Creates an aggregation that calculates the sum of a numeric field across multiple stage inputs.
+
+        Returns:
+            A new `Accumulator` representing the 'sum' aggregation.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.sum()
+
+    @staticmethod
+    def avg(expr: Expr | str) -> "Avg":
+        """Creates an aggregation that calculates the average (mean) of a numeric field across multiple
+        stage inputs.
+
+        Returns:
+            A new `Accumulator` representing the 'avg' aggregation.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.avg()
+
+    @staticmethod
+    def count(expr: Expr | str | None = None) -> "Count":
+        """Creates an aggregation that counts the number of stage inputs with valid evaluations of the
+        expression or field.
+
+        Returns:
+            A new `Accumulator` representing the 'count' aggregation.
+        """
+        if expr is None:
+            return Count()
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.count()
+
+    @staticmethod
+    def min(expr: Expr | str) -> "Min":
+        """Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
+
+        Returns:
+            A new `Accumulator` representing the 'min' aggregation.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.min()
+
+    @staticmethod
+    def max(expr: Expr | str) -> "Max":
+        """Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
+
+        Returns:
+            A new `Accumulator` representing the 'max' aggregation.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.max()
+
+    @staticmethod
+    def char_length(expr: Expr | str) -> "CharLength":
+        """Creates an expression that calculates the character length of a string.
+
+        Returns:
+            A new `Expr` representing the length of the string.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.char_length()
+
+    @staticmethod
+    def byte_length(expr: Expr | str) -> "ByteLength":
+        """Creates an expression that calculates the byte length of a string in its UTF-8 form.
+
+        Returns:
+            A new `Expr` representing the byte length of the string.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.byte_length()
+
+    @staticmethod
+    def like(expr: Expr | str, pattern: Expr | str) -> "Like":
+        """Creates an expression that performs a case-sensitive string comparison.
+
+        Args:
+            expr: The expression or field path to perform the comparison on.
+            pattern: The pattern (string or expression) to search for. You can use "%" as a wildcard character.
+
+        Returns:
+            A new `Expr` representing the 'like' comparison.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.like(pattern)
+
+    @staticmethod
+    def regex_contains(expr: Expr | str, regex: Expr | str) -> "RegexContains":
+        """Creates an expression that checks if a string contains a specified regular expression as a
+        substring.
+
+        Args:
+            expr: The expression or field path to perform the comparison on.
+            regex: The regular expression (string or expression) to use for the search.
+
+        Returns:
+            A new `Expr` representing the 'contains' comparison.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.regex_contains(regex)
+
+    @staticmethod
+    def regex_matches(expr: Expr | str, regex: Expr | str) -> "RegexMatch":
+        """Creates an expression that checks if a string matches a specified regular expression.
+
+        Args:
+            expr: The expression or field path to match against.
+            regex: The regular expression (string or expression) to use for the match.
+
+        Returns:
+            A new `Expr` representing the regular expression match.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.regex_matches(regex)
+
+    @staticmethod
+    def str_contains(expr: Expr | str, substring: Expr | str) -> "StrContains":
+        """Creates an expression that checks if this string expression contains a specified substring.
+
+        Args:
+            expr: The expression or field path to perform the comparison on.
+            substring: The substring (string or expression) to use for the search.
+
+        Returns:
+            A new `Expr` representing the 'contains' comparison.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.str_contains(substring)
+
+    @staticmethod
+    def starts_with(expr: Expr | str, prefix: Expr | str) -> "StartsWith":
+        """Creates an expression that checks if a string starts with a given prefix.
+
+        Args:
+            expr: The expression or field path to check.
+            prefix: The prefix (string or expression) to check for.
+
+        Returns:
+            A new `Expr` representing the 'starts with' comparison.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.starts_with(prefix)
+
+    @staticmethod
+    def ends_with(expr: Expr | str, postfix: Expr | str) -> "EndsWith":
+        """Creates an expression that checks if a string ends with a given postfix.
+
+        Args:
+            expr: The expression or field path to check.
+            postfix: The postfix (string or expression) to check for.
+
+        Returns:
+            A new `Expr` representing the 'ends with' comparison.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return expr_val.ends_with(postfix)
+
+    @staticmethod
+    def str_concat(first: Expr | str, *elements: Expr | CONSTANT_TYPE) -> "StrConcat":
+        """Creates an expression that concatenates string expressions, fields or constants together.
+
+        Args:
+            first: The first expression or field path to concatenate.
+            *elements: The expressions or constants (typically strings) to concatenate.
+
+        Returns:
+            A new `Expr` representing the concatenated string.
+        """
+        first_expr = Field.of(first) if isinstance(first, str) else first
+        return first_expr.str_concat(*elements)
+
+    @staticmethod
+    def map_get(map_expr: Expr | str, key: str) -> "MapGet":
+        """Accesses a value from a map (object) field using the provided key.
+
+        Args:
+            map_expr: The expression or field path of the map.
+            key: The key to access in the map.
+
+        Returns:
+            A new `Expr` representing the value associated with the given key in the map.
+        """
+        map_val = Field.of(map_expr) if isinstance(map_expr, str) else map_expr
+        return map_val.map_get(key)
+
+    @staticmethod
+    def vector_length(vector_expr: Expr | str) -> "VectorLength":
+        """Creates an expression that calculates the length (dimension) of a Firestore Vector.
+
+        Returns:
+            A new `Expr` representing the length of the vector.
+        """
+        vector_val = Field.of(vector_expr) if isinstance(vector_expr, str) else vector_expr
+        return vector_val.vector_length()
+
+    @staticmethod
+    def timestamp_to_unix_micros(timestamp_expr: Expr | str) -> "TimestampToUnixMicros":
+        """Creates an expression that converts a timestamp to the number of microseconds since the epoch
+        (1970-01-01 00:00:00 UTC).
+
+        Truncates higher levels of precision by rounding down to the beginning of the microsecond.
+
+        Returns:
+            A new `Expr` representing the number of microseconds since the epoch.
+        """
+        timestamp_val = (
+            Field.of(timestamp_expr) if isinstance(timestamp_expr, str) else timestamp_expr
+        )
+        return timestamp_val.timestamp_to_unix_micros()
+
+    @staticmethod
+    def unix_micros_to_timestamp(micros_expr: Expr | str) -> "UnixMicrosToTimestamp":
+        """Creates an expression that converts a number of microseconds since the epoch (1970-01-01
+        00:00:00 UTC) to a timestamp.
+
+        Returns:
+            A new `Expr` representing the timestamp.
+        """
+        micros_val = Field.of(micros_expr) if isinstance(micros_expr, str) else micros_expr
+        return micros_val.unix_micros_to_timestamp()
+
+    @staticmethod
+    def timestamp_to_unix_millis(timestamp_expr: Expr | str) -> "TimestampToUnixMillis":
+        """Creates an expression that converts a timestamp to the number of milliseconds since the epoch
+        (1970-01-01 00:00:00 UTC).
+
+        Truncates higher levels of precision by rounding down to the beginning of the millisecond.
+
+        Returns:
+            A new `Expr` representing the number of milliseconds since the epoch.
+        """
+        timestamp_val = (
+            Field.of(timestamp_expr) if isinstance(timestamp_expr, str) else timestamp_expr
+        )
+        return timestamp_val.timestamp_to_unix_millis()
+
+    @staticmethod
+    def unix_millis_to_timestamp(millis_expr: Expr | str) -> "UnixMillisToTimestamp":
+        """Creates an expression that converts a number of milliseconds since the epoch (1970-01-01
+        00:00:00 UTC) to a timestamp.
+
+        Returns:
+            A new `Expr` representing the timestamp.
+        """
+        millis_val = Field.of(millis_expr) if isinstance(millis_expr, str) else millis_expr
+        return millis_val.unix_millis_to_timestamp()
+
+    @staticmethod
+    def timestamp_to_unix_seconds(timestamp_expr: Expr | str) -> "TimestampToUnixSeconds":
+        """Creates an expression that converts a timestamp to the number of seconds since the epoch
+        (1970-01-01 00:00:00 UTC).
+
+        Truncates higher levels of precision by rounding down to the beginning of the second.
+
+        Returns:
+            A new `Expr` representing the number of seconds since the epoch.
+        """
+        timestamp_val = (
+            Field.of(timestamp_expr) if isinstance(timestamp_expr, str) else timestamp_expr
+        )
+        return timestamp_val.timestamp_to_unix_seconds()
+
+    @staticmethod
+    def unix_seconds_to_timestamp(seconds_expr: Expr | str) -> "UnixSecondsToTimestamp":
+        """Creates an expression that converts a number of seconds since the epoch (1970-01-01 00:00:00
+        UTC) to a timestamp.
+
+        Returns:
+            A new `Expr` representing the timestamp.
+        """
+        seconds_val = (
+            Field.of(seconds_expr) if isinstance(seconds_expr, str) else seconds_expr
+        )
+        return seconds_val.unix_seconds_to_timestamp()
+
+    @staticmethod
+    def timestamp_add(
+        timestamp: Expr | str, unit: Expr | str, amount: Expr | float
+    ) -> "TimestampAdd":
+        """Creates an expression that adds a specified amount of time to this timestamp expression.
+
+        Args:
+            timestamp: The expression or field path of the timestamp.
+            unit: The expression or string evaluating to the unit of time to add, must be one of
+                  'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
+            amount: The expression or float representing the amount of time to add.
+
+        Returns:
+            A new `Expr` representing the resulting timestamp.
+        """
+        timestamp_expr = Field.of(timestamp) if isinstance(timestamp, str) else timestamp
+        return timestamp_expr.timestamp_add(unit, amount)
+
+    @staticmethod
+    def timestamp_sub(
+        timestamp: Expr | str, unit: Expr | str, amount: Expr | float
+    ) -> "TimestampSub":
+        """Creates an expression that subtracts a specified amount of time from this timestamp expression.
+
+        Args:
+            timestamp: The expression or field path of the timestamp.
+            unit: The expression or string evaluating to the unit of time to subtract, must be one of
+                  'microsecond', 'millisecond', 'second', 'minute', 'hour', 'day'.
+            amount: The expression or float representing the amount of time to subtract.
+
+        Returns:
+            A new `Expr` representing the resulting timestamp.
+        """
+        timestamp_expr = Field.of(timestamp) if isinstance(timestamp, str) else timestamp
+        return timestamp_expr.timestamp_sub(unit, amount)
+
 
 class Divide(Function):
     """Represents the division function."""
