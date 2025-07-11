@@ -155,6 +155,8 @@ class TestExpr:
 
         result = method_ptr(*args)
         assert isinstance(result, result_cls)
+        if isinstance(result, expr.Function) and not method == "not_in_any":
+            assert result.params[0] == base_instance
 
 
 class TestConstant:
@@ -904,6 +906,67 @@ class TestFunctionClasses:
     """
     contains test methods for each Expr class that derives from Function
     """
+
+    @pytest.mark.parametrize(
+        "method,args,result_cls",
+        [
+            ("add", ("field", 2), expr.Add),
+            ("subtract", ("field", 2), expr.Subtract),
+            ("multiply", ("field", 2), expr.Multiply),
+            ("divide", ("field", 2), expr.Divide),
+            ("mod", ("field", 2), expr.Mod),
+            ("logical_max", ("field", 2), expr.LogicalMax),
+            ("logical_min", ("field", 2), expr.LogicalMin),
+            ("eq", ("field", 2), expr.Eq),
+            ("neq", ("field", 2), expr.Neq),
+            ("lt", ("field", 2), expr.Lt),
+            ("lte", ("field", 2), expr.Lte),
+            ("gt", ("field", 2), expr.Gt),
+            ("gte", ("field", 2), expr.Gte),
+            ("in_any", ("field", [None]), expr.In),
+            ("not_in_any", ("field", [None]), expr.Not),
+            ("array_contains", ("field", None), expr.ArrayContains),
+            ("array_contains_all", ("field", [None]), expr.ArrayContainsAll),
+            ("array_contains_any", ("field", [None]), expr.ArrayContainsAny),
+            ("array_length", ("field",), expr.ArrayLength),
+            ("array_reverse", ("field",), expr.ArrayReverse),
+            ("is_nan", ("field",), expr.IsNaN),
+            ("exists", ("field",), expr.Exists),
+            ("sum", ("field",), expr.Sum),
+            ("avg", ("field",), expr.Avg),
+            ("count", ("field",), expr.Count),
+            ("count", (), expr.Count),
+            ("min", ("field",), expr.Min),
+            ("max", ("field",), expr.Max),
+            ("char_length", ("field",), expr.CharLength),
+            ("byte_length", ("field",), expr.ByteLength),
+            ("like", ("field", "pattern"), expr.Like),
+            ("regex_contains", ("field", "regex"), expr.RegexContains),
+            ("regex_matches", ("field", "regex"), expr.RegexMatch),
+            ("str_contains", ("field", "substring"), expr.StrContains),
+            ("starts_with", ("field", "prefix"), expr.StartsWith),
+            ("ends_with", ("field", "postfix"), expr.EndsWith),
+            ("str_concat", ("field", "elem1", "elem2"), expr.StrConcat),
+            ("map_get", ("field", "key"), expr.MapGet),
+            ("vector_length", ("field",), expr.VectorLength),
+            ("timestamp_to_unix_micros", ("field",), expr.TimestampToUnixMicros),
+            ("unix_micros_to_timestamp", ("field",), expr.UnixMicrosToTimestamp),
+            ("timestamp_to_unix_millis", ("field",), expr.TimestampToUnixMillis),
+            ("unix_millis_to_timestamp", ("field",), expr.UnixMillisToTimestamp),
+            ("timestamp_to_unix_seconds", ("field",), expr.TimestampToUnixSeconds),
+            ("unix_seconds_to_timestamp", ("field",), expr.UnixSecondsToTimestamp),
+            ("timestamp_add", ("field", "day", 1), expr.TimestampAdd),
+            ("timestamp_sub", ("field", "hour", 2.5), expr.TimestampSub),
+        ],
+    )
+    def test_static_builder(self, method, args, result_cls):
+        """
+        Test building functions using methods exposed on base Function class.
+        """
+        method_ptr = getattr(expr.Function, method)
+
+        result = method_ptr(*args)
+        assert isinstance(result, result_cls)
 
     @pytest.mark.parametrize(
         "first,second,expected",
