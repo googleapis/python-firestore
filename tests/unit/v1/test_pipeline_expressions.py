@@ -145,6 +145,8 @@ class TestExpr:
 
         result = method_ptr(*args)
         assert isinstance(result, result_cls)
+        if isinstance(result, expr.Function) and not method == "not_in_any":
+            assert result.params[0] == base_instance
 
 
 class TestConstant:

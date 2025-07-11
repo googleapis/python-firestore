@@ -695,7 +695,7 @@ class Expr(ABC):
             A new `Expr` representing the concatenated string.
         """
         return StrConcat(
-            *[self._cast_to_expr_or_convert_to_constant(el) for el in elements]
+            self, *[self._cast_to_expr_or_convert_to_constant(el) for el in elements]
         )
 
     def map_get(self, key: str) -> "MapGet":
