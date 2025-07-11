@@ -156,13 +156,7 @@ class AddFields(Stage):
         self.fields = list(fields)
 
     def _pb_args(self):
-        return [
-            Value(
-                map_value={
-                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}
-                }
-            )
-        ]
+        return [Selectable._to_value(self.fields)]
 
 
 class Aggregate(Stage):
@@ -186,18 +180,8 @@ class Aggregate(Stage):
 
     def _pb_args(self):
         return [
-            Value(
-                map_value={
-                    "fields": {
-                        m[0]: m[1] for m in [f._to_map() for f in self.accumulators]
-                    }
-                }
-            ),
-            Value(
-                map_value={
-                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.groups]}
-                }
-            ),
+            Selectable._to_value(self.accumulators),
+            Selectable._to_value(self.groups),
         ]
 
     def __repr__(self):
@@ -254,13 +238,7 @@ class Distinct(Stage):
         ]
 
     def _pb_args(self) -> list[Value]:
-        return [
-            Value(
-                map_value={
-                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}
-                }
-            )
-        ]
+        return [Selectable._to_value(self.fields)]
 
 
 class Documents(Stage):
