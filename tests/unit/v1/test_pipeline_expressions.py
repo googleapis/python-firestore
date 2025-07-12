@@ -22,7 +22,7 @@ from google.cloud.firestore_v1.types import query as query_pb
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1._helpers import GeoPoint
-from google.cloud.firestore_v1.pipeline_expressions import FilterCondition, ListOfExprs
+from google.cloud.firestore_v1.pipeline_expressions import BooleanExpr, ListOfExprs
 import google.cloud.firestore_v1.pipeline_expressions as expr
 
 
@@ -143,13 +143,13 @@ class TestExpr:
             ("timestamp_sub", ("hour", 2.5), expr.TimestampSub),
             ("ascending", (), expr.Ordering),
             ("descending", (), expr.Ordering),
-            ("as_", ("alias",), expr.ExprWithAlias),
+            ("as_", ("alias",), expr.AliasedExpr),
         ],
     )
     @pytest.mark.parametrize("base_instance", [expr.Constant(1), expr.Function.add("1", 1), expr.Field.of("test"), expr.Constant(1).as_("one")])
     def test_infix_call(self, method, args, result_cls, base_instance):
         """
-        many FilterCondition expressions support infix execution, and are exposed as methods on Expr. Test calling them
+        many BooleanExpr expressions support infix execution, and are exposed as methods on Expr. Test calling them
         """
         method_ptr = getattr(base_instance, method)
 
@@ -363,7 +363,7 @@ class TestSelectable:
             assert result[0] == "field1"
             assert result[1] == Value(field_reference_value="field1")
 
-    class TestExprWithAlias:
+    class TestAliasedExpr:
         def test_repr(self):
             instance = expr.Field.of("field1").as_("alias1")
             assert repr(instance) == "Field.of('field1').as_('alias1')"
@@ -371,14 +371,14 @@ class TestSelectable:
         def test_ctor(self):
             arg = expr.Field.of("field1")
             alias = "alias1"
-            instance = expr.ExprWithAlias(arg, alias)
+            instance = expr.AliasedExpr(arg, alias)
             assert instance.expr == arg
             assert instance.alias == alias
 
         def test_to_pb(self):
             arg = expr.Field.of("field1")
             alias = "alias1"
-            instance = expr.ExprWithAlias(arg, alias)
+            instance = expr.AliasedExpr(arg, alias)
             result = instance._to_pb()
             assert result.map_value.fields.get("alias1") == arg._to_pb()
 
@@ -389,7 +389,7 @@ class TestSelectable:
             assert result[1] == Value(field_reference_value="field1")
 
 
-class TestFilterCondition:
+class TestBooleanExpr:
     def test__from_query_filter_pb_composite_filter_or(self, mock_client):
         """
         test composite OR filters
@@ -417,7 +417,7 @@ class TestFilterCondition:
             composite_filter=composite_pb
         )
 
-        result = FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         # should include existance checks
         expected_cond1 = expr.And(
@@ -460,7 +460,7 @@ class TestFilterCondition:
             composite_filter=composite_pb
         )
 
-        result = FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         # should include existance checks
         expected_cond1 = expr.And(
@@ -511,7 +511,7 @@ class TestFilterCondition:
             composite_filter=outer_or_pb
         )
 
-        result = FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         expected_cond1 = expr.And(
             expr.Exists(expr.Field.of("field1")),
@@ -548,7 +548,7 @@ class TestFilterCondition:
         )
 
         with pytest.raises(TypeError, match="Unexpected CompositeFilter operator type"):
-            FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
+            BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
     @pytest.mark.parametrize(
         "op_enum, expected_expr_func",
@@ -581,7 +581,7 @@ class TestFilterCondition:
         )
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(unary_filter=filter_pb)
 
-        result = FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         field_expr_inst = expr.Field.of(field_path)
         expected_condition = expected_expr_func(field_expr_inst)
@@ -602,7 +602,7 @@ class TestFilterCondition:
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(unary_filter=filter_pb)
 
         with pytest.raises(TypeError, match="Unexpected UnaryFilter operator type"):
-            FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
+            BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
     @pytest.mark.parametrize(
         "op_enum, value, expected_expr_func",
@@ -654,7 +654,7 @@ class TestFilterCondition:
         )
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(field_filter=filter_pb)
 
-        result = FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         field_expr = expr.Field.of(field_path)
         # convert values into constants
@@ -683,7 +683,7 @@ class TestFilterCondition:
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(field_filter=filter_pb)
 
         with pytest.raises(TypeError, match="Unexpected FieldFilter operator type"):
-            FilterCondition._from_query_filter_pb(wrapped_filter_pb, mock_client)
+            BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
     def test__from_query_filter_pb_unknown_filter_type(self, mock_client):
         """
@@ -691,12 +691,12 @@ class TestFilterCondition:
         """
         # Test with an unexpected protobuf type
         with pytest.raises(TypeError, match="Unexpected filter type"):
-            FilterCondition._from_query_filter_pb(document_pb.Value(), mock_client)
+            BooleanExpr._from_query_filter_pb(document_pb.Value(), mock_client)
 
 
-class TestFilterConditionClasses:
+class TestBooleanExprClasses:
     """
-    contains test methods for each Expr class that derives from FilterCondition
+    contains test methods for each Expr class that derives from BooleanExpr
     """
 
     def _make_arg(self, name="Mock"):
