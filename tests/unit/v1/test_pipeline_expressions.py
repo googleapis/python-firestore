@@ -136,7 +136,15 @@ class TestExpr:
             ("as_", ("alias",), expr.ExprWithAlias),
         ],
     )
-    @pytest.mark.parametrize("base_instance", [expr.Constant(1), expr.Function.add("1", 1), expr.Field.of("test"), expr.Constant(1).as_("one")])
+    @pytest.mark.parametrize(
+        "base_instance",
+        [
+            expr.Constant(1),
+            expr.Function.add("1", 1),
+            expr.Field.of("test"),
+            expr.Constant(1).as_("one"),
+        ],
+    )
     def test_infix_call(self, method, args, result_cls, base_instance):
         """
         many FilterCondition expressions support infix execution, and are exposed as methods on Expr. Test calling them
