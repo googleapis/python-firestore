@@ -376,7 +376,7 @@ class Expr(ABC):
             >>> Field.of("status").not_in_any(["pending", "cancelled"])
 
         Args:
-            *array: The values or expressions to check against.
+            array: The values or expressions to check against.
 
         Returns:
             A new `Expr` representing the 'NOT IN' comparison.
@@ -1203,7 +1203,7 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.lte(left_expr, right)
 
-    def in_any(left: Expr | str, array: List[Expr | CONSTANT_TYPE]) -> "In":
+    def in_any(left: Expr | str, array: Sequence[Expr | CONSTANT_TYPE]) -> "In":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
@@ -1221,7 +1221,7 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.in_any(left_expr, array)
 
-    def not_in_any(left: Expr | str, array: List[Expr | CONSTANT_TYPE]) -> "Not":
+    def not_in_any(left: Expr | str, array: Sequence[Expr | CONSTANT_TYPE]) -> "Not":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
@@ -1258,7 +1258,7 @@ class Function(Expr):
         return Expr.array_contains(array_expr, element)
 
     def array_contains_all(
-        array: Expr | str, elements: List[Expr | CONSTANT_TYPE]
+        array: Expr | str, elements: Sequence[Expr | CONSTANT_TYPE]
     ) -> "ArrayContainsAll":
         """Creates an expression that checks if an array contains all the specified elements.
 
@@ -1277,7 +1277,7 @@ class Function(Expr):
         return Expr.array_contains_all(array_expr, elements)
 
     def array_contains_any(
-        array: Expr | str, elements: List[Expr | CONSTANT_TYPE]
+        array: Expr | str, elements: Sequence[Expr | CONSTANT_TYPE]
     ) -> "ArrayContainsAny":
         """Creates an expression that checks if an array contains any of the specified elements.
 
@@ -2153,9 +2153,7 @@ class And(FilterCondition):
 
 class ArrayContains(FilterCondition):
     def __init__(self, array: Expr, element: Expr):
-        super().__init__(
-            "array_contains", [array, element]
-        )
+        super().__init__("array_contains", [array, element])
 
 
 class ArrayContainsAll(FilterCondition):
@@ -2211,9 +2209,7 @@ class If(FilterCondition):
     """Represents a conditional expression (if-then-else)."""
 
     def __init__(self, condition: "FilterCondition", true_expr: Expr, false_expr: Expr):
-        super().__init__(
-            "if", [condition, true_expr, false_expr]
-        )
+        super().__init__("if", [condition, true_expr, false_expr])
 
 
 class In(FilterCondition):
