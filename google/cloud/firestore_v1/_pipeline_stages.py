@@ -350,6 +350,26 @@ class RemoveFields(Stage):
         return [f._to_pb() for f in self.fields]
 
 
+class Replace(Stage):
+    """Replaces the document content with the value of a specified field."""
+
+    class Mode(Enum):
+        FULL_REPLACE = 0
+        MERGE_PREFER_NEXT = 1
+        MERGE_PREFER_PARENT = 2
+
+        def __repr__(self):
+            return f"Replace.Mode.{self.name.upper()}"
+
+    def __init__(self, field: Selectable | str, mode: Mode | str = Mode.FULL_REPLACE):
+        super().__init__()
+        self.field = Field(field) if isinstance(field, str) else field
+        self.mode = self.Mode[mode.upper()] if isinstance(mode, str) else mode
+
+    def _pb_args(self):
+        return [self.field._to_pb(), Value(string_value=self.mode.name.lower())]
+
+
 class Sample(Stage):
     """Performs pseudo-random sampling of documents."""
 
