@@ -23,9 +23,9 @@ from google.protobuf import timestamp_pb2  # type: ignore
 
 
 __protobuf__ = proto.module(
-    package='google.firestore.admin.v1',
+    package="google.firestore.admin.v1",
     manifest={
-        'PitrSnapshot',
+        "PitrSnapshot",
     },
 )
 

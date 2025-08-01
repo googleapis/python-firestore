@@ -357,6 +357,11 @@ class FirestoreAdminTransport(abc.ABC):
                 default_timeout=None,
                 client_info=client_info,
             ),
+            self.clone_database: gapic_v1.method.wrap_method(
+                self.clone_database,
+                default_timeout=120.0,
+                client_info=client_info,
+            ),
             self.cancel_operation: gapic_v1.method.wrap_method(
                 self.cancel_operation,
                 default_timeout=None,
@@ -685,6 +690,15 @@ class FirestoreAdminTransport(abc.ABC):
     ) -> Callable[
         [firestore_admin.DeleteBackupScheduleRequest],
         Union[empty_pb2.Empty, Awaitable[empty_pb2.Empty]],
+    ]:
+        raise NotImplementedError()
+
+    @property
+    def clone_database(
+        self,
+    ) -> Callable[
+        [firestore_admin.CloneDatabaseRequest],
+        Union[operations_pb2.Operation, Awaitable[operations_pb2.Operation]],
     ]:
         raise NotImplementedError()
 
