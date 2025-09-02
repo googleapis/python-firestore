@@ -953,7 +953,7 @@ class ListBackupsRequest(proto.Message):
             [Backup][google.firestore.admin.v1.Backup] are eligible for
             filtering:
 
-            -  ``database_uid`` (supports ``=`` only)
+            - ``database_uid`` (supports ``=`` only)
     """
 
     parent: str = proto.Field(

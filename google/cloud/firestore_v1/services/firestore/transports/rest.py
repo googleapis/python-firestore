@@ -1118,6 +1118,22 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
             resp, _ = self._interceptor.post_batch_get_documents_with_metadata(
                 resp, response_metadata
             )
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                http_response = {
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore_v1.FirestoreClient.batch_get_documents",
+                    extra={
+                        "serviceName": "google.firestore.v1.Firestore",
+                        "rpcName": "BatchGetDocuments",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _BatchWrite(_BaseFirestoreRestTransport._BaseBatchWrite, FirestoreRestStub):
@@ -2736,6 +2752,22 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
             resp, _ = self._interceptor.post_run_aggregation_query_with_metadata(
                 resp, response_metadata
             )
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                http_response = {
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore_v1.FirestoreClient.run_aggregation_query",
+                    extra={
+                        "serviceName": "google.firestore.v1.Firestore",
+                        "rpcName": "RunAggregationQuery",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _RunQuery(_BaseFirestoreRestTransport._BaseRunQuery, FirestoreRestStub):
@@ -2866,6 +2898,22 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
             resp, _ = self._interceptor.post_run_query_with_metadata(
                 resp, response_metadata
             )
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                http_response = {
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore_v1.FirestoreClient.run_query",
+                    extra={
+                        "serviceName": "google.firestore.v1.Firestore",
+                        "rpcName": "RunQuery",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _UpdateDocument(
