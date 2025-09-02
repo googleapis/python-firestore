@@ -534,6 +534,8 @@ def prerelease_deps(session, protobuf_implementation):
     session.run("python", "-c", "import grpc; print(grpc.__version__)")
     session.run("python", "-c", "import google.auth; print(google.auth.__version__)")
 
+    session.install("https://github.com/googleapis/python-api-core/archive/test-836.zip", "--ignore-installed", "--no-deps")
+
     session.run(
         "py.test",
         "tests/unit",
