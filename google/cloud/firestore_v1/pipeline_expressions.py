@@ -201,6 +201,124 @@ class Expr(ABC):
         """
         return Mod(self, self._cast_to_expr_or_convert_to_constant(other))
 
+    def abs(self) -> "Abs":
+        """Creates an expression that calculates the absolute value of this expression.
+
+        Example:
+            >>> # Get the absolute value of the 'change' field.
+            >>> Field.of("change").abs()
+
+        Returns:
+            A new `Expr` representing the absolute value.
+        """
+        return Abs(self)
+
+    def ceil(self) -> "Ceil":
+        """Creates an expression that calculates the ceiling of this expression.
+
+        Example:
+            >>> # Get the ceiling of the 'value' field.
+            >>> Field.of("value").ceil()
+
+        Returns:
+            A new `Expr` representing the ceiling value.
+        """
+        return Ceil(self)
+
+    def exp(self) -> "Exp":
+        """Creates an expression that computes e to the power of this expression.
+
+        Example:
+            >>> # Compute e to the power of the 'value' field
+            >>> Field.of("value").exp()
+
+        Returns:
+            A new `Expr` representing the exponential value.
+        """
+        return Exp(self)
+
+    def floor(self) -> "Floor":
+        """Creates an expression that calculates the floor of this expression.
+
+        Example:
+            >>> # Get the floor of the 'value' field.
+            >>> Field.of("value").floor()
+
+        Returns:
+            A new `Expr` representing the floor value.
+        """
+        return Floor(self)
+
+    def ln(self) -> "Ln":
+        """Creates an expression that calculates the natural logarithm of this expression.
+
+        Example:
+            >>> # Get the natural logarithm of the 'value' field.
+            >>> Field.of("value").ln()
+
+        Returns:
+            A new `Expr` representing the natural logarithm.
+        """
+        return Ln(self)
+
+    def log(self, base: Expr | float) -> "Log":
+        """Creates an expression that calculates the logarithm of this expression with a given base.
+
+        Example:
+            >>> # Get the logarithm of 'value' with base 2.
+            >>> Field.of("value").log(2)
+            >>> # Get the logarithm of 'value' with base from 'base_field'.
+            >>> Field.of("value").log(Field.of("base_field"))
+
+        Args:
+            base: The base of the logarithm.
+
+        Returns:
+            A new `Expr` representing the logarithm.
+        """
+        return Log(self, self._cast_to_expr_or_convert_to_constant(base))
+
+    def pow(self, exponent: Expr | float) -> "Pow":
+        """Creates an expression that calculates this expression raised to the power of the exponent.
+
+        Example:
+            >>> # Raise 'base_val' to the power of 2.
+            >>> Field.of("base_val").pow(2)
+            >>> # Raise 'base_val' to the power of 'exponent_val'.
+            >>> Field.of("base_val").pow(Field.of("exponent_val"))
+
+        Args:
+            exponent: The exponent.
+
+        Returns:
+            A new `Expr` representing the power operation.
+        """
+        return Pow(self, self._cast_to_expr_or_convert_to_constant(exponent))
+
+    def round(self) -> "Round":
+        """Creates an expression that rounds this expression to the nearest integer.
+
+        Example:
+            >>> # Round the 'value' field.
+            >>> Field.of("value").round()
+
+        Returns:
+            A new `Expr` representing the rounded value.
+        """
+        return Round(self)
+
+    def sqrt(self) -> "Sqrt":
+        """Creates an expression that calculates the square root of this expression.
+
+        Example:
+            >>> # Get the square root of the 'area' field.
+            >>> Field.of("area").sqrt()
+
+        Returns:
+            A new `Expr` representing the square root.
+        """
+        return Sqrt(self)
+
     def logical_max(self, other: Expr | CONSTANT_TYPE) -> "LogicalMax":
         """Creates an expression that returns the larger value between this expression
         and another expression or constant, based on Firestore's value type ordering.
@@ -1217,6 +1335,143 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.mod(left_expr, right)
 
+    def abs(expr: Expr | str) -> "Abs":
+        """Creates an expression that calculates the absolute value of an expression.
+
+        Example:
+            >>> Function.abs("change")
+
+        Args:
+            expr: The expression or field path.
+
+        Returns:
+            A new `Expr` representing the absolute value.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return Expr.abs(expr_val)
+
+    def ceil(expr: Expr | str) -> "Ceil":
+        """Creates an expression that calculates the ceiling of an expression.
+
+        Example:
+            >>> Function.ceil("value")
+
+        Args:
+            expr: The expression or field path.
+
+        Returns:
+            A new `Expr` representing the ceiling value.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return Expr.ceil(expr_val)
+
+    def exp(expr: Expr | str) -> "Exp":
+        """Creates an expression that calculates the exponential of an expression.
+
+        Example:
+            >>> Function.exp("value")
+
+        Args:
+            expr: The expression or field path.
+
+        Returns:
+            A new `Expr` representing the exponential value.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return Expr.exp(expr_val)
+
+    def floor(expr: Expr | str) -> "Floor":
+        """Creates an expression that calculates the floor of an expression.
+
+        Example:
+            >>> Function.floor("value")
+
+        Args:
+            expr: The expression or field path.
+
+        Returns:
+            A new `Expr` representing the floor value.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return Expr.floor(expr_val)
+
+    def ln(expr: Expr | str) -> "Ln":
+        """Creates an expression that calculates the natural logarithm of an expression.
+
+        Example:
+            >>> Function.ln("value")
+
+        Args:
+            expr: The expression or field path.
+
+        Returns:
+            A new `Expr` representing the natural logarithm.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return Expr.ln(expr_val)
+
+    def log(expr: Expr | str, base: Expr | float) -> "Log":
+        """Creates an expression that calculates the logarithm of an expression with a given base.
+
+        Example:
+            >>> Function.log("value", 2)
+
+        Args:
+            expr: The expression or field path.
+            base: The base of the logarithm.
+
+        Returns:
+            A new `Expr` representing the logarithm.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return Expr.log(expr_val, base)
+
+    def pow(base: Expr | str, exponent: Expr | float) -> "Pow":
+        """Creates an expression that calculates the base raised to the power of the exponent.
+
+        Example:
+            >>> Function.pow("base_val", 2)
+
+        Args:
+            base: The base expression or field path.
+            exponent: The exponent.
+
+        Returns:
+            A new `Expr` representing the power operation.
+        """
+        base_val = Field.of(base) if isinstance(base, str) else base
+        return Expr.pow(base_val, exponent)
+
+    def round(expr: Expr | str) -> "Round":
+        """Creates an expression that rounds an expression to the nearest integer.
+
+        Example:
+            >>> Function.round("value")
+
+        Args:
+            expr: The expression or field path.
+
+        Returns:
+            A new `Expr` representing the rounded value.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return Expr.round(expr_val)
+
+    def sqrt(expr: Expr | str) -> "Sqrt":
+        """Creates an expression that calculates the square root of an expression.
+
+        Example:
+            >>> Function.sqrt("area")
+
+        Args:
+            expr: The expression or field path.
+
+        Returns:
+            A new `Expr` representing the square root.
+        """
+        expr_val = Field.of(expr) if isinstance(expr, str) else expr
+        return Expr.sqrt(expr_val)
+
     def logical_max(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "LogicalMax":
         """Creates an expression that returns the larger value between this expression
         and another expression or constant, based on Firestore's value type ordering.
@@ -2000,6 +2255,68 @@ class TimestampAdd(Function):
 
     def __init__(self, timestamp: Expr, unit: Expr, amount: Expr):
         super().__init__("timestamp_add", [timestamp, unit, amount])
+
+class Abs(Function):
+    """Represents the absolute value function."""
+
+    def __init__(self, value: Expr):
+        super().__init__("abs", [value])
+
+
+class Ceil(Function):
+    """Represents the ceiling function."""
+
+    def __init__(self, value: Expr):
+        super().__init__("ceil", [value])
+
+
+class Exp(Function):
+    """Represents the exponential function."""
+
+    def __init__(self, value: Expr):
+        super().__init__("exp", [value])
+
+
+class Floor(Function):
+    """Represents the floor function."""
+
+    def __init__(self, value: Expr):
+        super().__init__("floor", [value])
+
+
+class Ln(Function):
+    """Represents the natural logarithm function."""
+
+    def __init__(self, value: Expr):
+        super().__init__("ln", [value])
+
+
+class Log(Function):
+    """Represents the logarithm function."""
+
+    def __init__(self, value: Expr, base: Expr):
+        super().__init__("log", [value, base])
+
+
+class Pow(Function):
+    """Represents the power function."""
+
+    def __init__(self, base: Expr, exponent: Expr):
+        super().__init__("pow", [base, exponent])
+
+
+class Round(Function):
+    """Represents the round function."""
+
+    def __init__(self, value: Expr):
+        super().__init__("round", [value])
+
+
+class Sqrt(Function):
+    """Represents the square root function."""
+
+    def __init__(self, value: Expr):
+        super().__init__("sqrt", [value])
 
 
 class TimestampSub(Function):

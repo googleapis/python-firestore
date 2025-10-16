@@ -90,6 +90,15 @@ class TestExpr:
             ("multiply", (2,), expr.Multiply),
             ("divide", (2,), expr.Divide),
             ("mod", (2,), expr.Mod),
+            ("abs", (), expr.Abs),
+            ("ceil", (), expr.Ceil),
+            ("exp", (), expr.Exp),
+            ("floor", (), expr.Floor),
+            ("ln", (), expr.Ln),
+            ("log", (10,), expr.Log),
+            ("pow", (2,), expr.Pow),
+            ("round", (), expr.Round),
+            ("sqrt", (), expr.Sqrt),
             ("logical_max", (2,), expr.LogicalMax),
             ("logical_min", (2,), expr.LogicalMin),
             ("eq", (2,), expr.Eq),
@@ -915,6 +924,15 @@ class TestFunctionClasses:
             ("multiply", ("field", 2), expr.Multiply),
             ("divide", ("field", 2), expr.Divide),
             ("mod", ("field", 2), expr.Mod),
+            ("abs", ("field",), expr.Abs),
+            ("ceil", ("field",), expr.Ceil),
+            ("exp", ("field",), expr.Exp),
+            ("floor", ("field",), expr.Floor),
+            ("ln", ("field",), expr.Ln),
+            ("log", ("field", 10), expr.Log),
+            ("pow", ("field", 2), expr.Pow),
+            ("round", ("field",), expr.Round),
+            ("sqrt", ("field",), expr.Sqrt),
             ("logical_max", ("field", 2), expr.LogicalMax),
             ("logical_min", ("field", 2), expr.LogicalMin),
             ("eq", ("field", 2), expr.Eq),
@@ -1309,3 +1327,69 @@ class TestFunctionClasses:
         assert instance.name == "array_concat"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "ArrayConcat(1, 2, 3)"
+
+    def test_abs(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Abs(arg1)
+        assert instance.name == "abs"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Abs(Value)"
+
+    def test_ceil(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Ceil(arg1)
+        assert instance.name == "ceil"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Ceil(Value)"
+
+    def test_exp(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Exp(arg1)
+        assert instance.name == "exp"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Exp(Value)"
+
+    def test_floor(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Floor(arg1)
+        assert instance.name == "floor"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Floor(Value)"
+
+    def test_ln(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Ln(arg1)
+        assert instance.name == "ln"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Ln(Value)"
+
+    def test_log(self):
+        arg1 = self._make_arg("Value")
+        arg2 = self._make_arg("Base")
+        instance = expr.Log(arg1, arg2)
+        assert instance.name == "log"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Log(Value, Base)"
+
+    def test_pow(self):
+        arg1 = self._make_arg("Base")
+        arg2 = self._make_arg("Exponent")
+        instance = expr.Pow(arg1, arg2)
+        assert instance.name == "pow"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Pow(Base, Exponent)"
+
+
+    def test_round(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Round(arg1)
+        assert instance.name == "round"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Round(Value)"
+
+    def test_sqrt(self):
+        arg1 = self._make_arg("Value")
+        instance = expr.Sqrt(arg1)
+        assert instance.name == "sqrt"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Sqrt(Value)"
