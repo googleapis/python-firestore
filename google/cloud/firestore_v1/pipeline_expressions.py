@@ -201,7 +201,7 @@ class Expr(ABC):
         """
         return Mod(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def logical_max(self, other: Expr | CONSTANT_TYPE) -> "Expr":
+    def logical_maximum(self, other: Expr | CONSTANT_TYPE) -> "Expr":
         """Creates an expression that returns the larger value between this expression
         and another expression or constant, based on Firestore's value type ordering.
 
@@ -210,19 +210,19 @@ class Expr(ABC):
 
         Example:
             >>> # Returns the larger value between the 'discount' field and the 'cap' field.
-            >>> Field.of("discount").logical_max(Field.of("cap"))
+            >>> Field.of("discount").logical_maximum(Field.of("cap"))
             >>> # Returns the larger value between the 'value' field and 10.
-            >>> Field.of("value").logical_max(10)
+            >>> Field.of("value").logical_maximum(10)
 
         Args:
             other: The other expression or constant value to compare with.
 
         Returns:
-            A new `Expr` representing the logical max operation.
+            A new `Expr` representing the logical maximum operation.
         """
-        return LogicalMax(self, self._cast_to_expr_or_convert_to_constant(other))
+        return LogicalMaximum(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def logical_min(self, other: Expr | CONSTANT_TYPE) -> "Expr":
+    def logical_minimum(self, other: Expr | CONSTANT_TYPE) -> "Expr":
         """Creates an expression that returns the smaller value between this expression
         and another expression or constant, based on Firestore's value type ordering.
 
@@ -231,27 +231,27 @@ class Expr(ABC):
 
         Example:
             >>> # Returns the smaller value between the 'discount' field and the 'floor' field.
-            >>> Field.of("discount").logical_min(Field.of("floor"))
+            >>> Field.of("discount").logical_minimum(Field.of("floor"))
             >>> # Returns the smaller value between the 'value' field and 10.
-            >>> Field.of("value").logical_min(10)
+            >>> Field.of("value").logical_minimum(10)
 
         Args:
             other: The other expression or constant value to compare with.
 
         Returns:
-            A new `Expr` representing the logical min operation.
+            A new `Expr` representing the logical minimum operation.
         """
-        return LogicalMin(self, self._cast_to_expr_or_convert_to_constant(other))
+        return LogicalMinimum(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def eq(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def equal(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to another
         expression or constant value.
 
         Example:
             >>> # Check if the 'age' field is equal to 21
-            >>> Field.of("age").eq(21)
+            >>> Field.of("age").equal(21)
             >>> # Check if the 'city' field is equal to "London"
-            >>> Field.of("city").eq("London")
+            >>> Field.of("city").equal("London")
 
         Args:
             other: The expression or constant value to compare for equality.
@@ -259,17 +259,17 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the equality comparison.
         """
-        return Eq(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Equal(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def neq(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def not_equal(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is not equal to another
         expression or constant value.
 
         Example:
             >>> # Check if the 'status' field is not equal to "completed"
-            >>> Field.of("status").neq("completed")
+            >>> Field.of("status").not_equal("completed")
             >>> # Check if the 'country' field is not equal to "USA"
-            >>> Field.of("country").neq("USA")
+            >>> Field.of("country").not_equal("USA")
 
         Args:
             other: The expression or constant value to compare for inequality.
@@ -277,17 +277,17 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the inequality comparison.
         """
-        return Neq(self, self._cast_to_expr_or_convert_to_constant(other))
+        return NotEqual(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def gt(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def greater_than(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is greater than another
         expression or constant value.
 
         Example:
             >>> # Check if the 'age' field is greater than the 'limit' field
-            >>> Field.of("age").gt(Field.of("limit"))
+            >>> Field.of("age").greater_than(Field.of("limit"))
             >>> # Check if the 'price' field is greater than 100
-            >>> Field.of("price").gt(100)
+            >>> Field.of("price").greater_than(100)
 
         Args:
             other: The expression or constant value to compare for greater than.
@@ -295,17 +295,17 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the greater than comparison.
         """
-        return Gt(self, self._cast_to_expr_or_convert_to_constant(other))
+        return GreaterThan(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def gte(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def greater_than_or_equal(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is greater than or equal
         to another expression or constant value.
 
         Example:
             >>> # Check if the 'quantity' field is greater than or equal to field 'requirement' plus 1
-            >>> Field.of("quantity").gte(Field.of('requirement').add(1))
+            >>> Field.of("quantity").greater_than_or_equal(Field.of('requirement').add(1))
             >>> # Check if the 'score' field is greater than or equal to 80
-            >>> Field.of("score").gte(80)
+            >>> Field.of("score").greater_than_or_equal(80)
 
         Args:
             other: The expression or constant value to compare for greater than or equal to.
@@ -313,17 +313,17 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the greater than or equal to comparison.
         """
-        return Gte(self, self._cast_to_expr_or_convert_to_constant(other))
+        return GreaterThanOrEqual(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def lt(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def less_than(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is less than another
         expression or constant value.
 
         Example:
             >>> # Check if the 'age' field is less than 'limit'
-            >>> Field.of("age").lt(Field.of('limit'))
+            >>> Field.of("age").less_than(Field.of('limit'))
             >>> # Check if the 'price' field is less than 50
-            >>> Field.of("price").lt(50)
+            >>> Field.of("price").less_than(50)
 
         Args:
             other: The expression or constant value to compare for less than.
@@ -331,17 +331,17 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the less than comparison.
         """
-        return Lt(self, self._cast_to_expr_or_convert_to_constant(other))
+        return LessThan(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def lte(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def less_than_or_equal(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is less than or equal to
         another expression or constant value.
 
         Example:
             >>> # Check if the 'quantity' field is less than or equal to 20
-            >>> Field.of("quantity").lte(Constant.of(20))
+            >>> Field.of("quantity").less_than_or_equal(Constant.of(20))
             >>> # Check if the 'score' field is less than or equal to 70
-            >>> Field.of("score").lte(70)
+            >>> Field.of("score").less_than_or_equal(70)
 
         Args:
             other: The expression or constant value to compare for less than or equal to.
@@ -349,7 +349,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the less than or equal to comparison.
         """
-        return Lte(self, self._cast_to_expr_or_convert_to_constant(other))
+        return LessThanOrEqual(self, self._cast_to_expr_or_convert_to_constant(other))
 
     def in_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to any of the
@@ -520,18 +520,18 @@ class Expr(ABC):
         """
         return Sum(self)
 
-    def avg(self) -> "Expr":
+    def average(self) -> "Expr":
         """Creates an aggregation that calculates the average (mean) of a numeric field across multiple
         stage inputs.
 
         Example:
             >>> # Calculate the average age of users
-            >>> Field.of("age").avg().as_("averageAge")
+            >>> Field.of("age").average().as_("averageAge")
 
         Returns:
             A new `AggregateFunction` representing the 'avg' aggregation.
         """
-        return Avg(self)
+        return Average(self)
 
     def count(self) -> "Expr":
         """Creates an aggregation that counts the number of stage inputs with valid evaluations of the
@@ -546,24 +546,24 @@ class Expr(ABC):
         """
         return Count(self)
 
-    def min(self) -> "Expr":
+    def minimum(self) -> "Expr":
         """Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
 
         Example:
             >>> # Find the lowest price of all products
-            >>> Field.of("price").min().as_("lowestPrice")
+            >>> Field.of("price").minimum().as_("lowestPrice")
 
         Returns:
-            A new `AggregateFunction` representing the 'min' aggregation.
+            A new `AggregateFunction` representing the 'minimum' aggregation.
         """
         return Min(self)
 
-    def max(self) -> "Expr":
+    def maxiumum(self) -> "Expr":
         """Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
 
         Example:
             >>> # Find the highest score in a leaderboard
-            >>> Field.of("score").max().as_("highestScore")
+            >>> Field.of("score").maxiumum().as_("highestScore")
 
         Returns:
             A new `AggregateFunction` representing the 'max' aggregation.
@@ -646,14 +646,14 @@ class Expr(ABC):
         """
         return RegexMatch(self, self._cast_to_expr_or_convert_to_constant(regex))
 
-    def str_contains(self, substring: Expr | str) -> "BooleanExpr":
+    def string_contains(self, substring: Expr | str) -> "BooleanExpr":
         """Creates an expression that checks if this string expression contains a specified substring.
 
         Example:
             >>> # Check if the 'description' field contains "example".
-            >>> Field.of("description").str_contains("example")
+            >>> Field.of("description").string_contains("example")
             >>> # Check if the 'description' field contains the value of the 'keyword' field.
-            >>> Field.of("description").str_contains(Field.of("keyword"))
+            >>> Field.of("description").string_contains(Field.of("keyword"))
 
         Args:
             substring: The substring (string or expression) to use for the search.
@@ -661,7 +661,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'contains' comparison.
         """
-        return StrContains(self, self._cast_to_expr_or_convert_to_constant(substring))
+        return StringContains(self, self._cast_to_expr_or_convert_to_constant(substring))
 
     def starts_with(self, prefix: Expr | str) -> "BooleanExpr":
         """Creates an expression that checks if a string starts with a given prefix.
@@ -697,12 +697,12 @@ class Expr(ABC):
         """
         return EndsWith(self, self._cast_to_expr_or_convert_to_constant(postfix))
 
-    def str_concat(self, *elements: Expr | CONSTANT_TYPE) -> "Expr":
+    def string_concat(self, *elements: Expr | CONSTANT_TYPE) -> "Expr":
         """Creates an expression that concatenates string expressions, fields or constants together.
 
         Example:
             >>> # Combine the 'firstName', " ", and 'lastName' fields into a single string
-            >>> Field.of("firstName").str_concat(" ", Field.of("lastName"))
+            >>> Field.of("firstName").string_concat(" ", Field.of("lastName"))
 
         Args:
             *elements: The expressions or constants (typically strings) to concatenate.
@@ -710,7 +710,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the concatenated string.
         """
-        return StrConcat(
+        return StringConcat(
             self, *[self._cast_to_expr_or_convert_to_constant(el) for el in elements]
         )
 
@@ -996,14 +996,14 @@ class Expr(ABC):
             self._cast_to_expr_or_convert_to_constant(amount),
         )
 
-    def timestamp_sub(self, unit: Expr | str, amount: Expr | float) -> "Expr":
+    def timestamp_subtract(self, unit: Expr | str, amount: Expr | float) -> "Expr":
         """Creates an expression that subtracts a specified amount of time from this timestamp expression.
 
         Example:
             >>> # Subtract a duration specified by the 'unit' and 'amount' fields from the 'timestamp' field.
-            >>> Field.of("timestamp").timestamp_sub(Field.of("unit"), Field.of("amount"))
+            >>> Field.of("timestamp").timestamp_subtract(Field.of("unit"), Field.of("amount"))
             >>> # Subtract 2.5 hours from the 'timestamp' field.
-            >>> Field.of("timestamp").timestamp_sub("hour", 2.5)
+            >>> Field.of("timestamp").timestamp_subtract("hour", 2.5)
 
         Args:
             unit: The expression or string evaluating to the unit of time to subtract, must be one of
@@ -1013,7 +1013,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the resulting timestamp.
         """
-        return TimestampSub(
+        return TimestampSubtract(
             self,
             self._cast_to_expr_or_convert_to_constant(unit),
             self._cast_to_expr_or_convert_to_constant(amount),
@@ -1217,7 +1217,7 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.mod(left_expr, right)
 
-    def logical_max(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Expr":
+    def logical_maximum(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Expr":
         """Creates an expression that returns the larger value between this expression
         and another expression or constant, based on Firestore's value type ordering.
 
@@ -1225,8 +1225,8 @@ class Function(Expr):
         https://cloud.google.com/firestore/docs/concepts/data-types#value_type_ordering
 
         Example:
-            >>> Function.logical_max("value", 10)
-            >>> Function.logical_max(Field.of("discount"), Field.of("cap"))
+            >>> Function.logical_maximum("value", 10)
+            >>> Function.logical_maximum(Field.of("discount"), Field.of("cap"))
 
         Args:
             left: The expression or field path to compare.
@@ -1236,9 +1236,9 @@ class Function(Expr):
             A new `Expr` representing the logical max operation.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.logical_max(left_expr, right)
+        return Expr.logical_maximum(left_expr, right)
 
-    def logical_min(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Expr":
+    def logical_minimum(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "Expr":
         """Creates an expression that returns the smaller value between this expression
         and another expression or constant, based on Firestore's value type ordering.
 
@@ -1246,26 +1246,26 @@ class Function(Expr):
         https://cloud.google.com/firestore/docs/concepts/data-types#value_type_ordering
 
         Example:
-            >>> Function.logical_min("value", 10)
-            >>> Function.logical_min(Field.of("discount"), Field.of("floor"))
+            >>> Function.logical_minimum("value", 10)
+            >>> Function.logical_minimum(Field.of("discount"), Field.of("floor"))
 
         Args:
             left: The expression or field path to compare.
             right: The other expression or constant value to compare with.
 
         Returns:
-            A new `Expr` representing the logical min operation.
+            A new `Expr` representing the logical minimum operation.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.logical_min(left_expr, right)
+        return Expr.logical_minimum(left_expr, right)
 
-    def eq(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def equal(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to another
         expression or constant value.
 
         Example:
-            >>> Function.eq("city", "London")
-            >>> Function.eq(Field.of("age"), 21)
+            >>> Function.equal("city", "London")
+            >>> Function.equal(Field.of("age"), 21)
 
         Args:
             left: The expression or field path to compare.
@@ -1275,15 +1275,15 @@ class Function(Expr):
             A new `Expr` representing the equality comparison.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.eq(left_expr, right)
+        return Expr.equal(left_expr, right)
 
-    def neq(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def not_equal(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is not equal to another
         expression or constant value.
 
         Example:
-            >>> Function.neq("country", "USA")
-            >>> Function.neq(Field.of("status"), "completed")
+            >>> Function.not_equal("country", "USA")
+            >>> Function.not_equal(Field.of("status"), "completed")
 
         Args:
             left: The expression or field path to compare.
@@ -1293,15 +1293,15 @@ class Function(Expr):
             A new `Expr` representing the inequality comparison.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.neq(left_expr, right)
+        return Expr.not_equal(left_expr, right)
 
-    def gt(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def greater_than(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is greater than another
         expression or constant value.
 
         Example:
-            >>> Function.gt("price", 100)
-            >>> Function.gt(Field.of("age"), Field.of("limit"))
+            >>> Function.greater_than("price", 100)
+            >>> Function.greater_than(Field.of("age"), Field.of("limit"))
 
         Args:
             left: The expression or field path to compare.
@@ -1311,15 +1311,15 @@ class Function(Expr):
             A new `Expr` representing the greater than comparison.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.gt(left_expr, right)
+        return Expr.greater_than(left_expr, right)
 
-    def gte(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def greater_than_or_equal(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is greater than or equal
         to another expression or constant value.
 
         Example:
-            >>> Function.gte("score", 80)
-            >>> Function.gte(Field.of("quantity"), Field.of('requirement').add(1))
+            >>> Function.greater_than_or_equal("score", 80)
+            >>> Function.greater_than_or_equal(Field.of("quantity"), Field.of('requirement').add(1))
 
         Args:
             left: The expression or field path to compare.
@@ -1329,15 +1329,15 @@ class Function(Expr):
             A new `Expr` representing the greater than or equal to comparison.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.gte(left_expr, right)
+        return Expr.greater_than_or_equal(left_expr, right)
 
-    def lt(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def less_than(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is less than another
         expression or constant value.
 
         Example:
-            >>> Function.lt("price", 50)
-            >>> Function.lt(Field.of("age"), Field.of('limit'))
+            >>> Function.less_than("price", 50)
+            >>> Function.less_than(Field.of("age"), Field.of('limit'))
 
         Args:
             left: The expression or field path to compare.
@@ -1347,15 +1347,15 @@ class Function(Expr):
             A new `Expr` representing the less than comparison.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.lt(left_expr, right)
+        return Expr.less_than(left_expr, right)
 
-    def lte(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def less_than_or_equal(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is less than or equal to
         another expression or constant value.
 
         Example:
-            >>> Function.lte("score", 70)
-            >>> Function.lte(Field.of("quantity"), Constant.of(20))
+            >>> Function.less_than_or_equal("score", 70)
+            >>> Function.less_than_or_equal(Field.of("quantity"), Constant.of(20))
 
         Args:
             left: The expression or field path to compare.
@@ -1365,7 +1365,7 @@ class Function(Expr):
             A new `Expr` representing the less than or equal to comparison.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.lte(left_expr, right)
+        return Expr.less_than_or_equal(left_expr, right)
 
     def in_any(left: Expr | str, array: List[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to any of the
@@ -1519,18 +1519,18 @@ class Function(Expr):
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
         return Expr.sum(expr_val)
 
-    def avg(expr: Expr | str) -> "Expr":
+    def average(expr: Expr | str) -> "Expr":
         """Creates an aggregation that calculates the average (mean) of a numeric field across multiple
         stage inputs.
 
         Example:
-            >>> Function.avg("age")
+            >>> Function.average("age")
 
         Returns:
-            A new `AggregateFunction` representing the 'avg' aggregation.
+            A new `AggregateFunction` representing the 'average' aggregation.
         """
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
-        return Expr.avg(expr_val)
+        return Expr.average(expr_val)
 
     def count(expr: Expr | str | None = None) -> "Expr":
         """Creates an aggregation that counts the number of stage inputs with valid evaluations of the
@@ -1548,29 +1548,29 @@ class Function(Expr):
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
         return Expr.count(expr_val)
 
-    def min(expr: Expr | str) -> "Expr":
+    def minimum(expr: Expr | str) -> "Expr":
         """Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
 
         Example:
-            >>> Function.min("price")
+            >>> Function.minimum("price")
 
         Returns:
-            A new `AggregateFunction` representing the 'min' aggregation.
+            A new `AggregateFunction` representing the 'minimum' aggregation.
         """
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
-        return Expr.min(expr_val)
+        return Expr.minimum(expr_val)
 
-    def max(expr: Expr | str) -> "Expr":
+    def maxiumum(expr: Expr | str) -> "Expr":
         """Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
 
         Example:
-            >>> Function.max("score")
+            >>> Function.maxiumum("score")
 
         Returns:
-            A new `AggregateFunction` representing the 'max' aggregation.
+            A new `AggregateFunction` representing the 'maximum' aggregation.
         """
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
-        return Expr.max(expr_val)
+        return Expr.maxiumum(expr_val)
 
     def char_length(expr: Expr | str) -> "Expr":
         """Creates an expression that calculates the character length of a string.
@@ -1649,12 +1649,12 @@ class Function(Expr):
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
         return Expr.regex_matches(expr_val, regex)
 
-    def str_contains(expr: Expr | str, substring: Expr | str) -> "BooleanExpr":
+    def string_contains(expr: Expr | str, substring: Expr | str) -> "BooleanExpr":
         """Creates an expression that checks if this string expression contains a specified substring.
 
         Example:
-            >>> Function.str_contains("description", "example")
-            >>> Function.str_contains(Field.of("description"), Field.of("keyword"))
+            >>> Function.string_contains("description", "example")
+            >>> Function.string_contains(Field.of("description"), Field.of("keyword"))
 
         Args:
             expr: The expression or field path to perform the comparison on.
@@ -1664,7 +1664,7 @@ class Function(Expr):
             A new `Expr` representing the 'contains' comparison.
         """
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
-        return Expr.str_contains(expr_val, substring)
+        return Expr.string_contains(expr_val, substring)
 
     def starts_with(expr: Expr | str, prefix: Expr | str) -> "BooleanExpr":
         """Creates an expression that checks if a string starts with a given prefix.
@@ -1700,11 +1700,11 @@ class Function(Expr):
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
         return Expr.ends_with(expr_val, postfix)
 
-    def str_concat(first: Expr | str, *elements: Expr | CONSTANT_TYPE) -> "Expr":
+    def string_concat(first: Expr | str, *elements: Expr | CONSTANT_TYPE) -> "Expr":
         """Creates an expression that concatenates string expressions, fields or constants together.
 
         Example:
-            >>> Function.str_concat("firstName", " ", Field.of("lastName"))
+            >>> Function.string_concat("firstName", " ", Field.of("lastName"))
 
         Args:
             first: The first expression or field path to concatenate.
@@ -1714,7 +1714,7 @@ class Function(Expr):
             A new `Expr` representing the concatenated string.
         """
         first_expr = Field.of(first) if isinstance(first, str) else first
-        return Expr.str_concat(first_expr, *elements)
+        return Expr.string_concat(first_expr, *elements)
 
     def map_get(map_expr: Expr | str, key: str) -> "Expr":
         """Accesses a value from a map (object) field using the provided key.
@@ -1918,14 +1918,14 @@ class EuclideanDistance(Function):
         super().__init__("euclidean_distance", [vector1, vector2])
 
 
-class LogicalMax(Function):
+class LogicalMaximum(Function):
     """Represents the logical maximum function based on Firestore type ordering."""
 
     def __init__(self, left: Expr, right: Expr):
         super().__init__("logical_maximum", [left, right])
 
 
-class LogicalMin(Function):
+class LogicalMinimum(Function):
     """Represents the logical minimum function based on Firestore type ordering."""
 
     def __init__(self, left: Expr, right: Expr):
@@ -1981,11 +1981,11 @@ class Reverse(Function):
         super().__init__("reverse", [expr])
 
 
-class StrConcat(Function):
+class StringConcat(Function):
     """Represents concatenating multiple strings."""
 
     def __init__(self, *exprs: Expr):
-        super().__init__("str_concat", exprs)
+        super().__init__("string_concat", exprs)
 
 
 class Subtract(Function):
@@ -2002,11 +2002,11 @@ class TimestampAdd(Function):
         super().__init__("timestamp_add", [timestamp, unit, amount])
 
 
-class TimestampSub(Function):
+class TimestampSubtract(Function):
     """Represents subtracting a duration from a timestamp."""
 
     def __init__(self, timestamp: Expr, unit: Expr, amount: Expr):
-        super().__init__("timestamp_sub", [timestamp, unit, amount])
+        super().__init__("timestamp_subtract", [timestamp, unit, amount])
 
 
 class TimestampToUnixMicros(Function):
@@ -2196,7 +2196,7 @@ class Sum(AggregateFunction):
         super().__init__("sum", [value])
 
 
-class Avg(AggregateFunction):
+class Average(AggregateFunction):
     """Represents the average aggregation function."""
 
     def __init__(self, value: Expr):
@@ -2445,7 +2445,7 @@ class EndsWith(BooleanExpr):
         super().__init__("ends_with", [expr, postfix])
 
 
-class Eq(BooleanExpr):
+class Equal(BooleanExpr):
     """Represents the equality comparison."""
 
     def __init__(self, left: Expr, right: Expr):
@@ -2459,18 +2459,18 @@ class Exists(BooleanExpr):
         super().__init__("exists", [expr])
 
 
-class Gt(BooleanExpr):
+class GreaterThan(BooleanExpr):
     """Represents the greater than comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("gt", [left, right])
+        super().__init__("greater_than", [left, right])
 
 
-class Gte(BooleanExpr):
+class GreaterThanOrEqual(BooleanExpr):
     """Represents the greater than or equal to comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("gte", [left, right])
+        super().__init__("greater_than_or_equal", [left, right])
 
 
 class If(BooleanExpr):
@@ -2505,25 +2505,25 @@ class Like(BooleanExpr):
         super().__init__("like", [expr, pattern])
 
 
-class Lt(BooleanExpr):
+class LessThan(BooleanExpr):
     """Represents the less than comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("lt", [left, right])
+        super().__init__("less_than", [left, right])
 
 
-class Lte(BooleanExpr):
+class LessThanOrEqual(BooleanExpr):
     """Represents the less than or equal to comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("lte", [left, right])
+        super().__init__("less_than_or_equal", [left, right])
 
 
-class Neq(BooleanExpr):
+class NotEqual(BooleanExpr):
     """Represents the inequality comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("neq", [left, right])
+        super().__init__("not_equal", [left, right])
 
 
 class Not(BooleanExpr):
@@ -2561,11 +2561,11 @@ class StartsWith(BooleanExpr):
         super().__init__("starts_with", [expr, prefix])
 
 
-class StrContains(BooleanExpr):
+class StringContains(BooleanExpr):
     """Represents checking if a string contains a specific substring."""
 
     def __init__(self, expr: Expr, substring: Expr):
-        super().__init__("str_contains", [expr, substring])
+        super().__init__("string_contains", [expr, substring])
 
 
 class Xor(BooleanExpr):
