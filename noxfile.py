@@ -43,6 +43,7 @@ UNIT_TEST_PYTHON_VERSIONS: List[str] = [
     "3.11",
     "3.12",
     "3.13",
+    "3.14",
 ]
 UNIT_TEST_STANDARD_DEPENDENCIES = [
     "mock",
@@ -61,7 +62,7 @@ UNIT_TEST_DEPENDENCIES: List[str] = []
 UNIT_TEST_EXTRAS: List[str] = []
 UNIT_TEST_EXTRAS_BY_PYTHON: Dict[str, List[str]] = {}
 
-SYSTEM_TEST_PYTHON_VERSIONS: List[str] = ["3.9"]
+SYSTEM_TEST_PYTHON_VERSIONS: List[str] = ["3.9", "3.14"]
 SYSTEM_TEST_STANDARD_DEPENDENCIES: List[str] = [
     "mock",
     "pytest",
@@ -84,6 +85,7 @@ nox.options.sessions = [
     "unit-3.11",
     "unit-3.12",
     "unit-3.13",
+    "unit-3.14",
     "system_emulated",
     "system",
     "mypy",
