@@ -930,7 +930,8 @@ class BaseQuery(object):
         if isinstance(document_fields, document.DocumentSnapshot):
             snapshot = document_fields
             document_fields = snapshot.to_dict()
-            document_fields["__name__"] = snapshot.reference
+            if document_fields is not None:
+                document_fields["__name__"] = snapshot.reference
 
         if isinstance(document_fields, dict):
             # Transform to list using orders

@@ -21,6 +21,7 @@ from typing import (
     AsyncGenerator,
     Awaitable,
     Callable,
+    Generic,
     Optional,
 )
 
@@ -253,7 +254,7 @@ class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
             )
 
 
-class _AsyncTransactional(_BaseTransactional):
+class _AsyncTransactional(_BaseTransactional, Generic[T, P]):
     """Provide a callable object to use as a transactional decorater.
 
     This is surfaced via
