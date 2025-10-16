@@ -24,6 +24,7 @@ from typing import (
     Generic,
     Optional,
 )
+from typing_extensions import Concatenate, ParamSpec, TypeVar
 
 from google.api_core import exceptions, gapic_v1
 from google.api_core import retry_async as retries
@@ -45,14 +46,14 @@ from google.cloud.firestore_v1.base_transaction import (
 # Types needed only for Type Hints
 if TYPE_CHECKING:  # pragma: NO COVER
     import datetime
-    from typing_extensions import TypeVar, ParamSpec, Concatenate
 
     from google.cloud.firestore_v1.async_stream_generator import AsyncStreamGenerator
     from google.cloud.firestore_v1.base_document import DocumentSnapshot
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
-    T = TypeVar("T")
-    P = ParamSpec("P")
+
+T = TypeVar("T")
+P = ParamSpec("P")
 
 
 class AsyncTransaction(async_batch.AsyncWriteBatch, BaseTransaction):
