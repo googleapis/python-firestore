@@ -930,7 +930,7 @@ class BaseQuery(object):
 
         if isinstance(document_fields, document.DocumentSnapshot):
             snapshot = document_fields
-            document_fields = snapshot.to_dict()
+            document_fields = copy.deepcopy(snapshot._data)
             document_fields["__name__"] = snapshot.reference
 
         if isinstance(document_fields, dict):
