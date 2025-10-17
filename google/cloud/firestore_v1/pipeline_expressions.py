@@ -431,7 +431,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the greater than or equal to comparison.
         """
-        return GreaterThanOrEqual(self, self._cast_to_expr_or_convert_to_constant(other))
+        return GreaterThanOrEqual(
+            self, self._cast_to_expr_or_convert_to_constant(other)
+        )
 
     def less_than(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
         """Creates an expression that checks if this expression is less than another
@@ -501,7 +503,7 @@ class Expr(ABC):
         """
         return Not(self.in_any(array))
 
-    def array_concat(self, array: List[Expr | CONSTANT_TYPE]) -> "Expr":
+    def array_concat(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "Expr":
         """Creates an expression that concatenates an array expression with another array.
 
         Example:
@@ -779,7 +781,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'contains' comparison.
         """
-        return StringContains(self, self._cast_to_expr_or_convert_to_constant(substring))
+        return StringContains(
+            self, self._cast_to_expr_or_convert_to_constant(substring)
+        )
 
     def starts_with(self, prefix: Expr | str) -> "BooleanExpr":
         """Creates an expression that checks if a string starts with a given prefix.
@@ -959,9 +963,7 @@ class Expr(ABC):
         """
         return CosineDistance(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def euclidean_distance(
-        self, other: Expr | list[float] | Vector
-    ) -> "Expr":
+    def euclidean_distance(self, other: Expr | list[float] | Vector) -> "Expr":
         """Calculates the Euclidean distance between two vectors.
 
         Example:
@@ -1568,7 +1570,9 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.greater_than(left_expr, right)
 
-    def greater_than_or_equal(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def greater_than_or_equal(
+        left: Expr | str, right: Expr | CONSTANT_TYPE
+    ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is greater than or equal
         to another expression or constant value.
 
@@ -1604,7 +1608,9 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.less_than(left_expr, right)
 
-    def less_than_or_equal(left: Expr | str, right: Expr | CONSTANT_TYPE) -> "BooleanExpr":
+    def less_than_or_equal(
+        left: Expr | str, right: Expr | CONSTANT_TYPE
+    ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is less than or equal to
         another expression or constant value.
 
@@ -1622,7 +1628,9 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.less_than_or_equal(left_expr, right)
 
-    def in_any(left: Expr | str, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
+    def in_any(
+        left: Expr | str, array: Sequence[Expr | CONSTANT_TYPE]
+    ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
@@ -1640,7 +1648,9 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.in_any(left_expr, array)
 
-    def not_in_any(left: Expr | str, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
+    def not_in_any(
+        left: Expr | str, array: Sequence[Expr | CONSTANT_TYPE]
+    ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
@@ -2262,6 +2272,7 @@ class TimestampAdd(Function):
     def __init__(self, timestamp: Expr, unit: Expr, amount: Expr):
         super().__init__("timestamp_add", [timestamp, unit, amount])
 
+
 class Abs(Function):
     """Represents the absolute value function."""
 
@@ -2412,7 +2423,7 @@ class Add(Function):
 class ArrayConcat(Function):
     """Represents concatenating multiple arrays."""
 
-    def __init__(self, array: Expr, rest: List[Expr]):
+    def __init__(self, array: Expr, rest: Sequence[Expr]):
         super().__init__("array_concat", [array] + rest)
 
 
@@ -2495,7 +2506,6 @@ class AggregateFunction(Function):
             provided alias.
         """
         return AliasedAggregate(self, alias)
-
 
 
 class Maximum(AggregateFunction):
@@ -2675,8 +2685,7 @@ class BooleanExpr(Function):
     def _from_query_filter_pb(filter_pb, client):
         if isinstance(filter_pb, Query_pb.CompositeFilter):
             sub_filters = [
-                BooleanExpr._from_query_filter_pb(f, client)
-                for f in filter_pb.filters
+                BooleanExpr._from_query_filter_pb(f, client) for f in filter_pb.filters
             ]
             if filter_pb.op == Query_pb.CompositeFilter.Operator.OR:
                 return Or(*sub_filters)
@@ -2798,9 +2807,7 @@ class If(BooleanExpr):
     """Represents a conditional expression (if-then-else)."""
 
     def __init__(self, condition: "BooleanExpr", true_expr: Expr, false_expr: Expr):
-        super().__init__(
-            "if", [condition, true_expr, false_expr]
-        )
+        super().__init__("if", [condition, true_expr, false_expr])
 
 
 class In(BooleanExpr):

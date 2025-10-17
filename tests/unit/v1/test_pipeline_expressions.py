@@ -624,20 +624,32 @@ class TestBooleanExpr:
     @pytest.mark.parametrize(
         "op_enum, value, expected_expr_func",
         [
-            (query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN, 10, expr.LessThan),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN,
+                10,
+                expr.LessThan,
+            ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN_OR_EQUAL,
                 10,
                 expr.LessThanOrEqual,
             ),
-            (query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN, 10, expr.GreaterThan),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN,
+                10,
+                expr.GreaterThan,
+            ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN_OR_EQUAL,
                 10,
                 expr.GreaterThanOrEqual,
             ),
             (query_pb.StructuredQuery.FieldFilter.Operator.EQUAL, 10, expr.Equal),
-            (query_pb.StructuredQuery.FieldFilter.Operator.NOT_EQUAL, 10, expr.NotEqual),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.NOT_EQUAL,
+                10,
+                expr.NotEqual,
+            ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS,
                 10,
@@ -1386,7 +1398,6 @@ class TestFunctionClasses:
         assert instance.name == "pow"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Pow(Base, Exponent)"
-
 
     def test_round(self):
         arg1 = self._make_arg("Value")

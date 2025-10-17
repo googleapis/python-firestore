@@ -843,7 +843,9 @@ class TestWhere:
         condition = Field.of("age").greater_than(30)
         instance = self._make_one(condition)
         repr_str = repr(instance)
-        assert repr_str == "Where(condition=Field.of('age').greater_than(Constant.of(30)))"
+        assert (
+            repr_str == "Where(condition=Field.of('age').greater_than(Constant.of(30)))"
+        )
 
     def test_to_pb(self):
         condition = Field.of("city").equal("SF")
