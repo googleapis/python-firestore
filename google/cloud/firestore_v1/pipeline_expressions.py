@@ -2669,7 +2669,7 @@ class BooleanExpr(Function):
 
     def __repr__(self):
         """
-        Most BooleanExprs can be triggered infix. Eg: Field.of('age').gte(18).
+        Most BooleanExprs can be triggered infix. Eg: Field.of('age').greater_than(18).
 
         Display them this way in the repr string where possible
         """

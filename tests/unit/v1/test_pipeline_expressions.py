@@ -405,6 +405,34 @@ class TestSelectable:
             assert result[0] == "alias1"
             assert result[1] == Value(field_reference_value="field1")
 
+    class TestAliasedAggregate:
+
+        def test_repr(self):
+            instance = expr.Field.of("field1").maximum().as_("alias1")
+            assert repr(instance) == "Maximum(Field.of('field1')).as_('alias1')"
+
+        def test_ctor(self):
+            arg = expr.Field.of("field1").minimum()
+            alias = "alias1"
+            instance = expr.AliasedAggregate(arg, alias)
+            assert instance.expr == arg
+            assert instance.alias == alias
+
+        def test_to_pb(self):
+            arg = expr.Field.of("field1").average()
+            alias = "alias1"
+            instance = expr.AliasedAggregate(arg, alias)
+            result = instance._to_pb()
+            assert result.map_value.fields.get("alias1") == arg._to_pb()
+
+        def test_to_map(self):
+            arg = expr.Field.of("field1").count()
+            alias = "alias1"
+            instance = expr.AliasedAggregate(arg, alias)
+            result = instance._to_map()
+            assert result[0] == "alias1"
+            assert result[1] == arg._to_pb()
+
 
 class TestBooleanExpr:
     def test__from_query_filter_pb_composite_filter_or(self, mock_client):
