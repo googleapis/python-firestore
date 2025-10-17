@@ -471,13 +471,13 @@ class Expr(ABC):
         """
         return LessThanOrEqual(self, self._cast_to_expr_or_convert_to_constant(other))
 
-    def in_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
+    def equal_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
         Example:
             >>> # Check if the 'category' field is either "Electronics" or value of field 'primaryType'
-            >>> Field.of("category").in_any(["Electronics", Field.of("primaryType")])
+            >>> Field.of("category").equal_any(["Electronics", Field.of("primaryType")])
 
         Args:
             array: The values or expressions to check against.
@@ -485,15 +485,15 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'IN' comparison.
         """
-        return In(self, [self._cast_to_expr_or_convert_to_constant(v) for v in array])
+        return EqualAny(self, [self._cast_to_expr_or_convert_to_constant(v) for v in array])
 
-    def not_in_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
+    def not_equal_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
         Example:
             >>> # Check if the 'status' field is neither "pending" nor "cancelled"
-            >>> Field.of("status").not_in_any(["pending", "cancelled"])
+            >>> Field.of("status").not_equal_any(["pending", "cancelled"])
 
         Args:
             array: The values or expressions to check against.
@@ -501,7 +501,38 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'NOT IN' comparison.
         """
-        return Not(self.in_any(array))
+        return NotEqualAny(self, [self._cast_to_expr_or_convert_to_constant(v) for v in array])
+
+    def array(self, elements: list[Expr | CONSTANT_TYPE]) -> "Expr":
+        """Creates an expression that creates a Firestore array value from an input list.
+
+        Example:
+            >>> Expr.array(["bar", Field.of("baz").as("foo"))])
+
+            Args:
+                elements: THe input list to evaluate in the expression
+
+            Returns:
+                A new `Expr` representing the array function.
+        """
+        return Array(elements)
+
+    def array_get(self, index: Expr | int) -> "Expr":
+        """Creates an expression that indexes into an array from the beginning or end
+        and returns the element. If the index exceeds the array length, an error is
+        returned. A negative index, starts from the end.
+
+        Example:
+            >>> # Return the value in the tags field array at index specified by field 'favoriteTag'.
+            >>> Field.of("tags").array_get(Field.of("favoriteTag"))
+
+        Args:
+            index: The index of the element to return.
+
+        Returns:
+            A new `Expr` representing the operation.
+        """
+        return ArrayGet(self, self._cast_to_expr_or_convert_to_constant(index))
 
     def array_concat(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "Expr":
         """Creates an expression that concatenates an array expression with another array.
@@ -1582,15 +1613,15 @@ class Function(Expr):
         left_expr = Field.of(left) if isinstance(left, str) else left
         return Expr.less_than_or_equal(left_expr, right)
 
-    def in_any(
+    def equal_any(
         left: Expr | str, array: Sequence[Expr | CONSTANT_TYPE]
     ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
         Example:
-            >>> Function.in_any("category", ["Electronics", "Apparel"])
-            >>> Function.in_any(Field.of("category"), ["Electronics", Field.of("primaryType")])
+            >>> Function.equal_any("category", ["Electronics", "Apparel"])
+            >>> Function.equal_any(Field.of("category"), ["Electronics", Field.of("primaryType")])
 
         Args:
             left: The expression or field path to compare.
@@ -1600,16 +1631,16 @@ class Function(Expr):
             A new `Expr` representing the 'IN' comparison.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.in_any(left_expr, array)
+        return Expr.equal_any(left_expr, array)
 
-    def not_in_any(
+    def not_equal_any(
         left: Expr | str, array: Sequence[Expr | CONSTANT_TYPE]
     ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
         Example:
-            >>> Function.not_in_any("status", ["pending", "cancelled"])
+            >>> Function.not_equal_any("status", ["pending", "cancelled"])
 
         Args:
             left: The expression or field path to compare.
@@ -1619,7 +1650,42 @@ class Function(Expr):
             A new `Expr` representing the 'NOT IN' comparison.
         """
         left_expr = Field.of(left) if isinstance(left, str) else left
-        return Expr.not_in_any(left_expr, array)
+        return Expr.not_equal_any(left_expr, array)
+
+    def array_get(array: Expr | str, index: Expr | int) -> "Expr":
+        """Creates an expression that indexes into an array from the beginning or end
+        and returns the element. If the index exceeds the array length, an error is
+        returned. A negative index, starts from the end.
+
+        Example:
+            >>> # Return the value in the tags field array at index specified by field 'favoriteTag'.
+            >>> Field.of("tags").array_get(Field.of("favoriteTag"))
+
+        Args:
+            index: The index of the element to return.
+
+        Returns:
+            A new `Expr` representing the operation.
+        """
+        array_expr = Field.of(array) if isinstance(array, str) else array
+        return Expr.array_get(array_expr, index)
+
+    def array_concat(array: Expr | str, other: Sequence[Expr | CONSTANT_TYPE]) -> "Expr":
+        """Creates an expression that concatenates an array expression with another array.
+
+        Example:
+            >>> # Combine the 'tags' array with a new array and an array field
+            >>> Field.of("tags").array_concat(["newTag1", "newTag2", Field.of("otherTag")])
+
+        Args:
+            array: The list of constants or expressions to concat with.
+
+        Returns:
+            A new `Expr` representing the concatenated array.
+        """
+        array_expr = Field.of(array) if isinstance(array, str) else array
+        return Expr.array_concat(array_expr, other)
+
 
     def array_contains(
         array: Expr | str, element: Expr | CONSTANT_TYPE
@@ -2360,6 +2426,23 @@ class Add(Function):
         super().__init__("add", [left, right])
 
 
+class Array(Function):
+    """Creates an expression that creates a Firestore array value from an input list."""
+
+    def __init__(self, elements: list[Expr]):
+        super().__init__("array", elements)
+
+    def __repr__(self):
+        return f"Array({self.params})"
+
+
+class ArrayGet(Function):
+    """Creates an expression that indexes into an array from the beginning or end and returns an element."""
+
+    def __init__(self, array: Expr, index: Expr):
+        super().__init__("array_get", [array, index])
+
+
 class ArrayConcat(Function):
     """Represents concatenating multiple arrays."""
 
@@ -2646,9 +2729,9 @@ class BooleanExpr(Function):
             elif filter_pb.op == Query_pb.FieldFilter.Operator.ARRAY_CONTAINS_ANY:
                 return And(field.exists(), field.array_contains_any(value))
             elif filter_pb.op == Query_pb.FieldFilter.Operator.IN:
-                return And(field.exists(), field.in_any(value))
+                return And(field.exists(), field.equal_any(value))
             elif filter_pb.op == Query_pb.FieldFilter.Operator.NOT_IN:
-                return And(field.exists(), field.not_in_any(value))
+                return And(field.exists(), field.not_equal_any(value))
             else:
                 raise TypeError(f"Unexpected FieldFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.Filter):
@@ -2729,13 +2812,18 @@ class If(BooleanExpr):
         super().__init__("if", [condition, true_expr, false_expr])
 
 
-class In(BooleanExpr):
+class EqualAny(BooleanExpr):
     """Represents checking if an expression's value is within a list of values."""
 
     def __init__(self, left: Expr, others: Sequence[Expr]):
-        super().__init__(
-            "in", [left, ListOfExprs(others)], infix_name_override="in_any"
-        )
+        super().__init__("equal_any", [left, ListOfExprs(others)])
+
+
+class NotEqualAny(BooleanExpr):
+    """Represents checking if an expression's value is not within a list of values."""
+
+    def __init__(self, left: Expr, others: Sequence[Expr]):
+        super().__init__("not_equal_any", [left, ListOfExprs(others)])
 
 
 class IsNaN(BooleanExpr):

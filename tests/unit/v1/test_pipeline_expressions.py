@@ -107,8 +107,9 @@ class TestExpr:
             ("less_than_or_equal", (2,), expr.LessThanOrEqual),
             ("greater_than", (2,), expr.GreaterThan),
             ("greater_than_or_equal", (2,), expr.GreaterThanOrEqual),
-            ("in_any", ([None],), expr.In),
-            ("not_in_any", ([None],), expr.Not),
+            ("equal_any", ([None],), expr.EqualAny),
+            ("not_equal_any", ([None],), expr.NotEqualAny),
+            ("array_get", (1,), expr.ArrayGet),
             ("array_concat", ([None],), expr.ArrayConcat),
             ("array_contains", (None,), expr.ArrayContains),
             ("array_contains_all", ([None],), expr.ArrayContainsAll),
@@ -170,7 +171,9 @@ class TestExpr:
 
         result = method_ptr(*args)
         assert isinstance(result, result_cls)
-        if isinstance(result, expr.Function) and not method == "not_in_any":
+        if isinstance(result, (expr.Ordering, expr.AliasedExpr)):
+            assert result.expr == base_instance
+        else:
             assert result.params[0] == base_instance
 
 
@@ -686,12 +689,8 @@ class TestBooleanExpr:
                 [10, 20],
                 expr.ArrayContainsAny,
             ),
-            (query_pb.StructuredQuery.FieldFilter.Operator.IN, [10, 20], expr.In),
-            (
-                query_pb.StructuredQuery.FieldFilter.Operator.NOT_IN,
-                [10, 20],
-                lambda f, v: expr.Not(f.in_any(v)),
-            ),
+            (query_pb.StructuredQuery.FieldFilter.Operator.IN, [10, 20], expr.EqualAny),
+            (query_pb.StructuredQuery.FieldFilter.Operator.NOT_IN, [10, 20], expr.NotEqualAny),
         ],
     )
     def test__from_query_filter_pb_field_filter(
@@ -852,16 +851,27 @@ class TestBooleanExprClasses:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.not_equal(Right)"
 
-    def test_in(self):
+    def test_equal_any(self):
         arg1 = self._make_arg("Field")
         arg2 = self._make_arg("Value1")
         arg3 = self._make_arg("Value2")
-        instance = expr.In(arg1, [arg2, arg3])
-        assert instance.name == "in"
+        instance = expr.EqualAny(arg1, [arg2, arg3])
+        assert instance.name == "equal_any"
         assert isinstance(instance.params[1], ListOfExprs)
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
-        assert repr(instance) == "Field.in_any(ListOfExprs([Value1, Value2]))"
+        assert repr(instance) == "Field.equal_any(ListOfExprs([Value1, Value2]))"
+
+    def test_not_equal_any(self):
+        arg1 = self._make_arg("Field")
+        arg2 = self._make_arg("Value1")
+        arg3 = self._make_arg("Value2")
+        instance = expr.NotEqualAny(arg1, [arg2, arg3])
+        assert instance.name == "not_equal_any"
+        assert isinstance(instance.params[1], ListOfExprs)
+        assert instance.params[0] == arg1
+        assert instance.params[1].exprs == [arg2, arg3]
+        assert repr(instance) == "Field.not_equal_any(ListOfExprs([Value1, Value2]))"
 
     def test_is_nan(self):
         arg1 = self._make_arg("Value")
@@ -987,8 +997,10 @@ class TestFunctionClasses:
             ("less_than_or_equal", ("field", 2), expr.LessThanOrEqual),
             ("greater_than", ("field", 2), expr.GreaterThan),
             ("greater_than_or_equal", ("field", 2), expr.GreaterThanOrEqual),
-            ("in_any", ("field", [None]), expr.In),
-            ("not_in_any", ("field", [None]), expr.Not),
+            ("equal_any", ("field", [None]), expr.EqualAny),
+            ("not_equal_any", ("field", [None]), expr.NotEqualAny),
+            ("array", ("field", [1, 2, 3]), expr.Array),
+            ("array_get", ("field", 2), expr.ArrayGet),
             ("array_contains", ("field", None), expr.ArrayContains),
             ("array_contains_all", ("field", [None]), expr.ArrayContainsAll),
             ("array_contains_any", ("field", [None]), expr.ArrayContainsAny),
@@ -1203,20 +1215,6 @@ class TestFunctionClasses:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Add(Left, Right)"
 
-    def test_array_element(self):
-        instance = expr.ArrayElement()
-        assert instance.name == "array_element"
-        assert instance.params == []
-        assert repr(instance) == "ArrayElement()"
-
-    def test_array_filter(self):
-        arg1 = self._make_arg("Array")
-        arg2 = self._make_arg("FilterCond")
-        instance = expr.ArrayFilter(arg1, arg2)
-        assert instance.name == "array_filter"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "ArrayFilter(Array, FilterCond)"
-
     def test_array_length(self):
         arg1 = self._make_arg("Array")
         instance = expr.ArrayLength(arg1)
@@ -1230,14 +1228,6 @@ class TestFunctionClasses:
         assert instance.name == "array_reverse"
         assert instance.params == [arg1]
         assert repr(instance) == "ArrayReverse(Array)"
-
-    def test_array_transform(self):
-        arg1 = self._make_arg("Array")
-        arg2 = self._make_arg("TransformFunc")
-        instance = expr.ArrayTransform(arg1, arg2)
-        assert instance.name == "array_transform"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "ArrayTransform(Array, TransformFunc)"
 
     def test_byte_length(self):
         arg1 = self._make_arg("Expr")
@@ -1351,6 +1341,21 @@ class TestFunctionClasses:
         assert instance.name == "trim"
         assert instance.params == [arg1]
         assert repr(instance) == "Trim(Expr)"
+
+    def test_array(self):
+        arg = self._make_arg("Value")
+        instance = expr.Array([1, 2, arg])
+        assert instance.name == "array"
+        assert instance.params == [1, 2, arg]
+        assert repr(instance) == "Array([1, 2, Value])"
+
+    def test_array_get(self):
+        arg1 = self._make_arg("Array")
+        arg2 = self._make_arg("Index")
+        instance = expr.ArrayGet(arg1, arg2)
+        assert instance.name == "array_get"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "ArrayGet(Array, Index)"
 
     def test_array_concat(self):
         arg1 = self._make_arg("1")
