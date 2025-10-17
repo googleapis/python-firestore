@@ -674,19 +674,19 @@ class Expr(ABC):
         Returns:
             A new `AggregateFunction` representing the 'minimum' aggregation.
         """
-        return Min(self)
+        return Minimum(self)
 
-    def maxiumum(self) -> "Expr":
+    def maximum(self) -> "Expr":
         """Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
 
         Example:
             >>> # Find the highest score in a leaderboard
-            >>> Field.of("score").maxiumum().as_("highestScore")
+            >>> Field.of("score").maximum().as_("highestScore")
 
         Returns:
-            A new `AggregateFunction` representing the 'max' aggregation.
+            A new `AggregateFunction` representing the 'maximum' aggregation.
         """
-        return Max(self)
+        return Maximum(self)
 
     def char_length(self) -> "Expr":
         """Creates an expression that calculates the character length of a string.
@@ -1815,17 +1815,17 @@ class Function(Expr):
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
         return Expr.minimum(expr_val)
 
-    def maxiumum(expr: Expr | str) -> "Expr":
+    def maximum(expr: Expr | str) -> "Expr":
         """Creates an aggregation that finds the maximum value of a field across multiple stage inputs.
 
         Example:
-            >>> Function.maxiumum("score")
+            >>> Function.maximum("score")
 
         Returns:
             A new `AggregateFunction` representing the 'maximum' aggregation.
         """
         expr_val = Field.of(expr) if isinstance(expr, str) else expr
-        return Expr.maxiumum(expr_val)
+        return Expr.maximum(expr_val)
 
     def char_length(expr: Expr | str) -> "Expr":
         """Creates an expression that calculates the character length of a string.
@@ -2128,7 +2128,7 @@ class Function(Expr):
         )
         return Expr.timestamp_add(timestamp_expr, unit, amount)
 
-    def timestamp_sub(
+    def timestamp_subtract(
         timestamp: Expr | str, unit: Expr | str, amount: Expr | float
     ) -> "Expr":
         """Creates an expression that subtracts a specified amount of time from this timestamp expression.
@@ -2149,7 +2149,7 @@ class Function(Expr):
         timestamp_expr = (
             Field.of(timestamp) if isinstance(timestamp, str) else timestamp
         )
-        return Expr.timestamp_sub(timestamp_expr, unit, amount)
+        return Expr.timestamp_subtract(timestamp_expr, unit, amount)
 
 
 class Divide(Function):
@@ -2174,17 +2174,23 @@ class EuclideanDistance(Function):
 
 
 class LogicalMaximum(Function):
-    """Represents the logical maximum function based on Firestore type ordering."""
+    """
+    Returns the larger value between this expression and another expression or constant,
+    based on Firestore's value type ordering.
+    """
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("logical_maximum", [left, right])
+        super().__init__("max", [left, right])
 
 
 class LogicalMinimum(Function):
-    """Represents the logical minimum function based on Firestore type ordering."""
+    """
+    Returns the smaller value between this expression and another expression or constant,
+    based on Firestore's value type ordering.
+    """
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("logical_minimum", [left, right])
+        super().__init__("min", [left, right])
 
 
 class MapGet(Function):
@@ -2492,18 +2498,18 @@ class AggregateFunction(Function):
 
 
 
-class Max(AggregateFunction):
-    """Represents the maximum aggregation function."""
+class Maximum(AggregateFunction):
+    """Finds the maximum value of a field, aggregated across multiple stage inputs."""
 
     def __init__(self, value: Expr):
-        super().__init__("maximum", [value])
+        super().__init__("max", [value])
 
 
-class Min(AggregateFunction):
-    """Represents the minimum aggregation function."""
+class Minimum(AggregateFunction):
+    """Finds the maximum value of a field, aggregated across multiple stage inputs."""
 
     def __init__(self, value: Expr):
-        super().__init__("minimum", [value])
+        super().__init__("min", [value])
 
 
 class Sum(AggregateFunction):
@@ -2517,7 +2523,7 @@ class Average(AggregateFunction):
     """Represents the average aggregation function."""
 
     def __init__(self, value: Expr):
-        super().__init__("avg", [value])
+        super().__init__("average", [value])
 
 
 class Count(AggregateFunction):
@@ -2687,26 +2693,26 @@ class BooleanExpr(Function):
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
                 return And(field.exists(), Not(field.is_nan()))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NULL:
-                return And(field.exists(), field.eq(None))
+                return And(field.exists(), field.equal(None))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NULL:
-                return And(field.exists(), Not(field.eq(None)))
+                return And(field.exists(), Not(field.equal(None)))
             else:
                 raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.FieldFilter):
             field = Field.of(filter_pb.field.field_path)
             value = decode_value(filter_pb.value, client)
             if filter_pb.op == Query_pb.FieldFilter.Operator.LESS_THAN:
-                return And(field.exists(), field.lt(value))
+                return And(field.exists(), field.less_than(value))
             elif filter_pb.op == Query_pb.FieldFilter.Operator.LESS_THAN_OR_EQUAL:
-                return And(field.exists(), field.lte(value))
+                return And(field.exists(), field.less_than_or_equal(value))
             elif filter_pb.op == Query_pb.FieldFilter.Operator.GREATER_THAN:
-                return And(field.exists(), field.gt(value))
+                return And(field.exists(), field.greater_than(value))
             elif filter_pb.op == Query_pb.FieldFilter.Operator.GREATER_THAN_OR_EQUAL:
-                return And(field.exists(), field.gte(value))
+                return And(field.exists(), field.greater_than_or_equal(value))
             elif filter_pb.op == Query_pb.FieldFilter.Operator.EQUAL:
-                return And(field.exists(), field.eq(value))
+                return And(field.exists(), field.equal(value))
             elif filter_pb.op == Query_pb.FieldFilter.Operator.NOT_EQUAL:
-                return And(field.exists(), field.neq(value))
+                return And(field.exists(), field.not_equal(value))
             if filter_pb.op == Query_pb.FieldFilter.Operator.ARRAY_CONTAINS:
                 return And(field.exists(), field.array_contains(value))
             elif filter_pb.op == Query_pb.FieldFilter.Operator.ARRAY_CONTAINS_ANY:
@@ -2764,7 +2770,7 @@ class Equal(BooleanExpr):
     """Represents the equality comparison."""
 
     def __init__(self, left: Expr, right: Expr):
-        super().__init__("eq", [left, right])
+        super().__init__("equal", [left, right])
 
 
 class Exists(BooleanExpr):

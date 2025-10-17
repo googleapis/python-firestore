@@ -34,9 +34,9 @@ from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.types import (
     StructuredAggregationQuery,
 )
-from google.cloud.firestore_v1.pipeline_expressions import Accumulator
+from google.cloud.firestore_v1.pipeline_expressions import AggregateFunction
 from google.cloud.firestore_v1.pipeline_expressions import Count
-from google.cloud.firestore_v1.pipeline_expressions import ExprWithAlias
+from google.cloud.firestore_v1.pipeline_expressions import AliasedExpr
 from google.cloud.firestore_v1.pipeline_expressions import Field
 
 # Types needed only for Type Hints
@@ -86,7 +86,7 @@ class BaseAggregation(ABC):
     @abc.abstractmethod
     def _to_pipeline_expr(
         self, autoindexer: Iterable[int]
-    ) -> ExprWithAlias[Accumulator]:
+    ) -> AliasedExpr[AggregateFunction]:
         """
         Convert this instance to a pipeline expression for use with pipeline.aggregate()
 
@@ -162,7 +162,7 @@ class AvgAggregation(BaseAggregation):
         return aggregation_pb
 
     def _to_pipeline_expr(self, autoindexer: Iterable[int]):
-        return Field.of(self.field_ref).avg().as_(self._pipeline_alias(autoindexer))
+        return Field.of(self.field_ref).average().as_(self._pipeline_alias(autoindexer))
 
 
 def _query_response_to_result(

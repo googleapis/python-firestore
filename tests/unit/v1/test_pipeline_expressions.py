@@ -99,14 +99,14 @@ class TestExpr:
             ("pow", (2,), expr.Pow),
             ("round", (), expr.Round),
             ("sqrt", (), expr.Sqrt),
-            ("logical_max", (2,), expr.LogicalMax),
-            ("logical_min", (2,), expr.LogicalMin),
-            ("eq", (2,), expr.Eq),
-            ("neq", (2,), expr.Neq),
-            ("lt", (2,), expr.Lt),
-            ("lte", (2,), expr.Lte),
-            ("gt", (2,), expr.Gt),
-            ("gte", (2,), expr.Gte),
+            ("logical_maximum", (2,), expr.LogicalMaximum),
+            ("logical_minimum", (2,), expr.LogicalMinimum),
+            ("equal", (2,), expr.Equal),
+            ("not_equal", (2,), expr.NotEqual),
+            ("less_than", (2,), expr.LessThan),
+            ("less_than_or_equal", (2,), expr.LessThanOrEqual),
+            ("greater_than", (2,), expr.GreaterThan),
+            ("greater_than_or_equal", (2,), expr.GreaterThanOrEqual),
             ("in_any", ([None],), expr.In),
             ("not_in_any", ([None],), expr.Not),
             ("array_concat", ([None],), expr.ArrayConcat),
@@ -118,19 +118,19 @@ class TestExpr:
             ("is_nan", (), expr.IsNaN),
             ("exists", (), expr.Exists),
             ("sum", (), expr.Sum),
-            ("avg", (), expr.Avg),
+            ("average", (), expr.Average),
             ("count", (), expr.Count),
-            ("min", (), expr.Min),
-            ("max", (), expr.Max),
+            ("minimum", (), expr.Minimum),
+            ("maximum", (), expr.Maximum),
             ("char_length", (), expr.CharLength),
             ("byte_length", (), expr.ByteLength),
             ("like", ("pattern",), expr.Like),
             ("regex_contains", ("regex",), expr.RegexContains),
             ("regex_matches", ("regex",), expr.RegexMatch),
-            ("str_contains", ("substring",), expr.StrContains),
+            ("string_contains", ("substring",), expr.StringContains),
             ("starts_with", ("prefix",), expr.StartsWith),
             ("ends_with", ("postfix",), expr.EndsWith),
-            ("str_concat", ("elem1", expr.Constant("elem2")), expr.StrConcat),
+            ("string_concat", ("elem1", expr.Constant("elem2")), expr.StringConcat),
             ("to_lower", (), expr.ToLower),
             ("to_upper", (), expr.ToUpper),
             ("trim", (), expr.Trim),
@@ -149,7 +149,7 @@ class TestExpr:
             ("timestamp_to_unix_seconds", (), expr.TimestampToUnixSeconds),
             ("unix_seconds_to_timestamp", (), expr.UnixSecondsToTimestamp),
             ("timestamp_add", ("day", 1), expr.TimestampAdd),
-            ("timestamp_sub", ("hour", 2.5), expr.TimestampSub),
+            ("timestamp_subtract", ("hour", 2.5), expr.TimestampSubtract),
             ("ascending", (), expr.Ordering),
             ("descending", (), expr.Ordering),
             ("as_", ("alias",), expr.AliasedExpr),
@@ -439,11 +439,11 @@ class TestBooleanExpr:
         # should include existance checks
         expected_cond1 = expr.And(
             expr.Exists(expr.Field.of("field1")),
-            expr.Eq(expr.Field.of("field1"), expr.Constant("val1")),
+            expr.Equal(expr.Field.of("field1"), expr.Constant("val1")),
         )
         expected_cond2 = expr.And(
             expr.Exists(expr.Field.of("field2")),
-            expr.Eq(expr.Field.of("field2"), expr.Constant(None)),
+            expr.Equal(expr.Field.of("field2"), expr.Constant(None)),
         )
         expected = expr.Or(expected_cond1, expected_cond2)
 
@@ -482,11 +482,11 @@ class TestBooleanExpr:
         # should include existance checks
         expected_cond1 = expr.And(
             expr.Exists(expr.Field.of("field1")),
-            expr.Gt(expr.Field.of("field1"), expr.Constant(100)),
+            expr.GreaterThan(expr.Field.of("field1"), expr.Constant(100)),
         )
         expected_cond2 = expr.And(
             expr.Exists(expr.Field.of("field2")),
-            expr.Lt(expr.Field.of("field2"), expr.Constant(200)),
+            expr.LessThan(expr.Field.of("field2"), expr.Constant(200)),
         )
         expected = expr.And(expected_cond1, expected_cond2)
         assert repr(result) == repr(expected)
@@ -532,15 +532,15 @@ class TestBooleanExpr:
 
         expected_cond1 = expr.And(
             expr.Exists(expr.Field.of("field1")),
-            expr.Eq(expr.Field.of("field1"), expr.Constant("val1")),
+            expr.Equal(expr.Field.of("field1"), expr.Constant("val1")),
         )
         expected_cond2 = expr.And(
             expr.Exists(expr.Field.of("field2")),
-            expr.Gt(expr.Field.of("field2"), expr.Constant(10)),
+            expr.GreaterThan(expr.Field.of("field2"), expr.Constant(10)),
         )
         expected_cond3 = expr.And(
             expr.Exists(expr.Field.of("field3")),
-            expr.Not(expr.Eq(expr.Field.of("field3"), expr.Constant(None))),
+            expr.Not(expr.Equal(expr.Field.of("field3"), expr.Constant(None))),
         )
         expected_inner_and = expr.And(expected_cond2, expected_cond3)
         expected_outer_or = expr.Or(expected_cond1, expected_inner_and)
@@ -577,11 +577,11 @@ class TestBooleanExpr:
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NULL,
-                lambda f: f.eq(None),
+                lambda f: f.equal(None),
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL,
-                lambda f: expr.Not(f.eq(None)),
+                lambda f: expr.Not(f.equal(None)),
             ),
         ],
     )
@@ -624,20 +624,20 @@ class TestBooleanExpr:
     @pytest.mark.parametrize(
         "op_enum, value, expected_expr_func",
         [
-            (query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN, 10, expr.Lt),
+            (query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN, 10, expr.LessThan),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN_OR_EQUAL,
                 10,
-                expr.Lte,
+                expr.LessThanOrEqual,
             ),
-            (query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN, 10, expr.Gt),
+            (query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN, 10, expr.GreaterThan),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN_OR_EQUAL,
                 10,
-                expr.Gte,
+                expr.GreaterThanOrEqual,
             ),
-            (query_pb.StructuredQuery.FieldFilter.Operator.EQUAL, 10, expr.Eq),
-            (query_pb.StructuredQuery.FieldFilter.Operator.NOT_EQUAL, 10, expr.Neq),
+            (query_pb.StructuredQuery.FieldFilter.Operator.EQUAL, 10, expr.Equal),
+            (query_pb.StructuredQuery.FieldFilter.Operator.NOT_EQUAL, 10, expr.NotEqual),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS,
                 10,
@@ -766,53 +766,53 @@ class TestBooleanExprClasses:
         assert instance.params == [arg1]
         assert repr(instance) == "Field.exists()"
 
-    def test_eq(self):
+    def test_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Eq(arg1, arg2)
-        assert instance.name == "eq"
+        instance = expr.Equal(arg1, arg2)
+        assert instance.name == "equal"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Left.eq(Right)"
+        assert repr(instance) == "Left.equal(Right)"
 
-    def test_gte(self):
+    def test_greater_than_or_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Gte(arg1, arg2)
-        assert instance.name == "gte"
+        instance = expr.GreaterThanOrEqual(arg1, arg2)
+        assert instance.name == "greater_than_or_equal"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Left.gte(Right)"
+        assert repr(instance) == "Left.greater_than_or_equal(Right)"
 
-    def test_gt(self):
+    def test_greater_than(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Gt(arg1, arg2)
-        assert instance.name == "gt"
+        instance = expr.GreaterThan(arg1, arg2)
+        assert instance.name == "greater_than"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Left.gt(Right)"
+        assert repr(instance) == "Left.greater_than(Right)"
 
-    def test_lte(self):
+    def test_less_than_or_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Lte(arg1, arg2)
-        assert instance.name == "lte"
+        instance = expr.LessThanOrEqual(arg1, arg2)
+        assert instance.name == "less_than_or_equal"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Left.lte(Right)"
+        assert repr(instance) == "Left.less_than_or_equal(Right)"
 
-    def test_lt(self):
+    def test_less_than(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Lt(arg1, arg2)
-        assert instance.name == "lt"
+        instance = expr.LessThan(arg1, arg2)
+        assert instance.name == "less_than"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Left.lt(Right)"
+        assert repr(instance) == "Left.less_than(Right)"
 
-    def test_neq(self):
+    def test_not_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Neq(arg1, arg2)
-        assert instance.name == "neq"
+        instance = expr.NotEqual(arg1, arg2)
+        assert instance.name == "not_equal"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Left.neq(Right)"
+        assert repr(instance) == "Left.not_equal(Right)"
 
     def test_in(self):
         arg1 = self._make_arg("Field")
@@ -902,13 +902,13 @@ class TestBooleanExprClasses:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.starts_with(Prefix)"
 
-    def test_str_contains(self):
+    def test_string_contains(self):
         arg1 = self._make_arg("Expr")
         arg2 = self._make_arg("Substring")
-        instance = expr.StrContains(arg1, arg2)
-        assert instance.name == "str_contains"
+        instance = expr.StringContains(arg1, arg2)
+        assert instance.name == "string_contains"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.str_contains(Substring)"
+        assert repr(instance) == "Expr.string_contains(Substring)"
 
     def test_xor(self):
         arg1 = self._make_arg("Condition1")
@@ -941,14 +941,14 @@ class TestFunctionClasses:
             ("pow", ("field", 2), expr.Pow),
             ("round", ("field",), expr.Round),
             ("sqrt", ("field",), expr.Sqrt),
-            ("logical_max", ("field", 2), expr.LogicalMax),
-            ("logical_min", ("field", 2), expr.LogicalMin),
-            ("eq", ("field", 2), expr.Eq),
-            ("neq", ("field", 2), expr.Neq),
-            ("lt", ("field", 2), expr.Lt),
-            ("lte", ("field", 2), expr.Lte),
-            ("gt", ("field", 2), expr.Gt),
-            ("gte", ("field", 2), expr.Gte),
+            ("logical_maximum", ("field", 2), expr.LogicalMaximum),
+            ("logical_minimum", ("field", 2), expr.LogicalMinimum),
+            ("equal", ("field", 2), expr.Equal),
+            ("not_equal", ("field", 2), expr.NotEqual),
+            ("less_than", ("field", 2), expr.LessThan),
+            ("less_than_or_equal", ("field", 2), expr.LessThanOrEqual),
+            ("greater_than", ("field", 2), expr.GreaterThan),
+            ("greater_than_or_equal", ("field", 2), expr.GreaterThanOrEqual),
             ("in_any", ("field", [None]), expr.In),
             ("not_in_any", ("field", [None]), expr.Not),
             ("array_contains", ("field", None), expr.ArrayContains),
@@ -959,20 +959,20 @@ class TestFunctionClasses:
             ("is_nan", ("field",), expr.IsNaN),
             ("exists", ("field",), expr.Exists),
             ("sum", ("field",), expr.Sum),
-            ("avg", ("field",), expr.Avg),
+            ("average", ("field",), expr.Average),
             ("count", ("field",), expr.Count),
             ("count", (), expr.Count),
-            ("min", ("field",), expr.Min),
-            ("max", ("field",), expr.Max),
+            ("minimum", ("field",), expr.Minimum),
+            ("maximum", ("field",), expr.Maximum),
             ("char_length", ("field",), expr.CharLength),
             ("byte_length", ("field",), expr.ByteLength),
             ("like", ("field", "pattern"), expr.Like),
             ("regex_contains", ("field", "regex"), expr.RegexContains),
             ("regex_matches", ("field", "regex"), expr.RegexMatch),
-            ("str_contains", ("field", "substring"), expr.StrContains),
+            ("string_contains", ("field", "substring"), expr.StringContains),
             ("starts_with", ("field", "prefix"), expr.StartsWith),
             ("ends_with", ("field", "postfix"), expr.EndsWith),
-            ("str_concat", ("field", "elem1", "elem2"), expr.StrConcat),
+            ("string_concat", ("field", "elem1", "elem2"), expr.StringConcat),
             ("map_get", ("field", "key"), expr.MapGet),
             ("vector_length", ("field",), expr.VectorLength),
             ("timestamp_to_unix_micros", ("field",), expr.TimestampToUnixMicros),
@@ -982,7 +982,7 @@ class TestFunctionClasses:
             ("timestamp_to_unix_seconds", ("field",), expr.TimestampToUnixSeconds),
             ("unix_seconds_to_timestamp", ("field",), expr.UnixSecondsToTimestamp),
             ("timestamp_add", ("field", "day", 1), expr.TimestampAdd),
-            ("timestamp_sub", ("field", "hour", 2.5), expr.TimestampSub),
+            ("timestamp_subtract", ("field", "hour", 2.5), expr.TimestampSubtract),
         ],
     )
     def test_function_builder(self, method, args, result_cls):
@@ -1023,21 +1023,21 @@ class TestFunctionClasses:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Divide(Left, Right)"
 
-    def test_logical_max(self):
+    def test_logical_maximum(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.LogicalMax(arg1, arg2)
-        assert instance.name == "logical_maximum"
+        instance = expr.LogicalMaximum(arg1, arg2)
+        assert instance.name == "max"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "LogicalMax(Left, Right)"
+        assert repr(instance) == "LogicalMaximum(Left, Right)"
 
-    def test_logical_min(self):
+    def test_logical_minimum(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.LogicalMin(arg1, arg2)
-        assert instance.name == "logical_minimum"
+        instance = expr.LogicalMinimum(arg1, arg2)
+        assert instance.name == "min"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "LogicalMin(Left, Right)"
+        assert repr(instance) == "LogicalMinimum(Left, Right)"
 
     def test_map_get(self):
         arg1 = self._make_arg("Map")
@@ -1070,13 +1070,13 @@ class TestFunctionClasses:
         assert instance.params == [arg1]
         assert repr(instance) == "Parent(Value)"
 
-    def test_str_concat(self):
+    def test_string_concat(self):
         arg1 = self._make_arg("Str1")
         arg2 = self._make_arg("Str2")
-        instance = expr.StrConcat(arg1, arg2)
-        assert instance.name == "str_concat"
+        instance = expr.StringConcat(arg1, arg2)
+        assert instance.name == "string_concat"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "StrConcat(Str1, Str2)"
+        assert repr(instance) == "StringConcat(Str1, Str2)"
 
     def test_subtract(self):
         arg1 = self._make_arg("Left")
@@ -1095,14 +1095,14 @@ class TestFunctionClasses:
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "TimestampAdd(Timestamp, Unit, Amount)"
 
-    def test_timestamp_sub(self):
+    def test_timestamp_subtract(self):
         arg1 = self._make_arg("Timestamp")
         arg2 = self._make_arg("Unit")
         arg3 = self._make_arg("Amount")
-        instance = expr.TimestampSub(arg1, arg2, arg3)
-        assert instance.name == "timestamp_sub"
+        instance = expr.TimestampSubtract(arg1, arg2, arg3)
+        assert instance.name == "timestamp_subtract"
         assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "TimestampSub(Timestamp, Unit, Amount)"
+        assert repr(instance) == "TimestampSubtract(Timestamp, Unit, Amount)"
 
     def test_timestamp_to_unix_micros(self):
         arg1 = self._make_arg("Input")
@@ -1225,12 +1225,12 @@ class TestFunctionClasses:
         assert instance.params == [arg1]
         assert repr(instance) == "Sum(Value)"
 
-    def test_avg(self):
+    def test_average(self):
         arg1 = self._make_arg("Value")
-        instance = expr.Avg(arg1)
-        assert instance.name == "avg"
+        instance = expr.Average(arg1)
+        assert instance.name == "average"
         assert instance.params == [arg1]
-        assert repr(instance) == "Avg(Value)"
+        assert repr(instance) == "Average(Value)"
 
     def test_count(self):
         arg1 = self._make_arg("Value")
@@ -1244,19 +1244,19 @@ class TestFunctionClasses:
         assert instance.params == []
         assert repr(instance) == "Count()"
 
-    def test_min(self):
+    def test_minimum(self):
         arg1 = self._make_arg("Value")
-        instance = expr.Min(arg1)
-        assert instance.name == "minimum"
+        instance = expr.Minimum(arg1)
+        assert instance.name == "min"
         assert instance.params == [arg1]
-        assert repr(instance) == "Min(Value)"
+        assert repr(instance) == "Minimum(Value)"
 
-    def test_max(self):
+    def test_maximum(self):
         arg1 = self._make_arg("Value")
-        instance = expr.Max(arg1)
-        assert instance.name == "maximum"
+        instance = expr.Maximum(arg1)
+        assert instance.name == "max"
         assert instance.params == [arg1]
-        assert repr(instance) == "Max(Value)"
+        assert repr(instance) == "Maximum(Value)"
 
     def test_dot_product(self):
         arg1 = self._make_arg("Left")

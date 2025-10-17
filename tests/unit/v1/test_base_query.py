@@ -2041,7 +2041,7 @@ def test__query_pipeline_composite_filter():
     in_filter = FieldFilter("field_a", "==", "value_a")
     query = client.collection("my_col").where(filter=in_filter)
     with mock.patch.object(
-        expr.FilterCondition, "_from_query_filter_pb"
+        expr.BooleanExpr, "_from_query_filter_pb"
     ) as convert_mock:
         pipeline = query.pipeline()
         convert_mock.assert_called_once_with(in_filter._to_pb(), client)
