@@ -135,8 +135,6 @@ class TestExpr:
             ("to_upper", (), expr.ToUpper),
             ("trim", (), expr.Trim),
             ("reverse", (), expr.Reverse),
-            ("replace_first", ("1", "2"), expr.ReplaceFirst),
-            ("replace_all", ("1", "2"), expr.ReplaceAll),
             ("map_get", ("key",), expr.MapGet),
             ("cosine_distance", [1], expr.CosineDistance),
             ("euclidean_distance", [1], expr.EuclideanDistance),
@@ -1037,14 +1035,18 @@ class TestFunctionClasses:
     @pytest.mark.parametrize(
         "first,second,expected",
         [
-            (expr.ArrayElement(), expr.ArrayElement(), True),
-            (expr.ArrayElement(), expr.CharLength(1), False),
-            (expr.ArrayElement(), object(), False),
-            (expr.ArrayElement(), None, False),
-            (expr.CharLength(1), expr.ArrayElement(), False),
+            (expr.Array([]), expr.Array([]), True),
+            (expr.Array([]), expr.CharLength(1), False),
+            (expr.Array([]), object(), False),
+            (expr.Array([]), None, False),
+            (expr.CharLength(1), expr.Array([]), False),
             (expr.CharLength(1), expr.CharLength(2), False),
             (expr.CharLength(1), expr.CharLength(1), True),
             (expr.CharLength(1), expr.ByteLength(1), False),
+            (expr.Array([1]), expr.Array([1]), True),
+            (expr.Array([1]), expr.Array([2]), False),
+            (expr.Array([1]), expr.Array([]), False),
+            (expr.Array([1, 2]), expr.Array([1]), False),
         ],
     )
     def test_equality(self, first, second, expected):
@@ -1321,23 +1323,6 @@ class TestFunctionClasses:
         assert instance.name == "cosine_distance"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "CosineDistance(Left, Right)"
-
-    def test_replace_all(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("OldValue")
-        arg3 = self._make_arg("NewValue")
-        instance = expr.ReplaceAll(arg1, arg2, arg3)
-        assert instance.name == "replace_all"
-        assert instance.params == [arg1, arg2, arg3]
-
-    def test_replace_first(self):
-        arg1 = self._make_arg("Expr")
-        arg2 = self._make_arg("OldValue")
-        arg3 = self._make_arg("NewValue")
-        instance = expr.ReplaceFirst(arg1, arg2, arg3)
-        assert instance.name == "replace_first"
-        assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "ReplaceFirst(Expr, OldValue, NewValue)"
 
     def test_reverse(self):
         arg1 = self._make_arg("Expr")

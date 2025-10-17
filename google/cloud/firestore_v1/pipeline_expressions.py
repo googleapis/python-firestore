@@ -884,52 +884,6 @@ class Expr(ABC):
         """
         return Reverse(self)
 
-    def replace_first(self, find: Expr | str, replace: Expr | str) -> "Expr":
-        """Creates an expression that replaces the first occurrence of a substring within a string with
-        another substring.
-
-        Example:
-            >>> # Replace the first occurrence of "hello" with "hi" in the 'message' field
-            >>> Field.of("message").replace_first("hello", "hi")
-            >>> # Replace the first occurrence of the value in 'findField' with the value in 'replaceField' in the 'message' field
-            >>> Field.of("message").replace_first(Field.of("findField"), Field.of("replaceField"))
-
-        Args:
-            find: The substring (string or expression) to search for.
-            replace: The substring (string or expression) to replace the first occurrence of 'find' with.
-
-        Returns:
-            A new `Expr` representing the string with the first occurrence replaced.
-        """
-        return ReplaceFirst(
-            self,
-            self._cast_to_expr_or_convert_to_constant(find),
-            self._cast_to_expr_or_convert_to_constant(replace),
-        )
-
-    def replace_all(self, find: Expr | str, replace: Expr | str) -> "Expr":
-        """Creates an expression that replaces all occurrences of a substring within a string with another
-        substring.
-
-        Example:
-            >>> # Replace all occurrences of "hello" with "hi" in the 'message' field
-            >>> Field.of("message").replace_all("hello", "hi")
-            >>> # Replace all occurrences of the value in 'findField' with the value in 'replaceField' in the 'message' field
-            >>> Field.of("message").replace_all(Field.of("findField"), Field.of("replaceField"))
-
-        Args:
-            find: The substring (string or expression) to search for.
-            replace: The substring (string or expression) to replace all occurrences of 'find' with.
-
-        Returns:
-            A new `Expr` representing the string with all occurrences replaced.
-        """
-        return ReplaceAll(
-            self,
-            self._cast_to_expr_or_convert_to_constant(find),
-            self._cast_to_expr_or_convert_to_constant(replace),
-        )
-
     def map_get(self, key: str) -> "Expr":
         """Accesses a value from a map (object) field using the provided key.
 
@@ -2231,20 +2185,6 @@ class Parent(Function):
         super().__init__("parent", [value])
 
 
-class ReplaceAll(Function):
-    """Represents replacing all occurrences of a substring."""
-
-    def __init__(self, value: Expr, pattern: Expr, replacement: Expr):
-        super().__init__("replace_all", [value, pattern, replacement])
-
-
-class ReplaceFirst(Function):
-    """Represents replacing the first occurrence of a substring."""
-
-    def __init__(self, value: Expr, pattern: Expr, replacement: Expr):
-        super().__init__("replace_first", [value, pattern, replacement])
-
-
 class Reverse(Function):
     """Represents reversing a string."""
 
@@ -2427,20 +2367,6 @@ class ArrayConcat(Function):
         super().__init__("array_concat", [array] + rest)
 
 
-class ArrayElement(Function):
-    """Represents accessing an element within an array"""
-
-    def __init__(self):
-        super().__init__("array_element", [])
-
-
-class ArrayFilter(Function):
-    """Represents filtering elements from an array based on a condition."""
-
-    def __init__(self, array: Expr, filter: "BooleanExpr"):
-        super().__init__("array_filter", [array, filter])
-
-
 class ArrayLength(Function):
     """Represents getting the length of an array."""
 
@@ -2453,13 +2379,6 @@ class ArrayReverse(Function):
 
     def __init__(self, array: Expr):
         super().__init__("array_reverse", [array])
-
-
-class ArrayTransform(Function):
-    """Represents applying a transformation function to each element of an array."""
-
-    def __init__(self, array: Expr, transform: Function):
-        super().__init__("array_transform", [array, transform])
 
 
 class ByteLength(Function):
