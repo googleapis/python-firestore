@@ -2002,6 +2002,145 @@ tests:
           - doubleValue: 0.6
           - stringValue: percent
           name: sample
+  - description: testMathFunctions - Abs
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Abs:
+                - Subtract:
+                  - Field: rating
+                  - Constant: 5
+            - "absRating"
+    assert_results:
+      - absRating: 0.8
+  - description: testMathFunctions - Ceil
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Ceil:
+                - Field: rating
+            - "ceilRating"
+    assert_results:
+      - ceilRating: 5
+  - description: testMathFunctions - Floor
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Floor:
+                - Field: rating
+            - "floorRating"
+    assert_results:
+      - floorRating: 4
+  - description: testMathFunctions - Exp
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Lord of the Rings"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Exp:
+                - Field: rating
+            - "expRating"
+    assert_results:
+      - expRating: 109.94717245212352
+  - description: testMathFunctions - Pow
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Pow:
+                - Field: rating
+                - Constant: 2
+            - "powerRating"
+    assert_results:
+      - powerRating: 17.64
+  - description: testMathFunctions - Round
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Round:
+                - Field: rating
+            - "roundedRating"
+    assert_results:
+      - roundedRating: 4
+  - description: testMathFunctions - Ln
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Ln:
+                - Field: rating
+            - "lnRating"
+    assert_results:
+      - lnRating: 1.4350845252893227
+  - description: testMathFunctions - Log
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Log:
+                - Field: rating
+                - Constant: 10
+            - "logRating"
+    assert_results:
+      - logRating: 0.6232492903979004
+  - description: testMathFunctions - Sqrt
+    pipeline:
+      - Collection: books
+      - Where:
+          - Eq:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Limit: 1
+      - Select:
+        - ExprWithAlias:
+            - Sqrt:
+                - Field: rating
+            - "sqrtRating"
+    assert_results:
+      - sqrtRating: 2.04939015319192
   - description: testUnion
     pipeline:
       - Collection: books
