@@ -148,11 +148,11 @@ class Expr(ABC):
         Example:
             >>> Expr.array(["bar", Field.of("baz")])
 
-            Args:
-                elements: THe input list to evaluate in the expression
+        Args:
+            elements: THe input list to evaluate in the expression
 
-            Returns:
-                A new `Expr` representing the array function.
+        Returns:
+            A new `Expr` representing the array function.
         """
         return Array([Expr._cast_to_expr_or_convert_to_constant(e) for e in elements])
 
@@ -163,13 +163,33 @@ class Expr(ABC):
         Example:
             >>> Expr.map({"foo": "bar", "baz": Field.of("baz")})
 
-            Args:
-                elements: THe input dict to evaluate in the expression
+        Args:
+            elements: THe input dict to evaluate in the expression
 
-            Returns:
-                A new `Expr` representing the map function.
+        Returns:
+            A new `Expr` representing the map function.
         """
         return Map({Constant.of(k): Expr._cast_to_expr_or_convert_to_constant(v) for k, v in elements.items()})
+
+    @staticmethod
+    def conditional(conditional: BooleanExpr, then_expr: Expr, else_expr: Expr) -> "Expr":
+        """
+        Creates a conditional expression that evaluates to a 'then' expression if a condition is true
+        and an 'else' expression if the condition is false.
+
+        Example:
+            >>> # If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
+            >>> Expr.conditional(Field.of("age").greater_than(18), Constant.of("Adult"), Constant.of("Minor"));
+
+        Args:
+            conditional: The condition to evaluate.
+            then_expr: The expression to return if the condition is true.
+            else_expr: The expression to return if the condition is false
+
+        Returns:
+            A new `Expr` representing the conditional expression.
+        """
+        return Conditional(conditional, then_expr, else_expr)
 
     @expose_as_static
     def add(self, other: Expr | float) -> "Expr":
@@ -1044,7 +1064,7 @@ class Expr(ABC):
         """Creates an expression that merges one or more dicts into a single map.
 
         Example:
-            >>> Field.of("settings").map_merge({"enabled":True}, Function.cond(Field.of('isAdmin'), {"admin":True}, {}})
+            >>> Field.of("settings").map_merge({"enabled":True}, Function.conditional(Field.of('isAdmin'), {"admin":True}, {}})
             >>> Expr.map({"city": "London"}).map_merge({"country": "UK"}, {"isCapital": True})
 
         Args:
@@ -2034,11 +2054,11 @@ class GreaterThanOrEqual(BooleanExpr):
         super().__init__("greater_than_or_equal", [left, right])
 
 
-class If(BooleanExpr):
+class Conditional(BooleanExpr):
     """Represents a conditional expression (if-then-else)."""
 
-    def __init__(self, condition: "BooleanExpr", true_expr: Expr, false_expr: Expr):
-        super().__init__("if", [condition, true_expr, false_expr])
+    def __init__(self, condition: "BooleanExpr", then_expr: Expr, else_expr: Expr):
+        super().__init__("conditional", [condition, then_expr, else_expr])
 
 
 class EqualAny(BooleanExpr):

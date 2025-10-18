@@ -911,14 +911,14 @@ class TestBooleanExprClasses:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.ends_with(Postfix)"
 
-    def test_if(self):
+    def test_conditional(self):
         arg1 = self._make_arg("Condition")
-        arg2 = self._make_arg("TrueExpr")
-        arg3 = self._make_arg("FalseExpr")
-        instance = expr.If(arg1, arg2, arg3)
-        assert instance.name == "if"
+        arg2 = self._make_arg("ThenExpr")
+        arg3 = self._make_arg("ElseExpr")
+        instance = expr.Conditional(arg1, arg2, arg3)
+        assert instance.name == "conditional"
         assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "If(Condition, TrueExpr, FalseExpr)"
+        assert repr(instance) == "Conditional(Condition, ThenExpr, ElseExpr)"
 
     def test_like(self):
         arg1 = self._make_arg("Expr")
@@ -977,6 +977,7 @@ class TestFunctionClasses:
     @pytest.mark.parametrize(
         "method,args,result_cls",
         [
+            ("conditional", ("field", "then", "else"), expr.Conditional),
             ("add", ("field", 2), expr.Add),
             ("subtract", ("field", 2), expr.Subtract),
             ("multiply", ("field", 2), expr.Multiply),
