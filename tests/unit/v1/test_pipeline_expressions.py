@@ -137,6 +137,8 @@ class TestExpr:
             ("trim", (), expr.Trim),
             ("reverse", (), expr.Reverse),
             ("map_get", ("key",), expr.MapGet),
+            ("map_remove", ("key",), expr.MapRemove),
+            ("map_merge", ({"key": "value"}, ), expr.MapMerge),
             ("cosine_distance", [1], expr.CosineDistance),
             ("euclidean_distance", [1], expr.EuclideanDistance),
             ("dot_product", [1], expr.DotProduct),
@@ -1000,6 +1002,7 @@ class TestFunctionClasses:
             ("equal_any", ("field", [None]), expr.EqualAny),
             ("not_equal_any", ("field", [None]), expr.NotEqualAny),
             ("array", ([1, 2, 3],), expr.Array),
+            ("map", ({"hello": "world"},), expr.Map),
             ("array_get", ("field", 2), expr.ArrayGet),
             ("array_contains", ("field", None), expr.ArrayContains),
             ("array_contains_all", ("field", [None]), expr.ArrayContainsAll),
@@ -1023,6 +1026,8 @@ class TestFunctionClasses:
             ("ends_with", ("field", "postfix"), expr.EndsWith),
             ("string_concat", ("field", "elem1", "elem2"), expr.StringConcat),
             ("map_get", ("field", "key"), expr.MapGet),
+            ("map_remove", ("field", "key"), expr.MapRemove),
+            ("map_merge", ("field", {"key": "value"}), expr.MapMerge),
             ("vector_length", ("field",), expr.VectorLength),
             ("timestamp_to_unix_micros", ("field",), expr.TimestampToUnixMicros),
             ("unix_micros_to_timestamp", ("field",), expr.UnixMicrosToTimestamp),
@@ -1092,6 +1097,14 @@ class TestFunctionClasses:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "LogicalMinimum(Left, Right)"
 
+    def test_map(self):
+        key = expr.Constant.of("key")
+        value = self._make_arg("value")
+        instance = expr.Map({"key": value})
+        assert instance.name == "map"
+        assert instance.params == [key, value]
+        assert repr(instance) == "Map({'key': value})"
+
     def test_map_get(self):
         arg1 = self._make_arg("Map")
         arg2 = expr.Constant("Key")
@@ -1099,6 +1112,23 @@ class TestFunctionClasses:
         assert instance.name == "map_get"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "MapGet(Map, Constant.of('Key'))"
+
+    def test_map_remove(self):
+        arg1 = self._make_arg("Map")
+        arg2 = expr.Constant("Key")
+        instance = expr.MapRemove(arg1, arg2)
+        assert instance.name == "map_remove"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "MapRemove(Map, Constant.of('Key'))"
+
+    def test_map_merge(self):
+        arg1 = self._make_arg("Map1")
+        arg2 = self._make_arg("Map2")
+        arg3 = self._make_arg("Map3")
+        instance = expr.MapMerge(arg1, arg2, arg3)
+        assert instance.name == "map_merge"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "MapMerge(Map1, Map2, Map3)"
 
     def test_mod(self):
         arg1 = self._make_arg("Left")

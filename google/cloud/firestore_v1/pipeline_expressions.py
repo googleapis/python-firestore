@@ -141,6 +141,36 @@ class Expr(ABC):
             else:
                 return self.instance_func.__get__(instance, owner)
 
+    @staticmethod
+    def array(elements: list[Expr | CONSTANT_TYPE]) -> "Expr":
+        """Creates an expression that creates a Firestore array value from an input list.
+
+        Example:
+            >>> Expr.array(["bar", Field.of("baz")])
+
+            Args:
+                elements: THe input list to evaluate in the expression
+
+            Returns:
+                A new `Expr` representing the array function.
+        """
+        return Array([Expr._cast_to_expr_or_convert_to_constant(e) for e in elements])
+
+    @staticmethod
+    def map(elements: dict[str, Expr | CONSTANT_TYPE]) -> "Expr":
+        """Creates an expression that creates a Firestore map value from an input dict.
+
+        Example:
+            >>> Expr.map({"foo": "bar", "baz": Field.of("baz")})
+
+            Args:
+                elements: THe input dict to evaluate in the expression
+
+            Returns:
+                A new `Expr` representing the map function.
+        """
+        return Map({Constant.of(k): Expr._cast_to_expr_or_convert_to_constant(v) for k, v in elements.items()})
+
     @expose_as_static
     def add(self, other: Expr | float) -> "Expr":
         """Creates an expression that adds this expression to another expression or constant.
@@ -551,21 +581,6 @@ class Expr(ABC):
             A new `Expr` representing the 'NOT IN' comparison.
         """
         return NotEqualAny(self, [self._cast_to_expr_or_convert_to_constant(v) for v in array])
-
-    @staticmethod
-    def array(elements: list[Expr | CONSTANT_TYPE]) -> "Expr":
-        """Creates an expression that creates a Firestore array value from an input list.
-
-        Example:
-            >>> Expr.array(["bar", Field.of("baz")])
-
-            Args:
-                elements: THe input list to evaluate in the expression
-
-            Returns:
-                A new `Expr` representing the array function.
-        """
-        return Array([Expr._cast_to_expr_or_convert_to_constant(e) for e in elements])
 
     @expose_as_static
     def array_get(self, index: Expr | int) -> "Expr":
@@ -994,11 +1009,10 @@ class Expr(ABC):
 
     @expose_as_static
     def map_get(self, key: str) -> "Expr":
-        """Accesses a value from a map (object) field using the provided key.
+        """Accesses a value from the map produced by evaluating this expression.
 
         Example:
-            >>> # Get the 'city' value from
-            >>> # the 'address' map field
+            >>> Expr.map({"city": "London"}).map_get("city")
             >>> Field.of("address").map_get("city")
 
         Args:
@@ -1008,6 +1022,42 @@ class Expr(ABC):
             A new `Expr` representing the value associated with the given key in the map.
         """
         return MapGet(self, Constant.of(key))
+
+    @expose_as_static
+    def map_remove(self, key: str) -> "Expr":
+        """Remove a key from a the map produced by evaluating this expression.
+
+        Example:
+            >>> Expr.map({"city": "London"}).map_remove("city")
+            >>> Field.of("address").map_remove("city")
+
+        Args:
+            key: The key to ewmove in the map.
+
+        Returns:
+            A new `Expr` representing the map_remove operation.
+        """
+        return MapRemove(self, Constant.of(key))
+
+    @expose_as_static
+    def map_merge(self, *other_maps: Expr | dict[str, Expr | CONSTANT_TYPE])-> "Expr":
+        """Creates an expression that merges one or more dicts into a single map.
+
+        Example:
+            >>> Field.of("settings").map_merge({"enabled":True}, Function.cond(Field.of('isAdmin'), {"admin":True}, {}})
+            >>> Expr.map({"city": "London"}).map_merge({"country": "UK"}, {"isCapital": True})
+
+        Args:
+            *other_maps: Sequence of maps to merge into the resulting map.
+
+        Returns:
+            A new `Expr` representing the value associated with the given key in the map.
+        """
+        map_list = []
+        for map in other_maps:
+            map_list.append(map if isinstance(map, Expr) else Expr.map(map))
+        return MapMerge(self, *map_list)
+
 
     @expose_as_static
     def cosine_distance(self, other: Expr | list[float] | Vector) -> "Expr":
@@ -1280,6 +1330,9 @@ class Constant(Expr, Generic[CONSTANT_TYPE]):
     def __repr__(self):
         return f"Constant.of({self.value!r})"
 
+    def __hash__(self):
+        return hash(self.value)
+
     def _to_pb(self) -> Value:
         return encode_value(self.value)
 
@@ -1369,11 +1422,41 @@ class LogicalMinimum(Function):
         super().__init__("min", [left, right])
 
 
+class Map(Function):
+    """Creates an expression that creates a Firestore map value from an input dict."""
+
+    def __init__(self, elements: dict[Constant[str], Expr]):
+        element_list = []
+        for k,v in elements.items():
+            element_list.append(k)
+            element_list.append(v)
+        super().__init__("map", element_list)
+
+    def __repr__(self):
+        d = {a:b for a, b in zip(self.params[::2], self.params[1::2])}
+        return f"Map({d})"
+
+
 class MapGet(Function):
-    """Represents accessing a value within a map by key."""
+    """Creates an expression that accesses a map value by key."""
 
     def __init__(self, map_: Expr, key: Constant[str]):
         super().__init__("map_get", [map_, key])
+
+
+class MapMerge(Function):
+    """Creates an expression that merges multiple map values."""
+
+    def __init__(self, *maps: Expr):
+        super().__init__("map_merge", [*maps])
+
+
+class MapRemove(Function):
+    """Creates an expression that removes a key from a map."""
+
+    def __init__(self, map_: Expr, key: Constant[str]):
+        super().__init__("map_remove", [map_, key])
+
 
 
 class Mod(Function):
