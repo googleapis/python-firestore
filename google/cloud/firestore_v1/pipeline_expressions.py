@@ -141,6 +141,26 @@ class Expr(ABC):
             else:
                 return self.instance_func.__get__(instance, owner)
 
+    @staticmethod
+    def conditional(conditional: BooleanExpr, then_expr: Expr, else_expr: Expr) -> "Expr":
+        """
+        Creates a conditional expression that evaluates to a 'then' expression if a condition is true
+        and an 'else' expression if the condition is false.
+
+        Example:
+            >>> # If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
+            >>> Expr.conditional(Field.of("age").greater_than(18), Constant.of("Adult"), Constant.of("Minor"));
+
+        Args:
+            conditional: The condition to evaluate.
+            then_expr: The expression to return if the condition is true.
+            else_expr: The expression to return if the condition is false
+
+        Returns:
+            A new `Expr` representing the conditional expression.
+        """
+        return Conditional(conditional, then_expr, else_expr)
+
     @expose_as_static
     def add(self, other: Expr | float) -> "Expr":
         """Creates an expression that adds this expression to another expression or constant.
@@ -1075,6 +1095,12 @@ class LogicalMinimum(Function):
     def __init__(self, left: Expr, right: Expr):
         super().__init__("minimum", [left, right])
 
+
+class MapGet(Function):
+    """Represents accessing a value within a map by key."""
+
+    def __init__(self, map_: Expr, key: Constant[str]):
+        super().__init__("map_get", [map_, key])
 
 
 class Mod(Function):
