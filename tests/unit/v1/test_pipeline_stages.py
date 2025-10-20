@@ -80,7 +80,7 @@ class TestAggregate:
     def test_ctor_positional(self):
         """test with only positional arguments"""
         sum_total = Sum(Field.of("total")).as_("sum_total")
-        avg_price = Field.of("price").avg().as_("avg_price")
+        avg_price = Field.of("price").average().as_("avg_price")
         instance = self._make_one(sum_total, avg_price)
         assert list(instance.accumulators) == [sum_total, avg_price]
         assert len(instance.groups) == 0
@@ -89,7 +89,7 @@ class TestAggregate:
     def test_ctor_keyword(self):
         """test with only keyword arguments"""
         sum_total = Sum(Field.of("total")).as_("sum_total")
-        avg_price = Field.of("price").avg().as_("avg_price")
+        avg_price = Field.of("price").average().as_("avg_price")
         group_category = Field.of("category")
         instance = self._make_one(
             accumulators=[avg_price, sum_total], groups=[group_category, "city"]
@@ -104,7 +104,7 @@ class TestAggregate:
     def test_ctor_combined(self):
         """test with a mix of arguments"""
         sum_total = Sum(Field.of("total")).as_("sum_total")
-        avg_price = Field.of("price").avg().as_("avg_price")
+        avg_price = Field.of("price").average().as_("avg_price")
         count = Count(Field.of("total")).as_("count")
         with pytest.raises(ValueError):
             self._make_one(sum_total, accumulators=[avg_price, count])
@@ -790,19 +790,21 @@ class TestWhere:
         return stages.Where(*args, **kwargs)
 
     def test_repr(self):
-        condition = Field.of("age").gt(30)
+        condition = Field.of("age").greater_than(30)
         instance = self._make_one(condition)
         repr_str = repr(instance)
-        assert repr_str == "Where(condition=Field.of('age').gt(Constant.of(30)))"
+        assert (
+            repr_str == "Where(condition=Field.of('age').greater_than(Constant.of(30)))"
+        )
 
     def test_to_pb(self):
-        condition = Field.of("city").eq("SF")
+        condition = Field.of("city").equal("SF")
         instance = self._make_one(condition)
         result = instance._to_pb()
         assert result.name == "where"
         assert len(result.args) == 1
         got_fn = result.args[0].function_value
-        assert got_fn.name == "eq"
+        assert got_fn.name == "equal"
         assert len(got_fn.args) == 2
         assert got_fn.args[0].field_reference_value == "city"
         assert got_fn.args[1].string_value == "SF"

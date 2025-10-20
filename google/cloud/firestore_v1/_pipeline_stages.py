@@ -23,11 +23,12 @@ from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.pipeline_expressions import (
-    Accumulator,
+    AggregateFunction,
     Expr,
-    ExprWithAlias,
+    AliasedAggregate,
+    AliasedExpr,
     Field,
-    FilterCondition,
+    BooleanExpr,
     Selectable,
     Ordering,
 )
@@ -156,13 +157,7 @@ class AddFields(Stage):
         self.fields = list(fields)
 
     def _pb_args(self):
-        return [
-            Value(
-                map_value={
-                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}
-                }
-            )
-        ]
+        return [Selectable._to_value(self.fields)]
 
 
 class Aggregate(Stage):
@@ -170,8 +165,8 @@ class Aggregate(Stage):
 
     def __init__(
         self,
-        *args: ExprWithAlias[Accumulator],
-        accumulators: Sequence[ExprWithAlias[Accumulator]] = (),
+        *args: AliasedExpr[AggregateFunction],
+        accumulators: Sequence[AliasedAggregate] = (),
         groups: Sequence[str | Selectable] = (),
     ):
         super().__init__()
@@ -186,18 +181,8 @@ class Aggregate(Stage):
 
     def _pb_args(self):
         return [
-            Value(
-                map_value={
-                    "fields": {
-                        m[0]: m[1] for m in [f._to_map() for f in self.accumulators]
-                    }
-                }
-            ),
-            Value(
-                map_value={
-                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.groups]}
-                }
-            ),
+            Selectable._to_value(self.accumulators),
+            Selectable._to_value(self.groups),
         ]
 
     def __repr__(self):
@@ -254,13 +239,7 @@ class Distinct(Stage):
         ]
 
     def _pb_args(self) -> list[Value]:
-        return [
-            Value(
-                map_value={
-                    "fields": {m[0]: m[1] for m in [f._to_map() for f in self.fields]}
-                }
-            )
-        ]
+        return [Selectable._to_value(self.fields)]
 
 
 class Documents(Stage):
@@ -461,7 +440,7 @@ class Unnest(Stage):
 class Where(Stage):
     """Filters documents based on a specified condition."""
 
-    def __init__(self, condition: FilterCondition):
+    def __init__(self, condition: BooleanExpr):
         super().__init__()
         self.condition = condition
 

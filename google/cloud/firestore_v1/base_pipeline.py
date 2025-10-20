@@ -23,11 +23,10 @@ from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_expressions import (
-    Accumulator,
+    AliasedAggregate,
     Expr,
-    ExprWithAlias,
     Field,
-    FilterCondition,
+    BooleanExpr,
     Selectable,
 )
 from google.cloud.firestore_v1 import _helpers
@@ -531,7 +530,7 @@ class _BasePipeline:
 
     def aggregate(
         self,
-        *accumulators: ExprWithAlias[Accumulator],
+        *accumulators: AliasedAggregate,
         groups: Sequence[str | Selectable] = (),
     ) -> "_BasePipeline":
         """
@@ -541,7 +540,7 @@ class _BasePipeline:
         This stage allows you to calculate aggregate values (like sum, average, count,
         min, max) over a set of documents.
 
-        - **Accumulators:** Define the aggregation calculations using `Accumulator`
+        - **Accumulators:** Define the aggregation calculations using `AggregateFunction`
           expressions (e.g., `sum()`, `avg()`, `count()`, `min()`, `max()`) combined
           with `as_()` to name the result field.
         - **Groups:** Optionally specify fields (by name or `Selectable`) to group
@@ -569,7 +568,7 @@ class _BasePipeline:
 
 
         Args:
-            *accumulators: One or more `ExprWithAlias[Accumulator]` expressions defining
+            *accumulators: One or more `AliasedAggregate` expressions defining
                            the aggregations to perform and their output names.
             groups: An optional sequence of field names (str) or `Selectable`
                     expressions to group by before aggregating.

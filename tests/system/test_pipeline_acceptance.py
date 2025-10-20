@@ -261,23 +261,27 @@ def client():
     data = yaml_loader("data")
     root_collection_ref = client.collection(f"pipeline-tests-{uuid.uuid4()}")
     root_doc_ref = root_collection_ref.document("root")
+    to_delete = []
     try:
         # setup data
         batch = client.batch()
         for collection_name, documents in data.items():
-            collection_ref = root_doc_ref.collection(collection_name)
+            collection_ref = client.collection(collection_name)
             for document_id, document_data in documents.items():
                 document_ref = collection_ref.document(document_id)
+                to_delete.append(document_ref)
                 batch.set(document_ref, document_data)
         batch.commit()
         yield client
     finally:
         # clear data
-        for collection_name, documents in data.items():
-            collection_ref = root_doc_ref.collection(collection_name)
-            for document_id in documents:
-                document_ref = collection_ref.document(document_id)
-                document_ref.delete()
+        for document_ref in to_delete:
+            document_ref.delete()
+        # for collection_name, documents in data.items():
+        #     collection_ref = client.collection(collection_name)
+        #     for document_id in documents:
+        #         document_ref = collection_ref.document(document_id)
+        #         document_ref.delete()
 
 
 @pytest.fixture(scope="module")
