@@ -20,6 +20,7 @@ import os
 import pytest
 import yaml
 import re
+import uuid
 from typing import Any
 
 from google.protobuf.json_format import MessageToDict
@@ -258,11 +259,13 @@ def client():
     """
     client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_ENTERPRISE_DB)
     data = yaml_loader("data")
+    root_collection_ref = client.collection(f"pipeline-tests-{uuid.uuid4()}")
+    root_doc_ref = root_collection_ref.document("root")
     try:
         # setup data
         batch = client.batch()
         for collection_name, documents in data.items():
-            collection_ref = client.collection(collection_name)
+            collection_ref = root_doc_ref.collection(collection_name)
             for document_id, document_data in documents.items():
                 document_ref = collection_ref.document(document_id)
                 batch.set(document_ref, document_data)
@@ -271,7 +274,7 @@ def client():
     finally:
         # clear data
         for collection_name, documents in data.items():
-            collection_ref = client.collection(collection_name)
+            collection_ref = root_doc_ref.collection(collection_name)
             for document_id in documents:
                 document_ref = collection_ref.document(document_id)
                 document_ref.delete()
