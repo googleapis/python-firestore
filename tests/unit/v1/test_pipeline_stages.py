@@ -21,8 +21,6 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     Constant,
     Field,
     Ordering,
-    Sum,
-    Count,
 )
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1._helpers import GeoPoint
@@ -79,7 +77,7 @@ class TestAggregate:
 
     def test_ctor_positional(self):
         """test with only positional arguments"""
-        sum_total = Sum(Field.of("total")).as_("sum_total")
+        sum_total = Field.of("total").sum().as_("sum_total")
         avg_price = Field.of("price").average().as_("avg_price")
         instance = self._make_one(sum_total, avg_price)
         assert list(instance.accumulators) == [sum_total, avg_price]
@@ -88,7 +86,7 @@ class TestAggregate:
 
     def test_ctor_keyword(self):
         """test with only keyword arguments"""
-        sum_total = Sum(Field.of("total")).as_("sum_total")
+        sum_total = Field.of("total").sum().as_("sum_total")
         avg_price = Field.of("price").average().as_("avg_price")
         group_category = Field.of("category")
         instance = self._make_one(
@@ -103,24 +101,24 @@ class TestAggregate:
 
     def test_ctor_combined(self):
         """test with a mix of arguments"""
-        sum_total = Sum(Field.of("total")).as_("sum_total")
+        sum_total = Field.of("total").sum().as_("sum_total")
         avg_price = Field.of("price").average().as_("avg_price")
-        count = Count(Field.of("total")).as_("count")
+        count = Field.of("total").count().as_("count")
         with pytest.raises(ValueError):
             self._make_one(sum_total, accumulators=[avg_price, count])
 
     def test_repr(self):
-        sum_total = Sum(Field.of("total")).as_("sum_total")
+        sum_total = Field.of("total").sum().as_("sum_total")
         group_category = Field.of("category")
         instance = self._make_one(sum_total, groups=[group_category])
         repr_str = repr(instance)
         assert (
             repr_str
-            == "Aggregate(Sum(Field.of('total')).as_('sum_total'), groups=[Field.of('category')])"
+            == "Aggregate(AggregateFunction(Field.of('total')).as_('sum_total'), groups=[Field.of('category')])"
         )
 
     def test_to_pb(self):
-        sum_total = Sum(Field.of("total")).as_("sum_total")
+        sum_total = Field.of("total").sum().as_("sum_total")
         group_category = Field.of("category")
         instance = self._make_one(sum_total, groups=[group_category])
         result = instance._to_pb()

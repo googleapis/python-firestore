@@ -132,7 +132,9 @@ class Expr(ABC):
             self.instance_func = instance_func
 
         def static_func(self, first_arg, *other_args, **kwargs):
-            first_expr = Field.of(first_arg) if not isinstance(first_arg, Expr) else first_arg
+            first_expr = (
+                Field.of(first_arg) if not isinstance(first_arg, Expr) else first_arg
+            )
             return self.instance_func(first_expr, *other_args, **kwargs)
 
         def __get__(self, instance, owner):
@@ -142,7 +144,11 @@ class Expr(ABC):
                 return self.instance_func.__get__(instance, owner)
 
     @staticmethod
-    def conditional(conditional: BooleanExpr, then_expr: Expr, else_expr: Expr) -> "Expr":
+    def conditional(
+        conditional: BooleanExpr,
+        then_expr: Expr,
+        else_expr: Expr,
+    ) -> "Expr":
         """
         Creates a conditional expression that evaluates to a 'then' expression if a condition is true
         and an 'else' expression if the condition is false.
@@ -159,7 +165,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the conditional expression.
         """
-        return Conditional(conditional, then_expr, else_expr)
+        return BooleanExpr(
+            "conditional", [conditional, then_expr, else_expr], use_infix_repr=False
+        )
 
     @expose_as_static
     def add(self, other: Expr | float) -> "Expr":
@@ -177,7 +185,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the addition operation.
         """
-        return Add(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Function("add", [self, self._cast_to_expr_or_convert_to_constant(other)])
 
     @expose_as_static
     def subtract(self, other: Expr | float) -> "Expr":
@@ -195,7 +203,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the subtraction operation.
         """
-        return Subtract(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Function(
+            "subtract", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def multiply(self, other: Expr | float) -> "Expr":
@@ -213,7 +223,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the multiplication operation.
         """
-        return Multiply(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Function(
+            "multiply", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def divide(self, other: Expr | float) -> "Expr":
@@ -231,7 +243,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the division operation.
         """
-        return Divide(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Function(
+            "divide", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def mod(self, other: Expr | float) -> "Expr":
@@ -249,8 +263,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the modulo operation.
         """
-        return Mod(self, self._cast_to_expr_or_convert_to_constant(other))
-
+        return Function("mod", [self, self._cast_to_expr_or_convert_to_constant(other)])
 
     @expose_as_static
     def logical_maximum(self, other: Expr | CONSTANT_TYPE) -> "Expr":
@@ -272,7 +285,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the logical maximum operation.
         """
-        return LogicalMaximum(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Function(
+            "maximum", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def logical_minimum(self, other: Expr | CONSTANT_TYPE) -> "Expr":
@@ -294,7 +309,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the logical minimum operation.
         """
-        return LogicalMinimum(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Function(
+            "minimum", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def equal(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
@@ -313,7 +330,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the equality comparison.
         """
-        return Equal(self, self._cast_to_expr_or_convert_to_constant(other))
+        return BooleanExpr(
+            "equal", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def not_equal(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
@@ -332,7 +351,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the inequality comparison.
         """
-        return NotEqual(self, self._cast_to_expr_or_convert_to_constant(other))
+        return BooleanExpr(
+            "not_equal", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def greater_than(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
@@ -351,7 +372,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the greater than comparison.
         """
-        return GreaterThan(self, self._cast_to_expr_or_convert_to_constant(other))
+        return BooleanExpr(
+            "greater_than", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def greater_than_or_equal(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
@@ -370,8 +393,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the greater than or equal to comparison.
         """
-        return GreaterThanOrEqual(
-            self, self._cast_to_expr_or_convert_to_constant(other)
+        return BooleanExpr(
+            "greater_than_or_equal",
+            [self, self._cast_to_expr_or_convert_to_constant(other)],
         )
 
     @expose_as_static
@@ -391,7 +415,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the less than comparison.
         """
-        return LessThan(self, self._cast_to_expr_or_convert_to_constant(other))
+        return BooleanExpr(
+            "less_than", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def less_than_or_equal(self, other: Expr | CONSTANT_TYPE) -> "BooleanExpr":
@@ -410,7 +436,10 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the less than or equal to comparison.
         """
-        return LessThanOrEqual(self, self._cast_to_expr_or_convert_to_constant(other))
+        return BooleanExpr(
+            "less_than_or_equal",
+            [self, self._cast_to_expr_or_convert_to_constant(other)],
+        )
 
     @expose_as_static
     def equal_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
@@ -427,7 +456,15 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'IN' comparison.
         """
-        return EqualAny(self, [self._cast_to_expr_or_convert_to_constant(v) for v in array])
+        return BooleanExpr(
+            "equal_any",
+            [
+                self,
+                ListOfExprs(
+                    [self._cast_to_expr_or_convert_to_constant(v) for v in array]
+                ),
+            ],
+        )
 
     @expose_as_static
     def not_equal_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
@@ -444,8 +481,15 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'NOT IN' comparison.
         """
-        return NotEqualAny(self, [self._cast_to_expr_or_convert_to_constant(v) for v in array])
-
+        return BooleanExpr(
+            "not_equal_any",
+            [
+                self,
+                ListOfExprs(
+                    [self._cast_to_expr_or_convert_to_constant(v) for v in array]
+                ),
+            ],
+        )
 
     @expose_as_static
     def array_contains(self, element: Expr | CONSTANT_TYPE) -> "BooleanExpr":
@@ -463,11 +507,14 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'array_contains' comparison.
         """
-        return ArrayContains(self, self._cast_to_expr_or_convert_to_constant(element))
+        return BooleanExpr(
+            "array_contains", [self, self._cast_to_expr_or_convert_to_constant(element)]
+        )
 
     @expose_as_static
     def array_contains_all(
-        self, elements: Sequence[Expr | CONSTANT_TYPE]
+        self,
+        elements: Sequence[Expr | CONSTANT_TYPE],
     ) -> "BooleanExpr":
         """Creates an expression that checks if an array contains all the specified elements.
 
@@ -483,13 +530,20 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'array_contains_all' comparison.
         """
-        return ArrayContainsAll(
-            self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
+        return BooleanExpr(
+            "array_contains_all",
+            [
+                self,
+                ListOfExprs(
+                    [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
+                ),
+            ],
         )
 
     @expose_as_static
     def array_contains_any(
-        self, elements: Sequence[Expr | CONSTANT_TYPE]
+        self,
+        elements: Sequence[Expr | CONSTANT_TYPE],
     ) -> "BooleanExpr":
         """Creates an expression that checks if an array contains any of the specified elements.
 
@@ -506,8 +560,14 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'array_contains_any' comparison.
         """
-        return ArrayContainsAny(
-            self, [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
+        return BooleanExpr(
+            "array_contains_any",
+            [
+                self,
+                ListOfExprs(
+                    [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
+                ),
+            ],
         )
 
     @expose_as_static
@@ -521,7 +581,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the length of the array.
         """
-        return ArrayLength(self)
+        return Function("array_length", [self])
 
     @expose_as_static
     def array_reverse(self) -> "Expr":
@@ -534,7 +594,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the reversed array.
         """
-        return ArrayReverse(self)
+        return Function("array_reverse", [self])
 
     @expose_as_static
     def is_nan(self) -> "BooleanExpr":
@@ -547,7 +607,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'isNaN' check.
         """
-        return IsNaN(self)
+        return BooleanExpr("is_nan", [self])
 
     @expose_as_static
     def exists(self) -> "BooleanExpr":
@@ -560,7 +620,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'exists' check.
         """
-        return Exists(self)
+        return BooleanExpr("exists", [self])
 
     @expose_as_static
     def sum(self) -> "Expr":
@@ -573,7 +633,7 @@ class Expr(ABC):
         Returns:
             A new `AggregateFunction` representing the 'sum' aggregation.
         """
-        return Sum(self)
+        return AggregateFunction("sum", [self])
 
     @expose_as_static
     def average(self) -> "Expr":
@@ -587,8 +647,7 @@ class Expr(ABC):
         Returns:
             A new `AggregateFunction` representing the 'avg' aggregation.
         """
-        return Average(self)
-
+        return AggregateFunction("average", [self])
 
     def count(self) -> "Expr":
         """Creates an aggregation that counts the number of stage inputs with valid evaluations of the
@@ -601,7 +660,7 @@ class Expr(ABC):
         Returns:
             A new `AggregateFunction` representing the 'count' aggregation.
         """
-        return Count(self)
+        return AggregateFunction("count", [self])
 
     @expose_as_static
     def minimum(self) -> "Expr":
@@ -614,7 +673,7 @@ class Expr(ABC):
         Returns:
             A new `AggregateFunction` representing the 'minimum' aggregation.
         """
-        return Minimum(self)
+        return AggregateFunction("minimum", [self])
 
     @expose_as_static
     def maximum(self) -> "Expr":
@@ -627,7 +686,7 @@ class Expr(ABC):
         Returns:
             A new `AggregateFunction` representing the 'maximum' aggregation.
         """
-        return Maximum(self)
+        return AggregateFunction("maximum", [self])
 
     @expose_as_static
     def char_length(self) -> "Expr":
@@ -640,7 +699,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the length of the string.
         """
-        return CharLength(self)
+        return Function("char_length", [self])
 
     @expose_as_static
     def byte_length(self) -> "Expr":
@@ -653,7 +712,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the byte length of the string.
         """
-        return ByteLength(self)
+        return Function("byte_length", [self])
 
     @expose_as_static
     def like(self, pattern: Expr | str) -> "BooleanExpr":
@@ -671,7 +730,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'like' comparison.
         """
-        return Like(self, self._cast_to_expr_or_convert_to_constant(pattern))
+        return BooleanExpr(
+            "like", [self, self._cast_to_expr_or_convert_to_constant(pattern)]
+        )
 
     @expose_as_static
     def regex_contains(self, regex: Expr | str) -> "BooleanExpr":
@@ -690,17 +751,19 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'contains' comparison.
         """
-        return RegexContains(self, self._cast_to_expr_or_convert_to_constant(regex))
+        return BooleanExpr(
+            "regex_contains", [self, self._cast_to_expr_or_convert_to_constant(regex)]
+        )
 
     @expose_as_static
-    def regex_matches(self, regex: Expr | str) -> "BooleanExpr":
+    def regex_match(self, regex: Expr | str) -> "BooleanExpr":
         """Creates an expression that checks if a string matches a specified regular expression.
 
         Example:
             >>> # Check if the 'email' field matches a valid email pattern
-            >>> Field.of("email").regex_matches("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}")
+            >>> Field.of("email").regex_match("[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}")
             >>> # Check if the 'email' field matches a regular expression stored in field 'regex'
-            >>> Field.of("email").regex_matches(Field.of("regex"))
+            >>> Field.of("email").regex_match(Field.of("regex"))
 
         Args:
             regex: The regular expression (string or expression) to use for the match.
@@ -708,7 +771,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the regular expression match.
         """
-        return RegexMatch(self, self._cast_to_expr_or_convert_to_constant(regex))
+        return BooleanExpr(
+            "regex_match", [self, self._cast_to_expr_or_convert_to_constant(regex)]
+        )
 
     @expose_as_static
     def string_contains(self, substring: Expr | str) -> "BooleanExpr":
@@ -726,8 +791,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'contains' comparison.
         """
-        return StringContains(
-            self, self._cast_to_expr_or_convert_to_constant(substring)
+        return BooleanExpr(
+            "string_contains",
+            [self, self._cast_to_expr_or_convert_to_constant(substring)],
         )
 
     @expose_as_static
@@ -746,7 +812,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'starts with' comparison.
         """
-        return StartsWith(self, self._cast_to_expr_or_convert_to_constant(prefix))
+        return BooleanExpr(
+            "starts_with", [self, self._cast_to_expr_or_convert_to_constant(prefix)]
+        )
 
     @expose_as_static
     def ends_with(self, postfix: Expr | str) -> "BooleanExpr":
@@ -764,7 +832,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'ends with' comparison.
         """
-        return EndsWith(self, self._cast_to_expr_or_convert_to_constant(postfix))
+        return BooleanExpr(
+            "ends_with", [self, self._cast_to_expr_or_convert_to_constant(postfix)]
+        )
 
     @expose_as_static
     def string_concat(self, *elements: Expr | CONSTANT_TYPE) -> "Expr":
@@ -780,10 +850,11 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the concatenated string.
         """
-        return StringConcat(
-            self, *[self._cast_to_expr_or_convert_to_constant(el) for el in elements]
+        return Function(
+            "string_concat",
+            [self]
+            + [self._cast_to_expr_or_convert_to_constant(el) for el in elements],
         )
-
 
     @expose_as_static
     def map_get(self, key: str) -> "Expr":
@@ -799,7 +870,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the value associated with the given key in the map.
         """
-        return MapGet(self, Constant.of(key))
+        return Function("map_get", [self, Constant.of(key)])
 
     @expose_as_static
     def vector_length(self) -> "Expr":
@@ -812,7 +883,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the length of the vector.
         """
-        return VectorLength(self)
+        return Function("vector_length", [self])
 
     @expose_as_static
     def timestamp_to_unix_micros(self) -> "Expr":
@@ -828,7 +899,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the number of microseconds since the epoch.
         """
-        return TimestampToUnixMicros(self)
+        return Function("timestamp_to_unix_micros", [self])
 
     @expose_as_static
     def unix_micros_to_timestamp(self) -> "Expr":
@@ -842,7 +913,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the timestamp.
         """
-        return UnixMicrosToTimestamp(self)
+        return Function("unix_micros_to_timestamp", [self])
 
     @expose_as_static
     def timestamp_to_unix_millis(self) -> "Expr":
@@ -858,7 +929,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the number of milliseconds since the epoch.
         """
-        return TimestampToUnixMillis(self)
+        return Function("timestamp_to_unix_millis", [self])
 
     @expose_as_static
     def unix_millis_to_timestamp(self) -> "Expr":
@@ -872,7 +943,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the timestamp.
         """
-        return UnixMillisToTimestamp(self)
+        return Function("unix_millis_to_timestamp", [self])
 
     @expose_as_static
     def timestamp_to_unix_seconds(self) -> "Expr":
@@ -888,7 +959,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the number of seconds since the epoch.
         """
-        return TimestampToUnixSeconds(self)
+        return Function("timestamp_to_unix_seconds", [self])
 
     @expose_as_static
     def unix_seconds_to_timestamp(self) -> "Expr":
@@ -902,7 +973,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the timestamp.
         """
-        return UnixSecondsToTimestamp(self)
+        return Function("unix_seconds_to_timestamp", [self])
 
     @expose_as_static
     def timestamp_add(self, unit: Expr | str, amount: Expr | float) -> "Expr":
@@ -922,10 +993,13 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the resulting timestamp.
         """
-        return TimestampAdd(
-            self,
-            self._cast_to_expr_or_convert_to_constant(unit),
-            self._cast_to_expr_or_convert_to_constant(amount),
+        return Function(
+            "timestamp_add",
+            [
+                self,
+                self._cast_to_expr_or_convert_to_constant(unit),
+                self._cast_to_expr_or_convert_to_constant(amount),
+            ],
         )
 
     @expose_as_static
@@ -946,10 +1020,13 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the resulting timestamp.
         """
-        return TimestampSubtract(
-            self,
-            self._cast_to_expr_or_convert_to_constant(unit),
-            self._cast_to_expr_or_convert_to_constant(amount),
+        return Function(
+            "timestamp_subtract",
+            [
+                self,
+                self._cast_to_expr_or_convert_to_constant(unit),
+                self._cast_to_expr_or_convert_to_constant(amount),
+            ],
         )
 
     def ascending(self) -> Ordering:
@@ -1069,186 +1146,6 @@ class Function(Expr):
         )
 
 
-class Divide(Function):
-    """Represents the division function."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("divide", [left, right])
-
-
-class LogicalMaximum(Function):
-    """
-    Returns the larger value between this expression and another expression or constant,
-    based on Firestore's value type ordering.
-    """
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("maximum", [left, right])
-
-
-class LogicalMinimum(Function):
-    """
-    Returns the smaller value between this expression and another expression or constant,
-    based on Firestore's value type ordering.
-    """
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("minimum", [left, right])
-
-
-class MapGet(Function):
-    """Represents accessing a value within a map by key."""
-
-    def __init__(self, map_: Expr, key: Constant[str]):
-        super().__init__("map_get", [map_, key])
-
-
-class Mod(Function):
-    """Represents the modulo function."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("mod", [left, right])
-
-
-class Multiply(Function):
-    """Represents the multiplication function."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("multiply", [left, right])
-
-
-class Parent(Function):
-    """Represents getting the parent document reference."""
-
-    def __init__(self, value: Expr):
-        super().__init__("parent", [value])
-
-
-class StringConcat(Function):
-    """Represents concatenating multiple strings."""
-
-    def __init__(self, *exprs: Expr):
-        super().__init__("string_concat", exprs)
-
-
-class Subtract(Function):
-    """Represents the subtraction function."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("subtract", [left, right])
-
-
-class TimestampAdd(Function):
-    """Represents adding a duration to a timestamp."""
-
-    def __init__(self, timestamp: Expr, unit: Expr, amount: Expr):
-        super().__init__("timestamp_add", [timestamp, unit, amount])
-
-
-class TimestampSubtract(Function):
-    """Represents subtracting a duration from a timestamp."""
-
-    def __init__(self, timestamp: Expr, unit: Expr, amount: Expr):
-        super().__init__("timestamp_subtract", [timestamp, unit, amount])
-
-
-class TimestampToUnixMicros(Function):
-    """Represents converting a timestamp to microseconds since epoch."""
-
-    def __init__(self, input: Expr):
-        super().__init__("timestamp_to_unix_micros", [input])
-
-
-class TimestampToUnixMillis(Function):
-    """Represents converting a timestamp to milliseconds since epoch."""
-
-    def __init__(self, input: Expr):
-        super().__init__("timestamp_to_unix_millis", [input])
-
-
-class TimestampToUnixSeconds(Function):
-    """Represents converting a timestamp to seconds since epoch."""
-
-    def __init__(self, input: Expr):
-        super().__init__("timestamp_to_unix_seconds", [input])
-
-
-class UnixMicrosToTimestamp(Function):
-    """Represents converting microseconds since epoch to a timestamp."""
-
-    def __init__(self, input: Expr):
-        super().__init__("unix_micros_to_timestamp", [input])
-
-
-class UnixMillisToTimestamp(Function):
-    """Represents converting milliseconds since epoch to a timestamp."""
-
-    def __init__(self, input: Expr):
-        super().__init__("unix_millis_to_timestamp", [input])
-
-
-class UnixSecondsToTimestamp(Function):
-    """Represents converting seconds since epoch to a timestamp."""
-
-    def __init__(self, input: Expr):
-        super().__init__("unix_seconds_to_timestamp", [input])
-
-
-class VectorLength(Function):
-    """Represents getting the length (dimension) of a vector."""
-
-    def __init__(self, array: Expr):
-        super().__init__("vector_length", [array])
-
-
-class Add(Function):
-    """Represents the addition function."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("add", [left, right])
-
-class ArrayGet(Function):
-    """Creates an expression that indexes into an array from the beginning or end and returns an element."""
-
-    def __init__(self, array: Expr, index: Expr):
-        super().__init__("array_get", [array, index])
-
-
-class ArrayLength(Function):
-    """Represents getting the length of an array."""
-
-    def __init__(self, array: Expr):
-        super().__init__("array_length", [array])
-
-
-class ArrayReverse(Function):
-    """Represents reversing the elements of an array."""
-
-    def __init__(self, array: Expr):
-        super().__init__("array_reverse", [array])
-
-
-class ByteLength(Function):
-    """Represents getting the byte length of a string (UTF-8)."""
-
-    def __init__(self, expr: Expr):
-        super().__init__("byte_length", [expr])
-
-
-class CharLength(Function):
-    """Represents getting the character length of a string."""
-
-    def __init__(self, expr: Expr):
-        super().__init__("char_length", [expr])
-
-
-class CollectionId(Function):
-    """Represents getting the collection ID from a document reference."""
-
-    def __init__(self, value: Expr):
-        super().__init__("collection_id", [value])
-
-
 class AggregateFunction(Function):
     """A base class for aggregation functions that operate across multiple inputs."""
 
@@ -1265,41 +1162,6 @@ class AggregateFunction(Function):
             provided alias.
         """
         return AliasedAggregate(self, alias)
-
-
-class Maximum(AggregateFunction):
-    """Finds the maximum value of a field, aggregated across multiple stage inputs."""
-
-    def __init__(self, value: Expr):
-        super().__init__("maximum", [value])
-
-
-class Minimum(AggregateFunction):
-    """Finds the maximum value of a field, aggregated across multiple stage inputs."""
-
-    def __init__(self, value: Expr):
-        super().__init__("minimum", [value])
-
-
-class Sum(AggregateFunction):
-    """Represents the sum aggregation function."""
-
-    def __init__(self, value: Expr):
-        super().__init__("sum", [value])
-
-
-class Average(AggregateFunction):
-    """Represents the average aggregation function."""
-
-    def __init__(self, value: Expr):
-        super().__init__("average", [value])
-
-
-class Count(AggregateFunction):
-    """Represents an aggregation that counts the total number of inputs."""
-
-    def __init__(self, value: Expr | None = None):
-        super().__init__("count", [value] if value else [])
 
 
 class Selectable(Expr):
@@ -1508,117 +1370,6 @@ class And(BooleanExpr):
         super().__init__("and", conditions, use_infix_repr=False)
 
 
-class ArrayContains(BooleanExpr):
-    def __init__(self, array: Expr, element: Expr):
-        super().__init__("array_contains", [array, element])
-
-
-class ArrayContainsAll(BooleanExpr):
-    """Represents checking if an array contains all specified elements."""
-
-    def __init__(self, array: Expr, elements: Sequence[Expr]):
-        super().__init__("array_contains_all", [array, ListOfExprs(elements)])
-
-
-class ArrayContainsAny(BooleanExpr):
-    """Represents checking if an array contains any of the specified elements."""
-
-    def __init__(self, array: Expr, elements: Sequence[Expr]):
-        super().__init__("array_contains_any", [array, ListOfExprs(elements)])
-
-
-class EndsWith(BooleanExpr):
-    """Represents checking if a string ends with a specific postfix."""
-
-    def __init__(self, expr: Expr, postfix: Expr):
-        super().__init__("ends_with", [expr, postfix])
-
-
-class Equal(BooleanExpr):
-    """Represents the equality comparison."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("equal", [left, right])
-
-
-class Exists(BooleanExpr):
-    """Represents checking if a field exists."""
-
-    def __init__(self, expr: Expr):
-        super().__init__("exists", [expr])
-
-
-class GreaterThan(BooleanExpr):
-    """Represents the greater than comparison."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("greater_than", [left, right])
-
-
-class GreaterThanOrEqual(BooleanExpr):
-    """Represents the greater than or equal to comparison."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("greater_than_or_equal", [left, right])
-
-
-class Conditional(BooleanExpr):
-    """Represents a conditional expression (if-then-else)."""
-
-    def __init__(self, condition: "BooleanExpr", then_expr: Expr, else_expr: Expr):
-        super().__init__("conditional", [condition, then_expr, else_expr])
-
-
-class EqualAny(BooleanExpr):
-    """Represents checking if an expression's value is within a list of values."""
-
-    def __init__(self, left: Expr, others: Sequence[Expr]):
-        super().__init__("equal_any", [left, ListOfExprs(others)])
-
-
-class NotEqualAny(BooleanExpr):
-    """Represents checking if an expression's value is not within a list of values."""
-
-    def __init__(self, left: Expr, others: Sequence[Expr]):
-        super().__init__("not_equal_any", [left, ListOfExprs(others)])
-
-
-
-class IsNaN(BooleanExpr):
-    """Represents checking if a numeric value is NaN."""
-
-    def __init__(self, value: Expr):
-        super().__init__("is_nan", [value])
-
-
-class Like(BooleanExpr):
-    """Represents a case-sensitive wildcard string comparison."""
-
-    def __init__(self, expr: Expr, pattern: Expr):
-        super().__init__("like", [expr, pattern])
-
-
-class LessThan(BooleanExpr):
-    """Represents the less than comparison."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("less_than", [left, right])
-
-
-class LessThanOrEqual(BooleanExpr):
-    """Represents the less than or equal to comparison."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("less_than_or_equal", [left, right])
-
-
-class NotEqual(BooleanExpr):
-    """Represents the inequality comparison."""
-
-    def __init__(self, left: Expr, right: Expr):
-        super().__init__("not_equal", [left, right])
-
-
 class Not(BooleanExpr):
     """Represents the logical NOT of a filter condition."""
 
@@ -1631,34 +1382,6 @@ class Or(BooleanExpr):
 
     def __init__(self, *conditions: "BooleanExpr"):
         super().__init__("or", conditions)
-
-
-class RegexContains(BooleanExpr):
-    """Represents checking if a string contains a substring matching a regex."""
-
-    def __init__(self, expr: Expr, regex: Expr):
-        super().__init__("regex_contains", [expr, regex])
-
-
-class RegexMatch(BooleanExpr):
-    """Represents checking if a string fully matches a regex."""
-
-    def __init__(self, expr: Expr, regex: Expr):
-        super().__init__("regex_match", [expr, regex])
-
-
-class StartsWith(BooleanExpr):
-    """Represents checking if a string starts with a specific prefix."""
-
-    def __init__(self, expr: Expr, prefix: Expr):
-        super().__init__("starts_with", [expr, prefix])
-
-
-class StringContains(BooleanExpr):
-    """Represents checking if a string contains a specific substring."""
-
-    def __init__(self, expr: Expr, substring: Expr):
-        super().__init__("string_contains", [expr, substring])
 
 
 class Xor(BooleanExpr):
