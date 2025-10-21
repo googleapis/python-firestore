@@ -1389,34 +1389,33 @@ class Not(BooleanExpr):
 
 class Or(BooleanExpr):
     """
-     Represents expression that performs a logical 'OR' operation on multiple filter conditions.
+    Represents expression that performs a logical 'OR' operation on multiple filter conditions.
 
-     Example:
-        >>> # Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
-        >>> # the 'status' field is "active"
-        >>> Expr.Or(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
+    Example:
+       >>> # Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
+       >>> # the 'status' field is "active"
+       >>> Expr.Or(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
-     Args:
-         *conditions: The filter conditions to 'OR' together.
+    Args:
+        *conditions: The filter conditions to 'OR' together.
     """
- 
+
     def __init__(self, *conditions: "BooleanExpr"):
         super().__init__("or", conditions, use_infix_repr=False)
 
 
 class Xor(BooleanExpr):
     """
-     Represents an expression that performs a logical 'XOR' (exclusive OR) operation on multiple filter conditions.
+    Represents an expression that performs a logical 'XOR' (exclusive OR) operation on multiple filter conditions.
 
-     Example:
-        >>> # Check if only one of the conditions is true: 'age' greater than 18, 'city' is "London",
-        >>> # or 'status' is "active".
-        >>> Expr.Xor(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
+    Example:
+       >>> # Check if only one of the conditions is true: 'age' greater than 18, 'city' is "London",
+       >>> # or 'status' is "active".
+       >>> Expr.Xor(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
-     Args:
-         *conditions: The filter conditions to 'XOR' together.
+    Args:
+        *conditions: The filter conditions to 'XOR' together.
     """
-
 
     def __init__(self, conditions: Sequence["BooleanExpr"]):
         super().__init__("xor", conditions, use_infix_repr=False)
@@ -1436,7 +1435,7 @@ class Conditional(BooleanExpr):
         then_expr: The expression to return if the condition is true.
         else_expr: The expression to return if the condition is false
     """
- 
+
     def __init__(self, condition: BooleanExpr, then_expr: Expr, else_expr: Expr):
         super().__init__(
             "conditional", [condition, then_expr, else_expr], use_infix_repr=False

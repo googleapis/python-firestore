@@ -219,14 +219,14 @@ class _BasePipeline:
         """
         return self._append(stages.Select(*selections))
 
-    def where(self, condition: FilterCondition) -> "_BasePipeline":
+    def where(self, condition: BooleanExpr) -> "_BasePipeline":
         """
         Filters the documents from previous stages to only include those matching
-        the specified `FilterCondition`.
+        the specified `BooleanExpr`.
 
         This stage allows you to apply conditions to the data, similar to a "WHERE"
         clause in SQL. You can filter documents based on their field values, using
-        implementations of `FilterCondition`, typically including but not limited to:
+        implementations of `BooleanExpr`, typically including but not limited to:
             - field comparators: `eq`, `lt` (less than), `gt` (greater than), etc.
             - logical operators: `And`, `Or`, `Not`, etc.
             - advanced functions: `regex_matches`, `array_contains`, etc.
@@ -251,7 +251,7 @@ class _BasePipeline:
 
 
         Args:
-            condition: The `FilterCondition` to apply.
+            condition: The `BooleanExpr` to apply.
 
         Returns:
             A new Pipeline object with this stage appended to the stage list
