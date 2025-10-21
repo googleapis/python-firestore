@@ -125,6 +125,17 @@ data:
       awards:
         hugo: true
         nebula: true
+  timestamps:
+    ts1:
+      time: "1993-04-28T12:01:00.654321+00:00"
+      micros:  735998460654321
+      millis:  735998460654
+      seconds: 735998460
+  vectors:
+    vec1:
+      embedding: [1.0, 2.0, 3.0]
+    vec2:
+      embedding: [4.0, 5.0, 6.0, 7.0]
 tests:
   - description: "testAggregates - count"
     pipeline:
@@ -1647,3 +1658,242 @@ tests:
                 tags_alias:
                   fieldReferenceValue: tags_alias
           name: select
+  - description: testGreaterThanOrEqual
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.greater_than_or_equal:
+              - Field: rating
+              - Constant: 4.6
+      - Select:
+        - title
+        - rating
+      - Sort:
+        - Ordering:
+          - Field: rating
+          - ASCENDING
+    assert_results:
+      - title: Dune
+        rating: 4.6
+      - title: The Lord of the Rings
+        rating: 4.7
+  - description: testInAndNotIn
+    pipeline:
+      - Collection: books
+      - Where:
+          - And:
+            - Expr.equal_any:
+                - Field: genre
+                - - Constant: Romance
+                  - Constant: Dystopian
+            - Expr.not_equal_any:
+                - Field: author
+                - - Constant: "George Orwell"
+    assert_results:
+      - title: "Pride and Prejudice"
+        author: "Jane Austen"
+        genre: "Romance"
+        published: 1813
+        rating: 4.5
+        tags:
+          - classic
+          - social commentary
+          - love
+        awards:
+          none: true
+      - title: "The Handmaid's Tale"
+        author: "Margaret Atwood"
+        genre: "Dystopian"
+        published: 1985
+        rating: 4.1
+        tags:
+          - feminism
+          - totalitarianism
+          - resistance
+        awards:
+          "arthur c. clarke": true
+          "booker prize": false
+  - description: testArrayReverse
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.array_reverse:
+                - Field: tags
+            - "reversedTags"
+    assert_results:
+      - reversedTags:
+        - adventure
+        - space
+        - comedy
+  - description: testExists
+    pipeline:
+      - Collection: books
+      - Where:
+          - And:
+            - Expr.exists:
+              - Field: awards.pulitzer
+            - Expr.equal:
+              - Field: awards.pulitzer
+              - Constant: true
+      - Select:
+        - title
+    assert_results:
+      - title: To Kill a Mockingbird
+  - description: testSum
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: genre
+              - Constant: Science Fiction
+      - Aggregate:
+        - AliasedExpr:
+            - Expr.sum:
+              - Field: rating
+            - "total_rating"
+    assert_results:
+      - total_rating: 8.8
+  - description: testStringContains
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.string_contains:
+              - Field: title
+              - Constant: "Hitchhiker's"
+      - Select:
+        - title
+    assert_results:
+      - title: "The Hitchhiker's Guide to the Galaxy"
+  - description: testVectorLength
+    pipeline:
+      - Collection: vectors
+      - Select:
+        - AliasedExpr:
+            - Expr.vector_length:
+                - Field: embedding
+            - "embedding_length"
+      - Sort:
+        - Ordering:
+          - Field: embedding_length
+          - ASCENDING
+    assert_results:
+      - embedding_length: 3
+      - embedding_length: 4
+  - description: testTimestampFunctions
+    pipeline:
+      - Collection: timestamps
+      - Select:
+        - AliasedExpr:
+            - Expr.timestamp_to_unix_micros:
+                - Field: time
+            - "micros"
+        - AliasedExpr:
+            - Expr.timestamp_to_unix_millis:
+                - Field: time
+            - "millis"
+        - AliasedExpr:
+            - Expr.timestamp_to_unix_seconds:
+                - Field: time
+            - "seconds"
+        - AliasedExpr:
+            - Expr.unix_micros_to_timestamp:
+                - Field: micros
+            - "from_micros"
+        - AliasedExpr:
+            - Expr.unix_millis_to_timestamp:
+                - Field: millis
+            - "from_millis"
+        - AliasedExpr:
+            - Expr.unix_seconds_to_timestamp:
+                - Field: seconds
+            - "from_seconds"
+        - AliasedExpr:
+            - Expr.timestamp_add:
+                - Field: time
+                - Constant: "day"
+                - Constant: 1
+            - "plus_day"
+        - AliasedExpr:
+            - Expr.timestamp_subtract:
+                - Field: time
+                - Constant: "hour"
+                - Constant: 1
+            - "minus_hour"
+    assert_results:
+      - micros:  735998460654321
+        millis:  735998460654
+        seconds: 735998460
+        from_micros: "1993-04-28T12:01:00.654321+00:00"
+        from_millis: "1993-04-28T12:01:00.654000+00:00"
+        from_seconds: "1993-04-28T12:01:00.000000+00:00"
+        plus_day: "1993-04-29T12:01:00.654321+00:00"
+        minus_hour: "1993-04-28T11:01:00.654321+00:00"
+  - description: testCollectionId
+    pipeline:
+      - Collection: books
+      - Limit: 1
+      - Select:
+        - AliasedExpr:
+            - Expr.collection_id:
+                - Field: __name__
+            - "collectionName"
+    assert_results:
+      - collectionName: "books"
+  - description: testXor
+    pipeline:
+      - Collection: books
+      - Where:
+          - Xor:
+            - - Expr.equal:
+                  - Field: genre
+                  - Constant: Romance
+              - Expr.greater_than:
+                  - Field: published
+                  - Constant: 1980
+      - Select:
+        - title
+        - genre
+        - published
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "Pride and Prejudice"
+        genre: "Romance"
+        published: 1813
+      - title: "The Handmaid's Tale"
+        genre: "Dystopian"
+        published: 1985
+  - description: testConditional
+    pipeline:
+      - Collection: books
+      - Select:
+        - title
+        - AliasedExpr:
+            - Conditional:
+                - Expr.greater_than:
+                    - Field: published
+                    - Constant: 1950
+                - Constant: "Modern"
+                - Constant: "Classic"
+            - "era"
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+      - Limit: 4
+    assert_results:
+      - title: "1984"
+        era: "Classic"
+      - title: "Crime and Punishment"
+        era: "Classic"
+      - title: "Dune"
+        era: "Modern"
+      - title: "One Hundred Years of Solitude"
+        era: "Modern"

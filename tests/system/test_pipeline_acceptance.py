@@ -17,6 +17,7 @@ This file loads and executes yaml-encoded test cases from pipeline_e2e.yaml
 
 from __future__ import annotations
 import os
+import datetime
 import pytest
 import yaml
 import re
@@ -26,6 +27,7 @@ from google.protobuf.json_format import MessageToDict
 
 from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1 import pipeline_expressions
+from google.cloud.firestore_v1.vector import Vector
 from google.api_core.exceptions import GoogleAPIError
 
 from google.cloud.firestore import Client, AsyncClient
@@ -91,7 +93,7 @@ def test_pipeline_results(test_dict, client):
     """
     Ensure pipeline returns expected results
     """
-    expected_results = test_dict.get("assert_results", None)
+    expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     # check if server responds as expected
@@ -132,7 +134,7 @@ async def test_pipeline_results_async(test_dict, async_client):
     """
     Ensure pipeline returns expected results
     """
-    expected_results = test_dict.get("assert_results", None)
+    expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(async_client, test_dict["pipeline"])
     # check if server responds as expected
@@ -265,6 +267,25 @@ def event_loop():
     loop.close()
 
 
+def _parse_yaml_types(data):
+    """helper to convert yaml data to firestore objects when needed"""
+    if isinstance(data, dict):
+        return {key: _parse_yaml_types(value) for key, value in data.items()}
+    if isinstance(data, list):
+        # detect vectors
+        if all([isinstance(d, float) for d in data]):
+            return Vector(data)
+        else:
+            return [_parse_yaml_types(value) for value in data]
+    # detect timestamps
+    if isinstance(data, str) and ":" in data:
+        try:
+            parsed_datetime = datetime.datetime.fromisoformat(data)
+            return parsed_datetime
+        except ValueError:
+            pass
+    return data
+
 @pytest.fixture(scope="module")
 def client():
     """
@@ -281,7 +302,7 @@ def client():
             for document_id, document_data in documents.items():
                 document_ref = collection_ref.document(document_id)
                 to_delete.append(document_ref)
-                batch.set(document_ref, document_data)
+                batch.set(document_ref, _parse_yaml_types(document_data))
         batch.commit()
         yield client
     finally:
