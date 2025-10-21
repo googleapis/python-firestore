@@ -1179,6 +1179,12 @@ class TestExpressionMethods:
         infix_instance = arg1.count()
         assert infix_instance == instance
 
+    def test_base_count(self):
+        instance = expr.Count()
+        assert instance.name == "count"
+        assert instance.params == []
+        assert repr(instance) == "Count()"
+
     def test_minimum(self):
         arg1 = self._make_arg("Value")
         instance = Expr.minimum(arg1)

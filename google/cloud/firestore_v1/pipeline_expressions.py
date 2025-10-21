@@ -627,6 +627,7 @@ class Expr(ABC):
         """
         return AggregateFunction("average", [self])
 
+    @expose_as_static
     def count(self) -> "Expr":
         """Creates an aggregation that counts the number of stage inputs with valid evaluations of the
         expression or field.
@@ -638,7 +639,7 @@ class Expr(ABC):
         Returns:
             A new `AggregateFunction` representing the 'count' aggregation.
         """
-        return AggregateFunction("count", [self])
+        return Count(self)
 
     @expose_as_static
     def minimum(self) -> "Expr":
@@ -1439,4 +1440,25 @@ class Conditional(BooleanExpr):
     def __init__(self, condition: BooleanExpr, then_expr: Expr, else_expr: Expr):
         super().__init__(
             "conditional", [condition, then_expr, else_expr], use_infix_repr=False
+        )
+
+class Count(AggregateFunction):
+    """
+    Represents an aggregation that counts the number of stage inputs with valid evaluations of the
+    expression or field.
+
+    Example:
+        >>> # Count the total number of products
+        >>> Field.of("productId").count().as_("totalProducts")
+        >>> Count(Field.of("productId"))
+        >>> Count().as_("count")
+
+    Args:
+        expression: The expression or field to count. If None, counts all stage inputs.
+    """
+
+    def __init__(self, expression: Expr | None = None):
+        expression_list = [expression] if expression else []
+        super().__init__(
+            "count", expression_list, use_infix_repr=bool(expression_list)
         )
