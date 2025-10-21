@@ -131,7 +131,8 @@ tests:
       - Collection: books
       - Aggregate:
         - AliasedExpr:
-            - Count
+            - Expr.count:
+              - Field: rating
             - "count"
     assert_results:
       - count: 10
@@ -147,25 +148,28 @@ tests:
                 count:
                   functionValue:
                     name: count
+                    args:
+                    - fieldReferenceValue: rating
           - mapValue: {}
           name: aggregate
   - description: "testAggregates - avg, count, max"
     pipeline:
       - Collection: books
       - Where:
-          - Equal:
+          - Expr.equal:
               - Field: genre
               - Constant: Science Fiction
       - Aggregate:
         - AliasedExpr:
-            - Count
+            - Expr.count:
+              - Field: rating
             - "count"
         - AliasedExpr:
-            - Average: 
+            - Expr.average:
               - Field: rating
             - "avg_rating"
         - AliasedExpr:
-            - Maximum: 
+            - Expr.maximum:
               - Field: rating
             - "max_rating"
     assert_results:
@@ -196,6 +200,8 @@ tests:
                 count:
                   functionValue:
                     name: count
+                    args:
+                    - fieldReferenceValue: rating
                 max_rating:
                   functionValue:
                     args:
@@ -207,7 +213,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - LessThan:
+        - Expr.less_than:
           - Field: published
           - Constant: 1900
       - Aggregate:
@@ -218,18 +224,18 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - LessThan:
+          - Expr.less_than:
               - Field: published
               - Constant: 1984
       - Aggregate:
           accumulators:
             - AliasedExpr:
-              - Average:
+              - Expr.average:
                 - Field: rating
               - "avg_rating"
           groups: [genre]
       - Where:
-          - GreaterThan:
+          - Expr.greater_than:
               - Field: avg_rating
               - Constant: 4.3
       - Sort:
@@ -289,14 +295,15 @@ tests:
       - Collection: books
       - Aggregate:
           - AliasedExpr:
-              - Count
+              - Expr.count:
+                - Field: rating
               - "count"
           - AliasedExpr:
-              - Maximum:
+              - Expr.maximum:
                 - Field: rating
               - "max_rating"
           - AliasedExpr:
-              - Minimum:
+              - Expr.minimum:
                 - Field: published
               - "min_published"
     assert_results:
@@ -314,6 +321,8 @@ tests:
               fields:
                 count:
                   functionValue:
+                    args:
+                    - fieldReferenceValue: rating
                     name: count
                 max_rating:
                   functionValue:
@@ -385,13 +394,13 @@ tests:
       - Collection: books
       - AddFields:
         - AliasedExpr:
-            - StringConcat:
+            - Expr.string_concat:
                 - Field: author
                 - Constant: _
                 - Field: title
             - "author_title"
         - AliasedExpr:
-            - StringConcat:
+            - Expr.string_concat:
                 - Field: title
                 - Constant: _
                 - Field: author
@@ -477,10 +486,10 @@ tests:
       - Collection: books
       - Where:
           - And:
-              - GreaterThan:
+              - Expr.greater_than:
                   - Field: rating
                   - Constant: 4.5
-              - Equal:
+              - Expr.equal:
                   - Field: genre
                   - Constant: Science Fiction
     assert_results:
@@ -522,10 +531,10 @@ tests:
       - Collection: books
       - Where:
           - Or:
-              - Equal:
+              - Expr.equal:
                   - Field: genre
                   - Constant: Romance
-              - Equal:
+              - Expr.equal:
                   - Field: genre
                   - Constant: Dystopian
       - Select:
@@ -624,7 +633,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - ArrayContains:
+          - Expr.array_contains:
               - Field: tags
               - Constant: comedy
     assert_results:
@@ -654,7 +663,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - ArrayContainsAny:
+          - Expr.array_contains_any:
             - Field: tags
             - - Constant: comedy
               - Constant: classic
@@ -701,7 +710,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - ArrayContainsAll:
+          - Expr.array_contains_all:
               - Field: tags
               - - Constant: adventure
                 - Constant: magic
@@ -736,11 +745,11 @@ tests:
       - Collection: books
       - Select:
         - AliasedExpr:
-            - ArrayLength:
+            - Expr.array_length:
                 - Field: tags
             - "tagsCount"
       - Where:
-          - Equal:
+          - Expr.equal:
               - Field: tagsCount
               - Constant: 3
     assert_results: # All documents have 3 tags
@@ -785,7 +794,7 @@ tests:
             - ASCENDING
       - Select:
           - AliasedExpr:
-              - StringConcat:
+              - Expr.string_concat:
                   - Field: author
                   - Constant:  " - "
                   - Field: title
@@ -825,7 +834,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - StartsWith:
+          - Expr.starts_with:
               - Field: title
               - Constant: The
       - Select:
@@ -870,7 +879,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - EndsWith:
+          - Expr.ends_with:
               - Field: title
               - Constant: y
       - Select:
@@ -914,12 +923,12 @@ tests:
       - Collection: books
       - Select:
         - AliasedExpr:
-            - CharLength:
+            - Expr.char_length:
                 - Field: title
             - "titleLength"
         - title
       - Where:
-          - GreaterThan:
+          - Expr.greater_than:
               - Field: titleLength
               - Constant: 20
       - Sort:
@@ -971,12 +980,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Equal:
+          - Expr.equal:
               - Field: author
               - Constant: "Douglas Adams"
       - Select:
         - AliasedExpr:
-            - CharLength:
+            - Expr.char_length:
                 - Field: title
             - "title_length"
     assert_results:
@@ -1007,13 +1016,13 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Equal:
+          - Expr.equal:
               - Field: author
               - Constant: Douglas Adams
       - Select:
         - AliasedExpr:
-            - ByteLength:
-                - StringConcat:
+            - Expr.byte_length:
+                - Expr.string_concat:
                   - Field: title
                   - Constant: _银河系漫游指南
             - "title_byte_length"
@@ -1049,7 +1058,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Like:
+          - Expr.like:
               - Field: title
               - Constant: "%Guide%"
       - Select:
@@ -1061,7 +1070,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - RegexContains:
+          - Expr.regex_contains:
               - Field: title
               - Constant: "(?i)(the|of)"
     assert_count: 5
@@ -1083,7 +1092,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - RegexMatch:
+          - Expr.regex_match:
               - Field: title
               - Constant: ".*(?i)(the|of).*"
     assert_count: 5
@@ -1104,42 +1113,42 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Equal:
+        - Expr.equal:
           - Field: title
           - Constant: To Kill a Mockingbird
       - Select:
         - AliasedExpr:
-            - Add:
+            - Expr.add:
                 - Field: rating
                 - Constant: 1
             - "ratingPlusOne"
         - AliasedExpr:
-            - Subtract:
+            - Expr.subtract:
                 - Field: published
                 - Constant: 1900
             - "yearsSince1900"
         - AliasedExpr:
-            - Multiply:
+            - Expr.multiply:
                 - Field: rating
                 - Constant: 10
             - "ratingTimesTen"
         - AliasedExpr:
-            - Divide:
+            - Expr.divide:
                 - Field: rating
                 - Constant: 2
             - "ratingDividedByTwo"
         - AliasedExpr:
-            - Multiply:
+            - Expr.multiply:
                 - Field: rating
                 - Constant: 20
             - "ratingTimes20"
         - AliasedExpr:
-            - Add:
+            - Expr.add:
                 - Field: rating
                 - Constant: 3
             - "ratingPlus3"
         - AliasedExpr:
-            - Mod:
+            - Expr.mod:
                 - Field: rating
                 - Constant: 2
             - "ratingMod2"
@@ -1215,13 +1224,13 @@ tests:
       - Collection: books
       - Where:
           - And:
-              - GreaterThan:
+              - Expr.greater_than:
                   - Field: rating
                   - Constant: 4.2
-              - LessThanOrEqual:
+              - Expr.less_than_or_equal:
                   - Field: rating
                   - Constant: 4.5
-              - NotEqual:
+              - Expr.not_equal:
                   - Field: genre
                   - Constant: Science Fiction
       - Select:
@@ -1286,13 +1295,13 @@ tests:
       - Where:
           - Or:
               - And:
-                  - GreaterThan:
+                  - Expr.greater_than:
                       - Field: rating
                       - Constant: 4.5
-                  - Equal:
+                  - Expr.equal:
                       - Field: genre
                       - Constant: Science Fiction
-              - LessThan:
+              - Expr.less_than:
                   - Field: published
                   - Constant: 1900
       - Select:
@@ -1353,12 +1362,12 @@ tests:
       - Collection: books
       - Where:
             - Not:
-                - IsNaN:
+                - Expr.is_nan:
                   - Field: rating
       - Select:
           - AliasedExpr:
               - Not:
-                  - IsNaN:
+                  - Expr.is_nan:
                     - Field: rating
               - "ratingIsNotNaN"
       - Limit: 1
@@ -1398,17 +1407,17 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Equal:
+          - Expr.equal:
               - Field: author
               - Constant: Douglas Adams
       - Select:
           - AliasedExpr:
-              - LogicalMaximum:
+              - Expr.logical_maximum:
                   - Field: rating
                   - Constant: 4.5
               - "max_rating"
           - AliasedExpr:
-              - LogicalMinimum:
+              - Expr.logical_minimum:
                   - Field: published
                   - Constant: 1900
               - "min_published"
@@ -1453,13 +1462,13 @@ tests:
           - DESCENDING
       - Select:
           - AliasedExpr:
-              - MapGet:
+              - Expr.map_get:
                   - Field: awards
-                  - Constant: hugo
+                  - hugo
               - "hugoAward"
           - Field: title
       - Where:
-          - Equal:
+          - Expr.equal:
               - Field: hugoAward
               - Constant: true
     assert_results:
@@ -1504,7 +1513,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Equal:
+          - Expr.equal:
               - Field: awards.hugo
               - Constant: true
       - Sort:
@@ -1604,7 +1613,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Equal:
+        - Expr.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
       - Unnest:

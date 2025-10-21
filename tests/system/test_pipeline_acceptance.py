@@ -161,7 +161,7 @@ def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
         # find arguments if given
         if isinstance(stage, dict):
             stage_yaml_args = stage[stage_name]
-            stage_obj = _apply_yaml_args(stage_cls, client, stage_yaml_args)
+            stage_obj = _apply_yaml_args_to_callable(stage_cls, client, stage_yaml_args)
         else:
             # yaml has no arguments
             stage_obj = stage_cls()
@@ -179,15 +179,21 @@ def _parse_expressions(client, yaml_element: Any):
         if len(yaml_element) == 1 and _is_expr_string(next(iter(yaml_element))):
             # build pipeline expressions if possible
             cls_str = next(iter(yaml_element))
-            cls = getattr(pipeline_expressions, cls_str)
+            callable_obj = None
+            if "." in cls_str:
+                cls_name, method_name = cls_str.split(".")
+                cls = getattr(pipeline_expressions, cls_name)
+                callable_obj = getattr(cls, method_name)
+            else:
+                callable_obj = getattr(pipeline_expressions, cls_str)
             yaml_args = yaml_element[cls_str]
-            return _apply_yaml_args(cls, client, yaml_args)
+            return _apply_yaml_args_to_callable(callable_obj, client, yaml_args)
         elif len(yaml_element) == 1 and _is_stage_string(next(iter(yaml_element))):
             # build pipeline stage if possible (eg, for SampleOptions)
             cls_str = next(iter(yaml_element))
             cls = getattr(stages, cls_str)
             yaml_args = yaml_element[cls_str]
-            return _apply_yaml_args(cls, client, yaml_args)
+            return _apply_yaml_args_to_callable(cls, client, yaml_args)
         elif len(yaml_element) == 1 and list(yaml_element)[0] == "Pipeline":
             # find Pipeline objects for Union expressions
             other_ppl = yaml_element["Pipeline"]
@@ -204,25 +210,33 @@ def _parse_expressions(client, yaml_element: Any):
         return yaml_element
 
 
-def _apply_yaml_args(cls, client, yaml_args):
+def _apply_yaml_args_to_callable(callable_obj, client, yaml_args):
     """
     Helper to instantiate a class with yaml arguments. The arguments will be applied
     as positional or keyword arguments, based on type
     """
     if isinstance(yaml_args, dict):
-        return cls(**_parse_expressions(client, yaml_args))
+        return callable_obj(**_parse_expressions(client, yaml_args))
     elif isinstance(yaml_args, list):
         # yaml has an array of arguments. Treat as args
-        return cls(*_parse_expressions(client, yaml_args))
+        return callable_obj(*_parse_expressions(client, yaml_args))
     else:
         # yaml has a single argument
-        return cls(_parse_expressions(client, yaml_args))
+        return callable_obj(_parse_expressions(client, yaml_args))
 
 
 def _is_expr_string(yaml_str):
     """
     Returns true if a string represents a class in pipeline_expressions
     """
+    if isinstance(yaml_str, str) and "." in yaml_str:
+        parts = yaml_str.split(".")
+        if len(parts) == 2:
+            cls_name, method_name = parts
+            if hasattr(pipeline_expressions, cls_name):
+                cls = getattr(pipeline_expressions, cls_name)
+                if hasattr(cls, method_name):
+                    return True
     return (
         isinstance(yaml_str, str)
         and yaml_str[0].isupper()
