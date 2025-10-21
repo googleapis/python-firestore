@@ -284,7 +284,9 @@ class Expr(ABC):
             A new `Expr` representing the logical maximum operation.
         """
         return Function(
-            "maximum", [self, self._cast_to_expr_or_convert_to_constant(other)], infix_name_override="logical_maximum"
+            "maximum",
+            [self, self._cast_to_expr_or_convert_to_constant(other)],
+            infix_name_override="logical_maximum",
         )
 
     @expose_as_static
@@ -308,7 +310,9 @@ class Expr(ABC):
             A new `Expr` representing the logical minimum operation.
         """
         return Function(
-            "minimum", [self, self._cast_to_expr_or_convert_to_constant(other)], infix_name_override="logical_minimum"
+            "minimum",
+            [self, self._cast_to_expr_or_convert_to_constant(other)],
+            infix_name_override="logical_minimum",
         )
 
     @expose_as_static
@@ -850,8 +854,7 @@ class Expr(ABC):
         """
         return Function(
             "string_concat",
-            [self]
-            + [self._cast_to_expr_or_convert_to_constant(el) for el in elements],
+            [self] + [self._cast_to_expr_or_convert_to_constant(el) for el in elements],
         )
 
     @expose_as_static
@@ -868,7 +871,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the value associated with the given key in the map.
         """
-        return Function("map_get", [self, Constant.of(key) if isinstance(key, str) else key])
+        return Function(
+            "map_get", [self, Constant.of(key) if isinstance(key, str) else key]
+        )
 
     @expose_as_static
     def vector_length(self) -> "Expr":
@@ -1040,7 +1045,6 @@ class Expr(ABC):
         """
         return Function("collection_id", [self])
 
-
     def ascending(self) -> Ordering:
         """Creates an `Ordering` that sorts documents in ascending order based on this expression.
 
@@ -1142,13 +1146,12 @@ class Function(Expr):
         params: Sequence[Expr],
         *,
         use_infix_repr: bool = True,
-        infix_name_override: str | None = None
+        infix_name_override: str | None = None,
     ):
         self.name = name
         self.params = list(params)
         self._use_infix_repr = use_infix_repr
         self._infix_name_override = infix_name_override
-
 
     def __repr__(self):
         """
@@ -1165,8 +1168,6 @@ class Function(Expr):
             else:
                 return f"{self.params[0]!r}.{infix_name}({', '.join([repr(p) for p in self.params[1:]])})"
         return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
-
-
 
     def __eq__(self, other):
         if not isinstance(other, Function):
@@ -1402,6 +1403,9 @@ class Xor(BooleanExpr):
     def __init__(self, conditions: Sequence["BooleanExpr"]):
         super().__init__("xor", conditions, use_infix_repr=False)
 
+
 class Conditional(BooleanExpr):
     def __init__(self, condition: BooleanExpr, then_expr: Expr, else_expr: Expr):
-        super().__init__("conditional", [condition, then_expr, else_expr], use_infix_repr=False)
+        super().__init__(
+            "conditional", [condition, then_expr, else_expr], use_infix_repr=False
+        )
