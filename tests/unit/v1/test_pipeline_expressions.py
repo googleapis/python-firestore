@@ -643,15 +643,51 @@ class TestBooleanExpr:
             BooleanExpr._from_query_filter_pb(document_pb.Value(), mock_client)
 
 
-class TestBooleanExprClasses:
+class TestExpressionMethods:
     """
-    contains test methods for each Expr class that derives from BooleanExpr
+    contains test methods for each Expr method
     """
 
+    @pytest.mark.parametrize(
+        "first,second,expected",
+        [
+            (
+                Field.of("a").char_length(),
+                Field.of("a").char_length(),
+                True,
+            ),
+            (
+                Field.of("a").char_length(),
+                Field.of("b").char_length(),
+                False,
+            ),
+            (
+                Field.of("a").char_length(),
+                Field.of("a").byte_length(),
+                False,
+            ),
+            (
+                Field.of("a").char_length(),
+                Field.of("b").byte_length(),
+                False,
+            ),
+            (
+                Constant.of("").byte_length(),
+                Field.of("").byte_length(),
+                False,
+            ),
+            (Field.of("").byte_length(), Field.of("").byte_length(), True),
+        ],
+    )
+    def test_equality(self, first, second, expected):
+        assert (first == second) is expected
+
     def _make_arg(self, name="Mock"):
-        arg = mock.Mock(spec=Expr)
-        arg._cast_to_expr_or_convert_to_constant = lambda x: x
-        arg.__repr__ = lambda x: name
+        class MockExpr(Constant):
+            def __repr__(self):
+                return self.value
+
+        arg = MockExpr(name)
         return arg
 
     def test_and(self):
@@ -678,6 +714,8 @@ class TestBooleanExprClasses:
         assert instance.name == "array_contains"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "ArrayField.array_contains(Element)"
+        infix_instance = arg1.array_contains(arg2)
+        assert infix_instance == instance
 
     def test_array_contains_any(self):
         arg1 = self._make_arg("ArrayField")
@@ -689,6 +727,8 @@ class TestBooleanExprClasses:
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
         assert repr(instance) == "ArrayField.array_contains_any([Element1, Element2])"
+        infix_instance = arg1.array_contains_any([arg2, arg3])
+        assert infix_instance == instance
 
     def test_exists(self):
         arg1 = self._make_arg("Field")
@@ -696,6 +736,8 @@ class TestBooleanExprClasses:
         assert instance.name == "exists"
         assert instance.params == [arg1]
         assert repr(instance) == "Field.exists()"
+        infix_instance = arg1.exists()
+        assert infix_instance == instance
 
     def test_equal(self):
         arg1 = self._make_arg("Left")
@@ -704,6 +746,8 @@ class TestBooleanExprClasses:
         assert instance.name == "equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.equal(Right)"
+        infix_instance = arg1.equal(arg2)
+        assert infix_instance == instance
 
     def test_greater_than_or_equal(self):
         arg1 = self._make_arg("Left")
@@ -712,6 +756,8 @@ class TestBooleanExprClasses:
         assert instance.name == "greater_than_or_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.greater_than_or_equal(Right)"
+        infix_instance = arg1.greater_than_or_equal(arg2)
+        assert infix_instance == instance
 
     def test_greater_than(self):
         arg1 = self._make_arg("Left")
@@ -720,6 +766,8 @@ class TestBooleanExprClasses:
         assert instance.name == "greater_than"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.greater_than(Right)"
+        infix_instance = arg1.greater_than(arg2)
+        assert infix_instance == instance
 
     def test_less_than_or_equal(self):
         arg1 = self._make_arg("Left")
@@ -728,6 +776,8 @@ class TestBooleanExprClasses:
         assert instance.name == "less_than_or_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.less_than_or_equal(Right)"
+        infix_instance = arg1.less_than_or_equal(arg2)
+        assert infix_instance == instance
 
     def test_less_than(self):
         arg1 = self._make_arg("Left")
@@ -736,6 +786,8 @@ class TestBooleanExprClasses:
         assert instance.name == "less_than"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.less_than(Right)"
+        infix_instance = arg1.less_than(arg2)
+        assert infix_instance == instance
 
     def test_not_equal(self):
         arg1 = self._make_arg("Left")
@@ -744,6 +796,8 @@ class TestBooleanExprClasses:
         assert instance.name == "not_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.not_equal(Right)"
+        infix_instance = arg1.not_equal(arg2)
+        assert infix_instance == instance
 
     def test_equal_any(self):
         arg1 = self._make_arg("Field")
@@ -755,6 +809,8 @@ class TestBooleanExprClasses:
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
         assert repr(instance) == "Field.equal_any([Value1, Value2])"
+        infix_instance = arg1.equal_any([arg2, arg3])
+        assert infix_instance == instance
 
     def test_not_equal_any(self):
         arg1 = self._make_arg("Field")
@@ -766,6 +822,8 @@ class TestBooleanExprClasses:
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
         assert repr(instance) == "Field.not_equal_any([Value1, Value2])"
+        infix_instance = arg1.not_equal_any([arg2, arg3])
+        assert infix_instance == instance
 
     def test_is_nan(self):
         arg1 = self._make_arg("Value")
@@ -773,6 +831,8 @@ class TestBooleanExprClasses:
         assert instance.name == "is_nan"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_nan()"
+        infix_instance = arg1.is_nan()
+        assert infix_instance == instance
 
     def test_not(self):
         arg1 = self._make_arg("Condition")
@@ -791,6 +851,8 @@ class TestBooleanExprClasses:
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
         assert repr(instance) == "ArrayField.array_contains_all([Element1, Element2])"
+        infix_instance = arg1.array_contains_all([arg2, arg3])
+        assert infix_instance == instance
 
     def test_ends_with(self):
         arg1 = self._make_arg("Expr")
@@ -799,6 +861,8 @@ class TestBooleanExprClasses:
         assert instance.name == "ends_with"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.ends_with(Postfix)"
+        infix_instance = arg1.ends_with(arg2)
+        assert infix_instance == instance
 
     def test_conditional(self):
         arg1 = self._make_arg("Condition")
@@ -816,6 +880,8 @@ class TestBooleanExprClasses:
         assert instance.name == "like"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.like(Pattern)"
+        infix_instance = arg1.like(arg2)
+        assert infix_instance == instance
 
     def test_regex_contains(self):
         arg1 = self._make_arg("Expr")
@@ -824,6 +890,8 @@ class TestBooleanExprClasses:
         assert instance.name == "regex_contains"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.regex_contains(Regex)"
+        infix_instance = arg1.regex_contains(arg2)
+        assert infix_instance == instance
 
     def test_regex_match(self):
         arg1 = self._make_arg("Expr")
@@ -832,6 +900,8 @@ class TestBooleanExprClasses:
         assert instance.name == "regex_match"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.regex_match(Regex)"
+        infix_instance = arg1.regex_match(arg2)
+        assert infix_instance == instance
 
     def test_starts_with(self):
         arg1 = self._make_arg("Expr")
@@ -840,6 +910,8 @@ class TestBooleanExprClasses:
         assert instance.name == "starts_with"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.starts_with(Prefix)"
+        infix_instance = arg1.starts_with(arg2)
+        assert infix_instance == instance
 
     def test_string_contains(self):
         arg1 = self._make_arg("Expr")
@@ -848,6 +920,8 @@ class TestBooleanExprClasses:
         assert instance.name == "string_contains"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.string_contains(Substring)"
+        infix_instance = arg1.string_contains(arg2)
+        assert infix_instance == instance
 
     def test_xor(self):
         arg1 = self._make_arg("Condition1")
@@ -857,52 +931,6 @@ class TestBooleanExprClasses:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Xor(Condition1, Condition2)"
 
-
-class TestFunctionClasses:
-    """
-    contains test methods for each Expr class that derives from Function
-    """
-
-    @pytest.mark.parametrize(
-        "first,second,expected",
-        [
-            (
-                Field.of("test").char_length(),
-                Field.of("test").char_length(),
-                True,
-            ),
-            (
-                Field.of("test").char_length(),
-                Field.of("diff").char_length(),
-                False,
-            ),
-            (
-                Field.of("same").char_length(),
-                Field.of("same").byte_length(),
-                False,
-            ),
-            (
-                Field.of("test").char_length(),
-                Field.of("diff").byte_length(),
-                False,
-            ),
-            (
-                Constant.of("").byte_length(),
-                Field.of("").byte_length(),
-                False,
-            ),
-            (Field.of("").byte_length(), Field.of("").byte_length(), True),
-        ],
-    )
-    def test_equality(self, first, second, expected):
-        assert (first == second) is expected
-
-    def _make_arg(self, name="Mock"):
-        arg = mock.Mock(spec=Expr)
-        arg._cast_to_expr_or_convert_to_constant = lambda x: x
-        arg.__repr__ = lambda x: name
-        return arg
-
     def test_divide(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
@@ -910,6 +938,8 @@ class TestFunctionClasses:
         assert instance.name == "divide"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.divide(Right)"
+        infix_instance = arg1.divide(arg2)
+        assert infix_instance == instance
 
     def test_logical_maximum(self):
         arg1 = self._make_arg("Left")
@@ -918,6 +948,8 @@ class TestFunctionClasses:
         assert instance.name == "maximum"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.logical_maximum(Right)"
+        infix_instance = arg1.logical_maximum(arg2)
+        assert infix_instance == instance
 
     def test_logical_minimum(self):
         arg1 = self._make_arg("Left")
@@ -926,6 +958,8 @@ class TestFunctionClasses:
         assert instance.name == "minimum"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.logical_minimum(Right)"
+        infix_instance = arg1.logical_minimum(arg2)
+        assert infix_instance == instance
 
     def test_map_get(self):
         arg1 = self._make_arg("Map")
@@ -934,6 +968,8 @@ class TestFunctionClasses:
         assert instance.name == "map_get"
         assert instance.params == [arg1, Constant.of(arg2)]
         assert repr(instance) == "Map.map_get(Constant.of('key'))"
+        infix_instance = arg1.map_get(Constant.of(arg2))
+        assert infix_instance == instance
 
     def test_mod(self):
         arg1 = self._make_arg("Left")
@@ -942,6 +978,8 @@ class TestFunctionClasses:
         assert instance.name == "mod"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.mod(Right)"
+        infix_instance = arg1.mod(arg2)
+        assert infix_instance == instance
 
     def test_multiply(self):
         arg1 = self._make_arg("Left")
@@ -950,14 +988,19 @@ class TestFunctionClasses:
         assert instance.name == "multiply"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.multiply(Right)"
+        infix_instance = arg1.multiply(arg2)
+        assert infix_instance == instance
 
     def test_string_concat(self):
         arg1 = self._make_arg("Str1")
         arg2 = self._make_arg("Str2")
-        instance = Expr.string_concat(arg1, arg2)
+        arg3 = self._make_arg("Str3")
+        instance = Expr.string_concat(arg1, arg2, arg3)
         assert instance.name == "string_concat"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Str1.string_concat(Str2)"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "Str1.string_concat(Str2, Str3)"
+        infix_instance = arg1.string_concat(arg2, arg3)
+        assert infix_instance == instance
 
     def test_subtract(self):
         arg1 = self._make_arg("Left")
@@ -966,6 +1009,8 @@ class TestFunctionClasses:
         assert instance.name == "subtract"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.subtract(Right)"
+        infix_instance = arg1.subtract(arg2)
+        assert infix_instance == instance
 
     def test_timestamp_add(self):
         arg1 = self._make_arg("Timestamp")
@@ -975,6 +1020,8 @@ class TestFunctionClasses:
         assert instance.name == "timestamp_add"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "Timestamp.timestamp_add(Unit, Amount)"
+        infix_instance = arg1.timestamp_add(arg2, arg3)
+        assert infix_instance == instance
 
     def test_timestamp_subtract(self):
         arg1 = self._make_arg("Timestamp")
@@ -984,6 +1031,8 @@ class TestFunctionClasses:
         assert instance.name == "timestamp_subtract"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "Timestamp.timestamp_subtract(Unit, Amount)"
+        infix_instance = arg1.timestamp_subtract(arg2, arg3)
+        assert infix_instance == instance
 
     def test_timestamp_to_unix_micros(self):
         arg1 = self._make_arg("Input")
@@ -991,6 +1040,8 @@ class TestFunctionClasses:
         assert instance.name == "timestamp_to_unix_micros"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.timestamp_to_unix_micros()"
+        infix_instance = arg1.timestamp_to_unix_micros()
+        assert infix_instance == instance
 
     def test_timestamp_to_unix_millis(self):
         arg1 = self._make_arg("Input")
@@ -998,6 +1049,8 @@ class TestFunctionClasses:
         assert instance.name == "timestamp_to_unix_millis"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.timestamp_to_unix_millis()"
+        infix_instance = arg1.timestamp_to_unix_millis()
+        assert infix_instance == instance
 
     def test_timestamp_to_unix_seconds(self):
         arg1 = self._make_arg("Input")
@@ -1005,6 +1058,8 @@ class TestFunctionClasses:
         assert instance.name == "timestamp_to_unix_seconds"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.timestamp_to_unix_seconds()"
+        infix_instance = arg1.timestamp_to_unix_seconds()
+        assert infix_instance == instance
 
     def test_unix_micros_to_timestamp(self):
         arg1 = self._make_arg("Input")
@@ -1012,6 +1067,8 @@ class TestFunctionClasses:
         assert instance.name == "unix_micros_to_timestamp"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.unix_micros_to_timestamp()"
+        infix_instance = arg1.unix_micros_to_timestamp()
+        assert infix_instance == instance
 
     def test_unix_millis_to_timestamp(self):
         arg1 = self._make_arg("Input")
@@ -1019,6 +1076,8 @@ class TestFunctionClasses:
         assert instance.name == "unix_millis_to_timestamp"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.unix_millis_to_timestamp()"
+        infix_instance = arg1.unix_millis_to_timestamp()
+        assert infix_instance == instance
 
     def test_unix_seconds_to_timestamp(self):
         arg1 = self._make_arg("Input")
@@ -1026,6 +1085,8 @@ class TestFunctionClasses:
         assert instance.name == "unix_seconds_to_timestamp"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.unix_seconds_to_timestamp()"
+        infix_instance = arg1.unix_seconds_to_timestamp()
+        assert infix_instance == instance
 
     def test_vector_length(self):
         arg1 = self._make_arg("Array")
@@ -1033,6 +1094,8 @@ class TestFunctionClasses:
         assert instance.name == "vector_length"
         assert instance.params == [arg1]
         assert repr(instance) == "Array.vector_length()"
+        infix_instance = arg1.vector_length()
+        assert infix_instance == instance
 
     def test_add(self):
         arg1 = self._make_arg("Left")
@@ -1041,6 +1104,8 @@ class TestFunctionClasses:
         assert instance.name == "add"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.add(Right)"
+        infix_instance = arg1.add(arg2)
+        assert infix_instance == instance
 
     def test_array_length(self):
         arg1 = self._make_arg("Array")
@@ -1048,6 +1113,8 @@ class TestFunctionClasses:
         assert instance.name == "array_length"
         assert instance.params == [arg1]
         assert repr(instance) == "Array.array_length()"
+        infix_instance = arg1.array_length()
+        assert infix_instance == instance
 
     def test_array_reverse(self):
         arg1 = self._make_arg("Array")
@@ -1055,6 +1122,8 @@ class TestFunctionClasses:
         assert instance.name == "array_reverse"
         assert instance.params == [arg1]
         assert repr(instance) == "Array.array_reverse()"
+        infix_instance = arg1.array_reverse()
+        assert infix_instance == instance
 
     def test_byte_length(self):
         arg1 = self._make_arg("Expr")
@@ -1062,6 +1131,8 @@ class TestFunctionClasses:
         assert instance.name == "byte_length"
         assert instance.params == [arg1]
         assert repr(instance) == "Expr.byte_length()"
+        infix_instance = arg1.byte_length()
+        assert infix_instance == instance
 
     def test_char_length(self):
         arg1 = self._make_arg("Expr")
@@ -1069,6 +1140,8 @@ class TestFunctionClasses:
         assert instance.name == "char_length"
         assert instance.params == [arg1]
         assert repr(instance) == "Expr.char_length()"
+        infix_instance = arg1.char_length()
+        assert infix_instance == instance
 
     def test_collection_id(self):
         arg1 = self._make_arg("Value")
@@ -1076,6 +1149,8 @@ class TestFunctionClasses:
         assert instance.name == "collection_id"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.collection_id()"
+        infix_instance = arg1.collection_id()
+        assert infix_instance == instance
 
     def test_sum(self):
         arg1 = self._make_arg("Value")
@@ -1083,6 +1158,8 @@ class TestFunctionClasses:
         assert instance.name == "sum"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.sum()"
+        infix_instance = arg1.sum()
+        assert infix_instance == instance
 
     def test_average(self):
         arg1 = self._make_arg("Value")
@@ -1090,6 +1167,8 @@ class TestFunctionClasses:
         assert instance.name == "average"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.average()"
+        infix_instance = arg1.average()
+        assert infix_instance == instance
 
     def test_count(self):
         arg1 = self._make_arg("Value")
@@ -1097,6 +1176,8 @@ class TestFunctionClasses:
         assert instance.name == "count"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.count()"
+        infix_instance = arg1.count()
+        assert infix_instance == instance
 
     def test_minimum(self):
         arg1 = self._make_arg("Value")
@@ -1104,6 +1185,8 @@ class TestFunctionClasses:
         assert instance.name == "minimum"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.minimum()"
+        infix_instance = arg1.minimum()
+        assert infix_instance == instance
 
     def test_maximum(self):
         arg1 = self._make_arg("Value")
@@ -1111,3 +1194,5 @@ class TestFunctionClasses:
         assert instance.name == "maximum"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.maximum()"
+        infix_instance = arg1.maximum()
+        assert infix_instance == instance
