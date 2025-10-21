@@ -22,12 +22,13 @@ from google.cloud.firestore_v1.types import query as query_pb
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1._helpers import GeoPoint
-from google.cloud.firestore_v1.pipeline_expressions import BooleanExpr, ListOfExprs
 import google.cloud.firestore_v1.pipeline_expressions as expr
-from google.cloud.firestore_v1.pipeline_expressions.expr import Expr
-from google.cloud.firestore_v1.pipeline_expressions.expr import Constant
-from google.cloud.firestore_v1.pipeline_expressions.expr import Field
-from google.cloud.firestore_v1.pipeline_expressions.expr import Ordering
+from google.cloud.firestore_v1.pipeline_expressions import BooleanExpr
+from google.cloud.firestore_v1.pipeline_expressions import _ListOfExprs
+from google.cloud.firestore_v1.pipeline_expressions import Expr
+from google.cloud.firestore_v1.pipeline_expressions import Constant
+from google.cloud.firestore_v1.pipeline_expressions import Field
+from google.cloud.firestore_v1.pipeline_expressions import Ordering
 
 
 @pytest.fixture
@@ -174,49 +175,49 @@ class TestConstant:
 
 class TestListOfExprs:
     def test_to_pb(self):
-        instance = expr.ListOfExprs([Constant(1), Constant(2)])
+        instance = _ListOfExprs([Constant(1), Constant(2)])
         result = instance._to_pb()
         assert len(result.array_value.values) == 2
         assert result.array_value.values[0].integer_value == 1
         assert result.array_value.values[1].integer_value == 2
 
     def test_empty_to_pb(self):
-        instance = expr.ListOfExprs([])
+        instance = _ListOfExprs([])
         result = instance._to_pb()
         assert len(result.array_value.values) == 0
 
     def test_repr(self):
-        instance = expr.ListOfExprs([Constant(1), Constant(2)])
+        instance = _ListOfExprs([Constant(1), Constant(2)])
         repr_string = repr(instance)
-        assert repr_string == "ListOfExprs([Constant.of(1), Constant.of(2)])"
-        empty_instance = expr.ListOfExprs([])
+        assert repr_string == "[Constant.of(1), Constant.of(2)]"
+        empty_instance = _ListOfExprs([])
         empty_repr_string = repr(empty_instance)
-        assert empty_repr_string == "ListOfExprs([])"
+        assert empty_repr_string == "[]"
 
     @pytest.mark.parametrize(
         "first,second,expected",
         [
-            (expr.ListOfExprs([]), expr.ListOfExprs([]), True),
-            (expr.ListOfExprs([]), expr.ListOfExprs([Constant(1)]), False),
-            (expr.ListOfExprs([Constant(1)]), expr.ListOfExprs([]), False),
+            (_ListOfExprs([]), _ListOfExprs([]), True),
+            (_ListOfExprs([]), _ListOfExprs([Constant(1)]), False),
+            (_ListOfExprs([Constant(1)]), _ListOfExprs([]), False),
             (
-                expr.ListOfExprs([Constant(1)]),
-                expr.ListOfExprs([Constant(1)]),
+                _ListOfExprs([Constant(1)]),
+                _ListOfExprs([Constant(1)]),
                 True,
             ),
             (
-                expr.ListOfExprs([Constant(1)]),
-                expr.ListOfExprs([Constant(2)]),
+                _ListOfExprs([Constant(1)]),
+                _ListOfExprs([Constant(2)]),
                 False,
             ),
             (
-                expr.ListOfExprs([Constant(1), Constant(2)]),
-                expr.ListOfExprs([Constant(1), Constant(2)]),
+                _ListOfExprs([Constant(1), Constant(2)]),
+                _ListOfExprs([Constant(1), Constant(2)]),
                 True,
             ),
-            (expr.ListOfExprs([Constant(1)]), [Constant(1)], False),
-            (expr.ListOfExprs([Constant(1)]), [1], False),
-            (expr.ListOfExprs([Constant(1)]), object(), False),
+            (_ListOfExprs([Constant(1)]), [Constant(1)], False),
+            (_ListOfExprs([Constant(1)]), [1], False),
+            (_ListOfExprs([Constant(1)]), object(), False),
         ],
     )
     def test_equality(self, first, second, expected):
@@ -684,13 +685,10 @@ class TestBooleanExprClasses:
         arg3 = self._make_arg("Element2")
         instance = Expr.array_contains_any(arg1, [arg2, arg3])
         assert instance.name == "array_contains_any"
-        assert isinstance(instance.params[1], ListOfExprs)
+        assert isinstance(instance.params[1], _ListOfExprs)
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
-        assert (
-            repr(instance)
-            == "ArrayField.array_contains_any(ListOfExprs([Element1, Element2]))"
-        )
+        assert repr(instance) == "ArrayField.array_contains_any([Element1, Element2])"
 
     def test_exists(self):
         arg1 = self._make_arg("Field")
@@ -753,10 +751,10 @@ class TestBooleanExprClasses:
         arg3 = self._make_arg("Value2")
         instance = Expr.equal_any(arg1, [arg2, arg3])
         assert instance.name == "equal_any"
-        assert isinstance(instance.params[1], ListOfExprs)
+        assert isinstance(instance.params[1], _ListOfExprs)
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
-        assert repr(instance) == "Field.equal_any(ListOfExprs([Value1, Value2]))"
+        assert repr(instance) == "Field.equal_any([Value1, Value2])"
 
     def test_not_equal_any(self):
         arg1 = self._make_arg("Field")
@@ -764,10 +762,10 @@ class TestBooleanExprClasses:
         arg3 = self._make_arg("Value2")
         instance = Expr.not_equal_any(arg1, [arg2, arg3])
         assert instance.name == "not_equal_any"
-        assert isinstance(instance.params[1], ListOfExprs)
+        assert isinstance(instance.params[1], _ListOfExprs)
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
-        assert repr(instance) == "Field.not_equal_any(ListOfExprs([Value1, Value2]))"
+        assert repr(instance) == "Field.not_equal_any([Value1, Value2])"
 
     def test_is_nan(self):
         arg1 = self._make_arg("Value")
@@ -789,13 +787,10 @@ class TestBooleanExprClasses:
         arg3 = self._make_arg("Element2")
         instance = Expr.array_contains_all(arg1, [arg2, arg3])
         assert instance.name == "array_contains_all"
-        assert isinstance(instance.params[1], ListOfExprs)
+        assert isinstance(instance.params[1], _ListOfExprs)
         assert instance.params[0] == arg1
         assert instance.params[1].exprs == [arg2, arg3]
-        assert (
-            repr(instance)
-            == "ArrayField.array_contains_all(ListOfExprs([Element1, Element2]))"
-        )
+        assert repr(instance) == "ArrayField.array_contains_all([Element1, Element2])"
 
     def test_ends_with(self):
         arg1 = self._make_arg("Expr")

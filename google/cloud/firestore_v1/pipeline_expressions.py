@@ -462,7 +462,7 @@ class Expr(ABC):
             "equal_any",
             [
                 self,
-                ListOfExprs(
+                _ListOfExprs(
                     [self._cast_to_expr_or_convert_to_constant(v) for v in array]
                 ),
             ],
@@ -487,7 +487,7 @@ class Expr(ABC):
             "not_equal_any",
             [
                 self,
-                ListOfExprs(
+                _ListOfExprs(
                     [self._cast_to_expr_or_convert_to_constant(v) for v in array]
                 ),
             ],
@@ -536,7 +536,7 @@ class Expr(ABC):
             "array_contains_all",
             [
                 self,
-                ListOfExprs(
+                _ListOfExprs(
                     [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
                 ),
             ],
@@ -566,7 +566,7 @@ class Expr(ABC):
             "array_contains_any",
             [
                 self,
-                ListOfExprs(
+                _ListOfExprs(
                     [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
                 ),
             ],
@@ -1118,20 +1118,20 @@ class Constant(Expr, Generic[CONSTANT_TYPE]):
         return encode_value(self.value)
 
 
-class ListOfExprs(Expr):
+class _ListOfExprs(Expr):
     """Represents a list of expressions, typically used as an argument to functions like 'in' or array functions."""
 
     def __init__(self, exprs: Sequence[Expr]):
         self.exprs: list[Expr] = list(exprs)
 
     def __eq__(self, other):
-        if not isinstance(other, ListOfExprs):
+        if not isinstance(other, _ListOfExprs):
             return False
         else:
             return other.exprs == self.exprs
 
     def __repr__(self):
-        return f"{self.__class__.__name__}({self.exprs})"
+        return repr(self.exprs)
 
     def _to_pb(self):
         return Value(array_value={"values": [e._to_pb() for e in self.exprs]})
