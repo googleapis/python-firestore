@@ -1897,3 +1897,62 @@ tests:
         era: "Modern"
       - title: "One Hundred Years of Solitude"
         era: "Modern"
+  - description: testFieldToFieldArithmetic
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - Select:
+        - AliasedExpr:
+            - Expr.add:
+                - Field: published
+                - Field: rating
+            - "pub_plus_rating"
+    assert_results:
+      - pub_plus_rating: 1969.6
+  - description: testFieldToFieldComparison
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.greater_than:
+              - Field: published
+              - Field: rating
+      - Select:
+        - title
+    assert_count: 10 # All books were published after year 4.7
+  - description: testExistsNegative
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.exists:
+              - Field: non_existent_field
+    assert_count: 0
+  - description: testConditionalWithFields
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal_any:
+              - Field: title
+              - - Constant: "Dune"
+                - Constant: "1984"
+      - Select:
+        - title
+        - AliasedExpr:
+            - Conditional:
+                - Expr.greater_than:
+                    - Field: published
+                    - Constant: 1950
+                - Field: author
+                - Field: genre
+            - "conditional_field"
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "1984"
+        conditional_field: "Dystopian"
+      - title: "Dune"
+        conditional_field: "Frank Herbert"
