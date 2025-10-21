@@ -17,6 +17,7 @@ This file loads and executes yaml-encoded test cases from pipeline_e2e.yaml
 
 from __future__ import annotations
 import os
+import datetime
 import pytest
 import yaml
 import re
@@ -26,6 +27,7 @@ from google.protobuf.json_format import MessageToDict
 
 from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1 import pipeline_expressions
+from google.cloud.firestore_v1.vector import Vector
 from google.api_core.exceptions import GoogleAPIError
 
 from google.cloud.firestore import Client, AsyncClient
@@ -91,7 +93,7 @@ def test_pipeline_results(test_dict, client):
     """
     Ensure pipeline returns expected results
     """
-    expected_results = test_dict.get("assert_results", None)
+    expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     # check if server responds as expected
@@ -132,7 +134,7 @@ async def test_pipeline_results_async(test_dict, async_client):
     """
     Ensure pipeline returns expected results
     """
-    expected_results = test_dict.get("assert_results", None)
+    expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(async_client, test_dict["pipeline"])
     # check if server responds as expected
@@ -160,7 +162,7 @@ def parse_pipeline(client, pipeline: list[dict[str, Any], str]):
         # find arguments if given
         if isinstance(stage, dict):
             stage_yaml_args = stage[stage_name]
-            stage_obj = _apply_yaml_args(stage_cls, client, stage_yaml_args)
+            stage_obj = _apply_yaml_args_to_callable(stage_cls, client, stage_yaml_args)
         else:
             # yaml has no arguments
             stage_obj = stage_cls()
@@ -178,15 +180,21 @@ def _parse_expressions(client, yaml_element: Any):
         if len(yaml_element) == 1 and _is_expr_string(next(iter(yaml_element))):
             # build pipeline expressions if possible
             cls_str = next(iter(yaml_element))
-            cls = getattr(pipeline_expressions, cls_str)
+            callable_obj = None
+            if "." in cls_str:
+                cls_name, method_name = cls_str.split(".")
+                cls = getattr(pipeline_expressions, cls_name)
+                callable_obj = getattr(cls, method_name)
+            else:
+                callable_obj = getattr(pipeline_expressions, cls_str)
             yaml_args = yaml_element[cls_str]
-            return _apply_yaml_args(cls, client, yaml_args)
+            return _apply_yaml_args_to_callable(callable_obj, client, yaml_args)
         elif len(yaml_element) == 1 and _is_stage_string(next(iter(yaml_element))):
             # build pipeline stage if possible (eg, for SampleOptions)
             cls_str = next(iter(yaml_element))
             cls = getattr(stages, cls_str)
             yaml_args = yaml_element[cls_str]
-            return _apply_yaml_args(cls, client, yaml_args)
+            return _apply_yaml_args_to_callable(cls, client, yaml_args)
         elif len(yaml_element) == 1 and list(yaml_element)[0] == "Pipeline":
             # find Pipeline objects for Union expressions
             other_ppl = yaml_element["Pipeline"]
@@ -203,25 +211,33 @@ def _parse_expressions(client, yaml_element: Any):
         return yaml_element
 
 
-def _apply_yaml_args(cls, client, yaml_args):
+def _apply_yaml_args_to_callable(callable_obj, client, yaml_args):
     """
     Helper to instantiate a class with yaml arguments. The arguments will be applied
     as positional or keyword arguments, based on type
     """
     if isinstance(yaml_args, dict):
-        return cls(**_parse_expressions(client, yaml_args))
+        return callable_obj(**_parse_expressions(client, yaml_args))
     elif isinstance(yaml_args, list):
         # yaml has an array of arguments. Treat as args
-        return cls(*_parse_expressions(client, yaml_args))
+        return callable_obj(*_parse_expressions(client, yaml_args))
     else:
         # yaml has a single argument
-        return cls(_parse_expressions(client, yaml_args))
+        return callable_obj(_parse_expressions(client, yaml_args))
 
 
 def _is_expr_string(yaml_str):
     """
     Returns true if a string represents a class in pipeline_expressions
     """
+    if isinstance(yaml_str, str) and "." in yaml_str:
+        parts = yaml_str.split(".")
+        if len(parts) == 2:
+            cls_name, method_name = parts
+            if hasattr(pipeline_expressions, cls_name):
+                cls = getattr(pipeline_expressions, cls_name)
+                if hasattr(cls, method_name):
+                    return True
     return (
         isinstance(yaml_str, str)
         and yaml_str[0].isupper()
@@ -251,6 +267,26 @@ def event_loop():
     loop.close()
 
 
+def _parse_yaml_types(data):
+    """helper to convert yaml data to firestore objects when needed"""
+    if isinstance(data, dict):
+        return {key: _parse_yaml_types(value) for key, value in data.items()}
+    if isinstance(data, list):
+        # detect vectors
+        if all([isinstance(d, float) for d in data]):
+            return Vector(data)
+        else:
+            return [_parse_yaml_types(value) for value in data]
+    # detect timestamps
+    if isinstance(data, str) and ":" in data:
+        try:
+            parsed_datetime = datetime.datetime.fromisoformat(data)
+            return parsed_datetime
+        except ValueError:
+            pass
+    return data
+
+
 @pytest.fixture(scope="module")
 def client():
     """
@@ -258,6 +294,7 @@ def client():
     """
     client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_ENTERPRISE_DB)
     data = yaml_loader("data")
+    to_delete = []
     try:
         # setup data
         batch = client.batch()
@@ -265,16 +302,14 @@ def client():
             collection_ref = client.collection(collection_name)
             for document_id, document_data in documents.items():
                 document_ref = collection_ref.document(document_id)
-                batch.set(document_ref, document_data)
+                to_delete.append(document_ref)
+                batch.set(document_ref, _parse_yaml_types(document_data))
         batch.commit()
         yield client
     finally:
         # clear data
-        for collection_name, documents in data.items():
-            collection_ref = client.collection(collection_name)
-            for document_id in documents:
-                document_ref = collection_ref.document(document_id)
-                document_ref.delete()
+        for document_ref in to_delete:
+            document_ref.delete()
 
 
 @pytest.fixture(scope="module")

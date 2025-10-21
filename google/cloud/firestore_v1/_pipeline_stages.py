@@ -23,11 +23,12 @@ from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.pipeline_expressions import (
-    Accumulator,
+    AggregateFunction,
     Expr,
-    ExprWithAlias,
+    AliasedAggregate,
+    AliasedExpr,
     Field,
-    FilterCondition,
+    BooleanExpr,
     Selectable,
     Ordering,
 )
@@ -164,8 +165,8 @@ class Aggregate(Stage):
 
     def __init__(
         self,
-        *args: ExprWithAlias[Accumulator],
-        accumulators: Sequence[ExprWithAlias[Accumulator]] = (),
+        *args: AliasedExpr[AggregateFunction],
+        accumulators: Sequence[AliasedAggregate] = (),
         groups: Sequence[str | Selectable] = (),
     ):
         super().__init__()
@@ -439,7 +440,7 @@ class Unnest(Stage):
 class Where(Stage):
     """Filters documents based on a specified condition."""
 
-    def __init__(self, condition: FilterCondition):
+    def __init__(self, condition: BooleanExpr):
         super().__init__()
         self.condition = condition
 
