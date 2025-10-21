@@ -286,6 +286,7 @@ def _parse_yaml_types(data):
             pass
     return data
 
+
 @pytest.fixture(scope="module")
 def client():
     """
