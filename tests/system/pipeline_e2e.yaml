@@ -125,13 +125,25 @@ data:
       awards:
         hugo: true
         nebula: true
+  timestamps:
+    ts1:
+      time: "1993-04-28T12:01:00.654321+00:00"
+      micros:  735998460654321
+      millis:  735998460654
+      seconds: 735998460
+  vectors:
+    vec1:
+      embedding: [1.0, 2.0, 3.0]
+    vec2:
+      embedding: [4.0, 5.0, 6.0, 7.0]
 tests:
   - description: "testAggregates - count"
     pipeline:
       - Collection: books
       - Aggregate:
-        - ExprWithAlias:
-            - Count
+        - AliasedExpr:
+            - Expr.count:
+              - Field: rating
             - "count"
     assert_results:
       - count: 10
@@ -147,25 +159,28 @@ tests:
                 count:
                   functionValue:
                     name: count
+                    args:
+                    - fieldReferenceValue: rating
           - mapValue: {}
           name: aggregate
   - description: "testAggregates - avg, count, max"
     pipeline:
       - Collection: books
       - Where:
-          - Eq:
+          - Expr.equal:
               - Field: genre
               - Constant: Science Fiction
       - Aggregate:
-        - ExprWithAlias:
-            - Count
+        - AliasedExpr:
+            - Expr.count:
+              - Field: rating
             - "count"
-        - ExprWithAlias:
-            - Avg: 
+        - AliasedExpr:
+            - Expr.average:
               - Field: rating
             - "avg_rating"
-        - ExprWithAlias:
-            - Max: 
+        - AliasedExpr:
+            - Expr.maximum:
               - Field: rating
             - "max_rating"
     assert_results:
@@ -183,7 +198,7 @@ tests:
               args:
               - fieldReferenceValue: genre
               - stringValue: Science Fiction
-              name: eq
+              name: equal
           name: where
         - args:
           - mapValue:
@@ -192,10 +207,12 @@ tests:
                   functionValue:
                     args:
                     - fieldReferenceValue: rating
-                    name: avg
+                    name: average
                 count:
                   functionValue:
                     name: count
+                    args:
+                    - fieldReferenceValue: rating
                 max_rating:
                   functionValue:
                     args:
@@ -207,7 +224,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Lt:
+        - Expr.less_than:
           - Field: published
           - Constant: 1900
       - Aggregate:
@@ -218,18 +235,18 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Lt:
+          - Expr.less_than:
               - Field: published
               - Constant: 1984
       - Aggregate:
           accumulators:
-            - ExprWithAlias:
-              - Avg:
+            - AliasedExpr:
+              - Expr.average:
                 - Field: rating
               - "avg_rating"
           groups: [genre]
       - Where:
-          - Gt:
+          - Expr.greater_than:
               - Field: avg_rating
               - Constant: 4.3
       - Sort:
@@ -254,7 +271,7 @@ tests:
               args:
               - fieldReferenceValue: published
               - integerValue: '1984'
-              name: lt
+              name: less_than
           name: where
         - args:
           - mapValue:
@@ -263,7 +280,7 @@ tests:
                   functionValue:
                     args:
                     - fieldReferenceValue: rating
-                    name: avg
+                    name: average
           - mapValue:
               fields:
                 genre:
@@ -274,7 +291,7 @@ tests:
               args:
               - fieldReferenceValue: avg_rating
               - doubleValue: 4.3
-              name: gt
+              name: greater_than
           name: where
         - args:
           - mapValue:
@@ -288,15 +305,16 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-          - ExprWithAlias:
-              - Count
+          - AliasedExpr:
+              - Expr.count:
+                - Field: rating
               - "count"
-          - ExprWithAlias:
-              - Max:
+          - AliasedExpr:
+              - Expr.maximum:
                 - Field: rating
               - "max_rating"
-          - ExprWithAlias:
-              - Min:
+          - AliasedExpr:
+              - Expr.minimum:
                 - Field: published
               - "min_published"
     assert_results:
@@ -314,6 +332,8 @@ tests:
               fields:
                 count:
                   functionValue:
+                    args:
+                    - fieldReferenceValue: rating
                     name: count
                 max_rating:
                   functionValue:
@@ -384,14 +404,14 @@ tests:
     pipeline:
       - Collection: books
       - AddFields:
-        - ExprWithAlias:
-            - StrConcat:
+        - AliasedExpr:
+            - Expr.string_concat:
                 - Field: author
                 - Constant: _
                 - Field: title
             - "author_title"
-        - ExprWithAlias:
-            - StrConcat:
+        - AliasedExpr:
+            - Expr.string_concat:
                 - Field: title
                 - Constant: _
                 - Field: author
@@ -445,14 +465,14 @@ tests:
                     - fieldReferenceValue: author
                     - stringValue: _
                     - fieldReferenceValue: title
-                    name: str_concat
+                    name: string_concat
                 title_author:
                   functionValue:
                     args:
                     - fieldReferenceValue: title
                     - stringValue: _
                     - fieldReferenceValue: author
-                    name: str_concat
+                    name: string_concat
           name: add_fields
         - args:
           - fieldReferenceValue: title_author
@@ -477,10 +497,10 @@ tests:
       - Collection: books
       - Where:
           - And:
-              - Gt:
+              - Expr.greater_than:
                   - Field: rating
                   - Constant: 4.5
-              - Eq:
+              - Expr.equal:
                   - Field: genre
                   - Constant: Science Fiction
     assert_results:
@@ -509,12 +529,12 @@ tests:
                   args:
                   - fieldReferenceValue: rating
                   - doubleValue: 4.5
-                  name: gt
+                  name: greater_than
               - functionValue:
                   args:
                   - fieldReferenceValue: genre
                   - stringValue: Science Fiction
-                  name: eq
+                  name: equal
               name: and
           name: where
   - description: whereByOrCondition
@@ -522,10 +542,10 @@ tests:
       - Collection: books
       - Where:
           - Or:
-              - Eq:
+              - Expr.equal:
                   - Field: genre
                   - Constant: Romance
-              - Eq:
+              - Expr.equal:
                   - Field: genre
                   - Constant: Dystopian
       - Select:
@@ -551,12 +571,12 @@ tests:
                   args:
                   - fieldReferenceValue: genre
                   - stringValue: Romance
-                  name: eq
+                  name: equal
               - functionValue:
                   args:
                   - fieldReferenceValue: genre
                   - stringValue: Dystopian
-                  name: eq
+                  name: equal
               name: or
           name: where
         - args:
@@ -624,7 +644,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - ArrayContains:
+          - Expr.array_contains:
               - Field: tags
               - Constant: comedy
     assert_results:
@@ -654,7 +674,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - ArrayContainsAny:
+          - Expr.array_contains_any:
             - Field: tags
             - - Constant: comedy
               - Constant: classic
@@ -701,7 +721,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - ArrayContainsAll:
+          - Expr.array_contains_all:
               - Field: tags
               - - Constant: adventure
                 - Constant: magic
@@ -735,12 +755,12 @@ tests:
     pipeline:
       - Collection: books
       - Select:
-        - ExprWithAlias:
-            - ArrayLength:
+        - AliasedExpr:
+            - Expr.array_length:
                 - Field: tags
             - "tagsCount"
       - Where:
-          - Eq:
+          - Expr.equal:
               - Field: tagsCount
               - Constant: 3
     assert_results: # All documents have 3 tags
@@ -774,9 +794,9 @@ tests:
               args:
               - fieldReferenceValue: tagsCount
               - integerValue: '3'
-              name: eq
+              name: equal
           name: where
-  - description: testStrConcat
+  - description: testStringConcat
     pipeline:
       - Collection: books
       - Sort:
@@ -784,8 +804,8 @@ tests:
             - Field: author
             - ASCENDING
       - Select:
-          - ExprWithAlias:
-              - StrConcat:
+          - AliasedExpr:
+              - Expr.string_concat:
                   - Field: author
                   - Constant:  " - "
                   - Field: title
@@ -816,7 +836,7 @@ tests:
                     - fieldReferenceValue: author
                     - stringValue: ' - '
                     - fieldReferenceValue: title
-                    name: str_concat
+                    name: string_concat
           name: select
         - args:
           - integerValue: '1'
@@ -825,7 +845,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - StartsWith:
+          - Expr.starts_with:
               - Field: title
               - Constant: The
       - Select:
@@ -870,7 +890,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - EndsWith:
+          - Expr.ends_with:
               - Field: title
               - Constant: y
       - Select:
@@ -913,13 +933,13 @@ tests:
     pipeline:
       - Collection: books
       - Select:
-        - ExprWithAlias:
-            - CharLength:
+        - AliasedExpr:
+            - Expr.char_length:
                 - Field: title
             - "titleLength"
         - title
       - Where:
-          - Gt:
+          - Expr.greater_than:
               - Field: titleLength
               - Constant: 20
       - Sort:
@@ -957,7 +977,7 @@ tests:
               args:
               - fieldReferenceValue: titleLength
               - integerValue: '20'
-              name: gt
+              name: greater_than
           name: where
         - args:
           - mapValue:
@@ -971,12 +991,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Eq:
+          - Expr.equal:
               - Field: author
               - Constant: "Douglas Adams"
       - Select:
-        - ExprWithAlias:
-            - CharLength:
+        - AliasedExpr:
+            - Expr.char_length:
                 - Field: title
             - "title_length"
     assert_results:
@@ -992,7 +1012,7 @@ tests:
               args:
               - fieldReferenceValue: author
               - stringValue: Douglas Adams
-              name: eq
+              name: equal
           name: where
         - args:
           - mapValue:
@@ -1007,13 +1027,13 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Eq:
+          - Expr.equal:
               - Field: author
               - Constant: Douglas Adams
       - Select:
-        - ExprWithAlias:
-            - ByteLength:
-                - StrConcat:
+        - AliasedExpr:
+            - Expr.byte_length:
+                - Expr.string_concat:
                   - Field: title
                   - Constant: _银河系漫游指南
             - "title_byte_length"
@@ -1030,7 +1050,7 @@ tests:
               args:
               - fieldReferenceValue: author
               - stringValue: Douglas Adams
-              name: eq
+              name: equal
           name: where
         - args:
           - mapValue:
@@ -1042,14 +1062,14 @@ tests:
                         args:
                         - fieldReferenceValue: title
                         - stringValue: "_\u94F6\u6CB3\u7CFB\u6F2B\u6E38\u6307\u5357"
-                        name: str_concat
+                        name: string_concat
                     name: byte_length
           name: select
   - description: testLike
     pipeline:
       - Collection: books
       - Where:
-          - Like:
+          - Expr.like:
               - Field: title
               - Constant: "%Guide%"
       - Select:
@@ -1061,7 +1081,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - RegexContains:
+          - Expr.regex_contains:
               - Field: title
               - Constant: "(?i)(the|of)"
     assert_count: 5
@@ -1083,7 +1103,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - RegexMatch:
+          - Expr.regex_match:
               - Field: title
               - Constant: ".*(?i)(the|of).*"
     assert_count: 5
@@ -1104,42 +1124,42 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Eq:
+        - Expr.equal:
           - Field: title
           - Constant: To Kill a Mockingbird
       - Select:
-        - ExprWithAlias:
-            - Add:
+        - AliasedExpr:
+            - Expr.add:
                 - Field: rating
                 - Constant: 1
             - "ratingPlusOne"
-        - ExprWithAlias:
-            - Subtract:
+        - AliasedExpr:
+            - Expr.subtract:
                 - Field: published
                 - Constant: 1900
             - "yearsSince1900"
-        - ExprWithAlias:
-            - Multiply:
+        - AliasedExpr:
+            - Expr.multiply:
                 - Field: rating
                 - Constant: 10
             - "ratingTimesTen"
-        - ExprWithAlias:
-            - Divide:
+        - AliasedExpr:
+            - Expr.divide:
                 - Field: rating
                 - Constant: 2
             - "ratingDividedByTwo"
-        - ExprWithAlias:
-            - Multiply:
+        - AliasedExpr:
+            - Expr.multiply:
                 - Field: rating
                 - Constant: 20
             - "ratingTimes20"
-        - ExprWithAlias:
-            - Add:
+        - AliasedExpr:
+            - Expr.add:
                 - Field: rating
                 - Constant: 3
             - "ratingPlus3"
-        - ExprWithAlias:
-            - Mod:
+        - AliasedExpr:
+            - Expr.mod:
                 - Field: rating
                 - Constant: 2
             - "ratingMod2"
@@ -1162,7 +1182,7 @@ tests:
               args:
               - fieldReferenceValue: title
               - stringValue: To Kill a Mockingbird
-              name: eq
+              name: equal
           name: where
         - args:
           - mapValue:
@@ -1215,13 +1235,13 @@ tests:
       - Collection: books
       - Where:
           - And:
-              - Gt:
+              - Expr.greater_than:
                   - Field: rating
                   - Constant: 4.2
-              - Lte:
+              - Expr.less_than_or_equal:
                   - Field: rating
                   - Constant: 4.5
-              - Neq:
+              - Expr.not_equal:
                   - Field: genre
                   - Constant: Science Fiction
       - Select:
@@ -1251,17 +1271,17 @@ tests:
                   args:
                   - fieldReferenceValue: rating
                   - doubleValue: 4.2
-                  name: gt
+                  name: greater_than
               - functionValue:
                   args:
                   - fieldReferenceValue: rating
                   - doubleValue: 4.5
-                  name: lte
+                  name: less_than_or_equal
               - functionValue:
                   args:
                   - fieldReferenceValue: genre
                   - stringValue: Science Fiction
-                  name: neq
+                  name: not_equal
               name: and
           name: where
         - args:
@@ -1286,13 +1306,13 @@ tests:
       - Where:
           - Or:
               - And:
-                  - Gt:
+                  - Expr.greater_than:
                       - Field: rating
                       - Constant: 4.5
-                  - Eq:
+                  - Expr.equal:
                       - Field: genre
                       - Constant: Science Fiction
-              - Lt:
+              - Expr.less_than:
                   - Field: published
                   - Constant: 1900
       - Select:
@@ -1320,18 +1340,18 @@ tests:
                       args:
                       - fieldReferenceValue: rating
                       - doubleValue: 4.5
-                      name: gt
+                      name: greater_than
                   - functionValue:
                       args:
                       - fieldReferenceValue: genre
                       - stringValue: Science Fiction
-                      name: eq
+                      name: equal
                   name: and
               - functionValue:
                   args:
                   - fieldReferenceValue: published
                   - integerValue: '1900'
-                  name: lt
+                  name: less_than
               name: or
           name: where
         - args:
@@ -1353,12 +1373,12 @@ tests:
       - Collection: books
       - Where:
             - Not:
-                - IsNaN:
+                - Expr.is_nan:
                   - Field: rating
       - Select:
-          - ExprWithAlias:
+          - AliasedExpr:
               - Not:
-                  - IsNaN:
+                  - Expr.is_nan:
                     - Field: rating
               - "ratingIsNotNaN"
       - Limit: 1
@@ -1398,23 +1418,23 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Eq:
+          - Expr.equal:
               - Field: author
               - Constant: Douglas Adams
       - Select:
-          - ExprWithAlias:
-              - LogicalMax:
+          - AliasedExpr:
+              - Expr.logical_maximum:
                   - Field: rating
                   - Constant: 4.5
               - "max_rating"
-          - ExprWithAlias:
-              - LogicalMax:
+          - AliasedExpr:
+              - Expr.logical_minimum:
                   - Field: published
                   - Constant: 1900
-              - "max_published"
+              - "min_published"
     assert_results:
       - max_rating: 4.5
-        max_published: 1979
+        min_published: 1900
     assert_proto:
       pipeline:
         stages:
@@ -1426,23 +1446,23 @@ tests:
               args:
               - fieldReferenceValue: author
               - stringValue: Douglas Adams
-              name: eq
+              name: equal
           name: where
         - args:
           - mapValue:
               fields:
-                max_published:
+                min_published:
                   functionValue:
                     args:
                     - fieldReferenceValue: published
                     - integerValue: '1900'
-                    name: logical_maximum
+                    name: minimum
                 max_rating:
                   functionValue:
                     args:
                     - fieldReferenceValue: rating
                     - doubleValue: 4.5
-                    name: logical_maximum
+                    name: maximum
           name: select
   - description: testMapGet
     pipeline:
@@ -1452,14 +1472,14 @@ tests:
           - Field: published
           - DESCENDING
       - Select:
-          - ExprWithAlias:
-              - MapGet:
+          - AliasedExpr:
+              - Expr.map_get:
                   - Field: awards
-                  - Constant: hugo
+                  - hugo
               - "hugoAward"
           - Field: title
       - Where:
-          - Eq:
+          - Expr.equal:
               - Field: hugoAward
               - Constant: true
     assert_results:
@@ -1498,13 +1518,13 @@ tests:
               args:
               - fieldReferenceValue: hugoAward
               - booleanValue: true
-              name: eq
+              name: equal
           name: where
   - description: testNestedFields
     pipeline:
       - Collection: books
       - Where:
-          - Eq:
+          - Expr.equal:
               - Field: awards.hugo
               - Constant: true
       - Sort:
@@ -1530,7 +1550,7 @@ tests:
               args:
               - fieldReferenceValue: awards.hugo
               - booleanValue: true
-              name: eq
+              name: equal
           name: where
         - args:
           - mapValue:
@@ -1604,7 +1624,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Eq:
+        - Expr.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
       - Unnest:
@@ -1626,7 +1646,7 @@ tests:
               args:
               - fieldReferenceValue: title
               - stringValue: The Hitchhiker's Guide to the Galaxy
-              name: eq
+              name: equal
           name: where
         - args:
           - fieldReferenceValue: tags
@@ -1638,3 +1658,301 @@ tests:
                 tags_alias:
                   fieldReferenceValue: tags_alias
           name: select
+  - description: testGreaterThanOrEqual
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.greater_than_or_equal:
+              - Field: rating
+              - Constant: 4.6
+      - Select:
+        - title
+        - rating
+      - Sort:
+        - Ordering:
+          - Field: rating
+          - ASCENDING
+    assert_results:
+      - title: Dune
+        rating: 4.6
+      - title: The Lord of the Rings
+        rating: 4.7
+  - description: testInAndNotIn
+    pipeline:
+      - Collection: books
+      - Where:
+          - And:
+            - Expr.equal_any:
+                - Field: genre
+                - - Constant: Romance
+                  - Constant: Dystopian
+            - Expr.not_equal_any:
+                - Field: author
+                - - Constant: "George Orwell"
+    assert_results:
+      - title: "Pride and Prejudice"
+        author: "Jane Austen"
+        genre: "Romance"
+        published: 1813
+        rating: 4.5
+        tags:
+          - classic
+          - social commentary
+          - love
+        awards:
+          none: true
+      - title: "The Handmaid's Tale"
+        author: "Margaret Atwood"
+        genre: "Dystopian"
+        published: 1985
+        rating: 4.1
+        tags:
+          - feminism
+          - totalitarianism
+          - resistance
+        awards:
+          "arthur c. clarke": true
+          "booker prize": false
+  - description: testArrayReverse
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.array_reverse:
+                - Field: tags
+            - "reversedTags"
+    assert_results:
+      - reversedTags:
+        - adventure
+        - space
+        - comedy
+  - description: testExists
+    pipeline:
+      - Collection: books
+      - Where:
+          - And:
+            - Expr.exists:
+              - Field: awards.pulitzer
+            - Expr.equal:
+              - Field: awards.pulitzer
+              - Constant: true
+      - Select:
+        - title
+    assert_results:
+      - title: To Kill a Mockingbird
+  - description: testSum
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: genre
+              - Constant: Science Fiction
+      - Aggregate:
+        - AliasedExpr:
+            - Expr.sum:
+              - Field: rating
+            - "total_rating"
+    assert_results:
+      - total_rating: 8.8
+  - description: testStringContains
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.string_contains:
+              - Field: title
+              - Constant: "Hitchhiker's"
+      - Select:
+        - title
+    assert_results:
+      - title: "The Hitchhiker's Guide to the Galaxy"
+  - description: testVectorLength
+    pipeline:
+      - Collection: vectors
+      - Select:
+        - AliasedExpr:
+            - Expr.vector_length:
+                - Field: embedding
+            - "embedding_length"
+      - Sort:
+        - Ordering:
+          - Field: embedding_length
+          - ASCENDING
+    assert_results:
+      - embedding_length: 3
+      - embedding_length: 4
+  - description: testTimestampFunctions
+    pipeline:
+      - Collection: timestamps
+      - Select:
+        - AliasedExpr:
+            - Expr.timestamp_to_unix_micros:
+                - Field: time
+            - "micros"
+        - AliasedExpr:
+            - Expr.timestamp_to_unix_millis:
+                - Field: time
+            - "millis"
+        - AliasedExpr:
+            - Expr.timestamp_to_unix_seconds:
+                - Field: time
+            - "seconds"
+        - AliasedExpr:
+            - Expr.unix_micros_to_timestamp:
+                - Field: micros
+            - "from_micros"
+        - AliasedExpr:
+            - Expr.unix_millis_to_timestamp:
+                - Field: millis
+            - "from_millis"
+        - AliasedExpr:
+            - Expr.unix_seconds_to_timestamp:
+                - Field: seconds
+            - "from_seconds"
+        - AliasedExpr:
+            - Expr.timestamp_add:
+                - Field: time
+                - Constant: "day"
+                - Constant: 1
+            - "plus_day"
+        - AliasedExpr:
+            - Expr.timestamp_subtract:
+                - Field: time
+                - Constant: "hour"
+                - Constant: 1
+            - "minus_hour"
+    assert_results:
+      - micros:  735998460654321
+        millis:  735998460654
+        seconds: 735998460
+        from_micros: "1993-04-28T12:01:00.654321+00:00"
+        from_millis: "1993-04-28T12:01:00.654000+00:00"
+        from_seconds: "1993-04-28T12:01:00.000000+00:00"
+        plus_day: "1993-04-29T12:01:00.654321+00:00"
+        minus_hour: "1993-04-28T11:01:00.654321+00:00"
+  - description: testCollectionId
+    pipeline:
+      - Collection: books
+      - Limit: 1
+      - Select:
+        - AliasedExpr:
+            - Expr.collection_id:
+                - Field: __name__
+            - "collectionName"
+    assert_results:
+      - collectionName: "books"
+  - description: testXor
+    pipeline:
+      - Collection: books
+      - Where:
+          - Xor:
+            - - Expr.equal:
+                  - Field: genre
+                  - Constant: Romance
+              - Expr.greater_than:
+                  - Field: published
+                  - Constant: 1980
+      - Select:
+        - title
+        - genre
+        - published
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "Pride and Prejudice"
+        genre: "Romance"
+        published: 1813
+      - title: "The Handmaid's Tale"
+        genre: "Dystopian"
+        published: 1985
+  - description: testConditional
+    pipeline:
+      - Collection: books
+      - Select:
+        - title
+        - AliasedExpr:
+            - Conditional:
+                - Expr.greater_than:
+                    - Field: published
+                    - Constant: 1950
+                - Constant: "Modern"
+                - Constant: "Classic"
+            - "era"
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+      - Limit: 4
+    assert_results:
+      - title: "1984"
+        era: "Classic"
+      - title: "Crime and Punishment"
+        era: "Classic"
+      - title: "Dune"
+        era: "Modern"
+      - title: "One Hundred Years of Solitude"
+        era: "Modern"
+  - description: testFieldToFieldArithmetic
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - Select:
+        - AliasedExpr:
+            - Expr.add:
+                - Field: published
+                - Field: rating
+            - "pub_plus_rating"
+    assert_results:
+      - pub_plus_rating: 1969.6
+  - description: testFieldToFieldComparison
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.greater_than:
+              - Field: published
+              - Field: rating
+      - Select:
+        - title
+    assert_count: 10 # All books were published after year 4.7
+  - description: testExistsNegative
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.exists:
+              - Field: non_existent_field
+    assert_count: 0
+  - description: testConditionalWithFields
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal_any:
+              - Field: title
+              - - Constant: "Dune"
+                - Constant: "1984"
+      - Select:
+        - title
+        - AliasedExpr:
+            - Conditional:
+                - Expr.greater_than:
+                    - Field: published
+                    - Constant: 1950
+                - Field: author
+                - Field: genre
+            - "conditional_field"
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "1984"
+        conditional_field: "Dystopian"
+      - title: "Dune"
+        conditional_field: "Frank Herbert"

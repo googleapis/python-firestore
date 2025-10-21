@@ -23,11 +23,10 @@ from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_expressions import (
-    Accumulator,
+    AliasedAggregate,
     Expr,
-    ExprWithAlias,
     Field,
-    FilterCondition,
+    BooleanExpr,
     Selectable,
 )
 from google.cloud.firestore_v1 import _helpers
@@ -146,15 +145,15 @@ class _BasePipeline:
 
         The added fields are defined using `Selectable` expressions, which can be:
             - `Field`: References an existing document field.
-            - `ExprWithAlias`: References an existing expression with an alias,
-                assigned using `Expr.as_()`
+            - `Function`: Performs a calculation using functions like `add`,
+              `multiply` with assigned aliases using `Expr.as_()`.
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, add
             >>> pipeline = client.pipeline().collection("books")
             >>> pipeline = pipeline.add_fields(
             ...     Field.of("rating").as_("bookRating"), # Rename 'rating' to 'bookRating'
-            ...     Field.of("quantity").add(5).as_("totalCost")  # Calculate 'totalCost'
+            ...     add(5, Field.of("quantity")).as_("totalCost")  # Calculate 'totalCost'
             ... )
 
         Args:
@@ -220,14 +219,14 @@ class _BasePipeline:
         """
         return self._append(stages.Select(*selections))
 
-    def where(self, condition: FilterCondition) -> "_BasePipeline":
+    def where(self, condition: BooleanExpr) -> "_BasePipeline":
         """
         Filters the documents from previous stages to only include those matching
-        the specified `FilterCondition`.
+        the specified `BooleanExpr`.
 
         This stage allows you to apply conditions to the data, similar to a "WHERE"
         clause in SQL. You can filter documents based on their field values, using
-        implementations of `FilterCondition`, typically including but not limited to:
+        implementations of `BooleanExpr`, typically including but not limited to:
             - field comparators: `eq`, `lt` (less than), `gt` (greater than), etc.
             - logical operators: `And`, `Or`, `Not`, etc.
             - advanced functions: `regex_matches`, `array_contains`, etc.
@@ -252,7 +251,7 @@ class _BasePipeline:
 
 
         Args:
-            condition: The `FilterCondition` to apply.
+            condition: The `BooleanExpr` to apply.
 
         Returns:
             A new Pipeline object with this stage appended to the stage list
@@ -531,7 +530,7 @@ class _BasePipeline:
 
     def aggregate(
         self,
-        *accumulators: ExprWithAlias[Accumulator],
+        *accumulators: AliasedAggregate,
         groups: Sequence[str | Selectable] = (),
     ) -> "_BasePipeline":
         """
@@ -541,7 +540,7 @@ class _BasePipeline:
         This stage allows you to calculate aggregate values (like sum, average, count,
         min, max) over a set of documents.
 
-        - **Accumulators:** Define the aggregation calculations using `Accumulator`
+        - **Accumulators:** Define the aggregation calculations using `AggregateFunction`
           expressions (e.g., `sum()`, `avg()`, `count()`, `min()`, `max()`) combined
           with `as_()` to name the result field.
         - **Groups:** Optionally specify fields (by name or `Selectable`) to group
@@ -569,7 +568,7 @@ class _BasePipeline:
 
 
         Args:
-            *accumulators: One or more `ExprWithAlias[Accumulator]` expressions defining
+            *accumulators: One or more `AliasedAggregate` expressions defining
                            the aggregations to perform and their output names.
             groups: An optional sequence of field names (str) or `Selectable`
                     expressions to group by before aggregating.

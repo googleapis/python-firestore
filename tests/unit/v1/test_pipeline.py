@@ -17,7 +17,6 @@ import pytest
 
 from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1.pipeline_expressions import Field
-from google.cloud.firestore_v1.pipeline_expressions import Exists
 
 
 def _make_pipeline(*args, client=mock.Mock()):
@@ -363,7 +362,7 @@ def test_pipeline_execute_stream_equivalence_mocked():
         ("remove_fields", (Field.of("n"),), stages.RemoveFields),
         ("select", ("name",), stages.Select),
         ("select", (Field.of("n"),), stages.Select),
-        ("where", (Exists(Field.of("n")),), stages.Where),
+        ("where", (Field.of("n").exists(),), stages.Where),
         ("find_nearest", ("name", [0.1], 0), stages.FindNearest),
         (
             "find_nearest",
