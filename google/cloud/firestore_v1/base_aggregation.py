@@ -162,7 +162,7 @@ class AvgAggregation(BaseAggregation):
         return aggregation_pb
 
     def _to_pipeline_expr(self, autoindexer: Iterable[int]):
-        return Field.of(self.field_ref).avg().as_(self._pipeline_alias(autoindexer))
+        return Field.of(self.field_ref).average().as_(self._pipeline_alias(autoindexer))
 
 
 def _query_response_to_result(

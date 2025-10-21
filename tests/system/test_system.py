@@ -98,6 +98,7 @@ def verify_pipeline(query):
             if isinstance(query, BaseAggregationQuery):
                 # aggregation queries return a list of lists of aggregation results
                 query_results = [[a._to_dict() for a in s] for s in query.get()]
+                query_results = list(itertools.chain.from_iterable(query_results))
             else:
                 # other qureies return a simple list of results
                 query_results = [s.to_dict() for s in query.get()]
