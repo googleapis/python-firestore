@@ -868,7 +868,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("Condition")
         arg2 = self._make_arg("ThenExpr")
         arg3 = self._make_arg("ElseExpr")
-        instance = Expr.conditional(arg1, arg2, arg3)
+        instance = expr.Conditional(arg1, arg2, arg3)
         assert instance.name == "conditional"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "Conditional(Condition, ThenExpr, ElseExpr)"

@@ -143,30 +143,6 @@ class Expr(ABC):
             else:
                 return self.instance_func.__get__(instance, owner)
 
-    @staticmethod
-    def conditional(
-        condition: BooleanExpr,
-        then_expr: Expr,
-        else_expr: Expr,
-    ) -> "Expr":
-        """
-        Creates a conditional expression that evaluates to a 'then' expression if a condition is true
-        and an 'else' expression if the condition is false.
-
-        Example:
-            >>> # If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
-            >>> Expr.conditional(Field.of("age").greater_than(18), Constant.of("Adult"), Constant.of("Minor"));
-
-        Args:
-            condition: The condition to evaluate.
-            then_expr: The expression to return if the condition is true.
-            else_expr: The expression to return if the condition is false
-
-        Returns:
-            A new `Expr` representing the conditional expression.
-        """
-        return Conditional(condition, then_expr, else_expr)
-
     @expose_as_static
     def add(self, other: Expr | float) -> "Expr":
         """Creates an expression that adds this expression to another expression or constant.
@@ -1379,17 +1355,18 @@ class BooleanExpr(Function):
 
 
 class And(BooleanExpr):
-     """
-     Represents an expression that performs a logical 'AND' operation on multiple filter conditions.
+    """
+    Represents an expression that performs a logical 'AND' operation on multiple filter conditions.
 
-     Example:
+    Example:
         >>> # Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
         >>> # the 'status' field is "active"
         >>> Expr.And(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
-     Args:
-         *conditions: The filter conditions to 'AND' together.
+    Args:
+        *conditions: The filter conditions to 'AND' together.
     """
+
     def __init__(self, *conditions: "BooleanExpr"):
         super().__init__("and", conditions, use_infix_repr=False)
 
