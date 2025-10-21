@@ -74,91 +74,6 @@ class TestOrdering:
         assert result.map_value.fields["direction"].string_value == "descending"
 
 
-class TestExpr:
-    def test_ctor(self):
-        """
-        Base class should be abstract
-        """
-        with pytest.raises(TypeError):
-            expr.Expr()
-
-    @pytest.mark.parametrize(
-        "method,args,result_cls",
-        [
-            ("add", (2,), expr.Add),
-            ("subtract", (2,), expr.Subtract),
-            ("multiply", (2,), expr.Multiply),
-            ("divide", (2,), expr.Divide),
-            ("mod", (2,), expr.Mod),
-            ("logical_maximum", (2,), expr.LogicalMaximum),
-            ("logical_minimum", (2,), expr.LogicalMinimum),
-            ("equal", (2,), expr.Equal),
-            ("not_equal", (2,), expr.NotEqual),
-            ("less_than", (2,), expr.LessThan),
-            ("less_than_or_equal", (2,), expr.LessThanOrEqual),
-            ("greater_than", (2,), expr.GreaterThan),
-            ("greater_than_or_equal", (2,), expr.GreaterThanOrEqual),
-            ("equal_any", ([None],), expr.EqualAny),
-            ("not_equal_any", ([None],), expr.NotEqualAny),
-            ("array_contains", (None,), expr.ArrayContains),
-            ("array_contains_all", ([None],), expr.ArrayContainsAll),
-            ("array_contains_any", ([None],), expr.ArrayContainsAny),
-            ("array_length", (), expr.ArrayLength),
-            ("array_reverse", (), expr.ArrayReverse),
-            ("is_nan", (), expr.IsNaN),
-            ("exists", (), expr.Exists),
-            ("sum", (), expr.Sum),
-            ("average", (), expr.Average),
-            ("count", (), expr.Count),
-            ("minimum", (), expr.Minimum),
-            ("maximum", (), expr.Maximum),
-            ("char_length", (), expr.CharLength),
-            ("byte_length", (), expr.ByteLength),
-            ("like", ("pattern",), expr.Like),
-            ("regex_contains", ("regex",), expr.RegexContains),
-            ("regex_matches", ("regex",), expr.RegexMatch),
-            ("string_contains", ("substring",), expr.StringContains),
-            ("starts_with", ("prefix",), expr.StartsWith),
-            ("ends_with", ("postfix",), expr.EndsWith),
-            ("string_concat", ("elem1", expr.Constant("elem2")), expr.StringConcat),
-            ("map_get", ("key",), expr.MapGet),
-            ("vector_length", (), expr.VectorLength),
-            ("timestamp_to_unix_micros", (), expr.TimestampToUnixMicros),
-            ("unix_micros_to_timestamp", (), expr.UnixMicrosToTimestamp),
-            ("timestamp_to_unix_millis", (), expr.TimestampToUnixMillis),
-            ("unix_millis_to_timestamp", (), expr.UnixMillisToTimestamp),
-            ("timestamp_to_unix_seconds", (), expr.TimestampToUnixSeconds),
-            ("unix_seconds_to_timestamp", (), expr.UnixSecondsToTimestamp),
-            ("timestamp_add", ("day", 1), expr.TimestampAdd),
-            ("timestamp_subtract", ("hour", 2.5), expr.TimestampSubtract),
-            ("ascending", (), expr.Ordering),
-            ("descending", (), expr.Ordering),
-            ("as_", ("alias",), expr.AliasedExpr),
-        ],
-    )
-    @pytest.mark.parametrize(
-        "base_instance",
-        [
-            expr.Constant(1),
-            expr.Function.add("1", 1),
-            expr.Field.of("test"),
-            expr.Constant(1).as_("one"),
-        ],
-    )
-    def test_infix_call(self, method, args, result_cls, base_instance):
-        """
-        many BooleanExpr expressions support infix execution, and are exposed as methods on Expr. Test calling them
-        """
-        method_ptr = getattr(base_instance, method)
-
-        result = method_ptr(*args)
-        assert isinstance(result, result_cls)
-        if isinstance(result, (expr.Ordering, expr.AliasedExpr)):
-            assert result.expr == base_instance
-        else:
-            assert result.params[0] == base_instance
-
-
 class TestConstant:
     @pytest.mark.parametrize(
         "input_val, to_pb_val",
@@ -392,10 +307,13 @@ class TestSelectable:
 
         def test_repr(self):
             instance = expr.Field.of("field1").maximum().as_("alias1")
-            assert repr(instance) == "Maximum(Field.of('field1')).as_('alias1')"
+            assert (
+                repr(instance)
+                == "Field.of('field1').maximum().as_('alias1')"
+            )
 
         def test_ctor(self):
-            arg = expr.Field.of("field1").minimum()
+            arg = expr.Expr.minimum("field1")
             alias = "alias1"
             instance = expr.AliasedAggregate(arg, alias)
             assert instance.expr == arg
@@ -448,14 +366,10 @@ class TestBooleanExpr:
         result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         # should include existance checks
-        expected_cond1 = expr.And(
-            expr.Exists(expr.Field.of("field1")),
-            expr.Equal(expr.Field.of("field1"), expr.Constant("val1")),
-        )
-        expected_cond2 = expr.And(
-            expr.Exists(expr.Field.of("field2")),
-            expr.Equal(expr.Field.of("field2"), expr.Constant(None)),
-        )
+        field1 = expr.Field.of("field1")
+        field2 = expr.Field.of("field2")
+        expected_cond1 = expr.And(field1.exists(), field1.equal(expr.Constant("val1")))
+        expected_cond2 = expr.And(field2.exists(), field2.equal(expr.Constant(None)))
         expected = expr.Or(expected_cond1, expected_cond2)
 
         assert repr(result) == repr(expected)
@@ -491,14 +405,12 @@ class TestBooleanExpr:
         result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         # should include existance checks
+        field1 = expr.Field.of("field1")
+        field2 = expr.Field.of("field2")
         expected_cond1 = expr.And(
-            expr.Exists(expr.Field.of("field1")),
-            expr.GreaterThan(expr.Field.of("field1"), expr.Constant(100)),
+            field1.exists(), field1.greater_than(expr.Constant(100))
         )
-        expected_cond2 = expr.And(
-            expr.Exists(expr.Field.of("field2")),
-            expr.LessThan(expr.Field.of("field2"), expr.Constant(200)),
-        )
+        expected_cond2 = expr.And(field2.exists(), field2.less_than(expr.Constant(200)))
         expected = expr.And(expected_cond1, expected_cond2)
         assert repr(result) == repr(expected)
 
@@ -541,17 +453,13 @@ class TestBooleanExpr:
 
         result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
-        expected_cond1 = expr.And(
-            expr.Exists(expr.Field.of("field1")),
-            expr.Equal(expr.Field.of("field1"), expr.Constant("val1")),
-        )
-        expected_cond2 = expr.And(
-            expr.Exists(expr.Field.of("field2")),
-            expr.GreaterThan(expr.Field.of("field2"), expr.Constant(10)),
-        )
+        field1 = expr.Field.of("field1")
+        field2 = expr.Field.of("field2")
+        field3 = expr.Field.of("field3")
+        expected_cond1 = expr.And(field1.exists(), field1.equal(expr.Constant("val1")))
+        expected_cond2 = expr.And(field2.exists(), field2.greater_than(expr.Constant(10)))
         expected_cond3 = expr.And(
-            expr.Exists(expr.Field.of("field3")),
-            expr.Not(expr.Equal(expr.Field.of("field3"), expr.Constant(None))),
+            field3.exists(), expr.Not(field3.equal(expr.Constant(None)))
         )
         expected_inner_and = expr.And(expected_cond2, expected_cond3)
         expected_outer_or = expr.Or(expected_cond1, expected_inner_and)
@@ -581,9 +489,13 @@ class TestBooleanExpr:
     @pytest.mark.parametrize(
         "op_enum, expected_expr_func",
         [
-            (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN, expr.IsNaN),
+            (
+                query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN,
+                expr.Expr.is_nan
+            ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN,
+
                 lambda f: expr.Not(f.is_nan()),
             ),
             (
@@ -614,7 +526,7 @@ class TestBooleanExpr:
         field_expr_inst = expr.Field.of(field_path)
         expected_condition = expected_expr_func(field_expr_inst)
         # should include existance checks
-        expected = expr.And(expr.Exists(field_expr_inst), expected_condition)
+        expected = expr.And(field_expr_inst.exists(), expected_condition)
 
         assert repr(result) == repr(expected)
 
@@ -638,41 +550,53 @@ class TestBooleanExpr:
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN,
                 10,
-                expr.LessThan,
+                expr.Expr.less_than,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN_OR_EQUAL,
                 10,
-                expr.LessThanOrEqual,
+                expr.Expr.less_than_or_equal
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN,
                 10,
-                expr.GreaterThan,
+                expr.Expr.greater_than
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN_OR_EQUAL,
                 10,
-                expr.GreaterThanOrEqual,
+                expr.Expr.greater_than_or_equal
             ),
-            (query_pb.StructuredQuery.FieldFilter.Operator.EQUAL, 10, expr.Equal),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.EQUAL,
+                10,
+                expr.Expr.equal
+            ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.NOT_EQUAL,
                 10,
-                expr.NotEqual,
+                expr.Expr.not_equal
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS,
                 10,
-                expr.ArrayContains,
+                expr.Expr.array_contains,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS_ANY,
                 [10, 20],
-                expr.ArrayContainsAny,
+                expr.Expr.array_contains_any,
             ),
-            (query_pb.StructuredQuery.FieldFilter.Operator.IN, [10, 20], expr.EqualAny),
-            (query_pb.StructuredQuery.FieldFilter.Operator.NOT_IN, [10, 20], expr.NotEqualAny),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.IN,
+                [10, 20],
+                expr.Expr.equal_any,
+            ),
+            (
+                query_pb.StructuredQuery.FieldFilter.Operator.NOT_IN,
+                [10, 20],
+                expr.Expr.not_equal_any,
+            ),
         ],
     )
     def test__from_query_filter_pb_field_filter(
@@ -701,7 +625,7 @@ class TestBooleanExpr:
         )
         expected_condition = expected_expr_func(field_expr, value)
         # should include existance checks
-        expected = expr.And(expr.Exists(field_expr), expected_condition)
+        expected = expr.And(field_expr.exists(), expected_condition)
 
         assert repr(result) == repr(expected)
 
@@ -736,17 +660,19 @@ class TestBooleanExprClasses:
     """
 
     def _make_arg(self, name="Mock"):
-        arg = mock.Mock()
+        arg = mock.Mock(spec=expr.Expr)
+        arg._cast_to_expr_or_convert_to_constant = lambda x: x
         arg.__repr__ = lambda x: name
         return arg
 
     def test_and(self):
         arg1 = self._make_arg()
         arg2 = self._make_arg()
-        instance = expr.And(arg1, arg2)
+        arg3 = self._make_arg()
+        instance = expr.And(arg1, arg2, arg3)
         assert instance.name == "and"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "And(Mock, Mock)"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "And(Mock, Mock, Mock)"
 
     def test_or(self):
         arg1 = self._make_arg("Arg1")
@@ -754,12 +680,12 @@ class TestBooleanExprClasses:
         instance = expr.Or(arg1, arg2)
         assert instance.name == "or"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Arg1.or(Arg2)"
+        assert repr(instance) == "Or(Arg1, Arg2)"
 
     def test_array_contains(self):
         arg1 = self._make_arg("ArrayField")
         arg2 = self._make_arg("Element")
-        instance = expr.ArrayContains(arg1, arg2)
+        instance = expr.Expr.array_contains(arg1, arg2)
         assert instance.name == "array_contains"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "ArrayField.array_contains(Element)"
@@ -768,7 +694,7 @@ class TestBooleanExprClasses:
         arg1 = self._make_arg("ArrayField")
         arg2 = self._make_arg("Element1")
         arg3 = self._make_arg("Element2")
-        instance = expr.ArrayContainsAny(arg1, [arg2, arg3])
+        instance = expr.Expr.array_contains_any(arg1, [arg2, arg3])
         assert instance.name == "array_contains_any"
         assert isinstance(instance.params[1], ListOfExprs)
         assert instance.params[0] == arg1
@@ -780,7 +706,7 @@ class TestBooleanExprClasses:
 
     def test_exists(self):
         arg1 = self._make_arg("Field")
-        instance = expr.Exists(arg1)
+        instance = expr.Expr.exists(arg1)
         assert instance.name == "exists"
         assert instance.params == [arg1]
         assert repr(instance) == "Field.exists()"
@@ -788,7 +714,7 @@ class TestBooleanExprClasses:
     def test_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Equal(arg1, arg2)
+        instance = expr.Expr.equal(arg1, arg2)
         assert instance.name == "equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.equal(Right)"
@@ -796,7 +722,7 @@ class TestBooleanExprClasses:
     def test_greater_than_or_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.GreaterThanOrEqual(arg1, arg2)
+        instance = expr.Expr.greater_than_or_equal(arg1, arg2)
         assert instance.name == "greater_than_or_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.greater_than_or_equal(Right)"
@@ -804,7 +730,7 @@ class TestBooleanExprClasses:
     def test_greater_than(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.GreaterThan(arg1, arg2)
+        instance = expr.Expr.greater_than(arg1, arg2)
         assert instance.name == "greater_than"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.greater_than(Right)"
@@ -812,7 +738,7 @@ class TestBooleanExprClasses:
     def test_less_than_or_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.LessThanOrEqual(arg1, arg2)
+        instance = expr.Expr.less_than_or_equal(arg1, arg2)
         assert instance.name == "less_than_or_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.less_than_or_equal(Right)"
@@ -820,7 +746,7 @@ class TestBooleanExprClasses:
     def test_less_than(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.LessThan(arg1, arg2)
+        instance = expr.Expr.less_than(arg1, arg2)
         assert instance.name == "less_than"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.less_than(Right)"
@@ -828,7 +754,7 @@ class TestBooleanExprClasses:
     def test_not_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.NotEqual(arg1, arg2)
+        instance = expr.Expr.not_equal(arg1, arg2)
         assert instance.name == "not_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.not_equal(Right)"
@@ -837,7 +763,7 @@ class TestBooleanExprClasses:
         arg1 = self._make_arg("Field")
         arg2 = self._make_arg("Value1")
         arg3 = self._make_arg("Value2")
-        instance = expr.EqualAny(arg1, [arg2, arg3])
+        instance = expr.Expr.equal_any(arg1, [arg2, arg3])
         assert instance.name == "equal_any"
         assert isinstance(instance.params[1], ListOfExprs)
         assert instance.params[0] == arg1
@@ -848,7 +774,7 @@ class TestBooleanExprClasses:
         arg1 = self._make_arg("Field")
         arg2 = self._make_arg("Value1")
         arg3 = self._make_arg("Value2")
-        instance = expr.NotEqualAny(arg1, [arg2, arg3])
+        instance = expr.Expr.not_equal_any(arg1, [arg2, arg3])
         assert instance.name == "not_equal_any"
         assert isinstance(instance.params[1], ListOfExprs)
         assert instance.params[0] == arg1
@@ -857,7 +783,7 @@ class TestBooleanExprClasses:
 
     def test_is_nan(self):
         arg1 = self._make_arg("Value")
-        instance = expr.IsNaN(arg1)
+        instance = expr.Expr.is_nan(arg1)
         assert instance.name == "is_nan"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_nan()"
@@ -873,7 +799,7 @@ class TestBooleanExprClasses:
         arg1 = self._make_arg("ArrayField")
         arg2 = self._make_arg("Element1")
         arg3 = self._make_arg("Element2")
-        instance = expr.ArrayContainsAll(arg1, [arg2, arg3])
+        instance = expr.Expr.array_contains_all(arg1, [arg2, arg3])
         assert instance.name == "array_contains_all"
         assert isinstance(instance.params[1], ListOfExprs)
         assert instance.params[0] == arg1
@@ -886,7 +812,7 @@ class TestBooleanExprClasses:
     def test_ends_with(self):
         arg1 = self._make_arg("Expr")
         arg2 = self._make_arg("Postfix")
-        instance = expr.EndsWith(arg1, arg2)
+        instance = expr.Expr.ends_with(arg1, arg2)
         assert instance.name == "ends_with"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.ends_with(Postfix)"
@@ -895,7 +821,7 @@ class TestBooleanExprClasses:
         arg1 = self._make_arg("Condition")
         arg2 = self._make_arg("ThenExpr")
         arg3 = self._make_arg("ElseExpr")
-        instance = expr.Conditional(arg1, arg2, arg3)
+        instance = expr.Expr.conditional(arg1, arg2, arg3)
         assert instance.name == "conditional"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "Conditional(Condition, ThenExpr, ElseExpr)"
@@ -903,7 +829,7 @@ class TestBooleanExprClasses:
     def test_like(self):
         arg1 = self._make_arg("Expr")
         arg2 = self._make_arg("Pattern")
-        instance = expr.Like(arg1, arg2)
+        instance = expr.Expr.like(arg1, arg2)
         assert instance.name == "like"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.like(Pattern)"
@@ -911,7 +837,7 @@ class TestBooleanExprClasses:
     def test_regex_contains(self):
         arg1 = self._make_arg("Expr")
         arg2 = self._make_arg("Regex")
-        instance = expr.RegexContains(arg1, arg2)
+        instance = expr.Expr.regex_contains(arg1, arg2)
         assert instance.name == "regex_contains"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.regex_contains(Regex)"
@@ -919,7 +845,7 @@ class TestBooleanExprClasses:
     def test_regex_match(self):
         arg1 = self._make_arg("Expr")
         arg2 = self._make_arg("Regex")
-        instance = expr.RegexMatch(arg1, arg2)
+        instance = expr.Expr.regex_match(arg1, arg2)
         assert instance.name == "regex_match"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.regex_match(Regex)"
@@ -927,7 +853,7 @@ class TestBooleanExprClasses:
     def test_starts_with(self):
         arg1 = self._make_arg("Expr")
         arg2 = self._make_arg("Prefix")
-        instance = expr.StartsWith(arg1, arg2)
+        instance = expr.Expr.starts_with(arg1, arg2)
         assert instance.name == "starts_with"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.starts_with(Prefix)"
@@ -935,7 +861,7 @@ class TestBooleanExprClasses:
     def test_string_contains(self):
         arg1 = self._make_arg("Expr")
         arg2 = self._make_arg("Substring")
-        instance = expr.StringContains(arg1, arg2)
+        instance = expr.Expr.string_contains(arg1, arg2)
         assert instance.name == "string_contains"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Expr.string_contains(Substring)"
@@ -955,300 +881,231 @@ class TestFunctionClasses:
     """
 
     @pytest.mark.parametrize(
-        "method,args,result_cls",
-        [
-            ("conditional", ("field", "then", "else"), expr.Conditional),
-            ("add", ("field", 2), expr.Add),
-            ("subtract", ("field", 2), expr.Subtract),
-            ("multiply", ("field", 2), expr.Multiply),
-            ("divide", ("field", 2), expr.Divide),
-            ("mod", ("field", 2), expr.Mod),
-            ("logical_maximum", ("field", 2), expr.LogicalMaximum),
-            ("logical_minimum", ("field", 2), expr.LogicalMinimum),
-            ("equal", ("field", 2), expr.Equal),
-            ("not_equal", ("field", 2), expr.NotEqual),
-            ("less_than", ("field", 2), expr.LessThan),
-            ("less_than_or_equal", ("field", 2), expr.LessThanOrEqual),
-            ("greater_than", ("field", 2), expr.GreaterThan),
-            ("greater_than_or_equal", ("field", 2), expr.GreaterThanOrEqual),
-            ("equal_any", ("field", [None]), expr.EqualAny),
-            ("not_equal_any", ("field", [None]), expr.NotEqualAny),
-            ("array_contains", ("field", None), expr.ArrayContains),
-            ("array_contains_all", ("field", [None]), expr.ArrayContainsAll),
-            ("array_contains_any", ("field", [None]), expr.ArrayContainsAny),
-            ("array_length", ("field",), expr.ArrayLength),
-            ("array_reverse", ("field",), expr.ArrayReverse),
-            ("is_nan", ("field",), expr.IsNaN),
-            ("exists", ("field",), expr.Exists),
-            ("sum", ("field",), expr.Sum),
-            ("average", ("field",), expr.Average),
-            ("count", ("field",), expr.Count),
-            ("minimum", ("field",), expr.Minimum),
-            ("maximum", ("field",), expr.Maximum),
-            ("char_length", ("field",), expr.CharLength),
-            ("byte_length", ("field",), expr.ByteLength),
-            ("like", ("field", "pattern"), expr.Like),
-            ("regex_contains", ("field", "regex"), expr.RegexContains),
-            ("regex_matches", ("field", "regex"), expr.RegexMatch),
-            ("string_contains", ("field", "substring"), expr.StringContains),
-            ("starts_with", ("field", "prefix"), expr.StartsWith),
-            ("ends_with", ("field", "postfix"), expr.EndsWith),
-            ("string_concat", ("field", "elem1", "elem2"), expr.StringConcat),
-            ("map_get", ("field", "key"), expr.MapGet),
-            ("vector_length", ("field",), expr.VectorLength),
-            ("timestamp_to_unix_micros", ("field",), expr.TimestampToUnixMicros),
-            ("unix_micros_to_timestamp", ("field",), expr.UnixMicrosToTimestamp),
-            ("timestamp_to_unix_millis", ("field",), expr.TimestampToUnixMillis),
-            ("unix_millis_to_timestamp", ("field",), expr.UnixMillisToTimestamp),
-            ("timestamp_to_unix_seconds", ("field",), expr.TimestampToUnixSeconds),
-            ("unix_seconds_to_timestamp", ("field",), expr.UnixSecondsToTimestamp),
-            ("timestamp_add", ("field", "day", 1), expr.TimestampAdd),
-            ("timestamp_subtract", ("field", "hour", 2.5), expr.TimestampSubtract),
-        ],
-    )
-    def test_function_builder(self, method, args, result_cls):
-        """
-        Test building functions using methods exposed on base Function class.
-        """
-        method_ptr = getattr(expr.Function, method)
-
-        result = method_ptr(*args)
-        assert isinstance(result, result_cls)
-
-    @pytest.mark.parametrize(
         "first,second,expected",
         [
-            (expr.CharLength(1), expr.CharLength(2), False),
-            (expr.CharLength(1), expr.CharLength(1), True),
-            (expr.CharLength(1), expr.ByteLength(1), False),
+            (expr.Field.of("test").char_length(), expr.Field.of("test").char_length(), True),
+            (expr.Field.of("test").char_length(), expr.Field.of("diff").char_length(), False),
+            (expr.Field.of("same").char_length(), expr.Field.of("same").byte_length(), False),
+            (expr.Field.of("test").char_length(), expr.Field.of("diff").byte_length(), False),
+            (expr.Constant.of("").byte_length(), expr.Field.of("").byte_length(), False),
+            (expr.Field.of("").byte_length(), expr.Field.of("").byte_length(), True),
         ],
     )
     def test_equality(self, first, second, expected):
         assert (first == second) is expected
 
     def _make_arg(self, name="Mock"):
-        arg = mock.Mock()
+        arg = mock.Mock(spec=expr.Expr)
+        arg._cast_to_expr_or_convert_to_constant = lambda x: x
         arg.__repr__ = lambda x: name
         return arg
 
     def test_divide(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Divide(arg1, arg2)
+        instance = expr.Expr.divide(arg1, arg2)
         assert instance.name == "divide"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Divide(Left, Right)"
+        assert repr(instance) == "Left.divide(Right)"
 
     def test_logical_maximum(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.LogicalMaximum(arg1, arg2)
+        instance = expr.Expr.logical_maximum(arg1, arg2)
         assert instance.name == "maximum"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "LogicalMaximum(Left, Right)"
+        assert repr(instance) == "Left.logical_maximum(Right)"
 
     def test_logical_minimum(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.LogicalMinimum(arg1, arg2)
+        instance = expr.Expr.logical_minimum(arg1, arg2)
         assert instance.name == "minimum"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "LogicalMinimum(Left, Right)"
+        assert repr(instance) == "Left.logical_minimum(Right)"
 
     def test_map_get(self):
         arg1 = self._make_arg("Map")
-        arg2 = expr.Constant("Key")
-        instance = expr.MapGet(arg1, arg2)
+        arg2 = "key"
+        instance = expr.Expr.map_get(arg1, arg2)
         assert instance.name == "map_get"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "MapGet(Map, Constant.of('Key'))"
+        assert instance.params == [arg1, expr.Constant.of(arg2)]
+        assert repr(instance) == "Map.map_get(Constant.of('key'))"
 
     def test_mod(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Mod(arg1, arg2)
+        instance = expr.Expr.mod(arg1, arg2)
         assert instance.name == "mod"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Mod(Left, Right)"
+        assert repr(instance) == "Left.mod(Right)"
 
     def test_multiply(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Multiply(arg1, arg2)
+        instance = expr.Expr.multiply(arg1, arg2)
         assert instance.name == "multiply"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Multiply(Left, Right)"
-
-    def test_parent(self):
-        arg1 = self._make_arg("Value")
-        instance = expr.Parent(arg1)
-        assert instance.name == "parent"
-        assert instance.params == [arg1]
-        assert repr(instance) == "Parent(Value)"
+        assert repr(instance) == "Left.multiply(Right)"
 
     def test_string_concat(self):
         arg1 = self._make_arg("Str1")
         arg2 = self._make_arg("Str2")
-        instance = expr.StringConcat(arg1, arg2)
+        instance = expr.Expr.string_concat(arg1, arg2)
         assert instance.name == "string_concat"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "StringConcat(Str1, Str2)"
+        assert repr(instance) == "Str1.string_concat(Str2)"
 
     def test_subtract(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Subtract(arg1, arg2)
+        instance = expr.Expr.subtract(arg1, arg2)
         assert instance.name == "subtract"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Subtract(Left, Right)"
+        assert repr(instance) == "Left.subtract(Right)"
 
     def test_timestamp_add(self):
         arg1 = self._make_arg("Timestamp")
         arg2 = self._make_arg("Unit")
         arg3 = self._make_arg("Amount")
-        instance = expr.TimestampAdd(arg1, arg2, arg3)
+        instance = expr.Expr.timestamp_add(arg1, arg2, arg3)
         assert instance.name == "timestamp_add"
         assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "TimestampAdd(Timestamp, Unit, Amount)"
+        assert repr(instance) == "Timestamp.timestamp_add(Unit, Amount)"
 
     def test_timestamp_subtract(self):
         arg1 = self._make_arg("Timestamp")
         arg2 = self._make_arg("Unit")
         arg3 = self._make_arg("Amount")
-        instance = expr.TimestampSubtract(arg1, arg2, arg3)
+        instance = expr.Expr.timestamp_subtract(arg1, arg2, arg3)
         assert instance.name == "timestamp_subtract"
         assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "TimestampSubtract(Timestamp, Unit, Amount)"
+        assert repr(instance) == "Timestamp.timestamp_subtract(Unit, Amount)"
 
     def test_timestamp_to_unix_micros(self):
         arg1 = self._make_arg("Input")
-        instance = expr.TimestampToUnixMicros(arg1)
+        instance = expr.Expr.timestamp_to_unix_micros(arg1)
         assert instance.name == "timestamp_to_unix_micros"
         assert instance.params == [arg1]
-        assert repr(instance) == "TimestampToUnixMicros(Input)"
+        assert repr(instance) == "Input.timestamp_to_unix_micros()"
 
     def test_timestamp_to_unix_millis(self):
         arg1 = self._make_arg("Input")
-        instance = expr.TimestampToUnixMillis(arg1)
+        instance = expr.Expr.timestamp_to_unix_millis(arg1)
         assert instance.name == "timestamp_to_unix_millis"
         assert instance.params == [arg1]
-        assert repr(instance) == "TimestampToUnixMillis(Input)"
+        assert repr(instance) == "Input.timestamp_to_unix_millis()"
 
     def test_timestamp_to_unix_seconds(self):
         arg1 = self._make_arg("Input")
-        instance = expr.TimestampToUnixSeconds(arg1)
+        instance = expr.Expr.timestamp_to_unix_seconds(arg1)
         assert instance.name == "timestamp_to_unix_seconds"
         assert instance.params == [arg1]
-        assert repr(instance) == "TimestampToUnixSeconds(Input)"
+        assert repr(instance) == "Input.timestamp_to_unix_seconds()"
 
     def test_unix_micros_to_timestamp(self):
         arg1 = self._make_arg("Input")
-        instance = expr.UnixMicrosToTimestamp(arg1)
+        instance = expr.Expr.unix_micros_to_timestamp(arg1)
         assert instance.name == "unix_micros_to_timestamp"
         assert instance.params == [arg1]
-        assert repr(instance) == "UnixMicrosToTimestamp(Input)"
+        assert repr(instance) == "Input.unix_micros_to_timestamp()"
 
     def test_unix_millis_to_timestamp(self):
         arg1 = self._make_arg("Input")
-        instance = expr.UnixMillisToTimestamp(arg1)
+        instance = expr.Expr.unix_millis_to_timestamp(arg1)
         assert instance.name == "unix_millis_to_timestamp"
         assert instance.params == [arg1]
-        assert repr(instance) == "UnixMillisToTimestamp(Input)"
+        assert repr(instance) == "Input.unix_millis_to_timestamp()"
 
     def test_unix_seconds_to_timestamp(self):
         arg1 = self._make_arg("Input")
-        instance = expr.UnixSecondsToTimestamp(arg1)
+        instance = expr.Expr.unix_seconds_to_timestamp(arg1)
         assert instance.name == "unix_seconds_to_timestamp"
         assert instance.params == [arg1]
-        assert repr(instance) == "UnixSecondsToTimestamp(Input)"
+        assert repr(instance) == "Input.unix_seconds_to_timestamp()"
 
     def test_vector_length(self):
         arg1 = self._make_arg("Array")
-        instance = expr.VectorLength(arg1)
+        instance = expr.Expr.vector_length(arg1)
         assert instance.name == "vector_length"
         assert instance.params == [arg1]
-        assert repr(instance) == "VectorLength(Array)"
+        assert repr(instance) == "Array.vector_length()"
 
     def test_add(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = expr.Add(arg1, arg2)
+        instance = expr.Expr.add(arg1, arg2)
         assert instance.name == "add"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Add(Left, Right)"
+        assert repr(instance) == "Left.add(Right)"
 
     def test_array_length(self):
         arg1 = self._make_arg("Array")
-        instance = expr.ArrayLength(arg1)
+        instance = expr.Expr.array_length(arg1)
         assert instance.name == "array_length"
         assert instance.params == [arg1]
-        assert repr(instance) == "ArrayLength(Array)"
+        assert repr(instance) == "Array.array_length()"
 
     def test_array_reverse(self):
         arg1 = self._make_arg("Array")
-        instance = expr.ArrayReverse(arg1)
+        instance = expr.Expr.array_reverse(arg1)
         assert instance.name == "array_reverse"
         assert instance.params == [arg1]
-        assert repr(instance) == "ArrayReverse(Array)"
+        assert repr(instance) == "Array.array_reverse()"
 
     def test_byte_length(self):
         arg1 = self._make_arg("Expr")
-        instance = expr.ByteLength(arg1)
+        instance = expr.Expr.byte_length(arg1)
         assert instance.name == "byte_length"
         assert instance.params == [arg1]
-        assert repr(instance) == "ByteLength(Expr)"
+        assert repr(instance) == "Expr.byte_length()"
 
     def test_char_length(self):
         arg1 = self._make_arg("Expr")
-        instance = expr.CharLength(arg1)
+        instance = expr.Expr.char_length(arg1)
         assert instance.name == "char_length"
         assert instance.params == [arg1]
-        assert repr(instance) == "CharLength(Expr)"
+        assert repr(instance) == "Expr.char_length()"
 
     def test_collection_id(self):
         arg1 = self._make_arg("Value")
-        instance = expr.CollectionId(arg1)
+        instance = expr.Expr.collection_id(arg1)
         assert instance.name == "collection_id"
         assert instance.params == [arg1]
-        assert repr(instance) == "CollectionId(Value)"
+        assert repr(instance) == "Value.collection_id()"
 
     def test_sum(self):
         arg1 = self._make_arg("Value")
-        instance = expr.Sum(arg1)
+        instance = expr.Expr.sum(arg1)
         assert instance.name == "sum"
         assert instance.params == [arg1]
-        assert repr(instance) == "Sum(Value)"
+        assert repr(instance) == "Value.sum()"
 
     def test_average(self):
         arg1 = self._make_arg("Value")
-        instance = expr.Average(arg1)
+        instance = expr.Expr.average(arg1)
         assert instance.name == "average"
         assert instance.params == [arg1]
-        assert repr(instance) == "Average(Value)"
+        assert repr(instance) == "Value.average()"
 
     def test_count(self):
         arg1 = self._make_arg("Value")
-        instance = expr.Count(arg1)
+        instance = expr.Expr.count(arg1)
         assert instance.name == "count"
         assert instance.params == [arg1]
-        assert repr(instance) == "Count(Value)"
-
-    def test_count_empty(self):
-        instance = expr.Count()
-        assert instance.params == []
-        assert repr(instance) == "Count()"
+        assert repr(instance) == "Value.count()"
 
     def test_minimum(self):
         arg1 = self._make_arg("Value")
-        instance = expr.Minimum(arg1)
+        instance = expr.Expr.minimum(arg1)
         assert instance.name == "minimum"
         assert instance.params == [arg1]
-        assert repr(instance) == "Minimum(Value)"
+        assert repr(instance) == "Value.minimum()"
 
     def test_maximum(self):
         arg1 = self._make_arg("Value")
-        instance = expr.Maximum(arg1)
+        instance = expr.Expr.maximum(arg1)
         assert instance.name == "maximum"
         assert instance.params == [arg1]
-        assert repr(instance) == "Maximum(Value)"
+        assert repr(instance) == "Value.maximum()"
 

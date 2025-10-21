@@ -145,7 +145,7 @@ class Expr(ABC):
 
     @staticmethod
     def conditional(
-        conditional: BooleanExpr,
+        condition: BooleanExpr,
         then_expr: Expr,
         else_expr: Expr,
     ) -> "Expr":
@@ -158,16 +158,14 @@ class Expr(ABC):
             >>> Expr.conditional(Field.of("age").greater_than(18), Constant.of("Adult"), Constant.of("Minor"));
 
         Args:
-            conditional: The condition to evaluate.
+            condition: The condition to evaluate.
             then_expr: The expression to return if the condition is true.
             else_expr: The expression to return if the condition is false
 
         Returns:
             A new `Expr` representing the conditional expression.
         """
-        return BooleanExpr(
-            "conditional", [conditional, then_expr, else_expr], use_infix_repr=False
-        )
+        return Conditional(condition, then_expr, else_expr)
 
     @expose_as_static
     def add(self, other: Expr | float) -> "Expr":
@@ -286,7 +284,7 @@ class Expr(ABC):
             A new `Expr` representing the logical maximum operation.
         """
         return Function(
-            "maximum", [self, self._cast_to_expr_or_convert_to_constant(other)]
+            "maximum", [self, self._cast_to_expr_or_convert_to_constant(other)], infix_name_override="logical_maximum"
         )
 
     @expose_as_static
@@ -310,7 +308,7 @@ class Expr(ABC):
             A new `Expr` representing the logical minimum operation.
         """
         return Function(
-            "minimum", [self, self._cast_to_expr_or_convert_to_constant(other)]
+            "minimum", [self, self._cast_to_expr_or_convert_to_constant(other)], infix_name_override="logical_minimum"
         )
 
     @expose_as_static
@@ -857,7 +855,7 @@ class Expr(ABC):
         )
 
     @expose_as_static
-    def map_get(self, key: str) -> "Expr":
+    def map_get(self, key: str | Constant[str]) -> "Expr":
         """Accesses a value from the map produced by evaluating this expression.
 
         Example:
@@ -870,7 +868,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the value associated with the given key in the map.
         """
-        return Function("map_get", [self, Constant.of(key)])
+        return Function("map_get", [self, Constant.of(key) if isinstance(key, str) else key])
 
     @expose_as_static
     def vector_length(self) -> "Expr":
@@ -1029,6 +1027,20 @@ class Expr(ABC):
             ],
         )
 
+    @expose_as_static
+    def collection_id(self):
+        """Creates an expression that returns the collection ID from a path.
+
+        Example:
+            >>> # Get the collection ID from a path.
+            >>> Field.of("__name__").collection_id()
+
+        Returns:
+            A new `Expr` representing the collection ID.
+        """
+        return Function("collection_id", [self])
+
+
     def ascending(self) -> Ordering:
         """Creates an `Ordering` that sorts documents in ascending order based on this expression.
 
@@ -1124,18 +1136,43 @@ class ListOfExprs(Expr):
 class Function(Expr):
     """A base class for expressions that represent function calls."""
 
-    def __init__(self, name: str, params: Sequence[Expr]):
+    def __init__(
+        self,
+        name: str,
+        params: Sequence[Expr],
+        *,
+        use_infix_repr: bool = True,
+        infix_name_override: str | None = None
+    ):
         self.name = name
         self.params = list(params)
+        self._use_infix_repr = use_infix_repr
+        self._infix_name_override = infix_name_override
+
+
+    def __repr__(self):
+        """
+        Most Functions can be triggered infix. Eg: Field.of('age').greater_than(18).
+
+        Display them this way in the repr string where possible
+        """
+        if self._use_infix_repr:
+            infix_name = self._infix_name_override or self.name
+            if len(self.params) == 1:
+                return f"{self.params[0]!r}.{infix_name}()"
+            elif len(self.params) == 2:
+                return f"{self.params[0]!r}.{infix_name}({self.params[1]!r})"
+            else:
+                return f"{self.params[0]!r}.{infix_name}({', '.join([repr(p) for p in self.params[1:]])})"
+        return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
+
+
 
     def __eq__(self, other):
         if not isinstance(other, Function):
             return False
         else:
             return other.name == self.name and other.params == self.params
-
-    def __repr__(self):
-        return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
 
     def _to_pb(self):
         return Value(
@@ -1277,31 +1314,6 @@ class Field(Selectable):
 class BooleanExpr(Function):
     """Filters the given data in some way."""
 
-    def __init__(
-        self,
-        *args,
-        use_infix_repr: bool = True,
-        infix_name_override: str | None = None,
-        **kwargs,
-    ):
-        self._use_infix_repr = use_infix_repr
-        self._infix_name_override = infix_name_override
-        super().__init__(*args, **kwargs)
-
-    def __repr__(self):
-        """
-        Most BooleanExprs can be triggered infix. Eg: Field.of('age').greater_than(18).
-
-        Display them this way in the repr string where possible
-        """
-        if self._use_infix_repr:
-            infix_name = self._infix_name_override or self.name
-            if len(self.params) == 1:
-                return f"{self.params[0]!r}.{infix_name}()"
-            elif len(self.params) == 2:
-                return f"{self.params[0]!r}.{infix_name}({self.params[1]!r})"
-        return super().__repr__()
-
     @staticmethod
     def _from_query_filter_pb(filter_pb, client):
         if isinstance(filter_pb, Query_pb.CompositeFilter):
@@ -1381,7 +1393,7 @@ class Or(BooleanExpr):
     """Represents the logical OR of multiple filter conditions."""
 
     def __init__(self, *conditions: "BooleanExpr"):
-        super().__init__("or", conditions)
+        super().__init__("or", conditions, use_infix_repr=False)
 
 
 class Xor(BooleanExpr):
@@ -1389,3 +1401,7 @@ class Xor(BooleanExpr):
 
     def __init__(self, conditions: Sequence["BooleanExpr"]):
         super().__init__("xor", conditions, use_infix_repr=False)
+
+class Conditional(BooleanExpr):
+    def __init__(self, condition: BooleanExpr, then_expr: Expr, else_expr: Expr):
+        super().__init__("conditional", [condition, then_expr, else_expr], use_infix_repr=False)

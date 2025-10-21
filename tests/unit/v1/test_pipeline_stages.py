@@ -114,7 +114,7 @@ class TestAggregate:
         repr_str = repr(instance)
         assert (
             repr_str
-            == "Aggregate(AggregateFunction(Field.of('total')).as_('sum_total'), groups=[Field.of('category')])"
+            == "Aggregate(Field.of('total').sum().as_('sum_total'), groups=[Field.of('category')])"
         )
 
     def test_to_pb(self):
