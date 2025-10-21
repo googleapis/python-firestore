@@ -834,6 +834,15 @@ class TestExpressionMethods:
         infix_instance = arg1.is_nan()
         assert infix_instance == instance
 
+    def test_is_null(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.is_ull(arg1)
+        assert instance.name == "is_null"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.is_null()"
+        infix_instance = arg1.is_null()
+        assert infix_instance == instance
+
     def test_not(self):
         arg1 = self._make_arg("Condition")
         instance = expr.Not(arg1)

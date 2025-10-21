@@ -588,6 +588,18 @@ class Expr(ABC):
         return BooleanExpr("is_nan", [self])
 
     @expose_as_static
+    def is_null(self) -> "BooleanExpr":
+        """Creates an expression that checks if this expression evaluates to 'Null'.
+
+        Example:
+            >>> Field.of("value").is_null()
+
+        Returns:
+            A new `Expr` representing the 'isNull' check.
+        """
+        return BooleanExpr("is_null", [self])
+
+    @expose_as_static
     def exists(self) -> "BooleanExpr":
         """Creates an expression that checks if a field exists in the document.
 
@@ -1313,9 +1325,9 @@ class BooleanExpr(Function):
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
                 return And(field.exists(), Not(field.is_nan()))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NULL:
-                return And(field.exists(), field.equal(None))
+                return And(field.exists(), field.is_null())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NULL:
-                return And(field.exists(), Not(field.equal(None)))
+                return And(field.exists(), Not(field.is_null()))
             else:
                 raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.FieldFilter):
