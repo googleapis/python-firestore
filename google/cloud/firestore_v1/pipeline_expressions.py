@@ -237,6 +237,8 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the modulo operation.
         """
+        return Function("mod", [self, self._cast_to_expr_or_convert_to_constant(other)])
+
     @expose_as_static
     def abs(self) -> "Abs":
         """Creates an expression that calculates the absolute value of this expression.
@@ -248,7 +250,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the absolute value.
         """
-        return Abs(self)
+        return Function("abs", [self])
 
     @expose_as_static
     def ceil(self) -> "Ceil":
@@ -261,7 +263,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the ceiling value.
         """
-        return Ceil(self)
+        return Function("ceil", [self])
 
     @expose_as_static
     def exp(self) -> "Exp":
@@ -274,7 +276,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the exponential value.
         """
-        return Exp(self)
+        return Function("exp", [self])
 
     @expose_as_static
     def floor(self) -> "Floor":
@@ -287,7 +289,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the floor value.
         """
-        return Floor(self)
+        return Function("floor", [self])
 
     @expose_as_static
     def ln(self) -> "Ln":
@@ -300,7 +302,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the natural logarithm.
         """
-        return Ln(self)
+        return Function("ln", [self])
 
     @expose_as_static
     def log(self, base: Expr | float) -> "Log":
@@ -318,7 +320,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the logarithm.
         """
-        return Log(self, self._cast_to_expr_or_convert_to_constant(base))
+        return Function(
+            "log", [self, self._cast_to_expr_or_convert_to_constant(base)]
+        )
 
     @expose_as_static
     def pow(self, exponent: Expr | float) -> "Pow":
@@ -336,7 +340,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the power operation.
         """
-        return Pow(self, self._cast_to_expr_or_convert_to_constant(exponent))
+        return Function("pow", [self, self._cast_to_expr_or_convert_to_constant(exponent)])
 
     @expose_as_static
     def round(self) -> "Round":
@@ -349,7 +353,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the rounded value.
         """
-        return Round(self)
+        return Function("round", [self])
 
     @expose_as_static
     def sqrt(self) -> "Sqrt":
@@ -362,8 +366,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the square root.
         """
-        return Sqrt(self)
-        return Function("mod", [self, self._cast_to_expr_or_convert_to_constant(other)])
+        return Function("sqrt", [self])
 
     @expose_as_static
     def logical_maximum(self, other: Expr | CONSTANT_TYPE) -> "Expr":
@@ -585,6 +588,16 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the 'NOT IN' comparison.
         """
+        return BooleanExpr(
+            "not_equal_any",
+            [
+                self,
+                _ListOfExprs(
+                    [self._cast_to_expr_or_convert_to_constant(v) for v in array]
+                ),
+            ],
+        )
+
     @expose_as_static
     def array_get(self, index: Expr | int) -> "Expr":
         """Creates an expression that indexes into an array from the beginning or end
@@ -601,7 +614,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the operation.
         """
-        return ArrayGet(self, self._cast_to_expr_or_convert_to_constant(index))
+        return Function("array_get", [self, self._cast_to_expr_or_convert_to_constant(index)])
 
     @expose_as_static
     def array_concat(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "Expr":
@@ -617,16 +630,8 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the concatenated array.
         """
-        return ArrayConcat(
-            self, [self._cast_to_expr_or_convert_to_constant(o) for o in array]
-        return BooleanExpr(
-            "not_equal_any",
-            [
-                self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(v) for v in array]
-                ),
-            ],
+        return Function(
+            "array_concat", [self] + [self._cast_to_expr_or_convert_to_constant(v) for v in array]
         )
 
     @expose_as_static
@@ -1017,7 +1022,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the lowercase string.
         """
-        return ToLower(self)
+        return Function("to_lower", [self])
 
     @expose_as_static
     def to_upper(self) -> "Expr":
@@ -1030,7 +1035,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the uppercase string.
         """
-        return ToUpper(self)
+        return Function("to_upper", [self])
 
     @expose_as_static
     def trim(self) -> "Expr":
@@ -1043,7 +1048,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the trimmed string.
         """
-        return Trim(self)
+        return Function("trim", [self])
 
     @expose_as_static
     def reverse(self) -> "Expr":
@@ -1056,7 +1061,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the reversed string.
         """
-        return Reverse(self)
+        return Function("reverse", [self])
 
     @expose_as_static
     def map_get(self, key: str | Constant[str]) -> "Expr":
@@ -1072,6 +1077,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the value associated with the given key in the map.
         """
+        return Function(
+            "map_get", [self, Constant.of(key) if isinstance(key, str) else key]
+        )
 
     @expose_as_static
     def map_remove(self, key: str) -> "Expr":
@@ -1087,7 +1095,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the map_remove operation.
         """
-        return MapRemove(self, Constant.of(key))
+        return Function("map_remove", [self, Constant.of(key)])
 
     @expose_as_static
     def map_merge(self, *other_maps: Expr | dict[str, Expr | CONSTANT_TYPE])-> "Expr":
@@ -1105,8 +1113,8 @@ class Expr(ABC):
         """
         map_list = []
         for map in other_maps:
-            map_list.append(map if isinstance(map, Expr) else Expr.map(map))
-        return MapMerge(self, *map_list)
+            map_list.append(map if isinstance(map, Expr) else Map(map))
+        return Function("map_merge", [self] + map_list)
 
 
     @expose_as_static
@@ -1125,7 +1133,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the cosine distance between the two vectors.
         """
-        return CosineDistance(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Function("cosine_distance", [self, self._cast_to_expr_or_convert_to_constant(other)])
 
     @expose_as_static
     def euclidean_distance(self, other: Expr | list[float] | Vector) -> "Expr":
@@ -1143,7 +1151,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the Euclidean distance between the two vectors.
         """
-        return EuclideanDistance(self, self._cast_to_expr_or_convert_to_constant(other))
+        return Function("euclidean_distance", [self, self._cast_to_expr_or_convert_to_constant(other)])
 
     @expose_as_static
     def dot_product(self, other: Expr | list[float] | Vector) -> "Expr":
@@ -1161,10 +1169,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the dot product between the two vectors.
         """
-        return DotProduct(self, self._cast_to_expr_or_convert_to_constant(other))
-        return Function(
-            "map_get", [self, Constant.of(key) if isinstance(key, str) else key]
-        )
+        return Function("dot_product", [self, self._cast_to_expr_or_convert_to_constant(other)])
 
     @expose_as_static
     def vector_length(self) -> "Expr":
@@ -1475,31 +1480,6 @@ class Function(Expr):
         )
 
 
-class Map(Function):
-    """Creates an expression that creates a Firestore map value from an input dict."""
-
-    def __init__(self, elements: dict[Constant[str], Expr]):
-        element_list = []
-        for k,v in elements.items():
-            element_list.append(k)
-            element_list.append(v)
-        super().__init__("map", element_list)
-
-    def __repr__(self):
-        d = {a:b for a, b in zip(self.params[::2], self.params[1::2])}
-        return f"Map({d})"
-
-
-class Array(Function):
-    """Creates an expression that creates a Firestore array value from an input list."""
-
-    def __init__(self, elements: list[Expr]):
-        super().__init__("array", elements)
-
-    def __repr__(self):
-        return f"Array({self.params})"
-
-
 class AggregateFunction(Function):
     """A base class for aggregation functions that operate across multiple inputs."""
 
@@ -1693,6 +1673,46 @@ class BooleanExpr(Function):
         else:
             raise TypeError(f"Unexpected filter type: {type(filter_pb)}")
 
+
+class Map(Function):
+    """
+    Creates an expression that creates a Firestore map value from an input dict.
+
+    Example:
+        >>> Expr.map({"foo": "bar", "baz": Field.of("baz")})
+
+    Args:
+        elements: THe input dict to evaluate in the expression
+    """
+
+    def __init__(self, elements: dict[Constant[str], Expr]):
+        element_list = []
+        for k,v in elements.items():
+            element_list.append(k)
+            element_list.append(v)
+        super().__init__("map", element_list)
+
+    def __repr__(self):
+        d = {a:b for a, b in zip(self.params[::2], self.params[1::2])}
+        return f"Map({d})"
+
+
+class Array(Function):
+    """
+    Creates an expression that creates a Firestore array value from an input list.
+
+    Example:
+        >>> Expr.array(["bar", Field.of("baz")])
+
+    Args:
+        elements: THe input list to evaluate in the expression
+    """
+
+    def __init__(self, elements: list[Expr]):
+        super().__init__("array", elements)
+
+    def __repr__(self):
+        return f"Array({self.params})"
 
 class And(BooleanExpr):
     """

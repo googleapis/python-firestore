@@ -370,7 +370,7 @@ class TestBooleanExpr:
         field1 = Field.of("field1")
         field2 = Field.of("field2")
         expected_cond1 = expr.And(field1.exists(), field1.equal(Constant("val1")))
-        expected_cond2 = expr.And(field2.exists(), field2.equal(Constant(None)))
+        expected_cond2 = expr.And(field2.exists(), field2.is_null())
         expected = expr.Or(expected_cond1, expected_cond2)
 
         assert repr(result) == repr(expected)
@@ -458,7 +458,7 @@ class TestBooleanExpr:
         expected_cond1 = expr.And(field1.exists(), field1.equal(Constant("val1")))
         expected_cond2 = expr.And(field2.exists(), field2.greater_than(Constant(10)))
         expected_cond3 = expr.And(
-            field3.exists(), expr.Not(field3.equal(Constant(None)))
+            field3.exists(), expr.Not(field3.is_null())
         )
         expected_inner_and = expr.And(expected_cond2, expected_cond3)
         expected_outer_or = expr.Or(expected_cond1, expected_inner_and)
@@ -495,11 +495,11 @@ class TestBooleanExpr:
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NULL,
-                lambda f: f.equal(None),
+                lambda f: f.is_null()
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL,
-                lambda f: expr.Not(f.equal(None)),
+                lambda f: expr.Not(f.is_null()),
             ),
         ],
     )
@@ -836,7 +836,7 @@ class TestExpressionMethods:
 
     def test_is_null(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.is_ull(arg1)
+        instance = Expr.is_null(arg1)
         assert instance.name == "is_null"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_null()"
