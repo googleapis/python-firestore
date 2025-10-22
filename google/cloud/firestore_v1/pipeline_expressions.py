@@ -651,7 +651,7 @@ class Expr(ABC):
         Returns:
             A new `AggregateFunction` representing the 'count' aggregation.
         """
-        return Count(self)
+        return AggregateFunction("count", [self])
 
     @expose_as_static
     def minimum(self) -> "Expr":
@@ -1399,6 +1399,9 @@ class Not(BooleanExpr):
     def __init__(self, condition: BooleanExpr):
         super().__init__("not", [condition], use_infix_repr=False)
 
+    Example:
+        >>> # Find documents where the 'completed' field is NOT true
+        >>> Expr.Not(Field.of("completed").equal(True))
 
 class Or(BooleanExpr):
     """
