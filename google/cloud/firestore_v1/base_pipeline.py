@@ -145,15 +145,15 @@ class _BasePipeline:
 
         The added fields are defined using `Selectable` expressions, which can be:
             - `Field`: References an existing document field.
-            - `ExprWithAlias`: References an existing expression with an alias,
-                assigned using `Expr.as_()`
+            - `Function`: Performs a calculation using functions like `add`,
+              `multiply` with assigned aliases using `Expr.as_()`.
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, add
             >>> pipeline = client.pipeline().collection("books")
             >>> pipeline = pipeline.add_fields(
             ...     Field.of("rating").as_("bookRating"), # Rename 'rating' to 'bookRating'
-            ...     Field.of("quantity").add(5).as_("totalCost")  # Calculate 'totalCost'
+            ...     add(5, Field.of("quantity")).as_("totalCost")  # Calculate 'totalCost'
             ... )
 
         Args:
@@ -588,7 +588,7 @@ class _BasePipeline:
         This stage allows you to calculate aggregate values (like sum, average, count,
         min, max) over a set of documents.
 
-        - **AggregateFunctions:** Define the aggregation calculations using `AggregateFunction`
+        - **Accumulators:** Define the aggregation calculations using `AggregateFunction`
           expressions (e.g., `sum()`, `avg()`, `count()`, `min()`, `max()`) combined
           with `as_()` to name the result field.
         - **Groups:** Optionally specify fields (by name or `Selectable`) to group
