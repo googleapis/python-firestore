@@ -1454,6 +1454,7 @@ class Conditional(BooleanExpr):
             "conditional", [condition, then_expr, else_expr], use_infix_repr=False
         )
 
+
 class Count(AggregateFunction):
     """
     Represents an aggregation that counts the number of stage inputs with valid evaluations of the
@@ -1471,6 +1472,4 @@ class Count(AggregateFunction):
 
     def __init__(self, expression: Expr | None = None):
         expression_list = [expression] if expression else []
-        super().__init__(
-            "count", expression_list, use_infix_repr=bool(expression_list)
-        )
+        super().__init__("count", expression_list, use_infix_repr=bool(expression_list))

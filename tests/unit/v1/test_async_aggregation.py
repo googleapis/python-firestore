@@ -810,7 +810,7 @@ def test_aggreation_to_pipeline_count_increment():
     assert len(aggregate_stage.accumulators) == n
     for i in range(n):
         assert isinstance(aggregate_stage.accumulators[i].expr, Count)
-        assert aggregate_stage.accumulators[i].alias == f"field_{i+1}"
+        assert aggregate_stage.accumulators[i].alias == f"field_{i + 1}"
 
 
 def test_async_aggreation_to_pipeline_complex():
