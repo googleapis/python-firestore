@@ -91,7 +91,7 @@ class BaseAggregation(ABC):
         Convert this instance to a pipeline expression for use with pipeline.aggregate()
 
         Args:
-          autoindexer: If an alias isn't supplied, an one should be created with the format "field_n"
+          autoindexer: If an alias isn't supplied, one should be created with the format "field_n"
             The autoindexer is an iterable that provides the `n` value to use for each expression
         """
 
