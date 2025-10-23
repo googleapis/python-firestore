@@ -1374,7 +1374,7 @@ class And(BooleanExpr):
     Example:
         >>> # Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
         >>> # the 'status' field is "active"
-        >>> Expr.And(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
+        >>> And(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
     Args:
         *conditions: The filter conditions to 'AND' together.
@@ -1390,7 +1390,7 @@ class Not(BooleanExpr):
 
     Example:
         >>> # Find documents where the 'completed' field is NOT true
-        >>> Expr.Not(Field.of("completed").equal(True))
+        >>> Not(Field.of("completed").equal(True))
 
     Args:
         condition: The filter condition to negate.
@@ -1399,9 +1399,6 @@ class Not(BooleanExpr):
     def __init__(self, condition: BooleanExpr):
         super().__init__("not", [condition], use_infix_repr=False)
 
-    Example:
-        >>> # Find documents where the 'completed' field is NOT true
-        >>> Expr.Not(Field.of("completed").equal(True))
 
 class Or(BooleanExpr):
     """
@@ -1410,7 +1407,7 @@ class Or(BooleanExpr):
     Example:
        >>> # Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
        >>> # the 'status' field is "active"
-       >>> Expr.Or(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
+       >>> Or(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
     Args:
         *conditions: The filter conditions to 'OR' together.
@@ -1427,7 +1424,7 @@ class Xor(BooleanExpr):
     Example:
        >>> # Check if only one of the conditions is true: 'age' greater than 18, 'city' is "London",
        >>> # or 'status' is "active".
-       >>> Expr.Xor(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
+       >>> Xor(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
     Args:
         *conditions: The filter conditions to 'XOR' together.
@@ -1444,7 +1441,7 @@ class Conditional(BooleanExpr):
 
     Example:
         >>> # If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
-        >>> Expr.conditional(Field.of("age").greater_than(18), Constant.of("Adult"), Constant.of("Minor"));
+        >>> Conditional(Field.of("age").greater_than(18), Constant.of("Adult"), Constant.of("Minor"));
 
     Args:
         condition: The condition to evaluate.
