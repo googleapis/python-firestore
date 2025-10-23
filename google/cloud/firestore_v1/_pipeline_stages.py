@@ -274,13 +274,15 @@ class FindNearest(Stage):
         self,
         field: str | Expr,
         vector: Sequence[float] | Vector,
-        distance_measure: "DistanceMeasure",
+        distance_measure: "DistanceMeasure" | str,
         options: Optional["FindNearestOptions"] = None,
     ):
         super().__init__("find_nearest")
         self.field: Expr = Field(field) if isinstance(field, str) else field
         self.vector: Vector = vector if isinstance(vector, Vector) else Vector(vector)
-        self.distance_measure = distance_measure
+        self.distance_measure = distance_measure if isinstance(
+            distance_measure, DistanceMeasure
+        ) else DistanceMeasure[distance_measure.upper()]
         self.options = options or FindNearestOptions()
 
     def _pb_args(self):

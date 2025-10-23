@@ -116,6 +116,14 @@ class Expr(ABC):
     def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
         return o if isinstance(o, Expr) else Constant(o)
 
+    @staticmethod
+    def _convert_to_vector_expr(o: list[float] | Vector | Expr) -> Expr:
+        if isinstance(o, list):
+            o = Vector(o)
+        elif isinstance(o, Constant) and isinstance(o.value, list):
+            o = Vector(o.value)
+        return Expr._cast_to_expr_or_convert_to_constant(o)
+
     class expose_as_static:
         """
         Decorator to mark instance methods to be exposed as static methods as well as instance
@@ -863,6 +871,60 @@ class Expr(ABC):
         return Function(
             "map_get", [self, Constant.of(key) if isinstance(key, str) else key]
         )
+
+    @expose_as_static
+    def cosine_distance(self, other: Expr | list[float] | Vector) -> "Expr":
+        """Calculates the cosine distance between two vectors.
+
+        Example:
+            >>> # Calculate the cosine distance between the 'userVector' field and the 'itemVector' field
+            >>> Field.of("userVector").cosine_distance(Field.of("itemVector"))
+            >>> # Calculate the Cosine distance between the 'location' field and a target location
+            >>> Field.of("location").cosine_distance([37.7749, -122.4194])
+
+        Args:
+            other: The other vector (represented as an Expr, list of floats, or Vector) to compare against.
+
+        Returns:
+            A new `Expr` representing the cosine distance between the two vectors.
+        """
+        return Function("cosine_distance", [self, self._convert_to_vector_expr(other)])
+
+    @expose_as_static
+    def euclidean_distance(self, other: Expr | list[float] | Vector) -> "Expr":
+        """Calculates the Euclidean distance between two vectors.
+
+        Example:
+            >>> # Calculate the Euclidean distance between the 'location' field and a target location
+            >>> Field.of("location").euclidean_distance([37.7749, -122.4194])
+            >>> # Calculate the Euclidean distance between two vector fields: 'pointA' and 'pointB'
+            >>> Field.of("pointA").euclidean_distance(Field.of("pointB"))
+
+        Args:
+            other: The other vector (represented as an Expr, list of floats, or Vector) to compare against.
+
+        Returns:
+            A new `Expr` representing the Euclidean distance between the two vectors.
+        """
+        return Function("euclidean_distance", [self, self._convert_to_vector_expr(other)])
+
+    @expose_as_static
+    def dot_product(self, other: Expr | list[float] | Vector) -> "Expr":
+        """Calculates the dot product between two vectors.
+
+        Example:
+            >>> # Calculate the dot product between a feature vector and a target vector
+            >>> Field.of("features").dot_product([0.5, 0.8, 0.2])
+            >>> # Calculate the dot product between two document vectors: 'docVector1' and 'docVector2'
+            >>> Field.of("docVector1").dot_product(Field.of("docVector2"))
+
+        Args:
+            other: The other vector (represented as an Expr, list of floats, or Vector) to calculate dot product with.
+
+        Returns:
+            A new `Expr` representing the dot product between the two vectors.
+        """
+        return Function("dot_product", [self, self._convert_to_vector_expr(other)])
 
     @expose_as_static
     def vector_length(self) -> "Expr":

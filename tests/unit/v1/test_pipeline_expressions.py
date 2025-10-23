@@ -1097,6 +1097,53 @@ class TestExpressionMethods:
         infix_instance = arg1.unix_seconds_to_timestamp()
         assert infix_instance == instance
 
+    def test_euclidean_distance(self):
+        arg1 = self._make_arg("Vector1")
+        arg2 = self._make_arg("Vector2")
+        instance = Expr.euclidean_distance(arg1, arg2)
+        assert instance.name == "euclidean_distance"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Vector1.euclidean_distance(Vector2)"
+        infix_instance = arg1.euclidean_distance(arg2)
+        assert infix_instance == instance
+
+    def test_cosine_distance(self):
+        arg1 = self._make_arg("Vector1")
+        arg2 = self._make_arg("Vector2")
+        instance = Expr.cosine_distance(arg1, arg2)
+        assert instance.name == "cosine_distance"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Vector1.cosine_distance(Vector2)"
+        infix_instance = arg1.cosine_distance(arg2)
+        assert infix_instance == instance
+
+    def test_dot_product(self):
+        arg1 = self._make_arg("Vector1")
+        arg2 = self._make_arg("Vector2")
+        instance = Expr.dot_product(arg1, arg2)
+        assert instance.name == "dot_product"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Vector1.dot_product(Vector2)"
+        infix_instance = arg1.dot_product(arg2)
+        assert infix_instance == instance
+
+    @pytest.mark.parametrize("method", ["euclidean_distance", "cosine_distance", "dot_product"])
+    @pytest.mark.parametrize(
+        "input", [Vector([1.0, 2.0]), [1, 2], Constant.of(Vector([1.0, 2.0])), Constant.of([1, 2]), []]
+    )
+    def test_vector_ctor(self, method, input):
+        """
+        test constructing various vector expressions with
+        different inputs
+        """
+        arg1 = self._make_arg("Vector")
+        instance = getattr(arg1, method)(input)
+        assert instance.name == method
+        got_second_param = instance.params[1]
+        assert isinstance(got_second_param, Constant)
+        assert isinstance(got_second_param.value, Vector)
+
+
     def test_vector_length(self):
         arg1 = self._make_arg("Array")
         instance = Expr.vector_length(arg1)

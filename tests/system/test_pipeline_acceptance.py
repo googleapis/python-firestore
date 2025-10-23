@@ -28,6 +28,7 @@ from google.protobuf.json_format import MessageToDict
 from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1 import pipeline_expressions
 from google.cloud.firestore_v1.vector import Vector
+from google.cloud.firestore_v1 import pipeline_expressions as expr
 from google.api_core.exceptions import GoogleAPIError
 
 from google.cloud.firestore import Client, AsyncClient
@@ -218,7 +219,7 @@ def _apply_yaml_args_to_callable(callable_obj, client, yaml_args):
     """
     if isinstance(yaml_args, dict):
         return callable_obj(**_parse_expressions(client, yaml_args))
-    elif isinstance(yaml_args, list):
+    elif isinstance(yaml_args, list) and not (callable_obj == expr.Constant or callable_obj == Vector):
         # yaml has an array of arguments. Treat as args
         return callable_obj(*_parse_expressions(client, yaml_args))
     else:
