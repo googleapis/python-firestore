@@ -185,8 +185,9 @@ class TestCollectionGroup:
         instance = self._make_one(input_arg)
         result = instance._to_pb()
         assert result.name == "collection_group"
-        assert len(result.args) == 1
-        assert result.args[0].string_value == "test"
+        assert len(result.args) == 2
+        assert result.args[0].reference_value == ""
+        assert result.args[1].string_value == "test"
         assert len(result.options) == 0
 
 

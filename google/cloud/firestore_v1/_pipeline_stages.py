@@ -216,7 +216,7 @@ class CollectionGroup(Stage):
         self.collection_id = collection_id
 
     def _pb_args(self):
-        return [Value(string_value=self.collection_id)]
+        return [Value(reference_value=""), Value(string_value=self.collection_id)]
 
 
 class Database(Stage):

@@ -588,6 +588,18 @@ class Expr(ABC):
         return BooleanExpr("is_nan", [self])
 
     @expose_as_static
+    def is_null(self) -> "BooleanExpr":
+        """Creates an expression that checks if this expression evaluates to 'Null'.
+
+        Example:
+            >>> Field.of("value").is_null()
+
+        Returns:
+            A new `Expr` representing the 'isNull' check.
+        """
+        return BooleanExpr("is_null", [self])
+
+    @expose_as_static
     def exists(self) -> "BooleanExpr":
         """Creates an expression that checks if a field exists in the document.
 
@@ -627,6 +639,7 @@ class Expr(ABC):
         """
         return AggregateFunction("average", [self])
 
+    @expose_as_static
     def count(self) -> "Expr":
         """Creates an aggregation that counts the number of stage inputs with valid evaluations of the
         expression or field.
@@ -1312,9 +1325,9 @@ class BooleanExpr(Function):
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
                 return And(field.exists(), Not(field.is_nan()))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NULL:
-                return And(field.exists(), field.equal(None))
+                return And(field.exists(), field.is_null())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NULL:
-                return And(field.exists(), Not(field.equal(None)))
+                return And(field.exists(), Not(field.is_null()))
             else:
                 raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.FieldFilter):
@@ -1361,7 +1374,7 @@ class And(BooleanExpr):
     Example:
         >>> # Check if the 'age' field is greater than 18 AND the 'city' field is "London" AND
         >>> # the 'status' field is "active"
-        >>> Expr.And(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
+        >>> And(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
     Args:
         *conditions: The filter conditions to 'AND' together.
@@ -1377,7 +1390,7 @@ class Not(BooleanExpr):
 
     Example:
         >>> # Find documents where the 'completed' field is NOT true
-        >>> Expr.Not(Field.of("completed").equal(True))
+        >>> Not(Field.of("completed").equal(True))
 
     Args:
         condition: The filter condition to negate.
@@ -1394,7 +1407,7 @@ class Or(BooleanExpr):
     Example:
        >>> # Check if the 'age' field is greater than 18 OR the 'city' field is "London" OR
        >>> # the 'status' field is "active"
-       >>> Expr.Or(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
+       >>> Or(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
     Args:
         *conditions: The filter conditions to 'OR' together.
@@ -1411,7 +1424,7 @@ class Xor(BooleanExpr):
     Example:
        >>> # Check if only one of the conditions is true: 'age' greater than 18, 'city' is "London",
        >>> # or 'status' is "active".
-       >>> Expr.Xor(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
+       >>> Xor(Field.of("age").greater_than(18), Field.of("city").equal("London"), Field.of("status").equal("active"))
 
     Args:
         *conditions: The filter conditions to 'XOR' together.
@@ -1428,7 +1441,7 @@ class Conditional(BooleanExpr):
 
     Example:
         >>> # If 'age' is greater than 18, return "Adult"; otherwise, return "Minor".
-        >>> Expr.conditional(Field.of("age").greater_than(18), Constant.of("Adult"), Constant.of("Minor"));
+        >>> Conditional(Field.of("age").greater_than(18), Constant.of("Adult"), Constant.of("Minor"));
 
     Args:
         condition: The condition to evaluate.
@@ -1439,4 +1452,25 @@ class Conditional(BooleanExpr):
     def __init__(self, condition: BooleanExpr, then_expr: Expr, else_expr: Expr):
         super().__init__(
             "conditional", [condition, then_expr, else_expr], use_infix_repr=False
+        )
+
+class Count(AggregateFunction):
+    """
+    Represents an aggregation that counts the number of stage inputs with valid evaluations of the
+    expression or field.
+
+    Example:
+        >>> # Count the total number of products
+        >>> Field.of("productId").count().as_("totalProducts")
+        >>> Count(Field.of("productId"))
+        >>> Count().as_("count")
+
+    Args:
+        expression: The expression or field to count. If None, counts all stage inputs.
+    """
+
+    def __init__(self, expression: Expr | None = None):
+        expression_list = [expression] if expression else []
+        super().__init__(
+            "count", expression_list, use_infix_repr=bool(expression_list)
         )
