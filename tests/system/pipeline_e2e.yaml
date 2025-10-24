@@ -701,10 +701,11 @@ tests:
           - functionValue:
               args:
               - fieldReferenceValue: tags
-              - arrayValue:
-                  values:
+              - functionValue:
+                  args:
                   - stringValue: comedy
                   - stringValue: classic
+                  name: array
               name: array_contains_any
           name: where
         - args:
@@ -743,10 +744,11 @@ tests:
           - functionValue:
               args:
               - fieldReferenceValue: tags
-              - arrayValue:
-                  values:
+              - functionValue:
+                  args:
                   - stringValue: adventure
                   - stringValue: magic
+                  name: array
               name: array_contains_all
           name: where
         - args:
@@ -1791,6 +1793,218 @@ tests:
         - adventure
         - space
         - comedy
+  - description: testArrayConcat
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.array_concat:
+                - Field: tags
+                - Constant: ["new_tag", "another_tag"]
+            - "concatenatedTags"
+    assert_results:
+      - concatenatedTags:
+        - comedy
+        - space
+        - adventure
+        - new_tag
+        - another_tag
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                concatenatedTags:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - functionValue:
+                        args:
+                        - stringValue: "new_tag"
+                        - stringValue: "another_tag"
+                        name: array
+                    name: array_concat
+          name: select
+  - description: testArrayConcatMultiple
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - Select:
+        - AliasedExpr:
+            - Expr.array_concat:
+                - Field: tags
+                - Constant: ["sci-fi"]
+                - Constant: ["classic", "epic"]
+            - "concatenatedTags"
+    assert_results:
+      - concatenatedTags:
+        - politics
+        - desert
+        - ecology
+        - sci-fi
+        - classic
+        - epic
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "Dune"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                concatenatedTags:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - functionValue:
+                        args:
+                        - stringValue: "sci-fi"
+                        name: array
+                    - functionValue:
+                        args:
+                        - stringValue: "classic"
+                        - stringValue: "epic"
+                        name: array
+                    name: array_concat
+          name: select
+  - description: testArrayContainsAnyWithField
+    pipeline:
+      - Collection: books
+      - AddFields:
+        - AliasedExpr:
+            - Expr.array_concat:
+                - Field: tags
+                - Constant: ["Dystopian"]
+            - "new_tags"
+      - Where:
+          - Expr.array_contains_any:
+            - Field: new_tags
+            - - Constant: non_existent_tag
+              - Field: genre
+      - Select:
+        - title
+        - genre
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "1984"
+        genre: "Dystopian"
+      - title: "The Handmaid's Tale"
+        genre: "Dystopian"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                new_tags:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - functionValue:
+                        args:
+                        - stringValue: "Dystopian"
+                        name: array
+                    name: array_concat
+          name: add_fields
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: new_tags
+              - functionValue:
+                  args:
+                  - stringValue: "non_existent_tag"
+                  - fieldReferenceValue: genre
+                  name: array
+              name: array_contains_any
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+                genre:
+                  fieldReferenceValue: genre
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+  - description: testArrayConcatLiterals
+    pipeline:
+      - Collection: books
+      - Limit: 1
+      - Select:
+        - AliasedExpr:
+            - Expr.array_concat:
+                - Array: [1, 2, 3]
+                - Array: [4, 5]
+            - "concatenated"
+    assert_results:
+      - concatenated: [1, 2, 3, 4, 5]
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - integerValue: '1'
+          name: limit
+        - args:
+          - mapValue:
+              fields:
+                concatenated:
+                  functionValue:
+                    args:
+                    - functionValue:
+                        args:
+                        - integerValue: '1'
+                        - integerValue: '2'
+                        - integerValue: '3'
+                        name: array
+                    - functionValue:
+                        args:
+                        - integerValue: '4'
+                        - integerValue: '5'
+                        name: array
+                    name: array_concat
+          name: select
   - description: testExists
     pipeline:
       - Collection: books
@@ -2213,11 +2427,12 @@ tests:
           - functionValue:
               args:
               - fieldReferenceValue: title
-              - arrayValue:
-                  values:
+              - functionValue:
+                  args:
                   - stringValue: "To Kill a Mockingbird"
                   - stringValue: "Pride and Prejudice"
                   - stringValue: "The Lord of the Rings"
+                  name: array
               name: equal_any
           name: where
         - args:

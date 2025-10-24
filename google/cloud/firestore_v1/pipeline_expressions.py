@@ -113,16 +113,18 @@ class Expr(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
-        return o if isinstance(o, Expr) else Constant(o)
-
-    @staticmethod
-    def _convert_to_vector_expr(o: list[float] | Vector | Expr) -> Expr:
+    def _cast_to_expr_or_convert_to_constant(o: Any, include_vector=False, include_array=False) -> "Expr":
+        """Convert arbitrary object to an Expr."""
+        if isinstance(o, Constant) and isinstance(o.value, list):
+            o = o.value
+        if isinstance(o, Expr):
+            return o
         if isinstance(o, list):
-            o = Vector(o)
-        elif isinstance(o, Constant) and isinstance(o.value, list):
-            o = Vector(o.value)
-        return Expr._cast_to_expr_or_convert_to_constant(o)
+            if include_vector and all([isinstance(i, (float, int)) for i in o]):
+                return Constant(Vector(o))
+            elif include_array:
+                return Array(o)
+        return Constant(o)
 
     class expose_as_static:
         """
@@ -140,6 +142,10 @@ class Expr(ABC):
             self.instance_func = instance_func
 
         def static_func(self, first_arg, *other_args, **kwargs):
+            if not isinstance(first_arg, (Expr, str)):
+                raise TypeError(
+                    f"`expressions must be called on an Expr or a string representing a field name. got {type(first_arg)}."
+                )
             first_expr = (
                 Field.of(first_arg) if not isinstance(first_arg, Expr) else first_arg
             )
@@ -557,7 +563,7 @@ class Expr(ABC):
         )
 
     @expose_as_static
-    def equal_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
+    def equal_any(self, array: Array | Sequence[Expr | CONSTANT_TYPE] | Expr) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
@@ -575,14 +581,12 @@ class Expr(ABC):
             "equal_any",
             [
                 self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(v) for v in array]
-                ),
+                self._cast_to_expr_or_convert_to_constant(array, include_array=True),
             ],
         )
 
     @expose_as_static
-    def not_equal_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
+    def not_equal_any(self, array: Array | list[Expr | CONSTANT_TYPE] | Expr) -> "BooleanExpr":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
@@ -600,9 +604,7 @@ class Expr(ABC):
             "not_equal_any",
             [
                 self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(v) for v in array]
-                ),
+                self._cast_to_expr_or_convert_to_constant(array, include_array=True),
             ],
         )
 
@@ -629,7 +631,7 @@ class Expr(ABC):
     @expose_as_static
     def array_contains_all(
         self,
-        elements: Sequence[Expr | CONSTANT_TYPE],
+        elements: Array | list[Expr | CONSTANT_TYPE] | Expr,
     ) -> "BooleanExpr":
         """Creates an expression that checks if an array contains all the specified elements.
 
@@ -649,16 +651,14 @@ class Expr(ABC):
             "array_contains_all",
             [
                 self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
-                ),
+                self._cast_to_expr_or_convert_to_constant(elements, include_array=True),
             ],
         )
 
     @expose_as_static
     def array_contains_any(
         self,
-        elements: Sequence[Expr | CONSTANT_TYPE],
+        elements: Array | list[Expr | CONSTANT_TYPE] | Expr,
     ) -> "BooleanExpr":
         """Creates an expression that checks if an array contains any of the specified elements.
 
@@ -679,9 +679,7 @@ class Expr(ABC):
             "array_contains_any",
             [
                 self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
-                ),
+                self._cast_to_expr_or_convert_to_constant(elements, include_array=True),
             ],
         )
 
@@ -710,6 +708,26 @@ class Expr(ABC):
             A new `Expr` representing the reversed array.
         """
         return Function("array_reverse", [self])
+
+    @expose_as_static
+    def array_concat(self, *other_arrays: Array | list[Expr | CONSTANT_TYPE] | Expr) -> "Expr":
+        """Creates an expression that concatenates an array expression with another array.
+
+        Example:
+            >>> # Combine the 'tags' array with a new array and an array field
+            >>> Field.of("tags").array_concat(["newTag1", "newTag2", Field.of("otherTag")])
+
+        Args:
+            array: The list of constants or expressions to concat with.
+
+        Returns:
+            A new `Expr` representing the concatenated array.
+        """
+        return Function(
+            "array_concat", [self] + [
+                self._cast_to_expr_or_convert_to_constant(arr, include_array=True) for arr in other_arrays
+            ],
+        )
 
     @expose_as_static
     def is_absent(self) -> "BooleanExpr":
@@ -1149,7 +1167,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the cosine distance between the two vectors.
         """
-        return Function("cosine_distance", [self, self._convert_to_vector_expr(other)])
+        return Function("cosine_distance", [self, self._cast_to_expr_or_convert_to_constant(other, include_vector=True)])
 
     @expose_as_static
     def euclidean_distance(self, other: Expr | list[float] | Vector) -> "Expr":
@@ -1167,7 +1185,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the Euclidean distance between the two vectors.
         """
-        return Function("euclidean_distance", [self, self._convert_to_vector_expr(other)])
+        return Function("euclidean_distance", [self, self._cast_to_expr_or_convert_to_constant(other, include_vector=True)])
 
     @expose_as_static
     def dot_product(self, other: Expr | list[float] | Vector) -> "Expr":
@@ -1185,7 +1203,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the dot product between the two vectors.
         """
-        return Function("dot_product", [self, self._convert_to_vector_expr(other)])
+        return Function("dot_product", [self, self._cast_to_expr_or_convert_to_constant(other, include_vector=True)])
 
     @expose_as_static
     def vector_length(self) -> "Expr":
@@ -1430,25 +1448,6 @@ class Constant(Expr, Generic[CONSTANT_TYPE]):
         return encode_value(self.value)
 
 
-class _ListOfExprs(Expr):
-    """Represents a list of expressions, typically used as an argument to functions like 'in' or array functions."""
-
-    def __init__(self, exprs: Sequence[Expr]):
-        self.exprs: list[Expr] = list(exprs)
-
-    def __eq__(self, other):
-        if not isinstance(other, _ListOfExprs):
-            return False
-        else:
-            return other.exprs == self.exprs
-
-    def __repr__(self):
-        return repr(self.exprs)
-
-    def _to_pb(self):
-        return Value(array_value={"values": [e._to_pb() for e in self.exprs]})
-
-
 class Function(Expr):
     """A base class for expressions that represent function calls."""
 
@@ -1689,6 +1688,25 @@ class BooleanExpr(Function):
         else:
             raise TypeError(f"Unexpected filter type: {type(filter_pb)}")
 
+class Array(Function):
+    """
+    Creates an expression that creates a Firestore array value from an input list.
+
+    Example:
+        >>> Expr.array(["bar", Field.of("baz")])
+
+    Args:
+        elements: THe input list to evaluate in the expression
+    """
+
+    def __init__(self, elements: list[Expr | CONSTANT_TYPE]):
+        if not isinstance(elements, list):
+            raise TypeError("Array must be constructed with a list")
+        converted_elements = [self._cast_to_expr_or_convert_to_constant(el) for el in elements]
+        super().__init__("array", converted_elements)
+
+    def __repr__(self):
+        return f"Array({self.params})"
 
 class And(BooleanExpr):
     """
