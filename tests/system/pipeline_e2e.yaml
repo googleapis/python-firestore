@@ -1583,6 +1583,153 @@ tests:
               - booleanValue: true
               name: equal
           name: where
+  - description: testMapGetWithField
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - AddFields:
+        - AliasedExpr:
+            - Constant: "hugo"
+            - "award_name"
+      - Select:
+          - AliasedExpr:
+              - Expr.map_get:
+                  - Field: awards
+                  - Field: award_name
+              - "hugoAward"
+          - Field: title
+    assert_results:
+      - hugoAward: true
+        title: Dune
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "Dune"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                award_name:
+                  stringValue: "hugo"
+          name: add_fields
+        - args:
+          - mapValue:
+              fields:
+                hugoAward:
+                  functionValue:
+                    name: map_get
+                    args:
+                    - fieldReferenceValue: awards
+                    - fieldReferenceValue: award_name
+                title:
+                  fieldReferenceValue: title
+          name: select
+  - description: testMapRemove
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - Select:
+        - AliasedExpr:
+            - Expr.map_remove:
+                - Field: awards
+                - "nebula"
+            - "awards_removed"
+    assert_results:
+      - awards_removed:
+          hugo: true
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "Dune"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                awards_removed:
+                  functionValue:
+                    name: map_remove
+                    args:
+                    - fieldReferenceValue: awards
+                    - stringValue: "nebula"
+          name: select
+  - description: testMapMerge
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - Select:
+        - AliasedExpr:
+            - Expr.map_merge:
+                - Field: awards
+                - Map:
+                   elements: {"new_award": true, "hugo": false}
+                - Map: 
+                   elements: {"another_award": "yes"}
+            - "awards_merged"
+    assert_results:
+      - awards_merged:
+          hugo: false
+          nebula: true
+          new_award: true
+          another_award: "yes"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "Dune"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                awards_merged:
+                  functionValue:
+                    name: map_merge
+                    args:
+                    - fieldReferenceValue: awards
+                    - functionValue:
+                        name: map
+                        args:
+                        - stringValue: "new_award"
+                        - booleanValue: true
+                        - stringValue: "hugo"
+                        - booleanValue: false
+                    - functionValue:
+                        name: map
+                        args:
+                        - stringValue: "another_award"
+                        - stringValue: "yes"
+          name: select
   - description: testNestedFields
     pipeline:
       - Collection: books
@@ -1893,6 +2040,23 @@ tests:
                         name: array
                     name: array_concat
           name: select
+  - description: testMapMergeLiterals
+    pipeline:
+      - Collection: books
+      - Limit: 1
+      - Select:
+        - AliasedExpr:
+            - Expr.map_merge:
+                - Map:
+                    elements: {"a": "orig", "b": "orig"}
+                - Map:
+                    elements: {"b": "new", "c": "new"}
+            - "merged"
+    assert_results:
+      - merged:
+          a: "orig"
+          b: "new"
+          c: "new"
   - description: testArrayContainsAnyWithField
     pipeline:
       - Collection: books

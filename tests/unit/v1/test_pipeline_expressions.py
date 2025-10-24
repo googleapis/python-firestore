@@ -616,6 +616,36 @@ class TestArray:
         with pytest.raises(TypeError):
             expr.Array(1)
 
+
+class TestMap:
+    """Tests for the map class"""
+    def test_map(self):
+        instance = expr.Map({Constant.of("a"): Constant.of("b")})
+        assert instance.name == "map"
+        assert instance.params == [Constant.of("a"), Constant.of("b")]
+        assert repr(instance) == "Map({'a': Constant.of('b')})"
+
+    def test_map_w_primitives(self):
+        instance = expr.Map({"a": "b", "0": 0, "bool": True})
+        assert instance.params == [
+            Constant.of("a"), Constant.of("b"),
+            Constant.of("0"), Constant.of(0),
+            Constant.of("bool"), Constant.of(True)
+        ]
+        assert repr(instance) == "Map({'a': Constant.of('b'), '0': Constant.of(0), 'bool': Constant.of(True)})"
+
+    def test_empty_map(self):
+        instance = expr.Map({})
+        assert instance.name == "map"
+        assert instance.params == []
+        assert repr(instance) == "Map({})"
+
+    def test_w_exprs(self):
+        instance = expr.Map({Constant.of("a"): expr.Array([1,2,3])})
+        assert instance.params == [Constant.of("a"), expr.Array([1,2,3])]
+        assert repr(instance) == "Map({'a': Array([Constant.of(1), Constant.of(2), Constant.of(3)])})"
+
+
 class TestExpressionMethods:
     """
     contains test methods for each Expr method
@@ -1045,6 +1075,27 @@ class TestExpressionMethods:
         assert instance.params == [arg1, Constant.of(arg2)]
         assert repr(instance) == "Map.map_get(Constant.of('key'))"
         infix_instance = arg1.map_get(Constant.of(arg2))
+        assert infix_instance == instance
+
+    def test_map_remove(self):
+        arg1 = self._make_arg("Map")
+        arg2 = "key"
+        instance = Expr.map_remove(arg1, arg2)
+        assert instance.name == "map_remove"
+        assert instance.params == [arg1, Constant.of(arg2)]
+        assert repr(instance) == "Map.map_remove(Constant.of('key'))"
+        infix_instance = arg1.map_remove(Constant.of(arg2))
+        assert infix_instance == instance
+
+    def test_map_merge(self):
+        arg1 = expr.Map({"a": 1})
+        arg2 = expr.Map({"b": 2})
+        arg3 = {"c": 3}
+        instance = Expr.map_merge(arg1, arg2, arg3)
+        assert instance.name == "map_merge"
+        assert instance.params == [arg1, arg2, expr.Map(arg3)]
+        assert repr(instance) == "Map({'a': Constant.of(1)}).map_merge(Map({'b': Constant.of(2)}), Map({'c': Constant.of(3)}))"
+        infix_instance = arg1.map_merge(arg2, arg3)
         assert infix_instance == instance
 
     def test_mod(self):

@@ -119,6 +119,8 @@ class Expr(ABC):
             o = o.value
         if isinstance(o, Expr):
             return o
+        if isinstance(o, dict):
+            return Map(o)
         if isinstance(o, list):
             if include_vector and all([isinstance(i, (float, int)) for i in o]):
                 return Constant(Vector(o))
@@ -1132,13 +1134,12 @@ class Expr(ABC):
             "join", [self, self._cast_to_expr_or_convert_to_constant(delimeter)]
         )
 
-
     @expose_as_static
     def map_get(self, key: str | Constant[str]) -> "Expr":
         """Accesses a value from the map produced by evaluating this expression.
 
         Example:
-            >>> Expr.map({"city": "London"}).map_get("city")
+            >>> Map({"city": "London"}).map_get("city")
             >>> Field.of("address").map_get("city")
 
         Args:
@@ -1148,7 +1149,42 @@ class Expr(ABC):
             A new `Expr` representing the value associated with the given key in the map.
         """
         return Function(
-            "map_get", [self, Constant.of(key) if isinstance(key, str) else key]
+            "map_get", [self, self._cast_to_expr_or_convert_to_constant(key)]
+        )
+
+    @expose_as_static
+    def map_remove(self, key: str | Constant[str]) -> "Expr":
+        """Remove a key from a the map produced by evaluating this expression.
+
+        Example:
+            >>> Map({"city": "London"}).map_remove("city")
+            >>> Field.of("address").map_remove("city")
+
+        Args:
+            key: The key to ewmove in the map.
+
+        Returns:
+            A new `Expr` representing the map_remove operation.
+        """
+        return Function("map_remove", [self, self._cast_to_expr_or_convert_to_constant(key)])
+
+    @expose_as_static
+    def map_merge(self, *other_maps: Map | dict[str | Constant[str], Expr | CONSTANT_TYPE] | Expr)-> "Expr":
+        """Creates an expression that merges one or more dicts into a single map.
+
+        Example:
+            >>> Map({"city": "London"}).map_merge({"country": "UK"}, {"isCapital": True})
+            >>> Field.of("settings").map_merge({"enabled":True}, Function.conditional(Field.of('isAdmin'), {"admin":True}, {}})
+
+        Args:
+            *other_maps: Sequence of maps to merge into the resulting map.
+
+        Returns:
+            A new `Expr` representing the value associated with the given key in the map.
+        """
+        return Function("map_merge", [self] + [
+                self._cast_to_expr_or_convert_to_constant(m) for m in other_maps
+            ],
         )
 
     @expose_as_static
@@ -1688,6 +1724,7 @@ class BooleanExpr(Function):
         else:
             raise TypeError(f"Unexpected filter type: {type(filter_pb)}")
 
+
 class Array(Function):
     """
     Creates an expression that creates a Firestore array value from an input list.
@@ -1707,6 +1744,30 @@ class Array(Function):
 
     def __repr__(self):
         return f"Array({self.params})"
+
+
+class Map(Function):
+    """
+    Creates an expression that creates a Firestore map value from an input dict.
+
+    Example:
+        >>> Expr.map({"foo": "bar", "baz": Field.of("baz")})
+
+    Args:
+        elements: THe input dict to evaluate in the expression
+    """
+
+    def __init__(self, elements: dict[str | Constant[str], Expr | CONSTANT_TYPE]):
+        element_list = []
+        for k,v in elements.items():
+            element_list.append(self._cast_to_expr_or_convert_to_constant(k))
+            element_list.append(self._cast_to_expr_or_convert_to_constant(v))
+        super().__init__("map", element_list)
+
+    def __repr__(self):
+        d = {a.value : b for a, b in zip(self.params[::2], self.params[1::2])}
+        return f"Map({d})"
+
 
 class And(BooleanExpr):
     """
