@@ -41,8 +41,6 @@ CONSTANT_TYPE = TypeVar(
     bytes,
     GeoPoint,
     Vector,
-    list,
-    Dict[str, Any],
     None,
 )
 
@@ -113,7 +111,7 @@ class Expr(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def _cast_to_expr_or_convert_to_constant(o: Any, include_vector=False, include_array=False) -> "Expr":
+    def _cast_to_expr_or_convert_to_constant(o: Any, include_vector=False) -> "Expr":
         """Convert arbitrary object to an Expr."""
         if isinstance(o, Constant) and isinstance(o.value, list):
             o = o.value
@@ -124,7 +122,7 @@ class Expr(ABC):
         if isinstance(o, list):
             if include_vector and all([isinstance(i, (float, int)) for i in o]):
                 return Constant(Vector(o))
-            elif include_array:
+            else:
                 return Array(o)
         return Constant(o)
 
@@ -583,7 +581,7 @@ class Expr(ABC):
             "equal_any",
             [
                 self,
-                self._cast_to_expr_or_convert_to_constant(array, include_array=True),
+                self._cast_to_expr_or_convert_to_constant(array),
             ],
         )
 
@@ -606,7 +604,7 @@ class Expr(ABC):
             "not_equal_any",
             [
                 self,
-                self._cast_to_expr_or_convert_to_constant(array, include_array=True),
+                self._cast_to_expr_or_convert_to_constant(array),
             ],
         )
 
@@ -653,7 +651,7 @@ class Expr(ABC):
             "array_contains_all",
             [
                 self,
-                self._cast_to_expr_or_convert_to_constant(elements, include_array=True),
+                self._cast_to_expr_or_convert_to_constant(elements),
             ],
         )
 
@@ -681,7 +679,7 @@ class Expr(ABC):
             "array_contains_any",
             [
                 self,
-                self._cast_to_expr_or_convert_to_constant(elements, include_array=True),
+                self._cast_to_expr_or_convert_to_constant(elements),
             ],
         )
 
@@ -727,7 +725,7 @@ class Expr(ABC):
         """
         return Function(
             "array_concat", [self] + [
-                self._cast_to_expr_or_convert_to_constant(arr, include_array=True) for arr in other_arrays
+                self._cast_to_expr_or_convert_to_constant(arr) for arr in other_arrays
             ],
         )
 

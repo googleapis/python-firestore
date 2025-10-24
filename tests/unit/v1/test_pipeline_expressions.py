@@ -97,13 +97,6 @@ class TestConstant:
             ),
             (GeoPoint(1, 2), Value(geo_point_value={"latitude": 1, "longitude": 2})),
             (
-                [0.0, 1.0, 2.0],
-                Value(
-                    array_value={"values": [Value(double_value=i) for i in range(3)]}
-                ),
-            ),
-            ({"a": "b"}, Value(map_value={"fields": {"a": Value(string_value="b")}})),
-            (
                 Vector([1.0, 2.0]),
                 Value(
                     map_value={

@@ -2064,7 +2064,7 @@ tests:
         - AliasedExpr:
             - Expr.array_concat:
                 - Field: tags
-                - Constant: ["Dystopian"]
+                - Array: ["Dystopian"]
             - "new_tags"
       - Where:
           - Expr.array_contains_any:
