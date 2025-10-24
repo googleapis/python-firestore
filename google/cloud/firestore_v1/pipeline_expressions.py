@@ -712,6 +712,20 @@ class Expr(ABC):
         return Function("array_reverse", [self])
 
     @expose_as_static
+    def is_absent(self) -> "BooleanExpr":
+        """Creates an expression that returns true if a value is absent. Otherwise, returns false even if
+        the value is null.
+
+        Example:
+            >>> # Check if the 'email' field is absent.
+            >>> Field.of("email").is_absent()
+
+        Returns:
+            A new `BooleanExpression` representing the isAbsent operation.
+        """
+        return BooleanExpr("is_absent", [self])
+
+    @expose_as_static
     def is_nan(self) -> "BooleanExpr":
         """Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
 
@@ -725,8 +739,21 @@ class Expr(ABC):
         return BooleanExpr("is_nan", [self])
 
     @expose_as_static
+    def is_not_nan(self) -> "BooleanExpr":
+        """Creates an expression that checks if this expression evaluates to a non-'NaN' (Not a Number) value.
+
+        Example:
+            >>> # Check if the result of a calculation is not NaN
+            >>> Field.of("value").divide(1).is_not_nan()
+
+        Returns:
+            A new `Expr` representing the 'is not NaN' check.
+        """
+        return BooleanExpr("is_not_nan", [self])
+
+    @expose_as_static
     def is_null(self) -> "BooleanExpr":
-        """Creates an expression that checks if this expression evaluates to 'Null'.
+        """Creates an expression that checks if the value of a field is 'Null'.
 
         Example:
             >>> Field.of("value").is_null()
@@ -735,6 +762,18 @@ class Expr(ABC):
             A new `Expr` representing the 'isNull' check.
         """
         return BooleanExpr("is_null", [self])
+
+    @expose_as_static
+    def is_not_null(self) -> "BooleanExpr":
+        """Creates an expression that checks if the value of a field is not 'Null'.
+
+        Example:
+            >>> Field.of("value").is_not_null()
+
+        Returns:
+            A new `Expr` representing the 'isNotNull' check.
+        """
+        return BooleanExpr("is_not_null", [self])
 
     @expose_as_static
     def exists(self) -> "BooleanExpr":
@@ -1607,11 +1646,11 @@ class BooleanExpr(Function):
             if filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NAN:
                 return And(field.exists(), field.is_nan())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
-                return And(field.exists(), Not(field.is_nan()))
+                return And(field.exists(), field.is_not_nan())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NULL:
                 return And(field.exists(), field.is_null())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NULL:
-                return And(field.exists(), Not(field.is_null()))
+                return And(field.exists(), field.is_not_null())
             else:
                 raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.FieldFilter):

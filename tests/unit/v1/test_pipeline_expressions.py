@@ -458,7 +458,7 @@ class TestBooleanExpr:
         expected_cond1 = expr.And(field1.exists(), field1.equal(Constant("val1")))
         expected_cond2 = expr.And(field2.exists(), field2.greater_than(Constant(10)))
         expected_cond3 = expr.And(
-            field3.exists(), expr.Not(field3.is_null())
+            field3.exists(), field3.is_not_null()
         )
         expected_inner_and = expr.And(expected_cond2, expected_cond3)
         expected_outer_or = expr.Or(expected_cond1, expected_inner_and)
@@ -491,15 +491,15 @@ class TestBooleanExpr:
             (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN, Expr.is_nan),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN,
-                lambda f: expr.Not(f.is_nan()),
+                Expr.is_not_nan,
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NULL,
-                lambda f: f.is_null(),
+                Expr.is_null,
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL,
-                lambda f: expr.Not(f.is_null()),
+                Expr.is_not_null,
             ),
         ],
     )
@@ -825,6 +825,15 @@ class TestExpressionMethods:
         infix_instance = arg1.not_equal_any([arg2, arg3])
         assert infix_instance == instance
 
+    def test_is_absent(self):
+        arg1 = self._make_arg("Field")
+        instance = Expr.is_absent(arg1)
+        assert instance.name == "is_absent"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Field.is_absent()"
+        infix_instance = arg1.is_absent()
+        assert infix_instance == instance
+
     def test_is_nan(self):
         arg1 = self._make_arg("Value")
         instance = Expr.is_nan(arg1)
@@ -834,6 +843,15 @@ class TestExpressionMethods:
         infix_instance = arg1.is_nan()
         assert infix_instance == instance
 
+    def test_is_not_nan(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.is_not_nan(arg1)
+        assert instance.name == "is_not_nan"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.is_not_nan()"
+        infix_instance = arg1.is_not_nan()
+        assert infix_instance == instance
+
     def test_is_null(self):
         arg1 = self._make_arg("Value")
         instance = Expr.is_null(arg1)
@@ -841,6 +859,15 @@ class TestExpressionMethods:
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_null()"
         infix_instance = arg1.is_null()
+        assert infix_instance == instance
+
+    def test_is_not_null(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.is_not_null(arg1)
+        assert instance.name == "is_not_null"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.is_not_null()"
+        infix_instance = arg1.is_not_null()
         assert infix_instance == instance
 
     def test_not(self):

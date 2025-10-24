@@ -1418,6 +1418,63 @@ tests:
         - args:
           - integerValue: '1'
           name: limit
+  - description: testIsNotNull
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.is_not_null:
+              - Field: rating
+    assert_count: 10
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: rating
+              name: is_not_null
+          name: where
+  - description: testIsNotNaN
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.is_not_nan:
+              - Field: rating
+    assert_count: 10
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: rating
+              name: is_not_nan
+          name: where
+  - description: testIsAbsent
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.is_absent:
+              - Field: awards.pulitzer
+    assert_count: 9
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: awards.pulitzer
+              name: is_absent
+          name: where
   - description: testLogicalMinMax
     pipeline:
       - Collection: books
