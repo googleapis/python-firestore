@@ -970,6 +970,73 @@ class TestExpressionMethods:
         infix_instance = arg1.logical_minimum(arg2)
         assert infix_instance == instance
 
+    def test_to_lower(self):
+        arg1 = self._make_arg("Input")
+        instance = Expr.to_lower(arg1)
+        assert instance.name == "to_lower"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Input.to_lower()"
+        infix_instance = arg1.to_lower()
+        assert infix_instance == instance
+
+    def test_to_upper(self):
+        arg1 = self._make_arg("Input")
+        instance = Expr.to_upper(arg1)
+        assert instance.name == "to_upper"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Input.to_upper()"
+        infix_instance = arg1.to_upper()
+        assert infix_instance == instance
+
+    def test_trim(self):
+        arg1 = self._make_arg("Input")
+        instance = Expr.trim(arg1)
+        assert instance.name == "trim"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Input.trim()"
+        infix_instance = arg1.trim()
+        assert infix_instance == instance
+
+    def test_string_reverse(self):
+        arg1 = self._make_arg("Input")
+        instance = Expr.string_reverse(arg1)
+        assert instance.name == "string_reverse"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Input.string_reverse()"
+        infix_instance = arg1.string_reverse()
+        assert infix_instance == instance
+
+    def test_substring(self):
+        arg1 = self._make_arg("Input")
+        arg2 = self._make_arg("Position")
+        instance = Expr.substring(arg1, arg2)
+        assert instance.name == "substring"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Input.substring(Position)"
+        infix_instance = arg1.substring(arg2)
+        assert infix_instance == instance
+
+    def test_substring_w_length(self):
+        arg1 = self._make_arg("Input")
+        arg2 = self._make_arg("Position")
+        arg3 = self._make_arg("Length")
+        instance = Expr.substring(arg1, arg2, arg3)
+        assert instance.name == "substring"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "Input.substring(Position, Length)"
+        infix_instance = arg1.substring(arg2, arg3)
+        assert infix_instance == instance
+
+    def test_join(self):
+        arg1 = self._make_arg("Array")
+        arg2 = self._make_arg("Separator")
+        instance = Expr.join(arg1, arg2)
+        assert instance.name == "join"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Array.join(Separator)"
+        infix_instance = arg1.join(arg2)
+        assert infix_instance == instance
+
     def test_map_get(self):
         arg1 = self._make_arg("Map")
         arg2 = "key"

@@ -2276,3 +2276,271 @@ tests:
             - "cosine_distance_result"
     assert_results:
       - cosine_distance_result: 0.0
+  - description: testStringFunctions - ToLower
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.to_lower:
+                - Field: title
+            - "lower_title"
+    assert_results:
+      - lower_title: "the hitchhiker's guide to the galaxy"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                lower_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    name: to_lower
+          name: select
+  - description: testStringFunctions - ToUpper
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.to_upper:
+                - Field: title
+            - "upper_title"
+    assert_results:
+      - upper_title: "THE HITCHHIKER'S GUIDE TO THE GALAXY"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                upper_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    name: to_upper
+          name: select
+  - description: testStringFunctions - Trim
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.trim:
+                - Expr.string_concat:
+                  - Constant: "  "
+                  - Field: title
+                  - Constant: "  "
+            - "trimmed_title"
+    assert_results:
+      - trimmed_title: "The Hitchhiker's Guide to the Galaxy"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                trimmed_title:
+                  functionValue:
+                    args:
+                    - functionValue:
+                        args:
+                        - stringValue: "  "
+                        - fieldReferenceValue: title
+                        - stringValue: "  "
+                        name: string_concat
+                    name: trim
+          name: select
+  - description: testStringFunctions - StringReverse
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Jane Austen"
+      - Select:
+        - AliasedExpr:
+            - Expr.string_reverse:
+                - Field: title
+            - "reversed_title"
+    assert_results:
+      - reversed_title: "ecidujerP dna edirP"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: "Jane Austen"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                reversed_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    name: string_reverse
+          name: select
+  - description: testStringFunctions - Substring
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.substring:
+                - Field: title
+                - Constant: 4
+                - Constant: 11
+            - "substring_title"
+    assert_results:
+      - substring_title: "Hitchhiker'"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: "Douglas Adams"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                substring_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    - integerValue: '4'
+                    - integerValue: '11'
+                    name: substring
+          name: select
+  - description: testStringFunctions - Substring without length
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Fyodor Dostoevsky"
+      - Select:
+        - AliasedExpr:
+            - Expr.substring:
+                - Field: title
+                - Constant: 10
+            - "substring_title"
+    assert_results:
+      - substring_title: "Punishment"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: "Fyodor Dostoevsky"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                substring_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    - integerValue: '10'
+                    name: substring
+          name: select
+  - description: testStringFunctions - Join
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.join:
+                - Field: tags
+                - Constant: ", "
+            - "joined_tags"
+    assert_results:
+      - joined_tags: "comedy, space, adventure"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: "Douglas Adams"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                joined_tags:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - stringValue: ", "
+                    name: join
+          name: select

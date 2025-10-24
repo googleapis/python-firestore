@@ -984,6 +984,99 @@ class Expr(ABC):
         )
 
     @expose_as_static
+    def to_lower(self) -> "Expr":
+        """Creates an expression that converts a string to lowercase.
+
+        Example:
+            >>> # Convert the 'name' field to lowercase
+            >>> Field.of("name").to_lower()
+
+        Returns:
+            A new `Expr` representing the lowercase string.
+        """
+        return Function("to_lower", [self])
+
+    @expose_as_static
+    def to_upper(self) -> "Expr":
+        """Creates an expression that converts a string to uppercase.
+
+        Example:
+            >>> # Convert the 'title' field to uppercase
+            >>> Field.of("title").to_upper()
+
+        Returns:
+            A new `Expr` representing the uppercase string.
+        """
+        return Function("to_upper", [self])
+
+    @expose_as_static
+    def trim(self) -> "Expr":
+        """Creates an expression that removes leading and trailing whitespace from a string.
+
+        Example:
+            >>> # Trim whitespace from the 'userInput' field
+            >>> Field.of("userInput").trim()
+
+        Returns:
+            A new `Expr` representing the trimmed string.
+        """
+        return Function("trim", [self])
+
+    @expose_as_static
+    def string_reverse(self) -> "Expr":
+        """Creates an expression that reverses a string.
+
+        Example:
+            >>> # Reverse the 'userInput' field
+            >>> Field.of("userInput").reverse()
+
+        Returns:
+            A new `Expr` representing the reversed string.
+        """
+        return Function("string_reverse", [self])
+
+    @expose_as_static
+    def substring(self, position: Expr | int, length: Expr | int | None=None) -> "Expr":
+        """Creates an expression that returns a substring of the results of this expression.
+
+
+        Example:
+            >>> Field.of("description").substring(5, 10)
+            >>> Field.of("description").substring(5)
+
+        Args:
+            position: the index of the first character of the substring.
+            length: the length of the substring. If not provided the substring
+                will end at the end of the input.
+
+        Returns:
+            A new `Expr` representing the extracted substring.
+        """
+        args = [self, self._cast_to_expr_or_convert_to_constant(position)]
+        if length is not None:
+            args.append(self._cast_to_expr_or_convert_to_constant(length))
+        return Function("substring", args)
+
+    @expose_as_static
+    def join(self, delimeter: Expr | str) -> "Expr":
+        """Creates an expression that joins the elements of an array into a string
+
+
+        Example:
+            >>> Field.of("tags").join(", ")
+
+        Args:
+            delimiter: The delimiter to add between the elements of the array.
+
+        Returns:
+            A new `Expr` representing the joined string.
+        """
+        return Function(
+            "join", [self, self._cast_to_expr_or_convert_to_constant(delimeter)]
+        )
+
+
+    @expose_as_static
     def map_get(self, key: str | Constant[str]) -> "Expr":
         """Accesses a value from the map produced by evaluating this expression.
 
