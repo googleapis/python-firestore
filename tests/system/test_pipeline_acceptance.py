@@ -95,12 +95,15 @@ def test_pipeline_results(test_dict, client):
     Ensure pipeline returns expected results
     """
     expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
+    expected_approximate_results = _parse_yaml_types(test_dict.get("assert_results_approximate", None))
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     # check if server responds as expected
     got_results = [snapshot.data() for snapshot in pipeline.stream()]
     if expected_results:
         assert got_results == expected_results
+    if expected_approximate_results:
+        assert got_results == pytest.approximate(expected_approximate_results)
     if expected_count is not None:
         assert len(got_results) == expected_count
 
@@ -136,12 +139,15 @@ async def test_pipeline_results_async(test_dict, async_client):
     Ensure pipeline returns expected results
     """
     expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
+    expected_approximate_results = _parse_yaml_types(test_dict.get("assert_results_approximate", None))
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(async_client, test_dict["pipeline"])
     # check if server responds as expected
     got_results = [snapshot.data() async for snapshot in pipeline.stream()]
     if expected_results:
         assert got_results == expected_results
+    if expected_approximate_results:
+        assert got_results == pytest.approximate(expected_approximate_results)
     if expected_count is not None:
         assert len(got_results) == expected_count
 

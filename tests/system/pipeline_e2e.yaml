@@ -2010,6 +2010,178 @@ tests:
               fields:
                 distance:
                   fieldReferenceValue: distance
+  - description: testMathExpressions
+    pipeline:
+      - Collection: books
+      - Where:
+        - Expr.equal:
+          - Field: title
+          - Constant: To Kill a Mockingbird
+      - Select:
+        - AliasedExpr:
+            - Expr.abs:
+                - Field: rating
+            - "abs_rating"
+        - AliasedExpr:
+            - Expr.ceil:
+                - Field: rating
+            - "ceil_rating"
+        - AliasedExpr:
+            - Expr.exp:
+                - Field: rating
+            - "exp_rating"
+        - AliasedExpr:
+            - Expr.floor:
+                - Field: rating
+            - "floor_rating"
+        - AliasedExpr:
+            - Expr.ln:
+                - Field: rating
+            - "ln_rating"
+        - AliasedExpr:
+            - Expr.log:
+                - Field: rating
+                - Constant: 10
+            - "log_rating_base10"
+        - AliasedExpr:
+            - Expr.pow:
+                - Field: rating
+                - Constant: 2
+            - "pow_rating"
+        - AliasedExpr:
+            - Expr.sqrt:
+                - Field: rating
+            - "sqrt_rating"
+    assert_results_approximate:
+      - abs_rating: 4.2
+        ceil_rating: 5.0
+        exp_rating: 66.686331
+        floor_rating: 4.0
+        ln_rating: 1.4350845
+        log_rating_base10: 0.623249
+        pow_rating: 17.64
+        sqrt_rating: 2.049390
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: To Kill a Mockingbird
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                abs_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: abs
+                ceil_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: ceil
+                exp_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: exp
+                floor_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: floor
+                ln_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: ln
+                log_rating_base10:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '10'
+                    name: log
+                pow_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '2'
+                    name: pow
+                sqrt_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: sqrt
+          name: select
+  - description: testRoundExpressions
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal_any:
+              - Field: title
+              - - Constant: "To Kill a Mockingbird" # rating 4.2
+                - Constant: "Pride and Prejudice" # rating 4.5
+                - Constant: "The Lord of the Rings" # rating 4.7
+      - Select:
+        - title
+        - AliasedExpr:
+            - Expr.round:
+                - Field: rating
+            - "round_rating"
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "Pride and Prejudice"
+        round_rating: 5.0
+      - title: "The Lord of the Rings"
+        round_rating: 5.0
+      - title: "To Kill a Mockingbird"
+        round_rating: 4.0
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - arrayValue:
+                  values:
+                  - stringValue: "To Kill a Mockingbird"
+                  - stringValue: "Pride and Prejudice"
+                  - stringValue: "The Lord of the Rings"
+              name: equal_any
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+                round_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: round
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
   - description: testFindNearestDotProduct
     pipeline:
       - Collection: vectors

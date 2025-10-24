@@ -248,6 +248,135 @@ class Expr(ABC):
         return Function("mod", [self, self._cast_to_expr_or_convert_to_constant(other)])
 
     @expose_as_static
+    def abs(self) -> "Expr":
+        """Creates an expression that calculates the absolute value of this expression.
+
+        Example:
+            >>> # Get the absolute value of the 'change' field.
+            >>> Field.of("change").abs()
+
+        Returns:
+            A new `Expr` representing the absolute value.
+        """
+        return Function("abs", [self])
+
+    @expose_as_static
+    def ceil(self) -> "Expr":
+        """Creates an expression that calculates the ceiling of this expression.
+
+        Example:
+            >>> # Get the ceiling of the 'value' field.
+            >>> Field.of("value").ceil()
+
+        Returns:
+            A new `Expr` representing the ceiling value.
+        """
+        return Function("ceil", [self])
+
+    @expose_as_static
+    def exp(self) -> "Expr":
+        """Creates an expression that computes e to the power of this expression.
+
+        Example:
+            >>> # Compute e to the power of the 'value' field
+            >>> Field.of("value").exp()
+
+        Returns:
+            A new `Expr` representing the exponential value.
+        """
+        return Function("exp", [self])
+
+    @expose_as_static
+    def floor(self) -> "Expr":
+        """Creates an expression that calculates the floor of this expression.
+
+        Example:
+            >>> # Get the floor of the 'value' field.
+            >>> Field.of("value").floor()
+
+        Returns:
+            A new `Expr` representing the floor value.
+        """
+        return Function("floor", [self])
+
+    @expose_as_static
+    def ln(self) -> "Expr":
+        """Creates an expression that calculates the natural logarithm of this expression.
+
+        Example:
+            >>> # Get the natural logarithm of the 'value' field.
+            >>> Field.of("value").ln()
+
+        Returns:
+            A new `Expr` representing the natural logarithm.
+        """
+        return Function("ln", [self])
+
+    @expose_as_static
+    def log(self, base: Expr | float) -> "Expr":
+        """Creates an expression that calculates the logarithm of this expression with a given base.
+
+        Example:
+            >>> # Get the logarithm of 'value' with base 2.
+            >>> Field.of("value").log(2)
+            >>> # Get the logarithm of 'value' with base from 'base_field'.
+            >>> Field.of("value").log(Field.of("base_field"))
+
+        Args:
+            base: The base of the logarithm.
+
+        Returns:
+            A new `Expr` representing the logarithm.
+        """
+        return Function(
+            "log", [self, self._cast_to_expr_or_convert_to_constant(base)]
+        )
+
+    @expose_as_static
+    def pow(self, exponent: Expr | float) -> "Expr":
+        """Creates an expression that calculates this expression raised to the power of the exponent.
+
+        Example:
+            >>> # Raise 'base_val' to the power of 2.
+            >>> Field.of("base_val").pow(2)
+            >>> # Raise 'base_val' to the power of 'exponent_val'.
+            >>> Field.of("base_val").pow(Field.of("exponent_val"))
+
+        Args:
+            exponent: The exponent.
+
+        Returns:
+            A new `Expr` representing the power operation.
+        """
+        return Function("pow", [self, self._cast_to_expr_or_convert_to_constant(exponent)])
+
+    @expose_as_static
+    def round(self) -> "Expr":
+        """Creates an expression that rounds this expression to the nearest integer.
+
+        Example:
+            >>> # Round the 'value' field.
+            >>> Field.of("value").round()
+
+        Returns:
+            A new `Expr` representing the rounded value.
+        """
+        return Function("round", [self])
+
+    @expose_as_static
+    def sqrt(self) -> "Expr":
+        """Creates an expression that calculates the square root of this expression.
+
+        Example:
+            >>> # Get the square root of the 'area' field.
+            >>> Field.of("area").sqrt()
+
+        Returns:
+            A new `Expr` representing the square root.
+        """
+        return Function("sqrt", [self])
+
+    @expose_as_static
     def logical_maximum(self, other: Expr | CONSTANT_TYPE) -> "Expr":
         """Creates an expression that returns the larger value between this expression
         and another expression or constant, based on Firestore's value type ordering.

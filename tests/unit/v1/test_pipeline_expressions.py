@@ -1163,6 +1163,89 @@ class TestExpressionMethods:
         infix_instance = arg1.add(arg2)
         assert infix_instance == instance
 
+    def test_abs(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.abs(arg1)
+        assert instance.name == "abs"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.abs()"
+        infix_instance = arg1.abs()
+        assert infix_instance == instance
+
+    def test_ceil(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.ceil(arg1)
+        assert instance.name == "ceil"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.ceil()"
+        infix_instance = arg1.ceil()
+        assert infix_instance == instance
+
+    def test_exp(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.exp(arg1)
+        assert instance.name == "exp"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.exp()"
+        infix_instance = arg1.exp()
+        assert infix_instance == instance
+
+    def test_floor(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.floor(arg1)
+        assert instance.name == "floor"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.floor()"
+        infix_instance = arg1.floor()
+        assert infix_instance == instance
+
+    def test_ln(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.ln(arg1)
+        assert instance.name == "ln"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.ln()"
+        infix_instance = arg1.ln()
+        assert infix_instance == instance
+
+    def test_log(self):
+        arg1 = self._make_arg("Value")
+        arg2 = self._make_arg("Base")
+        instance = Expr.log(arg1, arg2)
+        assert instance.name == "log"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Value.log(Base)"
+        infix_instance = arg1.log(arg2)
+        assert infix_instance == instance
+
+    def test_pow(self):
+        arg1 = self._make_arg("Value")
+        arg2 = self._make_arg("Exponent")
+        instance = Expr.pow(arg1, arg2)
+        assert instance.name == "pow"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Value.pow(Exponent)"
+        infix_instance = arg1.pow(arg2)
+        assert infix_instance == instance
+
+    def test_round(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.round(arg1)
+        assert instance.name == "round"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.round()"
+        infix_instance = arg1.round()
+        assert infix_instance == instance
+
+    def test_sqrt(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.sqrt(arg1)
+        assert instance.name == "sqrt"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.sqrt()"
+        infix_instance = arg1.sqrt()
+        assert infix_instance == instance
+
     def test_array_length(self):
         arg1 = self._make_arg("Array")
         instance = Expr.array_length(arg1)
