@@ -95,7 +95,9 @@ def test_pipeline_results(test_dict, client):
     Ensure pipeline returns expected results
     """
     expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
-    expected_approximate_results = _parse_yaml_types(test_dict.get("assert_results_approximate", None))
+    expected_approximate_results = _parse_yaml_types(
+        test_dict.get("assert_results_approximate", None)
+    )
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     # check if server responds as expected
@@ -139,7 +141,9 @@ async def test_pipeline_results_async(test_dict, async_client):
     Ensure pipeline returns expected results
     """
     expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
-    expected_approximate_results = _parse_yaml_types(test_dict.get("assert_results_approximate", None))
+    expected_approximate_results = _parse_yaml_types(
+        test_dict.get("assert_results_approximate", None)
+    )
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(async_client, test_dict["pipeline"])
     # check if server responds as expected
@@ -225,7 +229,11 @@ def _apply_yaml_args_to_callable(callable_obj, client, yaml_args):
     """
     if isinstance(yaml_args, dict):
         return callable_obj(**_parse_expressions(client, yaml_args))
-    elif isinstance(yaml_args, list) and not (callable_obj == expr.Constant or callable_obj == Vector or callable_obj == expr.Array):
+    elif isinstance(yaml_args, list) and not (
+        callable_obj == expr.Constant
+        or callable_obj == Vector
+        or callable_obj == expr.Array
+    ):
         # yaml has an array of arguments. Treat as args
         return callable_obj(*_parse_expressions(client, yaml_args))
     else:

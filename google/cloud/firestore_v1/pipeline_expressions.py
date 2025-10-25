@@ -17,7 +17,6 @@ from typing import (
     Any,
     Generic,
     TypeVar,
-    Dict,
     Sequence,
 )
 from abc import ABC
@@ -334,9 +333,7 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the logarithm.
         """
-        return Function(
-            "log", [self, self._cast_to_expr_or_convert_to_constant(base)]
-        )
+        return Function("log", [self, self._cast_to_expr_or_convert_to_constant(base)])
 
     @expose_as_static
     def pow(self, exponent: Expr | float) -> "Expr":
@@ -354,7 +351,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the power operation.
         """
-        return Function("pow", [self, self._cast_to_expr_or_convert_to_constant(exponent)])
+        return Function(
+            "pow", [self, self._cast_to_expr_or_convert_to_constant(exponent)]
+        )
 
     @expose_as_static
     def round(self) -> "Expr":
@@ -563,7 +562,9 @@ class Expr(ABC):
         )
 
     @expose_as_static
-    def equal_any(self, array: Array | Sequence[Expr | CONSTANT_TYPE] | Expr) -> "BooleanExpr":
+    def equal_any(
+        self, array: Array | Sequence[Expr | CONSTANT_TYPE] | Expr
+    ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
@@ -586,7 +587,9 @@ class Expr(ABC):
         )
 
     @expose_as_static
-    def not_equal_any(self, array: Array | list[Expr | CONSTANT_TYPE] | Expr) -> "BooleanExpr":
+    def not_equal_any(
+        self, array: Array | list[Expr | CONSTANT_TYPE] | Expr
+    ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
@@ -710,7 +713,9 @@ class Expr(ABC):
         return Function("array_reverse", [self])
 
     @expose_as_static
-    def array_concat(self, *other_arrays: Array | list[Expr | CONSTANT_TYPE] | Expr) -> "Expr":
+    def array_concat(
+        self, *other_arrays: Array | list[Expr | CONSTANT_TYPE] | Expr
+    ) -> "Expr":
         """Creates an expression that concatenates an array expression with another array.
 
         Example:
@@ -724,9 +729,9 @@ class Expr(ABC):
             A new `Expr` representing the concatenated array.
         """
         return Function(
-            "array_concat", [self] + [
-                self._cast_to_expr_or_convert_to_constant(arr) for arr in other_arrays
-            ],
+            "array_concat",
+            [self]
+            + [self._cast_to_expr_or_convert_to_constant(arr) for arr in other_arrays],
         )
 
     @expose_as_static
@@ -1093,7 +1098,9 @@ class Expr(ABC):
         return Function("string_reverse", [self])
 
     @expose_as_static
-    def substring(self, position: Expr | int, length: Expr | int | None=None) -> "Expr":
+    def substring(
+        self, position: Expr | int, length: Expr | int | None = None
+    ) -> "Expr":
         """Creates an expression that returns a substring of the results of this expression.
 
 
@@ -1164,10 +1171,14 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the map_remove operation.
         """
-        return Function("map_remove", [self, self._cast_to_expr_or_convert_to_constant(key)])
+        return Function(
+            "map_remove", [self, self._cast_to_expr_or_convert_to_constant(key)]
+        )
 
     @expose_as_static
-    def map_merge(self, *other_maps: Map | dict[str | Constant[str], Expr | CONSTANT_TYPE] | Expr)-> "Expr":
+    def map_merge(
+        self, *other_maps: Map | dict[str | Constant[str], Expr | CONSTANT_TYPE] | Expr
+    ) -> "Expr":
         """Creates an expression that merges one or more dicts into a single map.
 
         Example:
@@ -1180,9 +1191,9 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the value associated with the given key in the map.
         """
-        return Function("map_merge", [self] + [
-                self._cast_to_expr_or_convert_to_constant(m) for m in other_maps
-            ],
+        return Function(
+            "map_merge",
+            [self] + [self._cast_to_expr_or_convert_to_constant(m) for m in other_maps],
         )
 
     @expose_as_static
@@ -1201,7 +1212,13 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the cosine distance between the two vectors.
         """
-        return Function("cosine_distance", [self, self._cast_to_expr_or_convert_to_constant(other, include_vector=True)])
+        return Function(
+            "cosine_distance",
+            [
+                self,
+                self._cast_to_expr_or_convert_to_constant(other, include_vector=True),
+            ],
+        )
 
     @expose_as_static
     def euclidean_distance(self, other: Expr | list[float] | Vector) -> "Expr":
@@ -1219,7 +1236,13 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the Euclidean distance between the two vectors.
         """
-        return Function("euclidean_distance", [self, self._cast_to_expr_or_convert_to_constant(other, include_vector=True)])
+        return Function(
+            "euclidean_distance",
+            [
+                self,
+                self._cast_to_expr_or_convert_to_constant(other, include_vector=True),
+            ],
+        )
 
     @expose_as_static
     def dot_product(self, other: Expr | list[float] | Vector) -> "Expr":
@@ -1237,7 +1260,13 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the dot product between the two vectors.
         """
-        return Function("dot_product", [self, self._cast_to_expr_or_convert_to_constant(other, include_vector=True)])
+        return Function(
+            "dot_product",
+            [
+                self,
+                self._cast_to_expr_or_convert_to_constant(other, include_vector=True),
+            ],
+        )
 
     @expose_as_static
     def vector_length(self) -> "Expr":
@@ -1737,7 +1766,9 @@ class Array(Function):
     def __init__(self, elements: list[Expr | CONSTANT_TYPE]):
         if not isinstance(elements, list):
             raise TypeError("Array must be constructed with a list")
-        converted_elements = [self._cast_to_expr_or_convert_to_constant(el) for el in elements]
+        converted_elements = [
+            self._cast_to_expr_or_convert_to_constant(el) for el in elements
+        ]
         super().__init__("array", converted_elements)
 
     def __repr__(self):
@@ -1757,13 +1788,16 @@ class Map(Function):
 
     def __init__(self, elements: dict[str | Constant[str], Expr | CONSTANT_TYPE]):
         element_list = []
-        for k,v in elements.items():
+        for k, v in elements.items():
             element_list.append(self._cast_to_expr_or_convert_to_constant(k))
             element_list.append(self._cast_to_expr_or_convert_to_constant(v))
         super().__init__("map", element_list)
 
     def __repr__(self):
-        d = {a.value : b for a, b in zip(self.params[::2], self.params[1::2])}
+        formatted_params = [
+            a.value if isinstance(a, Constant) else a for a in self.params
+        ]
+        d = {a: b for a, b in zip(formatted_params[::2], formatted_params[1::2])}
         return f"Map({d})"
 
 
@@ -1854,6 +1888,7 @@ class Conditional(BooleanExpr):
             "conditional", [condition, then_expr, else_expr], use_infix_repr=False
         )
 
+
 class Count(AggregateFunction):
     """
     Represents an aggregation that counts the number of stage inputs with valid evaluations of the
@@ -1871,6 +1906,4 @@ class Count(AggregateFunction):
 
     def __init__(self, expression: Expr | None = None):
         expression_list = [expression] if expression else []
-        super().__init__(
-            "count", expression_list, use_infix_repr=bool(expression_list)
-        )
+        super().__init__("count", expression_list, use_infix_repr=bool(expression_list))

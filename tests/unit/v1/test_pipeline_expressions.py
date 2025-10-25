@@ -398,9 +398,7 @@ class TestBooleanExpr:
         field3 = Field.of("field3")
         expected_cond1 = expr.And(field1.exists(), field1.equal(Constant("val1")))
         expected_cond2 = expr.And(field2.exists(), field2.greater_than(Constant(10)))
-        expected_cond3 = expr.And(
-            field3.exists(), field3.is_not_null()
-        )
+        expected_cond3 = expr.And(field3.exists(), field3.is_not_null())
         expected_inner_and = expr.And(expected_cond2, expected_cond3)
         expected_outer_or = expr.Or(expected_cond1, expected_inner_and)
 
@@ -586,6 +584,7 @@ class TestBooleanExpr:
 
 class TestArray:
     """Tests for the array class"""
+
     def test_array(self):
         arg1 = Field.of("field1")
         instance = expr.Array([arg1])
@@ -612,20 +611,24 @@ class TestArray:
 
 class TestMap:
     """Tests for the map class"""
+
     def test_map(self):
         instance = expr.Map({Constant.of("a"): Constant.of("b")})
         assert instance.name == "map"
         assert instance.params == [Constant.of("a"), Constant.of("b")]
-        assert repr(instance) == "Map({'a': Constant.of('b')})"
+        assert repr(instance) == "Map({'a': 'b'})"
 
     def test_map_w_primitives(self):
         instance = expr.Map({"a": "b", "0": 0, "bool": True})
         assert instance.params == [
-            Constant.of("a"), Constant.of("b"),
-            Constant.of("0"), Constant.of(0),
-            Constant.of("bool"), Constant.of(True)
+            Constant.of("a"),
+            Constant.of("b"),
+            Constant.of("0"),
+            Constant.of(0),
+            Constant.of("bool"),
+            Constant.of(True),
         ]
-        assert repr(instance) == "Map({'a': Constant.of('b'), '0': Constant.of(0), 'bool': Constant.of(True)})"
+        assert repr(instance) == "Map({'a': 'b', '0': 0, 'bool': True})"
 
     def test_empty_map(self):
         instance = expr.Map({})
@@ -634,9 +637,12 @@ class TestMap:
         assert repr(instance) == "Map({})"
 
     def test_w_exprs(self):
-        instance = expr.Map({Constant.of("a"): expr.Array([1,2,3])})
-        assert instance.params == [Constant.of("a"), expr.Array([1,2,3])]
-        assert repr(instance) == "Map({'a': Array([Constant.of(1), Constant.of(2), Constant.of(3)])})"
+        instance = expr.Map({Constant.of("a"): expr.Array([1, 2, 3])})
+        assert instance.params == [Constant.of("a"), expr.Array([1, 2, 3])]
+        assert (
+            repr(instance)
+            == "Map({'a': Array([Constant.of(1), Constant.of(2), Constant.of(3)])})"
+        )
 
 
 class TestExpressionMethods:
@@ -722,7 +728,10 @@ class TestExpressionMethods:
         assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
         assert instance.params[1].params == [arg2, arg3]
-        assert repr(instance) == "ArrayField.array_contains_any(Array([Element1, Element2]))"
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_any(Array([Element1, Element2]))"
+        )
         infix_instance = arg1.array_contains_any([arg2, arg3])
         assert infix_instance == instance
 
@@ -882,7 +891,10 @@ class TestExpressionMethods:
         assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
         assert instance.params[1].params == [arg2, arg3]
-        assert repr(instance) == "ArrayField.array_contains_all(Array([Element1, Element2]))"
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_all(Array([Element1, Element2]))"
+        )
         infix_instance = arg1.array_contains_all([arg2, arg3])
         assert infix_instance == instance
 
@@ -1087,7 +1099,7 @@ class TestExpressionMethods:
         instance = Expr.map_merge(arg1, arg2, arg3)
         assert instance.name == "map_merge"
         assert instance.params == [arg1, arg2, expr.Map(arg3)]
-        assert repr(instance) == "Map({'a': Constant.of(1)}).map_merge(Map({'b': Constant.of(2)}), Map({'c': Constant.of(3)}))"
+        assert repr(instance) == "Map({'a': 1}).map_merge(Map({'b': 2}), Map({'c': 3}))"
         infix_instance = arg1.map_merge(arg2, arg3)
         assert infix_instance == instance
 
@@ -1238,7 +1250,9 @@ class TestExpressionMethods:
         infix_instance = arg1.dot_product(arg2)
         assert infix_instance == instance
 
-    @pytest.mark.parametrize("method", ["euclidean_distance", "cosine_distance", "dot_product"])
+    @pytest.mark.parametrize(
+        "method", ["euclidean_distance", "cosine_distance", "dot_product"]
+    )
     @pytest.mark.parametrize(
         "input", [Vector([1.0, 2.0]), [1, 2], Constant.of(Vector([1.0, 2.0])), []]
     )
@@ -1253,7 +1267,6 @@ class TestExpressionMethods:
         got_second_param = instance.params[1]
         assert isinstance(got_second_param, Constant)
         assert isinstance(got_second_param.value, Vector)
-
 
     def test_vector_length(self):
         arg1 = self._make_arg("Array")
@@ -1393,7 +1406,10 @@ class TestExpressionMethods:
         instance = arg1.array_concat(arg2, arg3, arg4)
         assert instance.name == "array_concat"
         assert instance.params == [arg1, arg2, arg3, expr.Array(arg4)]
-        assert repr(instance) == "Array([Constant.of(0)]).array_concat(Field.of('ArrayRef2'), Field.of('ArrayRef3'), Array([Constant]))"
+        assert (
+            repr(instance)
+            == "Array([Constant.of(0)]).array_concat(Field.of('ArrayRef2'), Field.of('ArrayRef3'), Array([Constant]))"
+        )
 
     def test_byte_length(self):
         arg1 = self._make_arg("Expr")
