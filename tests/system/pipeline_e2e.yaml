@@ -167,6 +167,64 @@ tests:
                     - fieldReferenceValue: rating
           - mapValue: {}
           name: aggregate
+  - description: "testAggregates - count_if"
+    pipeline:
+      - Collection: books
+      - Aggregate:
+        - AliasedExpr:
+            - Expr.count_if:
+              - Expr.greater_than:
+                - Field: rating
+                - Constant: 4.2
+            - "count_if_rating_gt_4_2"
+    assert_results:
+      - count_if_rating_gt_4_2: 5
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                count_if_rating_gt_4_2:
+                  functionValue:
+                    name: count_if
+                    args:
+                    - functionValue:
+                        name: greater_than
+                        args:
+                        - fieldReferenceValue: rating
+                        - doubleValue: 4.2
+          - mapValue: {}
+          name: aggregate
+  - description: "testAggregates - count_distinct"
+    pipeline:
+      - Collection: books
+      - Aggregate:
+        - AliasedExpr:
+            - Expr.count_distinct:
+              - Field: genre
+            - "distinct_genres"
+    assert_results:
+      - distinct_genres: 8
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                distinct_genres:
+                  functionValue:
+                    name: count_distinct
+                    args:
+                    - fieldReferenceValue: genre
+          - mapValue: {}
+          name: aggregate
   - description: "testAggregates - avg, count, max"
     pipeline:
       - Collection: books

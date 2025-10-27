@@ -1471,6 +1471,24 @@ class TestExpressionMethods:
         assert instance.params == []
         assert repr(instance) == "Count()"
 
+    def test_count_if(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.count_if(arg1)
+        assert instance.name == "count_if"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.count_if()"
+        infix_instance = arg1.count_if()
+        assert infix_instance == instance
+
+    def test_count_distinct(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.count_distinct(arg1)
+        assert instance.name == "count_distinct"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.count_distinct()"
+        infix_instance = arg1.count_distinct()
+        assert infix_instance == instance
+
     def test_minimum(self):
         arg1 = self._make_arg("Value")
         instance = Expr.minimum(arg1)

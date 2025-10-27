@@ -853,6 +853,35 @@ class Expr(ABC):
         return AggregateFunction("count", [self])
 
     @expose_as_static
+    def count_if(self) -> "Expr":
+        """Creates an aggregation that counts the number of values of the provided field or expression
+        that evaluate to True.
+
+        Example:
+            >>> # Count the number of adults
+            >>> Field.of("age").greater_than(18).count_if().as_("totalAdults")
+
+
+        Returns:
+            A new `AggregateFunction` representing the 'count_if' aggregation.
+        """
+        return AggregateFunction("count_if", [self])
+
+    @expose_as_static
+    def count_distinct(self) -> "Expr":
+        """Creates an aggregation that counts the number of distinct values of the 
+        provided field or expression.
+
+        Example:
+            >>> # Count the total number of countries in the data
+            >>> Field.of("country").count_distinct().as_("totalCountries")
+
+        Returns:
+            A new `AggregateFunction` representing the 'count_distinct' aggregation.
+        """
+        return AggregateFunction("count_distinct", [self])
+
+    @expose_as_static
     def minimum(self) -> "Expr":
         """Creates an aggregation that finds the minimum value of a field across multiple stage inputs.
 
