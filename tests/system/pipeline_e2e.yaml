@@ -993,7 +993,57 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
+  - description: testConcat
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.concat:
+                - Field: author
+                - Constant: ": "
+                - Field: title
+            - "author_title"
+        - AliasedExpr:
+            - Expr.concat:
+                - Field: tags
+                - - Constant: "new_tag"
+            - "concatenatedTags"
+    assert_results:
+      - author_title: "Douglas Adams: The Hitchhiker's Guide to the Galaxy"
+        concatenatedTags:
+          - comedy
+          - space
+          - adventure
+          - new_tag
   - description: testLength
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.length:
+                - Field: title
+            - "titleLength"
+        - AliasedExpr:
+            - Expr.length:
+                - Field: tags
+            - "tagsLength"
+        - AliasedExpr:
+            - Expr.length:
+                - Field: awards
+            - "awardsLength"
+    assert_results:
+      - titleLength: 36
+        tagsLength: 3
+        awardsLength: 2
+  - description: testCharLength
     pipeline:
       - Collection: books
       - Select:
@@ -1998,6 +2048,95 @@ tests:
         - adventure
         - space
         - comedy
+  - description: testDocumentId
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.document_id:
+                - Field: __name__
+            - "doc_id"
+    assert_results:
+      - doc_id: "book1"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                doc_id:
+                  functionValue:
+                    name: document_id
+                    args:
+                    - fieldReferenceValue: __name__
+          name: select
+  - description: testCurrentTimestamp
+    pipeline:
+      - Collection: books
+      - Limit: 1
+      - Select:
+        - AliasedExpr:
+            - And:
+              - Expr.greater_than_or_equal:
+                  - CurrentTimestamp: []
+                  - Expr.unix_seconds_to_timestamp:
+                    - Constant: 1735689600 # 2025-01-01
+              - Expr.less_than:
+                  - CurrentTimestamp: []
+                  - Expr.unix_seconds_to_timestamp:
+                    - Constant: 4892438400 # 2125-01-01
+            - "is_between_2025_and_2125"
+    assert_results:
+      - is_between_2025_and_2125: true
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - integerValue: '1'
+          name: limit
+        - args:
+          - mapValue:
+              fields:
+                is_between_2025_and_2125:
+                  functionValue:
+                    name: and
+                    args:
+                    - functionValue:
+                        name: greater_than_or_equal
+                        args:
+                        - functionValue:
+                            name: current_timestamp
+                        - functionValue:
+                            name: unix_seconds_to_timestamp
+                            args:
+                            - integerValue: '1735689600'
+                    - functionValue:
+                        name: less_than
+                        args:
+                        - functionValue:
+                            name: current_timestamp
+                        - functionValue:
+                            name: unix_seconds_to_timestamp
+                            args:
+                            - integerValue: '4892438400'
+          name: select
   - description: testArrayConcat
     pipeline:
       - Collection: books
@@ -2532,10 +2671,14 @@ tests:
                 - Field: rating
             - "ln_rating"
         - AliasedExpr:
+            - Expr.log10:
+                - Field: rating
+            - "log_rating_base10"
+        - AliasedExpr:
             - Expr.log:
                 - Field: rating
-                - Constant: 10
-            - "log_rating_base10"
+                - Constant: 2
+            - "log_rating_base2"
         - AliasedExpr:
             - Expr.pow:
                 - Field: rating
@@ -2552,6 +2695,7 @@ tests:
         floor_rating: 4.0
         ln_rating: 1.4350845
         log_rating_base10: 0.623249
+        log_rating_base2: 2.0704
         pow_rating: 17.64
         sqrt_rating: 2.049390
     assert_proto:
@@ -2599,7 +2743,12 @@ tests:
                   functionValue:
                     args:
                     - fieldReferenceValue: rating
-                    - integerValue: '10'
+                    name: log10
+                log_rating_base2:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '2'
                     name: log
                 pow_rating:
                   functionValue:

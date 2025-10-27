@@ -1144,6 +1144,12 @@ class TestExpressionMethods:
         infix_instance = arg1.subtract(arg2)
         assert infix_instance == instance
 
+    def test_current_timestamp(self):
+        instance = expr.CurrentTimestamp()
+        assert instance.name == "current_timestamp"
+        assert instance.params == []
+        assert repr(instance) == "CurrentTimestamp()"
+
     def test_timestamp_add(self):
         arg1 = self._make_arg("Timestamp")
         arg2 = self._make_arg("Unit")
@@ -1342,6 +1348,15 @@ class TestExpressionMethods:
         infix_instance = arg1.log(arg2)
         assert infix_instance == instance
 
+    def test_log10(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.log10(arg1)
+        assert instance.name == "log10"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.log10()"
+        infix_instance = arg1.log10()
+        assert infix_instance == instance
+
     def test_pow(self):
         arg1 = self._make_arg("Value")
         arg2 = self._make_arg("Exponent")
@@ -1429,6 +1444,26 @@ class TestExpressionMethods:
         infix_instance = arg1.char_length()
         assert infix_instance == instance
 
+    def test_concat(self):
+        arg1 = self._make_arg("First")
+        arg2 = self._make_arg("Second")
+        arg3 = "Third"
+        instance = Expr.concat(arg1, arg2, arg3)
+        assert instance.name == "concat"
+        assert instance.params == [arg1, arg2, Constant.of(arg3)]
+        assert repr(instance) == "First.concat(Second, Constant.of('Third'))"
+        infix_instance = arg1.concat(arg2, arg3)
+        assert infix_instance == instance
+
+    def test_length(self):
+        arg1 = self._make_arg("Expr")
+        instance = Expr.length(arg1)
+        assert instance.name == "length"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Expr.length()"
+        infix_instance = arg1.length()
+        assert infix_instance == instance
+
     def test_collection_id(self):
         arg1 = self._make_arg("Value")
         instance = Expr.collection_id(arg1)
@@ -1436,6 +1471,15 @@ class TestExpressionMethods:
         assert instance.params == [arg1]
         assert repr(instance) == "Value.collection_id()"
         infix_instance = arg1.collection_id()
+        assert infix_instance == instance
+
+    def test_document_id(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.document_id(arg1)
+        assert instance.name == "document_id"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.document_id()"
+        infix_instance = arg1.document_id()
         assert infix_instance == instance
 
     def test_sum(self):

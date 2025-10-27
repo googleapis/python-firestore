@@ -336,6 +336,18 @@ class Expr(ABC):
         return Function("log", [self, self._cast_to_expr_or_convert_to_constant(base)])
 
     @expose_as_static
+    def log10(self) -> "Expr":
+        """Creates an expression that calculates the base 10 logarithm of this expression.
+
+        Example:
+            >>> Field.of("value").log10()
+
+        Returns:
+            A new `Expr` representing the logarithm.
+        """
+        return Function("log10", [self])
+
+    @expose_as_static
     def pow(self, exponent: Expr | float) -> "Expr":
         """Creates an expression that calculates this expression raised to the power of the exponent.
 
@@ -733,6 +745,32 @@ class Expr(ABC):
             [self]
             + [self._cast_to_expr_or_convert_to_constant(arr) for arr in other_arrays],
         )
+
+    @expose_as_static
+    def concat(self, *others: Expr | CONSTANT_TYPE) -> "Expr":
+        """Creates an expression that concatenates expressions together
+
+        Args:
+            *others: The expressions to concatenate.
+
+        Returns:
+            A new `Expr` representing the concatenated value.
+        """
+        return Function("concat", [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others])
+
+    @expose_as_static
+    def length(self) -> "Expr":
+        """
+        Creates an expression that calculates the length of the expression if it is a string, array, map, or blob.
+
+        Example:
+            >>> # Get the length of the 'name' field.
+            >>> Field.of("name").length()
+
+        Returns:
+            A new `Expr` representing the length of the expression.
+        """
+        return Function("length", [self])
 
     @expose_as_static
     def is_absent(self) -> "BooleanExpr":
@@ -1467,6 +1505,19 @@ class Expr(ABC):
         """
         return Function("collection_id", [self])
 
+    @expose_as_static
+    def document_id(self):
+        """Creates an expression that returns the document ID from a path.
+
+        Example:
+            >>> # Get the document ID from a path.
+            >>> Field.of("__name__").document_id()
+
+        Returns:
+            A new `Expr` representing the document ID.
+        """
+        return Function("document_id", [self])
+
     def ascending(self) -> Ordering:
         """Creates an `Ordering` that sorts documents in ascending order based on this expression.
 
@@ -1936,3 +1987,13 @@ class Count(AggregateFunction):
     def __init__(self, expression: Expr | None = None):
         expression_list = [expression] if expression else []
         super().__init__("count", expression_list, use_infix_repr=bool(expression_list))
+
+class CurrentTimestamp(Function):
+    """Creates an expression that returns the current timestamp
+
+    Returns:
+        A new `Expr` representing the current timestamp.
+    """
+
+    def __init__(self):
+        super().__init__("current_timestamp", [], use_infix_repr=False)
