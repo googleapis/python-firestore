@@ -23,7 +23,8 @@ from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_expressions import (
-    AliasedAggregate,
+    AggregateFunction,
+    AliasedExpr,
     Expr,
     Field,
     BooleanExpr,
@@ -530,7 +531,7 @@ class _BasePipeline:
 
     def aggregate(
         self,
-        *accumulators: AliasedAggregate,
+        *accumulators: AliasedExpr[AggregateFunction],
         groups: Sequence[str | Selectable] = (),
     ) -> "_BasePipeline":
         """
@@ -546,7 +547,6 @@ class _BasePipeline:
         - **Groups:** Optionally specify fields (by name or `Selectable`) to group
           the documents by. Aggregations are then performed within each distinct group.
           If no groups are provided, the aggregation is performed over the entire input.
-
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field
             >>> pipeline = client.pipeline().collection("books")
@@ -568,8 +568,8 @@ class _BasePipeline:
 
 
         Args:
-            *accumulators: One or more `AliasedAggregate` expressions defining
-                           the aggregations to perform and their output names.
+            *accumulators: One or more expressions defining the aggregations to perform and their
+                           corresponding output names.
             groups: An optional sequence of field names (str) or `Selectable`
                     expressions to group by before aggregating.
 

@@ -1695,20 +1695,6 @@ class Function(Expr):
 class AggregateFunction(Function):
     """A base class for aggregation functions that operate across multiple inputs."""
 
-    def as_(self, alias: str) -> "AliasedAggregate":
-        """Assigns an alias to this expression.
-
-        Aliases are useful for renaming fields in the output of a stage or for giving meaningful
-        names to calculated values.
-
-        Args:
-            alias: The alias to assign to this expression.
-
-        Returns: A new AliasedAggregate that wraps this expression and associates it with the
-            provided alias.
-        """
-        return AliasedAggregate(self, alias)
-
 
 class Selectable(Expr):
     """Base class for expressions that can be selected or aliased in projection stages."""
@@ -1753,23 +1739,6 @@ class AliasedExpr(Selectable, Generic[T]):
     """Wraps an expression with an alias."""
 
     def __init__(self, expr: T, alias: str):
-        self.expr = expr
-        self.alias = alias
-
-    def _to_map(self):
-        return self.alias, self.expr._to_pb()
-
-    def __repr__(self):
-        return f"{self.expr}.as_('{self.alias}')"
-
-    def _to_pb(self):
-        return Value(map_value={"fields": {self.alias: self.expr._to_pb()}})
-
-
-class AliasedAggregate:
-    """Wraps an aggregate with an alias"""
-
-    def __init__(self, expr: AggregateFunction, alias: str):
         self.expr = expr
         self.alias = alias
 

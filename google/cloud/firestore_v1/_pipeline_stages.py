@@ -25,7 +25,6 @@ from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.pipeline_expressions import (
     AggregateFunction,
     Expr,
-    AliasedAggregate,
     AliasedExpr,
     Field,
     BooleanExpr,
@@ -166,7 +165,7 @@ class Aggregate(Stage):
     def __init__(
         self,
         *args: AliasedExpr[AggregateFunction],
-        accumulators: Sequence[AliasedAggregate] = (),
+        accumulators: Sequence[AliasedExpr[AggregateFunction]] = (),
         groups: Sequence[str | Selectable] = (),
     ):
         super().__init__()
