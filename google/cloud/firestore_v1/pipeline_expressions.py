@@ -756,7 +756,10 @@ class Expr(ABC):
         Returns:
             A new `Expr` representing the concatenated value.
         """
-        return Function("concat", [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others])
+        return Function(
+            "concat",
+            [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
+        )
 
     @expose_as_static
     def length(self) -> "Expr":
@@ -801,7 +804,8 @@ class Expr(ABC):
             A new `Expr` representing the ifAbsent operation.
         """
         return Function(
-            "if_absent", [self, self._cast_to_expr_or_convert_to_constant(default_value)]
+            "if_absent",
+            [self, self._cast_to_expr_or_convert_to_constant(default_value)],
         )
 
     @expose_as_static
@@ -957,7 +961,7 @@ class Expr(ABC):
 
     @expose_as_static
     def count_distinct(self) -> "Expr":
-        """Creates an aggregation that counts the number of distinct values of the 
+        """Creates an aggregation that counts the number of distinct values of the
         provided field or expression.
 
         Example:

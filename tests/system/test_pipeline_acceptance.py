@@ -87,7 +87,13 @@ def test_pipeline_expected_errors(test_dict, client):
 
 @pytest.mark.parametrize(
     "test_dict",
-    [t for t in yaml_loader() if "assert_results" in t or "assert_count" in t or "assert_results_approximate" in t],
+    [
+        t
+        for t in yaml_loader()
+        if "assert_results" in t
+        or "assert_count" in t
+        or "assert_results_approximate" in t
+    ],
     ids=lambda x: f"{x.get('description', '')}",
 )
 def test_pipeline_results(test_dict, client):
@@ -105,9 +111,13 @@ def test_pipeline_results(test_dict, client):
     if expected_results:
         assert got_results == expected_results
     if expected_approximate_results:
-        assert len(got_results) == len(expected_approximate_results), "got unexpected result count"
+        assert len(got_results) == len(
+            expected_approximate_results
+        ), "got unexpected result count"
         for idx in range(len(got_results)):
-            assert got_results[idx] == pytest.approx(expected_approximate_results[idx], abs=1e-4)
+            assert got_results[idx] == pytest.approx(
+                expected_approximate_results[idx], abs=1e-4
+            )
     if expected_count is not None:
         assert len(got_results) == expected_count
 
@@ -134,7 +144,13 @@ async def test_pipeline_expected_errors_async(test_dict, async_client):
 
 @pytest.mark.parametrize(
     "test_dict",
-    [t for t in yaml_loader() if "assert_results" in t or "assert_count" in t or "assert_results_approximate" in t],
+    [
+        t
+        for t in yaml_loader()
+        if "assert_results" in t
+        or "assert_count" in t
+        or "assert_results_approximate" in t
+    ],
     ids=lambda x: f"{x.get('description', '')}",
 )
 @pytest.mark.asyncio
@@ -153,9 +169,13 @@ async def test_pipeline_results_async(test_dict, async_client):
     if expected_results:
         assert got_results == expected_results
     if expected_approximate_results:
-        assert len(got_results) == len(expected_approximate_results), "got unexpected result count"
+        assert len(got_results) == len(
+            expected_approximate_results
+        ), "got unexpected result count"
         for idx in range(len(got_results)):
-            assert got_results[idx] == pytest.approx(expected_approximate_results[idx], abs=1e-4)
+            assert got_results[idx] == pytest.approx(
+                expected_approximate_results[idx], abs=1e-4
+            )
     if expected_count is not None:
         assert len(got_results) == expected_count
 

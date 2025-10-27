@@ -839,7 +839,6 @@ class TestExpressionMethods:
         infix_instance = arg1.is_absent()
         assert infix_instance == instance
 
-
     def test_if_absent(self):
         arg1 = self._make_arg("Field")
         arg2 = self._make_arg("ThenExpr")
