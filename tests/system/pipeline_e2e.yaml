@@ -1585,6 +1585,120 @@ tests:
               - fieldReferenceValue: awards.pulitzer
               name: is_absent
           name: where
+  - description: testIfAbsent
+    pipeline:
+      - Collection: books
+      - Select:
+        - AliasedExpr:
+            - Expr.if_absent:
+                - Field: awards.pulitzer
+                - Constant: false
+            - "pulitzer_award"
+        - title
+      - Where:
+          - Expr.equal:
+              - Field: pulitzer_award
+              - Constant: true
+    assert_results:
+      - pulitzer_award: true
+        title: To Kill a Mockingbird
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                pulitzer_award:
+                  functionValue:
+                    name: if_absent
+                    args:
+                    - fieldReferenceValue: awards.pulitzer
+                    - booleanValue: false
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: pulitzer_award
+              - booleanValue: true
+              name: equal
+          name: where
+  - description: testIsError
+    pipeline:
+      - Collection: books
+      - Select:
+        - AliasedExpr:
+            - Expr.is_error:
+                - Expr.divide:
+                    - Field: rating
+                    - Constant: "string"
+            - "is_error_result"
+      - Limit: 1
+    assert_results:
+      - is_error_result: true
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                is_error_result:
+                  functionValue:
+                    name: is_error
+                    args:
+                    - functionValue:
+                        name: divide
+                        args:
+                        - fieldReferenceValue: rating
+                        - stringValue: "string"
+          name: select
+        - args:
+          - integerValue: '1'
+          name: limit
+  - description: testIfError
+    pipeline:
+      - Collection: books
+      - Select:
+        - AliasedExpr:
+            - Expr.if_error:
+                - Expr.divide:
+                    - Field: rating
+                    - Field: genre
+                - Constant: "An error occurred"
+            - "if_error_result"
+      - Limit: 1
+    assert_results:
+      - if_error_result: "An error occurred"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                if_error_result:
+                  functionValue:
+                    name: if_error
+                    args:
+                    - functionValue:
+                        name: divide
+                        args:
+                        - fieldReferenceValue: rating
+                        - fieldReferenceValue: genre
+                    - stringValue: "An error occurred"
+          name: select
+        - args:
+          - integerValue: '1'
+          name: limit
   - description: testLogicalMinMax
     pipeline:
       - Collection: books

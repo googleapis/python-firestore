@@ -839,6 +839,17 @@ class TestExpressionMethods:
         infix_instance = arg1.is_absent()
         assert infix_instance == instance
 
+
+    def test_if_absent(self):
+        arg1 = self._make_arg("Field")
+        arg2 = self._make_arg("ThenExpr")
+        instance = Expr.if_absent(arg1, arg2)
+        assert instance.name == "if_absent"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Field.if_absent(ThenExpr)"
+        infix_instance = arg1.if_absent(arg2)
+        assert infix_instance == instance
+
     def test_is_nan(self):
         arg1 = self._make_arg("Value")
         instance = Expr.is_nan(arg1)
@@ -873,6 +884,25 @@ class TestExpressionMethods:
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_not_null()"
         infix_instance = arg1.is_not_null()
+        assert infix_instance == instance
+
+    def test_is_error(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.is_error(arg1)
+        assert instance.name == "is_error"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.is_error()"
+        infix_instance = arg1.is_error()
+        assert infix_instance == instance
+
+    def test_if_error(self):
+        arg1 = self._make_arg("Value")
+        arg2 = self._make_arg("ThenExpr")
+        instance = Expr.if_error(arg1, arg2)
+        assert instance.name == "if_error"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Value.if_error(ThenExpr)"
+        infix_instance = arg1.if_error(arg2)
         assert infix_instance == instance
 
     def test_not(self):

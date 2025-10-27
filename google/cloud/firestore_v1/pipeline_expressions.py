@@ -787,6 +787,24 @@ class Expr(ABC):
         return BooleanExpr("is_absent", [self])
 
     @expose_as_static
+    def if_absent(self, default_value: Expr | CONSTANT_TYPE) -> "Expr":
+        """Creates an expression that returns a default value if an expression evaluates to an absent value.
+
+        Example:
+            >>> # Return the value of the 'email' field, or "N/A" if it's absent.
+            >>> Field.of("email").if_absent("N/A")
+
+        Args:
+            default_value: The expression or constant value to return if this expression is absent.
+
+        Returns:
+            A new `Expr` representing the ifAbsent operation.
+        """
+        return Function(
+            "if_absent", [self, self._cast_to_expr_or_convert_to_constant(default_value)]
+        )
+
+    @expose_as_static
     def is_nan(self) -> "BooleanExpr":
         """Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
 
@@ -835,6 +853,38 @@ class Expr(ABC):
             A new `Expr` representing the 'isNotNull' check.
         """
         return BooleanExpr("is_not_null", [self])
+
+    @expose_as_static
+    def is_error(self):
+        """Creates an expression that checks if a given expression produces an error
+
+        Example:
+            >>> # Resolves to True if an expression produces an error
+            >>> Field.of("value").divide("string").is_error()
+
+        Returns:
+            A new `Expr` representing the isError operation.
+        """
+        return Function("is_error", [self])
+
+    @expose_as_static
+    def if_error(self, then_value: Expr | CONSTANT_TYPE) -> "Expr":
+        """Creates an expression that returns ``then_value`` if this expression evaluates to an error.
+        Otherwise, returns the value of this expression.
+
+        Example:
+            >>> # Resolves to 0 if an expression produces an error
+            >>> Field.of("value").divide("string").if_error(0)
+
+        Args:
+            then_value: The value to return if this expression evaluates to an error.
+
+        Returns:
+            A new `Expr` representing the ifError operation.
+        """
+        return Function(
+            "if_error", [self, self._cast_to_expr_or_convert_to_constant(then_value)]
+        )
 
     @expose_as_static
     def exists(self) -> "BooleanExpr":
@@ -1987,6 +2037,7 @@ class Count(AggregateFunction):
     def __init__(self, expression: Expr | None = None):
         expression_list = [expression] if expression else []
         super().__init__("count", expression_list, use_infix_repr=bool(expression_list))
+
 
 class CurrentTimestamp(Function):
     """Creates an expression that returns the current timestamp
