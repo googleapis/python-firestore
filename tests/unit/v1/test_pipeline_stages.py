@@ -461,9 +461,19 @@ class TestGenericStage:
             ),
         ],
     )
-    def test_ctor(self, input_args, expected_params):
+    def test_ctor_with_params(self, input_args, expected_params):
         instance = self._make_one(*input_args)
         assert instance.params == expected_params
+
+    def test_ctor_with_options(self):
+        options = {"index_field": Field.of("index")}
+        field = Field.of("field")
+        alias = Field.of("alias")
+        standard_unnest = stages.Unnest(field, alias, options=stages.UnnestOptions(**options))
+        generic_unnest = stages.GenericStage("unnest", field, alias, options=options)
+        assert standard_unnest._pb_args() == generic_unnest._pb_args()
+        assert standard_unnest._pb_options() == generic_unnest._pb_options()
+        assert standard_unnest._to_pb() == generic_unnest._to_pb()
 
     @pytest.mark.parametrize(
         "input_args,expected",

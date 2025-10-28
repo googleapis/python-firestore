@@ -300,14 +300,20 @@ class FindNearest(Stage):
 class GenericStage(Stage):
     """Represents a generic, named stage with parameters."""
 
-    def __init__(self, name: str, *params: Expr | Value):
+    def __init__(self, name: str, *params: Expr | Value, options: dict[str, Expr | Value] = {}):
         super().__init__(name)
         self.params: list[Value] = [
             p._to_pb() if isinstance(p, Expr) else p for p in params
         ]
+        self.options: dict[str, Value] = {
+            k: v._to_pb() if isinstance(v, Expr) else v for k, v in options.items()
+        }
 
     def _pb_args(self):
         return self.params
+
+    def _pb_options(self):
+        return self.options
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}')"
