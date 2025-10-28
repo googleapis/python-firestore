@@ -298,7 +298,7 @@ class FindNearest(Stage):
         return options
 
 
-class GenericStage(Stage):
+class RawStage(Stage):
     """Represents a generic, named stage with parameters."""
 
     def __init__(

@@ -67,33 +67,33 @@ def test_async_pipeline_repr_single_stage():
 
 def test_async_pipeline_repr_multiple_stage():
     stage_1 = stages.Collection("path")
-    stage_2 = stages.GenericStage("second", 2)
-    stage_3 = stages.GenericStage("third", 3)
+    stage_2 = stages.RawStage("second", 2)
+    stage_3 = stages.RawStage("third", 3)
     ppl = _make_async_pipeline(stage_1, stage_2, stage_3)
     repr_str = repr(ppl)
     assert repr_str == (
         "AsyncPipeline(\n"
         "  Collection(path='/path'),\n"
-        "  GenericStage(name='second'),\n"
-        "  GenericStage(name='third')\n"
+        "  RawStage(name='second'),\n"
+        "  RawStage(name='third')\n"
         ")"
     )
 
 
 def test_async_pipeline_repr_long():
     num_stages = 100
-    stage_list = [stages.GenericStage("custom", i) for i in range(num_stages)]
+    stage_list = [stages.RawStage("custom", i) for i in range(num_stages)]
     ppl = _make_async_pipeline(*stage_list)
     repr_str = repr(ppl)
-    assert repr_str.count("GenericStage") == num_stages
+    assert repr_str.count("RawStage") == num_stages
     assert repr_str.count("\n") == num_stages + 1
 
 
 def test_async_pipeline__to_pb():
     from google.cloud.firestore_v1.types.pipeline import StructuredPipeline
 
-    stage_1 = stages.GenericStage("first")
-    stage_2 = stages.GenericStage("second")
+    stage_1 = stages.RawStage("first")
+    stage_2 = stages.RawStage("second")
     ppl = _make_async_pipeline(stage_1, stage_2)
     pb = ppl._to_pb()
     assert isinstance(pb, StructuredPipeline)
@@ -103,9 +103,9 @@ def test_async_pipeline__to_pb():
 
 def test_async_pipeline_append():
     """append should create a new pipeline with the additional stage"""
-    stage_1 = stages.GenericStage("first")
+    stage_1 = stages.RawStage("first")
     ppl_1 = _make_async_pipeline(stage_1, client=object())
-    stage_2 = stages.GenericStage("second")
+    stage_2 = stages.RawStage("second")
     ppl_2 = ppl_1._append(stage_2)
     assert ppl_1 != ppl_2
     assert len(ppl_1.stages) == 1
@@ -130,7 +130,7 @@ async def test_async_pipeline_stream_empty():
     mock_rpc = mock.AsyncMock()
     client._firestore_api.execute_pipeline = mock_rpc
     mock_rpc.return_value = _async_it([ExecutePipelineResponse()])
-    ppl_1 = _make_async_pipeline(stages.GenericStage("s"), client=client)
+    ppl_1 = _make_async_pipeline(stages.RawStage("s"), client=client)
 
     results = [r async for r in ppl_1.stream()]
     assert results == []
@@ -159,7 +159,7 @@ async def test_async_pipeline_stream_no_doc_ref():
     mock_rpc.return_value = _async_it(
         [ExecutePipelineResponse(results=[Document()], execution_time={"seconds": 9})]
     )
-    ppl_1 = _make_async_pipeline(stages.GenericStage("s"), client=client)
+    ppl_1 = _make_async_pipeline(stages.RawStage("s"), client=client)
 
     results = [r async for r in ppl_1.stream()]
     assert len(results) == 1
@@ -401,8 +401,8 @@ async def test_async_pipeline_stream_stream_equivalence_mocked():
         ("unnest", ("field_name", "alias"), stages.Unnest),
         ("unnest", (Field.of("n"), Field.of("alias")), stages.Unnest),
         ("unnest", ("n", "a", stages.UnnestOptions("idx")), stages.Unnest),
-        ("generic_stage", ("stage_name",), stages.GenericStage),
-        ("generic_stage", ("stage_name", Field.of("n")), stages.GenericStage),
+        ("raw_stage", ("stage_name",), stages.RawStage),
+        ("raw_stage", ("stage_name", Field.of("n")), stages.RawStage),
         ("offset", (1,), stages.Offset),
         ("limit", (1,), stages.Limit),
         ("aggregate", (Field.of("n").as_("alias"),), stages.Aggregate),

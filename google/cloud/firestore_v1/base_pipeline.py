@@ -458,28 +458,29 @@ class _BasePipeline:
         """
         return self._append(stages.Unnest(field, alias, options))
 
-    def generic_stage(self, name: str, *params: Expression) -> "_BasePipeline":
+    def raw_stage(self, name: str, *params: Expression) -> "_BasePipeline":
         """
-        Adds a generic, named stage to the pipeline with specified parameters.
+        Adds a stage to the pipeline by specifying the stage name as an argument. This does not offer any
+        type safety on the stage params and requires the caller to know the order (and optionally names)
+        of parameters accepted by the stage.
 
-        This method provides a flexible way to extend the pipeline's functionality
-        by adding custom stages. Each generic stage is defined by a unique `name`
-        and a set of `params` that control its behavior.
+        This class provides a way to call stages that are supported by the Firestore backend but that
+        are not implemented in the SDK version being used.
 
         Example:
             >>> # Assume we don't have a built-in "where" stage
             >>> pipeline = client.pipeline().collection("books")
-            >>> pipeline = pipeline.generic_stage("where", [Field.of("published").lt(900)])
+            >>> pipeline = pipeline.raw_stage("where", Field.of("published").lt(900))
             >>> pipeline = pipeline.select("title", "author")
 
         Args:
-            name: The name of the generic stage.
+            name: The name of the stage.
             *params: A sequence of `Expression` objects representing the parameters for the stage.
 
         Returns:
             A new Pipeline object with this stage appended to the stage list
         """
-        return self._append(stages.GenericStage(name, *params))
+        return self._append(stages.RawStage(name, *params))
 
     def offset(self, offset: int) -> "_BasePipeline":
         """

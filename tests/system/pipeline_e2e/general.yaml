@@ -528,18 +528,18 @@ tests:
                     - booleanValue: true
                     - booleanValue: false
                     name: conditional
-  - description: testGenericStage
+  - description: testRawStage
     pipeline:
-      - GenericStage:
+      - RawStage:
           - "collection"
           - Value:
               reference_value: "/books"
-      - GenericStage:
+      - RawStage:
         - "where"
         - Function.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
-      - GenericStage:
+      - RawStage:
         - "select"
         - Value:
             map_value:
