@@ -1151,7 +1151,7 @@ class BaseQuery(object):
         # Filters
         for filter_ in self._field_filters:
             ppl = ppl.where(
-                pipeline_expressions.BooleanExpr._from_query_filter_pb(
+                pipeline_expressions.BooleanExpression._from_query_filter_pb(
                     filter_, self._client
                 )
             )

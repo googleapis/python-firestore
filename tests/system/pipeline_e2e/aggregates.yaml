@@ -3,8 +3,8 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-        - AliasedExpr:
-            - Expr.count:
+        - AliasedExpression:
+            - Function.count:
               - Field: rating
             - "count"
     assert_results:
@@ -29,9 +29,9 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-        - AliasedExpr:
-            - Expr.count_if:
-              - Expr.greater_than:
+        - AliasedExpression:
+            - Function.count_if:
+              - Function.greater_than:
                 - Field: rating
                 - Constant: 4.2
             - "count_if_rating_gt_4_2"
@@ -61,8 +61,8 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-        - AliasedExpr:
-            - Expr.count_distinct:
+        - AliasedExpression:
+            - Function.count_distinct:
               - Field: genre
             - "distinct_genres"
     assert_results:
@@ -87,20 +87,20 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: genre
               - Constant: Science Fiction
       - Aggregate:
-        - AliasedExpr:
-            - Expr.count:
+        - AliasedExpression:
+            - Function.count:
               - Field: rating
             - "count"
-        - AliasedExpr:
-            - Expr.average:
+        - AliasedExpression:
+            - Function.average:
               - Field: rating
             - "avg_rating"
-        - AliasedExpr:
-            - Expr.maximum:
+        - AliasedExpression:
+            - Function.maximum:
               - Field: rating
             - "max_rating"
     assert_results:
@@ -144,7 +144,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Expr.less_than:
+        - Function.less_than:
           - Field: published
           - Constant: 1900
       - Aggregate:
@@ -155,18 +155,18 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.less_than:
+          - Function.less_than:
               - Field: published
               - Constant: 1984
       - Aggregate:
           accumulators:
-            - AliasedExpr:
-              - Expr.average:
+            - AliasedExpression:
+              - Function.average:
                 - Field: rating
               - "avg_rating"
           groups: [genre]
       - Where:
-          - Expr.greater_than:
+          - Function.greater_than:
               - Field: avg_rating
               - Constant: 4.3
       - Sort:
@@ -225,16 +225,16 @@ tests:
     pipeline:
       - Collection: books
       - Aggregate:
-          - AliasedExpr:
-              - Expr.count:
+          - AliasedExpression:
+              - Function.count:
                 - Field: rating
               - "count"
-          - AliasedExpr:
-              - Expr.maximum:
+          - AliasedExpression:
+              - Function.maximum:
                 - Field: rating
               - "max_rating"
-          - AliasedExpr:
-              - Expr.minimum:
+          - AliasedExpression:
+              - Function.minimum:
                 - Field: published
               - "min_published"
     assert_results:
@@ -267,3 +267,18 @@ tests:
                     name: minimum
           - mapValue: {}
           name: aggregate
+  - description: testSum
+    pipeline:
+      - Collection: books
+      - Where:
+          - Function.equal:
+              - Field: genre
+              - Constant: Science Fiction
+      - Aggregate:
+        - AliasedExpression:
+            - Function.sum:
+              - Field: rating
+            - "total_rating"
+    assert_results:
+      - total_rating: 8.8
+

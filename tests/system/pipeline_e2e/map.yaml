@@ -7,14 +7,14 @@ tests:
           - Field: published
           - DESCENDING
       - Select:
-          - AliasedExpr:
-              - Expr.map_get:
+          - AliasedExpression:
+              - Function.map_get:
                   - Field: awards
                   - hugo
               - "hugoAward"
           - Field: title
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: hugoAward
               - Constant: true
     assert_results:
@@ -59,16 +59,16 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: title
               - Constant: "Dune"
       - AddFields:
-        - AliasedExpr:
+        - AliasedExpression:
             - Constant: "hugo"
             - "award_name"
       - Select:
-          - AliasedExpr:
-              - Expr.map_get:
+          - AliasedExpression:
+              - Function.map_get:
                   - Field: awards
                   - Field: award_name
               - "hugoAward"
@@ -111,12 +111,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: title
               - Constant: "Dune"
       - Select:
-        - AliasedExpr:
-            - Expr.map_remove:
+        - AliasedExpression:
+            - Function.map_remove:
                 - Field: awards
                 - "nebula"
             - "awards_removed"
@@ -150,12 +150,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: title
               - Constant: "Dune"
       - Select:
-        - AliasedExpr:
-            - Expr.map_merge:
+        - AliasedExpression:
+            - Function.map_merge:
                 - Field: awards
                 - Map:
                    elements: {"new_award": true, "hugo": false}
@@ -206,7 +206,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: awards.hugo
               - Constant: true
       - Sort:
@@ -255,8 +255,8 @@ tests:
       - Collection: books
       - Limit: 1
       - Select:
-        - AliasedExpr:
-            - Expr.map_merge:
+        - AliasedExpression:
+            - Function.map_merge:
                 - Map:
                     elements: {"a": "orig", "b": "orig"}
                 - Map:

@@ -4,10 +4,10 @@ tests:
       - Collection: books
       - Where:
           - And:
-              - Expr.greater_than:
+              - Function.greater_than:
                   - Field: rating
                   - Constant: 4.5
-              - Expr.equal:
+              - Function.equal:
                   - Field: genre
                   - Constant: Science Fiction
     assert_results:
@@ -49,10 +49,10 @@ tests:
       - Collection: books
       - Where:
           - Or:
-              - Expr.equal:
+              - Function.equal:
                   - Field: genre
                   - Constant: Romance
-              - Expr.equal:
+              - Function.equal:
                   - Field: genre
                   - Constant: Dystopian
       - Select:
@@ -105,13 +105,13 @@ tests:
       - Collection: books
       - Where:
           - And:
-              - Expr.greater_than:
+              - Function.greater_than:
                   - Field: rating
                   - Constant: 4.2
-              - Expr.less_than_or_equal:
+              - Function.less_than_or_equal:
                   - Field: rating
                   - Constant: 4.5
-              - Expr.not_equal:
+              - Function.not_equal:
                   - Field: genre
                   - Constant: Science Fiction
       - Select:
@@ -176,13 +176,13 @@ tests:
       - Where:
           - Or:
               - And:
-                  - Expr.greater_than:
+                  - Function.greater_than:
                       - Field: rating
                       - Constant: 4.5
-                  - Expr.equal:
+                  - Function.equal:
                       - Field: genre
                       - Constant: Science Fiction
-              - Expr.less_than:
+              - Function.less_than:
                   - Field: published
                   - Constant: 1900
       - Select:
@@ -243,12 +243,12 @@ tests:
       - Collection: books
       - Where:
             - Not:
-                - Expr.is_nan:
+                - Function.is_nan:
                   - Field: rating
       - Select:
-          - AliasedExpr:
+          - AliasedExpression:
               - Not:
-                  - Expr.is_nan:
+                  - Function.is_nan:
                     - Field: rating
               - "ratingIsNotNaN"
       - Limit: 1
@@ -288,7 +288,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.is_not_null:
+          - Function.is_not_null:
               - Field: rating
     assert_count: 10
     assert_proto:
@@ -307,7 +307,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.is_not_nan:
+          - Function.is_not_nan:
               - Field: rating
     assert_count: 10
     assert_proto:
@@ -326,7 +326,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.is_absent:
+          - Function.is_absent:
               - Field: awards.pulitzer
     assert_count: 9
     assert_proto:
@@ -345,14 +345,14 @@ tests:
     pipeline:
       - Collection: books
       - Select:
-        - AliasedExpr:
-            - Expr.if_absent:
+        - AliasedExpression:
+            - Function.if_absent:
                 - Field: awards.pulitzer
                 - Constant: false
             - "pulitzer_award"
         - title
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: pulitzer_award
               - Constant: true
     assert_results:
@@ -387,9 +387,9 @@ tests:
     pipeline:
       - Collection: books
       - Select:
-        - AliasedExpr:
-            - Expr.is_error:
-                - Expr.divide:
+        - AliasedExpression:
+            - Function.is_error:
+                - Function.divide:
                     - Field: rating
                     - Constant: "string"
             - "is_error_result"
@@ -422,9 +422,9 @@ tests:
     pipeline:
       - Collection: books
       - Select:
-        - AliasedExpr:
-            - Expr.if_error:
-                - Expr.divide:
+        - AliasedExpression:
+            - Function.if_error:
+                - Function.divide:
                     - Field: rating
                     - Field: genre
                 - Constant: "An error occurred"
@@ -459,17 +459,17 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: author
               - Constant: Douglas Adams
       - Select:
-          - AliasedExpr:
-              - Expr.logical_maximum:
+          - AliasedExpression:
+              - Function.logical_maximum:
                   - Field: rating
                   - Constant: 4.5
               - "max_rating"
-          - AliasedExpr:
-              - Expr.logical_minimum:
+          - AliasedExpression:
+              - Function.logical_minimum:
                   - Field: published
                   - Constant: 1900
               - "min_published"
@@ -509,7 +509,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.greater_than_or_equal:
+          - Function.greater_than_or_equal:
               - Field: rating
               - Constant: 4.6
       - Select:
@@ -529,11 +529,11 @@ tests:
       - Collection: books
       - Where:
           - And:
-            - Expr.equal_any:
+            - Function.equal_any:
                 - Field: genre
                 - - Constant: Romance
                   - Constant: Dystopian
-            - Expr.not_equal_any:
+            - Function.not_equal_any:
                 - Field: author
                 - - Constant: "George Orwell"
     assert_results:
@@ -565,9 +565,9 @@ tests:
       - Collection: books
       - Where:
           - And:
-            - Expr.exists:
+            - Function.exists:
               - Field: awards.pulitzer
-            - Expr.equal:
+            - Function.equal:
               - Field: awards.pulitzer
               - Constant: true
       - Select:
@@ -579,10 +579,10 @@ tests:
       - Collection: books
       - Where:
           - Xor:
-            - - Expr.equal:
+            - - Function.equal:
                   - Field: genre
                   - Constant: Romance
-              - Expr.greater_than:
+              - Function.greater_than:
                   - Field: published
                   - Constant: 1980
       - Select:
@@ -605,9 +605,9 @@ tests:
       - Collection: books
       - Select:
         - title
-        - AliasedExpr:
+        - AliasedExpression:
             - Conditional:
-                - Expr.greater_than:
+                - Function.greater_than:
                     - Field: published
                     - Constant: 1950
                 - Constant: "Modern"
@@ -631,7 +631,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.greater_than:
+          - Function.greater_than:
               - Field: published
               - Field: rating
       - Select:
@@ -641,22 +641,22 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.exists:
+          - Function.exists:
               - Field: non_existent_field
     assert_count: 0
   - description: testConditionalWithFields
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal_any:
+          - Function.equal_any:
               - Field: title
               - - Constant: "Dune"
                 - Constant: "1984"
       - Select:
         - title
-        - AliasedExpr:
+        - AliasedExpression:
             - Conditional:
-                - Expr.greater_than:
+                - Function.greater_than:
                     - Field: published
                     - Constant: 1950
                 - Field: author
