@@ -39,8 +39,9 @@ FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 
 test_dir_name = os.path.dirname(__file__)
 
+id_format = lambda x: f"{x.get('file_name', '')}: {x.get('description', '')}"
 
-def yaml_loader(field="tests", dir_name="pipeline_e2e"):
+def yaml_loader(field="tests", dir_name="pipeline_e2e", attach_file_name=True):
     """
     Helper to load test cases or data from yaml file
     """
@@ -48,7 +49,16 @@ def yaml_loader(field="tests", dir_name="pipeline_e2e"):
     for file_name in os.listdir(f"{test_dir_name}/{dir_name}"):
         with open(f"{test_dir_name}/{dir_name}/{file_name}") as f:
             new_yaml = yaml.safe_load(f)
-            extracted = new_yaml.get(field, None) if new_yaml else None
+            assert new_yaml is not None, f"found empty yaml in {file_name}"
+            extracted = new_yaml.get(field, None)
+            # attach file_name field
+            if attach_file_name:
+                if isinstance(extracted, list):
+                    for item in extracted:
+                        item["file_name"] = file_name
+                elif isinstance(extracted, dict):
+                    extracted["file_name"] = file_name
+            # aggregate files
             if not combined_yaml:
                 combined_yaml = extracted
             elif isinstance(combined_yaml, dict) and extracted:
@@ -61,7 +71,7 @@ def yaml_loader(field="tests", dir_name="pipeline_e2e"):
 @pytest.mark.parametrize(
     "test_dict",
     [t for t in yaml_loader() if "assert_proto" in t],
-    ids=lambda x: f"{x.get('description', '')}",
+    ids=id_format,
 )
 def test_pipeline_parse_proto(test_dict, client):
     """
@@ -78,7 +88,7 @@ def test_pipeline_parse_proto(test_dict, client):
 @pytest.mark.parametrize(
     "test_dict",
     [t for t in yaml_loader() if "assert_error" in t],
-    ids=lambda x: f"{x.get('description', '')}",
+    ids=id_format,
 )
 def test_pipeline_expected_errors(test_dict, client):
     """
@@ -103,7 +113,7 @@ def test_pipeline_expected_errors(test_dict, client):
         or "assert_count" in t
         or "assert_results_approximate" in t
     ],
-    ids=lambda x: f"{x.get('description', '')}",
+    ids=id_format,
 )
 def test_pipeline_results(test_dict, client):
     """
@@ -134,7 +144,7 @@ def test_pipeline_results(test_dict, client):
 @pytest.mark.parametrize(
     "test_dict",
     [t for t in yaml_loader() if "assert_error" in t],
-    ids=lambda x: f"{x.get('description', '')}",
+    ids=id_format,
 )
 @pytest.mark.asyncio
 async def test_pipeline_expected_errors_async(test_dict, async_client):
@@ -160,7 +170,7 @@ async def test_pipeline_expected_errors_async(test_dict, async_client):
         or "assert_count" in t
         or "assert_results_approximate" in t
     ],
-    ids=lambda x: f"{x.get('description', '')}",
+    ids=id_format,
 )
 @pytest.mark.asyncio
 async def test_pipeline_results_async(test_dict, async_client):
@@ -341,7 +351,7 @@ def client():
     Build a client to use for requests
     """
     client = Client(project=FIRESTORE_PROJECT, database=FIRESTORE_ENTERPRISE_DB)
-    data = yaml_loader("data")
+    data = yaml_loader("data", attach_file_name=False)
     to_delete = []
     try:
         # setup data
