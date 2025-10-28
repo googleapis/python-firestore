@@ -18,7 +18,7 @@ import mock
 import pytest
 
 from tests.unit.v1._test_helpers import make_client
-from google.cloud.firestore_v1 import _pipeline_stages as stages
+from google.cloud.firestore_v1 import pipeline_stages as stages
 
 
 def _make_base_query(*args, **kwargs):

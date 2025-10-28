@@ -1033,7 +1033,7 @@ def test_aggregation_from_query():
 )
 def test_aggreation_to_pipeline_sum(field, in_alias, out_alias):
     from google.cloud.firestore_v1.pipeline import Pipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate
+    from google.cloud.firestore_v1.pipeline_stages import Collection, Aggregate
 
     client = make_client()
     parent = client.collection("dee")
@@ -1064,7 +1064,7 @@ def test_aggreation_to_pipeline_sum(field, in_alias, out_alias):
 )
 def test_aggreation_to_pipeline_avg(field, in_alias, out_alias):
     from google.cloud.firestore_v1.pipeline import Pipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate
+    from google.cloud.firestore_v1.pipeline_stages import Collection, Aggregate
 
     client = make_client()
     parent = client.collection("dee")
@@ -1094,7 +1094,7 @@ def test_aggreation_to_pipeline_avg(field, in_alias, out_alias):
 )
 def test_aggreation_to_pipeline_count(in_alias, out_alias):
     from google.cloud.firestore_v1.pipeline import Pipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate
+    from google.cloud.firestore_v1.pipeline_stages import Collection, Aggregate
     from google.cloud.firestore_v1.pipeline_expressions import Count
 
     client = make_client()
@@ -1137,7 +1137,7 @@ def test_aggreation_to_pipeline_count_increment():
 
 def test_aggreation_to_pipeline_complex():
     from google.cloud.firestore_v1.pipeline import Pipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate, Select
+    from google.cloud.firestore_v1.pipeline_stages import Collection, Aggregate, Select
 
     client = make_client()
     query = client.collection("my_col").select(["field_a", "field_b.c"])

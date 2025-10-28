@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 from typing import Iterable, Sequence, TYPE_CHECKING
-from google.cloud.firestore_v1 import _pipeline_stages as stages
+from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )

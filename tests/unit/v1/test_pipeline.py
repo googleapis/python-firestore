@@ -15,7 +15,7 @@
 import mock
 import pytest
 
-from google.cloud.firestore_v1 import _pipeline_stages as stages
+from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.pipeline_expressions import Field
 
 

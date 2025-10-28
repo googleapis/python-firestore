@@ -14,7 +14,7 @@
 
 from __future__ import annotations
 from typing import Generic, TypeVar, TYPE_CHECKING
-from google.cloud.firestore_v1 import _pipeline_stages as stages
+from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 from google.cloud.firestore_v1._helpers import DOCUMENT_PATH_DELIMITER
 
