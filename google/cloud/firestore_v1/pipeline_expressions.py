@@ -110,7 +110,9 @@ class Expression(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def _cast_to_expr_or_convert_to_constant(o: Any, include_vector=False) -> "Expression":
+    def _cast_to_expr_or_convert_to_constant(
+        o: Any, include_vector=False
+    ) -> "Expression":
         """Convert arbitrary object to an Expression."""
         if isinstance(o, Constant) and isinstance(o.value, list):
             o = o.value
@@ -146,7 +148,9 @@ class Expression(ABC):
                     f"`expressions must be called on an Expression or a string representing a field name. got {type(first_arg)}."
                 )
             first_expr = (
-                Field.of(first_arg) if not isinstance(first_arg, Expression) else first_arg
+                Field.of(first_arg)
+                if not isinstance(first_arg, Expression)
+                else first_arg
             )
             return self.instance_func(first_expr, *other_args, **kwargs)
 
@@ -509,7 +513,9 @@ class Expression(ABC):
         )
 
     @expose_as_static
-    def greater_than_or_equal(self, other: Expression | CONSTANT_TYPE) -> "BooleanExpression":
+    def greater_than_or_equal(
+        self, other: Expression | CONSTANT_TYPE
+    ) -> "BooleanExpression":
         """Creates an expression that checks if this expression is greater than or equal
         to another expression or constant value.
 
@@ -552,7 +558,9 @@ class Expression(ABC):
         )
 
     @expose_as_static
-    def less_than_or_equal(self, other: Expression | CONSTANT_TYPE) -> "BooleanExpression":
+    def less_than_or_equal(
+        self, other: Expression | CONSTANT_TYPE
+    ) -> "BooleanExpression":
         """Creates an expression that checks if this expression is less than or equal to
         another expression or constant value.
 
@@ -624,7 +632,9 @@ class Expression(ABC):
         )
 
     @expose_as_static
-    def array_contains(self, element: Expression | CONSTANT_TYPE) -> "BooleanExpression":
+    def array_contains(
+        self, element: Expression | CONSTANT_TYPE
+    ) -> "BooleanExpression":
         """Creates an expression that checks if an array contains a specific element or value.
 
         Example:
@@ -1298,7 +1308,10 @@ class Expression(ABC):
 
     @expose_as_static
     def map_merge(
-        self, *other_maps: Map | dict[str | Constant[str], Expression | CONSTANT_TYPE] | Expression
+        self,
+        *other_maps: Map
+        | dict[str | Constant[str], Expression | CONSTANT_TYPE]
+        | Expression,
     ) -> "Expression":
         """Creates an expression that merges one or more dicts into a single map.
 
@@ -1342,7 +1355,9 @@ class Expression(ABC):
         )
 
     @expose_as_static
-    def euclidean_distance(self, other: Expression | list[float] | Vector) -> "Expression":
+    def euclidean_distance(
+        self, other: Expression | list[float] | Vector
+    ) -> "Expression":
         """Calculates the Euclidean distance between two vectors.
 
         Example:
@@ -1493,7 +1508,9 @@ class Expression(ABC):
         return Function("unix_seconds_to_timestamp", [self])
 
     @expose_as_static
-    def timestamp_add(self, unit: Expression | str, amount: Expression | float) -> "Expression":
+    def timestamp_add(
+        self, unit: Expression | str, amount: Expression | float
+    ) -> "Expression":
         """Creates an expression that adds a specified amount of time to this timestamp expression.
 
         Example:
@@ -1520,7 +1537,9 @@ class Expression(ABC):
         )
 
     @expose_as_static
-    def timestamp_subtract(self, unit: Expression | str, amount: Expression | float) -> "Expression":
+    def timestamp_subtract(
+        self, unit: Expression | str, amount: Expression | float
+    ) -> "Expression":
         """Creates an expression that subtracts a specified amount of time from this timestamp expression.
 
         Example:
@@ -1796,7 +1815,8 @@ class BooleanExpression(Function):
     def _from_query_filter_pb(filter_pb, client):
         if isinstance(filter_pb, Query_pb.CompositeFilter):
             sub_filters = [
-                BooleanExpression._from_query_filter_pb(f, client) for f in filter_pb.filters
+                BooleanExpression._from_query_filter_pb(f, client)
+                for f in filter_pb.filters
             ]
             if filter_pb.op == Query_pb.CompositeFilter.Operator.OR:
                 return Or(*sub_filters)
@@ -1986,7 +2006,9 @@ class Conditional(BooleanExpression):
         else_expr: The expression to return if the condition is false
     """
 
-    def __init__(self, condition: BooleanExpression, then_expr: Expression, else_expr: Expression):
+    def __init__(
+        self, condition: BooleanExpression, then_expr: Expression, else_expr: Expression
+    ):
         super().__init__(
             "conditional", [condition, then_expr, else_expr], use_infix_repr=False
         )

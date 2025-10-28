@@ -917,7 +917,9 @@ class TestExpressionessionMethods:
         instance = expr.Conditional(arg1, arg2, arg3)
         assert instance.name == "conditional"
         assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "Conditional(Condition, ThenExpression, ElseExpression)"
+        assert (
+            repr(instance) == "Conditional(Condition, ThenExpression, ElseExpression)"
+        )
 
     def test_like(self):
         arg1 = self._make_arg("Expression")

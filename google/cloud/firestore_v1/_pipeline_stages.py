@@ -302,14 +302,18 @@ class RawStage(Stage):
     """Represents a generic, named stage with parameters."""
 
     def __init__(
-        self, name: str, *params: Expression | Value, options: dict[str, Expression | Value] = {}
+        self,
+        name: str,
+        *params: Expression | Value,
+        options: dict[str, Expression | Value] = {},
     ):
         super().__init__(name)
         self.params: list[Value] = [
             p._to_pb() if isinstance(p, Expression) else p for p in params
         ]
         self.options: dict[str, Value] = {
-            k: v._to_pb() if isinstance(v, Expression) else v for k, v in options.items()
+            k: v._to_pb() if isinstance(v, Expression) else v
+            for k, v in options.items()
         }
 
     def _pb_args(self):
