@@ -40,13 +40,22 @@ FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 test_dir_name = os.path.dirname(__file__)
 
 
-def yaml_loader(field="tests", file_name="pipeline_e2e.yaml"):
+def yaml_loader(field="tests", dir_name="pipeline_e2e"):
     """
     Helper to load test cases or data from yaml file
     """
-    with open(f"{test_dir_name}/{file_name}") as f:
-        test_cases = yaml.safe_load(f)
-    return test_cases[field]
+    combined_yaml = None
+    for file_name in os.listdir(f"{test_dir_name}/{dir_name}"):
+        with open(f"{test_dir_name}/{dir_name}/{file_name}") as f:
+            new_yaml = yaml.safe_load(f)
+            extracted = new_yaml.get(field, None) if new_yaml else None
+            if not combined_yaml:
+                combined_yaml = extracted
+            elif isinstance(combined_yaml, dict) and extracted:
+                combined_yaml.update(extracted)
+            elif isinstance(combined_yaml, list) and extracted:
+                combined_yaml.extend(extracted)
+    return combined_yaml
 
 
 @pytest.mark.parametrize(
