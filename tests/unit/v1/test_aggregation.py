@@ -127,12 +127,12 @@ def test_avg_aggregation_no_alias_to_pb():
     "in_alias,expected_alias", [("total", "total"), (None, "field_1")]
 )
 def test_count_aggregation_to_pipeline_expr(in_alias, expected_alias):
-    from google.cloud.firestore_v1.pipeline_expressions import ExprWithAlias
+    from google.cloud.firestore_v1.pipeline_expressions import AliasedAggregate
     from google.cloud.firestore_v1.pipeline_expressions import Count
 
     count_aggregation = CountAggregation(alias=in_alias)
     got = count_aggregation._to_pipeline_expr(iter([1]))
-    assert isinstance(got, ExprWithAlias)
+    assert isinstance(got, AliasedAggregate)
     assert got.alias == expected_alias
     assert isinstance(got.expr, Count)
     assert len(got.expr.params) == 0
@@ -143,14 +143,13 @@ def test_count_aggregation_to_pipeline_expr(in_alias, expected_alias):
     [("total", "path", "total"), (None, "some_ref", "field_1")],
 )
 def test_sum_aggregation_to_pipeline_expr(in_alias, expected_path, expected_alias):
-    from google.cloud.firestore_v1.pipeline_expressions import ExprWithAlias
-    from google.cloud.firestore_v1.pipeline_expressions import Sum
+    from google.cloud.firestore_v1.pipeline_expressions import AliasedAggregate
 
     count_aggregation = SumAggregation(expected_path, alias=in_alias)
     got = count_aggregation._to_pipeline_expr(iter([1]))
-    assert isinstance(got, ExprWithAlias)
+    assert isinstance(got, AliasedAggregate)
     assert got.alias == expected_alias
-    assert isinstance(got.expr, Sum)
+    assert got.expr.name == "sum"
     assert got.expr.params[0].path == expected_path
 
 
@@ -159,14 +158,13 @@ def test_sum_aggregation_to_pipeline_expr(in_alias, expected_path, expected_alia
     [("total", "path", "total"), (None, "some_ref", "field_1")],
 )
 def test_avg_aggregation_to_pipeline_expr(in_alias, expected_path, expected_alias):
-    from google.cloud.firestore_v1.pipeline_expressions import ExprWithAlias
-    from google.cloud.firestore_v1.pipeline_expressions import Avg
+    from google.cloud.firestore_v1.pipeline_expressions import AliasedAggregate
 
     count_aggregation = AvgAggregation(expected_path, alias=in_alias)
     got = count_aggregation._to_pipeline_expr(iter([1]))
-    assert isinstance(got, ExprWithAlias)
+    assert isinstance(got, AliasedAggregate)
     assert got.alias == expected_alias
-    assert isinstance(got.expr, Avg)
+    assert got.expr.name == "average"
     assert got.expr.params[0].path == expected_path
 
 
@@ -1036,7 +1034,6 @@ def test_aggregation_from_query():
 def test_aggreation_to_pipeline_sum(field, in_alias, out_alias):
     from google.cloud.firestore_v1.pipeline import Pipeline
     from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate
-    from google.cloud.firestore_v1.pipeline_expressions import Sum
 
     client = make_client()
     parent = client.collection("dee")
@@ -1051,7 +1048,7 @@ def test_aggreation_to_pipeline_sum(field, in_alias, out_alias):
     aggregate_stage = pipeline.stages[1]
     assert isinstance(aggregate_stage, Aggregate)
     assert len(aggregate_stage.accumulators) == 1
-    assert isinstance(aggregate_stage.accumulators[0].expr, Sum)
+    assert aggregate_stage.accumulators[0].expr.name == "sum"
     expected_field = field if isinstance(field, str) else field.to_api_repr()
     assert aggregate_stage.accumulators[0].expr.params[0].path == expected_field
     assert aggregate_stage.accumulators[0].alias == out_alias
@@ -1068,7 +1065,6 @@ def test_aggreation_to_pipeline_sum(field, in_alias, out_alias):
 def test_aggreation_to_pipeline_avg(field, in_alias, out_alias):
     from google.cloud.firestore_v1.pipeline import Pipeline
     from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate
-    from google.cloud.firestore_v1.pipeline_expressions import Avg
 
     client = make_client()
     parent = client.collection("dee")
@@ -1083,7 +1079,7 @@ def test_aggreation_to_pipeline_avg(field, in_alias, out_alias):
     aggregate_stage = pipeline.stages[1]
     assert isinstance(aggregate_stage, Aggregate)
     assert len(aggregate_stage.accumulators) == 1
-    assert isinstance(aggregate_stage.accumulators[0].expr, Avg)
+    assert aggregate_stage.accumulators[0].expr.name == "average"
     expected_field = field if isinstance(field, str) else field.to_api_repr()
     assert aggregate_stage.accumulators[0].expr.params[0].path == expected_field
     assert aggregate_stage.accumulators[0].alias == out_alias
@@ -1142,7 +1138,6 @@ def test_aggreation_to_pipeline_count_increment():
 def test_aggreation_to_pipeline_complex():
     from google.cloud.firestore_v1.pipeline import Pipeline
     from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate, Select
-    from google.cloud.firestore_v1.pipeline_expressions import Sum, Avg, Count
 
     client = make_client()
     query = client.collection("my_col").select(["field_a", "field_b.c"])
@@ -1159,11 +1154,11 @@ def test_aggreation_to_pipeline_complex():
     assert isinstance(pipeline.stages[2], Aggregate)
     aggregate_stage = pipeline.stages[2]
     assert len(aggregate_stage.accumulators) == 4
-    assert isinstance(aggregate_stage.accumulators[0].expr, Sum)
+    assert aggregate_stage.accumulators[0].expr.name == "sum"
     assert aggregate_stage.accumulators[0].alias == "alias"
-    assert isinstance(aggregate_stage.accumulators[1].expr, Count)
+    assert aggregate_stage.accumulators[1].expr.name == "count"
     assert aggregate_stage.accumulators[1].alias == "field_1"
-    assert isinstance(aggregate_stage.accumulators[2].expr, Avg)
+    assert aggregate_stage.accumulators[2].expr.name == "average"
     assert aggregate_stage.accumulators[2].alias == "field_2"
-    assert isinstance(aggregate_stage.accumulators[3].expr, Sum)
+    assert aggregate_stage.accumulators[3].expr.name == "sum"
     assert aggregate_stage.accumulators[3].alias == "field_3"
