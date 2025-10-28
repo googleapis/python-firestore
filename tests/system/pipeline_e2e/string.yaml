@@ -240,7 +240,7 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
-  - description: testStringFunctions - CharLength
+  - description: CharLength
     pipeline:
       - Collection: books
       - Where:
@@ -276,7 +276,7 @@ tests:
                     - fieldReferenceValue: title
                     name: char_length
           name: select
-  - description: testStringFunctions - ByteLength
+  - description: ByteLength
     pipeline:
       - Collection: books
       - Where:
@@ -384,7 +384,7 @@ tests:
         - title
     assert_results:
       - title: "The Hitchhiker's Guide to the Galaxy"
-  - description: testStringFunctions - ToLower
+  - description: ToLower
     pipeline:
       - Collection: books
       - Where:
@@ -420,7 +420,7 @@ tests:
                     - fieldReferenceValue: title
                     name: to_lower
           name: select
-  - description: testStringFunctions - ToUpper
+  - description: ToUpper
     pipeline:
       - Collection: books
       - Where:
@@ -456,7 +456,7 @@ tests:
                     - fieldReferenceValue: title
                     name: to_upper
           name: select
-  - description: testStringFunctions - Trim
+  - description: Trim
     pipeline:
       - Collection: books
       - Where:
@@ -500,7 +500,7 @@ tests:
                         name: string_concat
                     name: trim
           name: select
-  - description: testStringFunctions - StringReverse
+  - description: StringReverse
     pipeline:
       - Collection: books
       - Where:
@@ -536,7 +536,7 @@ tests:
                     - fieldReferenceValue: title
                     name: string_reverse
           name: select
-  - description: testStringFunctions - Substring
+  - description: Substring
     pipeline:
       - Collection: books
       - Where:
@@ -576,7 +576,7 @@ tests:
                     - integerValue: '11'
                     name: substring
           name: select
-  - description: testStringFunctions - Substring without length
+  - description: Substring without length
     pipeline:
       - Collection: books
       - Where:
@@ -614,7 +614,7 @@ tests:
                     - integerValue: '10'
                     name: substring
           name: select
-  - description: testStringFunctions - Join
+  - description: Join
     pipeline:
       - Collection: books
       - Where:
