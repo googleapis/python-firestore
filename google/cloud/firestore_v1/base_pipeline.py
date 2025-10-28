@@ -24,10 +24,10 @@ from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_expressions import (
     AggregateFunction,
-    AliasedExpr,
-    Expr,
+    AliasedExpression,
+    Expression,
     Field,
-    BooleanExpr,
+    BooleanExpression,
     Selectable,
 )
 from google.cloud.firestore_v1 import _helpers
@@ -147,7 +147,7 @@ class _BasePipeline:
         The added fields are defined using `Selectable` expressions, which can be:
             - `Field`: References an existing document field.
             - `Function`: Performs a calculation using functions like `add`,
-              `multiply` with assigned aliases using `Expr.as_()`.
+              `multiply` with assigned aliases using `Expression.as_()`.
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Field, add
@@ -194,7 +194,7 @@ class _BasePipeline:
         The selected fields are defined using `Selectable` expressions or field names:
             - `Field`: References an existing document field.
             - `Function`: Represents the result of a function with an assigned alias
-              name using `Expr.as_()`.
+              name using `Expression.as_()`.
             - `str`: The name of an existing field.
 
         If no selections are provided, the output of this stage is empty. Use
@@ -220,14 +220,14 @@ class _BasePipeline:
         """
         return self._append(stages.Select(*selections))
 
-    def where(self, condition: BooleanExpr) -> "_BasePipeline":
+    def where(self, condition: BooleanExpression) -> "_BasePipeline":
         """
         Filters the documents from previous stages to only include those matching
-        the specified `BooleanExpr`.
+        the specified `BooleanExpression`.
 
         This stage allows you to apply conditions to the data, similar to a "WHERE"
         clause in SQL. You can filter documents based on their field values, using
-        implementations of `BooleanExpr`, typically including but not limited to:
+        implementations of `BooleanExpression`, typically including but not limited to:
             - field comparators: `eq`, `lt` (less than), `gt` (greater than), etc.
             - logical operators: `And`, `Or`, `Not`, etc.
             - advanced functions: `regex_matches`, `array_contains`, etc.
@@ -252,7 +252,7 @@ class _BasePipeline:
 
 
         Args:
-            condition: The `BooleanExpr` to apply.
+            condition: The `BooleanExpression` to apply.
 
         Returns:
             A new Pipeline object with this stage appended to the stage list
@@ -261,7 +261,7 @@ class _BasePipeline:
 
     def find_nearest(
         self,
-        field: str | Expr,
+        field: str | Expression,
         vector: Sequence[float] | "Vector",
         distance_measure: "DistanceMeasure",
         options: stages.FindNearestOptions | None = None,
@@ -298,7 +298,7 @@ class _BasePipeline:
             ... )
 
         Args:
-            field: The name of the field (str) or an expression (`Expr`) that
+            field: The name of the field (str) or an expression (`Expression`) that
                    evaluates to the vector data. This field should store vector values.
             vector: The target vector (sequence of floats or `Vector` object) to
                     compare against.
@@ -458,7 +458,7 @@ class _BasePipeline:
         """
         return self._append(stages.Unnest(field, alias, options))
 
-    def generic_stage(self, name: str, *params: Expr) -> "_BasePipeline":
+    def generic_stage(self, name: str, *params: Expression) -> "_BasePipeline":
         """
         Adds a generic, named stage to the pipeline with specified parameters.
 
@@ -474,7 +474,7 @@ class _BasePipeline:
 
         Args:
             name: The name of the generic stage.
-            *params: A sequence of `Expr` objects representing the parameters for the stage.
+            *params: A sequence of `Expression` objects representing the parameters for the stage.
 
         Returns:
             A new Pipeline object with this stage appended to the stage list
@@ -531,7 +531,7 @@ class _BasePipeline:
 
     def aggregate(
         self,
-        *accumulators: AliasedExpr[AggregateFunction],
+        *accumulators: AliasedExpression[AggregateFunction],
         groups: Sequence[str | Selectable] = (),
     ) -> "_BasePipeline":
         """

@@ -24,10 +24,10 @@ from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
 from google.cloud.firestore_v1.pipeline_expressions import (
     AggregateFunction,
-    Expr,
-    AliasedExpr,
+    Expression,
+    AliasedExpression,
     Field,
-    BooleanExpr,
+    BooleanExpression,
     Selectable,
     Ordering,
 )
@@ -164,8 +164,8 @@ class Aggregate(Stage):
 
     def __init__(
         self,
-        *args: AliasedExpr[AggregateFunction],
-        accumulators: Sequence[AliasedExpr[AggregateFunction]] = (),
+        *args: AliasedExpression[AggregateFunction],
+        accumulators: Sequence[AliasedExpression[AggregateFunction]] = (),
         groups: Sequence[str | Selectable] = (),
     ):
         super().__init__()
@@ -271,13 +271,13 @@ class FindNearest(Stage):
 
     def __init__(
         self,
-        field: str | Expr,
+        field: str | Expression,
         vector: Sequence[float] | Vector,
         distance_measure: "DistanceMeasure" | str,
         options: Optional["FindNearestOptions"] = None,
     ):
         super().__init__("find_nearest")
-        self.field: Expr = Field(field) if isinstance(field, str) else field
+        self.field: Expression = Field(field) if isinstance(field, str) else field
         self.vector: Vector = vector if isinstance(vector, Vector) else Vector(vector)
         self.distance_measure = (
             distance_measure
@@ -305,10 +305,10 @@ class FindNearest(Stage):
 class GenericStage(Stage):
     """Represents a generic, named stage with parameters."""
 
-    def __init__(self, name: str, *params: Expr | Value):
+    def __init__(self, name: str, *params: Expression | Value):
         super().__init__(name)
         self.params: list[Value] = [
-            p._to_pb() if isinstance(p, Expr) else p for p in params
+            p._to_pb() if isinstance(p, Expression) else p for p in params
         ]
 
     def _pb_args(self):
@@ -443,7 +443,7 @@ class Unnest(Stage):
 class Where(Stage):
     """Filters documents based on a specified condition."""
 
-    def __init__(self, condition: BooleanExpr):
+    def __init__(self, condition: BooleanExpression):
         super().__init__()
         self.condition = condition
 

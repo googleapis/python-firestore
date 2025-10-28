@@ -36,7 +36,7 @@ from google.cloud.firestore_v1.types import (
 )
 from google.cloud.firestore_v1.pipeline_expressions import AggregateFunction
 from google.cloud.firestore_v1.pipeline_expressions import Count
-from google.cloud.firestore_v1.pipeline_expressions import AliasedExpr
+from google.cloud.firestore_v1.pipeline_expressions import AliasedExpression
 from google.cloud.firestore_v1.pipeline_expressions import Field
 
 # Types needed only for Type Hints
@@ -86,7 +86,7 @@ class BaseAggregation(ABC):
     @abc.abstractmethod
     def _to_pipeline_expr(
         self, autoindexer: Iterable[int]
-    ) -> AliasedExpr[AggregateFunction]:
+    ) -> AliasedExpression[AggregateFunction]:
         """
         Convert this instance to a pipeline expression for use with pipeline.aggregate()
 

@@ -23,8 +23,8 @@ from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1._helpers import GeoPoint
 import google.cloud.firestore_v1.pipeline_expressions as expr
-from google.cloud.firestore_v1.pipeline_expressions import BooleanExpr
-from google.cloud.firestore_v1.pipeline_expressions import Expr
+from google.cloud.firestore_v1.pipeline_expressions import BooleanExpression
+from google.cloud.firestore_v1.pipeline_expressions import Expression
 from google.cloud.firestore_v1.pipeline_expressions import Constant
 from google.cloud.firestore_v1.pipeline_expressions import Field
 from google.cloud.firestore_v1.pipeline_expressions import Ordering
@@ -167,7 +167,7 @@ class TestConstant:
 
 class TestSelectable:
     """
-    contains tests for each Expr class that derives from Selectable
+    contains tests for each Expression class that derives from Selectable
     """
 
     def test_ctor(self):
@@ -224,7 +224,7 @@ class TestSelectable:
             assert result[0] == "field1"
             assert result[1] == Value(field_reference_value="field1")
 
-    class TestAliasedExpr:
+    class TestAliasedExpression:
         def test_repr(self):
             instance = Field.of("field1").as_("alias1")
             assert repr(instance) == "Field.of('field1').as_('alias1')"
@@ -232,14 +232,14 @@ class TestSelectable:
         def test_ctor(self):
             arg = Field.of("field1")
             alias = "alias1"
-            instance = expr.AliasedExpr(arg, alias)
+            instance = expr.AliasedExpression(arg, alias)
             assert instance.expr == arg
             assert instance.alias == alias
 
         def test_to_pb(self):
             arg = Field.of("field1")
             alias = "alias1"
-            instance = expr.AliasedExpr(arg, alias)
+            instance = expr.AliasedExpression(arg, alias)
             result = instance._to_pb()
             assert result.map_value.fields.get("alias1") == arg._to_pb()
 
@@ -249,35 +249,8 @@ class TestSelectable:
             assert result[0] == "alias1"
             assert result[1] == Value(field_reference_value="field1")
 
-    class TestAliasedAggregate:
-        def test_repr(self):
-            instance = Field.of("field1").maximum().as_("alias1")
-            assert repr(instance) == "Field.of('field1').maximum().as_('alias1')"
 
-        def test_ctor(self):
-            arg = Expr.minimum("field1")
-            alias = "alias1"
-            instance = expr.AliasedAggregate(arg, alias)
-            assert instance.expr == arg
-            assert instance.alias == alias
-
-        def test_to_pb(self):
-            arg = Field.of("field1").average()
-            alias = "alias1"
-            instance = expr.AliasedAggregate(arg, alias)
-            result = instance._to_pb()
-            assert result.map_value.fields.get("alias1") == arg._to_pb()
-
-        def test_to_map(self):
-            arg = Field.of("field1").count()
-            alias = "alias1"
-            instance = expr.AliasedAggregate(arg, alias)
-            result = instance._to_map()
-            assert result[0] == "alias1"
-            assert result[1] == arg._to_pb()
-
-
-class TestBooleanExpr:
+class TestBooleanExpression:
     def test__from_query_filter_pb_composite_filter_or(self, mock_client):
         """
         test composite OR filters
@@ -305,7 +278,7 @@ class TestBooleanExpr:
             composite_filter=composite_pb
         )
 
-        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpression._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         # should include existance checks
         field1 = Field.of("field1")
@@ -344,7 +317,7 @@ class TestBooleanExpr:
             composite_filter=composite_pb
         )
 
-        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpression._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         # should include existance checks
         field1 = Field.of("field1")
@@ -391,7 +364,7 @@ class TestBooleanExpr:
             composite_filter=outer_or_pb
         )
 
-        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpression._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         field1 = Field.of("field1")
         field2 = Field.of("field2")
@@ -422,23 +395,23 @@ class TestBooleanExpr:
         )
 
         with pytest.raises(TypeError, match="Unexpected CompositeFilter operator type"):
-            BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
+            BooleanExpression._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
     @pytest.mark.parametrize(
         "op_enum, expected_expr_func",
         [
-            (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN, Expr.is_nan),
+            (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN, Expression.is_nan),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN,
-                Expr.is_not_nan,
+                Expression.is_not_nan,
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NULL,
-                Expr.is_null,
+                Expression.is_null,
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL,
-                Expr.is_not_null,
+                Expression.is_not_null,
             ),
         ],
     )
@@ -455,7 +428,7 @@ class TestBooleanExpr:
         )
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(unary_filter=filter_pb)
 
-        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpression._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         field_expr_inst = Field.of(field_path)
         expected_condition = expected_expr_func(field_expr_inst)
@@ -476,7 +449,7 @@ class TestBooleanExpr:
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(unary_filter=filter_pb)
 
         with pytest.raises(TypeError, match="Unexpected UnaryFilter operator type"):
-            BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
+            BooleanExpression._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
     @pytest.mark.parametrize(
         "op_enum, value, expected_expr_func",
@@ -484,48 +457,48 @@ class TestBooleanExpr:
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN,
                 10,
-                Expr.less_than,
+                Expression.less_than,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.LESS_THAN_OR_EQUAL,
                 10,
-                Expr.less_than_or_equal,
+                Expression.less_than_or_equal,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN,
                 10,
-                Expr.greater_than,
+                Expression.greater_than,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.GREATER_THAN_OR_EQUAL,
                 10,
-                Expr.greater_than_or_equal,
+                Expression.greater_than_or_equal,
             ),
-            (query_pb.StructuredQuery.FieldFilter.Operator.EQUAL, 10, Expr.equal),
+            (query_pb.StructuredQuery.FieldFilter.Operator.EQUAL, 10, Expression.equal),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.NOT_EQUAL,
                 10,
-                Expr.not_equal,
+                Expression.not_equal,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS,
                 10,
-                Expr.array_contains,
+                Expression.array_contains,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.ARRAY_CONTAINS_ANY,
                 [10, 20],
-                Expr.array_contains_any,
+                Expression.array_contains_any,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.IN,
                 [10, 20],
-                Expr.equal_any,
+                Expression.equal_any,
             ),
             (
                 query_pb.StructuredQuery.FieldFilter.Operator.NOT_IN,
                 [10, 20],
-                Expr.not_equal_any,
+                Expression.not_equal_any,
             ),
         ],
     )
@@ -544,7 +517,7 @@ class TestBooleanExpr:
         )
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(field_filter=filter_pb)
 
-        result = BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
+        result = BooleanExpression._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
         field_expr = Field.of(field_path)
         # convert values into constants
@@ -571,7 +544,7 @@ class TestBooleanExpr:
         wrapped_filter_pb = query_pb.StructuredQuery.Filter(field_filter=filter_pb)
 
         with pytest.raises(TypeError, match="Unexpected FieldFilter operator type"):
-            BooleanExpr._from_query_filter_pb(wrapped_filter_pb, mock_client)
+            BooleanExpression._from_query_filter_pb(wrapped_filter_pb, mock_client)
 
     def test__from_query_filter_pb_unknown_filter_type(self, mock_client):
         """
@@ -579,7 +552,7 @@ class TestBooleanExpr:
         """
         # Test with an unexpected protobuf type
         with pytest.raises(TypeError, match="Unexpected filter type"):
-            BooleanExpr._from_query_filter_pb(document_pb.Value(), mock_client)
+            BooleanExpression._from_query_filter_pb(document_pb.Value(), mock_client)
 
 
 class TestArray:
@@ -645,9 +618,9 @@ class TestMap:
         )
 
 
-class TestExpressionMethods:
+class TestExpressionessionMethods:
     """
-    contains test methods for each Expr method
+    contains test methods for each Expression method
     """
 
     @pytest.mark.parametrize(
@@ -685,11 +658,11 @@ class TestExpressionMethods:
         assert (first == second) is expected
 
     def _make_arg(self, name="Mock"):
-        class MockExpr(Constant):
+        class MockExpression(Constant):
             def __repr__(self):
                 return self.value
 
-        arg = MockExpr(name)
+        arg = MockExpression(name)
         return arg
 
     def test_and(self):
@@ -712,7 +685,7 @@ class TestExpressionMethods:
     def test_array_contains(self):
         arg1 = self._make_arg("ArrayField")
         arg2 = self._make_arg("Element")
-        instance = Expr.array_contains(arg1, arg2)
+        instance = Expression.array_contains(arg1, arg2)
         assert instance.name == "array_contains"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "ArrayField.array_contains(Element)"
@@ -723,7 +696,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("ArrayField")
         arg2 = self._make_arg("Element1")
         arg3 = self._make_arg("Element2")
-        instance = Expr.array_contains_any(arg1, [arg2, arg3])
+        instance = Expression.array_contains_any(arg1, [arg2, arg3])
         assert instance.name == "array_contains_any"
         assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
@@ -737,7 +710,7 @@ class TestExpressionMethods:
 
     def test_exists(self):
         arg1 = self._make_arg("Field")
-        instance = Expr.exists(arg1)
+        instance = Expression.exists(arg1)
         assert instance.name == "exists"
         assert instance.params == [arg1]
         assert repr(instance) == "Field.exists()"
@@ -747,7 +720,7 @@ class TestExpressionMethods:
     def test_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.equal(arg1, arg2)
+        instance = Expression.equal(arg1, arg2)
         assert instance.name == "equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.equal(Right)"
@@ -757,7 +730,7 @@ class TestExpressionMethods:
     def test_greater_than_or_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.greater_than_or_equal(arg1, arg2)
+        instance = Expression.greater_than_or_equal(arg1, arg2)
         assert instance.name == "greater_than_or_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.greater_than_or_equal(Right)"
@@ -767,7 +740,7 @@ class TestExpressionMethods:
     def test_greater_than(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.greater_than(arg1, arg2)
+        instance = Expression.greater_than(arg1, arg2)
         assert instance.name == "greater_than"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.greater_than(Right)"
@@ -777,7 +750,7 @@ class TestExpressionMethods:
     def test_less_than_or_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.less_than_or_equal(arg1, arg2)
+        instance = Expression.less_than_or_equal(arg1, arg2)
         assert instance.name == "less_than_or_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.less_than_or_equal(Right)"
@@ -787,7 +760,7 @@ class TestExpressionMethods:
     def test_less_than(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.less_than(arg1, arg2)
+        instance = Expression.less_than(arg1, arg2)
         assert instance.name == "less_than"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.less_than(Right)"
@@ -797,7 +770,7 @@ class TestExpressionMethods:
     def test_not_equal(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.not_equal(arg1, arg2)
+        instance = Expression.not_equal(arg1, arg2)
         assert instance.name == "not_equal"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.not_equal(Right)"
@@ -808,7 +781,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("Field")
         arg2 = self._make_arg("Value1")
         arg3 = self._make_arg("Value2")
-        instance = Expr.equal_any(arg1, [arg2, arg3])
+        instance = Expression.equal_any(arg1, [arg2, arg3])
         assert instance.name == "equal_any"
         assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
@@ -821,7 +794,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("Field")
         arg2 = self._make_arg("Value1")
         arg3 = self._make_arg("Value2")
-        instance = Expr.not_equal_any(arg1, [arg2, arg3])
+        instance = Expression.not_equal_any(arg1, [arg2, arg3])
         assert instance.name == "not_equal_any"
         assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
@@ -832,7 +805,7 @@ class TestExpressionMethods:
 
     def test_is_absent(self):
         arg1 = self._make_arg("Field")
-        instance = Expr.is_absent(arg1)
+        instance = Expression.is_absent(arg1)
         assert instance.name == "is_absent"
         assert instance.params == [arg1]
         assert repr(instance) == "Field.is_absent()"
@@ -841,17 +814,17 @@ class TestExpressionMethods:
 
     def test_if_absent(self):
         arg1 = self._make_arg("Field")
-        arg2 = self._make_arg("ThenExpr")
-        instance = Expr.if_absent(arg1, arg2)
+        arg2 = self._make_arg("ThenExpression")
+        instance = Expression.if_absent(arg1, arg2)
         assert instance.name == "if_absent"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Field.if_absent(ThenExpr)"
+        assert repr(instance) == "Field.if_absent(ThenExpression)"
         infix_instance = arg1.if_absent(arg2)
         assert infix_instance == instance
 
     def test_is_nan(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.is_nan(arg1)
+        instance = Expression.is_nan(arg1)
         assert instance.name == "is_nan"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_nan()"
@@ -860,7 +833,7 @@ class TestExpressionMethods:
 
     def test_is_not_nan(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.is_not_nan(arg1)
+        instance = Expression.is_not_nan(arg1)
         assert instance.name == "is_not_nan"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_not_nan()"
@@ -869,7 +842,7 @@ class TestExpressionMethods:
 
     def test_is_null(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.is_null(arg1)
+        instance = Expression.is_null(arg1)
         assert instance.name == "is_null"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_null()"
@@ -878,7 +851,7 @@ class TestExpressionMethods:
 
     def test_is_not_null(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.is_not_null(arg1)
+        instance = Expression.is_not_null(arg1)
         assert instance.name == "is_not_null"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_not_null()"
@@ -887,7 +860,7 @@ class TestExpressionMethods:
 
     def test_is_error(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.is_error(arg1)
+        instance = Expression.is_error(arg1)
         assert instance.name == "is_error"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_error()"
@@ -896,11 +869,11 @@ class TestExpressionMethods:
 
     def test_if_error(self):
         arg1 = self._make_arg("Value")
-        arg2 = self._make_arg("ThenExpr")
-        instance = Expr.if_error(arg1, arg2)
+        arg2 = self._make_arg("ThenExpression")
+        instance = Expression.if_error(arg1, arg2)
         assert instance.name == "if_error"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Value.if_error(ThenExpr)"
+        assert repr(instance) == "Value.if_error(ThenExpression)"
         infix_instance = arg1.if_error(arg2)
         assert infix_instance == instance
 
@@ -915,7 +888,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("ArrayField")
         arg2 = self._make_arg("Element1")
         arg3 = self._make_arg("Element2")
-        instance = Expr.array_contains_all(arg1, [arg2, arg3])
+        instance = Expression.array_contains_all(arg1, [arg2, arg3])
         assert instance.name == "array_contains_all"
         assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
@@ -928,71 +901,71 @@ class TestExpressionMethods:
         assert infix_instance == instance
 
     def test_ends_with(self):
-        arg1 = self._make_arg("Expr")
+        arg1 = self._make_arg("Expression")
         arg2 = self._make_arg("Postfix")
-        instance = Expr.ends_with(arg1, arg2)
+        instance = Expression.ends_with(arg1, arg2)
         assert instance.name == "ends_with"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.ends_with(Postfix)"
+        assert repr(instance) == "Expression.ends_with(Postfix)"
         infix_instance = arg1.ends_with(arg2)
         assert infix_instance == instance
 
     def test_conditional(self):
         arg1 = self._make_arg("Condition")
-        arg2 = self._make_arg("ThenExpr")
-        arg3 = self._make_arg("ElseExpr")
+        arg2 = self._make_arg("ThenExpression")
+        arg3 = self._make_arg("ElseExpression")
         instance = expr.Conditional(arg1, arg2, arg3)
         assert instance.name == "conditional"
         assert instance.params == [arg1, arg2, arg3]
-        assert repr(instance) == "Conditional(Condition, ThenExpr, ElseExpr)"
+        assert repr(instance) == "Conditional(Condition, ThenExpression, ElseExpression)"
 
     def test_like(self):
-        arg1 = self._make_arg("Expr")
+        arg1 = self._make_arg("Expression")
         arg2 = self._make_arg("Pattern")
-        instance = Expr.like(arg1, arg2)
+        instance = Expression.like(arg1, arg2)
         assert instance.name == "like"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.like(Pattern)"
+        assert repr(instance) == "Expression.like(Pattern)"
         infix_instance = arg1.like(arg2)
         assert infix_instance == instance
 
     def test_regex_contains(self):
-        arg1 = self._make_arg("Expr")
+        arg1 = self._make_arg("Expression")
         arg2 = self._make_arg("Regex")
-        instance = Expr.regex_contains(arg1, arg2)
+        instance = Expression.regex_contains(arg1, arg2)
         assert instance.name == "regex_contains"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.regex_contains(Regex)"
+        assert repr(instance) == "Expression.regex_contains(Regex)"
         infix_instance = arg1.regex_contains(arg2)
         assert infix_instance == instance
 
     def test_regex_match(self):
-        arg1 = self._make_arg("Expr")
+        arg1 = self._make_arg("Expression")
         arg2 = self._make_arg("Regex")
-        instance = Expr.regex_match(arg1, arg2)
+        instance = Expression.regex_match(arg1, arg2)
         assert instance.name == "regex_match"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.regex_match(Regex)"
+        assert repr(instance) == "Expression.regex_match(Regex)"
         infix_instance = arg1.regex_match(arg2)
         assert infix_instance == instance
 
     def test_starts_with(self):
-        arg1 = self._make_arg("Expr")
+        arg1 = self._make_arg("Expression")
         arg2 = self._make_arg("Prefix")
-        instance = Expr.starts_with(arg1, arg2)
+        instance = Expression.starts_with(arg1, arg2)
         assert instance.name == "starts_with"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.starts_with(Prefix)"
+        assert repr(instance) == "Expression.starts_with(Prefix)"
         infix_instance = arg1.starts_with(arg2)
         assert infix_instance == instance
 
     def test_string_contains(self):
-        arg1 = self._make_arg("Expr")
+        arg1 = self._make_arg("Expression")
         arg2 = self._make_arg("Substring")
-        instance = Expr.string_contains(arg1, arg2)
+        instance = Expression.string_contains(arg1, arg2)
         assert instance.name == "string_contains"
         assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Expr.string_contains(Substring)"
+        assert repr(instance) == "Expression.string_contains(Substring)"
         infix_instance = arg1.string_contains(arg2)
         assert infix_instance == instance
 
@@ -1007,7 +980,7 @@ class TestExpressionMethods:
     def test_divide(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.divide(arg1, arg2)
+        instance = Expression.divide(arg1, arg2)
         assert instance.name == "divide"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.divide(Right)"
@@ -1017,7 +990,7 @@ class TestExpressionMethods:
     def test_logical_maximum(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.logical_maximum(arg1, arg2)
+        instance = Expression.logical_maximum(arg1, arg2)
         assert instance.name == "maximum"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.logical_maximum(Right)"
@@ -1027,7 +1000,7 @@ class TestExpressionMethods:
     def test_logical_minimum(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.logical_minimum(arg1, arg2)
+        instance = Expression.logical_minimum(arg1, arg2)
         assert instance.name == "minimum"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.logical_minimum(Right)"
@@ -1036,7 +1009,7 @@ class TestExpressionMethods:
 
     def test_to_lower(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.to_lower(arg1)
+        instance = Expression.to_lower(arg1)
         assert instance.name == "to_lower"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.to_lower()"
@@ -1045,7 +1018,7 @@ class TestExpressionMethods:
 
     def test_to_upper(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.to_upper(arg1)
+        instance = Expression.to_upper(arg1)
         assert instance.name == "to_upper"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.to_upper()"
@@ -1054,7 +1027,7 @@ class TestExpressionMethods:
 
     def test_trim(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.trim(arg1)
+        instance = Expression.trim(arg1)
         assert instance.name == "trim"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.trim()"
@@ -1063,7 +1036,7 @@ class TestExpressionMethods:
 
     def test_string_reverse(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.string_reverse(arg1)
+        instance = Expression.string_reverse(arg1)
         assert instance.name == "string_reverse"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.string_reverse()"
@@ -1073,7 +1046,7 @@ class TestExpressionMethods:
     def test_substring(self):
         arg1 = self._make_arg("Input")
         arg2 = self._make_arg("Position")
-        instance = Expr.substring(arg1, arg2)
+        instance = Expression.substring(arg1, arg2)
         assert instance.name == "substring"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Input.substring(Position)"
@@ -1084,7 +1057,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("Input")
         arg2 = self._make_arg("Position")
         arg3 = self._make_arg("Length")
-        instance = Expr.substring(arg1, arg2, arg3)
+        instance = Expression.substring(arg1, arg2, arg3)
         assert instance.name == "substring"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "Input.substring(Position, Length)"
@@ -1094,7 +1067,7 @@ class TestExpressionMethods:
     def test_join(self):
         arg1 = self._make_arg("Array")
         arg2 = self._make_arg("Separator")
-        instance = Expr.join(arg1, arg2)
+        instance = Expression.join(arg1, arg2)
         assert instance.name == "join"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Array.join(Separator)"
@@ -1104,7 +1077,7 @@ class TestExpressionMethods:
     def test_map_get(self):
         arg1 = self._make_arg("Map")
         arg2 = "key"
-        instance = Expr.map_get(arg1, arg2)
+        instance = Expression.map_get(arg1, arg2)
         assert instance.name == "map_get"
         assert instance.params == [arg1, Constant.of(arg2)]
         assert repr(instance) == "Map.map_get(Constant.of('key'))"
@@ -1114,7 +1087,7 @@ class TestExpressionMethods:
     def test_map_remove(self):
         arg1 = self._make_arg("Map")
         arg2 = "key"
-        instance = Expr.map_remove(arg1, arg2)
+        instance = Expression.map_remove(arg1, arg2)
         assert instance.name == "map_remove"
         assert instance.params == [arg1, Constant.of(arg2)]
         assert repr(instance) == "Map.map_remove(Constant.of('key'))"
@@ -1125,7 +1098,7 @@ class TestExpressionMethods:
         arg1 = expr.Map({"a": 1})
         arg2 = expr.Map({"b": 2})
         arg3 = {"c": 3}
-        instance = Expr.map_merge(arg1, arg2, arg3)
+        instance = Expression.map_merge(arg1, arg2, arg3)
         assert instance.name == "map_merge"
         assert instance.params == [arg1, arg2, expr.Map(arg3)]
         assert repr(instance) == "Map({'a': 1}).map_merge(Map({'b': 2}), Map({'c': 3}))"
@@ -1135,7 +1108,7 @@ class TestExpressionMethods:
     def test_mod(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.mod(arg1, arg2)
+        instance = Expression.mod(arg1, arg2)
         assert instance.name == "mod"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.mod(Right)"
@@ -1145,7 +1118,7 @@ class TestExpressionMethods:
     def test_multiply(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.multiply(arg1, arg2)
+        instance = Expression.multiply(arg1, arg2)
         assert instance.name == "multiply"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.multiply(Right)"
@@ -1156,7 +1129,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("Str1")
         arg2 = self._make_arg("Str2")
         arg3 = self._make_arg("Str3")
-        instance = Expr.string_concat(arg1, arg2, arg3)
+        instance = Expression.string_concat(arg1, arg2, arg3)
         assert instance.name == "string_concat"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "Str1.string_concat(Str2, Str3)"
@@ -1166,7 +1139,7 @@ class TestExpressionMethods:
     def test_subtract(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.subtract(arg1, arg2)
+        instance = Expression.subtract(arg1, arg2)
         assert instance.name == "subtract"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.subtract(Right)"
@@ -1183,7 +1156,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("Timestamp")
         arg2 = self._make_arg("Unit")
         arg3 = self._make_arg("Amount")
-        instance = Expr.timestamp_add(arg1, arg2, arg3)
+        instance = Expression.timestamp_add(arg1, arg2, arg3)
         assert instance.name == "timestamp_add"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "Timestamp.timestamp_add(Unit, Amount)"
@@ -1194,7 +1167,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("Timestamp")
         arg2 = self._make_arg("Unit")
         arg3 = self._make_arg("Amount")
-        instance = Expr.timestamp_subtract(arg1, arg2, arg3)
+        instance = Expression.timestamp_subtract(arg1, arg2, arg3)
         assert instance.name == "timestamp_subtract"
         assert instance.params == [arg1, arg2, arg3]
         assert repr(instance) == "Timestamp.timestamp_subtract(Unit, Amount)"
@@ -1203,7 +1176,7 @@ class TestExpressionMethods:
 
     def test_timestamp_to_unix_micros(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.timestamp_to_unix_micros(arg1)
+        instance = Expression.timestamp_to_unix_micros(arg1)
         assert instance.name == "timestamp_to_unix_micros"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.timestamp_to_unix_micros()"
@@ -1212,7 +1185,7 @@ class TestExpressionMethods:
 
     def test_timestamp_to_unix_millis(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.timestamp_to_unix_millis(arg1)
+        instance = Expression.timestamp_to_unix_millis(arg1)
         assert instance.name == "timestamp_to_unix_millis"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.timestamp_to_unix_millis()"
@@ -1221,7 +1194,7 @@ class TestExpressionMethods:
 
     def test_timestamp_to_unix_seconds(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.timestamp_to_unix_seconds(arg1)
+        instance = Expression.timestamp_to_unix_seconds(arg1)
         assert instance.name == "timestamp_to_unix_seconds"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.timestamp_to_unix_seconds()"
@@ -1230,7 +1203,7 @@ class TestExpressionMethods:
 
     def test_unix_micros_to_timestamp(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.unix_micros_to_timestamp(arg1)
+        instance = Expression.unix_micros_to_timestamp(arg1)
         assert instance.name == "unix_micros_to_timestamp"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.unix_micros_to_timestamp()"
@@ -1239,7 +1212,7 @@ class TestExpressionMethods:
 
     def test_unix_millis_to_timestamp(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.unix_millis_to_timestamp(arg1)
+        instance = Expression.unix_millis_to_timestamp(arg1)
         assert instance.name == "unix_millis_to_timestamp"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.unix_millis_to_timestamp()"
@@ -1248,7 +1221,7 @@ class TestExpressionMethods:
 
     def test_unix_seconds_to_timestamp(self):
         arg1 = self._make_arg("Input")
-        instance = Expr.unix_seconds_to_timestamp(arg1)
+        instance = Expression.unix_seconds_to_timestamp(arg1)
         assert instance.name == "unix_seconds_to_timestamp"
         assert instance.params == [arg1]
         assert repr(instance) == "Input.unix_seconds_to_timestamp()"
@@ -1258,7 +1231,7 @@ class TestExpressionMethods:
     def test_euclidean_distance(self):
         arg1 = self._make_arg("Vector1")
         arg2 = self._make_arg("Vector2")
-        instance = Expr.euclidean_distance(arg1, arg2)
+        instance = Expression.euclidean_distance(arg1, arg2)
         assert instance.name == "euclidean_distance"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Vector1.euclidean_distance(Vector2)"
@@ -1268,7 +1241,7 @@ class TestExpressionMethods:
     def test_cosine_distance(self):
         arg1 = self._make_arg("Vector1")
         arg2 = self._make_arg("Vector2")
-        instance = Expr.cosine_distance(arg1, arg2)
+        instance = Expression.cosine_distance(arg1, arg2)
         assert instance.name == "cosine_distance"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Vector1.cosine_distance(Vector2)"
@@ -1278,7 +1251,7 @@ class TestExpressionMethods:
     def test_dot_product(self):
         arg1 = self._make_arg("Vector1")
         arg2 = self._make_arg("Vector2")
-        instance = Expr.dot_product(arg1, arg2)
+        instance = Expression.dot_product(arg1, arg2)
         assert instance.name == "dot_product"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Vector1.dot_product(Vector2)"
@@ -1305,7 +1278,7 @@ class TestExpressionMethods:
 
     def test_vector_length(self):
         arg1 = self._make_arg("Array")
-        instance = Expr.vector_length(arg1)
+        instance = Expression.vector_length(arg1)
         assert instance.name == "vector_length"
         assert instance.params == [arg1]
         assert repr(instance) == "Array.vector_length()"
@@ -1315,7 +1288,7 @@ class TestExpressionMethods:
     def test_add(self):
         arg1 = self._make_arg("Left")
         arg2 = self._make_arg("Right")
-        instance = Expr.add(arg1, arg2)
+        instance = Expression.add(arg1, arg2)
         assert instance.name == "add"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.add(Right)"
@@ -1324,7 +1297,7 @@ class TestExpressionMethods:
 
     def test_abs(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.abs(arg1)
+        instance = Expression.abs(arg1)
         assert instance.name == "abs"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.abs()"
@@ -1333,7 +1306,7 @@ class TestExpressionMethods:
 
     def test_ceil(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.ceil(arg1)
+        instance = Expression.ceil(arg1)
         assert instance.name == "ceil"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.ceil()"
@@ -1342,7 +1315,7 @@ class TestExpressionMethods:
 
     def test_exp(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.exp(arg1)
+        instance = Expression.exp(arg1)
         assert instance.name == "exp"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.exp()"
@@ -1351,7 +1324,7 @@ class TestExpressionMethods:
 
     def test_floor(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.floor(arg1)
+        instance = Expression.floor(arg1)
         assert instance.name == "floor"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.floor()"
@@ -1360,7 +1333,7 @@ class TestExpressionMethods:
 
     def test_ln(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.ln(arg1)
+        instance = Expression.ln(arg1)
         assert instance.name == "ln"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.ln()"
@@ -1370,7 +1343,7 @@ class TestExpressionMethods:
     def test_log(self):
         arg1 = self._make_arg("Value")
         arg2 = self._make_arg("Base")
-        instance = Expr.log(arg1, arg2)
+        instance = Expression.log(arg1, arg2)
         assert instance.name == "log"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Value.log(Base)"
@@ -1379,7 +1352,7 @@ class TestExpressionMethods:
 
     def test_log10(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.log10(arg1)
+        instance = Expression.log10(arg1)
         assert instance.name == "log10"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.log10()"
@@ -1389,7 +1362,7 @@ class TestExpressionMethods:
     def test_pow(self):
         arg1 = self._make_arg("Value")
         arg2 = self._make_arg("Exponent")
-        instance = Expr.pow(arg1, arg2)
+        instance = Expression.pow(arg1, arg2)
         assert instance.name == "pow"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Value.pow(Exponent)"
@@ -1398,7 +1371,7 @@ class TestExpressionMethods:
 
     def test_round(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.round(arg1)
+        instance = Expression.round(arg1)
         assert instance.name == "round"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.round()"
@@ -1407,7 +1380,7 @@ class TestExpressionMethods:
 
     def test_sqrt(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.sqrt(arg1)
+        instance = Expression.sqrt(arg1)
         assert instance.name == "sqrt"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.sqrt()"
@@ -1416,7 +1389,7 @@ class TestExpressionMethods:
 
     def test_array_length(self):
         arg1 = self._make_arg("Array")
-        instance = Expr.array_length(arg1)
+        instance = Expression.array_length(arg1)
         assert instance.name == "array_length"
         assert instance.params == [arg1]
         assert repr(instance) == "Array.array_length()"
@@ -1425,7 +1398,7 @@ class TestExpressionMethods:
 
     def test_array_reverse(self):
         arg1 = self._make_arg("Array")
-        instance = Expr.array_reverse(arg1)
+        instance = Expression.array_reverse(arg1)
         assert instance.name == "array_reverse"
         assert instance.params == [arg1]
         assert repr(instance) == "Array.array_reverse()"
@@ -1435,7 +1408,7 @@ class TestExpressionMethods:
     def test_array_concat(self):
         arg1 = self._make_arg("ArrayRef1")
         arg2 = self._make_arg("ArrayRef2")
-        instance = Expr.array_concat(arg1, arg2)
+        instance = Expression.array_concat(arg1, arg2)
         assert instance.name == "array_concat"
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "ArrayRef1.array_concat(ArrayRef2)"
@@ -1456,20 +1429,20 @@ class TestExpressionMethods:
         )
 
     def test_byte_length(self):
-        arg1 = self._make_arg("Expr")
-        instance = Expr.byte_length(arg1)
+        arg1 = self._make_arg("Expression")
+        instance = Expression.byte_length(arg1)
         assert instance.name == "byte_length"
         assert instance.params == [arg1]
-        assert repr(instance) == "Expr.byte_length()"
+        assert repr(instance) == "Expression.byte_length()"
         infix_instance = arg1.byte_length()
         assert infix_instance == instance
 
     def test_char_length(self):
-        arg1 = self._make_arg("Expr")
-        instance = Expr.char_length(arg1)
+        arg1 = self._make_arg("Expression")
+        instance = Expression.char_length(arg1)
         assert instance.name == "char_length"
         assert instance.params == [arg1]
-        assert repr(instance) == "Expr.char_length()"
+        assert repr(instance) == "Expression.char_length()"
         infix_instance = arg1.char_length()
         assert infix_instance == instance
 
@@ -1477,7 +1450,7 @@ class TestExpressionMethods:
         arg1 = self._make_arg("First")
         arg2 = self._make_arg("Second")
         arg3 = "Third"
-        instance = Expr.concat(arg1, arg2, arg3)
+        instance = Expression.concat(arg1, arg2, arg3)
         assert instance.name == "concat"
         assert instance.params == [arg1, arg2, Constant.of(arg3)]
         assert repr(instance) == "First.concat(Second, Constant.of('Third'))"
@@ -1485,17 +1458,17 @@ class TestExpressionMethods:
         assert infix_instance == instance
 
     def test_length(self):
-        arg1 = self._make_arg("Expr")
-        instance = Expr.length(arg1)
+        arg1 = self._make_arg("Expression")
+        instance = Expression.length(arg1)
         assert instance.name == "length"
         assert instance.params == [arg1]
-        assert repr(instance) == "Expr.length()"
+        assert repr(instance) == "Expression.length()"
         infix_instance = arg1.length()
         assert infix_instance == instance
 
     def test_collection_id(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.collection_id(arg1)
+        instance = Expression.collection_id(arg1)
         assert instance.name == "collection_id"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.collection_id()"
@@ -1504,7 +1477,7 @@ class TestExpressionMethods:
 
     def test_document_id(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.document_id(arg1)
+        instance = Expression.document_id(arg1)
         assert instance.name == "document_id"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.document_id()"
@@ -1513,7 +1486,7 @@ class TestExpressionMethods:
 
     def test_sum(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.sum(arg1)
+        instance = Expression.sum(arg1)
         assert instance.name == "sum"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.sum()"
@@ -1522,7 +1495,7 @@ class TestExpressionMethods:
 
     def test_average(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.average(arg1)
+        instance = Expression.average(arg1)
         assert instance.name == "average"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.average()"
@@ -1531,7 +1504,7 @@ class TestExpressionMethods:
 
     def test_count(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.count(arg1)
+        instance = Expression.count(arg1)
         assert instance.name == "count"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.count()"
@@ -1546,7 +1519,7 @@ class TestExpressionMethods:
 
     def test_count_if(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.count_if(arg1)
+        instance = Expression.count_if(arg1)
         assert instance.name == "count_if"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.count_if()"
@@ -1555,7 +1528,7 @@ class TestExpressionMethods:
 
     def test_count_distinct(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.count_distinct(arg1)
+        instance = Expression.count_distinct(arg1)
         assert instance.name == "count_distinct"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.count_distinct()"
@@ -1564,7 +1537,7 @@ class TestExpressionMethods:
 
     def test_minimum(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.minimum(arg1)
+        instance = Expression.minimum(arg1)
         assert instance.name == "minimum"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.minimum()"
@@ -1573,7 +1546,7 @@ class TestExpressionMethods:
 
     def test_maximum(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.maximum(arg1)
+        instance = Expression.maximum(arg1)
         assert instance.name == "maximum"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.maximum()"
