@@ -39,7 +39,10 @@ FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 
 test_dir_name = os.path.dirname(__file__)
 
-id_format = lambda x: f"{x.get('file_name', '')}: {x.get('description', '')}"
+id_format = (
+    lambda x: f"{x.get('file_name', '')}: {x.get('description', '')}"
+)  # noqa: E731
+
 
 def yaml_loader(field="tests", dir_name="pipeline_e2e", attach_file_name=True):
     """
