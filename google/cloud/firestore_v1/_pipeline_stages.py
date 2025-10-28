@@ -258,13 +258,7 @@ class Documents(Stage):
         return Documents(*doc_paths)
 
     def _pb_args(self):
-        return [
-            Value(
-                array_value={
-                    "values": [Value(string_value=path) for path in self.paths]
-                }
-            )
-        ]
+        return [Value(reference_value=path) for path in self.paths]
 
 
 class FindNearest(Stage):
@@ -437,7 +431,7 @@ class Unnest(Stage):
     def _pb_options(self):
         options = {}
         if self.options is not None:
-            options["index_field"] = Value(string_value=self.options.index_field)
+            options["index_field"] = self.options.index_field._to_pb()
         return options
 
 
