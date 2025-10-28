@@ -386,10 +386,10 @@ async def test_async_pipeline_stream_stream_equivalence_mocked():
         ("select", ("name",), stages.Select),
         ("select", (Field.of("n"),), stages.Select),
         ("where", (Field.of("n").exists(),), stages.Where),
-        ("find_nearest", ("name", [0.1], 0), stages.FindNearest),
+        ("find_nearest", ("name", [0.1], "cosine"), stages.FindNearest),
         (
             "find_nearest",
-            ("name", [0.1], 0, stages.FindNearestOptions(10)),
+            ("name", [0.1], "cosine", stages.FindNearestOptions(10)),
             stages.FindNearest,
         ),
         ("sort", (Field.of("n").descending(),), stages.Sort),
