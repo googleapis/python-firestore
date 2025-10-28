@@ -152,7 +152,7 @@ class Expr(ABC):
 
         def __get__(self, instance, owner):
             if instance is None:
-                return self.static_func.__get__(instance, owner)
+                return self.static_func
             else:
                 return self.instance_func.__get__(instance, owner)
 
