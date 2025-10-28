@@ -113,7 +113,9 @@ class UnnestOptions:
     """
 
     def __init__(self, index_field: Field | str):
-        self.index_field = index_field if isinstance(index_field, Field) else Field.of(index_field)
+        self.index_field = (
+            index_field if isinstance(index_field, Field) else Field.of(index_field)
+        )
 
     def __repr__(self):
         return f"{self.__class__.__name__}(index_field={self.index_field.path!r})"
@@ -300,7 +302,9 @@ class FindNearest(Stage):
 class GenericStage(Stage):
     """Represents a generic, named stage with parameters."""
 
-    def __init__(self, name: str, *params: Expr | Value, options: dict[str, Expr | Value] = {}):
+    def __init__(
+        self, name: str, *params: Expr | Value, options: dict[str, Expr | Value] = {}
+    ):
         super().__init__(name)
         self.params: list[Value] = [
             p._to_pb() if isinstance(p, Expr) else p for p in params

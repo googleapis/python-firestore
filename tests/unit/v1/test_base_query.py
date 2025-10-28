@@ -2040,9 +2040,7 @@ def test__query_pipeline_composite_filter():
     client = make_client()
     in_filter = FieldFilter("field_a", "==", "value_a")
     query = client.collection("my_col").where(filter=in_filter)
-    with mock.patch.object(
-        expr.BooleanExpr, "_from_query_filter_pb"
-    ) as convert_mock:
+    with mock.patch.object(expr.BooleanExpr, "_from_query_filter_pb") as convert_mock:
         pipeline = query.pipeline()
         convert_mock.assert_called_once_with(in_filter._to_pb(), client)
         assert len(pipeline.stages) == 2
@@ -2087,8 +2085,6 @@ def test__query_pipeline_order_exists_multiple():
 
 
 def test__query_pipeline_order_exists_single():
-    from google.cloud.firestore_v1 import pipeline_expressions as expr
-
     client = make_client()
     query_single = client.collection("my_col").order_by("field_c")
     pipeline_single = query_single.pipeline()

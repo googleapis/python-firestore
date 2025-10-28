@@ -276,8 +276,7 @@ class TestDocuments:
         assert result.name == "documents"
         assert len(result.args) == 2
         assert (
-            result.args[0].reference_value
-            == "/projects/p/databases/d/documents/c/doc1"
+            result.args[0].reference_value == "/projects/p/databases/d/documents/c/doc1"
         )
         assert result.args[1].reference_value == "/c/doc2"
         assert len(result.options) == 0
@@ -469,7 +468,9 @@ class TestGenericStage:
         options = {"index_field": Field.of("index")}
         field = Field.of("field")
         alias = Field.of("alias")
-        standard_unnest = stages.Unnest(field, alias, options=stages.UnnestOptions(**options))
+        standard_unnest = stages.Unnest(
+            field, alias, options=stages.UnnestOptions(**options)
+        )
         generic_unnest = stages.GenericStage("unnest", field, alias, options=options)
         assert standard_unnest._pb_args() == generic_unnest._pb_args()
         assert standard_unnest._pb_options() == generic_unnest._pb_options()
