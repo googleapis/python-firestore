@@ -2035,10 +2035,27 @@ tests:
   - description: testUnion
     pipeline:
       - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: genre
+              - Constant: Romance
       - Union:
         - Pipeline:
-          - Collection: books
-    assert_count: 20 # Results will be duplicated
+            - Collection: books
+            - Where:
+                - Expr.equal:
+                    - Field: genre
+                    - Constant: Dystopian
+      - Select:
+        - title
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "1984"
+      - title: Pride and Prejudice
+      - title: "The Handmaid's Tale"
     assert_proto:
       pipeline:
         stages:
@@ -2046,12 +2063,47 @@ tests:
           - referenceValue: /books
           name: collection
         - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: genre
+              - stringValue: Romance
+              name: equal
+          name: where
+        - args:
           - pipelineValue:
               stages:
               - args:
                 - referenceValue: /books
                 name: collection
+              - args:
+                - functionValue:
+                    args:
+                    - fieldReferenceValue: genre
+                    - stringValue: Dystopian
+                    name: equal
+                name: where
           name: union
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+  - description: testUnionFullCollection
+    pipeline:
+      - Collection: books
+      - Union:
+        - Pipeline:
+          - Collection: books
+    assert_count: 20 # Results will be duplicated
   - description: testUnnest
     pipeline:
       - Collection: books
@@ -2089,6 +2141,57 @@ tests:
               fields:
                 tags_alias:
                   fieldReferenceValue: tags_alias
+          name: select
+  - description: testUnnestWithOptions
+    pipeline:
+      - Collection: books
+      - Where:
+        - Expr.equal:
+          - Field: title
+          - Constant: The Hitchhiker's Guide to the Galaxy
+      - Unnest:
+          field: tags
+          alias: tags_alias
+          options:
+            UnnestOptions:
+            - index
+      - Select: 
+        - tags_alias
+        - index
+    assert_results:
+      - tags_alias: comedy
+        index: 0
+      - tags_alias: space
+        index: 1
+      - tags_alias: adventure
+        index: 2
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: The Hitchhiker's Guide to the Galaxy
+              name: equal
+          name: where
+        - args:
+          - fieldReferenceValue: tags
+          - fieldReferenceValue: tags_alias
+          name: unnest
+          options:
+            index_field:
+              fieldReferenceValue: index
+        - args:
+          - mapValue:
+              fields:
+                tags_alias:
+                  fieldReferenceValue: tags_alias
+                index:
+                  fieldReferenceValue: index
           name: select
   - description: testGreaterThanOrEqual
     pipeline:
@@ -3300,4 +3403,266 @@ tests:
                     - fieldReferenceValue: tags
                     - stringValue: ", "
                     name: join
+          name: select
+  - description: testCollectionGroup
+    pipeline:
+      - CollectionGroup: books
+      - Select:
+        - title
+      - Distinct:
+        - title
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "1984"
+      - title: "Crime and Punishment"
+      - title: "Dune"
+      - title: "One Hundred Years of Solitude"
+      - title: "Pride and Prejudice"
+      - title: "The Great Gatsby"
+      - title: "The Handmaid's Tale"
+      - title: "The Hitchhiker's Guide to the Galaxy"
+      - title: "The Lord of the Rings"
+      - title: "To Kill a Mockingbird"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: ''
+          - stringValue: books
+          name: collection_group
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: distinct
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+
+  - description: testDistinct
+    pipeline:
+      - Collection: books
+      - Distinct:
+        - genre
+      - Sort:
+        - Ordering:
+          - Field: genre
+          - ASCENDING
+    assert_results:
+      - genre: Dystopian
+      - genre: Fantasy
+      - genre: Magical Realism
+      - genre: Modernist
+      - genre: Psychological Thriller
+      - genre: Romance
+      - genre: Science Fiction
+      - genre: Southern Gothic
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                genre:
+                  fieldReferenceValue: genre
+          name: distinct
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: genre
+          name: sort
+
+  - description: testDocuments
+    pipeline:
+      - Documents:
+        - /books/book1
+        - /books/book10
+      - Select:
+        - title
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "Dune"
+      - title: "The Hitchhiker's Guide to the Galaxy"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books/book1
+          - referenceValue: /books/book10
+          name: documents
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+
+  - description: testSampleWithLimit
+    pipeline:
+      - Collection: books
+      - Sample:
+          limit_or_options: 3
+    assert_count: 3
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - integerValue: '3'
+          - stringValue: documents
+          name: sample
+
+  - description: testSampleWithPercentage
+    pipeline:
+      - Collection: books
+      - Sample:
+          limit_or_options: 
+            SampleOptions:
+              value: 1
+              mode: "percent"
+    assert_count: 10
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - doubleValue: 1.0
+          - stringValue: percent
+          name: sample
+
+  - description: testDatabase
+    pipeline:
+      - Database
+      - Select:
+        - title
+      - Distinct:
+        - title
+      - Aggregate:
+        - AliasedExpr:
+            - Count: []
+            - count
+      - Select:
+        - AliasedExpr:
+          - Conditional:
+            - Expr.greater_than_or_equal:
+              - Field: count
+              - Constant: 10
+            - Constant: True
+            - Constant: False
+          - result
+    assert_results:
+      - result: True
+    assert_proto:
+      pipeline:
+        stages:
+        - name: database
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+          name: distinct
+        - args:
+          - mapValue:
+              fields:
+                count:
+                  functionValue:
+                    name: count
+          - mapValue: {}
+          name: aggregate
+        - name: select
+          args:
+          - mapValue:
+              fields:
+                result:
+                  functionValue:
+                    args:
+                    - functionValue:
+                        args:
+                        - fieldReferenceValue: count
+                        - integerValue: '10'
+                        name: greater_than_or_equal
+                    - booleanValue: true
+                    - booleanValue: false
+                    name: conditional
+  - description: testGenericStage
+    pipeline:
+      - GenericStage:
+          - "collection"
+          - Value:
+              reference_value: "/books"
+      - GenericStage:
+        - "where"
+        - Expr.equal:
+          - Field: title
+          - Constant: The Hitchhiker's Guide to the Galaxy
+      - GenericStage:
+        - "select"
+        - Value:
+            map_value:
+              fields:
+                author:
+                  field_reference_value: author
+    assert_results:
+      - author: Douglas Adams
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: The Hitchhiker's Guide to the Galaxy
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                author:
+                  fieldReferenceValue: author
           name: select

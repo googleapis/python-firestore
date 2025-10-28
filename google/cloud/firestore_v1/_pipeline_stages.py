@@ -112,11 +112,11 @@ class UnnestOptions:
             storing the original 0-based index of the element within the array.
     """
 
-    def __init__(self, index_field: str):
-        self.index_field = index_field
+    def __init__(self, index_field: Field | str):
+        self.index_field = index_field if isinstance(index_field, Field) else Field.of(index_field)
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(index_field={self.index_field!r})"
+        return f"{self.__class__.__name__}(index_field={self.index_field.path!r})"
 
 
 class Stage(ABC):
