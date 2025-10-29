@@ -114,8 +114,6 @@ class Expression(ABC):
         o: Any, include_vector=False
     ) -> "Expression":
         """Convert arbitrary object to an Expression."""
-        if isinstance(o, Constant) and isinstance(o.value, list):
-            o = o.value
         if isinstance(o, Expression):
             return o
         if isinstance(o, dict):
@@ -145,7 +143,7 @@ class Expression(ABC):
         def static_func(self, first_arg, *other_args, **kwargs):
             if not isinstance(first_arg, (Expression, str)):
                 raise TypeError(
-                    f"`expressions must be called on an Expression or a string representing a field name. got {type(first_arg)}."
+                    f"'{self.instance_func.__name__}' must be called on an Expression or a string representing a field. got {type(first_arg)}."
                 )
             first_expr = (
                 Field.of(first_arg)
@@ -1297,7 +1295,7 @@ class Expression(ABC):
             >>> Field.of("address").map_remove("city")
 
         Args:
-            key: The key to ewmove in the map.
+            key: The key to remove in the map.
 
         Returns:
             A new `Expression` representing the map_remove operation.
@@ -1883,7 +1881,7 @@ class Array(Function):
         >>> Expression.array(["bar", Field.of("baz")])
 
     Args:
-        elements: THe input list to evaluate in the expression
+        elements: The input list to evaluate in the expression
     """
 
     def __init__(self, elements: list[Expression | CONSTANT_TYPE]):
@@ -1906,7 +1904,7 @@ class Map(Function):
         >>> Expression.map({"foo": "bar", "baz": Field.of("baz")})
 
     Args:
-        elements: THe input dict to evaluate in the expression
+        elements: The input dict to evaluate in the expression
     """
 
     def __init__(self, elements: dict[str | Constant[str], Expression | CONSTANT_TYPE]):
