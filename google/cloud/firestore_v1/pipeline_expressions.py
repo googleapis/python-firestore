@@ -1280,14 +1280,14 @@ class Expr(ABC):
 
     @expose_as_static
     def map_remove(self, key: str | Constant[str]) -> "Expr":
-        """Remove a key from a the map produced by evaluating this expression.
+        """Remove a key from the map produced by evaluating this expression.
 
         Example:
             >>> Map({"city": "London"}).map_remove("city")
             >>> Field.of("address").map_remove("city")
 
         Args:
-            key: The key to ewmove in the map.
+            key: The key to remove in the map.
 
         Returns:
             A new `Expr` representing the map_remove operation.
@@ -1894,7 +1894,7 @@ class Array(Function):
         >>> Expr.array(["bar", Field.of("baz")])
 
     Args:
-        elements: THe input list to evaluate in the expression
+        elements: The input list to evaluate in the expression
     """
 
     def __init__(self, elements: list[Expr | CONSTANT_TYPE]):
@@ -1917,7 +1917,7 @@ class Map(Function):
         >>> Expr.map({"foo": "bar", "baz": Field.of("baz")})
 
     Args:
-        elements: THe input dict to evaluate in the expression
+        elements: The input dict to evaluate in the expression
     """
 
     def __init__(self, elements: dict[str | Constant[str], Expr | CONSTANT_TYPE]):
