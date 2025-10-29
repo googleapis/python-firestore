@@ -24,7 +24,6 @@ from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1._helpers import GeoPoint
 import google.cloud.firestore_v1.pipeline_expressions as expr
 from google.cloud.firestore_v1.pipeline_expressions import BooleanExpr
-from google.cloud.firestore_v1.pipeline_expressions import _ListOfExprs
 from google.cloud.firestore_v1.pipeline_expressions import Expr
 from google.cloud.firestore_v1.pipeline_expressions import Constant
 from google.cloud.firestore_v1.pipeline_expressions import Field
@@ -98,13 +97,6 @@ class TestConstant:
             ),
             (GeoPoint(1, 2), Value(geo_point_value={"latitude": 1, "longitude": 2})),
             (
-                [0.0, 1.0, 2.0],
-                Value(
-                    array_value={"values": [Value(double_value=i) for i in range(3)]}
-                ),
-            ),
-            ({"a": "b"}, Value(map_value={"fields": {"a": Value(string_value="b")}})),
-            (
                 Vector([1.0, 2.0]),
                 Value(
                     map_value={
@@ -167,57 +159,6 @@ class TestConstant:
             (Constant.of([1, 2, 3]), Constant.of([1, 2]), False),
             (Constant.of([1, 2, 3]), [1, 2, 3], True),
             (Constant.of([1, 2, 3]), object(), False),
-        ],
-    )
-    def test_equality(self, first, second, expected):
-        assert (first == second) is expected
-
-
-class TestListOfExprs:
-    def test_to_pb(self):
-        instance = _ListOfExprs([Constant(1), Constant(2)])
-        result = instance._to_pb()
-        assert len(result.array_value.values) == 2
-        assert result.array_value.values[0].integer_value == 1
-        assert result.array_value.values[1].integer_value == 2
-
-    def test_empty_to_pb(self):
-        instance = _ListOfExprs([])
-        result = instance._to_pb()
-        assert len(result.array_value.values) == 0
-
-    def test_repr(self):
-        instance = _ListOfExprs([Constant(1), Constant(2)])
-        repr_string = repr(instance)
-        assert repr_string == "[Constant.of(1), Constant.of(2)]"
-        empty_instance = _ListOfExprs([])
-        empty_repr_string = repr(empty_instance)
-        assert empty_repr_string == "[]"
-
-    @pytest.mark.parametrize(
-        "first,second,expected",
-        [
-            (_ListOfExprs([]), _ListOfExprs([]), True),
-            (_ListOfExprs([]), _ListOfExprs([Constant(1)]), False),
-            (_ListOfExprs([Constant(1)]), _ListOfExprs([]), False),
-            (
-                _ListOfExprs([Constant(1)]),
-                _ListOfExprs([Constant(1)]),
-                True,
-            ),
-            (
-                _ListOfExprs([Constant(1)]),
-                _ListOfExprs([Constant(2)]),
-                False,
-            ),
-            (
-                _ListOfExprs([Constant(1), Constant(2)]),
-                _ListOfExprs([Constant(1), Constant(2)]),
-                True,
-            ),
-            (_ListOfExprs([Constant(1)]), [Constant(1)], False),
-            (_ListOfExprs([Constant(1)]), [1], False),
-            (_ListOfExprs([Constant(1)]), object(), False),
         ],
     )
     def test_equality(self, first, second, expected):
@@ -370,7 +311,7 @@ class TestBooleanExpr:
         field1 = Field.of("field1")
         field2 = Field.of("field2")
         expected_cond1 = expr.And(field1.exists(), field1.equal(Constant("val1")))
-        expected_cond2 = expr.And(field2.exists(), field2.equal(Constant(None)))
+        expected_cond2 = expr.And(field2.exists(), field2.is_null())
         expected = expr.Or(expected_cond1, expected_cond2)
 
         assert repr(result) == repr(expected)
@@ -457,9 +398,7 @@ class TestBooleanExpr:
         field3 = Field.of("field3")
         expected_cond1 = expr.And(field1.exists(), field1.equal(Constant("val1")))
         expected_cond2 = expr.And(field2.exists(), field2.greater_than(Constant(10)))
-        expected_cond3 = expr.And(
-            field3.exists(), expr.Not(field3.equal(Constant(None)))
-        )
+        expected_cond3 = expr.And(field3.exists(), field3.is_not_null())
         expected_inner_and = expr.And(expected_cond2, expected_cond3)
         expected_outer_or = expr.Or(expected_cond1, expected_inner_and)
 
@@ -491,15 +430,15 @@ class TestBooleanExpr:
             (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN, Expr.is_nan),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN,
-                lambda f: expr.Not(f.is_nan()),
+                Expr.is_not_nan,
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NULL,
-                lambda f: f.equal(None),
+                Expr.is_null,
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL,
-                lambda f: expr.Not(f.equal(None)),
+                Expr.is_not_null,
             ),
         ],
     )
@@ -643,6 +582,69 @@ class TestBooleanExpr:
             BooleanExpr._from_query_filter_pb(document_pb.Value(), mock_client)
 
 
+class TestArray:
+    """Tests for the array class"""
+
+    def test_array(self):
+        arg1 = Field.of("field1")
+        instance = expr.Array([arg1])
+        assert instance.name == "array"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Array([Field.of('field1')])"
+
+    def test_empty_array(self):
+        instance = expr.Array([])
+        assert instance.name == "array"
+        assert instance.params == []
+        assert repr(instance) == "Array([])"
+
+    def test_array_w_primitives(self):
+        a = expr.Array([1, Constant.of(2), "3"])
+        assert a.name == "array"
+        assert a.params == [Constant.of(1), Constant.of(2), Constant.of("3")]
+        assert repr(a) == "Array([Constant.of(1), Constant.of(2), Constant.of('3')])"
+
+    def test_array_w_non_list(self):
+        with pytest.raises(TypeError):
+            expr.Array(1)
+
+
+class TestMap:
+    """Tests for the map class"""
+
+    def test_map(self):
+        instance = expr.Map({Constant.of("a"): Constant.of("b")})
+        assert instance.name == "map"
+        assert instance.params == [Constant.of("a"), Constant.of("b")]
+        assert repr(instance) == "Map({'a': 'b'})"
+
+    def test_map_w_primitives(self):
+        instance = expr.Map({"a": "b", "0": 0, "bool": True})
+        assert instance.params == [
+            Constant.of("a"),
+            Constant.of("b"),
+            Constant.of("0"),
+            Constant.of(0),
+            Constant.of("bool"),
+            Constant.of(True),
+        ]
+        assert repr(instance) == "Map({'a': 'b', '0': 0, 'bool': True})"
+
+    def test_empty_map(self):
+        instance = expr.Map({})
+        assert instance.name == "map"
+        assert instance.params == []
+        assert repr(instance) == "Map({})"
+
+    def test_w_exprs(self):
+        instance = expr.Map({Constant.of("a"): expr.Array([1, 2, 3])})
+        assert instance.params == [Constant.of("a"), expr.Array([1, 2, 3])]
+        assert (
+            repr(instance)
+            == "Map({'a': Array([Constant.of(1), Constant.of(2), Constant.of(3)])})"
+        )
+
+
 class TestExpressionMethods:
     """
     contains test methods for each Expr method
@@ -723,10 +725,13 @@ class TestExpressionMethods:
         arg3 = self._make_arg("Element2")
         instance = Expr.array_contains_any(arg1, [arg2, arg3])
         assert instance.name == "array_contains_any"
-        assert isinstance(instance.params[1], _ListOfExprs)
+        assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
-        assert instance.params[1].exprs == [arg2, arg3]
-        assert repr(instance) == "ArrayField.array_contains_any([Element1, Element2])"
+        assert instance.params[1].params == [arg2, arg3]
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_any(Array([Element1, Element2]))"
+        )
         infix_instance = arg1.array_contains_any([arg2, arg3])
         assert infix_instance == instance
 
@@ -805,10 +810,10 @@ class TestExpressionMethods:
         arg3 = self._make_arg("Value2")
         instance = Expr.equal_any(arg1, [arg2, arg3])
         assert instance.name == "equal_any"
-        assert isinstance(instance.params[1], _ListOfExprs)
+        assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
-        assert instance.params[1].exprs == [arg2, arg3]
-        assert repr(instance) == "Field.equal_any([Value1, Value2])"
+        assert instance.params[1].params == [arg2, arg3]
+        assert repr(instance) == "Field.equal_any(Array([Value1, Value2]))"
         infix_instance = arg1.equal_any([arg2, arg3])
         assert infix_instance == instance
 
@@ -818,11 +823,30 @@ class TestExpressionMethods:
         arg3 = self._make_arg("Value2")
         instance = Expr.not_equal_any(arg1, [arg2, arg3])
         assert instance.name == "not_equal_any"
-        assert isinstance(instance.params[1], _ListOfExprs)
+        assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
-        assert instance.params[1].exprs == [arg2, arg3]
-        assert repr(instance) == "Field.not_equal_any([Value1, Value2])"
+        assert instance.params[1].params == [arg2, arg3]
+        assert repr(instance) == "Field.not_equal_any(Array([Value1, Value2]))"
         infix_instance = arg1.not_equal_any([arg2, arg3])
+        assert infix_instance == instance
+
+    def test_is_absent(self):
+        arg1 = self._make_arg("Field")
+        instance = Expr.is_absent(arg1)
+        assert instance.name == "is_absent"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Field.is_absent()"
+        infix_instance = arg1.is_absent()
+        assert infix_instance == instance
+
+    def test_if_absent(self):
+        arg1 = self._make_arg("Field")
+        arg2 = self._make_arg("ThenExpr")
+        instance = Expr.if_absent(arg1, arg2)
+        assert instance.name == "if_absent"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Field.if_absent(ThenExpr)"
+        infix_instance = arg1.if_absent(arg2)
         assert infix_instance == instance
 
     def test_is_nan(self):
@@ -834,13 +858,50 @@ class TestExpressionMethods:
         infix_instance = arg1.is_nan()
         assert infix_instance == instance
 
+    def test_is_not_nan(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.is_not_nan(arg1)
+        assert instance.name == "is_not_nan"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.is_not_nan()"
+        infix_instance = arg1.is_not_nan()
+        assert infix_instance == instance
+
     def test_is_null(self):
         arg1 = self._make_arg("Value")
-        instance = Expr.is_ull(arg1)
+        instance = Expr.is_null(arg1)
         assert instance.name == "is_null"
         assert instance.params == [arg1]
         assert repr(instance) == "Value.is_null()"
         infix_instance = arg1.is_null()
+        assert infix_instance == instance
+
+    def test_is_not_null(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.is_not_null(arg1)
+        assert instance.name == "is_not_null"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.is_not_null()"
+        infix_instance = arg1.is_not_null()
+        assert infix_instance == instance
+
+    def test_is_error(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.is_error(arg1)
+        assert instance.name == "is_error"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.is_error()"
+        infix_instance = arg1.is_error()
+        assert infix_instance == instance
+
+    def test_if_error(self):
+        arg1 = self._make_arg("Value")
+        arg2 = self._make_arg("ThenExpr")
+        instance = Expr.if_error(arg1, arg2)
+        assert instance.name == "if_error"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Value.if_error(ThenExpr)"
+        infix_instance = arg1.if_error(arg2)
         assert infix_instance == instance
 
     def test_not(self):
@@ -856,10 +917,13 @@ class TestExpressionMethods:
         arg3 = self._make_arg("Element2")
         instance = Expr.array_contains_all(arg1, [arg2, arg3])
         assert instance.name == "array_contains_all"
-        assert isinstance(instance.params[1], _ListOfExprs)
+        assert isinstance(instance.params[1], expr.Array)
         assert instance.params[0] == arg1
-        assert instance.params[1].exprs == [arg2, arg3]
-        assert repr(instance) == "ArrayField.array_contains_all([Element1, Element2])"
+        assert instance.params[1].params == [arg2, arg3]
+        assert (
+            repr(instance)
+            == "ArrayField.array_contains_all(Array([Element1, Element2]))"
+        )
         infix_instance = arg1.array_contains_all([arg2, arg3])
         assert infix_instance == instance
 
@@ -970,6 +1034,73 @@ class TestExpressionMethods:
         infix_instance = arg1.logical_minimum(arg2)
         assert infix_instance == instance
 
+    def test_to_lower(self):
+        arg1 = self._make_arg("Input")
+        instance = Expr.to_lower(arg1)
+        assert instance.name == "to_lower"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Input.to_lower()"
+        infix_instance = arg1.to_lower()
+        assert infix_instance == instance
+
+    def test_to_upper(self):
+        arg1 = self._make_arg("Input")
+        instance = Expr.to_upper(arg1)
+        assert instance.name == "to_upper"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Input.to_upper()"
+        infix_instance = arg1.to_upper()
+        assert infix_instance == instance
+
+    def test_trim(self):
+        arg1 = self._make_arg("Input")
+        instance = Expr.trim(arg1)
+        assert instance.name == "trim"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Input.trim()"
+        infix_instance = arg1.trim()
+        assert infix_instance == instance
+
+    def test_string_reverse(self):
+        arg1 = self._make_arg("Input")
+        instance = Expr.string_reverse(arg1)
+        assert instance.name == "string_reverse"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Input.string_reverse()"
+        infix_instance = arg1.string_reverse()
+        assert infix_instance == instance
+
+    def test_substring(self):
+        arg1 = self._make_arg("Input")
+        arg2 = self._make_arg("Position")
+        instance = Expr.substring(arg1, arg2)
+        assert instance.name == "substring"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Input.substring(Position)"
+        infix_instance = arg1.substring(arg2)
+        assert infix_instance == instance
+
+    def test_substring_w_length(self):
+        arg1 = self._make_arg("Input")
+        arg2 = self._make_arg("Position")
+        arg3 = self._make_arg("Length")
+        instance = Expr.substring(arg1, arg2, arg3)
+        assert instance.name == "substring"
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "Input.substring(Position, Length)"
+        infix_instance = arg1.substring(arg2, arg3)
+        assert infix_instance == instance
+
+    def test_join(self):
+        arg1 = self._make_arg("Array")
+        arg2 = self._make_arg("Separator")
+        instance = Expr.join(arg1, arg2)
+        assert instance.name == "join"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Array.join(Separator)"
+        infix_instance = arg1.join(arg2)
+        assert infix_instance == instance
+
     def test_map_get(self):
         arg1 = self._make_arg("Map")
         arg2 = "key"
@@ -978,6 +1109,27 @@ class TestExpressionMethods:
         assert instance.params == [arg1, Constant.of(arg2)]
         assert repr(instance) == "Map.map_get(Constant.of('key'))"
         infix_instance = arg1.map_get(Constant.of(arg2))
+        assert infix_instance == instance
+
+    def test_map_remove(self):
+        arg1 = self._make_arg("Map")
+        arg2 = "key"
+        instance = Expr.map_remove(arg1, arg2)
+        assert instance.name == "map_remove"
+        assert instance.params == [arg1, Constant.of(arg2)]
+        assert repr(instance) == "Map.map_remove(Constant.of('key'))"
+        infix_instance = arg1.map_remove(Constant.of(arg2))
+        assert infix_instance == instance
+
+    def test_map_merge(self):
+        arg1 = expr.Map({"a": 1})
+        arg2 = expr.Map({"b": 2})
+        arg3 = {"c": 3}
+        instance = Expr.map_merge(arg1, arg2, arg3)
+        assert instance.name == "map_merge"
+        assert instance.params == [arg1, arg2, expr.Map(arg3)]
+        assert repr(instance) == "Map({'a': 1}).map_merge(Map({'b': 2}), Map({'c': 3}))"
+        infix_instance = arg1.map_merge(arg2, arg3)
         assert infix_instance == instance
 
     def test_mod(self):
@@ -1020,6 +1172,12 @@ class TestExpressionMethods:
         assert repr(instance) == "Left.subtract(Right)"
         infix_instance = arg1.subtract(arg2)
         assert infix_instance == instance
+
+    def test_current_timestamp(self):
+        instance = expr.CurrentTimestamp()
+        assert instance.name == "current_timestamp"
+        assert instance.params == []
+        assert repr(instance) == "CurrentTimestamp()"
 
     def test_timestamp_add(self):
         arg1 = self._make_arg("Timestamp")
@@ -1097,6 +1255,54 @@ class TestExpressionMethods:
         infix_instance = arg1.unix_seconds_to_timestamp()
         assert infix_instance == instance
 
+    def test_euclidean_distance(self):
+        arg1 = self._make_arg("Vector1")
+        arg2 = self._make_arg("Vector2")
+        instance = Expr.euclidean_distance(arg1, arg2)
+        assert instance.name == "euclidean_distance"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Vector1.euclidean_distance(Vector2)"
+        infix_instance = arg1.euclidean_distance(arg2)
+        assert infix_instance == instance
+
+    def test_cosine_distance(self):
+        arg1 = self._make_arg("Vector1")
+        arg2 = self._make_arg("Vector2")
+        instance = Expr.cosine_distance(arg1, arg2)
+        assert instance.name == "cosine_distance"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Vector1.cosine_distance(Vector2)"
+        infix_instance = arg1.cosine_distance(arg2)
+        assert infix_instance == instance
+
+    def test_dot_product(self):
+        arg1 = self._make_arg("Vector1")
+        arg2 = self._make_arg("Vector2")
+        instance = Expr.dot_product(arg1, arg2)
+        assert instance.name == "dot_product"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Vector1.dot_product(Vector2)"
+        infix_instance = arg1.dot_product(arg2)
+        assert infix_instance == instance
+
+    @pytest.mark.parametrize(
+        "method", ["euclidean_distance", "cosine_distance", "dot_product"]
+    )
+    @pytest.mark.parametrize(
+        "input", [Vector([1.0, 2.0]), [1, 2], Constant.of(Vector([1.0, 2.0])), []]
+    )
+    def test_vector_ctor(self, method, input):
+        """
+        test constructing various vector expressions with
+        different inputs
+        """
+        arg1 = self._make_arg("VectorRef")
+        instance = getattr(arg1, method)(input)
+        assert instance.name == method
+        got_second_param = instance.params[1]
+        assert isinstance(got_second_param, Constant)
+        assert isinstance(got_second_param.value, Vector)
+
     def test_vector_length(self):
         arg1 = self._make_arg("Array")
         instance = Expr.vector_length(arg1)
@@ -1114,6 +1320,98 @@ class TestExpressionMethods:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Left.add(Right)"
         infix_instance = arg1.add(arg2)
+        assert infix_instance == instance
+
+    def test_abs(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.abs(arg1)
+        assert instance.name == "abs"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.abs()"
+        infix_instance = arg1.abs()
+        assert infix_instance == instance
+
+    def test_ceil(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.ceil(arg1)
+        assert instance.name == "ceil"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.ceil()"
+        infix_instance = arg1.ceil()
+        assert infix_instance == instance
+
+    def test_exp(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.exp(arg1)
+        assert instance.name == "exp"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.exp()"
+        infix_instance = arg1.exp()
+        assert infix_instance == instance
+
+    def test_floor(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.floor(arg1)
+        assert instance.name == "floor"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.floor()"
+        infix_instance = arg1.floor()
+        assert infix_instance == instance
+
+    def test_ln(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.ln(arg1)
+        assert instance.name == "ln"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.ln()"
+        infix_instance = arg1.ln()
+        assert infix_instance == instance
+
+    def test_log(self):
+        arg1 = self._make_arg("Value")
+        arg2 = self._make_arg("Base")
+        instance = Expr.log(arg1, arg2)
+        assert instance.name == "log"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Value.log(Base)"
+        infix_instance = arg1.log(arg2)
+        assert infix_instance == instance
+
+    def test_log10(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.log10(arg1)
+        assert instance.name == "log10"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.log10()"
+        infix_instance = arg1.log10()
+        assert infix_instance == instance
+
+    def test_pow(self):
+        arg1 = self._make_arg("Value")
+        arg2 = self._make_arg("Exponent")
+        instance = Expr.pow(arg1, arg2)
+        assert instance.name == "pow"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "Value.pow(Exponent)"
+        infix_instance = arg1.pow(arg2)
+        assert infix_instance == instance
+
+    def test_round(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.round(arg1)
+        assert instance.name == "round"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.round()"
+        infix_instance = arg1.round()
+        assert infix_instance == instance
+
+    def test_sqrt(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.sqrt(arg1)
+        assert instance.name == "sqrt"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.sqrt()"
+        infix_instance = arg1.sqrt()
         assert infix_instance == instance
 
     def test_array_length(self):
@@ -1134,6 +1432,29 @@ class TestExpressionMethods:
         infix_instance = arg1.array_reverse()
         assert infix_instance == instance
 
+    def test_array_concat(self):
+        arg1 = self._make_arg("ArrayRef1")
+        arg2 = self._make_arg("ArrayRef2")
+        instance = Expr.array_concat(arg1, arg2)
+        assert instance.name == "array_concat"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "ArrayRef1.array_concat(ArrayRef2)"
+        infix_instance = arg1.array_concat(arg2)
+        assert infix_instance == instance
+
+    def test_array_concat_multiple(self):
+        arg1 = expr.Array([Constant.of(0)])
+        arg2 = Field.of("ArrayRef2")
+        arg3 = Field.of("ArrayRef3")
+        arg4 = [self._make_arg("Constant")]
+        instance = arg1.array_concat(arg2, arg3, arg4)
+        assert instance.name == "array_concat"
+        assert instance.params == [arg1, arg2, arg3, expr.Array(arg4)]
+        assert (
+            repr(instance)
+            == "Array([Constant.of(0)]).array_concat(Field.of('ArrayRef2'), Field.of('ArrayRef3'), Array([Constant]))"
+        )
+
     def test_byte_length(self):
         arg1 = self._make_arg("Expr")
         instance = Expr.byte_length(arg1)
@@ -1152,6 +1473,26 @@ class TestExpressionMethods:
         infix_instance = arg1.char_length()
         assert infix_instance == instance
 
+    def test_concat(self):
+        arg1 = self._make_arg("First")
+        arg2 = self._make_arg("Second")
+        arg3 = "Third"
+        instance = Expr.concat(arg1, arg2, arg3)
+        assert instance.name == "concat"
+        assert instance.params == [arg1, arg2, Constant.of(arg3)]
+        assert repr(instance) == "First.concat(Second, Constant.of('Third'))"
+        infix_instance = arg1.concat(arg2, arg3)
+        assert infix_instance == instance
+
+    def test_length(self):
+        arg1 = self._make_arg("Expr")
+        instance = Expr.length(arg1)
+        assert instance.name == "length"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Expr.length()"
+        infix_instance = arg1.length()
+        assert infix_instance == instance
+
     def test_collection_id(self):
         arg1 = self._make_arg("Value")
         instance = Expr.collection_id(arg1)
@@ -1159,6 +1500,15 @@ class TestExpressionMethods:
         assert instance.params == [arg1]
         assert repr(instance) == "Value.collection_id()"
         infix_instance = arg1.collection_id()
+        assert infix_instance == instance
+
+    def test_document_id(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.document_id(arg1)
+        assert instance.name == "document_id"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.document_id()"
+        infix_instance = arg1.document_id()
         assert infix_instance == instance
 
     def test_sum(self):
@@ -1193,6 +1543,24 @@ class TestExpressionMethods:
         assert instance.name == "count"
         assert instance.params == []
         assert repr(instance) == "Count()"
+
+    def test_count_if(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.count_if(arg1)
+        assert instance.name == "count_if"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.count_if()"
+        infix_instance = arg1.count_if()
+        assert infix_instance == instance
+
+    def test_count_distinct(self):
+        arg1 = self._make_arg("Value")
+        instance = Expr.count_distinct(arg1)
+        assert instance.name == "count_distinct"
+        assert instance.params == [arg1]
+        assert repr(instance) == "Value.count_distinct()"
+        infix_instance = arg1.count_distinct()
+        assert infix_instance == instance
 
     def test_minimum(self):
         arg1 = self._make_arg("Value")

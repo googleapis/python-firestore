@@ -28,6 +28,7 @@ from google.protobuf.json_format import MessageToDict
 from google.cloud.firestore_v1 import _pipeline_stages as stages
 from google.cloud.firestore_v1 import pipeline_expressions
 from google.cloud.firestore_v1.vector import Vector
+from google.cloud.firestore_v1 import pipeline_expressions as expr
 from google.api_core.exceptions import GoogleAPIError
 
 from google.cloud.firestore import Client, AsyncClient
@@ -86,7 +87,13 @@ def test_pipeline_expected_errors(test_dict, client):
 
 @pytest.mark.parametrize(
     "test_dict",
-    [t for t in yaml_loader() if "assert_results" in t or "assert_count" in t],
+    [
+        t
+        for t in yaml_loader()
+        if "assert_results" in t
+        or "assert_count" in t
+        or "assert_results_approximate" in t
+    ],
     ids=lambda x: f"{x.get('description', '')}",
 )
 def test_pipeline_results(test_dict, client):
@@ -94,12 +101,23 @@ def test_pipeline_results(test_dict, client):
     Ensure pipeline returns expected results
     """
     expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
+    expected_approximate_results = _parse_yaml_types(
+        test_dict.get("assert_results_approximate", None)
+    )
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(client, test_dict["pipeline"])
     # check if server responds as expected
     got_results = [snapshot.data() for snapshot in pipeline.stream()]
     if expected_results:
         assert got_results == expected_results
+    if expected_approximate_results:
+        assert len(got_results) == len(
+            expected_approximate_results
+        ), "got unexpected result count"
+        for idx in range(len(got_results)):
+            assert got_results[idx] == pytest.approx(
+                expected_approximate_results[idx], abs=1e-4
+            )
     if expected_count is not None:
         assert len(got_results) == expected_count
 
@@ -126,7 +144,13 @@ async def test_pipeline_expected_errors_async(test_dict, async_client):
 
 @pytest.mark.parametrize(
     "test_dict",
-    [t for t in yaml_loader() if "assert_results" in t or "assert_count" in t],
+    [
+        t
+        for t in yaml_loader()
+        if "assert_results" in t
+        or "assert_count" in t
+        or "assert_results_approximate" in t
+    ],
     ids=lambda x: f"{x.get('description', '')}",
 )
 @pytest.mark.asyncio
@@ -135,12 +159,23 @@ async def test_pipeline_results_async(test_dict, async_client):
     Ensure pipeline returns expected results
     """
     expected_results = _parse_yaml_types(test_dict.get("assert_results", None))
+    expected_approximate_results = _parse_yaml_types(
+        test_dict.get("assert_results_approximate", None)
+    )
     expected_count = test_dict.get("assert_count", None)
     pipeline = parse_pipeline(async_client, test_dict["pipeline"])
     # check if server responds as expected
     got_results = [snapshot.data() async for snapshot in pipeline.stream()]
     if expected_results:
         assert got_results == expected_results
+    if expected_approximate_results:
+        assert len(got_results) == len(
+            expected_approximate_results
+        ), "got unexpected result count"
+        for idx in range(len(got_results)):
+            assert got_results[idx] == pytest.approx(
+                expected_approximate_results[idx], abs=1e-4
+            )
     if expected_count is not None:
         assert len(got_results) == expected_count
 
@@ -218,7 +253,11 @@ def _apply_yaml_args_to_callable(callable_obj, client, yaml_args):
     """
     if isinstance(yaml_args, dict):
         return callable_obj(**_parse_expressions(client, yaml_args))
-    elif isinstance(yaml_args, list):
+    elif isinstance(yaml_args, list) and not (
+        callable_obj == expr.Constant
+        or callable_obj == Vector
+        or callable_obj == expr.Array
+    ):
         # yaml has an array of arguments. Treat as args
         return callable_obj(*_parse_expressions(client, yaml_args))
     else:

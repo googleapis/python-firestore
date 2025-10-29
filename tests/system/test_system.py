@@ -109,9 +109,11 @@ def verify_pipeline(query):
             if isinstance(query, BaseAggregationQuery):
                 # aggregation queries return a list of lists of aggregation results
                 query_results = _clean_results(
-                    list(itertools.chain.from_iterable(
-                         [[a._to_dict() for a in s] for s in query.get()]
-                    ))
+                    list(
+                        itertools.chain.from_iterable(
+                            [[a._to_dict() for a in s] for s in query.get()]
+                        )
+                    )
                 )
             else:
                 # other qureies return a simple list of results
@@ -1530,6 +1532,7 @@ def test_query_stream_or_get_w_no_explain_options(query_docs, database, method):
     with pytest.raises(QueryExplainError, match="explain_options not set on query"):
         results.get_explain_metrics()
     verify_pipeline(query)
+
 
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."

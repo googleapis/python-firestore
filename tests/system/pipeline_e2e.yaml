@@ -136,6 +136,10 @@ data:
       embedding: [1.0, 2.0, 3.0]
     vec2:
       embedding: [4.0, 5.0, 6.0, 7.0]
+    vec3:
+      embedding: [5.0, 6.0, 7.0]
+    vec4:
+      embedding: [1.0, 2.0, 4.0]
 tests:
   - description: "testAggregates - count"
     pipeline:
@@ -161,6 +165,64 @@ tests:
                     name: count
                     args:
                     - fieldReferenceValue: rating
+          - mapValue: {}
+          name: aggregate
+  - description: "testAggregates - count_if"
+    pipeline:
+      - Collection: books
+      - Aggregate:
+        - AliasedExpr:
+            - Expr.count_if:
+              - Expr.greater_than:
+                - Field: rating
+                - Constant: 4.2
+            - "count_if_rating_gt_4_2"
+    assert_results:
+      - count_if_rating_gt_4_2: 5
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                count_if_rating_gt_4_2:
+                  functionValue:
+                    name: count_if
+                    args:
+                    - functionValue:
+                        name: greater_than
+                        args:
+                        - fieldReferenceValue: rating
+                        - doubleValue: 4.2
+          - mapValue: {}
+          name: aggregate
+  - description: "testAggregates - count_distinct"
+    pipeline:
+      - Collection: books
+      - Aggregate:
+        - AliasedExpr:
+            - Expr.count_distinct:
+              - Field: genre
+            - "distinct_genres"
+    assert_results:
+      - distinct_genres: 8
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                distinct_genres:
+                  functionValue:
+                    name: count_distinct
+                    args:
+                    - fieldReferenceValue: genre
           - mapValue: {}
           name: aggregate
   - description: "testAggregates - avg, count, max"
@@ -697,10 +759,11 @@ tests:
           - functionValue:
               args:
               - fieldReferenceValue: tags
-              - arrayValue:
-                  values:
+              - functionValue:
+                  args:
                   - stringValue: comedy
                   - stringValue: classic
+                  name: array
               name: array_contains_any
           name: where
         - args:
@@ -739,10 +802,11 @@ tests:
           - functionValue:
               args:
               - fieldReferenceValue: tags
-              - arrayValue:
-                  values:
+              - functionValue:
+                  args:
                   - stringValue: adventure
                   - stringValue: magic
+                  name: array
               name: array_contains_all
           name: where
         - args:
@@ -929,7 +993,57 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
+  - description: testConcat
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.concat:
+                - Field: author
+                - Constant: ": "
+                - Field: title
+            - "author_title"
+        - AliasedExpr:
+            - Expr.concat:
+                - Field: tags
+                - - Constant: "new_tag"
+            - "concatenatedTags"
+    assert_results:
+      - author_title: "Douglas Adams: The Hitchhiker's Guide to the Galaxy"
+        concatenatedTags:
+          - comedy
+          - space
+          - adventure
+          - new_tag
   - description: testLength
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.length:
+                - Field: title
+            - "titleLength"
+        - AliasedExpr:
+            - Expr.length:
+                - Field: tags
+            - "tagsLength"
+        - AliasedExpr:
+            - Expr.length:
+                - Field: awards
+            - "awardsLength"
+    assert_results:
+      - titleLength: 36
+        tagsLength: 3
+        awardsLength: 2
+  - description: testCharLength
     pipeline:
       - Collection: books
       - Select:
@@ -1414,6 +1528,177 @@ tests:
         - args:
           - integerValue: '1'
           name: limit
+  - description: testIsNotNull
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.is_not_null:
+              - Field: rating
+    assert_count: 10
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: rating
+              name: is_not_null
+          name: where
+  - description: testIsNotNaN
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.is_not_nan:
+              - Field: rating
+    assert_count: 10
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: rating
+              name: is_not_nan
+          name: where
+  - description: testIsAbsent
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.is_absent:
+              - Field: awards.pulitzer
+    assert_count: 9
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: awards.pulitzer
+              name: is_absent
+          name: where
+  - description: testIfAbsent
+    pipeline:
+      - Collection: books
+      - Select:
+        - AliasedExpr:
+            - Expr.if_absent:
+                - Field: awards.pulitzer
+                - Constant: false
+            - "pulitzer_award"
+        - title
+      - Where:
+          - Expr.equal:
+              - Field: pulitzer_award
+              - Constant: true
+    assert_results:
+      - pulitzer_award: true
+        title: To Kill a Mockingbird
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                pulitzer_award:
+                  functionValue:
+                    name: if_absent
+                    args:
+                    - fieldReferenceValue: awards.pulitzer
+                    - booleanValue: false
+                title:
+                  fieldReferenceValue: title
+          name: select
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: pulitzer_award
+              - booleanValue: true
+              name: equal
+          name: where
+  - description: testIsError
+    pipeline:
+      - Collection: books
+      - Select:
+        - AliasedExpr:
+            - Expr.is_error:
+                - Expr.divide:
+                    - Field: rating
+                    - Constant: "string"
+            - "is_error_result"
+      - Limit: 1
+    assert_results:
+      - is_error_result: true
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                is_error_result:
+                  functionValue:
+                    name: is_error
+                    args:
+                    - functionValue:
+                        name: divide
+                        args:
+                        - fieldReferenceValue: rating
+                        - stringValue: "string"
+          name: select
+        - args:
+          - integerValue: '1'
+          name: limit
+  - description: testIfError
+    pipeline:
+      - Collection: books
+      - Select:
+        - AliasedExpr:
+            - Expr.if_error:
+                - Expr.divide:
+                    - Field: rating
+                    - Field: genre
+                - Constant: "An error occurred"
+            - "if_error_result"
+      - Limit: 1
+    assert_results:
+      - if_error_result: "An error occurred"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                if_error_result:
+                  functionValue:
+                    name: if_error
+                    args:
+                    - functionValue:
+                        name: divide
+                        args:
+                        - fieldReferenceValue: rating
+                        - fieldReferenceValue: genre
+                    - stringValue: "An error occurred"
+          name: select
+        - args:
+          - integerValue: '1'
+          name: limit
   - description: testLogicalMinMax
     pipeline:
       - Collection: books
@@ -1520,6 +1805,153 @@ tests:
               - booleanValue: true
               name: equal
           name: where
+  - description: testMapGetWithField
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - AddFields:
+        - AliasedExpr:
+            - Constant: "hugo"
+            - "award_name"
+      - Select:
+          - AliasedExpr:
+              - Expr.map_get:
+                  - Field: awards
+                  - Field: award_name
+              - "hugoAward"
+          - Field: title
+    assert_results:
+      - hugoAward: true
+        title: Dune
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "Dune"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                award_name:
+                  stringValue: "hugo"
+          name: add_fields
+        - args:
+          - mapValue:
+              fields:
+                hugoAward:
+                  functionValue:
+                    name: map_get
+                    args:
+                    - fieldReferenceValue: awards
+                    - fieldReferenceValue: award_name
+                title:
+                  fieldReferenceValue: title
+          name: select
+  - description: testMapRemove
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - Select:
+        - AliasedExpr:
+            - Expr.map_remove:
+                - Field: awards
+                - "nebula"
+            - "awards_removed"
+    assert_results:
+      - awards_removed:
+          hugo: true
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "Dune"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                awards_removed:
+                  functionValue:
+                    name: map_remove
+                    args:
+                    - fieldReferenceValue: awards
+                    - stringValue: "nebula"
+          name: select
+  - description: testMapMerge
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - Select:
+        - AliasedExpr:
+            - Expr.map_merge:
+                - Field: awards
+                - Map:
+                   elements: {"new_award": true, "hugo": false}
+                - Map: 
+                   elements: {"another_award": "yes"}
+            - "awards_merged"
+    assert_results:
+      - awards_merged:
+          hugo: false
+          nebula: true
+          new_award: true
+          another_award: "yes"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "Dune"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                awards_merged:
+                  functionValue:
+                    name: map_merge
+                    args:
+                    - fieldReferenceValue: awards
+                    - functionValue:
+                        name: map
+                        args:
+                        - stringValue: "new_award"
+                        - booleanValue: true
+                        - stringValue: "hugo"
+                        - booleanValue: false
+                    - functionValue:
+                        name: map
+                        args:
+                        - stringValue: "another_award"
+                        - stringValue: "yes"
+          name: select
   - description: testNestedFields
     pipeline:
       - Collection: books
@@ -1730,6 +2162,324 @@ tests:
         - adventure
         - space
         - comedy
+  - description: testDocumentId
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.document_id:
+                - Field: __name__
+            - "doc_id"
+    assert_results:
+      - doc_id: "book1"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                doc_id:
+                  functionValue:
+                    name: document_id
+                    args:
+                    - fieldReferenceValue: __name__
+          name: select
+  - description: testCurrentTimestamp
+    pipeline:
+      - Collection: books
+      - Limit: 1
+      - Select:
+        - AliasedExpr:
+            - And:
+              - Expr.greater_than_or_equal:
+                  - CurrentTimestamp: []
+                  - Expr.unix_seconds_to_timestamp:
+                    - Constant: 1735689600 # 2025-01-01
+              - Expr.less_than:
+                  - CurrentTimestamp: []
+                  - Expr.unix_seconds_to_timestamp:
+                    - Constant: 4892438400 # 2125-01-01
+            - "is_between_2025_and_2125"
+    assert_results:
+      - is_between_2025_and_2125: true
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - integerValue: '1'
+          name: limit
+        - args:
+          - mapValue:
+              fields:
+                is_between_2025_and_2125:
+                  functionValue:
+                    name: and
+                    args:
+                    - functionValue:
+                        name: greater_than_or_equal
+                        args:
+                        - functionValue:
+                            name: current_timestamp
+                        - functionValue:
+                            name: unix_seconds_to_timestamp
+                            args:
+                            - integerValue: '1735689600'
+                    - functionValue:
+                        name: less_than
+                        args:
+                        - functionValue:
+                            name: current_timestamp
+                        - functionValue:
+                            name: unix_seconds_to_timestamp
+                            args:
+                            - integerValue: '4892438400'
+          name: select
+  - description: testArrayConcat
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpr:
+            - Expr.array_concat:
+                - Field: tags
+                - Constant: ["new_tag", "another_tag"]
+            - "concatenatedTags"
+    assert_results:
+      - concatenatedTags:
+        - comedy
+        - space
+        - adventure
+        - new_tag
+        - another_tag
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                concatenatedTags:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - functionValue:
+                        args:
+                        - stringValue: "new_tag"
+                        - stringValue: "another_tag"
+                        name: array
+                    name: array_concat
+          name: select
+  - description: testArrayConcatMultiple
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: title
+              - Constant: "Dune"
+      - Select:
+        - AliasedExpr:
+            - Expr.array_concat:
+                - Field: tags
+                - Constant: ["sci-fi"]
+                - Constant: ["classic", "epic"]
+            - "concatenatedTags"
+    assert_results:
+      - concatenatedTags:
+        - politics
+        - desert
+        - ecology
+        - sci-fi
+        - classic
+        - epic
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "Dune"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                concatenatedTags:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - functionValue:
+                        args:
+                        - stringValue: "sci-fi"
+                        name: array
+                    - functionValue:
+                        args:
+                        - stringValue: "classic"
+                        - stringValue: "epic"
+                        name: array
+                    name: array_concat
+          name: select
+  - description: testMapMergeLiterals
+    pipeline:
+      - Collection: books
+      - Limit: 1
+      - Select:
+        - AliasedExpr:
+            - Expr.map_merge:
+                - Map:
+                    elements: {"a": "orig", "b": "orig"}
+                - Map:
+                    elements: {"b": "new", "c": "new"}
+            - "merged"
+    assert_results:
+      - merged:
+          a: "orig"
+          b: "new"
+          c: "new"
+  - description: testArrayContainsAnyWithField
+    pipeline:
+      - Collection: books
+      - AddFields:
+        - AliasedExpr:
+            - Expr.array_concat:
+                - Field: tags
+                - Array: ["Dystopian"]
+            - "new_tags"
+      - Where:
+          - Expr.array_contains_any:
+            - Field: new_tags
+            - - Constant: non_existent_tag
+              - Field: genre
+      - Select:
+        - title
+        - genre
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "1984"
+        genre: "Dystopian"
+      - title: "The Handmaid's Tale"
+        genre: "Dystopian"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - mapValue:
+              fields:
+                new_tags:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - functionValue:
+                        args:
+                        - stringValue: "Dystopian"
+                        name: array
+                    name: array_concat
+          name: add_fields
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: new_tags
+              - functionValue:
+                  args:
+                  - stringValue: "non_existent_tag"
+                  - fieldReferenceValue: genre
+                  name: array
+              name: array_contains_any
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+                genre:
+                  fieldReferenceValue: genre
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+  - description: testArrayConcatLiterals
+    pipeline:
+      - Collection: books
+      - Limit: 1
+      - Select:
+        - AliasedExpr:
+            - Expr.array_concat:
+                - Array: [1, 2, 3]
+                - Array: [4, 5]
+            - "concatenated"
+    assert_results:
+      - concatenated: [1, 2, 3, 4, 5]
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - integerValue: '1'
+          name: limit
+        - args:
+          - mapValue:
+              fields:
+                concatenated:
+                  functionValue:
+                    args:
+                    - functionValue:
+                        args:
+                        - integerValue: '1'
+                        - integerValue: '2'
+                        - integerValue: '3'
+                        name: array
+                    - functionValue:
+                        args:
+                        - integerValue: '4'
+                        - integerValue: '5'
+                        name: array
+                    name: array_concat
+          name: select
   - description: testExists
     pipeline:
       - Collection: books
@@ -1782,6 +2532,8 @@ tests:
           - Field: embedding_length
           - ASCENDING
     assert_results:
+      - embedding_length: 3
+      - embedding_length: 3
       - embedding_length: 3
       - embedding_length: 4
   - description: testTimestampFunctions
@@ -1956,3 +2708,596 @@ tests:
         conditional_field: "Dystopian"
       - title: "Dune"
         conditional_field: "Frank Herbert"
+  - description: testFindNearestEuclidean
+    pipeline:
+      - Collection: vectors
+      - FindNearest:
+          field: embedding
+          vector: [1.0, 2.0, 3.0]
+          distance_measure: EUCLIDEAN
+          options:
+            FindNearestOptions:
+              limit: 2
+              distance_field:
+                Field: distance
+      - Select:
+        - distance
+    assert_results:
+      - distance: 0.0
+      - distance: 1.0
+    assert_proto:
+      pipeline:
+        stages:
+        - name: collection
+          args:
+          - referenceValue: /vectors
+        - name: find_nearest
+          args:
+          - fieldReferenceValue: embedding
+          - mapValue:
+              fields:
+                __type__:
+                  stringValue: __vector__
+                value:
+                  arrayValue:
+                    values:
+                    - doubleValue: 1.0
+                    - doubleValue: 2.0
+                    - doubleValue: 3.0
+          - stringValue: euclidean
+          options:
+            limit:
+              integerValue: '2'
+            distance_field:
+              fieldReferenceValue: distance
+        - name: select
+          args:
+          - mapValue:
+              fields:
+                distance:
+                  fieldReferenceValue: distance
+  - description: testMathExpressions
+    pipeline:
+      - Collection: books
+      - Where:
+        - Expr.equal:
+          - Field: title
+          - Constant: To Kill a Mockingbird
+      - Select:
+        - AliasedExpr:
+            - Expr.abs:
+                - Field: rating
+            - "abs_rating"
+        - AliasedExpr:
+            - Expr.ceil:
+                - Field: rating
+            - "ceil_rating"
+        - AliasedExpr:
+            - Expr.exp:
+                - Field: rating
+            - "exp_rating"
+        - AliasedExpr:
+            - Expr.floor:
+                - Field: rating
+            - "floor_rating"
+        - AliasedExpr:
+            - Expr.ln:
+                - Field: rating
+            - "ln_rating"
+        - AliasedExpr:
+            - Expr.log10:
+                - Field: rating
+            - "log_rating_base10"
+        - AliasedExpr:
+            - Expr.log:
+                - Field: rating
+                - Constant: 2
+            - "log_rating_base2"
+        - AliasedExpr:
+            - Expr.pow:
+                - Field: rating
+                - Constant: 2
+            - "pow_rating"
+        - AliasedExpr:
+            - Expr.sqrt:
+                - Field: rating
+            - "sqrt_rating"
+    assert_results_approximate:
+      - abs_rating: 4.2
+        ceil_rating: 5.0
+        exp_rating: 66.686331
+        floor_rating: 4.0
+        ln_rating: 1.4350845
+        log_rating_base10: 0.623249
+        log_rating_base2: 2.0704
+        pow_rating: 17.64
+        sqrt_rating: 2.049390
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: To Kill a Mockingbird
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                abs_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: abs
+                ceil_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: ceil
+                exp_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: exp
+                floor_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: floor
+                ln_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: ln
+                log_rating_base10:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: log10
+                log_rating_base2:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '2'
+                    name: log
+                pow_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - integerValue: '2'
+                    name: pow
+                sqrt_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: sqrt
+          name: select
+  - description: testRoundExpressions
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal_any:
+              - Field: title
+              - - Constant: "To Kill a Mockingbird" # rating 4.2
+                - Constant: "Pride and Prejudice" # rating 4.5
+                - Constant: "The Lord of the Rings" # rating 4.7
+      - Select:
+        - title
+        - AliasedExpr:
+            - Expr.round:
+                - Field: rating
+            - "round_rating"
+      - Sort:
+        - Ordering:
+          - Field: title
+          - ASCENDING
+    assert_results:
+      - title: "Pride and Prejudice"
+        round_rating: 5.0
+      - title: "The Lord of the Rings"
+        round_rating: 5.0
+      - title: "To Kill a Mockingbird"
+        round_rating: 4.0
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - functionValue:
+                  args:
+                  - stringValue: "To Kill a Mockingbird"
+                  - stringValue: "Pride and Prejudice"
+                  - stringValue: "The Lord of the Rings"
+                  name: array
+              name: equal_any
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                title:
+                  fieldReferenceValue: title
+                round_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    name: round
+          name: select
+        - args:
+          - mapValue:
+              fields:
+                direction:
+                  stringValue: ascending
+                expression:
+                  fieldReferenceValue: title
+          name: sort
+  - description: testFindNearestDotProduct
+    pipeline:
+      - Collection: vectors
+      - FindNearest:
+          field: embedding
+          vector: [1.0, 2.0, 3.0]
+          distance_measure: DOT_PRODUCT
+          options:
+            FindNearestOptions:
+              limit: 3
+              distance_field: 
+                Field: distance
+      - Select:
+        - distance
+    assert_results:
+      - distance: 38.0
+      - distance: 17.0
+      - distance: 14.0
+    assert_proto:
+      pipeline:
+        stages:
+        - name: collection
+          args:
+          - referenceValue: /vectors
+        - name: find_nearest
+          args:
+          - fieldReferenceValue: embedding
+          - mapValue:
+              fields:
+                __type__:
+                  stringValue: __vector__
+                value:
+                  arrayValue:
+                    values:
+                    - doubleValue: 1.0
+                    - doubleValue: 2.0
+                    - doubleValue: 3.0
+          - stringValue: dot_product
+          options:
+            limit:
+              integerValue: '3'
+            distance_field:
+              fieldReferenceValue: distance
+        - name: select
+          args:
+          - mapValue:
+              fields:
+                distance:
+                  fieldReferenceValue: distance
+  - description: testDotProductWithConstant
+    pipeline:
+      - Collection: vectors
+      - Where:
+          - Expr.equal:
+              - Field: embedding
+              - Vector: [1.0, 2.0, 3.0]
+      - Select:
+        - AliasedExpr:
+            - Expr.dot_product:
+                - Field: embedding
+                - Vector: [1.0, 1.0, 1.0]
+            - "dot_product_result"
+    assert_results:
+      - dot_product_result: 6.0
+  - description: testEuclideanDistanceWithConstant
+    pipeline:
+      - Collection: vectors
+      - Where:
+          - Expr.equal:
+              - Field: embedding
+              - Vector: [1.0, 2.0, 3.0]
+      - Select:
+        - AliasedExpr:
+            - Expr.euclidean_distance:
+                - Field: embedding
+                - Vector: [1.0, 2.0, 3.0]
+            - "euclidean_distance_result"
+    assert_results:
+      - euclidean_distance_result: 0.0
+  - description: testCosineDistanceWithConstant
+    pipeline:
+      - Collection: vectors
+      - Where:
+          - Expr.equal:
+              - Field: embedding
+              - Vector: [1.0, 2.0, 3.0]
+      - Select:
+        - AliasedExpr:
+            - Expr.cosine_distance:
+                - Field: embedding
+                - Vector: [1.0, 2.0, 3.0]
+            - "cosine_distance_result"
+    assert_results:
+      - cosine_distance_result: 0.0
+  - description: testStringFunctions - ToLower
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.to_lower:
+                - Field: title
+            - "lower_title"
+    assert_results:
+      - lower_title: "the hitchhiker's guide to the galaxy"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                lower_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    name: to_lower
+          name: select
+  - description: testStringFunctions - ToUpper
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.to_upper:
+                - Field: title
+            - "upper_title"
+    assert_results:
+      - upper_title: "THE HITCHHIKER'S GUIDE TO THE GALAXY"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                upper_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    name: to_upper
+          name: select
+  - description: testStringFunctions - Trim
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.trim:
+                - Expr.string_concat:
+                  - Constant: "  "
+                  - Field: title
+                  - Constant: "  "
+            - "trimmed_title"
+    assert_results:
+      - trimmed_title: "The Hitchhiker's Guide to the Galaxy"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                trimmed_title:
+                  functionValue:
+                    args:
+                    - functionValue:
+                        args:
+                        - stringValue: "  "
+                        - fieldReferenceValue: title
+                        - stringValue: "  "
+                        name: string_concat
+                    name: trim
+          name: select
+  - description: testStringFunctions - StringReverse
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Jane Austen"
+      - Select:
+        - AliasedExpr:
+            - Expr.string_reverse:
+                - Field: title
+            - "reversed_title"
+    assert_results:
+      - reversed_title: "ecidujerP dna edirP"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: "Jane Austen"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                reversed_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    name: string_reverse
+          name: select
+  - description: testStringFunctions - Substring
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.substring:
+                - Field: title
+                - Constant: 4
+                - Constant: 11
+            - "substring_title"
+    assert_results:
+      - substring_title: "Hitchhiker'"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: "Douglas Adams"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                substring_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    - integerValue: '4'
+                    - integerValue: '11'
+                    name: substring
+          name: select
+  - description: testStringFunctions - Substring without length
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Fyodor Dostoevsky"
+      - Select:
+        - AliasedExpr:
+            - Expr.substring:
+                - Field: title
+                - Constant: 10
+            - "substring_title"
+    assert_results:
+      - substring_title: "Punishment"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: "Fyodor Dostoevsky"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                substring_title:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: title
+                    - integerValue: '10'
+                    name: substring
+          name: select
+  - description: testStringFunctions - Join
+    pipeline:
+      - Collection: books
+      - Where:
+          - Expr.equal:
+              - Field: author
+              - Constant: "Douglas Adams"
+      - Select:
+        - AliasedExpr:
+            - Expr.join:
+                - Field: tags
+                - Constant: ", "
+            - "joined_tags"
+    assert_results:
+      - joined_tags: "comedy, space, adventure"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: "Douglas Adams"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                joined_tags:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - stringValue: ", "
+                    name: join
+          name: select

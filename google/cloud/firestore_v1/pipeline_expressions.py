@@ -17,7 +17,6 @@ from typing import (
     Any,
     Generic,
     TypeVar,
-    Dict,
     Sequence,
 )
 from abc import ABC
@@ -41,8 +40,6 @@ CONSTANT_TYPE = TypeVar(
     bytes,
     GeoPoint,
     Vector,
-    list,
-    Dict[str, Any],
     None,
 )
 
@@ -113,8 +110,20 @@ class Expr(ABC):
         raise NotImplementedError
 
     @staticmethod
-    def _cast_to_expr_or_convert_to_constant(o: Any) -> "Expr":
-        return o if isinstance(o, Expr) else Constant(o)
+    def _cast_to_expr_or_convert_to_constant(o: Any, include_vector=False) -> "Expr":
+        """Convert arbitrary object to an Expr."""
+        if isinstance(o, Constant) and isinstance(o.value, list):
+            o = o.value
+        if isinstance(o, Expr):
+            return o
+        if isinstance(o, dict):
+            return Map(o)
+        if isinstance(o, list):
+            if include_vector and all([isinstance(i, (float, int)) for i in o]):
+                return Constant(Vector(o))
+            else:
+                return Array(o)
+        return Constant(o)
 
     class expose_as_static:
         """
@@ -132,6 +141,10 @@ class Expr(ABC):
             self.instance_func = instance_func
 
         def static_func(self, first_arg, *other_args, **kwargs):
+            if not isinstance(first_arg, (Expr, str)):
+                raise TypeError(
+                    f"`expressions must be called on an Expr or a string representing a field name. got {type(first_arg)}."
+                )
             first_expr = (
                 Field.of(first_arg) if not isinstance(first_arg, Expr) else first_arg
             )
@@ -238,6 +251,147 @@ class Expr(ABC):
             A new `Expr` representing the modulo operation.
         """
         return Function("mod", [self, self._cast_to_expr_or_convert_to_constant(other)])
+
+    @expose_as_static
+    def abs(self) -> "Expr":
+        """Creates an expression that calculates the absolute value of this expression.
+
+        Example:
+            >>> # Get the absolute value of the 'change' field.
+            >>> Field.of("change").abs()
+
+        Returns:
+            A new `Expr` representing the absolute value.
+        """
+        return Function("abs", [self])
+
+    @expose_as_static
+    def ceil(self) -> "Expr":
+        """Creates an expression that calculates the ceiling of this expression.
+
+        Example:
+            >>> # Get the ceiling of the 'value' field.
+            >>> Field.of("value").ceil()
+
+        Returns:
+            A new `Expr` representing the ceiling value.
+        """
+        return Function("ceil", [self])
+
+    @expose_as_static
+    def exp(self) -> "Expr":
+        """Creates an expression that computes e to the power of this expression.
+
+        Example:
+            >>> # Compute e to the power of the 'value' field
+            >>> Field.of("value").exp()
+
+        Returns:
+            A new `Expr` representing the exponential value.
+        """
+        return Function("exp", [self])
+
+    @expose_as_static
+    def floor(self) -> "Expr":
+        """Creates an expression that calculates the floor of this expression.
+
+        Example:
+            >>> # Get the floor of the 'value' field.
+            >>> Field.of("value").floor()
+
+        Returns:
+            A new `Expr` representing the floor value.
+        """
+        return Function("floor", [self])
+
+    @expose_as_static
+    def ln(self) -> "Expr":
+        """Creates an expression that calculates the natural logarithm of this expression.
+
+        Example:
+            >>> # Get the natural logarithm of the 'value' field.
+            >>> Field.of("value").ln()
+
+        Returns:
+            A new `Expr` representing the natural logarithm.
+        """
+        return Function("ln", [self])
+
+    @expose_as_static
+    def log(self, base: Expr | float) -> "Expr":
+        """Creates an expression that calculates the logarithm of this expression with a given base.
+
+        Example:
+            >>> # Get the logarithm of 'value' with base 2.
+            >>> Field.of("value").log(2)
+            >>> # Get the logarithm of 'value' with base from 'base_field'.
+            >>> Field.of("value").log(Field.of("base_field"))
+
+        Args:
+            base: The base of the logarithm.
+
+        Returns:
+            A new `Expr` representing the logarithm.
+        """
+        return Function("log", [self, self._cast_to_expr_or_convert_to_constant(base)])
+
+    @expose_as_static
+    def log10(self) -> "Expr":
+        """Creates an expression that calculates the base 10 logarithm of this expression.
+
+        Example:
+            >>> Field.of("value").log10()
+
+        Returns:
+            A new `Expr` representing the logarithm.
+        """
+        return Function("log10", [self])
+
+    @expose_as_static
+    def pow(self, exponent: Expr | float) -> "Expr":
+        """Creates an expression that calculates this expression raised to the power of the exponent.
+
+        Example:
+            >>> # Raise 'base_val' to the power of 2.
+            >>> Field.of("base_val").pow(2)
+            >>> # Raise 'base_val' to the power of 'exponent_val'.
+            >>> Field.of("base_val").pow(Field.of("exponent_val"))
+
+        Args:
+            exponent: The exponent.
+
+        Returns:
+            A new `Expr` representing the power operation.
+        """
+        return Function(
+            "pow", [self, self._cast_to_expr_or_convert_to_constant(exponent)]
+        )
+
+    @expose_as_static
+    def round(self) -> "Expr":
+        """Creates an expression that rounds this expression to the nearest integer.
+
+        Example:
+            >>> # Round the 'value' field.
+            >>> Field.of("value").round()
+
+        Returns:
+            A new `Expr` representing the rounded value.
+        """
+        return Function("round", [self])
+
+    @expose_as_static
+    def sqrt(self) -> "Expr":
+        """Creates an expression that calculates the square root of this expression.
+
+        Example:
+            >>> # Get the square root of the 'area' field.
+            >>> Field.of("area").sqrt()
+
+        Returns:
+            A new `Expr` representing the square root.
+        """
+        return Function("sqrt", [self])
 
     @expose_as_static
     def logical_maximum(self, other: Expr | CONSTANT_TYPE) -> "Expr":
@@ -420,7 +574,9 @@ class Expr(ABC):
         )
 
     @expose_as_static
-    def equal_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
+    def equal_any(
+        self, array: Array | Sequence[Expr | CONSTANT_TYPE] | Expr
+    ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is equal to any of the
         provided values or expressions.
 
@@ -438,14 +594,14 @@ class Expr(ABC):
             "equal_any",
             [
                 self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(v) for v in array]
-                ),
+                self._cast_to_expr_or_convert_to_constant(array),
             ],
         )
 
     @expose_as_static
-    def not_equal_any(self, array: Sequence[Expr | CONSTANT_TYPE]) -> "BooleanExpr":
+    def not_equal_any(
+        self, array: Array | list[Expr | CONSTANT_TYPE] | Expr
+    ) -> "BooleanExpr":
         """Creates an expression that checks if this expression is not equal to any of the
         provided values or expressions.
 
@@ -463,9 +619,7 @@ class Expr(ABC):
             "not_equal_any",
             [
                 self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(v) for v in array]
-                ),
+                self._cast_to_expr_or_convert_to_constant(array),
             ],
         )
 
@@ -492,7 +646,7 @@ class Expr(ABC):
     @expose_as_static
     def array_contains_all(
         self,
-        elements: Sequence[Expr | CONSTANT_TYPE],
+        elements: Array | list[Expr | CONSTANT_TYPE] | Expr,
     ) -> "BooleanExpr":
         """Creates an expression that checks if an array contains all the specified elements.
 
@@ -512,16 +666,14 @@ class Expr(ABC):
             "array_contains_all",
             [
                 self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
-                ),
+                self._cast_to_expr_or_convert_to_constant(elements),
             ],
         )
 
     @expose_as_static
     def array_contains_any(
         self,
-        elements: Sequence[Expr | CONSTANT_TYPE],
+        elements: Array | list[Expr | CONSTANT_TYPE] | Expr,
     ) -> "BooleanExpr":
         """Creates an expression that checks if an array contains any of the specified elements.
 
@@ -542,9 +694,7 @@ class Expr(ABC):
             "array_contains_any",
             [
                 self,
-                _ListOfExprs(
-                    [self._cast_to_expr_or_convert_to_constant(e) for e in elements]
-                ),
+                self._cast_to_expr_or_convert_to_constant(elements),
             ],
         )
 
@@ -575,6 +725,90 @@ class Expr(ABC):
         return Function("array_reverse", [self])
 
     @expose_as_static
+    def array_concat(
+        self, *other_arrays: Array | list[Expr | CONSTANT_TYPE] | Expr
+    ) -> "Expr":
+        """Creates an expression that concatenates an array expression with another array.
+
+        Example:
+            >>> # Combine the 'tags' array with a new array and an array field
+            >>> Field.of("tags").array_concat(["newTag1", "newTag2", Field.of("otherTag")])
+
+        Args:
+            array: The list of constants or expressions to concat with.
+
+        Returns:
+            A new `Expr` representing the concatenated array.
+        """
+        return Function(
+            "array_concat",
+            [self]
+            + [self._cast_to_expr_or_convert_to_constant(arr) for arr in other_arrays],
+        )
+
+    @expose_as_static
+    def concat(self, *others: Expr | CONSTANT_TYPE) -> "Expr":
+        """Creates an expression that concatenates expressions together
+
+        Args:
+            *others: The expressions to concatenate.
+
+        Returns:
+            A new `Expr` representing the concatenated value.
+        """
+        return Function(
+            "concat",
+            [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
+        )
+
+    @expose_as_static
+    def length(self) -> "Expr":
+        """
+        Creates an expression that calculates the length of the expression if it is a string, array, map, or blob.
+
+        Example:
+            >>> # Get the length of the 'name' field.
+            >>> Field.of("name").length()
+
+        Returns:
+            A new `Expr` representing the length of the expression.
+        """
+        return Function("length", [self])
+
+    @expose_as_static
+    def is_absent(self) -> "BooleanExpr":
+        """Creates an expression that returns true if a value is absent. Otherwise, returns false even if
+        the value is null.
+
+        Example:
+            >>> # Check if the 'email' field is absent.
+            >>> Field.of("email").is_absent()
+
+        Returns:
+            A new `BooleanExpression` representing the isAbsent operation.
+        """
+        return BooleanExpr("is_absent", [self])
+
+    @expose_as_static
+    def if_absent(self, default_value: Expr | CONSTANT_TYPE) -> "Expr":
+        """Creates an expression that returns a default value if an expression evaluates to an absent value.
+
+        Example:
+            >>> # Return the value of the 'email' field, or "N/A" if it's absent.
+            >>> Field.of("email").if_absent("N/A")
+
+        Args:
+            default_value: The expression or constant value to return if this expression is absent.
+
+        Returns:
+            A new `Expr` representing the ifAbsent operation.
+        """
+        return Function(
+            "if_absent",
+            [self, self._cast_to_expr_or_convert_to_constant(default_value)],
+        )
+
+    @expose_as_static
     def is_nan(self) -> "BooleanExpr":
         """Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
 
@@ -588,8 +822,21 @@ class Expr(ABC):
         return BooleanExpr("is_nan", [self])
 
     @expose_as_static
+    def is_not_nan(self) -> "BooleanExpr":
+        """Creates an expression that checks if this expression evaluates to a non-'NaN' (Not a Number) value.
+
+        Example:
+            >>> # Check if the result of a calculation is not NaN
+            >>> Field.of("value").divide(1).is_not_nan()
+
+        Returns:
+            A new `Expr` representing the 'is not NaN' check.
+        """
+        return BooleanExpr("is_not_nan", [self])
+
+    @expose_as_static
     def is_null(self) -> "BooleanExpr":
-        """Creates an expression that checks if this expression evaluates to 'Null'.
+        """Creates an expression that checks if the value of a field is 'Null'.
 
         Example:
             >>> Field.of("value").is_null()
@@ -598,6 +845,50 @@ class Expr(ABC):
             A new `Expr` representing the 'isNull' check.
         """
         return BooleanExpr("is_null", [self])
+
+    @expose_as_static
+    def is_not_null(self) -> "BooleanExpr":
+        """Creates an expression that checks if the value of a field is not 'Null'.
+
+        Example:
+            >>> Field.of("value").is_not_null()
+
+        Returns:
+            A new `Expr` representing the 'isNotNull' check.
+        """
+        return BooleanExpr("is_not_null", [self])
+
+    @expose_as_static
+    def is_error(self):
+        """Creates an expression that checks if a given expression produces an error
+
+        Example:
+            >>> # Resolves to True if an expression produces an error
+            >>> Field.of("value").divide("string").is_error()
+
+        Returns:
+            A new `Expr` representing the isError operation.
+        """
+        return Function("is_error", [self])
+
+    @expose_as_static
+    def if_error(self, then_value: Expr | CONSTANT_TYPE) -> "Expr":
+        """Creates an expression that returns ``then_value`` if this expression evaluates to an error.
+        Otherwise, returns the value of this expression.
+
+        Example:
+            >>> # Resolves to 0 if an expression produces an error
+            >>> Field.of("value").divide("string").if_error(0)
+
+        Args:
+            then_value: The value to return if this expression evaluates to an error.
+
+        Returns:
+            A new `Expr` representing the ifError operation.
+        """
+        return Function(
+            "if_error", [self, self._cast_to_expr_or_convert_to_constant(then_value)]
+        )
 
     @expose_as_static
     def exists(self) -> "BooleanExpr":
@@ -652,6 +943,35 @@ class Expr(ABC):
             A new `AggregateFunction` representing the 'count' aggregation.
         """
         return AggregateFunction("count", [self])
+
+    @expose_as_static
+    def count_if(self) -> "Expr":
+        """Creates an aggregation that counts the number of values of the provided field or expression
+        that evaluate to True.
+
+        Example:
+            >>> # Count the number of adults
+            >>> Field.of("age").greater_than(18).count_if().as_("totalAdults")
+
+
+        Returns:
+            A new `AggregateFunction` representing the 'count_if' aggregation.
+        """
+        return AggregateFunction("count_if", [self])
+
+    @expose_as_static
+    def count_distinct(self) -> "Expr":
+        """Creates an aggregation that counts the number of distinct values of the
+        provided field or expression.
+
+        Example:
+            >>> # Count the total number of countries in the data
+            >>> Field.of("country").count_distinct().as_("totalCountries")
+
+        Returns:
+            A new `AggregateFunction` representing the 'count_distinct' aggregation.
+        """
+        return AggregateFunction("count_distinct", [self])
 
     @expose_as_static
     def minimum(self) -> "Expr":
@@ -847,11 +1167,105 @@ class Expr(ABC):
         )
 
     @expose_as_static
+    def to_lower(self) -> "Expr":
+        """Creates an expression that converts a string to lowercase.
+
+        Example:
+            >>> # Convert the 'name' field to lowercase
+            >>> Field.of("name").to_lower()
+
+        Returns:
+            A new `Expr` representing the lowercase string.
+        """
+        return Function("to_lower", [self])
+
+    @expose_as_static
+    def to_upper(self) -> "Expr":
+        """Creates an expression that converts a string to uppercase.
+
+        Example:
+            >>> # Convert the 'title' field to uppercase
+            >>> Field.of("title").to_upper()
+
+        Returns:
+            A new `Expr` representing the uppercase string.
+        """
+        return Function("to_upper", [self])
+
+    @expose_as_static
+    def trim(self) -> "Expr":
+        """Creates an expression that removes leading and trailing whitespace from a string.
+
+        Example:
+            >>> # Trim whitespace from the 'userInput' field
+            >>> Field.of("userInput").trim()
+
+        Returns:
+            A new `Expr` representing the trimmed string.
+        """
+        return Function("trim", [self])
+
+    @expose_as_static
+    def string_reverse(self) -> "Expr":
+        """Creates an expression that reverses a string.
+
+        Example:
+            >>> # Reverse the 'userInput' field
+            >>> Field.of("userInput").reverse()
+
+        Returns:
+            A new `Expr` representing the reversed string.
+        """
+        return Function("string_reverse", [self])
+
+    @expose_as_static
+    def substring(
+        self, position: Expr | int, length: Expr | int | None = None
+    ) -> "Expr":
+        """Creates an expression that returns a substring of the results of this expression.
+
+
+        Example:
+            >>> Field.of("description").substring(5, 10)
+            >>> Field.of("description").substring(5)
+
+        Args:
+            position: the index of the first character of the substring.
+            length: the length of the substring. If not provided the substring
+                will end at the end of the input.
+
+        Returns:
+            A new `Expr` representing the extracted substring.
+        """
+        args = [self, self._cast_to_expr_or_convert_to_constant(position)]
+        if length is not None:
+            args.append(self._cast_to_expr_or_convert_to_constant(length))
+        return Function("substring", args)
+
+    @expose_as_static
+    def join(self, delimeter: Expr | str) -> "Expr":
+        """Creates an expression that joins the elements of an array into a string
+
+
+        Example:
+            >>> Field.of("tags").join(", ")
+
+        Args:
+            delimiter: The delimiter to add between the elements of the array.
+
+        Returns:
+            A new `Expr` representing the joined string.
+        """
+        return Function(
+            "join", [self, self._cast_to_expr_or_convert_to_constant(delimeter)]
+        )
+
+    @expose_as_static
     def map_get(self, key: str | Constant[str]) -> "Expr":
         """Accesses a value from the map produced by evaluating this expression.
 
         Example:
-            >>> Expr.map({"city": "London"}).map_get("city")
+            >>> Map({"city": "London"}).map_get("city")
             >>> Field.of("address").map_get("city")
 
         Args:
@@ -861,7 +1275,118 @@ class Expr(ABC):
             A new `Expr` representing the value associated with the given key in the map.
         """
         return Function(
-            "map_get", [self, Constant.of(key) if isinstance(key, str) else key]
+            "map_get", [self, self._cast_to_expr_or_convert_to_constant(key)]
+        )
+
+    @expose_as_static
+    def map_remove(self, key: str | Constant[str]) -> "Expr":
+        """Remove a key from the map produced by evaluating this expression.
+
+        Example:
+            >>> Map({"city": "London"}).map_remove("city")
+            >>> Field.of("address").map_remove("city")
+
+        Args:
+            key: The key to remove in the map.
+
+        Returns:
+            A new `Expr` representing the map_remove operation.
+        """
+        return Function(
+            "map_remove", [self, self._cast_to_expr_or_convert_to_constant(key)]
+        )
+
+    @expose_as_static
+    def map_merge(
+        self, *other_maps: Map | dict[str | Constant[str], Expr | CONSTANT_TYPE] | Expr
+    ) -> "Expr":
+        """Creates an expression that merges one or more dicts into a single map.
+
+        Example:
+            >>> Map({"city": "London"}).map_merge({"country": "UK"}, {"isCapital": True})
+            >>> Field.of("settings").map_merge({"enabled":True}, Function.conditional(Field.of('isAdmin'), {"admin":True}, {}})
+
+        Args:
+            *other_maps: Sequence of maps to merge into the resulting map.
+
+        Returns:
+            A new `Expr` representing the value associated with the given key in the map.
+        """
+        return Function(
+            "map_merge",
+            [self] + [self._cast_to_expr_or_convert_to_constant(m) for m in other_maps],
+        )
+
+    @expose_as_static
+    def cosine_distance(self, other: Expr | list[float] | Vector) -> "Expr":
+        """Calculates the cosine distance between two vectors.
+
+        Example:
+            >>> # Calculate the cosine distance between the 'userVector' field and the 'itemVector' field
+            >>> Field.of("userVector").cosine_distance(Field.of("itemVector"))
+            >>> # Calculate the Cosine distance between the 'location' field and a target location
+            >>> Field.of("location").cosine_distance([37.7749, -122.4194])
+
+        Args:
+            other: The other vector (represented as an Expr, list of floats, or Vector) to compare against.
+
+        Returns:
+            A new `Expr` representing the cosine distance between the two vectors.
+        """
+        return Function(
+            "cosine_distance",
+            [
+                self,
+                self._cast_to_expr_or_convert_to_constant(other, include_vector=True),
+            ],
+        )
+
+    @expose_as_static
+    def euclidean_distance(self, other: Expr | list[float] | Vector) -> "Expr":
+        """Calculates the Euclidean distance between two vectors.
+
+        Example:
+            >>> # Calculate the Euclidean distance between the 'location' field and a target location
+            >>> Field.of("location").euclidean_distance([37.7749, -122.4194])
+            >>> # Calculate the Euclidean distance between two vector fields: 'pointA' and 'pointB'
+            >>> Field.of("pointA").euclidean_distance(Field.of("pointB"))
+
+        Args:
+            other: The other vector (represented as an Expr, list of floats, or Vector) to compare against.
+
+        Returns:
+            A new `Expr` representing the Euclidean distance between the two vectors.
+        """
+        return Function(
+            "euclidean_distance",
+            [
+                self,
+                self._cast_to_expr_or_convert_to_constant(other, include_vector=True),
+            ],
+        )
+
+    @expose_as_static
+    def dot_product(self, other: Expr | list[float] | Vector) -> "Expr":
+        """Calculates the dot product between two vectors.
+
+        Example:
+            >>> # Calculate the dot product between a feature vector and a target vector
+            >>> Field.of("features").dot_product([0.5, 0.8, 0.2])
+            >>> # Calculate the dot product between two document vectors: 'docVector1' and 'docVector2'
+            >>> Field.of("docVector1").dot_product(Field.of("docVector2"))
+
+        Args:
+            other: The other vector (represented as an Expr, list of floats, or Vector) to calculate dot product with.
+
+        Returns:
+            A new `Expr` representing the dot product between the two vectors.
+        """
+        return Function(
+            "dot_product",
+            [
+                self,
+                self._cast_to_expr_or_convert_to_constant(other, include_vector=True),
+            ],
         )
 
     @expose_as_static
@@ -1034,6 +1559,19 @@ class Expr(ABC):
         """
         return Function("collection_id", [self])
 
+    @expose_as_static
+    def document_id(self):
+        """Creates an expression that returns the document ID from a path.
+
+        Example:
+            >>> # Get the document ID from a path.
+            >>> Field.of("__name__").document_id()
+
+        Returns:
+            A new `Expr` representing the document ID.
+        """
+        return Function("document_id", [self])
+
     def ascending(self) -> Ordering:
         """Creates an `Ordering` that sorts documents in ascending order based on this expression.
 
@@ -1105,25 +1643,6 @@ class Constant(Expr, Generic[CONSTANT_TYPE]):
 
     def _to_pb(self) -> Value:
         return encode_value(self.value)
-
-
-class _ListOfExprs(Expr):
-    """Represents a list of expressions, typically used as an argument to functions like 'in' or array functions."""
-
-    def __init__(self, exprs: Sequence[Expr]):
-        self.exprs: list[Expr] = list(exprs)
-
-    def __eq__(self, other):
-        if not isinstance(other, _ListOfExprs):
-            return False
-        else:
-            return other.exprs == self.exprs
-
-    def __repr__(self):
-        return repr(self.exprs)
-
-    def _to_pb(self):
-        return Value(array_value={"values": [e._to_pb() for e in self.exprs]})
 
 
 class Function(Expr):
@@ -1323,11 +1842,11 @@ class BooleanExpr(Function):
             if filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NAN:
                 return And(field.exists(), field.is_nan())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
-                return And(field.exists(), Not(field.is_nan()))
+                return And(field.exists(), field.is_not_nan())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NULL:
                 return And(field.exists(), field.is_null())
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NULL:
-                return And(field.exists(), Not(field.is_null()))
+                return And(field.exists(), field.is_not_null())
             else:
                 raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.FieldFilter):
@@ -1365,6 +1884,55 @@ class BooleanExpr(Function):
             return BooleanExpr._from_query_filter_pb(f, client)
         else:
             raise TypeError(f"Unexpected filter type: {type(filter_pb)}")
+
+
+class Array(Function):
+    """
+    Creates an expression that creates a Firestore array value from an input list.
+
+    Example:
+        >>> Expr.array(["bar", Field.of("baz")])
+
+    Args:
+        elements: The input list to evaluate in the expression
+    """
+
+    def __init__(self, elements: list[Expr | CONSTANT_TYPE]):
+        if not isinstance(elements, list):
+            raise TypeError("Array must be constructed with a list")
+        converted_elements = [
+            self._cast_to_expr_or_convert_to_constant(el) for el in elements
+        ]
+        super().__init__("array", converted_elements)
+
+    def __repr__(self):
+        return f"Array({self.params})"
+
+
+class Map(Function):
+    """
+    Creates an expression that creates a Firestore map value from an input dict.
+
+    Example:
+        >>> Expr.map({"foo": "bar", "baz": Field.of("baz")})
+
+    Args:
+        elements: The input dict to evaluate in the expression
+    """
+
+    def __init__(self, elements: dict[str | Constant[str], Expr | CONSTANT_TYPE]):
+        element_list = []
+        for k, v in elements.items():
+            element_list.append(self._cast_to_expr_or_convert_to_constant(k))
+            element_list.append(self._cast_to_expr_or_convert_to_constant(v))
+        super().__init__("map", element_list)
+
+    def __repr__(self):
+        formatted_params = [
+            a.value if isinstance(a, Constant) else a for a in self.params
+        ]
+        d = {a: b for a, b in zip(formatted_params[::2], formatted_params[1::2])}
+        return f"Map({d})"
 
 
 class And(BooleanExpr):
@@ -1454,6 +2022,7 @@ class Conditional(BooleanExpr):
             "conditional", [condition, then_expr, else_expr], use_infix_repr=False
         )
 
+
 class Count(AggregateFunction):
     """
     Represents an aggregation that counts the number of stage inputs with valid evaluations of the
@@ -1471,6 +2040,15 @@ class Count(AggregateFunction):
 
     def __init__(self, expression: Expr | None = None):
         expression_list = [expression] if expression else []
-        super().__init__(
-            "count", expression_list, use_infix_repr=bool(expression_list)
-        )
+        super().__init__("count", expression_list, use_infix_repr=bool(expression_list))
+
+
+class CurrentTimestamp(Function):
+    """Creates an expression that returns the current timestamp
+
+    Returns:
+        A new `Expr` representing the current timestamp.
+    """
+
+    def __init__(self):
+        super().__init__("current_timestamp", [], use_infix_repr=False)

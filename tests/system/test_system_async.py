@@ -208,13 +208,14 @@ async def verify_pipeline(query):
                 await pipeline.execute()
         else:
             # ensure results match query
-            pipeline_results = _clean_results([s.data() async for s in pipeline.stream()])
+            pipeline_results = _clean_results(
+                [s.data() async for s in pipeline.stream()]
+            )
             assert query_results == pipeline_results
     except FailedPrecondition as e:
         # if testing against a non-enterprise db, skip this check
         if ENTERPRISE_MODE_ERROR not in e.message:
             raise e
-
 
 
 @pytest.fixture(scope="module")
