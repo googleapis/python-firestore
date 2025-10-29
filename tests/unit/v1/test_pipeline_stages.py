@@ -567,11 +567,11 @@ class TestReplaceWith:
         return stages.ReplaceWith(*args, **kwargs)
 
     @pytest.mark.parametrize("in_field,in_mode,expected_field,expected_mode", [
-        ("test", "merge_prefer_next", Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_NEXT),
-        ("test", "MERGE_PREFER_PARENT", Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_PARENT),
+        ("test", "merge_prefer_next", Field.of("test"), stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING),
+        ("test", "MERGE_OVERWRITE_EXISTING", Field.of("test"), stages.ReplaceWith.Mode.MERGE_OVERWRITE_EXISTING),
         ("test", None, Field.of("test"), stages.ReplaceWith.Mode.FULL_REPLACE),
-        (Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_NEXT, Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_NEXT),
-        (Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_PARENT, Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_PARENT),
+        (Field.of("test"), stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING, Field.of("test"), stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING),
+        (Field.of("test"), stages.ReplaceWith.Mode.MERGE_OVERWRITE_EXISTING, Field.of("test"), stages.ReplaceWith.Mode.MERGE_OVERWRITE_EXISTING),
     ])
     def test_ctor(self, in_field, in_mode, expected_field, expected_mode):
         args = [in_field]
@@ -583,12 +583,12 @@ class TestReplaceWith:
         assert instance.name == "replace_with"
 
     def test_repr(self):
-        instance = self._make_one("test", stages.ReplaceWith.Mode.MERGE_PREFER_NEXT)
+        instance = self._make_one("test", stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING)
         repr_str = repr(instance)
-        assert repr_str == "ReplaceWith(field=Field.of('test'), mode='MERGE_PREFER_NEXT')"
+        assert repr_str == "ReplaceWith(field=Field.of('test'), mode='MERGE_KEEP_EXISTING')"
 
     def test_to_pb(self):
-        instance = self._make_one(Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_NEXT)
+        instance = self._make_one(Field.of("test"), stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING)
         result = instance._to_pb()
         assert result.name == "replace_with"
         assert len(result.args) == 2

@@ -353,8 +353,8 @@ class _BasePipeline:
         Args:
             field: The `Selectable` field containing the map whose content will
                    replace the document.
-            mode: The replacement mode. Can be one of FULL_REPLACE, MERGE_PREFER_NEXT,
-                   or MERGE_PREFER_PARENT
+            mode: The replacement mode. Can be one of FULL_REPLACE, MERGE_KEEP_EXISTING,
+                   or MERGE_OVERWRITE_EXISTING
 
         Returns:
             A new Pipeline object with this stage appended to the stage list

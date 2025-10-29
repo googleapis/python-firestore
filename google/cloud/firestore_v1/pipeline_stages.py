@@ -367,8 +367,8 @@ class ReplaceWith(Stage):
 
     class Mode(Enum):
         FULL_REPLACE = 0
-        MERGE_PREFER_NEXT = 1
-        MERGE_PREFER_PARENT = 2
+        MERGE_OVERWRITE_EXISTING = 1
+        MERGE_KEEP_EXISTING = 2
 
         def __repr__(self):
             return repr(self.name)
