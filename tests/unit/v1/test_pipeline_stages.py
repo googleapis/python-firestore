@@ -561,18 +561,21 @@ class TestRemoveFields:
         assert result.args[1].field_reference_value == "field2"
         assert len(result.options) == 0
 
-class TestReplaceWith:
 
+class TestReplaceWith:
     def _make_one(self, *args, **kwargs):
         return stages.ReplaceWith(*args, **kwargs)
 
-    @pytest.mark.parametrize("in_field,expected_field", [
-        ("test", Field.of("test")),
-        ("test", Field.of("test")),
-        ("test", Field.of("test")),
-        (Field.of("test"), Field.of("test")),
-        (Field.of("test"), Field.of("test")),
-    ])
+    @pytest.mark.parametrize(
+        "in_field,expected_field",
+        [
+            ("test", Field.of("test")),
+            ("test", Field.of("test")),
+            ("test", Field.of("test")),
+            (Field.of("test"), Field.of("test")),
+            (Field.of("test"), Field.of("test")),
+        ],
+    )
     def test_ctor(self, in_field, expected_field):
         instance = self._make_one(in_field)
         assert instance.field == expected_field
@@ -590,6 +593,7 @@ class TestReplaceWith:
         assert len(result.args) == 2
         assert result.args[0].field_reference_value == "test"
         assert result.args[1].string_value == "full_replace"
+
 
 class TestSample:
     class TestSampleOptions:

@@ -337,9 +337,8 @@ class _BasePipeline:
             }
             ```
 
-            >>> pipeline = client.pipeline().collection("people")
             >>> # Emit the 'parents' map as the document
-            >>> pipeline = pipeline.replace(Field.of("parents"))
+            >>> pipeline = client.pipeline().collection("people").replace_with(Field.of("parents"))
 
             Output document:
             ```json
