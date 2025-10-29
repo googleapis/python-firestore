@@ -365,21 +365,12 @@ class RemoveFields(Stage):
 class ReplaceWith(Stage):
     """Replaces the document content with the value of a specified field."""
 
-    class Mode(Enum):
-        FULL_REPLACE = 0
-        MERGE_OVERWRITE_EXISTING = 1
-        MERGE_KEEP_EXISTING = 2
-
-        def __repr__(self):
-            return repr(self.name)
-
-    def __init__(self, field: Selectable | str, mode: Mode | str = Mode.FULL_REPLACE):
+    def __init__(self, field: Selectable):
         super().__init__("replace_with")
         self.field = Field(field) if isinstance(field, str) else field
-        self.mode = self.Mode[mode.upper()] if isinstance(mode, str) else mode
 
     def _pb_args(self):
-        return [self.field._to_pb(), Value(string_value=self.mode.name.lower())]
+        return [self.field._to_pb(), Value(string_value="full_replace")]
 
 
 class Sample(Stage):

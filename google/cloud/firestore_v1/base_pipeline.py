@@ -318,7 +318,6 @@ class _BasePipeline:
     def replace_with(
         self,
         field: Selectable,
-        mode: stages.ReplaceWith.Mode | str = stages.ReplaceWith.Mode.FULL_REPLACE,
     ) -> "_BasePipeline":
         """
         Fully overwrites all fields in a document with those coming from a nested map.
@@ -353,13 +352,10 @@ class _BasePipeline:
         Args:
             field: The `Selectable` field containing the map whose content will
                    replace the document.
-            mode: The replacement mode. Can be one of FULL_REPLACE, MERGE_KEEP_EXISTING,
-                   or MERGE_OVERWRITE_EXISTING
-
         Returns:
             A new Pipeline object with this stage appended to the stage list
         """
-        return self._append(stages.ReplaceWith(field, mode))
+        return self._append(stages.ReplaceWith(field))
 
     def sort(self, *orders: stages.Ordering) -> "_BasePipeline":
         """

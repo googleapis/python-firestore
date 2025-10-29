@@ -566,34 +566,30 @@ class TestReplaceWith:
     def _make_one(self, *args, **kwargs):
         return stages.ReplaceWith(*args, **kwargs)
 
-    @pytest.mark.parametrize("in_field,in_mode,expected_field,expected_mode", [
-        ("test", "merge_prefer_next", Field.of("test"), stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING),
-        ("test", "MERGE_OVERWRITE_EXISTING", Field.of("test"), stages.ReplaceWith.Mode.MERGE_OVERWRITE_EXISTING),
-        ("test", None, Field.of("test"), stages.ReplaceWith.Mode.FULL_REPLACE),
-        (Field.of("test"), stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING, Field.of("test"), stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING),
-        (Field.of("test"), stages.ReplaceWith.Mode.MERGE_OVERWRITE_EXISTING, Field.of("test"), stages.ReplaceWith.Mode.MERGE_OVERWRITE_EXISTING),
+    @pytest.mark.parametrize("in_field,expected_field", [
+        ("test", Field.of("test")),
+        ("test", Field.of("test")),
+        ("test", Field.of("test")),
+        (Field.of("test"), Field.of("test")),
+        (Field.of("test"), Field.of("test")),
     ])
-    def test_ctor(self, in_field, in_mode, expected_field, expected_mode):
-        args = [in_field]
-        if in_mode is not None:
-            args.append(in_mode)
-        instance = self._make_one(*args)
+    def test_ctor(self, in_field, expected_field):
+        instance = self._make_one(in_field)
         assert instance.field == expected_field
-        assert instance.mode == expected_mode
         assert instance.name == "replace_with"
 
     def test_repr(self):
-        instance = self._make_one("test", stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING)
+        instance = self._make_one("test")
         repr_str = repr(instance)
-        assert repr_str == "ReplaceWith(field=Field.of('test'), mode='MERGE_KEEP_EXISTING')"
+        assert repr_str == "ReplaceWith(field=Field.of('test'))"
 
     def test_to_pb(self):
-        instance = self._make_one(Field.of("test"), stages.ReplaceWith.Mode.MERGE_KEEP_EXISTING)
+        instance = self._make_one(Field.of("test"))
         result = instance._to_pb()
         assert result.name == "replace_with"
         assert len(result.args) == 2
         assert result.args[0].field_reference_value == "test"
-        assert result.args[1].string_value == "merge_prefer_next"
+        assert result.args[1].string_value == "full_replace"
 
 class TestSample:
     class TestSampleOptions:
