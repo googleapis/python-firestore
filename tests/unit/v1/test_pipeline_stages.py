@@ -561,6 +561,39 @@ class TestRemoveFields:
         assert result.args[1].field_reference_value == "field2"
         assert len(result.options) == 0
 
+class TestReplaceWith:
+
+    def _make_one(self, *args, **kwargs):
+        return stages.ReplaceWith(*args, **kwargs)
+
+    @pytest.mark.parametrize("in_field,in_mode,expected_field,expected_mode", [
+        ("test", "merge_prefer_next", Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_NEXT),
+        ("test", "MERGE_PREFER_PARENT", Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_PARENT),
+        ("test", None, Field.of("test"), stages.ReplaceWith.Mode.FULL_REPLACE),
+        (Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_NEXT, Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_NEXT),
+        (Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_PARENT, Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_PARENT),
+    ])
+    def test_ctor(self, in_field, in_mode, expected_field, expected_mode):
+        args = [in_field]
+        if in_mode is not None:
+            args.append(in_mode)
+        instance = self._make_one(*args)
+        assert instance.field == expected_field
+        assert instance.mode == expected_mode
+        assert instance.name == "replace_with"
+
+    def test_repr(self):
+        instance = self._make_one("test", stages.ReplaceWith.Mode.MERGE_PREFER_NEXT)
+        repr_str = repr(instance)
+        assert repr_str == "ReplaceWith(field=Field.of('test'), mode='MERGE_PREFER_NEXT')"
+
+    def test_to_pb(self):
+        instance = self._make_one(Field.of("test"), stages.ReplaceWith.Mode.MERGE_PREFER_NEXT)
+        result = instance._to_pb()
+        assert result.name == "replace_with"
+        assert len(result.args) == 2
+        assert result.args[0].field_reference_value == "test"
+        assert result.args[1].string_value == "merge_prefer_next"
 
 class TestSample:
     class TestSampleOptions:
