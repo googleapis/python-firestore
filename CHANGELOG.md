@@ -4,6 +4,52 @@
 
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
+## [2.22.0](https://github.com/googleapis/google-cloud-python/compare/google-cloud-firestore-v2.21.0...google-cloud-firestore-v2.22.0) (2025-10-29)
+
+
+### Features
+
+* Add support for Python 3.14 (#1110)  ([52b2055d01ab5d2c34e00f8861e29990f89cd3d8](https://github.com/googleapis/google-cloud-python/commit/52b2055d01ab5d2c34e00f8861e29990f89cd3d8))
+* Expose tags field in Database and RestoreDatabaseRequest public protos (#1074)  ([49836391dc712bd482781a26ccd3c8a8408c473b](https://github.com/googleapis/google-cloud-python/commit/49836391dc712bd482781a26ccd3c8a8408c473b))
+* Added read_time as a parameter to various calls (synchronous/base classes) (#1050) * feat: Added read_time as a parameter to various calls (synchronous/base classes)
+* 🦉 Updates from OwlBot post-processor
+See https://github.com/googleapis/repo-automation-bots/blob/main/packages/owl-bot/README.md
+* fixed tests + added system tests
+* 🦉 Updates from OwlBot post-processor
+See https://github.com/googleapis/repo-automation-bots/blob/main/packages/owl-bot/README.md
+* Removed specific system test assertions
+* added system test with python datetimes
+* 🦉 Updates from OwlBot post-processor
+See https://github.com/googleapis/repo-automation-bots/blob/main/packages/owl-bot/README.md
+* revised type hints
+* linting
+* feat: Added read_time as a parameter to various calls (async classes) (#1059)
+* feat: Added read_time as a parameter to various calls (async classes)
+* used TYPE_CHECKING; fixed unit tests
+* linting + fixing cover
+* final linting
+* TYPE_CHECKING
+* 🦉 Updates from OwlBot post-processor
+See https://github.com/googleapis/repo-automation-bots/blob/main/packages/owl-bot/README.md
+* Update client.py
+fix no cover comment
+* fixed async system test
+--------- ([d8e3af1f9dbdfaf5df0d993a0a7e28883472c621](https://github.com/googleapis/google-cloud-python/commit/d8e3af1f9dbdfaf5df0d993a0a7e28883472c621))
+
+
+### Bug Fixes
+
+* update the async transactional types (#1066) * fix: update the async transactional types to not require extra awaits
+* add typing extensions
+* python <3.10 compat
+* use a protocol
+* moved back to ParamSpec implementation
+* updated mypy.ini
+* fixed some types
+* 🦉 Updates from OwlBot post-processor
+See https://github.com/googleapis/repo-automation-bots/blob/main/packages/owl-bot/README.md
+--------- ([210a14a4b758d70aad05940665ed2a2a21ae2a8b](https://github.com/googleapis/google-cloud-python/commit/210a14a4b758d70aad05940665ed2a2a21ae2a8b))
+
 
 ## [2.21.0](https://github.com/googleapis/python-firestore/compare/v2.20.2...v2.21.0) (2025-05-23)
 
