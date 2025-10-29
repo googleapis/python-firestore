@@ -90,7 +90,14 @@ def verify_pipeline(query):
     It can be attached to existing query tests to check both
     modalities at the same time
     """
+    import os
+    import warnings
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
+
+    # return early on kokoro. Test project doesn't currently support pipelines
+    # TODO: enable pipeline verification when kokoro test project is whitelisted
+    if os.getenv("KOKORO_JOB_NAME"):
+        pytest.skip("skipping pipeline verification on kokoro")
 
     def _clean_results(results):
         if isinstance(results, dict):
