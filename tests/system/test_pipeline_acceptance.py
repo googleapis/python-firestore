@@ -40,7 +40,7 @@ FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 # TODO: enable kokoro tests when internal test project is whitelisted
 pytestmark = pytest.mark.skipif(
     condition=os.getenv("KOKORO_JOB_NAME") is not None,
-    reason="Pipeline tests are currently not supported by kokoro"
+    reason="Pipeline tests are currently not supported by kokoro",
 )
 
 test_dir_name = os.path.dirname(__file__)

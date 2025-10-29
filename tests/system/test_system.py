@@ -91,7 +91,6 @@ def verify_pipeline(query):
     modalities at the same time
     """
     import os
-    import warnings
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
 
     # return early on kokoro. Test project doesn't currently support pipelines
