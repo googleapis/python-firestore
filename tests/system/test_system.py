@@ -64,6 +64,13 @@ def _get_credentials_and_project():
 
 @pytest.fixture(scope="session")
 def database(request):
+    import os
+    from test__helpers import FIRESTORE_ENTERPRISE_DB
+
+    # enterprise mode currently does not support RunQuery calls in prod on kokoro test project
+    # TODO: remove skip when kokoro test project supports full enterprise mode
+    if request.param == FIRESTORE_ENTERPRISE_DB and os.getenv("KOKORO_JOB_NAME"):
+        pytest.skip("enterprise mode does not support RunQuery on kokoro")
     return request.param
 
 

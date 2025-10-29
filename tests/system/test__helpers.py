@@ -18,6 +18,5 @@ FIRESTORE_OTHER_DB = os.environ.get("SYSTEM_TESTS_DATABASE", "system-tests-named
 FIRESTORE_ENTERPRISE_DB = os.environ.get("ENTERPRISE_DATABASE", "enterprise-db")
 
 # run all tests against default database, and a named database
-# TODO: add enterprise mode when GA (RunQuery not currently supported)
 TEST_DATABASES = [None, FIRESTORE_OTHER_DB]
 TEST_DATABASES_W_ENTERPRISE = TEST_DATABASES + [FIRESTORE_ENTERPRISE_DB]
