@@ -656,3 +656,155 @@ tests:
                 index:
                   fieldReferenceValue: index
           name: select
+  - description: replaceWithFullReplace
+    pipeline:
+      - Collection: books
+      - Where:
+        - Function.equal:
+          - Field: title
+          - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - ReplaceWith:
+        - Field: awards
+        - FULL_REPLACE
+    assert_results:
+      - hugo: True
+        nebula: False
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - fieldReferenceValue: awards
+          - stringValue: full_replace
+          name: replace_with
+  - description: replaceWithMergeOverwrite
+    pipeline:
+      - Collection: books
+      - Where:
+        - Function.equal:
+          - Field: title
+          - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - AddFields:
+        - AliasedExpression:
+          - Constant: "should_replace"
+          - "nebula"
+      - ReplaceWith:
+        - Field: awards
+        - MERGE_OVERWRITE_EXISTING
+      - Select:
+          - title
+          - hugo
+          - nebula
+          - awards
+    assert_results:
+      - title: "The Hitchhiker's Guide to the Galaxy"
+        hugo: true
+        nebula: false
+        awards:
+          hugo: true
+          nebula: false
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                nebula:
+                  stringValue: should_replace
+          name: add_fields
+        - args:
+          - fieldReferenceValue: awards
+          - stringValue: merge_overwrite_existing
+          name: replace_with
+        - args:
+          - mapValue:
+              fields:
+                awards:
+                  fieldReferenceValue: awards
+                hugo:
+                  fieldReferenceValue: hugo
+                nebula:
+                  fieldReferenceValue: nebula
+                title:
+                  fieldReferenceValue: title
+          name: select
+  - description: replaceWithMergeKeep
+    pipeline:
+      - Collection: books
+      - Where:
+        - Function.equal:
+          - Field: title
+          - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - AddFields:
+        - AliasedExpression:
+          - Constant: "should_keep"
+          - "nebula"
+      - ReplaceWith:
+        - Field: awards
+        - MERGE_KEEP_EXISTING
+      - Select:
+          - title
+          - hugo
+          - nebula
+          - awards
+    assert_results:
+      - title: "The Hitchhiker's Guide to the Galaxy"
+        hugo: true
+        nebula: should_keep
+        awards:
+          hugo: true
+          nebula: false
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                nebula:
+                  stringValue: should_keep
+          name: add_fields
+        - args:
+          - fieldReferenceValue: awards
+          - stringValue: merge_keep_existing
+          name: replace_with
+        - args:
+          - mapValue:
+              fields:
+                awards:
+                  fieldReferenceValue: awards
+                hugo:
+                  fieldReferenceValue: hugo
+                nebula:
+                  fieldReferenceValue: nebula
+                title:
+                  fieldReferenceValue: title
+          name: select
