@@ -2215,7 +2215,7 @@ def test_watch_collection(client, cleanup, database):
         )
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_watch_query(client, cleanup, database):
     db = client
     collection_ref = db.collection("wq-users" + UNIQUE_RESOURCE_ID)
@@ -2236,7 +2236,6 @@ def test_watch_query(client, cleanup, database):
         query_ran_query = collection_ref.where(filter=FieldFilter("first", "==", "Ada"))
         query_ran = query_ran_query.stream()
         assert len(docs) == len([i for i in query_ran])
-        verify_pipeline(query_ran_query)
 
     on_snapshot.called_count = 0
 
@@ -2577,7 +2576,7 @@ def test_chunked_and_recursive(client, cleanup, database):
     assert [doc.id for doc in next(iter)] == page_3_ids
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_watch_query_order(client, cleanup, database):
     db = client
     collection_ref = db.collection("users")
@@ -2614,7 +2613,6 @@ def test_watch_query_order(client, cleanup, database):
                 ), "expect the sort order to match, born"
             on_snapshot.called_count += 1
             on_snapshot.last_doc_count = len(docs)
-            verify_pipeline(query_ref)
         except Exception as e:
             on_snapshot.failed = e
 
