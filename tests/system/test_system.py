@@ -45,6 +45,7 @@ from test__helpers import (
     ENTERPRISE_MODE_ERROR,
     TEST_DATABASES,
     TEST_DATABASES_W_ENTERPRISE,
+    IS_KOKORO_TEST,
 )
 
 
@@ -64,6 +65,12 @@ def _get_credentials_and_project():
 
 @pytest.fixture(scope="session")
 def database(request):
+    from test__helpers import FIRESTORE_ENTERPRISE_DB
+
+    # enterprise mode currently does not support RunQuery calls in prod on kokoro test project
+    # TODO: remove skip when kokoro test project supports full enterprise mode
+    if request.param == FIRESTORE_ENTERPRISE_DB and IS_KOKORO_TEST:
+        pytest.skip("enterprise mode does not support RunQuery on kokoro")
     return request.param
 
 
@@ -91,6 +98,11 @@ def verify_pipeline(query):
     modalities at the same time
     """
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
+
+    # return early on kokoro. Test project doesn't currently support pipelines
+    # TODO: enable pipeline verification when kokoro test project is whitelisted
+    if IS_KOKORO_TEST:
+        pytest.skip("skipping pipeline verification on kokoro")
 
     def _clean_results(results):
         if isinstance(results, dict):
@@ -2203,7 +2215,7 @@ def test_watch_collection(client, cleanup, database):
         )
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_watch_query(client, cleanup, database):
     db = client
     collection_ref = db.collection("wq-users" + UNIQUE_RESOURCE_ID)
@@ -2224,7 +2236,6 @@ def test_watch_query(client, cleanup, database):
         query_ran_query = collection_ref.where(filter=FieldFilter("first", "==", "Ada"))
         query_ran = query_ran_query.stream()
         assert len(docs) == len([i for i in query_ran])
-        verify_pipeline(query_ran_query)
 
     on_snapshot.called_count = 0
 
@@ -2565,7 +2576,7 @@ def test_chunked_and_recursive(client, cleanup, database):
     assert [doc.id for doc in next(iter)] == page_3_ids
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_watch_query_order(client, cleanup, database):
     db = client
     collection_ref = db.collection("users")
@@ -2602,7 +2613,6 @@ def test_watch_query_order(client, cleanup, database):
                 ), "expect the sort order to match, born"
             on_snapshot.called_count += 1
             on_snapshot.last_doc_count = len(docs)
-            verify_pipeline(query_ref)
         except Exception as e:
             on_snapshot.failed = e
 
