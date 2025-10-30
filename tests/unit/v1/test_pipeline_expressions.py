@@ -677,15 +677,15 @@ class TestExpressionMethods:
         """The first argument should always be an expression or field name"""
         expected_message = "must be called on an Expression or a string representing a field. got <class 'int'>."
         with pytest.raises(TypeError) as e1:
-            Expr.logical_minimum(5, 1)
+            Expression.logical_minimum(5, 1)
         assert str(e1.value) == f"'logical_minimum' {expected_message}"
         with pytest.raises(TypeError) as e2:
-            Expr.sqrt(9)
+            Expression.sqrt(9)
         assert str(e2.value) == f"'sqrt' {expected_message}"
 
     def test_expression_w_string(self):
         """should be able to use string for first argument. Should be interpreted as Field"""
-        instance = Expr.logical_minimum("first", "second")
+        instance = Expression.logical_minimum("first", "second")
         assert isinstance(instance.params[0], Field)
         assert instance.params[0].path == "first"
 
