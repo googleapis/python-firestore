@@ -45,6 +45,7 @@ from test__helpers import (
     ENTERPRISE_MODE_ERROR,
     TEST_DATABASES,
     TEST_DATABASES_W_ENTERPRISE,
+    IS_KOKORO_TEST,
 )
 
 
@@ -64,12 +65,11 @@ def _get_credentials_and_project():
 
 @pytest.fixture(scope="session")
 def database(request):
-    import os
     from test__helpers import FIRESTORE_ENTERPRISE_DB
 
     # enterprise mode currently does not support RunQuery calls in prod on kokoro test project
     # TODO: remove skip when kokoro test project supports full enterprise mode
-    if request.param == FIRESTORE_ENTERPRISE_DB and os.getenv("KOKORO_JOB_NAME"):
+    if request.param == FIRESTORE_ENTERPRISE_DB and IS_KOKORO_TEST:
         pytest.skip("enterprise mode does not support RunQuery on kokoro")
     return request.param
 
@@ -97,12 +97,11 @@ def verify_pipeline(query):
     It can be attached to existing query tests to check both
     modalities at the same time
     """
-    import os
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
 
     # return early on kokoro. Test project doesn't currently support pipelines
     # TODO: enable pipeline verification when kokoro test project is whitelisted
-    if os.getenv("KOKORO_JOB_NAME"):
+    if IS_KOKORO_TEST:
         pytest.skip("skipping pipeline verification on kokoro")
 
     def _clean_results(results):

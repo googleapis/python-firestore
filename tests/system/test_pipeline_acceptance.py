@@ -33,13 +33,13 @@ from google.api_core.exceptions import GoogleAPIError
 
 from google.cloud.firestore import Client, AsyncClient
 
-from test__helpers import FIRESTORE_ENTERPRISE_DB
+from test__helpers import FIRESTORE_ENTERPRISE_DB, IS_KOKORO_TEST
 
 FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
 
 # TODO: enable kokoro tests when internal test project is whitelisted
 pytestmark = pytest.mark.skipif(
-    condition=os.getenv("KOKORO_JOB_NAME") is not None,
+    condition=IS_KOKORO_TEST,
     reason="Pipeline tests are currently not supported by kokoro",
 )
 
