@@ -274,12 +274,11 @@ class TestDocuments:
         instance = self._make_one("/projects/p/databases/d/documents/c/doc1", "/c/doc2")
         result = instance._to_pb()
         assert result.name == "documents"
-        assert len(result.args) == 1
+        assert len(result.args) == 2
         assert (
-            result.args[0].array_value.values[0].string_value
-            == "/projects/p/databases/d/documents/c/doc1"
+            result.args[0].reference_value == "/projects/p/databases/d/documents/c/doc1"
         )
-        assert result.args[0].array_value.values[1].string_value == "/c/doc2"
+        assert result.args[1].reference_value == "/c/doc2"
         assert len(result.options) == 0
 
 
@@ -461,9 +460,21 @@ class TestGenericStage:
             ),
         ],
     )
-    def test_ctor(self, input_args, expected_params):
+    def test_ctor_with_params(self, input_args, expected_params):
         instance = self._make_one(*input_args)
         assert instance.params == expected_params
+
+    def test_ctor_with_options(self):
+        options = {"index_field": Field.of("index")}
+        field = Field.of("field")
+        alias = Field.of("alias")
+        standard_unnest = stages.Unnest(
+            field, alias, options=stages.UnnestOptions(**options)
+        )
+        generic_unnest = stages.GenericStage("unnest", field, alias, options=options)
+        assert standard_unnest._pb_args() == generic_unnest._pb_args()
+        assert standard_unnest._pb_options() == generic_unnest._pb_options()
+        assert standard_unnest._to_pb() == generic_unnest._to_pb()
 
     @pytest.mark.parametrize(
         "input_args,expected",
@@ -709,7 +720,8 @@ class TestUnnest:
         def test_ctor_options(self):
             index_field_val = "my_index"
             instance = self._make_one_options(index_field=index_field_val)
-            assert instance.index_field == index_field_val
+            assert isinstance(instance.index_field, Field)
+            assert instance.index_field.path == index_field_val
 
         def test_repr(self):
             instance = self._make_one_options(index_field="my_idx")
@@ -781,7 +793,7 @@ class TestUnnest:
         assert result.args[1].field_reference_value == alias_str
 
         assert len(result.options) == 1
-        assert result.options["index_field"].string_value == "item_index"
+        assert result.options["index_field"].field_reference_value == "item_index"
 
 
 class TestWhere:

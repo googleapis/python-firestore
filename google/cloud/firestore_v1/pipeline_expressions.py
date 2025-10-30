@@ -112,8 +112,6 @@ class Expr(ABC):
     @staticmethod
     def _cast_to_expr_or_convert_to_constant(o: Any, include_vector=False) -> "Expr":
         """Convert arbitrary object to an Expr."""
-        if isinstance(o, Constant) and isinstance(o.value, list):
-            o = o.value
         if isinstance(o, Expr):
             return o
         if isinstance(o, dict):
@@ -143,7 +141,7 @@ class Expr(ABC):
         def static_func(self, first_arg, *other_args, **kwargs):
             if not isinstance(first_arg, (Expr, str)):
                 raise TypeError(
-                    f"`expressions must be called on an Expr or a string representing a field name. got {type(first_arg)}."
+                    f"'{self.instance_func.__name__}' must be called on an Expression or a string representing a field. got {type(first_arg)}."
                 )
             first_expr = (
                 Field.of(first_arg) if not isinstance(first_arg, Expr) else first_arg
@@ -152,7 +150,7 @@ class Expr(ABC):
 
         def __get__(self, instance, owner):
             if instance is None:
-                return self.static_func.__get__(instance, owner)
+                return self.static_func
             else:
                 return self.instance_func.__get__(instance, owner)
 
@@ -1280,7 +1278,7 @@ class Expr(ABC):
 
     @expose_as_static
     def map_remove(self, key: str | Constant[str]) -> "Expr":
-        """Remove a key from the map produced by evaluating this expression.
+        """Remove a key from a the map produced by evaluating this expression.
 
         Example:
             >>> Map({"city": "London"}).map_remove("city")

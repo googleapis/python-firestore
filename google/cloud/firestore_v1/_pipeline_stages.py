@@ -112,11 +112,13 @@ class UnnestOptions:
             storing the original 0-based index of the element within the array.
     """
 
-    def __init__(self, index_field: str):
-        self.index_field = index_field
+    def __init__(self, index_field: Field | str):
+        self.index_field = (
+            index_field if isinstance(index_field, Field) else Field.of(index_field)
+        )
 
     def __repr__(self):
-        return f"{self.__class__.__name__}(index_field={self.index_field!r})"
+        return f"{self.__class__.__name__}(index_field={self.index_field.path!r})"
 
 
 class Stage(ABC):
@@ -258,13 +260,7 @@ class Documents(Stage):
         return Documents(*doc_paths)
 
     def _pb_args(self):
-        return [
-            Value(
-                array_value={
-                    "values": [Value(string_value=path) for path in self.paths]
-                }
-            )
-        ]
+        return [Value(reference_value=path) for path in self.paths]
 
 
 class FindNearest(Stage):
@@ -306,14 +302,22 @@ class FindNearest(Stage):
 class GenericStage(Stage):
     """Represents a generic, named stage with parameters."""
 
-    def __init__(self, name: str, *params: Expr | Value):
+    def __init__(
+        self, name: str, *params: Expr | Value, options: dict[str, Expr | Value] = {}
+    ):
         super().__init__(name)
         self.params: list[Value] = [
             p._to_pb() if isinstance(p, Expr) else p for p in params
         ]
+        self.options: dict[str, Value] = {
+            k: v._to_pb() if isinstance(v, Expr) else v for k, v in options.items()
+        }
 
     def _pb_args(self):
         return self.params
+
+    def _pb_options(self):
+        return self.options
 
     def __repr__(self):
         return f"{self.__class__.__name__}(name='{self.name}')"
@@ -437,7 +441,7 @@ class Unnest(Stage):
     def _pb_options(self):
         options = {}
         if self.options is not None:
-            options["index_field"] = Value(string_value=self.options.index_field)
+            options["index_field"] = self.options.index_field._to_pb()
         return options
 
 

@@ -2040,9 +2040,7 @@ def test__query_pipeline_composite_filter():
     client = make_client()
     in_filter = FieldFilter("field_a", "==", "value_a")
     query = client.collection("my_col").where(filter=in_filter)
-    with mock.patch.object(
-        expr.FilterCondition, "_from_query_filter_pb"
-    ) as convert_mock:
+    with mock.patch.object(expr.BooleanExpr, "_from_query_filter_pb") as convert_mock:
         pipeline = query.pipeline()
         convert_mock.assert_called_once_with(in_filter._to_pb(), client)
         assert len(pipeline.stages) == 2
@@ -2080,15 +2078,13 @@ def test__query_pipeline_order_exists_multiple():
     assert isinstance(where_stage.condition, expr.And)
     assert len(where_stage.condition.params) == 2
     operands = [p for p in where_stage.condition.params]
-    assert isinstance(operands[0], expr.Exists)
+    assert operands[0].name == "exists"
     assert operands[0].params[0].path == "field_a"
-    assert isinstance(operands[1], expr.Exists)
+    assert operands[1].name == "exists"
     assert operands[1].params[0].path == "field_b"
 
 
 def test__query_pipeline_order_exists_single():
-    from google.cloud.firestore_v1 import pipeline_expressions as expr
-
     client = make_client()
     query_single = client.collection("my_col").order_by("field_c")
     pipeline_single = query_single.pipeline()
@@ -2098,7 +2094,7 @@ def test__query_pipeline_order_exists_single():
     assert len(pipeline_single.stages) == 3
     where_stage_single = pipeline_single.stages[1]
     assert isinstance(where_stage_single, stages.Where)
-    assert isinstance(where_stage_single.condition, expr.Exists)
+    assert where_stage_single.condition.name == "exists"
     assert where_stage_single.condition.params[0].path == "field_c"
 
 
