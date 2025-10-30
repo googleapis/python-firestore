@@ -16,7 +16,7 @@ import pytest
 from unittest import mock
 
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
-import google.cloud.firestore_v1._pipeline_stages as stages
+import google.cloud.firestore_v1.pipeline_stages as stages
 from google.cloud.firestore_v1.pipeline_expressions import (
     Constant,
     Field,
@@ -420,9 +420,9 @@ class TestFindNearest:
         assert len(result.args) == 3
 
 
-class TestGenericStage:
+class TestRawStage:
     def _make_one(self, *args, **kwargs):
-        return stages.GenericStage(*args, **kwargs)
+        return stages.RawStage(*args, **kwargs)
 
     @pytest.mark.parametrize(
         "input_args,expected_params",
@@ -471,7 +471,7 @@ class TestGenericStage:
         standard_unnest = stages.Unnest(
             field, alias, options=stages.UnnestOptions(**options)
         )
-        generic_unnest = stages.GenericStage("unnest", field, alias, options=options)
+        generic_unnest = stages.RawStage("unnest", field, alias, options=options)
         assert standard_unnest._pb_args() == generic_unnest._pb_args()
         assert standard_unnest._pb_options() == generic_unnest._pb_options()
         assert standard_unnest._to_pb() == generic_unnest._to_pb()
@@ -479,8 +479,8 @@ class TestGenericStage:
     @pytest.mark.parametrize(
         "input_args,expected",
         [
-            (("name",), "GenericStage(name='name')"),
-            (("custom", Value(string_value="val")), "GenericStage(name='custom')"),
+            (("name",), "RawStage(name='name')"),
+            (("custom", Value(string_value="val")), "RawStage(name='custom')"),
         ],
     )
     def test_repr(self, input_args, expected):

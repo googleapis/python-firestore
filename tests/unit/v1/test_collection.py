@@ -514,7 +514,7 @@ def test_stream_w_read_time(query_class):
 def test_collectionreference_pipeline():
     from tests.unit.v1 import _test_helpers
     from google.cloud.firestore_v1.pipeline import Pipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection
+    from google.cloud.firestore_v1.pipeline_stages import Collection
 
     client = _test_helpers.make_client()
     collection = _make_collection_reference("collection", client=client)

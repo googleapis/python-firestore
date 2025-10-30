@@ -709,7 +709,7 @@ async def test_aggregation_query_stream_w_explain_options_analyze_false():
 )
 def test_async_aggreation_to_pipeline_sum(field, in_alias, out_alias):
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate
+    from google.cloud.firestore_v1.pipeline_stages import Collection, Aggregate
 
     client = make_async_client()
     parent = client.collection("dee")
@@ -740,7 +740,7 @@ def test_async_aggreation_to_pipeline_sum(field, in_alias, out_alias):
 )
 def test_async_aggreation_to_pipeline_avg(field, in_alias, out_alias):
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate
+    from google.cloud.firestore_v1.pipeline_stages import Collection, Aggregate
 
     client = make_async_client()
     parent = client.collection("dee")
@@ -770,7 +770,7 @@ def test_async_aggreation_to_pipeline_avg(field, in_alias, out_alias):
 )
 def test_async_aggreation_to_pipeline_count(in_alias, out_alias):
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate
+    from google.cloud.firestore_v1.pipeline_stages import Collection, Aggregate
     from google.cloud.firestore_v1.pipeline_expressions import Count
 
     client = make_async_client()
@@ -813,7 +813,7 @@ def test_aggreation_to_pipeline_count_increment():
 
 def test_async_aggreation_to_pipeline_complex():
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
-    from google.cloud.firestore_v1._pipeline_stages import Collection, Aggregate, Select
+    from google.cloud.firestore_v1.pipeline_stages import Collection, Aggregate, Select
 
     client = make_async_client()
     query = client.collection("my_col").select(["field_a", "field_b.c"])

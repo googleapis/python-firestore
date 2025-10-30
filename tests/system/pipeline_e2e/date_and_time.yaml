@@ -4,15 +4,15 @@ tests:
       - Collection: books
       - Limit: 1
       - Select:
-        - AliasedExpr:
+        - AliasedExpression:
             - And:
-              - Expr.greater_than_or_equal:
+              - Function.greater_than_or_equal:
                   - CurrentTimestamp: []
-                  - Expr.unix_seconds_to_timestamp:
+                  - Function.unix_seconds_to_timestamp:
                     - Constant: 1735689600 # 2025-01-01
-              - Expr.less_than:
+              - Function.less_than:
                   - CurrentTimestamp: []
-                  - Expr.unix_seconds_to_timestamp:
+                  - Function.unix_seconds_to_timestamp:
                     - Constant: 4892438400 # 2125-01-01
             - "is_between_2025_and_2125"
     assert_results:
@@ -56,38 +56,38 @@ tests:
     pipeline:
       - Collection: timestamps
       - Select:
-        - AliasedExpr:
-            - Expr.timestamp_to_unix_micros:
+        - AliasedExpression:
+            - Function.timestamp_to_unix_micros:
                 - Field: time
             - "micros"
-        - AliasedExpr:
-            - Expr.timestamp_to_unix_millis:
+        - AliasedExpression:
+            - Function.timestamp_to_unix_millis:
                 - Field: time
             - "millis"
-        - AliasedExpr:
-            - Expr.timestamp_to_unix_seconds:
+        - AliasedExpression:
+            - Function.timestamp_to_unix_seconds:
                 - Field: time
             - "seconds"
-        - AliasedExpr:
-            - Expr.unix_micros_to_timestamp:
+        - AliasedExpression:
+            - Function.unix_micros_to_timestamp:
                 - Field: micros
             - "from_micros"
-        - AliasedExpr:
-            - Expr.unix_millis_to_timestamp:
+        - AliasedExpression:
+            - Function.unix_millis_to_timestamp:
                 - Field: millis
             - "from_millis"
-        - AliasedExpr:
-            - Expr.unix_seconds_to_timestamp:
+        - AliasedExpression:
+            - Function.unix_seconds_to_timestamp:
                 - Field: seconds
             - "from_seconds"
-        - AliasedExpr:
-            - Expr.timestamp_add:
+        - AliasedExpression:
+            - Function.timestamp_add:
                 - Field: time
                 - Constant: "day"
                 - Constant: 1
             - "plus_day"
-        - AliasedExpr:
-            - Expr.timestamp_subtract:
+        - AliasedExpression:
+            - Function.timestamp_subtract:
                 - Field: time
                 - Constant: "hour"
                 - Constant: 1

@@ -25,7 +25,7 @@ from typing import Any
 
 from google.protobuf.json_format import MessageToDict
 
-from google.cloud.firestore_v1 import _pipeline_stages as stages
+from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1 import pipeline_expressions
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1 import pipeline_expressions as expr

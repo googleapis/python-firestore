@@ -56,14 +56,14 @@ tests:
     pipeline:
       - Collection: books
       - AddFields:
-        - AliasedExpr:
-            - Expr.string_concat:
+        - AliasedExpression:
+            - Function.string_concat:
                 - Field: author
                 - Constant: _
                 - Field: title
             - "author_title"
-        - AliasedExpr:
-            - Expr.string_concat:
+        - AliasedExpression:
+            - Function.string_concat:
                 - Field: title
                 - Constant: _
                 - Field: author
@@ -144,7 +144,6 @@ tests:
                 expression:
                   fieldReferenceValue: author_title
           name: sort
-
   - description: testPipelineWithOffsetAndLimit
     pipeline:
       - Collection: books
@@ -192,116 +191,6 @@ tests:
                 title:
                   fieldReferenceValue: title
           name: select
-  - description: testArithmeticOperations
-    pipeline:
-      - Collection: books
-      - Where:
-        - Expr.equal:
-          - Field: title
-          - Constant: To Kill a Mockingbird
-      - Select:
-        - AliasedExpr:
-            - Expr.add:
-                - Field: rating
-                - Constant: 1
-            - "ratingPlusOne"
-        - AliasedExpr:
-            - Expr.subtract:
-                - Field: published
-                - Constant: 1900
-            - "yearsSince1900"
-        - AliasedExpr:
-            - Expr.multiply:
-                - Field: rating
-                - Constant: 10
-            - "ratingTimesTen"
-        - AliasedExpr:
-            - Expr.divide:
-                - Field: rating
-                - Constant: 2
-            - "ratingDividedByTwo"
-        - AliasedExpr:
-            - Expr.multiply:
-                - Field: rating
-                - Constant: 20
-            - "ratingTimes20"
-        - AliasedExpr:
-            - Expr.add:
-                - Field: rating
-                - Constant: 3
-            - "ratingPlus3"
-        - AliasedExpr:
-            - Expr.mod:
-                - Field: rating
-                - Constant: 2
-            - "ratingMod2"
-    assert_results:
-      - ratingPlusOne: 5.2
-        yearsSince1900: 60
-        ratingTimesTen: 42.0
-        ratingDividedByTwo: 2.1
-        ratingTimes20: 84
-        ratingPlus3: 7.2
-        ratingMod2: 0.20000000000000018
-    assert_proto:
-      pipeline:
-        stages:
-        - args:
-          - referenceValue: /books
-          name: collection
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: title
-              - stringValue: To Kill a Mockingbird
-              name: equal
-          name: where
-        - args:
-          - mapValue:
-              fields:
-                ratingDividedByTwo:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: rating
-                    - integerValue: '2'
-                    name: divide
-                ratingPlusOne:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: rating
-                    - integerValue: '1'
-                    name: add
-                ratingTimesTen:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: rating
-                    - integerValue: '10'
-                    name: multiply
-                yearsSince1900:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: published
-                    - integerValue: '1900'
-                    name: subtract
-                ratingTimes20:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: rating
-                    - integerValue: '20'
-                    name: multiply
-                ratingPlus3:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: rating
-                    - integerValue: '3'
-                    name: add
-                ratingMod2:
-                  functionValue:
-                    args:
-                    - fieldReferenceValue: rating
-                    - integerValue: '2'
-                    name: mod
-          name: select
   - description: testSampleLimit
     pipeline:
       - Collection: books
@@ -338,14 +227,14 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: genre
               - Constant: Romance
       - Union:
         - Pipeline:
             - Collection: books
             - Where:
-                - Expr.equal:
+                - Function.equal:
                     - Field: genre
                     - Constant: Dystopian
       - Select:
@@ -410,12 +299,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Expr.equal:
+          - Function.equal:
               - Field: title
               - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Select:
-        - AliasedExpr:
-            - Expr.document_id:
+        - AliasedExpression:
+            - Function.document_id:
                 - Field: __name__
             - "doc_id"
     assert_results:
@@ -442,28 +331,13 @@ tests:
                     args:
                     - fieldReferenceValue: __name__
           name: select
-  - description: testSum
-    pipeline:
-      - Collection: books
-      - Where:
-          - Expr.equal:
-              - Field: genre
-              - Constant: Science Fiction
-      - Aggregate:
-        - AliasedExpr:
-            - Expr.sum:
-              - Field: rating
-            - "total_rating"
-    assert_results:
-      - total_rating: 8.8
-
   - description: testCollectionId
     pipeline:
       - Collection: books
       - Limit: 1
       - Select:
-        - AliasedExpr:
-            - Expr.collection_id:
+        - AliasedExpression:
+            - Function.collection_id:
                 - Field: __name__
             - "collectionName"
     assert_results:
@@ -601,13 +475,13 @@ tests:
       - Distinct:
         - title
       - Aggregate:
-        - AliasedExpr:
+        - AliasedExpression:
             - Count: []
             - count
       - Select:
-        - AliasedExpr:
+        - AliasedExpression:
           - Conditional:
-            - Expr.greater_than_or_equal:
+            - Function.greater_than_or_equal:
               - Field: count
               - Constant: 10
             - Constant: True
@@ -654,18 +528,18 @@ tests:
                     - booleanValue: true
                     - booleanValue: false
                     name: conditional
-  - description: testGenericStage
+  - description: testRawStage
     pipeline:
-      - GenericStage:
+      - RawStage:
           - "collection"
           - Value:
               reference_value: "/books"
-      - GenericStage:
+      - RawStage:
         - "where"
-        - Expr.equal:
+        - Function.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
-      - GenericStage:
+      - RawStage:
         - "select"
         - Value:
             map_value:
@@ -697,7 +571,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Expr.equal:
+        - Function.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
       - Unnest:
@@ -735,7 +609,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Expr.equal:
+        - Function.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
       - Unnest:

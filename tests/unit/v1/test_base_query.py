@@ -18,7 +18,7 @@ import mock
 import pytest
 
 from tests.unit.v1._test_helpers import make_client
-from google.cloud.firestore_v1 import _pipeline_stages as stages
+from google.cloud.firestore_v1 import pipeline_stages as stages
 
 
 def _make_base_query(*args, **kwargs):
@@ -2040,7 +2040,9 @@ def test__query_pipeline_composite_filter():
     client = make_client()
     in_filter = FieldFilter("field_a", "==", "value_a")
     query = client.collection("my_col").where(filter=in_filter)
-    with mock.patch.object(expr.BooleanExpr, "_from_query_filter_pb") as convert_mock:
+    with mock.patch.object(
+        expr.BooleanExpression, "_from_query_filter_pb"
+    ) as convert_mock:
         pipeline = query.pipeline()
         convert_mock.assert_called_once_with(in_filter._to_pb(), client)
         assert len(pipeline.stages) == 2
