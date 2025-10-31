@@ -238,22 +238,15 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
-  - description: testChecks
+  - description: testIsNotNull
     pipeline:
       - Collection: books
       - Where:
-            - Not:
-                - Function.is_nan:
-                  - Field: rating
-      - Select:
-          - AliasedExpression:
-              - Not:
-                  - Function.is_nan:
-                    - Field: rating
-              - "ratingIsNotNaN"
-      - Limit: 1
-    assert_results:
-      - ratingIsNotNaN: true
+          - Not:
+            - Function.equal:
+                - Field: rating
+                - null
+    assert_count: 10
     assert_proto:
       pipeline:
         stages:
@@ -266,30 +259,18 @@ tests:
               - functionValue:
                   args:
                   - fieldReferenceValue: rating
-                  name: is_nan
+                  - nullValue: null
+                  name: equal
               name: not
           name: where
-        - args:
-          - mapValue:
-              fields:
-                ratingIsNotNaN:
-                  functionValue:
-                    args:
-                    - functionValue:
-                        args:
-                        - fieldReferenceValue: rating
-                        name: is_nan
-                    name: not
-          name: select
-        - args:
-          - integerValue: '1'
-          name: limit
-  - description: testIsNotNull
+  - description: testIsNotNan
     pipeline:
       - Collection: books
       - Where:
-          - Function.is_not_null:
-              - Field: rating
+          - Not:
+            - Function.equal:
+                - Field: rating
+                - NaN
     assert_count: 10
     assert_proto:
       pipeline:
@@ -300,27 +281,12 @@ tests:
         - args:
           - functionValue:
               args:
-              - fieldReferenceValue: rating
-              name: is_not_null
-          name: where
-  - description: testIsNotNaN
-    pipeline:
-      - Collection: books
-      - Where:
-          - Function.is_not_nan:
-              - Field: rating
-    assert_count: 10
-    assert_proto:
-      pipeline:
-        stages:
-        - args:
-          - referenceValue: /books
-          name: collection
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: rating
-              name: is_not_nan
+              - functionValue:
+                  args:
+                  - fieldReferenceValue: rating
+                  - doubleValue: NaN
+                  name: equal
+              name: not
           name: where
   - description: testIsAbsent
     pipeline:
