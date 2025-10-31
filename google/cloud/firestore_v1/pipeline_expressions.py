@@ -817,56 +817,6 @@ class Expression(ABC):
         )
 
     @expose_as_static
-    def is_nan(self) -> "BooleanExpression":
-        """Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
-
-        Example:
-            >>> # Check if the result of a calculation is NaN
-            >>> Field.of("value").divide(0).is_nan()
-
-        Returns:
-            A new `Expression` representing the 'isNaN' check.
-        """
-        return BooleanExpression("is_nan", [self])
-
-    @expose_as_static
-    def is_not_nan(self) -> "BooleanExpression":
-        """Creates an expression that checks if this expression evaluates to a non-'NaN' (Not a Number) value.
-
-        Example:
-            >>> # Check if the result of a calculation is not NaN
-            >>> Field.of("value").divide(1).is_not_nan()
-
-        Returns:
-            A new `Expression` representing the 'is not NaN' check.
-        """
-        return BooleanExpression("is_not_nan", [self])
-
-    @expose_as_static
-    def is_null(self) -> "BooleanExpression":
-        """Creates an expression that checks if the value of a field is 'Null'.
-
-        Example:
-            >>> Field.of("value").is_null()
-
-        Returns:
-            A new `Expression` representing the 'isNull' check.
-        """
-        return BooleanExpression("is_null", [self])
-
-    @expose_as_static
-    def is_not_null(self) -> "BooleanExpression":
-        """Creates an expression that checks if the value of a field is not 'Null'.
-
-        Example:
-            >>> Field.of("value").is_not_null()
-
-        Returns:
-            A new `Expression` representing the 'isNotNull' check.
-        """
-        return BooleanExpression("is_not_null", [self])
-
-    @expose_as_static
     def is_error(self):
         """Creates an expression that checks if a given expression produces an error
 
@@ -1827,13 +1777,13 @@ class BooleanExpression(Function):
         elif isinstance(filter_pb, Query_pb.UnaryFilter):
             field = Field.of(filter_pb.field.field_path)
             if filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NAN:
-                return And(field.exists(), field.is_nan())
+                return And(field.exists(), field.equal(float("nan")))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
-                return And(field.exists(), field.is_not_nan())
+                return And(field.exists(), Not(field.equal(float("nan"))))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NULL:
-                return And(field.exists(), field.is_null())
+                return And(field.exists(), field.equal(None))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NULL:
-                return And(field.exists(), field.is_not_null())
+                return And(field.exists(), Not(field.equal(None)))
             else:
                 raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.FieldFilter):
