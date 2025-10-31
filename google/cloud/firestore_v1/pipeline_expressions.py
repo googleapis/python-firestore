@@ -1603,7 +1603,10 @@ class Constant(Expression, Generic[CONSTANT_TYPE]):
         return Constant(value)
 
     def __repr__(self):
-        return f"Constant.of({self.value!r})"
+        value_str = repr(self.value)
+        if isinstance(self.value, float) and value_str == "nan":
+            value_str = "math.nan"
+        return f"Constant.of({value_str})"
 
     def __hash__(self):
         return hash(self.value)

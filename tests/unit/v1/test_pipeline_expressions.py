@@ -121,6 +121,7 @@ class TestConstant:
     @pytest.mark.parametrize("input", [float("nan"), math.nan])
     def test_nan_to_pb(self, input):
         instance = Constant.of(input)
+        assert repr(instance) == "Constant.of(math.nan)"
         pb_val = instance._to_pb()
         assert math.isnan(pb_val.double_value)
 
