@@ -353,6 +353,8 @@ def _parse_yaml_types(data):
             return parsed_datetime
         except ValueError:
             pass
+    if data == "NaN":
+        return float("NaN")
     return data
 
 

@@ -238,55 +238,48 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
-  - description: testIsNotNull
+  - description: testIsNull
     pipeline:
-      - Collection: books
+      - Collection: errors
       - Where:
-          - Not:
-            - Function.equal:
-                - Field: rating
-                - null
-    assert_count: 10
+        - Function.equal:
+            - Field: value
+            - null
+    assert_results:
+      - value: null
     assert_proto:
       pipeline:
         stages:
         - args:
-          - referenceValue: /books
+          - referenceValue: /errors
           name: collection
         - args:
           - functionValue:
               args:
-              - functionValue:
-                  args:
-                  - fieldReferenceValue: rating
-                  - nullValue: null
-                  name: equal
-              name: not
+              - fieldReferenceValue: value
+              - nullValue: null
+              name: equal
           name: where
-  - description: testIsNotNan
+  - description: testIsNan
     pipeline:
-      - Collection: books
+      - Collection: errors
       - Where:
-          - Not:
-            - Function.equal:
-                - Field: rating
-                - NaN
-    assert_count: 10
+        - Function.equal:
+            - Field: value
+            - NaN
+    assert_count: 1
     assert_proto:
       pipeline:
         stages:
         - args:
-          - referenceValue: /books
+          - referenceValue: /errors
           name: collection
         - args:
           - functionValue:
               args:
-              - functionValue:
-                  args:
-                  - fieldReferenceValue: rating
-                  - doubleValue: NaN
-                  name: equal
-              name: not
+              - fieldReferenceValue: value
+              - doubleValue: NaN
+              name: equal
           name: where
   - description: testIsAbsent
     pipeline:
