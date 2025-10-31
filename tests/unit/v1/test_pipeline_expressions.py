@@ -555,6 +555,14 @@ class TestBooleanExpression:
             BooleanExpression._from_query_filter_pb(document_pb.Value(), mock_client)
 
 
+class TestFunction:
+    def test_equals(self):
+        assert expr.Function.sqrt("1") == expr.Function.sqrt("1")
+        assert expr.Function.sqrt("1") != expr.Function.sqrt("2")
+        assert expr.Function.sqrt("1") != expr.Function.sum("1")
+        assert expr.Function.sqrt("1") != object()
+
+
 class TestArray:
     """Tests for the array class"""
 
@@ -618,15 +626,7 @@ class TestMap:
         )
 
 
-class TestFunction:
-    def test_equals(self):
-        assert expr.Function.sqrt("1") == expr.Function.sqrt("1")
-        assert expr.Function.sqrt("1") != expr.Function.sqrt("2")
-        assert expr.Function.sqrt("1") != expr.Function.sum("1")
-        assert expr.Function.sqrt("1") != object()
-
-
-class TestExpressionMethods:
+class TestExpressionessionMethods:
     """
     contains test methods for each Expression method
     """

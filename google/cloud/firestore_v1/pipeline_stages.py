@@ -362,6 +362,17 @@ class RemoveFields(Stage):
         return [f._to_pb() for f in self.fields]
 
 
+class ReplaceWith(Stage):
+    """Replaces the document content with the value of a specified field."""
+
+    def __init__(self, field: Selectable):
+        super().__init__("replace_with")
+        self.field = Field(field) if isinstance(field, str) else field
+
+    def _pb_args(self):
+        return [self.field._to_pb(), Value(string_value="full_replace")]
+
+
 class Sample(Stage):
     """Performs pseudo-random sampling of documents."""
 

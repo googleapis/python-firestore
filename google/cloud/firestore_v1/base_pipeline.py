@@ -315,6 +315,47 @@ class _BasePipeline:
             stages.FindNearest(field, vector, distance_measure, options)
         )
 
+    def replace_with(
+        self,
+        field: Selectable,
+    ) -> "_BasePipeline":
+        """
+        Fully overwrites all fields in a document with those coming from a nested map.
+
+        This stage allows you to emit a map value as a document. Each key of the map becomes a field
+        on the document that contains the corresponding value.
+
+        Example:
+            Input document:
+            ```json
+            {
+              "name": "John Doe Jr.",
+              "parents": {
+                "father": "John Doe Sr.",
+                "mother": "Jane Doe"
+              }
+            }
+            ```
+
+            >>> # Emit the 'parents' map as the document
+            >>> pipeline = client.pipeline().collection("people").replace_with(Field.of("parents"))
+
+            Output document:
+            ```json
+            {
+              "father": "John Doe Sr.",
+              "mother": "Jane Doe"
+            }
+            ```
+
+        Args:
+            field: The `Selectable` field containing the map whose content will
+                   replace the document.
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
+        """
+        return self._append(stages.ReplaceWith(field))
+
     def sort(self, *orders: stages.Ordering) -> "_BasePipeline":
         """
         Sorts the documents from previous stages based on one or more `Ordering` criteria.

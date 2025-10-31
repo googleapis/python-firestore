@@ -656,3 +656,32 @@ tests:
                 index:
                   fieldReferenceValue: index
           name: select
+  - description: replaceWith
+    pipeline:
+      - Collection: books
+      - Where:
+        - Function.equal:
+          - Field: title
+          - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - ReplaceWith:
+        - Field: awards
+    assert_results:
+      - hugo: True
+        nebula: False
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - fieldReferenceValue: awards
+          - stringValue: full_replace
+          name: replace_with

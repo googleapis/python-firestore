@@ -369,6 +369,8 @@ def test_pipeline_execute_stream_equivalence_mocked():
             ("name", [0.1], "cosine", stages.FindNearestOptions(10)),
             stages.FindNearest,
         ),
+        ("replace_with", ("name",), stages.ReplaceWith),
+        ("replace_with", (Field.of("n"),), stages.ReplaceWith),
         ("sort", (Field.of("n").descending(),), stages.Sort),
         ("sort", (Field.of("n").descending(), Field.of("m").ascending()), stages.Sort),
         ("sample", (10,), stages.Sample),
