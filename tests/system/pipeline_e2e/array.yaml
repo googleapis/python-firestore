@@ -185,7 +185,7 @@ tests:
         - AliasedExpression:
             - Function.array_concat:
                 - Field: tags
-                - Constant: ["new_tag", "another_tag"]
+                - ["new_tag", "another_tag"]
             - "concatenatedTags"
     assert_results:
       - concatenatedTags:
@@ -232,8 +232,8 @@ tests:
         - AliasedExpression:
             - Function.array_concat:
                 - Field: tags
-                - Constant: ["sci-fi"]
-                - Constant: ["classic", "epic"]
+                - ["sci-fi"]
+                - ["classic", "epic"]
             - "concatenatedTags"
     assert_results:
       - concatenatedTags:
