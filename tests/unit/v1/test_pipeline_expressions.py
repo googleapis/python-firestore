@@ -14,6 +14,7 @@
 
 import pytest
 import mock
+import math
 import datetime
 
 from google.cloud.firestore_v1 import _helpers
@@ -116,6 +117,12 @@ class TestConstant:
     def test_to_pb(self, input_val, to_pb_val):
         instance = Constant.of(input_val)
         assert instance._to_pb() == to_pb_val
+
+    @pytest.mark.parametrize("input", [float("nan"), math.nan])
+    def test_nan_to_pb(self, input):
+        instance = Constant.of(input)
+        pb_val = instance._to_pb()
+        assert math.isnan(pb_val.double_value)
 
     @pytest.mark.parametrize(
         "input_val,expected",
