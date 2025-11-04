@@ -67,6 +67,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.query_profile import ExplainOptions
     from google.cloud.firestore_v1.query_results import QueryResultsList
     from google.cloud.firestore_v1.stream_generator import StreamGenerator
+    from google.cloud.firestore_v1.pipeline_source import PipelineSource
 
     import datetime
 
@@ -1129,24 +1130,23 @@ class BaseQuery(object):
 
         return copied
 
-    def pipeline(self):
+    def _build_pipeline(self, source: "PipelineSource"):
         """
         Convert this query into a Pipeline
 
         Queries containing a `cursor` or `limit_to_last` are not currently supported
 
+        Args:
+            source: the PipelineSource to build the pipeline off of
         Raises:
-            - ValueError: raised if Query wasn't created with an associated client
             - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
         Returns:
             a Pipeline representing the query
         """
-        if not self._client:
-            raise ValueError("Query does not have an associated client")
         if self._all_descendants:
-            ppl = self._client.pipeline().collection_group(self._parent.id)
+            ppl = source.collection_group(self._parent.id)
         else:
-            ppl = self._client.pipeline().collection(self._parent._path)
+            ppl = source.collection(self._parent._path)
 
         # Filters
         for filter_ in self._field_filters:
