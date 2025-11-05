@@ -15,7 +15,6 @@
 import types
 
 import mock
-import pytest
 
 from datetime import datetime, timezone
 from tests.unit.v1._test_helpers import DEFAULT_TEST_PROJECT

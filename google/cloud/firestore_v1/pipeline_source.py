@@ -46,7 +46,9 @@ class PipelineSource(Generic[PipelineType]):
     def _create_pipeline(self, source_stage):
         return self.client._pipeline_cls._create_with_stages(self.client, source_stage)
 
-    def create_from(self, query: "BaseQuery" | "BaseAggregationQuery" | "BaseCollectionReference") -> PipelineType:
+    def create_from(
+        self, query: "BaseQuery" | "BaseAggregationQuery" | "BaseCollectionReference"
+    ) -> PipelineType:
         """
         Create a pipeline from an existing query
 
