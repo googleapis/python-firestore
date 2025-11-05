@@ -1695,7 +1695,6 @@ def test_pipeline_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
 
-
     # Find a read_time before adding the new document.
     snapshots = collection.get()
     read_time = snapshots[0].read_time

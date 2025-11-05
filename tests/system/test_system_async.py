@@ -1611,6 +1611,7 @@ async def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert new_ref.id in new_values
     assert new_values[new_ref.id] == new_data
 
+
 @pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 async def test_pipeline_w_read_time(query_docs, cleanup, database):

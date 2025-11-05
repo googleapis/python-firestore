@@ -77,7 +77,12 @@ class AsyncPipeline(_BasePipeline):
                 if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
                 within the past 7 days. For the most accurate results, use UTC timezone.
         """
-        return [result async for result in self.stream(transaction=transaction, read_time=read_time)]
+        return [
+            result
+            async for result in self.stream(
+                transaction=transaction, read_time=read_time
+            )
+        ]
 
     async def stream(
         self,
