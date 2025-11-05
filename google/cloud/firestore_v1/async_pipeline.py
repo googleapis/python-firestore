@@ -18,6 +18,7 @@ from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.pipeline_result import PipelineResult
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
@@ -59,6 +60,7 @@ class AsyncPipeline(_BasePipeline):
     async def execute(
         self,
         transaction: "AsyncTransaction" | None = None,
+        read_time: datetime.datetime | None = None,
     ) -> list[PipelineResult]:
         """
         Executes this pipeline and returns results as a list
@@ -70,12 +72,17 @@ class AsyncPipeline(_BasePipeline):
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
         """
-        return [result async for result in self.stream(transaction=transaction)]
+        return [result async for result in self.stream(transaction=transaction, read_time=read_time)]
 
     async def stream(
         self,
         transaction: "AsyncTransaction" | None = None,
+        read_time: datetime.datetime | None = None,
     ) -> AsyncIterable[PipelineResult]:
         """
         Process this pipeline as a stream, providing results through an Iterable
@@ -87,8 +94,12 @@ class AsyncPipeline(_BasePipeline):
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
         """
-        request = self._prep_execute_request(transaction)
+        request = self._prep_execute_request(transaction, read_time)
         async for response in await self._client._firestore_api.execute_pipeline(
             request
         ):
