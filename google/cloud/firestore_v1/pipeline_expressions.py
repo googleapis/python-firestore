@@ -630,6 +630,25 @@ class Expression(ABC):
         )
 
     @expose_as_static
+    def array_get(self, offset: Expression | int) -> "Function":
+        """
+        Creates an expression that indexes into an array from the beginning or end and returns the
+        element. A negative offset starts from the end.
+
+        Example:
+            >>> Array([1,2,3]).array_get(0)
+
+        Args:
+            offset: the index of the element to return
+
+        Returns:
+            A new `Expression` representing the `array_get` operation.
+        """
+        return Function(
+            "array_get", [self, self._cast_to_expr_or_convert_to_constant(offset)]
+        )
+
+    @expose_as_static
     def array_contains(
         self, element: Expression | CONSTANT_TYPE
     ) -> "BooleanExpression":

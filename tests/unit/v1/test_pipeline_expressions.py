@@ -706,6 +706,16 @@ class TestExpressionessionMethods:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Or(Arg1, Arg2)"
 
+    def test_array_get(self):
+        arg1 = self._make_arg("ArrayField")
+        arg2 = self._make_arg("Offset")
+        instance = Expression.array_get(arg1, arg2)
+        assert instance.name == "array_get"
+        assert instance.params == [arg1, arg2]
+        assert repr(instance) == "ArrayField.array_get(Offset)"
+        infix_istance = arg1.array_get(arg2)
+        assert infix_istance == instance
+
     def test_array_contains(self):
         arg1 = self._make_arg("ArrayField")
         arg2 = self._make_arg("Element")
