@@ -5,6 +5,20 @@
 [1]: https://pypi.org/project/google-cloud-firestore/#history
 
 
+## [2.22.0](https://github.com/googleapis/python-firestore/compare/v2.21.0...v2.22.0) (2025-11-05)
+
+
+### Features
+
+* Add support for Python 3.14 ([#1110](https://github.com/googleapis/python-firestore/issues/1110)) ([52b2055](https://github.com/googleapis/python-firestore/commit/52b2055d01ab5d2c34e00f8861e29990f89cd3d8))
+* Added read_time as a parameter to various calls (synchronous/base classes) ([#1050](https://github.com/googleapis/python-firestore/issues/1050)) ([d8e3af1](https://github.com/googleapis/python-firestore/commit/d8e3af1f9dbdfaf5df0d993a0a7e28883472c621))
+* Expose tags field in Database and RestoreDatabaseRequest public protos ([#1074](https://github.com/googleapis/python-firestore/issues/1074)) ([4983639](https://github.com/googleapis/python-firestore/commit/49836391dc712bd482781a26ccd3c8a8408c473b))
+
+
+### Bug Fixes
+
+* Update the async transactional types ([#1066](https://github.com/googleapis/python-firestore/issues/1066)) ([210a14a](https://github.com/googleapis/python-firestore/commit/210a14a4b758d70aad05940665ed2a2a21ae2a8b))
+
 ## [2.21.0](https://github.com/googleapis/python-firestore/compare/v2.20.2...v2.21.0) (2025-05-23)
 
 
