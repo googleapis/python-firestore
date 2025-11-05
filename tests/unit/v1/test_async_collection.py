@@ -609,15 +609,9 @@ def test_asynccollectionreference_pipeline():
 
     client = make_async_client()
     collection = _make_async_collection_reference("collection", client=client)
-    pipeline = collection.pipeline()
+    pipeline = collection._build_pipeline(client.pipeline())
     assert isinstance(pipeline, AsyncPipeline)
     # should have single "Collection" stage
     assert len(pipeline.stages) == 1
     assert isinstance(pipeline.stages[0], Collection)
     assert pipeline.stages[0].path == "/collection"
-
-
-def test_asynccollectionreference_pipeline_no_client():
-    collection = _make_async_collection_reference("collection")
-    with pytest.raises(ValueError, match="client"):
-        collection.pipeline()
