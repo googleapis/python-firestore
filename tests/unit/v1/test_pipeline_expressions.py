@@ -408,7 +408,10 @@ class TestBooleanExpression:
     @pytest.mark.parametrize(
         "op_enum, expected_expr_func",
         [
-            (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN, lambda x: x.equal(float("nan"))),
+            (
+                query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN,
+                lambda x: x.equal(float("nan")),
+            ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN,
                 lambda x: expr.Not(x.equal(float("nan"))),

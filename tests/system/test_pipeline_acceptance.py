@@ -270,7 +270,7 @@ def _parse_expressions(client, yaml_element: Any):
             }
     elif _is_expr_string(yaml_element):
         return getattr(pipeline_expressions, yaml_element)()
-    elif yaml_element == 'NaN':
+    elif yaml_element == "NaN":
         return float(yaml_element)
     else:
         return yaml_element
