@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License
+import mock
 
 from google.cloud.firestore_v1.pipeline_source import PipelineSource
 from google.cloud.firestore_v1.pipeline import Pipeline
@@ -19,6 +20,8 @@ from google.cloud.firestore_v1.client import Client
 from google.cloud.firestore_v1.async_client import AsyncClient
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_document import BaseDocumentReference
+from google.cloud.firestore_v1.query import Query
+from google.cloud.firestore_v1.async_query import AsyncQuery
 
 
 class TestPipelineSource:
@@ -26,6 +29,9 @@ class TestPipelineSource:
 
     def _make_client(self):
         return Client()
+
+    def _make_query(self):
+        return Query(mock.Mock())
 
     def test_make_from_client(self):
         instance = self._make_client().pipeline()
@@ -35,6 +41,23 @@ class TestPipelineSource:
         instance = self._make_client().pipeline()
         ppl = instance._create_pipeline(None)
         assert isinstance(ppl, self._expected_pipeline_type)
+
+    def test_create_from_mock(self):
+        mock_query = mock.Mock()
+        expected = object()
+        mock_query._build_pipeline.return_value = expected
+        instance = self._make_client().pipeline()
+        got = instance.create_from(mock_query)
+        assert got == expected
+        assert mock_query._build_pipeline.call_count == 1
+        assert mock_query._build_pipeline.call_args_list[0][0][0] == instance
+
+    def test_create_from_query(self):
+        query = self._make_query()
+        instance = self._make_client().pipeline()
+        ppl = instance.create_from(query)
+        assert isinstance(ppl, self._expected_pipeline_type)
+        assert len(ppl.stages) == 1
 
     def test_collection(self):
         instance = self._make_client().pipeline()
@@ -98,3 +121,6 @@ class TestPipelineSourceWithAsyncClient(TestPipelineSource):
 
     def _make_client(self):
         return AsyncClient()
+
+    def _make_query(self):
+        return AsyncQuery(mock.Mock())
