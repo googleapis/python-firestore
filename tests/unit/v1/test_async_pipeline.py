@@ -321,6 +321,36 @@ async def test_async_pipeline_stream_with_transaction():
 
 
 @pytest.mark.asyncio
+async def test_async_pipeline_stream_with_read_time():
+    """
+    test stream pipeline with read_time
+    """
+    import datetime
+
+    from google.cloud.firestore_v1.types import ExecutePipelineResponse
+    from google.cloud.firestore_v1.types import ExecutePipelineRequest
+
+    client = mock.Mock()
+    client.project = "A"
+    client._database = "B"
+    mock_rpc = mock.AsyncMock()
+    client._firestore_api.execute_pipeline = mock_rpc
+
+    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    mock_rpc.return_value = _async_it([ExecutePipelineResponse()])
+    ppl_1 = _make_async_pipeline(client=client)
+
+    [r async for r in ppl_1.stream(read_time=read_time)]
+    assert mock_rpc.call_count == 1
+    request = mock_rpc.call_args[0][0]
+    assert isinstance(request, ExecutePipelineRequest)
+    assert request.structured_pipeline == ppl_1._to_pb()
+    assert request.database == "projects/A/databases/B"
+    assert request.read_time == read_time
+
+
+@pytest.mark.asyncio
 async def test_async_pipeline_stream_stream_equivalence():
     """
     Pipeline.stream should provide same results from pipeline.stream, as a list
@@ -364,16 +394,22 @@ async def test_async_pipeline_stream_stream_equivalence_mocked():
     """
     pipeline.stream should call pipeline.stream internally
     """
+    import datetime
+
     ppl_1 = _make_async_pipeline()
     expected_data = [object(), object()]
-    expected_arg = object()
+    expected_transaction = object()
+    expected_read_time = datetime.datetime.now(tz=datetime.timezone.utc)
     with mock.patch.object(ppl_1, "stream") as mock_stream:
         mock_stream.return_value = _async_it(expected_data)
-        stream_results = await ppl_1.execute(expected_arg)
+        stream_results = await ppl_1.execute(
+            transaction=expected_transaction, read_time=expected_read_time
+        )
         assert mock_stream.call_count == 1
         assert mock_stream.call_args[0] == ()
-        assert len(mock_stream.call_args[1]) == 1
-        assert mock_stream.call_args[1]["transaction"] == expected_arg
+        assert len(mock_stream.call_args[1]) == 2
+        assert mock_stream.call_args[1]["transaction"] == expected_transaction
+        assert mock_stream.call_args[1]["read_time"] == expected_read_time
         assert stream_results == expected_data
 
 
