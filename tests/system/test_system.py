@@ -1689,13 +1689,9 @@ def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert new_values[new_ref.id] == new_data
 
 
+@pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 def test_pipeline_w_read_time(query_docs, cleanup, database):
-    # return early on kokoro. Test project doesn't currently support pipelines
-    # TODO: enable pipeline verification when kokoro test project is whitelisted
-    if IS_KOKORO_TEST:
-        pytest.skip("skipping pipeline verification on kokoro")
-
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
 
