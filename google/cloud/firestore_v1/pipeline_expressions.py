@@ -396,7 +396,7 @@ class Expression(ABC):
         return Function("sqrt", [self])
 
     @expose_as_static
-    def logical_maximum(self, other: Expression | CONSTANT_TYPE) -> "Expression":
+    def logical_maximum(self, *others: Expression | CONSTANT_TYPE) -> "Expression":
         """Creates an expression that returns the larger value between this expression
         and another expression or constant, based on Firestore's value type ordering.
 
@@ -406,23 +406,23 @@ class Expression(ABC):
         Example:
             >>> # Returns the larger value between the 'discount' field and the 'cap' field.
             >>> Field.of("discount").logical_maximum(Field.of("cap"))
-            >>> # Returns the larger value between the 'value' field and 10.
-            >>> Field.of("value").logical_maximum(10)
+            >>> # Returns the larger value between the 'value' field and some ints
+            >>> Field.of("value").logical_maximum(10, 20, 30)
 
         Args:
-            other: The other expression or constant value to compare with.
+            others: The other expression or constant values to compare with.
 
         Returns:
             A new `Expression` representing the logical maximum operation.
         """
         return Function(
             "maximum",
-            [self, self._cast_to_expr_or_convert_to_constant(other)],
+            [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
             infix_name_override="logical_maximum",
         )
 
     @expose_as_static
-    def logical_minimum(self, other: Expression | CONSTANT_TYPE) -> "Expression":
+    def logical_minimum(self, *others: Expression | CONSTANT_TYPE) -> "Expression":
         """Creates an expression that returns the smaller value between this expression
         and another expression or constant, based on Firestore's value type ordering.
 
@@ -432,18 +432,18 @@ class Expression(ABC):
         Example:
             >>> # Returns the smaller value between the 'discount' field and the 'floor' field.
             >>> Field.of("discount").logical_minimum(Field.of("floor"))
-            >>> # Returns the smaller value between the 'value' field and 10.
-            >>> Field.of("value").logical_minimum(10)
+            >>> # Returns the smaller value between the 'value' field and some ints
+            >>> Field.of("value").logical_minimum(10, 20, 30)
 
         Args:
-            other: The other expression or constant value to compare with.
+            others: The other expression or constant values to compare with.
 
         Returns:
             A new `Expression` representing the logical minimum operation.
         """
         return Function(
             "minimum",
-            [self, self._cast_to_expr_or_convert_to_constant(other)],
+            [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
             infix_name_override="logical_minimum",
         )
 

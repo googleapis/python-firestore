@@ -1024,23 +1024,25 @@ class TestExpressionessionMethods:
         assert infix_instance == instance
 
     def test_logical_maximum(self):
-        arg1 = self._make_arg("Left")
-        arg2 = self._make_arg("Right")
-        instance = Expression.logical_maximum(arg1, arg2)
+        arg1 = self._make_arg("A1")
+        arg2 = self._make_arg("A2")
+        arg3 = self._make_arg("A3")
+        instance = Expression.logical_maximum(arg1, arg2, arg3)
         assert instance.name == "maximum"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Left.logical_maximum(Right)"
-        infix_instance = arg1.logical_maximum(arg2)
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "A1.logical_maximum(A2, A3)"
+        infix_instance = arg1.logical_maximum(arg2, arg3)
         assert infix_instance == instance
 
     def test_logical_minimum(self):
-        arg1 = self._make_arg("Left")
-        arg2 = self._make_arg("Right")
-        instance = Expression.logical_minimum(arg1, arg2)
+        arg1 = self._make_arg("A1")
+        arg2 = self._make_arg("A2")
+        arg3 = self._make_arg("A3")
+        instance = Expression.logical_minimum(arg1, arg2, arg3)
         assert instance.name == "minimum"
-        assert instance.params == [arg1, arg2]
-        assert repr(instance) == "Left.logical_minimum(Right)"
-        infix_instance = arg1.logical_minimum(arg2)
+        assert instance.params == [arg1, arg2, arg3]
+        assert repr(instance) == "A1.logical_minimum(A2, A3)"
+        infix_instance = arg1.logical_minimum(arg2, arg3)
         assert infix_instance == instance
 
     def test_to_lower(self):
