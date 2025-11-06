@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, MutableMapping, TYPE_CHECKING
+from typing import Any, MutableMapping, Iterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
@@ -137,3 +137,31 @@ class PipelineResult:
         )
         value = get_nested_value(str_path, self._fields_pb)
         return _helpers.decode_value(value, self._client)
+
+class PipelineSnapshot(list[PipelineResult]):
+    def __init__(self, results_list: list[PipelineResult]):
+        super().__init__(results_list)
+
+    @classmethod
+    def _from_stream(cls, stream: PipelineStream):
+        results = [r for r in stream]
+        return cls(results)
+
+class PipelineStream(Iterable[PipelineResult]):
+
+    def __init__(self, client, rpc_stream):
+        self._client = client
+        self._stream = rpc_stream
+
+    def __iter__(self) -> PipelineStream:
+        for response in self._stream:
+            for doc in response.results:
+                ref = self._client.document(doc.name) if doc.name else None
+                yield PipelineResult(
+                    self._client,
+                    doc.fields,
+                    ref,
+                    response._pb.execution_time,
+                    doc._pb.create_time if doc.create_time else None,
+                    doc._pb.update_time if doc.update_time else None,
+                )
