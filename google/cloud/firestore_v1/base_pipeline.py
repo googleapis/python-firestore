@@ -100,49 +100,6 @@ class _BasePipeline:
         """
         return self.__class__._create_with_stages(self._client, *self.stages, new_stage)
 
-    def _prep_execute_request(
-        self,
-        transaction: BaseTransaction | None,
-        explain_options: ExplainOptions | None,
-    ) -> ExecutePipelineRequest:
-        """
-        shared logic for creating an ExecutePipelineRequest
-        """
-        database_name = (
-            f"projects/{self._client.project}/databases/{self._client._database}"
-        )
-        transaction_id = (
-            _helpers.get_transaction_id(transaction)
-            if transaction is not None
-            else None
-        )
-        options = {}
-        if explain_options:
-            options["explain_options"] = explain_options._to_value()
-        request = ExecutePipelineRequest(
-            database=database_name,
-            transaction=transaction_id,
-            structured_pipeline=self._to_pb(**options)
-        )
-        return request
-
-    def _execute_response_helper(
-        self, response: ExecutePipelineResponse
-    ) -> Iterable[PipelineResult]:
-        """
-        shared logic for unpacking an ExecutePipelineReponse into PipelineResults
-        """
-        for doc in response.results:
-            ref = self._client.document(doc.name) if doc.name else None
-            yield PipelineResult(
-                self._client,
-                doc.fields,
-                ref,
-                response._pb.execution_time,
-                doc._pb.create_time if doc.create_time else None,
-                doc._pb.update_time if doc.update_time else None,
-            )
-
     def add_fields(self, *fields: Selectable) -> "_BasePipeline":
         """
         Adds new fields to outputs from previous stages.

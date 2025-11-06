@@ -99,6 +99,4 @@ class Pipeline(_BasePipeline):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
         """
-        request = self._prep_execute_request(transaction, explain_options)
-        stream = self._client._firestore_api.execute_pipeline(request)
-        return PipelineStream(stream, self, explain_options)
+        return PipelineStream(self, transaction, explain_options)

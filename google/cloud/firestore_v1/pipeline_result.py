@@ -19,11 +19,15 @@ from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.query_profile import ExplainStats
 from google.cloud.firestore_v1.query_profile import QueryExplainError
+from google.cloud.firestore_v1.query_profile import ExplainStats
+from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.base_client import BaseClient
+    from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+    from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
     from google.protobuf.timestamp_pb2 import Timestamp
     from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
@@ -150,8 +154,14 @@ class PipelineResult:
 class _PipelineResultContainer:
     """Helper to hold shared attributes for PipelineSnapshot and PipelineStream"""
 
-    def __init__(self, pipeline: Pipeline | AsyncPipeline, explain_options: ExplainOptions | None):
+    def __init__(
+        self,
+        pipeline: Pipeline | AsyncPipeline,
+        transaction: Transaction | AsyncTransaction | None,
+        explain_options: ExplainOptions | None
+    ):
         # public
+        self.transaction = transaction
         self.pipeline: _BasePipeline = pipeline
         self.execution_time: Timestamp | None = None
         # private
@@ -170,6 +180,28 @@ class _PipelineResultContainer:
             raise QueryExplainError("stream not started")
         else:
             raise QueryExplainError("explain_options not found")
+
+    def _build_request(self) -> ExecutePipelineRequest:
+        """
+        shared logic for creating an ExecutePipelineRequest
+        """
+        database_name = (
+            f"projects/{self._client.project}/databases/{self._client._database}"
+        )
+        transaction_id = (
+            _helpers.get_transaction_id(self.transaction)
+            if self.transaction is not None
+            else None
+        )
+        options = {}
+        if self._explain_options:
+            options["explain_options"] = self._explain_options._to_value()
+        request = ExecutePipelineRequest(
+            database=database_name,
+            transaction=transaction_id,
+            structured_pipeline=self.pipeline._to_pb(**options)
+        )
+        return request
 
     def _process_response(self, response: ExecutePipelineResponse):
         """Shared logic for processing an individual response from a stream"""
@@ -202,7 +234,7 @@ class PipelineSnapshot(_PipelineResultContainer, list[PipelineResult]):
 
     @classmethod
     def _from_stream(cls, results: list[PipelineResult], source: _PipelineResultContainer):
-        return cls(results, source.pipeline, source._explain_stats)
+        return cls(results, source.pipeline, source.transaction, source._explain_stats)
 
 
 class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
@@ -210,13 +242,11 @@ class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
     An iterable stream representing the result of a pipeline.stream() operation, along with related metadata
     """
 
-    def __init__(self, rpc_stream: Iterable[ExecutePipelineResponse], pipeline: Pipeline, *args):
-        super().__init__(pipeline, *args)
-        self._stream = rpc_stream
-
     def __iter__(self):
         self._started = True
-        for response in self._stream:
+        request = self._build_request()
+        stream = self._client._firestore_api.execute_pipeline(request)
+        for response in stream:
             yield from self._process_response(response)
 
 class AsyncPipelineStream(_PipelineResultContainer, AsyncIterable[PipelineResult]):
@@ -224,12 +254,10 @@ class AsyncPipelineStream(_PipelineResultContainer, AsyncIterable[PipelineResult
     An iterable stream representing the result of an async pipeline.stream() operation, along with related metadata
     """
 
-    def __init__(self, rpc_stream: Awaitable[AsyncIterable[ExecutePipelineResponse]], pipeline: AsyncPipeline, *args):
-        super().__init__(pipeline, *args)
-        self._stream = rpc_stream
-
     async def __aiter__(self):
         self._started = True
-        async for response in await self._stream:
+        request = self._build_request()
+        stream = await self._client._firestore_api.execute_pipeline(request)
+        async for response in stream:
             for response in self._process_response(response):
                 yield response
