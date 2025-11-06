@@ -238,89 +238,48 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
-  - description: testChecks
+  - description: testIsNull
     pipeline:
-      - Collection: books
+      - Collection: errors
       - Where:
-            - Not:
-                - Function.is_nan:
-                  - Field: rating
-      - Select:
-          - AliasedExpression:
-              - Not:
-                  - Function.is_nan:
-                    - Field: rating
-              - "ratingIsNotNaN"
-      - Limit: 1
+        - Function.equal:
+            - Field: value
+            - null
     assert_results:
-      - ratingIsNotNaN: true
+      - value: null
     assert_proto:
       pipeline:
         stages:
         - args:
-          - referenceValue: /books
+          - referenceValue: /errors
           name: collection
         - args:
           - functionValue:
               args:
-              - functionValue:
-                  args:
-                  - fieldReferenceValue: rating
-                  name: is_nan
-              name: not
+              - fieldReferenceValue: value
+              - nullValue: null
+              name: equal
           name: where
-        - args:
-          - mapValue:
-              fields:
-                ratingIsNotNaN:
-                  functionValue:
-                    args:
-                    - functionValue:
-                        args:
-                        - fieldReferenceValue: rating
-                        name: is_nan
-                    name: not
-          name: select
-        - args:
-          - integerValue: '1'
-          name: limit
-  - description: testIsNotNull
+  - description: testIsNan
     pipeline:
-      - Collection: books
+      - Collection: errors
       - Where:
-          - Function.is_not_null:
-              - Field: rating
-    assert_count: 10
+        - Function.equal:
+            - Field: value
+            - NaN
+    assert_count: 1
     assert_proto:
       pipeline:
         stages:
         - args:
-          - referenceValue: /books
+          - referenceValue: /errors
           name: collection
         - args:
           - functionValue:
               args:
-              - fieldReferenceValue: rating
-              name: is_not_null
-          name: where
-  - description: testIsNotNaN
-    pipeline:
-      - Collection: books
-      - Where:
-          - Function.is_not_nan:
-              - Field: rating
-    assert_count: 10
-    assert_proto:
-      pipeline:
-        stages:
-        - args:
-          - referenceValue: /books
-          name: collection
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: rating
-              name: is_not_nan
+              - fieldReferenceValue: value
+              - doubleValue: NaN
+              name: equal
           name: where
   - description: testIsAbsent
     pipeline:
