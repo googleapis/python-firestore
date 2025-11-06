@@ -37,6 +37,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
     from google.cloud.firestore_v1.transaction import BaseTransaction
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class _BasePipeline:
@@ -87,9 +88,10 @@ class _BasePipeline:
             stages_str = ",\n  ".join([repr(s) for s in self.stages])
             return f"{cls_str}(\n  {stages_str}\n)"
 
-    def _to_pb(self) -> StructuredPipeline_pb:
+    def _to_pb(self, **options) -> StructuredPipeline_pb:
         return StructuredPipeline_pb(
-            pipeline={"stages": [s._to_pb() for s in self.stages]}
+            pipeline={"stages": [s._to_pb() for s in self.stages]},
+            options=options,
         )
 
     def _append(self, new_stage):
@@ -99,7 +101,9 @@ class _BasePipeline:
         return self.__class__._create_with_stages(self._client, *self.stages, new_stage)
 
     def _prep_execute_request(
-        self, transaction: BaseTransaction | None
+        self,
+        transaction: BaseTransaction | None,
+        explain_options: ExplainOptions | None,
     ) -> ExecutePipelineRequest:
         """
         shared logic for creating an ExecutePipelineRequest
@@ -112,10 +116,13 @@ class _BasePipeline:
             if transaction is not None
             else None
         )
+        options = {}
+        if explain_options:
+            options["explain_options"] = explain_options._to_value()
         request = ExecutePipelineRequest(
             database=database_name,
             transaction=transaction_id,
-            structured_pipeline=self._to_pb(),
+            structured_pipeline=self._to_pb(**options)
         )
         return request
 

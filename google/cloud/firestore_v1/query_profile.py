@@ -19,6 +19,8 @@ import datetime
 
 from dataclasses import dataclass
 from google.protobuf.json_format import MessageToDict
+from google.cloud.firestore_v1.types.document import MapValue
+from google.cloud.firestore_v1.types.document import Value
 
 
 @dataclass(frozen=True)
@@ -40,6 +42,11 @@ class ExplainOptions:
 
     def _to_dict(self):
         return {"analyze": self.analyze}
+
+    def _to_value(self):
+        mode_str = "analyze" if self.analyze else "explain"
+        value_pb = MapValue(fields={"mode": Value(string_value=mode_str)})
+        return Value(map_value=value_pb)
 
 
 @dataclass(frozen=True)

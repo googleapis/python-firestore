@@ -21,6 +21,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.pipeline_result import PipelineResult
     from google.cloud.firestore_v1.transaction import Transaction
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class Pipeline(_BasePipeline):
@@ -55,36 +56,44 @@ class Pipeline(_BasePipeline):
 
     def execute(
         self,
+        *,
         transaction: "Transaction" | None = None,
+        explain_options: ExplainOptions | None = None,
     ) -> list[PipelineResult]:
         """
         Executes this pipeline and returns results as a list
 
         Args:
-            transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned list.
         """
-        return [result for result in self.stream(transaction=transaction)]
+        return [result for result in self.stream(transaction=transaction, explain_options=explain_options)]
 
     def stream(
         self,
+        *,
         transaction: "Transaction" | None = None,
+        explain_options: ExplainOptions | None = None,
     ) -> Iterable[PipelineResult]:
         """
         Process this pipeline as a stream, providing results through an Iterable
 
         Args:
-            transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
         """
-        request = self._prep_execute_request(transaction)
+        request = self._prep_execute_request(transaction, explain_options)
         for response in self._client._firestore_api.execute_pipeline(request):
             yield from self._execute_response_helper(response)
