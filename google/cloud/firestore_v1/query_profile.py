@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from google.protobuf.json_format import MessageToDict
 from google.cloud.firestore_v1.types.document import MapValue
 from google.cloud.firestore_v1.types.document import Value
+from google.cloud.firestore_v1.types.explain_stats import ExplainStats as ExplainStats_pb
 
 
 @dataclass(frozen=True)
@@ -150,3 +151,47 @@ class QueryExplainError(Exception):
     """
 
     pass
+
+class ExplainStats:
+    """
+    Contains query profiling statistics for a pipeline query.
+
+    This class is not meant to be instantiated directly by the user. Instead, an
+    instance of `ExplainStats` may be returned by pipeline execution methods
+    when `explain_options` are provided.
+
+    It provides methods to access the explain statistics in different formats.
+    """
+
+    def __init__(self, stats_pb: ExplainStats_pb):
+        """
+        Args:
+            stats_pb (ExplainStats_pb): The raw protobuf message for explain stats.
+        """
+        self._stats_pb = stats_pb
+
+    def get_text(self) -> str:
+        """
+        Returns the explain stats string verbatim as returned from the Firestore backend.
+
+        Returns:
+            str: the string representation of the explain_stats object
+
+        Raises:
+            QueryExplainError: If the explain stats cannot be parsed.
+        """
+        try:
+            dict_repr = MessageToDict(self._stats_pb, preserving_proto_field_name=True)
+            return dict_repr["data"]["value"]
+        except (KeyError, TypeError) as e:
+            raise QueryExplainError("Failed to parse explain stats") from e
+
+    def get_raw(self) -> ExplainStats_pb:
+        """
+        Returns the explain stats in an encoded proto format, as returned from the Firestore backend.
+        The caller is responsible for unpacking this proto message.
+
+        Returns:
+            google.cloud.firestore_v1.types.explain_stats.ExplainStats: the proto from the backend
+        """
+        return self._stats_pb

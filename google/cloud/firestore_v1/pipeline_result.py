@@ -17,6 +17,7 @@ from typing import Any, MutableMapping, Iterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
+from google.cloud.firestore_v1.query_profile import ExplainStats
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_client import BaseClient
@@ -139,22 +140,30 @@ class PipelineResult:
         return _helpers.decode_value(value, self._client)
 
 class PipelineSnapshot(list[PipelineResult]):
-    def __init__(self, results_list: list[PipelineResult]):
+    def __init__(
+        self,
+        results_list: list[PipelineResult],
+        explain_stats: ExplainStats | None = None
+    ):
         super().__init__(results_list)
+        self._explain_stats = explain_stats
 
     @classmethod
     def _from_stream(cls, stream: PipelineStream):
         results = [r for r in stream]
-        return cls(results)
+        return cls(results, ExplainStats=stream._explain_stats)
 
 class PipelineStream(Iterable[PipelineResult]):
 
     def __init__(self, client, rpc_stream):
         self._client = client
         self._stream = rpc_stream
+        self._explain_stats = None
 
     def __iter__(self) -> PipelineStream:
         for response in self._stream:
+            if response.explain_stats:
+               self._explain_stats = ExplainStats(response.explain_stats)
             for doc in response.results:
                 ref = self._client.document(doc.name) if doc.name else None
                 yield PipelineResult(
