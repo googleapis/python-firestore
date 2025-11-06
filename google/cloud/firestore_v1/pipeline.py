@@ -76,7 +76,8 @@ class Pipeline(_BasePipeline):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned list.
         """
-        stream = self.stream(transaction=transaction, explain_options=explain_options)
+        kwargs = {k: v for k, v in locals().items() if k != 'self'}
+        stream = PipelineStream(PipelineResult, self, **kwargs)
         results = [result for result in stream]
         return PipelineSnapshot(results, stream)
 
@@ -99,6 +100,5 @@ class Pipeline(_BasePipeline):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
         """
-        return PipelineStream(
-            PipelineResult, self, transaction, explain_options
-        )
+        kwargs = {k: v for k, v in locals().items() if k != 'self'}
+        return PipelineStream(PipelineResult, self, **kwargs)

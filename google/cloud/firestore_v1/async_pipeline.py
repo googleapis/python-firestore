@@ -78,7 +78,8 @@ class AsyncPipeline(_BasePipeline):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned list.
         """
-        stream = self.stream(transaction=transaction, explain_options=explain_options)
+        kwargs = {k: v for k, v in locals().items() if k != 'self'}
+        stream = AsyncPipelineStream(PipelineResult, self, **kwargs)
         results = [result async for result in stream]
         return PipelineSnapshot(results, stream)
 
@@ -101,6 +102,5 @@ class AsyncPipeline(_BasePipeline):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
         """
-        return AsyncPipelineStream(
-            PipelineResult, self, transaction, explain_options
-        )
+        kwargs = {k: v for k, v in locals().items() if k != 'self'}
+        return AsyncPipelineStream(PipelineResult, self, **kwargs)
