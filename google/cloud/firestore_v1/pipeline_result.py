@@ -234,7 +234,9 @@ class PipelineSnapshot(_PipelineResultContainer, list[PipelineResult]):
 
     @classmethod
     def _from_stream(cls, results: list[PipelineResult], source: _PipelineResultContainer):
-        return cls(results, source.pipeline, source.transaction, source._explain_stats)
+        new_instance = cls(results, source.pipeline, source.transaction, source._explain_stats)
+        new_instance._explain_stats = source._explain_stats
+        new_instance.execution_time = source.execution_time
 
 
 class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
@@ -243,6 +245,8 @@ class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
     """
 
     def __iter__(self):
+        if self._started:
+            raise RuntimeError(f"{self.__class__.__name__} can only be iterated once")
         self._started = True
         request = self._build_request()
         stream = self._client._firestore_api.execute_pipeline(request)
@@ -255,6 +259,8 @@ class AsyncPipelineStream(_PipelineResultContainer, AsyncIterable[PipelineResult
     """
 
     async def __aiter__(self):
+        if self._started:
+            raise RuntimeError(f"{self.__class__.__name__} can only be iterated once")
         self._started = True
         request = self._build_request()
         stream = await self._client._firestore_api.execute_pipeline(request)
