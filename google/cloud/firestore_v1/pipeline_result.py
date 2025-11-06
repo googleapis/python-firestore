@@ -18,13 +18,21 @@ from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.query_profile import ExplainStats
+from google.cloud.firestore_v1.query_profile import QueryExplainError
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    from google.cloud.firestore_v1.async_client import AsyncClient
+    from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.base_client import BaseClient
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
     from google.protobuf.timestamp_pb2 import Timestamp
+    from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
     from google.cloud.firestore_v1.types.document import Value as ValueProto
     from google.cloud.firestore_v1.vector import Vector
+    from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
+    from google.cloud.firestore_v1.base_pipeline import _BasePipeline
+    from google.cloud.firestore_v1.pipeline import Pipeline
+    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class PipelineResult:
@@ -139,38 +147,70 @@ class PipelineResult:
         value = get_nested_value(str_path, self._fields_pb)
         return _helpers.decode_value(value, self._client)
 
-class PipelineSnapshot(list[PipelineResult]):
-    def __init__(
-        self,
-        results_list: list[PipelineResult],
-        explain_stats: ExplainStats | None = None
-    ):
-        super().__init__(results_list)
-        self._explain_stats = explain_stats
+class _PipelineResultContainer:
+    """Helper to hold shared attributes for PipelineSnapshot and PipelineStream"""
+
+    def __init__(self, pipeline: _BasePipeline, explain_options: ExplainOptions | None):
+        # public
+        self.pipeline: _BasePipeline = pipeline
+        self.execution_time: Timestamp | None = None
+        # private
+        self._started: bool = False
+        self._explain_stats: ExplainStats | None = None
+        self._explain_options: ExplainOptions | None = explain_options
+
+    @property
+    def explain_stats(self) -> ExplainStats:
+        if self._explain_stats is not None:
+            return self._explain_stats
+        elif self._explain_options is None:
+            raise QueryExplainError("explain_options not set on query.")
+        elif not self._started:
+            raise QueryExplainError("stream not started")
+        else:
+            raise QueryExplainError("explain_options not found")
+ 
+
+class PipelineSnapshot(_PipelineResultContainer, list[PipelineResult]):
+    """
+    A list type that holds the result of a pipeline.execute() operation, along with related metadata
+    """
+    def __init__(self, results_list: list[PipelineResult], *args):
+        super().__init__(*args)
+        list.__init__(self, results_list)
+        # snapshots are always completed
+        self._started = True
 
     @classmethod
     def _from_stream(cls, stream: PipelineStream):
         results = [r for r in stream]
-        return cls(results, ExplainStats=stream._explain_stats)
+        return cls(results, stream.pipeline, stream._explain_stats)
 
-class PipelineStream(Iterable[PipelineResult]):
+class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
+    """
+    An iterable stream representing the result of a pipeline.stream() operation, along with related metadata
+    """
 
-    def __init__(self, client, rpc_stream):
-        self._client = client
-        self._stream = rpc_stream
-        self._explain_stats = None
+    def __init__(self, rpc_stream: Iterable[ExecutePipelineResponse], pipeline: Pipeline, *args):
+        super().__init__(pipeline, *args)
+        self._client: Client = pipeline._client
+        self._stream: Iterable[ExecutePipelineResponse] = rpc_stream
 
-    def __iter__(self) -> PipelineStream:
+    def __iter__(self):
+        self._started = True
         for response in self._stream:
             if response.explain_stats:
                self._explain_stats = ExplainStats(response.explain_stats)
+            execution_time = response._pb.execution_time
+            if execution_time and not self.execution_time:
+                self.execution_time = execution_time
             for doc in response.results:
                 ref = self._client.document(doc.name) if doc.name else None
                 yield PipelineResult(
                     self._client,
                     doc.fields,
                     ref,
-                    response._pb.execution_time,
+                    execution_time,
                     doc._pb.create_time if doc.create_time else None,
                     doc._pb.update_time if doc.update_time else None,
                 )

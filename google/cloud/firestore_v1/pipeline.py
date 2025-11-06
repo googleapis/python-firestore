@@ -99,4 +99,4 @@ class Pipeline(_BasePipeline):
         """
         request = self._prep_execute_request(transaction, explain_options)
         stream = self._client._firestore_api.execute_pipeline(request)
-        return PipelineStream(self._client, stream)
+        return PipelineStream(stream, self, explain_options)
