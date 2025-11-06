@@ -14,6 +14,7 @@
 
 from __future__ import annotations
 from typing import Any, Awaitable, AsyncIterable, Iterable, MutableMapping, TYPE_CHECKING
+import copy
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
@@ -226,17 +227,11 @@ class PipelineSnapshot(_PipelineResultContainer, list[PipelineResult]):
     """
     A list type that holds the result of a pipeline.execute() operation, along with related metadata
     """
-    def __init__(self, results_list: list[PipelineResult], *args):
-        super().__init__(*args)
+    def __init__(self, results_list: list[PipelineResult], source: _PipelineResultContainer):
+        self.__dict__.update(copy.deepcopy(source.__dict__))
         list.__init__(self, results_list)
-        # snapshots are always completed
+        # snapshots are always complete
         self._started = True
-
-    @classmethod
-    def _from_stream(cls, results: list[PipelineResult], source: _PipelineResultContainer):
-        new_instance = cls(results, source.pipeline, source.transaction, source._explain_stats)
-        new_instance._explain_stats = source._explain_stats
-        new_instance.execution_time = source.execution_time
 
 
 class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):

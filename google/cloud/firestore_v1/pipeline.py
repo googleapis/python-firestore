@@ -78,7 +78,7 @@ class Pipeline(_BasePipeline):
         """
         stream = self.stream(transaction=transaction, explain_options=explain_options)
         results = [result for result in stream]
-        return PipelineSnapshot._from_stream(results, stream)
+        return PipelineSnapshot(results, stream)
 
     def stream(
         self,
