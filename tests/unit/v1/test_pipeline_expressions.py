@@ -14,6 +14,7 @@
 
 import pytest
 import mock
+import math
 import datetime
 
 from google.cloud.firestore_v1 import _helpers
@@ -116,6 +117,13 @@ class TestConstant:
     def test_to_pb(self, input_val, to_pb_val):
         instance = Constant.of(input_val)
         assert instance._to_pb() == to_pb_val
+
+    @pytest.mark.parametrize("input", [float("nan"), math.nan])
+    def test_nan_to_pb(self, input):
+        instance = Constant.of(input)
+        assert repr(instance) == "Constant.of(math.nan)"
+        pb_val = instance._to_pb()
+        assert math.isnan(pb_val.double_value)
 
     @pytest.mark.parametrize(
         "input_val,expected",
@@ -284,7 +292,7 @@ class TestBooleanExpression:
         field1 = Field.of("field1")
         field2 = Field.of("field2")
         expected_cond1 = expr.And(field1.exists(), field1.equal(Constant("val1")))
-        expected_cond2 = expr.And(field2.exists(), field2.is_null())
+        expected_cond2 = expr.And(field2.exists(), field2.equal(None))
         expected = expr.Or(expected_cond1, expected_cond2)
 
         assert repr(result) == repr(expected)
@@ -371,7 +379,7 @@ class TestBooleanExpression:
         field3 = Field.of("field3")
         expected_cond1 = expr.And(field1.exists(), field1.equal(Constant("val1")))
         expected_cond2 = expr.And(field2.exists(), field2.greater_than(Constant(10)))
-        expected_cond3 = expr.And(field3.exists(), field3.is_not_null())
+        expected_cond3 = expr.And(field3.exists(), expr.Not(field3.equal(None)))
         expected_inner_and = expr.And(expected_cond2, expected_cond3)
         expected_outer_or = expr.Or(expected_cond1, expected_inner_and)
 
@@ -400,18 +408,21 @@ class TestBooleanExpression:
     @pytest.mark.parametrize(
         "op_enum, expected_expr_func",
         [
-            (query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN, Expression.is_nan),
+            (
+                query_pb.StructuredQuery.UnaryFilter.Operator.IS_NAN,
+                lambda x: x.equal(float("nan")),
+            ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NAN,
-                Expression.is_not_nan,
+                lambda x: expr.Not(x.equal(float("nan"))),
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NULL,
-                Expression.is_null,
+                lambda x: x.equal(None),
             ),
             (
                 query_pb.StructuredQuery.UnaryFilter.Operator.IS_NOT_NULL,
-                Expression.is_not_null,
+                lambda x: expr.Not(x.equal(None)),
             ),
         ],
     )
@@ -844,42 +855,6 @@ class TestExpressionessionMethods:
         assert instance.params == [arg1, arg2]
         assert repr(instance) == "Field.if_absent(ThenExpression)"
         infix_instance = arg1.if_absent(arg2)
-        assert infix_instance == instance
-
-    def test_is_nan(self):
-        arg1 = self._make_arg("Value")
-        instance = Expression.is_nan(arg1)
-        assert instance.name == "is_nan"
-        assert instance.params == [arg1]
-        assert repr(instance) == "Value.is_nan()"
-        infix_instance = arg1.is_nan()
-        assert infix_instance == instance
-
-    def test_is_not_nan(self):
-        arg1 = self._make_arg("Value")
-        instance = Expression.is_not_nan(arg1)
-        assert instance.name == "is_not_nan"
-        assert instance.params == [arg1]
-        assert repr(instance) == "Value.is_not_nan()"
-        infix_instance = arg1.is_not_nan()
-        assert infix_instance == instance
-
-    def test_is_null(self):
-        arg1 = self._make_arg("Value")
-        instance = Expression.is_null(arg1)
-        assert instance.name == "is_null"
-        assert instance.params == [arg1]
-        assert repr(instance) == "Value.is_null()"
-        infix_instance = arg1.is_null()
-        assert infix_instance == instance
-
-    def test_is_not_null(self):
-        arg1 = self._make_arg("Value")
-        instance = Expression.is_not_null(arg1)
-        assert instance.name == "is_not_null"
-        assert instance.params == [arg1]
-        assert repr(instance) == "Value.is_not_null()"
-        infix_instance = arg1.is_not_null()
         assert infix_instance == instance
 
     def test_is_error(self):
