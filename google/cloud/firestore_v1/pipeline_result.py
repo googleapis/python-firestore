@@ -20,7 +20,6 @@ from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.query_profile import ExplainStats
 from google.cloud.firestore_v1.query_profile import QueryExplainError
-from google.cloud.firestore_v1.query_profile import ExplainStats
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 
 if TYPE_CHECKING:  # pragma: NO COVER

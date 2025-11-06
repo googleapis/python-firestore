@@ -22,7 +22,7 @@ from google.protobuf.json_format import MessageToDict
 from google.cloud.firestore_v1.types.document import MapValue
 from google.cloud.firestore_v1.types.document import Value
 from google.cloud.firestore_v1.types.explain_stats import ExplainStats as ExplainStats_pb
-
+from google.protobuf.wrappers_pb2 import StringValue
 
 @dataclass(frozen=True)
 class ExplainOptions:
@@ -180,11 +180,13 @@ class ExplainStats:
         Raises:
             QueryExplainError: If the explain stats cannot be parsed.
         """
-        try:
-            dict_repr = MessageToDict(self._stats_pb, preserving_proto_field_name=True)
-            return dict_repr["data"]["value"]
-        except (KeyError, TypeError) as e:
-            raise QueryExplainError("Failed to parse explain stats") from e
+        pb_data = self._stats_pb._pb.data
+        content = StringValue()
+        if pb_data.Unpack(content):
+            return content.value
+        raise QueryExplainError(
+            "Unable to decode explain stats. Did you request an output format that returns a string value, such as 'text' or 'json'?"
+        )
 
     def get_raw(self) -> ExplainStats_pb:
         """
