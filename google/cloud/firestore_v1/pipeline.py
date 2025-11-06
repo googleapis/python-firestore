@@ -76,7 +76,9 @@ class Pipeline(_BasePipeline):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned list.
         """
-        return PipelineSnapshot._from_stream(self.stream(transaction=transaction, explain_options=explain_options))
+        stream = self.stream(transaction=transaction, explain_options=explain_options)
+        results = [result for result in stream]
+        return PipelineSnapshot._from_stream(results, stream)
 
     def stream(
         self,

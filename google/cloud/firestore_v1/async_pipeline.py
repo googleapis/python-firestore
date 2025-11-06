@@ -16,6 +16,8 @@ from __future__ import annotations
 from typing import AsyncIterable, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
+from google.cloud.firestore_v1.pipeline_result import AsyncPipelineStream
+from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_client import AsyncClient
@@ -41,7 +43,7 @@ class AsyncPipeline(_BasePipeline):
         ...                      .collection("books")
         ...                      .where(Field.of("published").gt(1980))
         ...                      .select("title", "author")
-        ...     async for result in pipeline.execute():
+        ...     async for result in pipeline.stream():
         ...         print(result)
 
     Use `client.pipeline()` to create instances of this class.
@@ -62,7 +64,7 @@ class AsyncPipeline(_BasePipeline):
         *,
         transaction: "AsyncTransaction" | None = None,
         explain_options: ExplainOptions | None = None,
-    ) -> list[PipelineResult]:
+    ) -> PipelineSnapshot[PipelineResult]:
         """
         Executes this pipeline and returns results as a list
 
@@ -76,16 +78,18 @@ class AsyncPipeline(_BasePipeline):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned list.
         """
-        return [result async for result in self.stream(transaction=transaction, explain_options=explain_options)]
+        stream = self.stream(transaction=transaction, explain_options=explain_options)
+        results = [result async for result in stream]
+        return await PipelineSnapshot._from_stream(results, stream)
 
-    async def stream(
+    def stream(
         self,
         *,
         transaction: "AsyncTransaction" | None = None,
         explain_options: ExplainOptions | None = None,
-    ) -> AsyncIterable[PipelineResult]:
+    ) -> AsyncPipelineStream[PipelineResult]:
         """
-        Process this pipeline as a stream, providing results through an Iterable
+        Process this pipeline as a stream, providing results through an AsyncIterable
 
         Args:
             transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
@@ -98,8 +102,5 @@ class AsyncPipeline(_BasePipeline):
                 explain_metrics will be available on the returned generator.
         """
         request = self._prep_execute_request(transaction, explain_options)
-        async for response in await self._client._firestore_api.execute_pipeline(
-            request
-        ):
-            for result in self._execute_response_helper(response):
-                yield result
+        stream = self._client._firestore_api.execute_pipeline(request)
+        return AsyncPipelineStream(stream, self, explain_options)

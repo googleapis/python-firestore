@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, MutableMapping, Iterable, TYPE_CHECKING
+from typing import Any, Awaitable, AsyncIterable, Iterable, MutableMapping, TYPE_CHECKING
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
@@ -150,11 +150,12 @@ class PipelineResult:
 class _PipelineResultContainer:
     """Helper to hold shared attributes for PipelineSnapshot and PipelineStream"""
 
-    def __init__(self, pipeline: _BasePipeline, explain_options: ExplainOptions | None):
+    def __init__(self, pipeline: Pipeline | AsyncPipeline, explain_options: ExplainOptions | None):
         # public
         self.pipeline: _BasePipeline = pipeline
         self.execution_time: Timestamp | None = None
         # private
+        self._client: Client | AsyncClient = pipeline._client
         self._started: bool = False
         self._explain_stats: ExplainStats | None = None
         self._explain_options: ExplainOptions | None = explain_options
@@ -169,6 +170,24 @@ class _PipelineResultContainer:
             raise QueryExplainError("stream not started")
         else:
             raise QueryExplainError("explain_options not found")
+
+    def _process_response(self, response: ExecutePipelineResponse):
+        """Shared logic for processing an individual response from a stream"""
+        if response.explain_stats:
+           self._explain_stats = ExplainStats(response.explain_stats)
+        execution_time = response._pb.execution_time
+        if execution_time and not self.execution_time:
+            self.execution_time = execution_time
+        for doc in response.results:
+            ref = self._client.document(doc.name) if doc.name else None
+            yield PipelineResult(
+                self._client,
+                doc.fields,
+                ref,
+                execution_time,
+                doc._pb.create_time if doc.create_time else None,
+                doc._pb.update_time if doc.update_time else None,
+            )
  
 
 class PipelineSnapshot(_PipelineResultContainer, list[PipelineResult]):
@@ -182,9 +201,9 @@ class PipelineSnapshot(_PipelineResultContainer, list[PipelineResult]):
         self._started = True
 
     @classmethod
-    def _from_stream(cls, stream: PipelineStream):
-        results = [r for r in stream]
-        return cls(results, stream.pipeline, stream._explain_stats)
+    def _from_stream(cls, results: list[PipelineResult], source: _PipelineResultContainer):
+        return cls(results, source.pipeline, source._explain_stats)
+
 
 class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
     """
@@ -193,24 +212,24 @@ class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
 
     def __init__(self, rpc_stream: Iterable[ExecutePipelineResponse], pipeline: Pipeline, *args):
         super().__init__(pipeline, *args)
-        self._client: Client = pipeline._client
-        self._stream: Iterable[ExecutePipelineResponse] = rpc_stream
+        self._stream = rpc_stream
 
     def __iter__(self):
         self._started = True
         for response in self._stream:
-            if response.explain_stats:
-               self._explain_stats = ExplainStats(response.explain_stats)
-            execution_time = response._pb.execution_time
-            if execution_time and not self.execution_time:
-                self.execution_time = execution_time
-            for doc in response.results:
-                ref = self._client.document(doc.name) if doc.name else None
-                yield PipelineResult(
-                    self._client,
-                    doc.fields,
-                    ref,
-                    execution_time,
-                    doc._pb.create_time if doc.create_time else None,
-                    doc._pb.update_time if doc.update_time else None,
-                )
+            yield from self._process_response(response)
+
+class AsyncPipelineStream(_PipelineResultContainer, AsyncIterable[PipelineResult]):
+    """
+    An iterable stream representing the result of an async pipeline.stream() operation, along with related metadata
+    """
+
+    def __init__(self, rpc_stream: Awaitable[AsyncIterable[ExecutePipelineResponse]], pipeline: AsyncPipeline, *args):
+        super().__init__(pipeline, *args)
+        self._stream = rpc_stream
+
+    async def __aiter__(self):
+        self._started = True
+        async for response in await self._stream:
+            for response in self._process_response(response):
+                yield response
