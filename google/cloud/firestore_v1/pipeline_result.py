@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, Awaitable, AsyncIterable, Iterable, MutableMapping, TYPE_CHECKING
+from typing import Any, Awaitable, AsyncIterable, AsyncIterator, Iterable, Iterator, Generic, MutableMapping, Type, TypeVar, TYPE_CHECKING
 import copy
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
@@ -152,14 +152,19 @@ class PipelineResult:
         value = get_nested_value(str_path, self._fields_pb)
         return _helpers.decode_value(value, self._client)
 
-class _PipelineResultContainer:
+
+T = TypeVar("T", bound=PipelineResult)
+
+
+class _PipelineResultContainer(Generic[T]):
     """Helper to hold shared attributes for PipelineSnapshot and PipelineStream"""
 
     def __init__(
         self,
+        return_type: Type[T],
         pipeline: Pipeline | AsyncPipeline,
         transaction: Transaction | AsyncTransaction | None,
-        explain_options: ExplainOptions | None
+        explain_options: ExplainOptions | None,
     ):
         # public
         self.transaction = transaction
@@ -170,6 +175,7 @@ class _PipelineResultContainer:
         self._started: bool = False
         self._explain_stats: ExplainStats | None = None
         self._explain_options: ExplainOptions | None = explain_options
+        self._return_type = return_type
 
     @property
     def explain_stats(self) -> ExplainStats:
@@ -204,7 +210,7 @@ class _PipelineResultContainer:
         )
         return request
 
-    def _process_response(self, response: ExecutePipelineResponse):
+    def _process_response(self, response: ExecutePipelineResponse) -> Iterable[T]:
         """Shared logic for processing an individual response from a stream"""
         if response.explain_stats:
            self._explain_stats = ExplainStats(response.explain_stats)
@@ -213,7 +219,7 @@ class _PipelineResultContainer:
             self.execution_time = execution_time
         for doc in response.results:
             ref = self._client.document(doc.name) if doc.name else None
-            yield PipelineResult(
+            yield self._return_type(
                 self._client,
                 doc.fields,
                 ref,
@@ -221,25 +227,25 @@ class _PipelineResultContainer:
                 doc._pb.create_time if doc.create_time else None,
                 doc._pb.update_time if doc.update_time else None,
             )
- 
 
-class PipelineSnapshot(_PipelineResultContainer, list[PipelineResult]):
+
+class PipelineSnapshot(_PipelineResultContainer[T], list[T]):
     """
     A list type that holds the result of a pipeline.execute() operation, along with related metadata
     """
-    def __init__(self, results_list: list[PipelineResult], source: _PipelineResultContainer):
+    def __init__(self, results_list: list[T], source: _PipelineResultContainer[T]):
         self.__dict__.update(copy.deepcopy(source.__dict__))
         list.__init__(self, results_list)
         # snapshots are always complete
         self._started = True
 
 
-class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
+class PipelineStream(_PipelineResultContainer[T], Iterable[T]):
     """
     An iterable stream representing the result of a pipeline.stream() operation, along with related metadata
     """
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator[T]:
         if self._started:
             raise RuntimeError(f"{self.__class__.__name__} can only be iterated once")
         self._started = True
@@ -248,12 +254,12 @@ class PipelineStream(_PipelineResultContainer, Iterable[PipelineResult]):
         for response in stream:
             yield from self._process_response(response)
 
-class AsyncPipelineStream(_PipelineResultContainer, AsyncIterable[PipelineResult]):
+class AsyncPipelineStream(_PipelineResultContainer[T], AsyncIterable[T]):
     """
     An iterable stream representing the result of an async pipeline.stream() operation, along with related metadata
     """
 
-    async def __aiter__(self):
+    async def __aiter__(self) -> AsyncIterator[T]:
         if self._started:
             raise RuntimeError(f"{self.__class__.__name__} can only be iterated once")
         self._started = True

@@ -18,10 +18,10 @@ from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 from google.cloud.firestore_v1.pipeline_result import PipelineStream
 from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
+from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.client import Client
-    from google.cloud.firestore_v1.pipeline_result import PipelineResult
     from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.query_profile import ExplainMetrics
     from google.cloud.firestore_v1.query_profile import ExplainOptions
@@ -99,4 +99,6 @@ class Pipeline(_BasePipeline):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
         """
-        return PipelineStream(self, transaction, explain_options)
+        return PipelineStream(
+            PipelineResult, self, transaction, explain_options
+        )
