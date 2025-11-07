@@ -176,13 +176,17 @@ class ExplainStats:
 
     def get_text(self) -> str:
         """
-        Returns the explain stats string verbatim as returned from the Firestore backend.
+        Returns the explain stats as a string.
+
+        This method is suitable for explain formats that have a text-based output,
+        such as 'text' or 'json'.
 
         Returns:
-            str: the string representation of the explain_stats object
+            str: The string representation of the explain stats.
 
         Raises:
-            QueryExplainError: If the explain stats cannot be parsed.
+            QueryExplainError: If the explain stats payload from the backend is not
+                a string. This can happen if a non-text output format was requested.
         """
         pb_data = self._stats_pb._pb.data
         content = StringValue()

@@ -168,7 +168,7 @@ T = TypeVar("T", bound=PipelineResult)
 
 
 class _PipelineResultContainer(Generic[T]):
-    """Helper to hold shared attributes for PipelineSnapshot and PipelineStream"""
+    """Base class to hold shared attributes for PipelineSnapshot and PipelineStream"""
 
     def __init__(
         self,
