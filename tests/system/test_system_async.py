@@ -1652,7 +1652,7 @@ async def test_query_with_order_dot_key(client, cleanup, database):
     assert found_data == [snap.to_dict() for snap in cursor_with_key_data]
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_unary(client, cleanup, database):
     collection_name = "unary" + UNIQUE_RESOURCE_ID
     collection = client.collection(collection_name)
