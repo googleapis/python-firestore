@@ -185,7 +185,7 @@ class _PipelineResultContainer(Generic[T]):
         elif not self._started:
             raise QueryExplainError("stream not started")
         else:
-            raise QueryExplainError("explain_options not found")
+            raise QueryExplainError("explain_stats not found")
 
     def _build_request(self) -> ExecutePipelineRequest:
         """
@@ -265,5 +265,5 @@ class AsyncPipelineStream(_PipelineResultContainer[T], AsyncIterable[T]):
         request = self._build_request()
         stream = await self._client._firestore_api.execute_pipeline(request)
         async for response in stream:
-            for response in self._process_response(response):
-                yield response
+            for result in self._process_response(response):
+                yield result

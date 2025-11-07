@@ -16,6 +16,10 @@ import mock
 import pytest
 
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
+from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
+from google.cloud.firestore_v1.pipeline_result import PipelineStream
+from google.cloud.firestore_v1.pipeline_result import AsyncPipelineStream
+from google.cloud.firestore_v1.query_profile import QueryExplainError
 
 
 class TestPipelineResult:
@@ -174,3 +178,131 @@ class TestPipelineResult:
             got = instance.get("key")
             decode_mock.assert_called_once_with("value", client)
             assert got == decode_mock.return_value
+
+class TestPipelineSnapshot:
+
+    def _make_one(self, *args, **kwargs):
+        if not args:
+            # use defaults if not passed
+            args = [[], mock.Mock()]
+        return PipelineSnapshot(*args, **kwargs)
+
+    def test_ctor(self):
+        in_arr = [1, 2, 3]
+        expected_type = object()
+        expected_pipeline = mock.Mock()
+        expected_transaction = object()
+        expected_options = object()
+        source = PipelineStream(expected_type, expected_pipeline, expected_transaction, expected_options)
+        instance = self._make_one(in_arr, source)
+        assert instance._return_type == expected_type
+        assert instance.pipeline == expected_pipeline
+        assert instance._client == expected_pipeline._client
+        assert instance._explain_options == expected_options
+        assert instance._explain_stats is None
+        assert instance._started is True
+        assert instance.execution_time is None
+
+    def test_list_methods(self):
+        instance = self._make_one(list(range(10)), mock.Mock())
+        assert isinstance(instance, list)
+        assert len(instance) == 10
+        assert instance[0] == 0
+        assert instance[-1] == 9
+
+    def test_explain_stats(self):
+        instance = self._make_one()
+        expected_stats = mock.Mock()
+        instance._explain_stats = expected_stats
+        assert instance.explain_stats == expected_stats
+        # test different failure modes
+        instance._explain_stats = None
+        instance._explain_options = None
+        # fail if explain_stats set without explain_options
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "explain_options not set" in str(e)
+        # fail if explain_stats missing
+        instance._explain_options = object()
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "explain_stats not found" in str(e)
+
+
+
+class TestPipelineStream:
+    def _make_one(self, *args, **kwargs):
+        if not args:
+            # use defaults if not passed
+            args = [PipelineResult, mock.Mock(), None, None]
+        return PipelineStream(*args, **kwargs)
+
+    def test_explain_stats(self):
+        instance = self._make_one()
+        expected_stats = mock.Mock()
+        instance._started = True
+        instance._explain_stats = expected_stats
+        assert instance.explain_stats == expected_stats
+        # test different failure modes
+        instance._explain_stats = None
+        instance._explain_options = None
+        # fail if explain_stats set without explain_options
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "explain_options not set" in str(e)
+        # fail if explain_stats missing
+        instance._explain_options = object()
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "explain_stats not found" in str(e)
+        # fail if not started
+        instance._started = False
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "stream not started" in str(e)
+
+    def test_double_iterate(self):
+        instance = self._make_one()
+        instance.pipeline._client.project = "project-id"
+        instance.pipeline._client._database = "database-id"
+        instance.pipeline._to_pb.return_value = {}
+        instance._client._firestore_api.execute_pipeline.return_value = []
+        # consume the iterator
+        list(instance)
+        with pytest.raises(RuntimeError):
+            list(instance)
+
+
+class TestAsyncPipelineStream:
+    def _make_one(self, *args, **kwargs):
+        if not args:
+            # use defaults if not passed
+            args = [PipelineResult, mock.Mock(), None, None]
+        return AsyncPipelineStream(*args, **kwargs)
+
+    def test_explain_stats(self):
+        instance = self._make_one()
+        expected_stats = mock.Mock()
+        instance._started = True
+        instance._explain_stats = expected_stats
+        assert instance.explain_stats == expected_stats
+        # test different failure modes
+        instance._explain_stats = None
+        instance._explain_options = None
+        # fail if explain_stats set without explain_options
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "explain_options not set" in str(e)
+        # fail if explain_stats missing
+        instance._explain_options = object()
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "explain_stats not found" in str(e)
+        # fail if not started
+        instance._started = False
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "stream not started" in str(e)
+
+    def test_double_iterate(self):
+        pass
