@@ -1771,7 +1771,7 @@ def test_query_with_order_dot_key(client, cleanup, database):
     assert found_data == [snap.to_dict() for snap in cursor_with_key_data]
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_query_unary(client, cleanup, database):
     collection_name = "unary" + UNIQUE_RESOURCE_ID
     collection = client.collection(collection_name)
@@ -3331,7 +3331,7 @@ def test_query_with_or_composite_filter(collection, database):
     verify_pipeline(query)
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 @pytest.mark.parametrize(
     "aggregation_type,expected_value", [("count", 5), ("sum", 100), ("avg", 4.0)]
 )
