@@ -233,7 +233,7 @@ class PipelineSnapshot(_PipelineResultContainer[T], list[T]):
     A list type that holds the result of a pipeline.execute() operation, along with related metadata
     """
     def __init__(self, results_list: list[T], source: _PipelineResultContainer[T]):
-        self.__dict__.update(copy.deepcopy(source.__dict__))
+        self.__dict__.update(source.__dict__.copy())
         list.__init__(self, results_list)
         # snapshots are always complete
         self._started = True
