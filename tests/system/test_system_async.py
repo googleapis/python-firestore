@@ -214,7 +214,8 @@ async def verify_pipeline(query):
         except Exception as e:
             # if we expect the query to fail, capture the exception
             query_exception = e
-        pipeline = query.pipeline()
+        client = query._client
+        pipeline = client.pipeline().create_from(query)
         if query_exception:
             # ensure that the pipeline uses same error as query
             with pytest.raises(query_exception.__class__):

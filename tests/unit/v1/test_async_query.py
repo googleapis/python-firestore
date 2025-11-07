@@ -917,7 +917,7 @@ def test_asyncquery_collection_pipeline_type():
     client = make_async_client()
     parent = client.collection("test")
     query = parent._query()
-    ppl = query.pipeline()
+    ppl = query._build_pipeline(client.pipeline())
     assert isinstance(ppl, AsyncPipeline)
 
 
@@ -926,5 +926,5 @@ def test_asyncquery_collectiongroup_pipeline_type():
 
     client = make_async_client()
     query = client.collection_group("test")
-    ppl = query.pipeline()
+    ppl = query._build_pipeline(client.pipeline())
     assert isinstance(ppl, AsyncPipeline)
