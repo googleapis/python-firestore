@@ -126,20 +126,18 @@ def test_explain_options__to_dict():
     assert ExplainOptions(analyze=False)._to_dict() == {"analyze": False}
 
 
-@pytest.mark.parametrize(
-    "analyze_bool,expected_str", [(True, "analyze"), (False, "explain")]
-)
-def test_explain_options__to_value(analyze_bool, expected_str):
+@pytest.mark.parametrize("mode_str", ["analyze", "explain"])
+def test_pipeline_explain_options__to_value(mode_str):
     """
     Should be able to create a Value protobuf representation of ExplainOptions
     """
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_profile import PipelineExplainOptions
     from google.cloud.firestore_v1.types.document import MapValue
     from google.cloud.firestore_v1.types.document import Value
 
-    options = ExplainOptions(analyze=analyze_bool)
+    options = PipelineExplainOptions(mode=mode_str)
     expected_value = Value(
-        map_value=MapValue(fields={"mode": Value(string_value=expected_str)})
+        map_value=MapValue(fields={"mode": Value(string_value=mode_str)})
     )
     assert options._to_value() == expected_value
 

@@ -1660,7 +1660,7 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
 def test_pipeline_explain_options_explain_mode(database, method, query_docs):
     """Explain currently not supported by backend. Expect error"""
     from google.cloud.firestore_v1.query_profile import (
-        ExplainOptions,
+        PipelineExplainOptions,
     )
 
     collection, _, _ = query_docs
@@ -1668,7 +1668,7 @@ def test_pipeline_explain_options_explain_mode(database, method, query_docs):
 
     # Tests either `execute()` or `stream()`.
     method_under_test = getattr(pipeline, method)
-    explain_options = ExplainOptions(analyze=False)
+    explain_options = PipelineExplainOptions(mode="explain")
 
     # for now, expect error on explain mode
     with pytest.raises(InvalidArgument) as e:
@@ -1684,7 +1684,7 @@ def test_pipeline_explain_options_explain_mode(database, method, query_docs):
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 def test_pipeline_explain_options_analyze_mode(database, method, query_docs):
     from google.cloud.firestore_v1.query_profile import (
-        ExplainOptions,
+        PipelineExplainOptions,
         ExplainStats,
         QueryExplainError,
     )
@@ -1697,7 +1697,7 @@ def test_pipeline_explain_options_analyze_mode(database, method, query_docs):
 
     # Tests either `execute()` or `stream()`.
     method_under_test = getattr(pipeline, method)
-    results = method_under_test(explain_options=ExplainOptions(analyze=True))
+    results = method_under_test(explain_options=PipelineExplainOptions())
 
     if method == "stream":
         # check for error accessing explain stats before iterating
@@ -1731,7 +1731,7 @@ def test_pipeline_explain_options_using_additional_options(
 ):
     """additional_options field allows passing in arbitrary options. Test with explain_options"""
     from google.cloud.firestore_v1.query_profile import (
-        ExplainOptions,
+        PipelineExplainOptions,
         ExplainStats,
     )
     from google.cloud.firestore_v1.types.explain_stats import (
@@ -1744,7 +1744,7 @@ def test_pipeline_explain_options_using_additional_options(
     # Tests either `execute()` or `stream()`.
     method_under_test = getattr(pipeline, method)
 
-    encoded_options = {"explain_options": ExplainOptions(analyze=True)._to_value()}
+    encoded_options = {"explain_options": PipelineExplainOptions()._to_value()}
 
     results = method_under_test(
         explain_options=mock.Mock(), additional_options=encoded_options

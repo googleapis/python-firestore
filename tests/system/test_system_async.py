@@ -1582,14 +1582,14 @@ async def test_pipeline_explain_options_explain_mode(database, method, query_doc
     """Explain currently not supported by backend. Expect error"""
     from google.api_core.exceptions import InvalidArgument
     from google.cloud.firestore_v1.query_profile import (
-        ExplainOptions,
+        PipelineExplainOptions,
     )
 
     collection, _, _ = query_docs
     pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
 
     method_under_test = getattr(pipeline, method)
-    explain_options = ExplainOptions(analyze=False)
+    explain_options = PipelineExplainOptions(mode="explain")
 
     with pytest.raises(InvalidArgument) as e:
         if method == "stream":
@@ -1608,7 +1608,7 @@ async def test_pipeline_explain_options_explain_mode(database, method, query_doc
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 async def test_pipeline_explain_options_analyze_mode(database, method, query_docs):
     from google.cloud.firestore_v1.query_profile import (
-        ExplainOptions,
+        PipelineExplainOptions,
         ExplainStats,
         QueryExplainError,
     )
@@ -1620,7 +1620,7 @@ async def test_pipeline_explain_options_analyze_mode(database, method, query_doc
     pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
 
     method_under_test = getattr(pipeline, method)
-    explain_options = ExplainOptions(analyze=True)
+    explain_options = PipelineExplainOptions()
 
     if method == "execute":
         results = await method_under_test(explain_options=explain_options)
@@ -1655,7 +1655,7 @@ async def test_pipeline_explain_options_using_additional_options(
 ):
     """additional_options field allows passing in arbitrary options. Test with explain_options"""
     from google.cloud.firestore_v1.query_profile import (
-        ExplainOptions,
+        PipelineExplainOptions,
         ExplainStats,
     )
     from google.cloud.firestore_v1.types.explain_stats import (
@@ -1666,7 +1666,7 @@ async def test_pipeline_explain_options_using_additional_options(
     pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
 
     method_under_test = getattr(pipeline, method)
-    encoded_options = {"explain_options": ExplainOptions(analyze=True)._to_value()}
+    encoded_options = {"explain_options": PipelineExplainOptions()._to_value()}
 
     stub = method_under_test(
         explain_options=mock.Mock(), additional_options=encoded_options

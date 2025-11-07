@@ -48,7 +48,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.base_pipeline import _BasePipeline
     from google.cloud.firestore_v1.pipeline import Pipeline
     from google.cloud.firestore_v1.pipeline_expressions import Constant
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_profile import PipelineExplainOptions
 
 
 class PipelineResult:
@@ -175,7 +175,7 @@ class _PipelineResultContainer(Generic[T]):
         return_type: Type[T],
         pipeline: Pipeline | AsyncPipeline,
         transaction: Transaction | AsyncTransaction | None,
-        explain_options: ExplainOptions | None,
+        explain_options: PipelineExplainOptions | None,
         index_mode: str | None,
         additional_options: dict[str, Constant | Value],
     ):
@@ -187,7 +187,7 @@ class _PipelineResultContainer(Generic[T]):
         self._client: Client | AsyncClient = pipeline._client
         self._started: bool = False
         self._explain_stats: ExplainStats | None = None
-        self._explain_options: ExplainOptions | None = explain_options
+        self._explain_options: PipelineExplainOptions | None = explain_options
         self._return_type = return_type
         self._index_mode = index_mode
         self._additonal_options = {

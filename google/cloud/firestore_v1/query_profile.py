@@ -47,9 +47,30 @@ class ExplainOptions:
     def _to_dict(self):
         return {"analyze": self.analyze}
 
+
+@dataclass(frozen=True)
+class PipelineExplainOptions:
+    """
+    Explain options for pipeline queries.
+
+    Set on a pipeline.execution() or pipeline.stream() call, to provide
+    explain_stats in the pipeline output
+
+    :type mode: str
+    :param mode: Optional. The mode of operation for this explain query.
+        When set to 'analyze', the query will be executed and return the full
+        query results along with execution statistics.
+
+    :type output_format: str | None
+    :param output_format: Optional. The format in which to return the explain
+        stats.
+    """
+
+    mode: str = "analyze"
+
     def _to_value(self):
-        mode_str = "analyze" if self.analyze else "explain"
-        value_pb = MapValue(fields={"mode": Value(string_value=mode_str)})
+        out_dict = {"mode": Value(string_value=self.mode)}
+        value_pb = MapValue(fields=out_dict)
         return Value(map_value=value_pb)
 
 

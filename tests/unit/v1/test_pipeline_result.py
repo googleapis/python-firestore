@@ -22,7 +22,7 @@ from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
 from google.cloud.firestore_v1.pipeline_result import PipelineStream
 from google.cloud.firestore_v1.pipeline_result import AsyncPipelineStream
 from google.cloud.firestore_v1.query_profile import QueryExplainError
-from google.cloud.firestore_v1.query_profile import ExplainOptions
+from google.cloud.firestore_v1.query_profile import PipelineExplainOptions
 from google.cloud.firestore_v1._helpers import encode_value
 from google.cloud.firestore_v1.types.document import Document
 from google.protobuf.timestamp_pb2 import Timestamp
@@ -295,11 +295,11 @@ class SharedStreamTests:
         [
             ({"index_mode": "mode"}, {"index_mode": encode_value("mode")}),
             (
-                {"explain_options": ExplainOptions(analyze=True)},
+                {"explain_options": PipelineExplainOptions()},
                 {"explain_options": encode_value({"mode": "analyze"})},
             ),
             (
-                {"explain_options": ExplainOptions(analyze=False)},
+                {"explain_options": PipelineExplainOptions(mode="explain")},
                 {"explain_options": encode_value({"mode": "explain"})},
             ),
             (
@@ -312,7 +312,7 @@ class SharedStreamTests:
             ),
             (
                 {
-                    "explain_options": ExplainOptions(),
+                    "explain_options": PipelineExplainOptions(),
                     "additional_options": {"explain_options": Constant.of("override")},
                 },
                 {"explain_options": encode_value("override")},

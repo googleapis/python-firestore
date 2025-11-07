@@ -25,7 +25,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
     from google.cloud.firestore_v1.pipeline_expressions import Constant
     from google.cloud.firestore_v1.types.document import Value
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
+    from google.cloud.firestore_v1.query_profile import PipelineExplainOptions
 
 
 class AsyncPipeline(_BasePipeline):
@@ -65,7 +65,7 @@ class AsyncPipeline(_BasePipeline):
         self,
         *,
         transaction: "AsyncTransaction" | None = None,
-        explain_options: ExplainOptions | None = None,
+        explain_options: PipelineExplainOptions | None = None,
         index_mode: str | None = None,
         additional_options: dict[str, Value | Constant] = {},
     ) -> PipelineSnapshot[PipelineResult]:
@@ -78,7 +78,7 @@ class AsyncPipeline(_BasePipeline):
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
-            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned list.
             index_mode (Optional[str]): Configures the pipeline to require a certain type of indexes to be present.
@@ -95,7 +95,7 @@ class AsyncPipeline(_BasePipeline):
         self,
         *,
         transaction: "AsyncTransaction" | None = None,
-        explain_options: ExplainOptions | None = None,
+        explain_options: PipelineExplainOptions | None = None,
         index_mode: str | None = None,
         additional_options: dict[str, Value | Constant] = {},
     ) -> AsyncPipelineStream[PipelineResult]:
@@ -108,7 +108,7 @@ class AsyncPipeline(_BasePipeline):
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
-            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.ExplainOptions`]):
+            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
             index_mode (Optional[str]): Configures the pipeline to require a certain type of indexes to be present.
