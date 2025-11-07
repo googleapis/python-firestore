@@ -22,6 +22,9 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
+    from google.cloud.firestore_v1.base_query import BaseQuery
+    from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
+    from google.cloud.firestore_v1.base_collection import BaseCollectionReference
 
 
 PipelineType = TypeVar("PipelineType", bound=_BasePipeline)
@@ -42,6 +45,23 @@ class PipelineSource(Generic[PipelineType]):
 
     def _create_pipeline(self, source_stage):
         return self.client._pipeline_cls._create_with_stages(self.client, source_stage)
+
+    def create_from(
+        self, query: "BaseQuery" | "BaseAggregationQuery" | "BaseCollectionReference"
+    ) -> PipelineType:
+        """
+        Create a pipeline from an existing query
+
+        Queries containing a `cursor` or `limit_to_last` are not currently supported
+
+        Args:
+            query: the query to build the pipeline off of
+        Raises:
+            - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
+        Returns:
+            a new pipeline instance representing the query
+        """
+        return query._build_pipeline(self)
 
     def collection(self, path: str | tuple[str]) -> PipelineType:
         """

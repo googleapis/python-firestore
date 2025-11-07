@@ -430,10 +430,11 @@ def test_basecollectionreference_pipeline(mock_query):
         _query.return_value = mock_query
 
         collection = _make_base_collection_reference("collection")
-        pipeline = collection.pipeline()
+        mock_source = mock.Mock()
+        pipeline = collection._build_pipeline(mock_source)
 
-        mock_query.pipeline.assert_called_once_with()
-        assert pipeline == mock_query.pipeline.return_value
+        mock_query._build_pipeline.assert_called_once_with(mock_source)
+        assert pipeline == mock_query._build_pipeline.return_value
 
 
 @mock.patch("random.choice")

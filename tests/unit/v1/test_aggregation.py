@@ -1040,7 +1040,7 @@ def test_aggreation_to_pipeline_sum(field, in_alias, out_alias):
     query = make_query(parent)
     aggregation_query = make_aggregation_query(query)
     aggregation_query.sum(field, alias=in_alias)
-    pipeline = aggregation_query.pipeline()
+    pipeline = aggregation_query._build_pipeline(client.pipeline())
     assert isinstance(pipeline, Pipeline)
     assert len(pipeline.stages) == 2
     assert isinstance(pipeline.stages[0], Collection)
@@ -1071,7 +1071,7 @@ def test_aggreation_to_pipeline_avg(field, in_alias, out_alias):
     query = make_query(parent)
     aggregation_query = make_aggregation_query(query)
     aggregation_query.avg(field, alias=in_alias)
-    pipeline = aggregation_query.pipeline()
+    pipeline = aggregation_query._build_pipeline(client.pipeline())
     assert isinstance(pipeline, Pipeline)
     assert len(pipeline.stages) == 2
     assert isinstance(pipeline.stages[0], Collection)
@@ -1102,7 +1102,7 @@ def test_aggreation_to_pipeline_count(in_alias, out_alias):
     query = make_query(parent)
     aggregation_query = make_aggregation_query(query)
     aggregation_query.count(alias=in_alias)
-    pipeline = aggregation_query.pipeline()
+    pipeline = aggregation_query._build_pipeline(client.pipeline())
     assert isinstance(pipeline, Pipeline)
     assert len(pipeline.stages) == 2
     assert isinstance(pipeline.stages[0], Collection)
@@ -1127,7 +1127,7 @@ def test_aggreation_to_pipeline_count_increment():
     aggregation_query = make_aggregation_query(query)
     for _ in range(n):
         aggregation_query.count()
-    pipeline = aggregation_query.pipeline()
+    pipeline = aggregation_query._build_pipeline(client.pipeline())
     aggregate_stage = pipeline.stages[1]
     assert len(aggregate_stage.accumulators) == n
     for i in range(n):
@@ -1146,7 +1146,7 @@ def test_aggreation_to_pipeline_complex():
     aggregation_query.count()
     aggregation_query.avg("other")
     aggregation_query.sum("final")
-    pipeline = aggregation_query.pipeline()
+    pipeline = aggregation_query._build_pipeline(client.pipeline())
     assert isinstance(pipeline, Pipeline)
     assert len(pipeline.stages) == 3
     assert isinstance(pipeline.stages[0], Collection)
