@@ -16,11 +16,14 @@ import mock
 import pytest
 
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
+from google.cloud.firestore_v1.pipeline_expressions import Constant
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
 from google.cloud.firestore_v1.pipeline_result import PipelineStream
 from google.cloud.firestore_v1.pipeline_result import AsyncPipelineStream
 from google.cloud.firestore_v1.query_profile import QueryExplainError
+from google.cloud.firestore_v1.query_profile import ExplainOptions
+from google.cloud.firestore_v1._helpers import encode_value
 from google.cloud.firestore_v1.types.document import Document
 from google.protobuf.timestamp_pb2 import Timestamp
 
@@ -210,13 +213,17 @@ class TestPipelineSnapshot:
         expected_type = object()
         expected_pipeline = mock.Mock()
         expected_transaction = object()
-        expected_options = object()
-        source = PipelineStream(expected_type, expected_pipeline, expected_transaction, expected_options)
+        expected_explain_options = object()
+        expected_index_mode =  "mode"
+        expected_addtl_options = {}
+        source = PipelineStream(expected_type, expected_pipeline, expected_transaction, expected_explain_options, expected_index_mode, expected_addtl_options)
         instance = self._make_one(in_arr, source)
         assert instance._return_type == expected_type
         assert instance.pipeline == expected_pipeline
         assert instance._client == expected_pipeline._client
-        assert instance._explain_options == expected_options
+        assert instance._additonal_options == expected_addtl_options
+        assert instance._index_mode == expected_index_mode
+        assert instance._explain_options == expected_explain_options
         assert instance._explain_stats is None
         assert instance._started is True
         assert instance.execution_time is None
@@ -246,13 +253,82 @@ class TestPipelineSnapshot:
             instance.explain_stats
         assert "explain_stats not found" in str(e)
 
+class SharedStreamTests:
+    """
+    Shared test logic for PipelineStream and AsyncPipelineStream
+    """
+    def _make_one(self, *args, **kwargs):
+        raise NotImplementedError
 
+    def test_explain_stats(self):
+        instance = self._make_one()
+        expected_stats = mock.Mock()
+        instance._started = True
+        instance._explain_stats = expected_stats
+        assert instance.explain_stats == expected_stats
+        # test different failure modes
+        instance._explain_stats = None
+        instance._explain_options = None
+        # fail if explain_stats set without explain_options
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "explain_options not set" in str(e)
+        # fail if explain_stats missing
+        instance._explain_options = object()
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "explain_stats not found" in str(e)
+        # fail if not started
+        instance._started = False
+        with pytest.raises(QueryExplainError) as e:
+            instance.explain_stats
+        assert "not available until query is complete" in str(e)
 
-class TestPipelineStream:
+    @pytest.mark.parametrize("init_kwargs,expected_options", [
+        ({"index_mode": "mode"}, {"index_mode": encode_value("mode")}),
+        ({"explain_options": ExplainOptions(analyze=True)}, {"explain_options": encode_value({"mode": "analyze"})}),
+        ({"explain_options": ExplainOptions(analyze=False)}, {"explain_options": encode_value({"mode": "explain"})}),
+        ({"additional_options": {"explain_options": Constant("custom")}}, {"explain_options": encode_value("custom")}),
+        ({"additional_options": {"explain_options": encode_value("custom")}}, {"explain_options": encode_value("custom")}),
+        ({"explain_options": ExplainOptions(), "additional_options": {"explain_options": Constant.of("override")}}, {"explain_options": encode_value("override")}),
+        ({"index_mode": "mode", "additional_options": {"index_mode": Constant("new")}}, {"index_mode": encode_value("new")}),
+    ])
+    def test_build_request_options(self, init_kwargs, expected_options):
+        """
+        Certain Arguments to PipelineStream should be passed to `options` field in proto request
+        """
+        from google.cloud.firestore_v1.pipeline import Pipeline
+        option_kwargs = {
+            "explain_options": None,
+            "index_mode": None,
+            "additional_options": {},
+        }
+        option_kwargs.update(init_kwargs)
+        pipeline = Pipeline(mock.Mock())
+        instance = self._make_one(None, pipeline, None, **option_kwargs)
+        request = instance._build_request()
+        options = dict(request.structured_pipeline.options)
+        assert options == expected_options
+        assert len(options) == len(expected_options)
+
+    def test_build_request_transaction(self):
+        """Ensure transaction is passed down when building request"""
+        from google.cloud.firestore_v1.pipeline import Pipeline
+        from google.cloud.firestore_v1.transaction import Transaction
+
+        pipeline = Pipeline(mock.Mock())
+        expected_id = b"expected"
+        transaction = Transaction(mock.Mock())
+        transaction._id = expected_id
+        instance = self._make_one(None, pipeline, transaction, None, None, {})
+        request = instance._build_request()
+        assert request.transaction == expected_id
+
+class TestPipelineStream(SharedStreamTests):
     def _make_one(self, *args, **kwargs):
         if not args:
             # use defaults if not passed
-            args = [PipelineResult, mock.Mock(), None, None]
+            args = [PipelineResult, mock.Mock(), None, None, None, {}]
         return PipelineStream(*args, **kwargs)
 
     def test_explain_stats(self):
@@ -286,7 +362,7 @@ class TestPipelineStream:
         pipeline._client.document.side_effect = lambda path: mock.Mock(id=path.split("/")[-1])
         pipeline._to_pb.return_value = {}
 
-        instance = self._make_one(PipelineResult, pipeline, None, None)
+        instance = self._make_one(PipelineResult, pipeline, None, None, None, {})
 
         instance._client._firestore_api.execute_pipeline.return_value = _mock_stream_responses
 
@@ -315,36 +391,13 @@ class TestPipelineStream:
             list(instance)
 
 
-class TestAsyncPipelineStream:
+class TestAsyncPipelineStream(SharedStreamTests):
     def _make_one(self, *args, **kwargs):
         if not args:
             # use defaults if not passed
-            args = [PipelineResult, mock.Mock(), None, None]
+            args = [PipelineResult, mock.Mock(), None, None, None, {}]
         return AsyncPipelineStream(*args, **kwargs)
 
-    def test_explain_stats(self):
-        instance = self._make_one()
-        expected_stats = mock.Mock()
-        instance._started = True
-        instance._explain_stats = expected_stats
-        assert instance.explain_stats == expected_stats
-        # test different failure modes
-        instance._explain_stats = None
-        instance._explain_options = None
-        # fail if explain_stats set without explain_options
-        with pytest.raises(QueryExplainError) as e:
-            instance.explain_stats
-        assert "explain_options not set" in str(e)
-        # fail if explain_stats missing
-        instance._explain_options = object()
-        with pytest.raises(QueryExplainError) as e:
-            instance.explain_stats
-        assert "explain_stats not found" in str(e)
-        # fail if not started
-        instance._started = False
-        with pytest.raises(QueryExplainError) as e:
-            instance.explain_stats
-        assert "not available until query is complete" in str(e)
 
     @pytest.mark.asyncio
     async def test_aiter(self):
@@ -354,7 +407,7 @@ class TestAsyncPipelineStream:
         pipeline._client.document.side_effect = lambda path: mock.Mock(id=path.split("/")[-1])
         pipeline._to_pb.return_value = {}
 
-        instance = self._make_one(PipelineResult, pipeline, None, None)
+        instance = self._make_one(PipelineResult, pipeline, None, None, None, {})
 
         async def async_gen(items):
             for item in items:

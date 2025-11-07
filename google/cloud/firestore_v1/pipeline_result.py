@@ -21,6 +21,7 @@ from google.cloud.firestore_v1.field_path import FieldPath
 from google.cloud.firestore_v1.query_profile import ExplainStats
 from google.cloud.firestore_v1.query_profile import QueryExplainError
 from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
+from google.cloud.firestore_v1.types.document import Value
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_client import AsyncClient
@@ -164,6 +165,8 @@ class _PipelineResultContainer(Generic[T]):
         pipeline: Pipeline | AsyncPipeline,
         transaction: Transaction | AsyncTransaction | None,
         explain_options: ExplainOptions | None,
+        index_mode: str | None,
+        additional_options: dict[str, Constant | Value],
     ):
         # public
         self.transaction = transaction
@@ -175,6 +178,8 @@ class _PipelineResultContainer(Generic[T]):
         self._explain_stats: ExplainStats | None = None
         self._explain_options: ExplainOptions | None = explain_options
         self._return_type = return_type
+        self._index_mode = index_mode
+        self._additonal_options = {k: v if isinstance(v, Value) else v._to_pb() for k,v in additional_options.items()}
 
     @property
     def explain_stats(self) -> ExplainStats:
@@ -195,13 +200,17 @@ class _PipelineResultContainer(Generic[T]):
             f"projects/{self._client.project}/databases/{self._client._database}"
         )
         transaction_id = (
-            _helpers.get_transaction_id(self.transaction)
+            _helpers.get_transaction_id(self.transaction, read_operation=False)
             if self.transaction is not None
             else None
         )
         options = {}
         if self._explain_options:
             options["explain_options"] = self._explain_options._to_value()
+        if self._index_mode:
+            options["index_mode"] = Value(string_value=self._index_mode)
+        if self._additonal_options:
+            options.update(self._additonal_options)
         request = ExecutePipelineRequest(
             database=database_name,
             transaction=transaction_id,

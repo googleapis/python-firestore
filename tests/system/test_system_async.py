@@ -22,6 +22,7 @@ from typing import Callable, Dict, List, Optional
 import google.auth
 import pytest
 import pytest_asyncio
+import mock
 from google.api_core import exceptions as core_exceptions
 from google.api_core import retry_async as retries
 from google.api_core.exceptions import (
@@ -1642,6 +1643,46 @@ async def test_pipeline_explain_options_analyze_mode(
 
     assert num_results == len(allowed_vals)
 
+    assert isinstance(explain_stats, ExplainStats)
+    assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
+    text_stats = explain_stats.get_text()
+    assert "Execution:" in text_stats
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+async def test_pipeline_explain_options_using_additional_options(
+    database, method, query_docs
+):
+    """additional_options field allows passing in arbitrary options. Test with explain_options"""
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainOptions,
+        ExplainStats,
+        QueryExplainError,
+    )
+    from google.cloud.firestore_v1.types.explain_stats import (
+        ExplainStats as ExplainStats_pb,
+    )
+
+    collection, _, allowed_vals = query_docs
+    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+
+    method_under_test = getattr(pipeline, method)
+    encoded_options = {"explain_options": ExplainOptions(analyze=True)._to_value()}
+
+    stub = method_under_test(explain_options=mock.Mock(), additional_options=encoded_options)
+    if method == "execute":
+        results = await stub
+        num_results = len(results)
+    else:
+        results = stub
+        num_results = len([item async for item in results])
+
+    assert num_results == len(allowed_vals)
+
+    explain_stats = results.explain_stats
     assert isinstance(explain_stats, ExplainStats)
     assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
     text_stats = explain_stats.get_text()

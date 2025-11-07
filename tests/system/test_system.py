@@ -21,6 +21,7 @@ from typing import Callable, Dict, List, Optional
 
 import google.auth
 import pytest
+import mock
 from google.api_core.exceptions import (
     AlreadyExists,
     FailedPrecondition,
@@ -1660,7 +1661,6 @@ def test_pipeline_explain_options_explain_mode(
     database, method, query_docs
 ):
     """Explain currently not supported by backend. Expect error"""
-    from google.api_core.exceptions import InvalidArgument
     from google.cloud.firestore_v1.query_profile import (
         ExplainOptions,
         ExplainStats,
@@ -1722,6 +1722,61 @@ def test_pipeline_explain_options_analyze_mode(
     assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
     text_stats = explain_stats.get_text()
     assert "Execution:" in text_stats
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_using_additional_options(
+    database, method, query_docs
+):
+    """additional_options field allows passing in arbitrary options. Test with explain_options"""
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainOptions,
+        ExplainStats,
+        QueryExplainError,
+    )
+    from google.cloud.firestore_v1.types.explain_stats import ExplainStats as ExplainStats_pb
+
+    collection, _, allowed_vals = query_docs
+    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+
+    encoded_options = {"explain_options": ExplainOptions(analyze=True)._to_value()}
+
+    results = method_under_test(explain_options=mock.Mock(), additional_options=encoded_options)
+
+    # Finish iterating results, and explain_stats should be available.
+    results_list = list(results)
+    num_results = len(results_list)
+    assert num_results == len(allowed_vals)
+
+    # Verify explain_stats.
+    explain_stats = results.explain_stats
+    assert isinstance(explain_stats, ExplainStats)
+
+    assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
+    text_stats = explain_stats.get_text()
+    assert "Execution:" in text_stats
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_index_mode(
+    database, query_docs
+):
+    """test pipeline query with explicit index mode"""
+
+    collection, _, allowed_vals = query_docs
+    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+    with pytest.raises(InvalidArgument) as e:
+        pipeline.execute(index_mode="fake_index")
+    assert "Invalid index_mode: fake_index" in str(e)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
