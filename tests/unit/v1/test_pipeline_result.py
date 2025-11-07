@@ -277,7 +277,7 @@ class TestPipelineStream:
         instance._started = False
         with pytest.raises(QueryExplainError) as e:
             instance.explain_stats
-        assert "stream not started" in str(e)
+        assert "not available until query is complete" in str(e)
 
     def test_iter(self):
         pipeline = mock.Mock()
@@ -344,7 +344,7 @@ class TestAsyncPipelineStream:
         instance._started = False
         with pytest.raises(QueryExplainError) as e:
             instance.explain_stats
-        assert "stream not started" in str(e)
+        assert "not available until query is complete" in str(e)
 
     @pytest.mark.asyncio
     async def test_aiter(self):

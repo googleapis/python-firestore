@@ -183,7 +183,7 @@ class _PipelineResultContainer(Generic[T]):
         elif self._explain_options is None:
             raise QueryExplainError("explain_options not set on query.")
         elif not self._started:
-            raise QueryExplainError("stream not started")
+            raise QueryExplainError("explain_stats not available until query is complete")
         else:
             raise QueryExplainError("explain_stats not found")
 

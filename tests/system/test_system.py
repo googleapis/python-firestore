@@ -46,6 +46,7 @@ from test__helpers import (
     TEST_DATABASES,
     TEST_DATABASES_W_ENTERPRISE,
     IS_KOKORO_TEST,
+    FIRESTORE_ENTERPRISE_DB,
 )
 
 
@@ -1648,6 +1649,79 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
         match="execution_stats not available when explain_options.analyze=False",
     ):
         explain_metrics.execution_stats
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_explain_mode(
+    database, method, query_docs
+):
+    """Explain currently not supported by backend. Expect error"""
+    from google.api_core.exceptions import InvalidArgument
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainOptions,
+        ExplainStats,
+    )
+
+    collection, _, _ = query_docs
+    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+    explain_options = ExplainOptions(analyze=False)
+
+    # for now, expect error on explain mode
+    with pytest.raises(InvalidArgument) as e:
+        results = method_under_test(explain_options=explain_options)
+        list(results)
+    assert"Explain execution mode is not supported" in str(e)
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_analyze_mode(
+    database, method, query_docs
+):
+    from google.cloud.firestore_v1.query_profile import (
+        ExplainOptions,
+        ExplainStats,
+        QueryExplainError,
+    )
+    from google.cloud.firestore_v1.types.explain_stats import ExplainStats as ExplainStats_pb
+
+    collection, _, allowed_vals = query_docs
+    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+    results = method_under_test(explain_options=ExplainOptions(analyze=True))
+
+    if method == "stream":
+        # check for error accessing explain stats before iterating
+        with pytest.raises(
+            QueryExplainError,
+            match="explain_stats not available until query is complete",
+        ):
+            results.explain_stats
+
+    # Finish iterating results, and explain_stats should be available.
+    results_list = list(results)
+    num_results = len(results_list)
+    assert num_results == len(allowed_vals)
+
+    # Verify explain_stats.
+    explain_stats = results.explain_stats
+    assert isinstance(explain_stats, ExplainStats)
+
+    assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
+    text_stats = explain_stats.get_text()
+    assert "Execution:" in text_stats
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
