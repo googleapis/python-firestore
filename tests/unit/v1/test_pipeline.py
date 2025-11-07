@@ -107,7 +107,6 @@ def test_pipeline__to_pb_with_options():
     assert pb.options["option_1"].integer_value == 1
 
 
-
 def test_pipeline_append():
     """append should create a new pipeline with the additional stage"""
 

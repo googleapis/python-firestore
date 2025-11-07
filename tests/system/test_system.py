@@ -1657,13 +1657,10 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
 )
 @pytest.mark.parametrize("method", ["execute", "stream"])
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
-def test_pipeline_explain_options_explain_mode(
-    database, method, query_docs
-):
+def test_pipeline_explain_options_explain_mode(database, method, query_docs):
     """Explain currently not supported by backend. Expect error"""
     from google.cloud.firestore_v1.query_profile import (
         ExplainOptions,
-        ExplainStats,
     )
 
     collection, _, _ = query_docs
@@ -1677,7 +1674,7 @@ def test_pipeline_explain_options_explain_mode(
     with pytest.raises(InvalidArgument) as e:
         results = method_under_test(explain_options=explain_options)
         list(results)
-    assert"Explain execution mode is not supported" in str(e)
+    assert "Explain execution mode is not supported" in str(e)
 
 
 @pytest.mark.skipif(
@@ -1685,15 +1682,15 @@ def test_pipeline_explain_options_explain_mode(
 )
 @pytest.mark.parametrize("method", ["execute", "stream"])
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
-def test_pipeline_explain_options_analyze_mode(
-    database, method, query_docs
-):
+def test_pipeline_explain_options_analyze_mode(database, method, query_docs):
     from google.cloud.firestore_v1.query_profile import (
         ExplainOptions,
         ExplainStats,
         QueryExplainError,
     )
-    from google.cloud.firestore_v1.types.explain_stats import ExplainStats as ExplainStats_pb
+    from google.cloud.firestore_v1.types.explain_stats import (
+        ExplainStats as ExplainStats_pb,
+    )
 
     collection, _, allowed_vals = query_docs
     pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
@@ -1736,9 +1733,10 @@ def test_pipeline_explain_options_using_additional_options(
     from google.cloud.firestore_v1.query_profile import (
         ExplainOptions,
         ExplainStats,
-        QueryExplainError,
     )
-    from google.cloud.firestore_v1.types.explain_stats import ExplainStats as ExplainStats_pb
+    from google.cloud.firestore_v1.types.explain_stats import (
+        ExplainStats as ExplainStats_pb,
+    )
 
     collection, _, allowed_vals = query_docs
     pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
@@ -1748,7 +1746,9 @@ def test_pipeline_explain_options_using_additional_options(
 
     encoded_options = {"explain_options": ExplainOptions(analyze=True)._to_value()}
 
-    results = method_under_test(explain_options=mock.Mock(), additional_options=encoded_options)
+    results = method_under_test(
+        explain_options=mock.Mock(), additional_options=encoded_options
+    )
 
     # Finish iterating results, and explain_stats should be available.
     results_list = list(results)
@@ -1763,13 +1763,12 @@ def test_pipeline_explain_options_using_additional_options(
     text_stats = explain_stats.get_text()
     assert "Execution:" in text_stats
 
+
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
-def test_pipeline_index_mode(
-    database, query_docs
-):
+def test_pipeline_index_mode(database, query_docs):
     """test pipeline query with explicit index mode"""
 
     collection, _, allowed_vals = query_docs

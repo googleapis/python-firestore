@@ -13,15 +13,13 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Iterable, Sequence, TYPE_CHECKING
+from typing import Sequence, TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.types.pipeline import (
     StructuredPipeline as StructuredPipeline_pb,
 )
 from google.cloud.firestore_v1.vector import Vector
 from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
-from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
-from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_expressions import (
     AggregateFunction,
     AliasedExpression,
@@ -30,14 +28,10 @@ from google.cloud.firestore_v1.pipeline_expressions import (
     BooleanExpression,
     Selectable,
 )
-from google.cloud.firestore_v1 import _helpers
 
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
-    from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
-    from google.cloud.firestore_v1.transaction import BaseTransaction
-    from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
 class _BasePipeline:

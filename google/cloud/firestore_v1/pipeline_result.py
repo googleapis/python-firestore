@@ -13,8 +13,18 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, Awaitable, AsyncIterable, AsyncIterator, Iterable, Iterator, Generic, MutableMapping, Type, TypeVar, TYPE_CHECKING
-import copy
+from typing import (
+    Any,
+    AsyncIterable,
+    AsyncIterator,
+    Iterable,
+    Iterator,
+    Generic,
+    MutableMapping,
+    Type,
+    TypeVar,
+    TYPE_CHECKING,
+)
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
@@ -37,6 +47,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
     from google.cloud.firestore_v1.base_pipeline import _BasePipeline
     from google.cloud.firestore_v1.pipeline import Pipeline
+    from google.cloud.firestore_v1.pipeline_expressions import Constant
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
@@ -179,7 +190,10 @@ class _PipelineResultContainer(Generic[T]):
         self._explain_options: ExplainOptions | None = explain_options
         self._return_type = return_type
         self._index_mode = index_mode
-        self._additonal_options = {k: v if isinstance(v, Value) else v._to_pb() for k,v in additional_options.items()}
+        self._additonal_options = {
+            k: v if isinstance(v, Value) else v._to_pb()
+            for k, v in additional_options.items()
+        }
 
     @property
     def explain_stats(self) -> ExplainStats:
@@ -188,7 +202,9 @@ class _PipelineResultContainer(Generic[T]):
         elif self._explain_options is None:
             raise QueryExplainError("explain_options not set on query.")
         elif not self._started:
-            raise QueryExplainError("explain_stats not available until query is complete")
+            raise QueryExplainError(
+                "explain_stats not available until query is complete"
+            )
         else:
             raise QueryExplainError("explain_stats not found")
 
@@ -214,14 +230,14 @@ class _PipelineResultContainer(Generic[T]):
         request = ExecutePipelineRequest(
             database=database_name,
             transaction=transaction_id,
-            structured_pipeline=self.pipeline._to_pb(**options)
+            structured_pipeline=self.pipeline._to_pb(**options),
         )
         return request
 
     def _process_response(self, response: ExecutePipelineResponse) -> Iterable[T]:
         """Shared logic for processing an individual response from a stream"""
         if response.explain_stats:
-           self._explain_stats = ExplainStats(response.explain_stats)
+            self._explain_stats = ExplainStats(response.explain_stats)
         execution_time = response._pb.execution_time
         if execution_time and not self.execution_time:
             self.execution_time = execution_time
@@ -241,6 +257,7 @@ class PipelineSnapshot(_PipelineResultContainer[T], list[T]):
     """
     A list type that holds the result of a pipeline.execute() operation, along with related metadata
     """
+
     def __init__(self, results_list: list[T], source: _PipelineResultContainer[T]):
         self.__dict__.update(source.__dict__.copy())
         list.__init__(self, results_list)
@@ -261,6 +278,7 @@ class PipelineStream(_PipelineResultContainer[T], Iterable[T]):
         stream = self._client._firestore_api.execute_pipeline(request)
         for response in stream:
             yield from self._process_response(response)
+
 
 class AsyncPipelineStream(_PipelineResultContainer[T], AsyncIterable[T]):
     """

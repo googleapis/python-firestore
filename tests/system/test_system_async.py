@@ -1578,9 +1578,7 @@ async def test_query_stream_or_get_w_explain_options_analyze_false(
 )
 @pytest.mark.parametrize("method", ["execute", "stream"])
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
-async def test_pipeline_explain_options_explain_mode(
-    database, method, query_docs
-):
+async def test_pipeline_explain_options_explain_mode(database, method, query_docs):
     """Explain currently not supported by backend. Expect error"""
     from google.api_core.exceptions import InvalidArgument
     from google.cloud.firestore_v1.query_profile import (
@@ -1608,9 +1606,7 @@ async def test_pipeline_explain_options_explain_mode(
 )
 @pytest.mark.parametrize("method", ["execute", "stream"])
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
-async def test_pipeline_explain_options_analyze_mode(
-    database, method, query_docs
-):
+async def test_pipeline_explain_options_analyze_mode(database, method, query_docs):
     from google.cloud.firestore_v1.query_profile import (
         ExplainOptions,
         ExplainStats,
@@ -1648,6 +1644,7 @@ async def test_pipeline_explain_options_analyze_mode(
     text_stats = explain_stats.get_text()
     assert "Execution:" in text_stats
 
+
 @pytest.mark.skipif(
     FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
 )
@@ -1660,7 +1657,6 @@ async def test_pipeline_explain_options_using_additional_options(
     from google.cloud.firestore_v1.query_profile import (
         ExplainOptions,
         ExplainStats,
-        QueryExplainError,
     )
     from google.cloud.firestore_v1.types.explain_stats import (
         ExplainStats as ExplainStats_pb,
@@ -1672,7 +1668,9 @@ async def test_pipeline_explain_options_using_additional_options(
     method_under_test = getattr(pipeline, method)
     encoded_options = {"explain_options": ExplainOptions(analyze=True)._to_value()}
 
-    stub = method_under_test(explain_options=mock.Mock(), additional_options=encoded_options)
+    stub = method_under_test(
+        explain_options=mock.Mock(), additional_options=encoded_options
+    )
     if method == "execute":
         results = await stub
         num_results = len(results)

@@ -30,18 +30,15 @@ from google.protobuf.timestamp_pb2 import Timestamp
 
 _mock_stream_responses = [
     ExecutePipelineResponse(
-        results=[
-            Document(name="projects/p/databases/d/documents/c/d1", fields={})
-        ],
+        results=[Document(name="projects/p/databases/d/documents/c/d1", fields={})],
         execution_time=Timestamp(seconds=1, nanos=2),
     ),
     ExecutePipelineResponse(
-        results=[
-            Document(name="projects/p/databases/d/documents/c/d2", fields={})
-        ],
+        results=[Document(name="projects/p/databases/d/documents/c/d2", fields={})],
         execution_time=Timestamp(seconds=3, nanos=4),
     ),
 ]
+
 
 class TestPipelineResult:
     def _make_one(self, *args, **kwargs):
@@ -200,8 +197,8 @@ class TestPipelineResult:
             decode_mock.assert_called_once_with("value", client)
             assert got == decode_mock.return_value
 
-class TestPipelineSnapshot:
 
+class TestPipelineSnapshot:
     def _make_one(self, *args, **kwargs):
         if not args:
             # use defaults if not passed
@@ -214,9 +211,16 @@ class TestPipelineSnapshot:
         expected_pipeline = mock.Mock()
         expected_transaction = object()
         expected_explain_options = object()
-        expected_index_mode =  "mode"
+        expected_index_mode = "mode"
         expected_addtl_options = {}
-        source = PipelineStream(expected_type, expected_pipeline, expected_transaction, expected_explain_options, expected_index_mode, expected_addtl_options)
+        source = PipelineStream(
+            expected_type,
+            expected_pipeline,
+            expected_transaction,
+            expected_explain_options,
+            expected_index_mode,
+            expected_addtl_options,
+        )
         instance = self._make_one(in_arr, source)
         assert instance._return_type == expected_type
         assert instance.pipeline == expected_pipeline
@@ -253,10 +257,12 @@ class TestPipelineSnapshot:
             instance.explain_stats
         assert "explain_stats not found" in str(e)
 
+
 class SharedStreamTests:
     """
     Shared test logic for PipelineStream and AsyncPipelineStream
     """
+
     def _make_one(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -284,20 +290,48 @@ class SharedStreamTests:
             instance.explain_stats
         assert "not available until query is complete" in str(e)
 
-    @pytest.mark.parametrize("init_kwargs,expected_options", [
-        ({"index_mode": "mode"}, {"index_mode": encode_value("mode")}),
-        ({"explain_options": ExplainOptions(analyze=True)}, {"explain_options": encode_value({"mode": "analyze"})}),
-        ({"explain_options": ExplainOptions(analyze=False)}, {"explain_options": encode_value({"mode": "explain"})}),
-        ({"additional_options": {"explain_options": Constant("custom")}}, {"explain_options": encode_value("custom")}),
-        ({"additional_options": {"explain_options": encode_value("custom")}}, {"explain_options": encode_value("custom")}),
-        ({"explain_options": ExplainOptions(), "additional_options": {"explain_options": Constant.of("override")}}, {"explain_options": encode_value("override")}),
-        ({"index_mode": "mode", "additional_options": {"index_mode": Constant("new")}}, {"index_mode": encode_value("new")}),
-    ])
+    @pytest.mark.parametrize(
+        "init_kwargs,expected_options",
+        [
+            ({"index_mode": "mode"}, {"index_mode": encode_value("mode")}),
+            (
+                {"explain_options": ExplainOptions(analyze=True)},
+                {"explain_options": encode_value({"mode": "analyze"})},
+            ),
+            (
+                {"explain_options": ExplainOptions(analyze=False)},
+                {"explain_options": encode_value({"mode": "explain"})},
+            ),
+            (
+                {"additional_options": {"explain_options": Constant("custom")}},
+                {"explain_options": encode_value("custom")},
+            ),
+            (
+                {"additional_options": {"explain_options": encode_value("custom")}},
+                {"explain_options": encode_value("custom")},
+            ),
+            (
+                {
+                    "explain_options": ExplainOptions(),
+                    "additional_options": {"explain_options": Constant.of("override")},
+                },
+                {"explain_options": encode_value("override")},
+            ),
+            (
+                {
+                    "index_mode": "mode",
+                    "additional_options": {"index_mode": Constant("new")},
+                },
+                {"index_mode": encode_value("new")},
+            ),
+        ],
+    )
     def test_build_request_options(self, init_kwargs, expected_options):
         """
         Certain Arguments to PipelineStream should be passed to `options` field in proto request
         """
         from google.cloud.firestore_v1.pipeline import Pipeline
+
         option_kwargs = {
             "explain_options": None,
             "index_mode": None,
@@ -323,6 +357,7 @@ class SharedStreamTests:
         instance = self._make_one(None, pipeline, transaction, None, None, {})
         request = instance._build_request()
         assert request.transaction == expected_id
+
 
 class TestPipelineStream(SharedStreamTests):
     def _make_one(self, *args, **kwargs):
@@ -359,12 +394,16 @@ class TestPipelineStream(SharedStreamTests):
         pipeline = mock.Mock()
         pipeline._client.project = "project-id"
         pipeline._client._database = "database-id"
-        pipeline._client.document.side_effect = lambda path: mock.Mock(id=path.split("/")[-1])
+        pipeline._client.document.side_effect = lambda path: mock.Mock(
+            id=path.split("/")[-1]
+        )
         pipeline._to_pb.return_value = {}
 
         instance = self._make_one(PipelineResult, pipeline, None, None, None, {})
 
-        instance._client._firestore_api.execute_pipeline.return_value = _mock_stream_responses
+        instance._client._firestore_api.execute_pipeline.return_value = (
+            _mock_stream_responses
+        )
 
         results = list(instance)
 
@@ -398,13 +437,14 @@ class TestAsyncPipelineStream(SharedStreamTests):
             args = [PipelineResult, mock.Mock(), None, None, None, {}]
         return AsyncPipelineStream(*args, **kwargs)
 
-
     @pytest.mark.asyncio
     async def test_aiter(self):
         pipeline = mock.Mock()
         pipeline._client.project = "project-id"
         pipeline._client._database = "database-id"
-        pipeline._client.document.side_effect = lambda path: mock.Mock(id=path.split("/")[-1])
+        pipeline._client.document.side_effect = lambda path: mock.Mock(
+            id=path.split("/")[-1]
+        )
         pipeline._to_pb.return_value = {}
 
         instance = self._make_one(PipelineResult, pipeline, None, None, None, {})

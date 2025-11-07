@@ -125,9 +125,10 @@ def test_explain_options__to_dict():
     assert ExplainOptions(analyze=True)._to_dict() == {"analyze": True}
     assert ExplainOptions(analyze=False)._to_dict() == {"analyze": False}
 
-@pytest.mark.parametrize("analyze_bool,expected_str", [
-    (True, "analyze"), (False, "explain")
-])
+
+@pytest.mark.parametrize(
+    "analyze_bool,expected_str", [(True, "analyze"), (False, "explain")]
+)
 def test_explain_options__to_value(analyze_bool, expected_str):
     """
     Should be able to create a Value protobuf representation of ExplainOptions
@@ -180,8 +181,6 @@ def test_explain_stats_get_text_error():
         QueryExplainError,
     )
     from google.cloud.firestore_v1.types import explain_stats as explain_stats_pb2
-    from google.cloud.firestore_v1.types import document
-    from google.protobuf import any_pb2
 
     expected_stats_pb = explain_stats_pb2.ExplainStats(data={})
     stats = ExplainStats(expected_stats_pb)

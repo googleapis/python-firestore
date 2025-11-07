@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import AsyncIterable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
 from google.cloud.firestore_v1.pipeline_result import AsyncPipelineStream
@@ -23,6 +23,8 @@ from google.cloud.firestore_v1.pipeline_result import PipelineResult
 if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+    from google.cloud.firestore_v1.pipeline_expressions import Constant
+    from google.cloud.firestore_v1.types.document import Value
     from google.cloud.firestore_v1.query_profile import ExplainOptions
 
 
@@ -84,7 +86,7 @@ class AsyncPipeline(_BasePipeline):
             additional_options (Optional[dict[str, Value | Constant]]): Additional options to pass to the query.
                 These options will take precedence over method argument if there is a conflict (e.g. explain_options, index_mode)
         """
-        kwargs = {k: v for k, v in locals().items() if k != 'self'}
+        kwargs = {k: v for k, v in locals().items() if k != "self"}
         stream = AsyncPipelineStream(PipelineResult, self, **kwargs)
         results = [result async for result in stream]
         return PipelineSnapshot(results, stream)
@@ -114,5 +116,5 @@ class AsyncPipeline(_BasePipeline):
             additional_options (Optional[dict[str, Value | Constant]]): Additional options to pass to the query.
                 These options will take precedence over method argument if there is a conflict (e.g. explain_options, index_mode)
         """
-        kwargs = {k: v for k, v in locals().items() if k != 'self'}
+        kwargs = {k: v for k, v in locals().items() if k != "self"}
         return AsyncPipelineStream(PipelineResult, self, **kwargs)

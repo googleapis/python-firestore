@@ -21,8 +21,11 @@ from dataclasses import dataclass
 from google.protobuf.json_format import MessageToDict
 from google.cloud.firestore_v1.types.document import MapValue
 from google.cloud.firestore_v1.types.document import Value
-from google.cloud.firestore_v1.types.explain_stats import ExplainStats as ExplainStats_pb
+from google.cloud.firestore_v1.types.explain_stats import (
+    ExplainStats as ExplainStats_pb,
+)
 from google.protobuf.wrappers_pb2 import StringValue
+
 
 @dataclass(frozen=True)
 class ExplainOptions:
@@ -151,6 +154,7 @@ class QueryExplainError(Exception):
     """
 
     pass
+
 
 class ExplainStats:
     """
