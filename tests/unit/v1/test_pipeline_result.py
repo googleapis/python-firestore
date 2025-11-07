@@ -15,12 +15,30 @@
 import mock
 import pytest
 
+from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
 from google.cloud.firestore_v1.pipeline_result import PipelineStream
 from google.cloud.firestore_v1.pipeline_result import AsyncPipelineStream
 from google.cloud.firestore_v1.query_profile import QueryExplainError
+from google.cloud.firestore_v1.types.document import Document
+from google.protobuf.timestamp_pb2 import Timestamp
 
+
+_mock_stream_responses = [
+    ExecutePipelineResponse(
+        results=[
+            Document(name="projects/p/databases/d/documents/c/d1", fields={})
+        ],
+        execution_time=Timestamp(seconds=1, nanos=2),
+    ),
+    ExecutePipelineResponse(
+        results=[
+            Document(name="projects/p/databases/d/documents/c/d2", fields={})
+        ],
+        execution_time=Timestamp(seconds=3, nanos=4),
+    ),
+]
 
 class TestPipelineResult:
     def _make_one(self, *args, **kwargs):
@@ -261,6 +279,30 @@ class TestPipelineStream:
             instance.explain_stats
         assert "stream not started" in str(e)
 
+    def test_iter(self):
+        pipeline = mock.Mock()
+        pipeline._client.project = "project-id"
+        pipeline._client._database = "database-id"
+        pipeline._client.document.side_effect = lambda path: mock.Mock(id=path.split("/")[-1])
+        pipeline._to_pb.return_value = {}
+
+        instance = self._make_one(PipelineResult, pipeline, None, None)
+
+        instance._client._firestore_api.execute_pipeline.return_value = _mock_stream_responses
+
+        results = list(instance)
+
+        assert len(results) == 2
+        assert isinstance(results[0], PipelineResult)
+        assert results[0].id == "d1"
+        assert isinstance(results[1], PipelineResult)
+        assert results[1].id == "d2"
+
+        assert instance.execution_time.seconds == 1
+        assert instance.execution_time.nanos == 2
+
+        instance._client._firestore_api.execute_pipeline.assert_called_once()
+
     def test_double_iterate(self):
         instance = self._make_one()
         instance.pipeline._client.project = "project-id"
@@ -304,5 +346,55 @@ class TestAsyncPipelineStream:
             instance.explain_stats
         assert "stream not started" in str(e)
 
-    def test_double_iterate(self):
-        pass
+    @pytest.mark.asyncio
+    async def test_aiter(self):
+        pipeline = mock.Mock()
+        pipeline._client.project = "project-id"
+        pipeline._client._database = "database-id"
+        pipeline._client.document.side_effect = lambda path: mock.Mock(id=path.split("/")[-1])
+        pipeline._to_pb.return_value = {}
+
+        instance = self._make_one(PipelineResult, pipeline, None, None)
+
+        async def async_gen(items):
+            for item in items:
+                yield item
+
+        instance._client._firestore_api.execute_pipeline = mock.AsyncMock(
+            return_value=async_gen(_mock_stream_responses)
+        )
+
+        results = [item async for item in instance]
+
+        assert len(results) == 2
+        assert isinstance(results[0], PipelineResult)
+        assert results[0].id == "d1"
+        assert isinstance(results[1], PipelineResult)
+        assert results[1].id == "d2"
+
+        assert instance.execution_time.seconds == 1
+        assert instance.execution_time.nanos == 2
+
+        instance._client._firestore_api.execute_pipeline.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_double_iterate(self):
+        instance = self._make_one()
+        instance.pipeline._client.project = "project-id"
+        instance.pipeline._client._database = "database-id"
+        instance.pipeline._to_pb.return_value = {}
+
+        async def async_gen(items):
+            for item in items:
+                yield item
+
+        # mock the api call to avoid real network requests
+        instance._client._firestore_api.execute_pipeline = mock.AsyncMock(
+            return_value=async_gen([])
+        )
+
+        # consume the iterator
+        [item async for item in instance]
+        # should fail on second attempt
+        with pytest.raises(RuntimeError):
+            [item async for item in instance]
