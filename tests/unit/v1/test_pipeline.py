@@ -313,6 +313,34 @@ def test_pipeline_stream_with_transaction():
     assert request.transaction == b"123"
 
 
+def test_pipeline_stream_with_read_time():
+    """
+    test stream pipeline with read_time
+    """
+    import datetime
+
+    from google.cloud.firestore_v1.types import ExecutePipelineResponse
+    from google.cloud.firestore_v1.types import ExecutePipelineRequest
+
+    client = mock.Mock()
+    client.project = "A"
+    client._database = "B"
+    mock_rpc = client._firestore_api.execute_pipeline
+
+    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    mock_rpc.return_value = [ExecutePipelineResponse()]
+    ppl_1 = _make_pipeline(client=client)
+
+    list(ppl_1.stream(read_time=read_time))
+    assert mock_rpc.call_count == 1
+    request = mock_rpc.call_args[0][0]
+    assert isinstance(request, ExecutePipelineRequest)
+    assert request.structured_pipeline == ppl_1._to_pb()
+    assert request.database == "projects/A/databases/B"
+    assert request.read_time == read_time
+
+
 def test_pipeline_execute_stream_equivalence():
     """
     Pipeline.execute should provide same results from pipeline.stream, as a list

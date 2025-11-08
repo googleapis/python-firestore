@@ -34,6 +34,7 @@ from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
 from google.cloud.firestore_v1.types.document import Value
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.base_client import BaseClient
@@ -175,6 +176,7 @@ class _PipelineResultContainer(Generic[T]):
         return_type: Type[T],
         pipeline: Pipeline | AsyncPipeline,
         transaction: Transaction | AsyncTransaction | None,
+        read_time: datetime.datetime | None,
         explain_options: PipelineExplainOptions | None,
         index_mode: str | None,
         additional_options: dict[str, Constant | Value],
@@ -186,6 +188,7 @@ class _PipelineResultContainer(Generic[T]):
         # private
         self._client: Client | AsyncClient = pipeline._client
         self._started: bool = False
+        self._read_time = read_time
         self._explain_stats: ExplainStats | None = None
         self._explain_options: PipelineExplainOptions | None = explain_options
         self._return_type = return_type
@@ -231,6 +234,7 @@ class _PipelineResultContainer(Generic[T]):
             database=database_name,
             transaction=transaction_id,
             structured_pipeline=self.pipeline._to_pb(**options),
+            read_time=self._read_time,
         )
         return request
 

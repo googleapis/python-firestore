@@ -1587,7 +1587,9 @@ async def test_pipeline_explain_options_explain_mode(database, method, query_doc
     )
 
     collection, _, _ = query_docs
-    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
 
     method_under_test = getattr(pipeline, method)
     explain_options = PipelineExplainOptions(mode="explain")
@@ -1618,7 +1620,9 @@ async def test_pipeline_explain_options_analyze_mode(database, method, query_doc
     )
 
     collection, _, allowed_vals = query_docs
-    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
 
     method_under_test = getattr(pipeline, method)
     explain_options = PipelineExplainOptions()
@@ -1664,7 +1668,9 @@ async def test_pipeline_explain_options_using_additional_options(
     )
 
     collection, _, allowed_vals = query_docs
-    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
 
     method_under_test = getattr(pipeline, method)
     encoded_options = {"explain_options": PipelineExplainOptions()._to_value()}
@@ -1686,6 +1692,49 @@ async def test_pipeline_explain_options_using_additional_options(
     assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
     text_stats = explain_stats.get_text()
     assert "Execution:" in text_stats
+
+
+@pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+async def test_pipeline_w_read_time(query_docs, cleanup, database):
+    collection, stored, allowed_vals = query_docs
+    num_vals = len(allowed_vals)
+
+    # Find a read_time before adding the new document.
+    snapshots = await collection.get()
+    read_time = snapshots[0].read_time
+
+    new_data = {
+        "a": 9000,
+        "b": 1,
+    }
+    _, new_ref = await collection.add(new_data)
+    # Add to clean-up.
+    cleanup(new_ref.delete)
+    stored[new_ref.id] = new_data
+    client = collection._client
+    query = collection.where(filter=FieldFilter("b", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # new query should have new_data
+    new_results = [result async for result in pipeline.stream()]
+    new_values = {result.ref.id: result.data() for result in new_results}
+    assert len(new_values) == num_vals + 1
+    assert new_ref.id in new_values
+    assert new_values[new_ref.id] == new_data
+
+    # pipeline with read_time should not have new_data
+    results = [result async for result in pipeline.stream(read_time=read_time)]
+
+    values = {result.ref.id: result.data() for result in results}
+
+    assert len(values) == num_vals
+    assert new_ref.id not in values
+    for key, value in values.items():
+        assert stored[key] == value
+        assert value["b"] == 1
+        assert value["a"] != 9000
+        assert key != new_ref.id
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)

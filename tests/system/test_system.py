@@ -1665,7 +1665,9 @@ def test_pipeline_explain_options_explain_mode(database, method, query_docs):
     )
 
     collection, _, _ = query_docs
-    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
 
     # Tests either `execute()` or `stream()`.
     method_under_test = getattr(pipeline, method)
@@ -1694,7 +1696,9 @@ def test_pipeline_explain_options_analyze_mode(database, method, query_docs):
     )
 
     collection, _, allowed_vals = query_docs
-    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
 
     # Tests either `execute()` or `stream()`.
     method_under_test = getattr(pipeline, method)
@@ -1740,7 +1744,9 @@ def test_pipeline_explain_options_using_additional_options(
     )
 
     collection, _, allowed_vals = query_docs
-    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
 
     # Tests either `execute()` or `stream()`.
     method_under_test = getattr(pipeline, method)
@@ -1751,7 +1757,7 @@ def test_pipeline_explain_options_using_additional_options(
         explain_options=mock.Mock(), additional_options=encoded_options
     )
 
-    # Finish iterating results, and explain_stats should be available.
+    # Finish iterating results, and explain_stats should be available./w_read
     results_list = list(results)
     num_results = len(results_list)
     assert num_results == len(allowed_vals)
@@ -1773,7 +1779,9 @@ def test_pipeline_index_mode(database, query_docs):
     """test pipeline query with explicit index mode"""
 
     collection, _, allowed_vals = query_docs
-    pipeline = collection.where(filter=FieldFilter("a", "==", 1)).pipeline()
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
     with pytest.raises(InvalidArgument) as e:
         pipeline.execute(index_mode="fake_index")
     assert "Invalid index_mode: fake_index" in str(e)
@@ -1815,6 +1823,50 @@ def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert len(new_values) == num_vals + 1
     assert new_ref.id in new_values
     assert new_values[new_ref.id] == new_data
+
+
+@pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_w_read_time(query_docs, cleanup, database):
+    collection, stored, allowed_vals = query_docs
+    num_vals = len(allowed_vals)
+
+    # Find a read_time before adding the new document.
+    snapshots = collection.get()
+    read_time = snapshots[0].read_time
+
+    new_data = {
+        "a": 9000,
+        "b": 1,
+    }
+    _, new_ref = collection.add(new_data)
+    # Add to clean-up.
+    cleanup(new_ref.delete)
+    stored[new_ref.id] = new_data
+
+    client = collection._client
+    query = collection.where(filter=FieldFilter("b", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # new query should have new_data
+    new_results = list(pipeline.stream())
+    new_values = {result.ref.id: result.data() for result in new_results}
+    assert len(new_values) == num_vals + 1
+    assert new_ref.id in new_values
+    assert new_values[new_ref.id] == new_data
+
+    # query with read_time should not have new)data
+    results = list(pipeline.stream(read_time=read_time))
+
+    values = {result.ref.id: result.data() for result in results}
+
+    assert len(values) == num_vals
+    assert new_ref.id not in values
+    for key, value in values.items():
+        assert stored[key] == value
+        assert value["b"] == 1
+        assert value["a"] != 9000
+        assert key != new_ref.id
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)

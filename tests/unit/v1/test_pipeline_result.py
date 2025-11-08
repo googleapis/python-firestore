@@ -210,6 +210,7 @@ class TestPipelineSnapshot:
         expected_type = object()
         expected_pipeline = mock.Mock()
         expected_transaction = object()
+        expected_read_time = 123
         expected_explain_options = object()
         expected_index_mode = "mode"
         expected_addtl_options = {}
@@ -217,6 +218,7 @@ class TestPipelineSnapshot:
             expected_type,
             expected_pipeline,
             expected_transaction,
+            expected_read_time,
             expected_explain_options,
             expected_index_mode,
             expected_addtl_options,
@@ -231,6 +233,8 @@ class TestPipelineSnapshot:
         assert instance._explain_stats is None
         assert instance._started is True
         assert instance.execution_time is None
+        assert instance.transaction == expected_transaction
+        assert instance._read_time == expected_read_time
 
     def test_list_methods(self):
         instance = self._make_one(list(range(10)), mock.Mock())
@@ -265,6 +269,20 @@ class SharedStreamTests:
 
     def _make_one(self, *args, **kwargs):
         raise NotImplementedError
+
+    def _mock_init_args(self):
+        # return default mocks for all init args
+        from google.cloud.firestore_v1.pipeline import Pipeline
+
+        return {
+            "return_type": PipelineResult,
+            "pipeline": Pipeline(mock.Mock()),
+            "transaction": None,
+            "read_time": None,
+            "explain_options": None,
+            "index_mode": None,
+            "additional_options": {},
+        }
 
     def test_explain_stats(self):
         instance = self._make_one()
@@ -330,16 +348,7 @@ class SharedStreamTests:
         """
         Certain Arguments to PipelineStream should be passed to `options` field in proto request
         """
-        from google.cloud.firestore_v1.pipeline import Pipeline
-
-        option_kwargs = {
-            "explain_options": None,
-            "index_mode": None,
-            "additional_options": {},
-        }
-        option_kwargs.update(init_kwargs)
-        pipeline = Pipeline(mock.Mock())
-        instance = self._make_one(None, pipeline, None, **option_kwargs)
+        instance = self._make_one(**init_kwargs)
         request = instance._build_request()
         options = dict(request.structured_pipeline.options)
         assert options == expected_options
@@ -347,24 +356,30 @@ class SharedStreamTests:
 
     def test_build_request_transaction(self):
         """Ensure transaction is passed down when building request"""
-        from google.cloud.firestore_v1.pipeline import Pipeline
         from google.cloud.firestore_v1.transaction import Transaction
 
-        pipeline = Pipeline(mock.Mock())
         expected_id = b"expected"
         transaction = Transaction(mock.Mock())
         transaction._id = expected_id
-        instance = self._make_one(None, pipeline, transaction, None, None, {})
+        instance = self._make_one(transaction=transaction)
         request = instance._build_request()
         assert request.transaction == expected_id
 
+    def test_build_request_read_time(self):
+        """Ensure readtime is passed down when building request"""
+        import datetime
+
+        ts = datetime.datetime.now()
+        instance = self._make_one(read_time=ts)
+        request = instance._build_request()
+        assert request.read_time.timestamp() == ts.timestamp()
+
 
 class TestPipelineStream(SharedStreamTests):
-    def _make_one(self, *args, **kwargs):
-        if not args:
-            # use defaults if not passed
-            args = [PipelineResult, mock.Mock(), None, None, None, {}]
-        return PipelineStream(*args, **kwargs)
+    def _make_one(self, **kwargs):
+        init_kwargs = self._mock_init_args()
+        init_kwargs.update(kwargs)
+        return PipelineStream(**init_kwargs)
 
     def test_explain_stats(self):
         instance = self._make_one()
@@ -399,7 +414,7 @@ class TestPipelineStream(SharedStreamTests):
         )
         pipeline._to_pb.return_value = {}
 
-        instance = self._make_one(PipelineResult, pipeline, None, None, None, {})
+        instance = self._make_one(pipeline=pipeline)
 
         instance._client._firestore_api.execute_pipeline.return_value = (
             _mock_stream_responses
@@ -420,9 +435,6 @@ class TestPipelineStream(SharedStreamTests):
 
     def test_double_iterate(self):
         instance = self._make_one()
-        instance.pipeline._client.project = "project-id"
-        instance.pipeline._client._database = "database-id"
-        instance.pipeline._to_pb.return_value = {}
         instance._client._firestore_api.execute_pipeline.return_value = []
         # consume the iterator
         list(instance)
@@ -431,11 +443,10 @@ class TestPipelineStream(SharedStreamTests):
 
 
 class TestAsyncPipelineStream(SharedStreamTests):
-    def _make_one(self, *args, **kwargs):
-        if not args:
-            # use defaults if not passed
-            args = [PipelineResult, mock.Mock(), None, None, None, {}]
-        return AsyncPipelineStream(*args, **kwargs)
+    def _make_one(self, **kwargs):
+        init_kwargs = self._mock_init_args()
+        init_kwargs.update(kwargs)
+        return AsyncPipelineStream(**init_kwargs)
 
     @pytest.mark.asyncio
     async def test_aiter(self):
@@ -447,7 +458,7 @@ class TestAsyncPipelineStream(SharedStreamTests):
         )
         pipeline._to_pb.return_value = {}
 
-        instance = self._make_one(PipelineResult, pipeline, None, None, None, {})
+        instance = self._make_one(pipeline=pipeline)
 
         async def async_gen(items):
             for item in items:
@@ -473,9 +484,6 @@ class TestAsyncPipelineStream(SharedStreamTests):
     @pytest.mark.asyncio
     async def test_double_iterate(self):
         instance = self._make_one()
-        instance.pipeline._client.project = "project-id"
-        instance.pipeline._client._database = "database-id"
-        instance.pipeline._to_pb.return_value = {}
 
         async def async_gen(items):
             for item in items:

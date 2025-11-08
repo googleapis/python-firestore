@@ -21,6 +21,7 @@ from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
 from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.pipeline_expressions import Constant
     from google.cloud.firestore_v1.transaction import Transaction
@@ -62,6 +63,7 @@ class Pipeline(_BasePipeline):
         self,
         *,
         transaction: "Transaction" | None = None,
+        read_time: datetime.datetime | None = None,
         explain_options: PipelineExplainOptions | None = None,
         index_mode: str | None = None,
         additional_options: dict[str, Value | Constant] = {},
@@ -75,6 +77,10 @@ class Pipeline(_BasePipeline):
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
             explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned list.
@@ -92,6 +98,7 @@ class Pipeline(_BasePipeline):
         self,
         *,
         transaction: "Transaction" | None = None,
+        read_time: datetime.datetime | None = None,
         explain_options: PipelineExplainOptions | None = None,
         index_mode: str | None = None,
         additional_options: dict[str, Value | Constant] = {},
@@ -105,6 +112,10 @@ class Pipeline(_BasePipeline):
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
             explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
