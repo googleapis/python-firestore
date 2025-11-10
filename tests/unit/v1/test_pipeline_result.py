@@ -32,6 +32,7 @@ _mock_stream_responses = [
     ExecutePipelineResponse(
         results=[Document(name="projects/p/databases/d/documents/c/d1", fields={})],
         execution_time=Timestamp(seconds=1, nanos=2),
+        explain_stats={"data": {}},
     ),
     ExecutePipelineResponse(
         results=[Document(name="projects/p/databases/d/documents/c/d2", fields={})],
@@ -431,6 +432,10 @@ class TestPipelineStream(SharedStreamTests):
         assert instance.execution_time.seconds == 1
         assert instance.execution_time.nanos == 2
 
+        # expect empty stats
+        got_stats = instance.explain_stats.get_raw().data
+        assert got_stats.value == b""
+
         instance._client._firestore_api.execute_pipeline.assert_called_once()
 
     def test_double_iterate(self):
@@ -478,6 +483,10 @@ class TestAsyncPipelineStream(SharedStreamTests):
 
         assert instance.execution_time.seconds == 1
         assert instance.execution_time.nanos == 2
+
+        # expect empty stats
+        got_stats = instance.explain_stats.get_raw().data
+        assert got_stats.value == b""
 
         instance._client._firestore_api.execute_pipeline.assert_called_once()
 
