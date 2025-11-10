@@ -1994,18 +1994,10 @@ def test__collection_group_query_response_to_snapshot_response():
     assert snapshot.update_time == response_pb._pb.document.update_time
 
 
-def test__query_pipeline_no_client():
-    mock_parent = mock.Mock()
-    mock_parent._client = None
-    query = _make_base_query(mock_parent)
-    with pytest.raises(ValueError, match="client"):
-        query.pipeline()
-
-
 def test__query_pipeline_decendants():
     client = make_client()
     query = client.collection_group("my_col")
-    pipeline = query.pipeline()
+    pipeline = query._build_pipeline(client.pipeline())
 
     assert len(pipeline.stages) == 1
     stage = pipeline.stages[0]
@@ -2025,7 +2017,7 @@ def test__query_pipeline_no_decendants(in_path, out_path):
     client = make_client()
     collection = client.collection(in_path)
     query = collection._query()
-    pipeline = query.pipeline()
+    pipeline = query._build_pipeline(client.pipeline())
 
     assert len(pipeline.stages) == 1
     stage = pipeline.stages[0]
@@ -2043,7 +2035,7 @@ def test__query_pipeline_composite_filter():
     with mock.patch.object(
         expr.BooleanExpression, "_from_query_filter_pb"
     ) as convert_mock:
-        pipeline = query.pipeline()
+        pipeline = query._build_pipeline(client.pipeline())
         convert_mock.assert_called_once_with(in_filter._to_pb(), client)
         assert len(pipeline.stages) == 2
         stage = pipeline.stages[1]
@@ -2054,7 +2046,7 @@ def test__query_pipeline_composite_filter():
 def test__query_pipeline_projections():
     client = make_client()
     query = client.collection("my_col").select(["field_a", "field_b.c"])
-    pipeline = query.pipeline()
+    pipeline = query._build_pipeline(client.pipeline())
 
     assert len(pipeline.stages) == 2
     stage = pipeline.stages[1]
@@ -2069,7 +2061,7 @@ def test__query_pipeline_order_exists_multiple():
 
     client = make_client()
     query = client.collection("my_col").order_by("field_a").order_by("field_b")
-    pipeline = query.pipeline()
+    pipeline = query._build_pipeline(client.pipeline())
 
     # should have collection, where, and sort
     # we're interested in where
@@ -2089,7 +2081,7 @@ def test__query_pipeline_order_exists_multiple():
 def test__query_pipeline_order_exists_single():
     client = make_client()
     query_single = client.collection("my_col").order_by("field_c")
-    pipeline_single = query_single.pipeline()
+    pipeline_single = query_single._build_pipeline(client.pipeline())
 
     # should have collection, where, and sort
     # we're interested in where
@@ -2110,7 +2102,7 @@ def test__query_pipeline_order_sorts():
         .order_by("field_a", direction=BaseQuery.ASCENDING)
         .order_by("field_b", direction=BaseQuery.DESCENDING)
     )
-    pipeline = query.pipeline()
+    pipeline = query._build_pipeline(client.pipeline())
 
     assert len(pipeline.stages) == 3
     sort_stage = pipeline.stages[2]
@@ -2128,21 +2120,21 @@ def test__query_pipeline_unsupported():
     client = make_client()
     query_start = client.collection("my_col").start_at({"field_a": "value"})
     with pytest.raises(NotImplementedError, match="cursors"):
-        query_start.pipeline()
+        query_start._build_pipeline(client.pipeline())
 
     query_end = client.collection("my_col").end_at({"field_a": "value"})
     with pytest.raises(NotImplementedError, match="cursors"):
-        query_end.pipeline()
+        query_end._build_pipeline(client.pipeline())
 
     query_limit_last = client.collection("my_col").limit_to_last(10)
     with pytest.raises(NotImplementedError, match="limit_to_last"):
-        query_limit_last.pipeline()
+        query_limit_last._build_pipeline(client.pipeline())
 
 
 def test__query_pipeline_limit():
     client = make_client()
     query = client.collection("my_col").limit(15)
-    pipeline = query.pipeline()
+    pipeline = query._build_pipeline(client.pipeline())
 
     assert len(pipeline.stages) == 2
     stage = pipeline.stages[1]
@@ -2153,7 +2145,7 @@ def test__query_pipeline_limit():
 def test__query_pipeline_offset():
     client = make_client()
     query = client.collection("my_col").offset(5)
-    pipeline = query.pipeline()
+    pipeline = query._build_pipeline(client.pipeline())
 
     assert len(pipeline.stages) == 2
     stage = pipeline.stages[1]

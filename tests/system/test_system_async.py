@@ -57,6 +57,7 @@ from test__helpers import (
     TEST_DATABASES,
     TEST_DATABASES_W_ENTERPRISE,
     IS_KOKORO_TEST,
+    FIRESTORE_ENTERPRISE_DB,
 )
 
 RETRIES = retries.AsyncRetry(
@@ -213,7 +214,8 @@ async def verify_pipeline(query):
         except Exception as e:
             # if we expect the query to fail, capture the exception
             query_exception = e
-        pipeline = query.pipeline()
+        client = query._client
+        pipeline = client.pipeline().create_from(query)
         if query_exception:
             # ensure that the pipeline uses same error as query
             with pytest.raises(query_exception.__class__):
@@ -1611,6 +1613,50 @@ async def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert new_values[new_ref.id] == new_data
 
 
+@pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+async def test_pipeline_w_read_time(query_docs, cleanup, database):
+    collection, stored, allowed_vals = query_docs
+    num_vals = len(allowed_vals)
+
+    # Find a read_time before adding the new document.
+    snapshots = await collection.get()
+    read_time = snapshots[0].read_time
+
+    new_data = {
+        "a": 9000,
+        "b": 1,
+        "c": [10000, 1000],
+        "stats": {"sum": 9001, "product": 9000},
+    }
+    _, new_ref = await collection.add(new_data)
+    # Add to clean-up.
+    cleanup(new_ref.delete)
+    stored[new_ref.id] = new_data
+
+    pipeline = collection.where(filter=FieldFilter("b", "==", 1)).pipeline()
+
+    # new query should have new_data
+    new_results = [result async for result in pipeline.stream()]
+    new_values = {result.ref.id: result.data() for result in new_results}
+    assert len(new_values) == num_vals + 1
+    assert new_ref.id in new_values
+    assert new_values[new_ref.id] == new_data
+
+    # pipeline with read_time should not have new_data
+    results = [result async for result in pipeline.stream(read_time=read_time)]
+
+    values = {result.ref.id: result.data() for result in results}
+
+    assert len(values) == num_vals
+    assert new_ref.id not in values
+    for key, value in values.items():
+        assert stored[key] == value
+        assert value["b"] == 1
+        assert value["a"] != 9000
+        assert key != new_ref.id
+
+
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_with_order_dot_key(client, cleanup, database):
     db = client
@@ -1651,7 +1697,7 @@ async def test_query_with_order_dot_key(client, cleanup, database):
     assert found_data == [snap.to_dict() for snap in cursor_with_key_data]
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 async def test_query_unary(client, cleanup, database):
     collection_name = "unary" + UNIQUE_RESOURCE_ID
     collection = client.collection(collection_name)

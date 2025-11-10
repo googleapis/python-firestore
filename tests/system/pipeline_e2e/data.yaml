@@ -140,3 +140,8 @@ data:
       embedding: [5.0, 6.0, 7.0]
     vec4:
       embedding: [1.0, 2.0, 4.0]
+  errors:
+    doc_with_nan:
+      value: "NaN"
+    doc_with_null:
+      value: null

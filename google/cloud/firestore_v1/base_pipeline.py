@@ -33,6 +33,7 @@ from google.cloud.firestore_v1.pipeline_expressions import (
 from google.cloud.firestore_v1 import _helpers
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
     from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.async_client import AsyncClient
     from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
@@ -99,7 +100,9 @@ class _BasePipeline:
         return self.__class__._create_with_stages(self._client, *self.stages, new_stage)
 
     def _prep_execute_request(
-        self, transaction: BaseTransaction | None
+        self,
+        transaction: BaseTransaction | None,
+        read_time: datetime.datetime | None,
     ) -> ExecutePipelineRequest:
         """
         shared logic for creating an ExecutePipelineRequest
@@ -116,6 +119,7 @@ class _BasePipeline:
             database=database_name,
             transaction=transaction_id,
             structured_pipeline=self._to_pb(),
+            read_time=read_time,
         )
         return request
 

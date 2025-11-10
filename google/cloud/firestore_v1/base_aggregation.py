@@ -48,6 +48,7 @@ if TYPE_CHECKING:  # pragma: NO COVER
     from google.cloud.firestore_v1.stream_generator import (
         StreamGenerator,
     )
+    from google.cloud.firestore_v1.pipeline_source import PipelineSource
 
     import datetime
 
@@ -356,14 +357,15 @@ class BaseAggregationQuery(ABC):
             A generator of the query results.
         """
 
-    def pipeline(self):
+    def _build_pipeline(self, source: "PipelineSource"):
         """
         Convert this query into a Pipeline
 
         Queries containing a `cursor` or `limit_to_last` are not currently supported
 
+        Args:
+            source: the PipelineSource to build the pipeline off of
         Raises:
-            - ValueError: raised if Query wasn't created with an associated client
             - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
         Returns:
             a Pipeline representing the query
@@ -371,4 +373,4 @@ class BaseAggregationQuery(ABC):
         # use autoindexer to keep track of which field number to use for un-aliased fields
         autoindexer = itertools.count(start=1)
         exprs = [a._to_pipeline_expr(autoindexer) for a in self._aggregations]
-        return self._nested_query.pipeline().aggregate(*exprs)
+        return self._nested_query._build_pipeline(source).aggregate(*exprs)
