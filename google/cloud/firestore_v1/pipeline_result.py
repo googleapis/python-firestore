@@ -13,17 +13,43 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Any, MutableMapping, TYPE_CHECKING
+from typing import (
+    Any,
+    AsyncIterable,
+    AsyncIterator,
+    Iterable,
+    Iterator,
+    Generic,
+    MutableMapping,
+    Type,
+    TypeVar,
+    TYPE_CHECKING,
+)
 from google.cloud.firestore_v1 import _helpers
 from google.cloud.firestore_v1.field_path import get_nested_value
 from google.cloud.firestore_v1.field_path import FieldPath
+from google.cloud.firestore_v1.query_profile import ExplainStats
+from google.cloud.firestore_v1.query_profile import QueryExplainError
+from google.cloud.firestore_v1.types.firestore import ExecutePipelineRequest
+from google.cloud.firestore_v1.types.document import Value
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
+    from google.cloud.firestore_v1.async_client import AsyncClient
+    from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.base_client import BaseClient
+    from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+    from google.cloud.firestore_v1.transaction import Transaction
     from google.cloud.firestore_v1.base_document import BaseDocumentReference
     from google.protobuf.timestamp_pb2 import Timestamp
+    from google.cloud.firestore_v1.types.firestore import ExecutePipelineResponse
     from google.cloud.firestore_v1.types.document import Value as ValueProto
     from google.cloud.firestore_v1.vector import Vector
+    from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
+    from google.cloud.firestore_v1.base_pipeline import _BasePipeline
+    from google.cloud.firestore_v1.pipeline import Pipeline
+    from google.cloud.firestore_v1.pipeline_expressions import Constant
+    from google.cloud.firestore_v1.query_profile import PipelineExplainOptions
 
 
 class PipelineResult:
@@ -137,3 +163,138 @@ class PipelineResult:
         )
         value = get_nested_value(str_path, self._fields_pb)
         return _helpers.decode_value(value, self._client)
+
+
+T = TypeVar("T", bound=PipelineResult)
+
+
+class _PipelineResultContainer(Generic[T]):
+    """Base class to hold shared attributes for PipelineSnapshot and PipelineStream"""
+
+    def __init__(
+        self,
+        return_type: Type[T],
+        pipeline: Pipeline | AsyncPipeline,
+        transaction: Transaction | AsyncTransaction | None,
+        read_time: datetime.datetime | None,
+        explain_options: PipelineExplainOptions | None,
+        index_mode: str | None,
+        additional_options: dict[str, Constant | Value],
+    ):
+        # public
+        self.transaction = transaction
+        self.pipeline: _BasePipeline = pipeline
+        self.execution_time: Timestamp | None = None
+        # private
+        self._client: Client | AsyncClient = pipeline._client
+        self._started: bool = False
+        self._read_time = read_time
+        self._explain_stats: ExplainStats | None = None
+        self._explain_options: PipelineExplainOptions | None = explain_options
+        self._return_type = return_type
+        self._index_mode = index_mode
+        self._additonal_options = {
+            k: v if isinstance(v, Value) else v._to_pb()
+            for k, v in additional_options.items()
+        }
+
+    @property
+    def explain_stats(self) -> ExplainStats:
+        if self._explain_stats is not None:
+            return self._explain_stats
+        elif self._explain_options is None:
+            raise QueryExplainError("explain_options not set on query.")
+        elif not self._started:
+            raise QueryExplainError(
+                "explain_stats not available until query is complete"
+            )
+        else:
+            raise QueryExplainError("explain_stats not found")
+
+    def _build_request(self) -> ExecutePipelineRequest:
+        """
+        shared logic for creating an ExecutePipelineRequest
+        """
+        database_name = (
+            f"projects/{self._client.project}/databases/{self._client._database}"
+        )
+        transaction_id = (
+            _helpers.get_transaction_id(self.transaction, read_operation=False)
+            if self.transaction is not None
+            else None
+        )
+        options = {}
+        if self._explain_options:
+            options["explain_options"] = self._explain_options._to_value()
+        if self._index_mode:
+            options["index_mode"] = Value(string_value=self._index_mode)
+        if self._additonal_options:
+            options.update(self._additonal_options)
+        request = ExecutePipelineRequest(
+            database=database_name,
+            transaction=transaction_id,
+            structured_pipeline=self.pipeline._to_pb(**options),
+            read_time=self._read_time,
+        )
+        return request
+
+    def _process_response(self, response: ExecutePipelineResponse) -> Iterable[T]:
+        """Shared logic for processing an individual response from a stream"""
+        if response.explain_stats:
+            self._explain_stats = ExplainStats(response.explain_stats)
+        execution_time = response._pb.execution_time
+        if execution_time and not self.execution_time:
+            self.execution_time = execution_time
+        for doc in response.results:
+            ref = self._client.document(doc.name) if doc.name else None
+            yield self._return_type(
+                self._client,
+                doc.fields,
+                ref,
+                execution_time,
+                doc._pb.create_time if doc.create_time else None,
+                doc._pb.update_time if doc.update_time else None,
+            )
+
+
+class PipelineSnapshot(_PipelineResultContainer[T], list[T]):
+    """
+    A list type that holds the result of a pipeline.execute() operation, along with related metadata
+    """
+
+    def __init__(self, results_list: list[T], source: _PipelineResultContainer[T]):
+        self.__dict__.update(source.__dict__.copy())
+        list.__init__(self, results_list)
+        # snapshots are always complete
+        self._started = True
+
+
+class PipelineStream(_PipelineResultContainer[T], Iterable[T]):
+    """
+    An iterable stream representing the result of a pipeline.stream() operation, along with related metadata
+    """
+
+    def __iter__(self) -> Iterator[T]:
+        if self._started:
+            raise RuntimeError(f"{self.__class__.__name__} can only be iterated once")
+        self._started = True
+        request = self._build_request()
+        stream = self._client._firestore_api.execute_pipeline(request)
+        for response in stream:
+            yield from self._process_response(response)
+
+
+class AsyncPipelineStream(_PipelineResultContainer[T], AsyncIterable[T]):
+    """
+    An iterable stream representing the result of an async pipeline.stream() operation, along with related metadata
+    """
+
+    async def __aiter__(self) -> AsyncIterator[T]:
+        if self._started:
+            raise RuntimeError(f"{self.__class__.__name__} can only be iterated once")
+        self._started = True
+        request = self._build_request()
+        stream = await self._client._firestore_api.execute_pipeline(request)
+        async for response in stream:
+            for result in self._process_response(response):
+                yield result

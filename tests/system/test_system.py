@@ -21,6 +21,7 @@ from typing import Callable, Dict, List, Optional
 
 import google.auth
 import pytest
+import mock
 from google.api_core.exceptions import (
     AlreadyExists,
     FailedPrecondition,
@@ -1652,6 +1653,140 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
         explain_metrics.execution_stats
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_explain_mode(database, method, query_docs):
+    """Explain currently not supported by backend. Expect error"""
+    from google.cloud.firestore_v1.query_profile import (
+        PipelineExplainOptions,
+    )
+
+    collection, _, _ = query_docs
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+    explain_options = PipelineExplainOptions(mode="explain")
+
+    # for now, expect error on explain mode
+    with pytest.raises(InvalidArgument) as e:
+        results = method_under_test(explain_options=explain_options)
+        list(results)
+    assert "Explain execution mode is not supported" in str(e)
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_analyze_mode(database, method, query_docs):
+    from google.cloud.firestore_v1.query_profile import (
+        PipelineExplainOptions,
+        ExplainStats,
+        QueryExplainError,
+    )
+    from google.cloud.firestore_v1.types.explain_stats import (
+        ExplainStats as ExplainStats_pb,
+    )
+
+    collection, _, allowed_vals = query_docs
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+    results = method_under_test(explain_options=PipelineExplainOptions())
+
+    if method == "stream":
+        # check for error accessing explain stats before iterating
+        with pytest.raises(
+            QueryExplainError,
+            match="explain_stats not available until query is complete",
+        ):
+            results.explain_stats
+
+    # Finish iterating results, and explain_stats should be available.
+    results_list = list(results)
+    num_results = len(results_list)
+    assert num_results == len(allowed_vals)
+
+    # Verify explain_stats.
+    explain_stats = results.explain_stats
+    assert isinstance(explain_stats, ExplainStats)
+
+    assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
+    text_stats = explain_stats.get_text()
+    assert "Execution:" in text_stats
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_using_additional_options(
+    database, method, query_docs
+):
+    """additional_options field allows passing in arbitrary options. Test with explain_options"""
+    from google.cloud.firestore_v1.query_profile import (
+        PipelineExplainOptions,
+        ExplainStats,
+    )
+    from google.cloud.firestore_v1.types.explain_stats import (
+        ExplainStats as ExplainStats_pb,
+    )
+
+    collection, _, allowed_vals = query_docs
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+
+    encoded_options = {"explain_options": PipelineExplainOptions()._to_value()}
+
+    results = method_under_test(
+        explain_options=mock.Mock(), additional_options=encoded_options
+    )
+
+    # Finish iterating results, and explain_stats should be available./w_read
+    results_list = list(results)
+    num_results = len(results_list)
+    assert num_results == len(allowed_vals)
+
+    # Verify explain_stats.
+    explain_stats = results.explain_stats
+    assert isinstance(explain_stats, ExplainStats)
+
+    assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
+    text_stats = explain_stats.get_text()
+    assert "Execution:" in text_stats
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_index_mode(database, query_docs):
+    """test pipeline query with explicit index mode"""
+
+    collection, _, allowed_vals = query_docs
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+    with pytest.raises(InvalidArgument) as e:
+        pipeline.execute(index_mode="fake_index")
+    assert "Invalid index_mode: fake_index" in str(e)
+
+
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_query_stream_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
@@ -1703,15 +1838,16 @@ def test_pipeline_w_read_time(query_docs, cleanup, database):
     new_data = {
         "a": 9000,
         "b": 1,
-        "c": [10000, 1000],
-        "stats": {"sum": 9001, "product": 9000},
     }
     _, new_ref = collection.add(new_data)
     # Add to clean-up.
     cleanup(new_ref.delete)
     stored[new_ref.id] = new_data
 
-    pipeline = collection.where(filter=FieldFilter("b", "==", 1)).pipeline()
+    client = collection._client
+    query = collection.where(filter=FieldFilter("b", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
     # new query should have new_data
     new_results = list(pipeline.stream())
     new_values = {result.ref.id: result.data() for result in new_results}
