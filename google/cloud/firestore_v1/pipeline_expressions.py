@@ -1850,7 +1850,7 @@ class Array(Function):
     Creates an expression that creates a Firestore array value from an input list.
 
     Example:
-        >>> Expression.array(["bar", Field.of("baz")])
+        >>> Array(["bar", Field.of("baz")])
 
     Args:
         elements: The input list to evaluate in the expression
