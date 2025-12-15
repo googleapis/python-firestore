@@ -61,7 +61,9 @@ from google.cloud.firestore_v1.types import aggregation_result
 from google.cloud.firestore_v1.types import common
 from google.cloud.firestore_v1.types import document
 from google.cloud.firestore_v1.types import document as gf_document
+from google.cloud.firestore_v1.types import explain_stats
 from google.cloud.firestore_v1.types import firestore
+from google.cloud.firestore_v1.types import pipeline
 from google.cloud.firestore_v1.types import query
 from google.cloud.firestore_v1.types import query_profile
 from google.cloud.firestore_v1.types import write as gf_write
@@ -3887,6 +3889,185 @@ async def test_run_query_field_headers_async():
 @pytest.mark.parametrize(
     "request_type",
     [
+        firestore.ExecutePipelineRequest,
+        dict,
+    ],
+)
+def test_execute_pipeline(request_type, transport: str = "grpc"):
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = iter([firestore.ExecutePipelineResponse()])
+        response = client.execute_pipeline(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls) == 1
+        _, args, _ = call.mock_calls[0]
+        request = firestore.ExecutePipelineRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    for message in response:
+        assert isinstance(message, firestore.ExecutePipelineResponse)
+
+
+def test_execute_pipeline_non_empty_request_with_auto_populated_field():
+    # This test is a coverage failsafe to make sure that UUID4 fields are
+    # automatically populated, according to AIP-4235, with non-empty requests.
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Populate all string fields in the request which are not UUID4
+    # since we want to check that UUID4 are populated automatically
+    # if they meet the requirements of AIP 4235.
+    request = firestore.ExecutePipelineRequest(
+        database="database_value",
+    )
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        call.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client.execute_pipeline(request=request)
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        assert args[0] == firestore.ExecutePipelineRequest(
+            database="database_value",
+        )
+
+
+def test_execute_pipeline_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="grpc",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.execute_pipeline in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.execute_pipeline
+        ] = mock_rpc
+        request = {}
+        client.execute_pipeline(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.execute_pipeline(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_execute_pipeline_async_use_cached_wrapped_rpc(
+    transport: str = "grpc_asyncio",
+):
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method_async.wrap_method") as wrapper_fn:
+        client = FirestoreAsyncClient(
+            credentials=async_anonymous_credentials(),
+            transport=transport,
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert (
+            client._client._transport.execute_pipeline
+            in client._client._transport._wrapped_methods
+        )
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.AsyncMock()
+        mock_rpc.return_value = mock.Mock()
+        client._client._transport._wrapped_methods[
+            client._client._transport.execute_pipeline
+        ] = mock_rpc
+
+        request = {}
+        await client.execute_pipeline(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        await client.execute_pipeline(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_execute_pipeline_async(
+    transport: str = "grpc_asyncio", request_type=firestore.ExecutePipelineRequest
+):
+    client = FirestoreAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport=transport,
+    )
+
+    # Everything is optional in proto3 as far as the runtime is concerned,
+    # and we are mocking out the actual API, so just send an empty request.
+    request = request_type()
+
+    # Mock the actual call within the gRPC stub, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = mock.Mock(aio.UnaryStreamCall, autospec=True)
+        call.return_value.read = mock.AsyncMock(
+            side_effect=[firestore.ExecutePipelineResponse()]
+        )
+        response = await client.execute_pipeline(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert len(call.mock_calls)
+        _, args, _ = call.mock_calls[0]
+        request = firestore.ExecutePipelineRequest()
+        assert args[0] == request
+
+    # Establish that the response is the type that we expect.
+    message = await response.read()
+    assert isinstance(message, firestore.ExecutePipelineResponse)
+
+
+@pytest.mark.asyncio
+async def test_execute_pipeline_async_from_dict():
+    await test_execute_pipeline_async(request_type=dict)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
         firestore.RunAggregationQueryRequest,
         dict,
     ],
@@ -7410,6 +7591,132 @@ def test_run_query_rest_unset_required_fields():
     assert set(unset_fields) == (set(()) & set(("parent",)))
 
 
+def test_execute_pipeline_rest_use_cached_wrapped_rpc():
+    # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
+    # instead of constructing them on each call
+    with mock.patch("google.api_core.gapic_v1.method.wrap_method") as wrapper_fn:
+        client = FirestoreClient(
+            credentials=ga_credentials.AnonymousCredentials(),
+            transport="rest",
+        )
+
+        # Should wrap all calls on client creation
+        assert wrapper_fn.call_count > 0
+        wrapper_fn.reset_mock()
+
+        # Ensure method has been cached
+        assert client._transport.execute_pipeline in client._transport._wrapped_methods
+
+        # Replace cached wrapped function with mock
+        mock_rpc = mock.Mock()
+        mock_rpc.return_value.name = (
+            "foo"  # operation_request.operation in compute client(s) expect a string.
+        )
+        client._transport._wrapped_methods[
+            client._transport.execute_pipeline
+        ] = mock_rpc
+
+        request = {}
+        client.execute_pipeline(request)
+
+        # Establish that the underlying gRPC stub method was called.
+        assert mock_rpc.call_count == 1
+
+        client.execute_pipeline(request)
+
+        # Establish that a new wrapper was not created for this call
+        assert wrapper_fn.call_count == 0
+        assert mock_rpc.call_count == 2
+
+
+def test_execute_pipeline_rest_required_fields(
+    request_type=firestore.ExecutePipelineRequest,
+):
+    transport_class = transports.FirestoreRestTransport
+
+    request_init = {}
+    request_init["database"] = ""
+    request = request_type(**request_init)
+    pb_request = request_type.pb(request)
+    jsonified_request = json.loads(
+        json_format.MessageToJson(pb_request, use_integers_for_enums=False)
+    )
+
+    # verify fields with default values are dropped
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).execute_pipeline._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with default values are now present
+
+    jsonified_request["database"] = "database_value"
+
+    unset_fields = transport_class(
+        credentials=ga_credentials.AnonymousCredentials()
+    ).execute_pipeline._get_unset_required_fields(jsonified_request)
+    jsonified_request.update(unset_fields)
+
+    # verify required fields with non-default values are left alone
+    assert "database" in jsonified_request
+    assert jsonified_request["database"] == "database_value"
+
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+    request = request_type(**request_init)
+
+    # Designate an appropriate value for the returned response.
+    return_value = firestore.ExecutePipelineResponse()
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(Session, "request") as req:
+        # We need to mock transcode() because providing default values
+        # for required fields will fail the real version if the http_options
+        # expect actual values for those fields.
+        with mock.patch.object(path_template, "transcode") as transcode:
+            # A uri without fields and an empty body will force all the
+            # request fields to show up in the query_params.
+            pb_request = request_type.pb(request)
+            transcode_result = {
+                "uri": "v1/sample_method",
+                "method": "post",
+                "query_params": pb_request,
+            }
+            transcode_result["body"] = pb_request
+            transcode.return_value = transcode_result
+
+            response_value = Response()
+            response_value.status_code = 200
+
+            # Convert return value to protobuf type
+            return_value = firestore.ExecutePipelineResponse.pb(return_value)
+            json_return_value = json_format.MessageToJson(return_value)
+            json_return_value = "[{}]".format(json_return_value)
+
+            response_value._content = json_return_value.encode("UTF-8")
+            req.return_value = response_value
+            req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+
+            with mock.patch.object(response_value, "iter_content") as iter_content:
+                iter_content.return_value = iter(json_return_value)
+                response = client.execute_pipeline(request)
+
+            expected_params = [("$alt", "json;enum-encoding=int")]
+            actual_params = req.call_args.kwargs["params"]
+            assert expected_params == actual_params
+
+
+def test_execute_pipeline_rest_unset_required_fields():
+    transport = transports.FirestoreRestTransport(
+        credentials=ga_credentials.AnonymousCredentials
+    )
+
+    unset_fields = transport.execute_pipeline._get_unset_required_fields({})
+    assert set(unset_fields) == (set(()) & set(("database",)))
+
+
 def test_run_aggregation_query_rest_use_cached_wrapped_rpc():
     # Clients should use _prep_wrapped_messages to create cached wrapped rpcs,
     # instead of constructing them on each call
@@ -8555,6 +8862,27 @@ def test_run_query_empty_call_grpc():
 
 # This test is a coverage failsafe to make sure that totally empty calls,
 # i.e. request == None and no flattened fields passed, work.
+def test_execute_pipeline_empty_call_grpc():
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        call.return_value = iter([firestore.ExecutePipelineResponse()])
+        client.execute_pipeline(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
 def test_run_aggregation_query_empty_call_grpc():
     client = FirestoreClient(
         credentials=ga_credentials.AnonymousCredentials(),
@@ -8660,6 +8988,60 @@ def test_create_document_empty_call_grpc():
         request_msg = firestore.CreateDocumentRequest()
 
         assert args[0] == request_msg
+
+
+def test_execute_pipeline_routing_parameters_request_1_grpc():
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        call.return_value = iter([firestore.ExecutePipelineResponse()])
+        client.execute_pipeline(request={"database": "projects/sample1/sample2"})
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, kw = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest(
+            **{"database": "projects/sample1/sample2"}
+        )
+
+        assert args[0] == request_msg
+
+        expected_headers = {"project_id": "sample1"}
+        assert (
+            gapic_v1.routing_header.to_grpc_metadata(expected_headers) in kw["metadata"]
+        )
+
+
+def test_execute_pipeline_routing_parameters_request_2_grpc():
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="grpc",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        call.return_value = iter([firestore.ExecutePipelineResponse()])
+        client.execute_pipeline(
+            request={"database": "projects/sample1/databases/sample2/sample3"}
+        )
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, kw = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest(
+            **{"database": "projects/sample1/databases/sample2/sample3"}
+        )
+
+        assert args[0] == request_msg
+
+        expected_headers = {"project_id": "sample1", "database_id": "sample2"}
+        assert (
+            gapic_v1.routing_header.to_grpc_metadata(expected_headers) in kw["metadata"]
+        )
 
 
 def test_transport_kind_grpc_asyncio():
@@ -8914,6 +9296,32 @@ async def test_run_query_empty_call_grpc_asyncio():
 # This test is a coverage failsafe to make sure that totally empty calls,
 # i.e. request == None and no flattened fields passed, work.
 @pytest.mark.asyncio
+async def test_execute_pipeline_empty_call_grpc_asyncio():
+    client = FirestoreAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = mock.Mock(aio.UnaryStreamCall, autospec=True)
+        call.return_value.read = mock.AsyncMock(
+            side_effect=[firestore.ExecutePipelineResponse()]
+        )
+        await client.execute_pipeline(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
+@pytest.mark.asyncio
 async def test_run_aggregation_query_empty_call_grpc_asyncio():
     client = FirestoreAsyncClient(
         credentials=async_anonymous_credentials(),
@@ -9046,6 +9454,70 @@ async def test_create_document_empty_call_grpc_asyncio():
         request_msg = firestore.CreateDocumentRequest()
 
         assert args[0] == request_msg
+
+
+@pytest.mark.asyncio
+async def test_execute_pipeline_routing_parameters_request_1_grpc_asyncio():
+    client = FirestoreAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = mock.Mock(aio.UnaryStreamCall, autospec=True)
+        call.return_value.read = mock.AsyncMock(
+            side_effect=[firestore.ExecutePipelineResponse()]
+        )
+        await client.execute_pipeline(request={"database": "projects/sample1/sample2"})
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, kw = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest(
+            **{"database": "projects/sample1/sample2"}
+        )
+
+        assert args[0] == request_msg
+
+        expected_headers = {"project_id": "sample1"}
+        assert (
+            gapic_v1.routing_header.to_grpc_metadata(expected_headers) in kw["metadata"]
+        )
+
+
+@pytest.mark.asyncio
+async def test_execute_pipeline_routing_parameters_request_2_grpc_asyncio():
+    client = FirestoreAsyncClient(
+        credentials=async_anonymous_credentials(),
+        transport="grpc_asyncio",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        # Designate an appropriate return value for the call.
+        call.return_value = mock.Mock(aio.UnaryStreamCall, autospec=True)
+        call.return_value.read = mock.AsyncMock(
+            side_effect=[firestore.ExecutePipelineResponse()]
+        )
+        await client.execute_pipeline(
+            request={"database": "projects/sample1/databases/sample2/sample3"}
+        )
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, kw = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest(
+            **{"database": "projects/sample1/databases/sample2/sample3"}
+        )
+
+        assert args[0] == request_msg
+
+        expected_headers = {"project_id": "sample1", "database_id": "sample2"}
+        assert (
+            gapic_v1.routing_header.to_grpc_metadata(expected_headers) in kw["metadata"]
+        )
 
 
 def test_transport_kind_rest():
@@ -10221,6 +10693,137 @@ def test_run_query_rest_interceptors(null_interceptor):
         post_with_metadata.return_value = firestore.RunQueryResponse(), metadata
 
         client.run_query(
+            request,
+            metadata=[
+                ("key", "val"),
+                ("cephalopod", "squid"),
+            ],
+        )
+
+        pre.assert_called_once()
+        post.assert_called_once()
+        post_with_metadata.assert_called_once()
+
+
+def test_execute_pipeline_rest_bad_request(
+    request_type=firestore.ExecutePipelineRequest,
+):
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+    # send a request that will satisfy transcoding
+    request_init = {"database": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a BadRequest error.
+    with mock.patch.object(Session, "request") as req, pytest.raises(
+        core_exceptions.BadRequest
+    ):
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        json_return_value = ""
+        response_value.json = mock.Mock(return_value={})
+        response_value.status_code = 400
+        response_value.request = mock.Mock()
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        client.execute_pipeline(request)
+
+
+@pytest.mark.parametrize(
+    "request_type",
+    [
+        firestore.ExecutePipelineRequest,
+        dict,
+    ],
+)
+def test_execute_pipeline_rest_call_success(request_type):
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(), transport="rest"
+    )
+
+    # send a request that will satisfy transcoding
+    request_init = {"database": "projects/sample1/databases/sample2"}
+    request = request_type(**request_init)
+
+    # Mock the http request call within the method and fake a response.
+    with mock.patch.object(type(client.transport._session), "request") as req:
+        # Designate an appropriate value for the returned response.
+        return_value = firestore.ExecutePipelineResponse(
+            transaction=b"transaction_blob",
+        )
+
+        # Wrap the value into a proper Response obj
+        response_value = mock.Mock()
+        response_value.status_code = 200
+
+        # Convert return value to protobuf type
+        return_value = firestore.ExecutePipelineResponse.pb(return_value)
+        json_return_value = json_format.MessageToJson(return_value)
+        json_return_value = "[{}]".format(json_return_value)
+        response_value.iter_content = mock.Mock(return_value=iter(json_return_value))
+        req.return_value = response_value
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        response = client.execute_pipeline(request)
+
+    assert isinstance(response, Iterable)
+    response = next(response)
+
+    # Establish that the response is the type that we expect.
+    assert isinstance(response, firestore.ExecutePipelineResponse)
+    assert response.transaction == b"transaction_blob"
+
+
+@pytest.mark.parametrize("null_interceptor", [True, False])
+def test_execute_pipeline_rest_interceptors(null_interceptor):
+    transport = transports.FirestoreRestTransport(
+        credentials=ga_credentials.AnonymousCredentials(),
+        interceptor=None if null_interceptor else transports.FirestoreRestInterceptor(),
+    )
+    client = FirestoreClient(transport=transport)
+
+    with mock.patch.object(
+        type(client.transport._session), "request"
+    ) as req, mock.patch.object(
+        path_template, "transcode"
+    ) as transcode, mock.patch.object(
+        transports.FirestoreRestInterceptor, "post_execute_pipeline"
+    ) as post, mock.patch.object(
+        transports.FirestoreRestInterceptor, "post_execute_pipeline_with_metadata"
+    ) as post_with_metadata, mock.patch.object(
+        transports.FirestoreRestInterceptor, "pre_execute_pipeline"
+    ) as pre:
+        pre.assert_not_called()
+        post.assert_not_called()
+        post_with_metadata.assert_not_called()
+        pb_message = firestore.ExecutePipelineRequest.pb(
+            firestore.ExecutePipelineRequest()
+        )
+        transcode.return_value = {
+            "method": "post",
+            "uri": "my_uri",
+            "body": pb_message,
+            "query_params": pb_message,
+        }
+
+        req.return_value = mock.Mock()
+        req.return_value.status_code = 200
+        req.return_value.headers = {"header-1": "value-1", "header-2": "value-2"}
+        return_value = firestore.ExecutePipelineResponse.to_json(
+            firestore.ExecutePipelineResponse()
+        )
+        req.return_value.iter_content = mock.Mock(return_value=iter(return_value))
+
+        request = firestore.ExecutePipelineRequest()
+        metadata = [
+            ("key", "val"),
+            ("cephalopod", "squid"),
+        ]
+        pre.return_value = request, metadata
+        post.return_value = firestore.ExecutePipelineResponse()
+        post_with_metadata.return_value = firestore.ExecutePipelineResponse(), metadata
+
+        client.execute_pipeline(
             request,
             metadata=[
                 ("key", "val"),
@@ -11411,6 +12014,26 @@ def test_run_query_empty_call_rest():
 
 # This test is a coverage failsafe to make sure that totally empty calls,
 # i.e. request == None and no flattened fields passed, work.
+def test_execute_pipeline_empty_call_rest():
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        client.execute_pipeline(request=None)
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, _ = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest()
+
+        assert args[0] == request_msg
+
+
+# This test is a coverage failsafe to make sure that totally empty calls,
+# i.e. request == None and no flattened fields passed, work.
 def test_run_aggregation_query_empty_call_rest():
     client = FirestoreClient(
         credentials=ga_credentials.AnonymousCredentials(),
@@ -11513,6 +12136,58 @@ def test_create_document_empty_call_rest():
         assert args[0] == request_msg
 
 
+def test_execute_pipeline_routing_parameters_request_1_rest():
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        client.execute_pipeline(request={"database": "projects/sample1/sample2"})
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, kw = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest(
+            **{"database": "projects/sample1/sample2"}
+        )
+
+        assert args[0] == request_msg
+
+        expected_headers = {"project_id": "sample1"}
+        assert (
+            gapic_v1.routing_header.to_grpc_metadata(expected_headers) in kw["metadata"]
+        )
+
+
+def test_execute_pipeline_routing_parameters_request_2_rest():
+    client = FirestoreClient(
+        credentials=ga_credentials.AnonymousCredentials(),
+        transport="rest",
+    )
+
+    # Mock the actual call, and fake the request.
+    with mock.patch.object(type(client.transport.execute_pipeline), "__call__") as call:
+        client.execute_pipeline(
+            request={"database": "projects/sample1/databases/sample2/sample3"}
+        )
+
+        # Establish that the underlying stub method was called.
+        call.assert_called()
+        _, args, kw = call.mock_calls[0]
+        request_msg = firestore.ExecutePipelineRequest(
+            **{"database": "projects/sample1/databases/sample2/sample3"}
+        )
+
+        assert args[0] == request_msg
+
+        expected_headers = {"project_id": "sample1", "database_id": "sample2"}
+        assert (
+            gapic_v1.routing_header.to_grpc_metadata(expected_headers) in kw["metadata"]
+        )
+
+
 def test_transport_grpc_default():
     # A client should use the gRPC transport by default.
     client = FirestoreClient(
@@ -11555,6 +12230,7 @@ def test_firestore_base_transport():
         "commit",
         "rollback",
         "run_query",
+        "execute_pipeline",
         "run_aggregation_query",
         "partition_query",
         "write",
@@ -11859,6 +12535,9 @@ def test_firestore_client_transport_session_collision(transport_name):
     assert session1 != session2
     session1 = client1.transport.run_query._session
     session2 = client2.transport.run_query._session
+    assert session1 != session2
+    session1 = client1.transport.execute_pipeline._session
+    session2 = client2.transport.execute_pipeline._session
     assert session1 != session2
     session1 = client1.transport.run_aggregation_query._session
     session2 = client2.transport.run_aggregation_query._session

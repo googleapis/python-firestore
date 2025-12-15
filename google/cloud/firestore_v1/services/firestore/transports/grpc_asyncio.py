@@ -590,6 +590,34 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
         return self._stubs["run_query"]
 
     @property
+    def execute_pipeline(
+        self,
+    ) -> Callable[
+        [firestore.ExecutePipelineRequest], Awaitable[firestore.ExecutePipelineResponse]
+    ]:
+        r"""Return a callable for the execute pipeline method over gRPC.
+
+        Executes a pipeline query.
+
+        Returns:
+            Callable[[~.ExecutePipelineRequest],
+                    Awaitable[~.ExecutePipelineResponse]]:
+                A function that, when called, will call the underlying RPC
+                on the server.
+        """
+        # Generate a "stub function" on-the-fly which will actually make
+        # the request.
+        # gRPC handles serialization and deserialization, so we just need
+        # to pass in the functions for each.
+        if "execute_pipeline" not in self._stubs:
+            self._stubs["execute_pipeline"] = self._logged_channel.unary_stream(
+                "/google.firestore.v1.Firestore/ExecutePipeline",
+                request_serializer=firestore.ExecutePipelineRequest.serialize,
+                response_deserializer=firestore.ExecutePipelineResponse.deserialize,
+            )
+        return self._stubs["execute_pipeline"]
+
+    @property
     def run_aggregation_query(
         self,
     ) -> Callable[
@@ -949,6 +977,23 @@ class FirestoreGrpcAsyncIOTransport(FirestoreTransport):
             ),
             self.run_query: self._wrap_method(
                 self.run_query,
+                default_retry=retries.AsyncRetry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=300.0,
+                ),
+                default_timeout=300.0,
+                client_info=client_info,
+            ),
+            self.execute_pipeline: self._wrap_method(
+                self.execute_pipeline,
                 default_retry=retries.AsyncRetry(
                     initial=0.1,
                     maximum=60.0,

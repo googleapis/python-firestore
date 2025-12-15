@@ -291,6 +291,23 @@ class FirestoreTransport(abc.ABC):
                 default_timeout=300.0,
                 client_info=client_info,
             ),
+            self.execute_pipeline: gapic_v1.method.wrap_method(
+                self.execute_pipeline,
+                default_retry=retries.Retry(
+                    initial=0.1,
+                    maximum=60.0,
+                    multiplier=1.3,
+                    predicate=retries.if_exception_type(
+                        core_exceptions.DeadlineExceeded,
+                        core_exceptions.InternalServerError,
+                        core_exceptions.ResourceExhausted,
+                        core_exceptions.ServiceUnavailable,
+                    ),
+                    deadline=300.0,
+                ),
+                default_timeout=300.0,
+                client_info=client_info,
+            ),
             self.run_aggregation_query: gapic_v1.method.wrap_method(
                 self.run_aggregation_query,
                 default_retry=retries.Retry(
@@ -511,6 +528,18 @@ class FirestoreTransport(abc.ABC):
     ) -> Callable[
         [firestore.RunQueryRequest],
         Union[firestore.RunQueryResponse, Awaitable[firestore.RunQueryResponse]],
+    ]:
+        raise NotImplementedError()
+
+    @property
+    def execute_pipeline(
+        self,
+    ) -> Callable[
+        [firestore.ExecutePipelineRequest],
+        Union[
+            firestore.ExecutePipelineResponse,
+            Awaitable[firestore.ExecutePipelineResponse],
+        ],
     ]:
         raise NotImplementedError()
 

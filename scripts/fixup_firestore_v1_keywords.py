@@ -51,6 +51,7 @@ class firestoreCallTransformer(cst.CSTTransformer):
         'commit': ('database', 'writes', 'transaction', ),
         'create_document': ('parent', 'collection_id', 'document', 'document_id', 'mask', ),
         'delete_document': ('name', 'current_document', ),
+        'execute_pipeline': ('database', 'structured_pipeline', 'transaction', 'new_transaction', 'read_time', ),
         'get_document': ('name', 'mask', 'transaction', 'read_time', ),
         'list_collection_ids': ('parent', 'page_size', 'page_token', 'read_time', ),
         'list_documents': ('parent', 'collection_id', 'page_size', 'page_token', 'order_by', 'mask', 'transaction', 'read_time', 'show_missing', ),

@@ -2,7 +2,7 @@ image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-li
 libraries:
   - id: google-cloud-firestore
     version: 2.21.0
-    last_generated_commit: 659ea6e98acc7d58661ce2aa7b4cf76a7ef3fd42
+    last_generated_commit: b60f5a5783d5ec0e8a8d254f73ad00316b9b646f
     apis:
       - path: google/firestore/v1
         service_config: firestore_v1.yaml
