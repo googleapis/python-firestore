@@ -555,9 +555,9 @@ class StructuredQuery(proto.Message):
                 when the vectors are more similar, the comparison is
                 inverted.
 
-                - For EUCLIDEAN, COSINE: WHERE distance <=
-                  distance_threshold
-                - For DOT_PRODUCT: WHERE distance >= distance_threshold
+                - For EUCLIDEAN, COSINE:
+                  ``WHERE distance <= distance_threshold``
+                - For DOT_PRODUCT: ``WHERE distance >= distance_threshold``
         """
 
         class DistanceMeasure(proto.Enum):
