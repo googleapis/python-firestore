@@ -1,7 +1,7 @@
 image: us-central1-docker.pkg.dev/cloud-sdk-librarian-prod/images-prod/python-librarian-generator@sha256:eec191fc4904c204cd717c79812cd66997b5559776483ee223f69c8f43e99224
 libraries:
   - id: google-cloud-firestore
-    version: 2.21.0
+    version: 2.22.0
     last_generated_commit: 659ea6e98acc7d58661ce2aa7b4cf76a7ef3fd42
     apis:
       - path: google/firestore/v1
