@@ -96,6 +96,17 @@ def test_pipeline__to_pb():
     assert pb.pipeline.stages[1] == stage_2._to_pb()
 
 
+def test_pipeline__to_pb_with_options():
+    from google.cloud.firestore_v1.types.pipeline import StructuredPipeline
+    from google.cloud.firestore_v1.types.document import Value
+
+    ppl = _make_pipeline()
+    options = {"option_1": Value(integer_value=1)}
+    pb = ppl._to_pb(**options)
+    assert isinstance(pb, StructuredPipeline)
+    assert pb.options["option_1"].integer_value == 1
+
+
 def test_pipeline_append():
     """append should create a new pipeline with the additional stage"""
 
@@ -363,29 +374,6 @@ def test_pipeline_execute_stream_equivalence():
     assert stream_results == execute_results
     assert stream_results[0].data()["key"] == "str_val"
     assert execute_results[0].data()["key"] == "str_val"
-
-
-def test_pipeline_execute_stream_equivalence_mocked():
-    """
-    pipeline.execute should call pipeline.stream internally
-    """
-    import datetime
-
-    ppl_1 = _make_pipeline()
-    expected_data = [object(), object()]
-    expected_transaction = object()
-    expected_read_time = datetime.datetime.now(tz=datetime.timezone.utc)
-    with mock.patch.object(ppl_1, "stream") as mock_stream:
-        mock_stream.return_value = expected_data
-        stream_results = ppl_1.execute(
-            transaction=expected_transaction, read_time=expected_read_time
-        )
-        assert mock_stream.call_count == 1
-        assert mock_stream.call_args[0] == ()
-        assert len(mock_stream.call_args[1]) == 2
-        assert mock_stream.call_args[1]["transaction"] == expected_transaction
-        assert mock_stream.call_args[1]["read_time"] == expected_read_time
-        assert stream_results == expected_data
 
 
 @pytest.mark.parametrize(

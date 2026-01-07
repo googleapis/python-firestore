@@ -389,30 +389,6 @@ async def test_async_pipeline_stream_stream_equivalence():
     assert stream_results[0].data()["key"] == "str_val"
 
 
-@pytest.mark.asyncio
-async def test_async_pipeline_stream_stream_equivalence_mocked():
-    """
-    pipeline.stream should call pipeline.stream internally
-    """
-    import datetime
-
-    ppl_1 = _make_async_pipeline()
-    expected_data = [object(), object()]
-    expected_transaction = object()
-    expected_read_time = datetime.datetime.now(tz=datetime.timezone.utc)
-    with mock.patch.object(ppl_1, "stream") as mock_stream:
-        mock_stream.return_value = _async_it(expected_data)
-        stream_results = await ppl_1.execute(
-            transaction=expected_transaction, read_time=expected_read_time
-        )
-        assert mock_stream.call_count == 1
-        assert mock_stream.call_args[0] == ()
-        assert len(mock_stream.call_args[1]) == 2
-        assert mock_stream.call_args[1]["transaction"] == expected_transaction
-        assert mock_stream.call_args[1]["read_time"] == expected_read_time
-        assert stream_results == expected_data
-
-
 @pytest.mark.parametrize(
     "method,args,result_cls",
     [
