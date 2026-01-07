@@ -2117,18 +2117,56 @@ def test__query_pipeline_order_sorts():
 
 
 def test__query_pipeline_cursors():
+    from google.cloud.firestore_v1 import pipeline_expressions as expr
+
     client = make_client()
     query_start = (
         client.collection("my_col").order_by("field_a").start_at({"field_a": "value"})
     )
     pipeline = query_start._build_pipeline(client.pipeline())
-    assert len(pipeline.stages) >= 2
+    
+    # Expected stages: Collection, Exists, Where(Cursor), Sort
+    assert len(pipeline.stages) == 4
+    assert pipeline.stages[0].path == "/my_col"
+    assert isinstance(pipeline.stages[1], stages.Where)  # Exists
+
+    cursor_stage = pipeline.stages[2]
+    assert isinstance(cursor_stage, stages.Where)
+    condition = cursor_stage.condition
+    # start_at({"field_a": "value"}) -> field_a >= "value"
+    # Implemented as Or(field_a > "value", field_a == "value")
+    assert isinstance(condition, expr.Or)
+    assert len(condition.params) == 2
+    assert condition.params[0].name == "greater_than"
+    assert isinstance(condition.params[0].params[0], expr.Field)
+    assert condition.params[0].params[0].path == "field_a"
+    assert condition.params[1].name == "equal"
+
+    assert isinstance(pipeline.stages[3], stages.Sort)
 
     query_end = (
         client.collection("my_col").order_by("field_a").end_at({"field_a": "value"})
     )
     pipeline = query_end._build_pipeline(client.pipeline())
-    assert len(pipeline.stages) >= 2
+    
+    # Expected stages: Collection, Exists, Where(Cursor), Sort
+    assert len(pipeline.stages) == 4
+    assert pipeline.stages[0].path == "/my_col"
+    assert isinstance(pipeline.stages[1], stages.Where)  # Exists
+
+    cursor_stage = pipeline.stages[2]
+    assert isinstance(cursor_stage, stages.Where)
+    condition = cursor_stage.condition
+    # end_at({"field_a": "value"}) -> field_a <= "value"
+    # Implemented as Or(field_a < "value", field_a == "value")
+    assert isinstance(condition, expr.Or)
+    assert len(condition.params) == 2
+    assert condition.params[0].name == "less_than"
+    assert isinstance(condition.params[0].params[0], expr.Field)
+    assert condition.params[0].params[0].path == "field_a"
+    assert condition.params[1].name == "equal"
+
+    assert isinstance(pipeline.stages[3], stages.Sort)
 
 
 def test__query_pipeline_limit_to_last():
