@@ -1444,7 +1444,7 @@ def test_query_stream_w_field_path(query_docs, database):
     verify_pipeline(query)
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 def test_query_stream_w_start_end_cursor(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1458,6 +1458,7 @@ def test_query_stream_w_start_end_cursor(query_docs, database):
     for key, value in values:
         assert stored[key] == value
         assert value["a"] == num_vals - 2
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
@@ -1733,7 +1734,7 @@ def test_pipeline_w_read_time(query_docs, cleanup, database):
         assert key != new_ref.id
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 def test_query_with_order_dot_key(client, cleanup, database):
     db = client
     collection_id = "collek" + UNIQUE_RESOURCE_ID
@@ -1770,6 +1771,9 @@ def test_query_with_order_dot_key(client, cleanup, database):
     )
     cursor_with_key_data = list(query4.stream())
     assert found_data == [snap.to_dict() for snap in cursor_with_key_data]
+    verify_pipeline(query)
+    verify_pipeline(query2)
+    verify_pipeline(query3)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1863,7 +1867,7 @@ def test_collection_group_queries(client, cleanup, database):
     verify_pipeline(query)
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 def test_collection_group_queries_startat_endat(client, cleanup, database):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
@@ -1894,6 +1898,7 @@ def test_collection_group_queries_startat_endat(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2", "cg-doc3", "cg-doc4"])
+    verify_pipeline(query)
 
     query = (
         client.collection_group(collection_group)
@@ -1904,6 +1909,7 @@ def test_collection_group_queries_startat_endat(client, cleanup, database):
     snapshots = list(query.stream())
     found = set(snapshot.id for snapshot in snapshots)
     assert found == set(["cg-doc2"])
+    verify_pipeline(query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
@@ -2724,6 +2730,7 @@ def test_repro_429(client, cleanup, database):
     for snapshot in query2.stream():
         print(f"id: {snapshot.id}")
     verify_pipeline(query)
+    verify_pipeline(query2)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -2883,7 +2890,7 @@ def test_count_query_stream_empty_aggregation(query, database):
     assert "Aggregations can not be empty" in exc_info.value.message
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 def test_count_query_with_start_at(query, database):
     """
     Ensure that count aggregation queries work when chained with a start_at
@@ -2900,6 +2907,7 @@ def test_count_query_with_start_at(query, database):
     for result in count_query.stream():
         for aggregation_result in result:
             assert aggregation_result.value == expected_count
+    verify_pipeline(count_query)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
