@@ -1193,8 +1193,6 @@ class BaseQuery(object):
             if self._limit_to_last:
                 actual_orderings = _reverse_orderings(orderings)
                 ppl = ppl.sort(*actual_orderings)
-            else:
-                ppl = ppl.sort(*orderings)
 
             # Apply cursor conditions.
             # Cursors are translated into filter conditions (e.g., field > value)
@@ -1212,6 +1210,9 @@ class BaseQuery(object):
                         end_at_val, orderings, is_start_cursor=False
                     )
                 )
+
+            if not self._limit_to_last:
+                ppl = ppl.sort(*orderings)
 
             if self._limit is not None:
                 ppl = ppl.limit(self._limit)

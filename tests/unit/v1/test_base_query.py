@@ -2337,3 +2337,99 @@ def _make_snapshot(docref, values):
     from google.cloud.firestore_v1 import document
 
     return document.DocumentSnapshot(docref, values, True, None, None, None)
+
+
+def test__build_pipeline_limit_to_last_ordering():
+    from google.cloud.firestore_v1 import pipeline_expressions as expr
+
+    # Verify that for limit_to_last=True:
+    # 1. Sort (reversed)
+    # 2. Where (cursor condition)
+
+    client = make_client()
+    # Query: Order by 'a' ASC, StartAt(10), LimitToLast(5)
+    query = (
+        client.collection("my_col").order_by("a").start_at({"a": 10}).limit_to_last(5)
+    )
+
+    pipeline = query._build_pipeline(client.pipeline())
+
+    # Expected stages:
+    # 0. Collection
+    # 1. Exists (for 'a')
+    # 2. Sort (DESCENDING) -> This must come BEFORE the cursor filter
+    # 3. Where (a > 10 condition or similar)
+    # 4. Limit (5)
+    # 5. Sort (ASCENDING)
+
+    assert len(pipeline.stages) >= 4
+
+    # Find indices
+    sort_reversed_idx = -1
+    cursor_where_idx = -1
+
+    for i, stage in enumerate(pipeline.stages):
+        if isinstance(stage, stages.Sort):
+            # Check if it is the reversed sort (DESCENDING)
+            if (
+                len(stage.orders) > 0
+                and stage.orders[0].order_dir == expr.Ordering.Direction.DESCENDING
+            ):
+                if sort_reversed_idx == -1:
+                    sort_reversed_idx = i
+
+        if isinstance(stage, stages.Where):
+            # Check if this is the cursor condition.
+            # Cursor condition for start_at({"a": 10}) should be related to 'a' and 10.
+            # usually an OR or Comparison.
+            # The Exists filter is also a Where, but it's usually `exists(a)`.
+
+            # Simple check: The condition is not just an 'exists' function call.
+            cond = stage.condition
+            if not (hasattr(cond, "name") and cond.name == "exists"):
+                # Assume this is the cursor filter
+                cursor_where_idx = i
+
+    assert sort_reversed_idx != -1, "Reversed sort stage not found"
+    assert cursor_where_idx != -1, "Cursor filter stage not found"
+
+    # Reversed Sort must happen BEFORE Cursor Filter
+    assert sort_reversed_idx < cursor_where_idx
+
+
+def test__build_pipeline_normal_ordering():
+    from google.cloud.firestore_v1 import pipeline_expressions as expr
+
+    # Verify that for limit_to_last=False (Normal):
+    # 1. Where (cursor condition)
+    # 2. Sort
+
+    client = make_client()
+    # Query: Order by 'a' ASC, StartAt(10)
+    query = client.collection("my_col").order_by("a").start_at({"a": 10})
+
+    pipeline = query._build_pipeline(client.pipeline())
+
+    # Expected stages:
+    # 0. Collection
+    # 1. Exists (for 'a')
+    # 2. Where (cursor condition)
+    # 3. Sort (ASCENDING)
+
+    sort_idx = -1
+    cursor_where_idx = -1
+
+    for i, stage in enumerate(pipeline.stages):
+        if isinstance(stage, stages.Sort):
+            sort_idx = i
+
+        if isinstance(stage, stages.Where):
+            cond = stage.condition
+            if not (hasattr(cond, "name") and cond.name == "exists"):
+                cursor_where_idx = i
+
+    assert sort_idx != -1, "Sort stage not found"
+    assert cursor_where_idx != -1, "Cursor filter stage not found"
+
+    # Cursor Filter must happen BEFORE Sort
+    assert cursor_where_idx < sort_idx
