@@ -1417,28 +1417,32 @@ def _where_conditions_from_cursor(
     cursor_values, before = cursor
     size = len(cursor_values)
 
+    if is_start_cursor:
+        filter_func = pipeline_expressions.Expression.greater_than
+    else:
+        filter_func = pipeline_expressions.Expression.less_than
+
     field = orderings[size - 1].expr
     value = pipeline_expressions.Constant(cursor_values[size - 1])
 
-    if not is_start_cursor:
-        condition = field.less_than(value)
-    else:
-        condition = field.greater_than(value)
+    # Add condition for last bound
+    condition = filter_func(field, value)
 
     if (is_start_cursor and before) or (not is_start_cursor and not before):
+        # When the cursor bound is inclusive, then the last bound
+        # can be equal to the value, otherwise it's not equal
         condition = pipeline_expressions.Or(condition, field.equal(value))
 
+    # Iterate backwards over the remaining bounds, adding a condition for each one
     for i in range(size - 2, -1, -1):
         field = orderings[i].expr
         value = pipeline_expressions.Constant(cursor_values[i])
 
-        if not is_start_cursor:
-            current_filter = field.less_than(value)
-        else:
-            current_filter = field.greater_than(value)
-
+        # For each field in the orderings, the condition is either
+        # a) lessThan|greaterThan the cursor value,
+        # b) or equal the cursor value and lessThan|greaterThan the cursor values for other fields
         condition = pipeline_expressions.Or(
-            current_filter,
+            filter_func(field, value),
             pipeline_expressions.And(field.equal(value), condition),
         )
 
