@@ -396,7 +396,7 @@ class Expression(ABC):
         return Function("sqrt", [self])
 
     @expose_as_static
-    def logical_maximum(self, other: Expression | CONSTANT_TYPE) -> "Expression":
+    def logical_maximum(self, *others: Expression | CONSTANT_TYPE) -> "Expression":
         """Creates an expression that returns the larger value between this expression
         and another expression or constant, based on Firestore's value type ordering.
 
@@ -406,23 +406,23 @@ class Expression(ABC):
         Example:
             >>> # Returns the larger value between the 'discount' field and the 'cap' field.
             >>> Field.of("discount").logical_maximum(Field.of("cap"))
-            >>> # Returns the larger value between the 'value' field and 10.
-            >>> Field.of("value").logical_maximum(10)
+            >>> # Returns the larger value between the 'value' field and some ints
+            >>> Field.of("value").logical_maximum(10, 20, 30)
 
         Args:
-            other: The other expression or constant value to compare with.
+            others: The other expression or constant values to compare with.
 
         Returns:
             A new `Expression` representing the logical maximum operation.
         """
         return Function(
             "maximum",
-            [self, self._cast_to_expr_or_convert_to_constant(other)],
+            [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
             infix_name_override="logical_maximum",
         )
 
     @expose_as_static
-    def logical_minimum(self, other: Expression | CONSTANT_TYPE) -> "Expression":
+    def logical_minimum(self, *others: Expression | CONSTANT_TYPE) -> "Expression":
         """Creates an expression that returns the smaller value between this expression
         and another expression or constant, based on Firestore's value type ordering.
 
@@ -432,18 +432,18 @@ class Expression(ABC):
         Example:
             >>> # Returns the smaller value between the 'discount' field and the 'floor' field.
             >>> Field.of("discount").logical_minimum(Field.of("floor"))
-            >>> # Returns the smaller value between the 'value' field and 10.
-            >>> Field.of("value").logical_minimum(10)
+            >>> # Returns the smaller value between the 'value' field and some ints
+            >>> Field.of("value").logical_minimum(10, 20, 30)
 
         Args:
-            other: The other expression or constant value to compare with.
+            others: The other expression or constant values to compare with.
 
         Returns:
             A new `Expression` representing the logical minimum operation.
         """
         return Function(
             "minimum",
-            [self, self._cast_to_expr_or_convert_to_constant(other)],
+            [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
             infix_name_override="logical_minimum",
         )
 
@@ -627,6 +627,25 @@ class Expression(ABC):
                 self,
                 self._cast_to_expr_or_convert_to_constant(array),
             ],
+        )
+
+    @expose_as_static
+    def array_get(self, offset: Expression | int) -> "Function":
+        """
+        Creates an expression that indexes into an array from the beginning or end and returns the
+        element. A negative offset starts from the end.
+
+        Example:
+            >>> Array([1,2,3]).array_get(0)
+
+        Args:
+            offset: the index of the element to return
+
+        Returns:
+            A new `Expression` representing the `array_get` operation.
+        """
+        return Function(
+            "array_get", [self, self._cast_to_expr_or_convert_to_constant(offset)]
         )
 
     @expose_as_static
@@ -815,56 +834,6 @@ class Expression(ABC):
             "if_absent",
             [self, self._cast_to_expr_or_convert_to_constant(default_value)],
         )
-
-    @expose_as_static
-    def is_nan(self) -> "BooleanExpression":
-        """Creates an expression that checks if this expression evaluates to 'NaN' (Not a Number).
-
-        Example:
-            >>> # Check if the result of a calculation is NaN
-            >>> Field.of("value").divide(0).is_nan()
-
-        Returns:
-            A new `Expression` representing the 'isNaN' check.
-        """
-        return BooleanExpression("is_nan", [self])
-
-    @expose_as_static
-    def is_not_nan(self) -> "BooleanExpression":
-        """Creates an expression that checks if this expression evaluates to a non-'NaN' (Not a Number) value.
-
-        Example:
-            >>> # Check if the result of a calculation is not NaN
-            >>> Field.of("value").divide(1).is_not_nan()
-
-        Returns:
-            A new `Expression` representing the 'is not NaN' check.
-        """
-        return BooleanExpression("is_not_nan", [self])
-
-    @expose_as_static
-    def is_null(self) -> "BooleanExpression":
-        """Creates an expression that checks if the value of a field is 'Null'.
-
-        Example:
-            >>> Field.of("value").is_null()
-
-        Returns:
-            A new `Expression` representing the 'isNull' check.
-        """
-        return BooleanExpression("is_null", [self])
-
-    @expose_as_static
-    def is_not_null(self) -> "BooleanExpression":
-        """Creates an expression that checks if the value of a field is not 'Null'.
-
-        Example:
-            >>> Field.of("value").is_not_null()
-
-        Returns:
-            A new `Expression` representing the 'isNotNull' check.
-        """
-        return BooleanExpression("is_not_null", [self])
 
     @expose_as_static
     def is_error(self):
@@ -1653,7 +1622,10 @@ class Constant(Expression, Generic[CONSTANT_TYPE]):
         return Constant(value)
 
     def __repr__(self):
-        return f"Constant.of({self.value!r})"
+        value_str = repr(self.value)
+        if isinstance(self.value, float) and value_str == "nan":
+            value_str = "math.nan"
+        return f"Constant.of({value_str})"
 
     def __hash__(self):
         return hash(self.value)
@@ -1827,13 +1799,13 @@ class BooleanExpression(Function):
         elif isinstance(filter_pb, Query_pb.UnaryFilter):
             field = Field.of(filter_pb.field.field_path)
             if filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NAN:
-                return And(field.exists(), field.is_nan())
+                return And(field.exists(), field.equal(float("nan")))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NAN:
-                return And(field.exists(), field.is_not_nan())
+                return And(field.exists(), Not(field.equal(float("nan"))))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NULL:
-                return And(field.exists(), field.is_null())
+                return And(field.exists(), field.equal(None))
             elif filter_pb.op == Query_pb.UnaryFilter.Operator.IS_NOT_NULL:
-                return And(field.exists(), field.is_not_null())
+                return And(field.exists(), Not(field.equal(None)))
             else:
                 raise TypeError(f"Unexpected UnaryFilter operator type: {filter_pb.op}")
         elif isinstance(filter_pb, Query_pb.FieldFilter):
@@ -1878,7 +1850,7 @@ class Array(Function):
     Creates an expression that creates a Firestore array value from an input list.
 
     Example:
-        >>> Expression.array(["bar", Field.of("baz")])
+        >>> Array(["bar", Field.of("baz")])
 
     Args:
         elements: The input list to evaluate in the expression

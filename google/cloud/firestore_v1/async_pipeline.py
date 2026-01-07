@@ -13,14 +13,20 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import AsyncIterable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
+from google.cloud.firestore_v1.pipeline_result import AsyncPipelineStream
+from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
+from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
     from google.cloud.firestore_v1.async_client import AsyncClient
-    from google.cloud.firestore_v1.pipeline_result import PipelineResult
     from google.cloud.firestore_v1.async_transaction import AsyncTransaction
+    from google.cloud.firestore_v1.pipeline_expressions import Constant
+    from google.cloud.firestore_v1.types.document import Value
+    from google.cloud.firestore_v1.query_profile import PipelineExplainOptions
 
 
 class AsyncPipeline(_BasePipeline):
@@ -40,7 +46,7 @@ class AsyncPipeline(_BasePipeline):
         ...                      .collection("books")
         ...                      .where(Field.of("published").gt(1980))
         ...                      .select("title", "author")
-        ...     async for result in pipeline.execute():
+        ...     async for result in pipeline.stream():
         ...         print(result)
 
     Use `client.pipeline()` to create instances of this class.
@@ -58,39 +64,68 @@ class AsyncPipeline(_BasePipeline):
 
     async def execute(
         self,
+        *,
         transaction: "AsyncTransaction" | None = None,
-    ) -> list[PipelineResult]:
+        read_time: datetime.datetime | None = None,
+        explain_options: PipelineExplainOptions | None = None,
+        index_mode: str | None = None,
+        additional_options: dict[str, Value | Constant] = {},
+    ) -> PipelineSnapshot[PipelineResult]:
         """
         Executes this pipeline and returns results as a list
 
         Args:
-            transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
+            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned list.
+            index_mode (Optional[str]): Configures the pipeline to require a certain type of indexes to be present.
+                Firestore will reject the request if there is not appropiate indexes to serve the query.
+            additional_options (Optional[dict[str, Value | Constant]]): Additional options to pass to the query.
+                These options will take precedence over method argument if there is a conflict (e.g. explain_options, index_mode)
         """
-        return [result async for result in self.stream(transaction=transaction)]
+        kwargs = {k: v for k, v in locals().items() if k != "self"}
+        stream = AsyncPipelineStream(PipelineResult, self, **kwargs)
+        results = [result async for result in stream]
+        return PipelineSnapshot(results, stream)
 
-    async def stream(
+    def stream(
         self,
+        *,
+        read_time: datetime.datetime | None = None,
         transaction: "AsyncTransaction" | None = None,
-    ) -> AsyncIterable[PipelineResult]:
+        explain_options: PipelineExplainOptions | None = None,
+        index_mode: str | None = None,
+        additional_options: dict[str, Value | Constant] = {},
+    ) -> AsyncPipelineStream[PipelineResult]:
         """
-        Process this pipeline as a stream, providing results through an Iterable
+        Process this pipeline as a stream, providing results through an AsyncIterable
 
         Args:
-            transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
+            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
+            index_mode (Optional[str]): Configures the pipeline to require a certain type of indexes to be present.
+                Firestore will reject the request if there is not appropiate indexes to serve the query.
+            additional_options (Optional[dict[str, Value | Constant]]): Additional options to pass to the query.
+                These options will take precedence over method argument if there is a conflict (e.g. explain_options, index_mode)
         """
-        request = self._prep_execute_request(transaction)
-        async for response in await self._client._firestore_api.execute_pipeline(
-            request
-        ):
-            for result in self._execute_response_helper(response):
-                yield result
+        kwargs = {k: v for k, v in locals().items() if k != "self"}
+        return AsyncPipelineStream(PipelineResult, self, **kwargs)

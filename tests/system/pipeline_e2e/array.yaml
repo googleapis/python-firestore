@@ -185,7 +185,7 @@ tests:
         - AliasedExpression:
             - Function.array_concat:
                 - Field: tags
-                - Constant: ["new_tag", "another_tag"]
+                - ["new_tag", "another_tag"]
             - "concatenatedTags"
     assert_results:
       - concatenatedTags:
@@ -232,8 +232,8 @@ tests:
         - AliasedExpression:
             - Function.array_concat:
                 - Field: tags
-                - Constant: ["sci-fi"]
-                - Constant: ["classic", "epic"]
+                - ["sci-fi"]
+                - ["classic", "epic"]
             - "concatenatedTags"
     assert_results:
       - concatenatedTags:
@@ -385,4 +385,80 @@ tests:
                         - integerValue: '5'
                         name: array
                     name: array_concat
+          name: select
+  - description: testArrayGet
+    pipeline:
+      - Collection: books
+      - Where:
+          - Function.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpression:
+            - Function.array_get:
+                - Field: tags
+                - Constant: 0
+            - "firstTag"
+    assert_results:
+      - firstTag: "comedy"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                firstTag:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - integerValue: '0'
+                    name: array_get
+          name: select
+  - description: testArrayGet_NegativeOffset
+    pipeline:
+      - Collection: books
+      - Where:
+          - Function.equal:
+              - Field: title
+              - Constant: "The Hitchhiker's Guide to the Galaxy"
+      - Select:
+        - AliasedExpression:
+            - Function.array_get:
+                - Field: tags
+                - Constant: -1
+            - "lastTag"
+    assert_results:
+      - lastTag: "adventure"
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: title
+              - stringValue: "The Hitchhiker's Guide to the Galaxy"
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                lastTag:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: tags
+                    - integerValue: '-1'
+                    name: array_get
           name: select

@@ -13,14 +13,20 @@
 # limitations under the License.
 
 from __future__ import annotations
-from typing import Iterable, TYPE_CHECKING
+from typing import TYPE_CHECKING
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_pipeline import _BasePipeline
+from google.cloud.firestore_v1.pipeline_result import PipelineStream
+from google.cloud.firestore_v1.pipeline_result import PipelineSnapshot
+from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
 if TYPE_CHECKING:  # pragma: NO COVER
+    import datetime
     from google.cloud.firestore_v1.client import Client
-    from google.cloud.firestore_v1.pipeline_result import PipelineResult
+    from google.cloud.firestore_v1.pipeline_expressions import Constant
     from google.cloud.firestore_v1.transaction import Transaction
+    from google.cloud.firestore_v1.types.document import Value
+    from google.cloud.firestore_v1.query_profile import PipelineExplainOptions
 
 
 class Pipeline(_BasePipeline):
@@ -55,36 +61,68 @@ class Pipeline(_BasePipeline):
 
     def execute(
         self,
+        *,
         transaction: "Transaction" | None = None,
-    ) -> list[PipelineResult]:
+        read_time: datetime.datetime | None = None,
+        explain_options: PipelineExplainOptions | None = None,
+        index_mode: str | None = None,
+        additional_options: dict[str, Value | Constant] = {},
+    ) -> PipelineSnapshot[PipelineResult]:
         """
         Executes this pipeline and returns results as a list
 
         Args:
-            transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
+            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned list.
+            index_mode (Optional[str]): Configures the pipeline to require a certain type of indexes to be present.
+                Firestore will reject the request if there is not appropiate indexes to serve the query.
+            additional_options (Optional[dict[str, Value | Constant]]): Additional options to pass to the query.
+                These options will take precedence over method argument if there is a conflict (e.g. explain_options, index_mode)
         """
-        return [result for result in self.stream(transaction=transaction)]
+        kwargs = {k: v for k, v in locals().items() if k != "self"}
+        stream = PipelineStream(PipelineResult, self, **kwargs)
+        results = [result for result in stream]
+        return PipelineSnapshot(results, stream)
 
     def stream(
         self,
+        *,
         transaction: "Transaction" | None = None,
-    ) -> Iterable[PipelineResult]:
+        read_time: datetime.datetime | None = None,
+        explain_options: PipelineExplainOptions | None = None,
+        index_mode: str | None = None,
+        additional_options: dict[str, Value | Constant] = {},
+    ) -> PipelineStream[PipelineResult]:
         """
         Process this pipeline as a stream, providing results through an Iterable
 
         Args:
-            transaction
-                (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
+            transaction (Optional[:class:`~google.cloud.firestore_v1.transaction.Transaction`]):
                 An existing transaction that this query will run in.
                 If a ``transaction`` is used and it already has write operations
                 added, this method cannot be used (i.e. read-after-write is not
                 allowed).
+            read_time (Optional[datetime.datetime]): If set, reads documents as they were at the given
+                time. This must be a microsecond precision timestamp within the past one hour, or
+                if Point-in-Time Recovery is enabled, can additionally be a whole minute timestamp
+                within the past 7 days. For the most accurate results, use UTC timezone.
+            explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
+                Options to enable query profiling for this query. When set,
+                explain_metrics will be available on the returned generator.
+            index_mode (Optional[str]): Configures the pipeline to require a certain type of indexes to be present.
+                Firestore will reject the request if there is not appropiate indexes to serve the query.
+            additional_options (Optional[dict[str, Value | Constant]]): Additional options to pass to the query.
+                These options will take precedence over method argument if there is a conflict (e.g. explain_options, index_mode)
         """
-        request = self._prep_execute_request(transaction)
-        for response in self._client._firestore_api.execute_pipeline(request):
-            yield from self._execute_response_helper(response)
+        kwargs = {k: v for k, v in locals().items() if k != "self"}
+        return PipelineStream(PipelineResult, self, **kwargs)

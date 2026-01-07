@@ -96,6 +96,17 @@ def test_pipeline__to_pb():
     assert pb.pipeline.stages[1] == stage_2._to_pb()
 
 
+def test_pipeline__to_pb_with_options():
+    from google.cloud.firestore_v1.types.pipeline import StructuredPipeline
+    from google.cloud.firestore_v1.types.document import Value
+
+    ppl = _make_pipeline()
+    options = {"option_1": Value(integer_value=1)}
+    pb = ppl._to_pb(**options)
+    assert isinstance(pb, StructuredPipeline)
+    assert pb.options["option_1"].integer_value == 1
+
+
 def test_pipeline_append():
     """append should create a new pipeline with the additional stage"""
 
@@ -302,6 +313,34 @@ def test_pipeline_stream_with_transaction():
     assert request.transaction == b"123"
 
 
+def test_pipeline_stream_with_read_time():
+    """
+    test stream pipeline with read_time
+    """
+    import datetime
+
+    from google.cloud.firestore_v1.types import ExecutePipelineResponse
+    from google.cloud.firestore_v1.types import ExecutePipelineRequest
+
+    client = mock.Mock()
+    client.project = "A"
+    client._database = "B"
+    mock_rpc = client._firestore_api.execute_pipeline
+
+    read_time = datetime.datetime.now(tz=datetime.timezone.utc)
+
+    mock_rpc.return_value = [ExecutePipelineResponse()]
+    ppl_1 = _make_pipeline(client=client)
+
+    list(ppl_1.stream(read_time=read_time))
+    assert mock_rpc.call_count == 1
+    request = mock_rpc.call_args[0][0]
+    assert isinstance(request, ExecutePipelineRequest)
+    assert request.structured_pipeline == ppl_1._to_pb()
+    assert request.database == "projects/A/databases/B"
+    assert request.read_time == read_time
+
+
 def test_pipeline_execute_stream_equivalence():
     """
     Pipeline.execute should provide same results from pipeline.stream, as a list
@@ -335,23 +374,6 @@ def test_pipeline_execute_stream_equivalence():
     assert stream_results == execute_results
     assert stream_results[0].data()["key"] == "str_val"
     assert execute_results[0].data()["key"] == "str_val"
-
-
-def test_pipeline_execute_stream_equivalence_mocked():
-    """
-    pipeline.execute should call pipeline.stream internally
-    """
-    ppl_1 = _make_pipeline()
-    expected_data = [object(), object()]
-    expected_arg = object()
-    with mock.patch.object(ppl_1, "stream") as mock_stream:
-        mock_stream.return_value = expected_data
-        stream_results = ppl_1.execute(expected_arg)
-        assert mock_stream.call_count == 1
-        assert mock_stream.call_args[0] == ()
-        assert len(mock_stream.call_args[1]) == 1
-        assert mock_stream.call_args[1]["transaction"] == expected_arg
-        assert stream_results == expected_data
 
 
 @pytest.mark.parametrize(

@@ -238,89 +238,48 @@ tests:
                 expression:
                   fieldReferenceValue: title
           name: sort
-  - description: testChecks
+  - description: testIsNull
     pipeline:
-      - Collection: books
+      - Collection: errors
       - Where:
-            - Not:
-                - Function.is_nan:
-                  - Field: rating
-      - Select:
-          - AliasedExpression:
-              - Not:
-                  - Function.is_nan:
-                    - Field: rating
-              - "ratingIsNotNaN"
-      - Limit: 1
+        - Function.equal:
+            - Field: value
+            - null
     assert_results:
-      - ratingIsNotNaN: true
+      - value: null
     assert_proto:
       pipeline:
         stages:
         - args:
-          - referenceValue: /books
+          - referenceValue: /errors
           name: collection
         - args:
           - functionValue:
               args:
-              - functionValue:
-                  args:
-                  - fieldReferenceValue: rating
-                  name: is_nan
-              name: not
+              - fieldReferenceValue: value
+              - nullValue: null
+              name: equal
           name: where
-        - args:
-          - mapValue:
-              fields:
-                ratingIsNotNaN:
-                  functionValue:
-                    args:
-                    - functionValue:
-                        args:
-                        - fieldReferenceValue: rating
-                        name: is_nan
-                    name: not
-          name: select
-        - args:
-          - integerValue: '1'
-          name: limit
-  - description: testIsNotNull
+  - description: testIsNan
     pipeline:
-      - Collection: books
+      - Collection: errors
       - Where:
-          - Function.is_not_null:
-              - Field: rating
-    assert_count: 10
+        - Function.equal:
+            - Field: value
+            - NaN
+    assert_count: 1
     assert_proto:
       pipeline:
         stages:
         - args:
-          - referenceValue: /books
+          - referenceValue: /errors
           name: collection
         - args:
           - functionValue:
               args:
-              - fieldReferenceValue: rating
-              name: is_not_null
-          name: where
-  - description: testIsNotNaN
-    pipeline:
-      - Collection: books
-      - Where:
-          - Function.is_not_nan:
-              - Field: rating
-    assert_count: 10
-    assert_proto:
-      pipeline:
-        stages:
-        - args:
-          - referenceValue: /books
-          name: collection
-        - args:
-          - functionValue:
-              args:
-              - fieldReferenceValue: rating
-              name: is_not_nan
+              - fieldReferenceValue: value
+              - doubleValue: NaN
+              name: equal
           name: where
   - description: testIsAbsent
     pipeline:
@@ -503,6 +462,64 @@ tests:
                     args:
                     - fieldReferenceValue: rating
                     - doubleValue: 4.5
+                    name: maximum
+          name: select
+  - description: testLogicalMinMaxWithMultipleInputs
+    pipeline:
+      - Collection: books
+      - Where:
+          - Function.equal:
+              - Field: author
+              - Constant: Douglas Adams
+      - Select:
+          - AliasedExpression:
+              - Function.logical_maximum:
+                  - Field: rating
+                  - Constant: 4.5
+                  - Constant: 3.0
+                  - Constant: 5.0
+              - "max_rating"
+          - AliasedExpression:
+              - Function.logical_minimum:
+                  - Field: published
+                  - Constant: 1900
+                  - Constant: 2000
+                  - Constant: 1984
+              - "min_published"
+    assert_results:
+      - max_rating: 5.0
+        min_published: 1900
+    assert_proto:
+      pipeline:
+        stages:
+        - args:
+          - referenceValue: /books
+          name: collection
+        - args:
+          - functionValue:
+              args:
+              - fieldReferenceValue: author
+              - stringValue: Douglas Adams
+              name: equal
+          name: where
+        - args:
+          - mapValue:
+              fields:
+                min_published:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: published
+                    - integerValue: '1900'
+                    - integerValue: '2000'
+                    - integerValue: '1984'
+                    name: minimum
+                max_rating:
+                  functionValue:
+                    args:
+                    - fieldReferenceValue: rating
+                    - doubleValue: 4.5
+                    - doubleValue: 3.0
+                    - doubleValue: 5.0
                     name: maximum
           name: select
   - description: testGreaterThanOrEqual

@@ -21,6 +21,7 @@ from typing import Callable, Dict, List, Optional
 
 import google.auth
 import pytest
+import mock
 from google.api_core.exceptions import (
     AlreadyExists,
     FailedPrecondition,
@@ -45,6 +46,8 @@ from test__helpers import (
     ENTERPRISE_MODE_ERROR,
     TEST_DATABASES,
     TEST_DATABASES_W_ENTERPRISE,
+    IS_KOKORO_TEST,
+    FIRESTORE_ENTERPRISE_DB,
 )
 
 
@@ -123,7 +126,8 @@ def verify_pipeline(query):
         except Exception as e:
             # if we expect the query to fail, capture the exception
             query_exception = e
-        pipeline = query.pipeline()
+        client = query._client
+        pipeline = client.pipeline().create_from(query)
         if query_exception:
             # ensure that the pipeline uses same error as query
             with pytest.raises(query_exception.__class__):
@@ -1640,6 +1644,140 @@ def test_query_stream_or_get_w_explain_options_analyze_false(
         explain_metrics.execution_stats
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_explain_mode(database, method, query_docs):
+    """Explain currently not supported by backend. Expect error"""
+    from google.cloud.firestore_v1.query_profile import (
+        PipelineExplainOptions,
+    )
+
+    collection, _, _ = query_docs
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+    explain_options = PipelineExplainOptions(mode="explain")
+
+    # for now, expect error on explain mode
+    with pytest.raises(InvalidArgument) as e:
+        results = method_under_test(explain_options=explain_options)
+        list(results)
+    assert "Explain execution mode is not supported" in str(e)
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_analyze_mode(database, method, query_docs):
+    from google.cloud.firestore_v1.query_profile import (
+        PipelineExplainOptions,
+        ExplainStats,
+        QueryExplainError,
+    )
+    from google.cloud.firestore_v1.types.explain_stats import (
+        ExplainStats as ExplainStats_pb,
+    )
+
+    collection, _, allowed_vals = query_docs
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+    results = method_under_test(explain_options=PipelineExplainOptions())
+
+    if method == "stream":
+        # check for error accessing explain stats before iterating
+        with pytest.raises(
+            QueryExplainError,
+            match="explain_stats not available until query is complete",
+        ):
+            results.explain_stats
+
+    # Finish iterating results, and explain_stats should be available.
+    results_list = list(results)
+    num_results = len(results_list)
+    assert num_results == len(allowed_vals)
+
+    # Verify explain_stats.
+    explain_stats = results.explain_stats
+    assert isinstance(explain_stats, ExplainStats)
+
+    assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
+    text_stats = explain_stats.get_text()
+    assert "Execution:" in text_stats
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("method", ["execute", "stream"])
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_explain_options_using_additional_options(
+    database, method, query_docs
+):
+    """additional_options field allows passing in arbitrary options. Test with explain_options"""
+    from google.cloud.firestore_v1.query_profile import (
+        PipelineExplainOptions,
+        ExplainStats,
+    )
+    from google.cloud.firestore_v1.types.explain_stats import (
+        ExplainStats as ExplainStats_pb,
+    )
+
+    collection, _, allowed_vals = query_docs
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # Tests either `execute()` or `stream()`.
+    method_under_test = getattr(pipeline, method)
+
+    encoded_options = {"explain_options": PipelineExplainOptions()._to_value()}
+
+    results = method_under_test(
+        explain_options=mock.Mock(), additional_options=encoded_options
+    )
+
+    # Finish iterating results, and explain_stats should be available./w_read
+    results_list = list(results)
+    num_results = len(results_list)
+    assert num_results == len(allowed_vals)
+
+    # Verify explain_stats.
+    explain_stats = results.explain_stats
+    assert isinstance(explain_stats, ExplainStats)
+
+    assert isinstance(explain_stats.get_raw(), ExplainStats_pb)
+    text_stats = explain_stats.get_text()
+    assert "Execution:" in text_stats
+
+
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
+)
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_index_mode(database, query_docs):
+    """test pipeline query with explicit index mode"""
+
+    collection, _, allowed_vals = query_docs
+    client = collection._client
+    query = collection.where(filter=FieldFilter("a", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+    with pytest.raises(InvalidArgument) as e:
+        pipeline.execute(index_mode="fake_index")
+    assert "Invalid index_mode: fake_index" in str(e)
+
+
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_query_stream_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
@@ -1676,6 +1814,50 @@ def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert len(new_values) == num_vals + 1
     assert new_ref.id in new_values
     assert new_values[new_ref.id] == new_data
+
+
+@pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
+@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
+def test_pipeline_w_read_time(query_docs, cleanup, database):
+    collection, stored, allowed_vals = query_docs
+    num_vals = len(allowed_vals)
+
+    # Find a read_time before adding the new document.
+    snapshots = collection.get()
+    read_time = snapshots[0].read_time
+
+    new_data = {
+        "a": 9000,
+        "b": 1,
+    }
+    _, new_ref = collection.add(new_data)
+    # Add to clean-up.
+    cleanup(new_ref.delete)
+    stored[new_ref.id] = new_data
+
+    client = collection._client
+    query = collection.where(filter=FieldFilter("b", "==", 1))
+    pipeline = client.pipeline().create_from(query)
+
+    # new query should have new_data
+    new_results = list(pipeline.stream())
+    new_values = {result.ref.id: result.data() for result in new_results}
+    assert len(new_values) == num_vals + 1
+    assert new_ref.id in new_values
+    assert new_values[new_ref.id] == new_data
+
+    # query with read_time should not have new)data
+    results = list(pipeline.stream(read_time=read_time))
+
+    values = {result.ref.id: result.data() for result in results}
+
+    assert len(values) == num_vals
+    assert new_ref.id not in values
+    for key, value in values.items():
+        assert stored[key] == value
+        assert value["b"] == 1
+        assert value["a"] != 9000
+        assert key != new_ref.id
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -1717,7 +1899,7 @@ def test_query_with_order_dot_key(client, cleanup, database):
     assert found_data == [snap.to_dict() for snap in cursor_with_key_data]
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_query_unary(client, cleanup, database):
     collection_name = "unary" + UNIQUE_RESOURCE_ID
     collection = client.collection(collection_name)
@@ -3277,7 +3459,7 @@ def test_query_with_or_composite_filter(collection, database):
     verify_pipeline(query)
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 @pytest.mark.parametrize(
     "aggregation_type,expected_value", [("count", 5), ("sum", 100), ("avg", 4.0)]
 )
