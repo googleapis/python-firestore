@@ -1134,12 +1134,8 @@ class BaseQuery(object):
         """
         Convert this query into a Pipeline
 
-        Queries containing a `cursor` or `limit_to_last` are not currently supported
-
         Args:
             source: the PipelineSource to build the pipeline off of
-        Raises:
-            - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
         Returns:
             a Pipeline representing the query
         """
@@ -1162,9 +1158,10 @@ class BaseQuery(object):
 
         # Orders
         orders = self._normalize_orders()
+
+        exists = []
+        orderings = []
         if orders:
-            exists = []
-            orderings = []
             for order in orders:
                 field = pipeline_expressions.Field.of(order.field.field_path)
                 exists.append(field.exists())
@@ -1178,22 +1175,57 @@ class BaseQuery(object):
             # Add exists filters to match Query's implicit orderby semantics.
             if len(exists) == 1:
                 ppl = ppl.where(exists[0])
-            else:
+            elif len(exists) > 1:
                 ppl = ppl.where(pipeline_expressions.And(*exists))
 
-            # Add sort orderings
-            ppl = ppl.sort(*orderings)
+        if orderings:
+            # Normalize cursors to get the raw values corresponding to the orders
+            start_at_val = None
+            if self._start_at:
+                start_at_val = self._normalize_cursor(self._start_at, orders)
 
-        # Cursors, Limit and Offset
-        if self._start_at or self._end_at or self._limit_to_last:
-            raise NotImplementedError(
-                "Query to Pipeline conversion: cursors and limit_to_last is not supported yet."
-            )
-        else:  # Limit & Offset without cursors
-            if self._offset:
-                ppl = ppl.offset(self._offset)
-            if self._limit:
+            end_at_val = None
+            if self._end_at:
+                end_at_val = self._normalize_cursor(self._end_at, orders)
+
+            # If limit_to_last is set, we need to reverse the orderings to find the
+            # "last" N documents (which effectively become the "first" N in reverse order).
+            if self._limit_to_last:
+                actual_orderings = _reverse_orderings(orderings)
+                ppl = ppl.sort(*actual_orderings)
+            else:
+                ppl = ppl.sort(*orderings)
+
+            # Apply cursor conditions.
+            # Cursors are translated into filter conditions (e.g., field > value)
+            # based on the orderings.
+            if start_at_val:
+                ppl = ppl.where(
+                    _where_conditions_from_cursor(
+                        start_at_val, orderings, is_start_cursor=True
+                    )
+                )
+
+            if end_at_val:
+                ppl = ppl.where(
+                    _where_conditions_from_cursor(
+                        end_at_val, orderings, is_start_cursor=False
+                    )
+                )
+
+            if self._limit is not None:
                 ppl = ppl.limit(self._limit)
+
+            # If we reversed the orderings for limit_to_last, we must now re-sort
+            # using the original orderings to return the results in the user-requested order.
+            if self._limit_to_last:
+                ppl = ppl.sort(*orderings)
+        elif self._limit is not None and not self._limit_to_last:
+            ppl = ppl.limit(self._limit)
+
+        # Offset
+        if self._offset:
+            ppl = ppl.offset(self._offset)
 
         return ppl
 
@@ -1364,6 +1396,65 @@ def _cursor_pb(cursor_pair: Optional[Tuple[list, bool]]) -> Optional[Cursor]:
         return query.Cursor(values=value_pbs, before=before)
     else:
         return None
+
+
+def _where_conditions_from_cursor(
+    cursor: Tuple[List, bool],
+    orderings: List[pipeline_expressions.Ordering],
+    is_start_cursor: bool,
+) -> pipeline_expressions.BooleanExpression:
+    """
+    Converts a cursor into a filter condition for the pipeline.
+
+    Args:
+        cursor: The cursor values and the 'before' flag.
+        orderings: The list of ordering expressions used in the query.
+        is_start_cursor: True if this is a start_at/start_after cursor, False if it is an end_at/end_before cursor.
+    Returns:
+        A BooleanExpression representing the cursor condition.
+    """
+    cursor_values, before = cursor
+    size = len(cursor_values)
+
+    field = orderings[size - 1].expr
+    value = pipeline_expressions.Constant(cursor_values[size - 1])
+
+    if not is_start_cursor:
+        condition = field.less_than(value)
+    else:
+        condition = field.greater_than(value)
+
+    if (is_start_cursor and before) or (not is_start_cursor and not before):
+        condition = pipeline_expressions.Or(condition, field.equal(value))
+
+    for i in range(size - 2, -1, -1):
+        field = orderings[i].expr
+        value = pipeline_expressions.Constant(cursor_values[i])
+
+        if not is_start_cursor:
+            current_filter = field.less_than(value)
+        else:
+            current_filter = field.greater_than(value)
+
+        condition = pipeline_expressions.Or(
+            current_filter,
+            pipeline_expressions.And(field.equal(value), condition),
+        )
+
+    return condition
+
+
+def _reverse_orderings(
+    orderings: List[pipeline_expressions.Ordering],
+) -> List[pipeline_expressions.Ordering]:
+    reversed_orderings = []
+    for o in orderings:
+        if o.order_dir == pipeline_expressions.Ordering.Direction.ASCENDING:
+            new_dir = "descending"
+        else:
+            new_dir = "ascending"
+        reversed_orderings.append(pipeline_expressions.Ordering(o.expr, new_dir))
+    return reversed_orderings
 
 
 def _query_response_to_snapshot(
