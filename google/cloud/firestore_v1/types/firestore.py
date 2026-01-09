@@ -932,21 +932,23 @@ class ExecutePipelineResponse(proto.Message):
             only a partial progress message is returned.
 
             The fields present in the returned documents are only those
-            that were explicitly requested in the pipeline, this include
-            those like [``__name__``][google.firestore.v1.Document.name]
-            &
+            that were explicitly requested in the pipeline, this
+            includes those like
+            [``__name__``][google.firestore.v1.Document.name] and
             [``__update_time__``][google.firestore.v1.Document.update_time].
             This is explicitly a divergence from ``Firestore.RunQuery``
             / ``Firestore.GetDocument`` RPCs which always return such
             fields even when they are not specified in the
             [``mask``][google.firestore.v1.DocumentMask].
         execution_time (google.protobuf.timestamp_pb2.Timestamp):
-            The time at which the document(s) were read.
+            The time at which the results are valid.
 
-            This may be monotonically increasing; in this case, the
-            previous documents in the result stream are guaranteed not
-            to have changed between their ``execution_time`` and this
-            one.
+            This is a (not strictly) monotonically increasing value
+            across multiple responses in the same stream. The API
+            guarantees that all previously returned results are still
+            valid at the latest ``execution_time``. This allows the API
+            consumer to treat the query if it ran at the latest
+            ``execution_time`` returned.
 
             If the query returns no results, a response with
             ``execution_time`` and no ``results`` will be sent, and this
@@ -954,9 +956,11 @@ class ExecutePipelineResponse(proto.Message):
         explain_stats (google.cloud.firestore_v1.types.ExplainStats):
             Query explain stats.
 
-            Contains all metadata related to pipeline
-            planning and execution, specific contents depend
-            on the supplied pipeline options.
+            This is present on the **last** response if the request
+            configured explain to run in 'analyze' or 'explain' mode in
+            the pipeline options. If the query does not return any
+            results, a response with ``explain_stats`` and no
+            ``results`` will still be sent.
     """
 
     transaction: bytes = proto.Field(
@@ -1162,8 +1166,8 @@ class PartitionQueryRequest(proto.Message):
             For example, two subsequent calls using a page_token may
             return:
 
-            -  cursor B, cursor M, cursor Q
-            -  cursor A, cursor U, cursor W
+            - cursor B, cursor M, cursor Q
+            - cursor A, cursor U, cursor W
 
             To obtain a complete result set ordered with respect to the
             results of the query supplied to PartitionQuery, the results
@@ -1237,9 +1241,9 @@ class PartitionQueryResponse(proto.Message):
             cursors A and B, running the following three queries will
             return the entire result set of the original query:
 
-            -  query, end_at A
-            -  query, start_at A, end_at B
-            -  query, start_at B
+            - query, end_at A
+            - query, start_at A, end_at B
+            - query, start_at B
 
             An empty result may indicate that the query has too few
             results to be partitioned, or that the query is not yet
@@ -1561,9 +1565,9 @@ class Target(proto.Message):
 
             Note that if the client sends multiple ``AddTarget``
             requests without an ID, the order of IDs returned in
-            ``TargetChage.target_ids`` are undefined. Therefore, clients
-            should provide a target ID instead of relying on the server
-            to assign one.
+            ``TargetChange.target_ids`` are undefined. Therefore,
+            clients should provide a target ID instead of relying on the
+            server to assign one.
 
             If ``target_id`` is non-zero, there must not be an existing
             active target on this stream with the same ID.

@@ -28,50 +28,10 @@ common = gcp.CommonTemplates()
 firestore_default_version = "v1"
 firestore_admin_default_version = "v1"
 
-# This is a customized version of the s.get_staging_dirs() function from synthtool to
-# cater for copying 3 different folders from googleapis-gen
-# which are firestore, firestore/admin and firestore/bundle.
-# Source https://github.com/googleapis/synthtool/blob/master/synthtool/transforms.py#L280
-def get_staging_dirs(
-    default_version: Optional[str] = None, sub_directory: Optional[str] = None
-) -> List[Path]:
-    """Returns the list of directories, one per version, copied from
-    https://github.com/googleapis/googleapis-gen. Will return in lexical sorting
-    order with the exception of the default_version which will be last (if specified).
-
-    Args:
-      default_version (str): the default version of the API. The directory for this version
-        will be the last item in the returned list if specified.
-      sub_directory (str): if a `sub_directory` is provided, only the directories within the
-        specified `sub_directory` will be returned.
-
-    Returns: the empty list if no file were copied.
-    """
-
-    staging = Path("owl-bot-staging")
-
-    if sub_directory:
-        staging /= sub_directory
-
-    if staging.is_dir():
-        # Collect the subdirectories of the staging directory.
-        versions = [v.name for v in staging.iterdir() if v.is_dir()]
-        # Reorder the versions so the default version always comes last.
-        versions = [v for v in versions if v != default_version]
-        versions.sort()
-        if default_version is not None:
-            versions += [default_version]
-        dirs = [staging / v for v in versions]
-        for dir in dirs:
-            s._tracked_paths.add(dir)
-        return dirs
-    else:
-        return []
-
-def update_fixup_scripts(library):
+def update_fixup_scripts(path):
     # Add message for missing 'libcst' dependency
     s.replace(
-        library / "scripts/fixup*.py",
+        library / "scripts" / path,
         """import libcst as cst""",
         """try:
     import libcst as cst
@@ -82,19 +42,21 @@ except ImportError:
     """,
     )
 
-for library in get_staging_dirs(default_version=firestore_default_version, sub_directory="firestore"):
-    s.move(library / f"google/cloud/firestore_{library.name}", excludes=[f"__init__.py", "**/gapic_version.py", "noxfile.py"])
+for library in s.get_staging_dirs(default_version=firestore_default_version):
+    s.move(library / f"google/cloud/firestore_{library.name}", excludes=[f"__init__.py", "noxfile.py"])
     s.move(library / f"tests/", f"tests")
-    update_fixup_scripts(library)
-    s.move(library / "scripts")
+    fixup_script_path = "fixup_firestore_v1_keywords.py"
+    update_fixup_scripts(fixup_script_path)
+    s.move(library / "scripts" / fixup_script_path)
 
-for library in get_staging_dirs(default_version=firestore_admin_default_version, sub_directory="firestore_admin"):
-    s.move(library / f"google/cloud/firestore_admin_{library.name}", excludes=[f"__init__.py", "**/gapic_version.py", "noxfile.py"])
+for library in s.get_staging_dirs(default_version=firestore_admin_default_version):
+    s.move(library / f"google/cloud/firestore_admin_{library.name}", excludes=[f"__init__.py", "noxfile.py"])
     s.move(library / f"tests", f"tests")
-    update_fixup_scripts(library)
-    s.move(library / "scripts")
+    fixup_script_path = "fixup_firestore_admin_v1_keywords.py"
+    update_fixup_scripts(fixup_script_path)
+    s.move(library / "scripts" / fixup_script_path)
 
-for library in get_staging_dirs(sub_directory="firestore_bundle"):
+for library in s.get_staging_dirs():
     s.replace(
         library / "google/cloud/bundle/types/bundle.py",
         "from google.firestore.v1 import document_pb2  # type: ignore\n"
@@ -127,7 +89,7 @@ for library in get_staging_dirs(sub_directory="firestore_bundle"):
     s.move(
         library / f"google/cloud/bundle",
         f"google/cloud/firestore_bundle",
-        excludes=["**/gapic_version.py", "noxfile.py"],
+        excludes=["noxfile.py"],
     )
     s.move(library / f"tests", f"tests")
 
@@ -143,24 +105,14 @@ templated_files = common.py_library(
     microgenerator=True,
     cov_level=100,
     split_system_tests=True,
-    default_python_version="3.13",
-    system_test_python_versions=["3.9", "3.14"],
+    default_python_version="3.14",
+    system_test_python_versions=["3.14"],
     unit_test_python_versions=["3.7", "3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"],
 )
 
 s.move(templated_files,
-       excludes=[".github/release-please.yml", "renovate.json"])
+       excludes=[".github/**", ".kokoro/**", "renovate.json"])
 
 python.py_samples(skip_readmes=True)
 
 s.shell.run(["nox", "-s", "blacken"], hide_output=False)
-
-s.replace(
-    ".kokoro/build.sh",
-    "# Setup service account credentials.",
-    """\
-# Setup firestore account credentials
-export FIRESTORE_APPLICATION_CREDENTIALS=${KOKORO_GFILE_DIR}/firebase-credentials.json
-
-# Setup service account credentials.""",
-)

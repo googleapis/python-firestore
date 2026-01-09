@@ -1006,27 +1006,27 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
                  credentials identify the application to the service; if none
                  are specified, the client will attempt to ascertain the
                  credentials from the environment.
-
-             credentials_file (Optional[str]): A file with credentials that can
-                 be loaded with :func:`google.auth.load_credentials_from_file`.
-                 This argument is ignored if ``channel`` is provided.
-             scopes (Optional(Sequence[str])): A list of scopes. This argument is
-                 ignored if ``channel`` is provided.
-             client_cert_source_for_mtls (Callable[[], Tuple[bytes, bytes]]): Client
-                 certificate to configure mutual TLS HTTP channel. It is ignored
-                 if ``channel`` is provided.
-             quota_project_id (Optional[str]): An optional project to use for billing
-                 and quota.
-             client_info (google.api_core.gapic_v1.client_info.ClientInfo):
-                 The client info used to send a user-agent string along with
-                 API requests. If ``None``, then default info will be used.
-                 Generally, you only need to set this if you are developing
-                 your own client library.
-             always_use_jwt_access (Optional[bool]): Whether self signed JWT should
-                 be used for service account credentials.
-             url_scheme: the protocol scheme for the API endpoint.  Normally
-                 "https", but for testing or local servers,
-                 "http" can be specified.
+            credentials_file (Optional[str]): Deprecated. A file with credentials that can
+                be loaded with :func:`google.auth.load_credentials_from_file`.
+                This argument is ignored if ``channel`` is provided. This argument will be
+                removed in the next major version of this library.
+            scopes (Optional(Sequence[str])): A list of scopes. This argument is
+                ignored if ``channel`` is provided.
+            client_cert_source_for_mtls (Callable[[], Tuple[bytes, bytes]]): Client
+                certificate to configure mutual TLS HTTP channel. It is ignored
+                if ``channel`` is provided.
+            quota_project_id (Optional[str]): An optional project to use for billing
+                and quota.
+            client_info (google.api_core.gapic_v1.client_info.ClientInfo):
+                The client info used to send a user-agent string along with
+                API requests. If ``None``, then default info will be used.
+                Generally, you only need to set this if you are developing
+                your own client library.
+            always_use_jwt_access (Optional[bool]): Whether self signed JWT should
+                be used for service account credentials.
+            url_scheme: the protocol scheme for the API endpoint.  Normally
+                "https", but for testing or local servers,
+                "http" can be specified.
         """
         # Run the base constructor
         # TODO(yon-mg): resolve other ctor params i.e. scopes, quota, etc.
@@ -1180,6 +1180,22 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
             resp, _ = self._interceptor.post_batch_get_documents_with_metadata(
                 resp, response_metadata
             )
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                http_response = {
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore_v1.FirestoreClient.batch_get_documents",
+                    extra={
+                        "serviceName": "google.firestore.v1.Firestore",
+                        "rpcName": "BatchGetDocuments",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _BatchWrite(_BaseFirestoreRestTransport._BaseBatchWrite, FirestoreRestStub):
@@ -2052,6 +2068,22 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
             resp, _ = self._interceptor.post_execute_pipeline_with_metadata(
                 resp, response_metadata
             )
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                http_response = {
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore_v1.FirestoreClient.execute_pipeline",
+                    extra={
+                        "serviceName": "google.firestore.v1.Firestore",
+                        "rpcName": "ExecutePipeline",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _GetDocument(_BaseFirestoreRestTransport._BaseGetDocument, FirestoreRestStub):
@@ -2934,6 +2966,22 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
             resp, _ = self._interceptor.post_run_aggregation_query_with_metadata(
                 resp, response_metadata
             )
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                http_response = {
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore_v1.FirestoreClient.run_aggregation_query",
+                    extra={
+                        "serviceName": "google.firestore.v1.Firestore",
+                        "rpcName": "RunAggregationQuery",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _RunQuery(_BaseFirestoreRestTransport._BaseRunQuery, FirestoreRestStub):
@@ -3064,6 +3112,22 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
             resp, _ = self._interceptor.post_run_query_with_metadata(
                 resp, response_metadata
             )
+            if CLIENT_LOGGING_SUPPORTED and _LOGGER.isEnabledFor(
+                logging.DEBUG
+            ):  # pragma: NO COVER
+                http_response = {
+                    "headers": dict(response.headers),
+                    "status": response.status_code,
+                }
+                _LOGGER.debug(
+                    "Received response for google.firestore_v1.FirestoreClient.run_query",
+                    extra={
+                        "serviceName": "google.firestore.v1.Firestore",
+                        "rpcName": "RunQuery",
+                        "metadata": http_response["headers"],
+                        "httpResponse": http_response,
+                    },
+                )
             return resp
 
     class _UpdateDocument(

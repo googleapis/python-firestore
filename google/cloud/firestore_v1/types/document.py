@@ -74,7 +74,7 @@ class Document(proto.Message):
             may contain any character. Some characters, including
             :literal:`\``, must be escaped using a ``\``. For example,
             :literal:`\`x&y\`` represents ``x&y`` and
-            :literal:`\`bak\`tik\`` represents :literal:`bak`tik`.
+            :literal:`\`bak\\`tik\`` represents :literal:`bak`tik`.
         create_time (google.protobuf.timestamp_pb2.Timestamp):
             Output only. The time at which the document was created.
 
@@ -195,10 +195,10 @@ class Value(proto.Message):
 
             **Requires:**
 
-            -  Must follow [field reference][FieldReference.field_path]
-               limitations.
+            - Must follow [field reference][FieldReference.field_path]
+              limitations.
 
-            -  Not allowed to be used when writing documents.
+            - Not allowed to be used when writing documents.
 
             This field is a member of `oneof`_ ``value_type``.
         function_value (google.cloud.firestore_v1.types.Function):
@@ -206,7 +206,7 @@ class Value(proto.Message):
 
             **Requires:**
 
-            -  Not allowed to be used when writing documents.
+            - Not allowed to be used when writing documents.
 
             This field is a member of `oneof`_ ``value_type``.
         pipeline_value (google.cloud.firestore_v1.types.Pipeline):
@@ -214,7 +214,7 @@ class Value(proto.Message):
 
             **Requires:**
 
-            -  Not allowed to be used when writing documents.
+            - Not allowed to be used when writing documents.
 
             This field is a member of `oneof`_ ``value_type``.
     """
@@ -353,8 +353,8 @@ class Function(proto.Message):
 
             **Requires:**
 
-            -  must be in snake case (lower case with underscore
-               separator).
+            - must be in snake case (lower case with underscore
+              separator).
         args (MutableSequence[google.cloud.firestore_v1.types.Value]):
             Optional. Ordered list of arguments the given
             function expects.
@@ -417,8 +417,8 @@ class Pipeline(proto.Message):
 
                 **Requires:**
 
-                -  must be in snake case (lower case with underscore
-                   separator).
+                - must be in snake case (lower case with underscore
+                  separator).
             args (MutableSequence[google.cloud.firestore_v1.types.Value]):
                 Optional. Ordered list of arguments the given
                 stage expects.
