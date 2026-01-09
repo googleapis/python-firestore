@@ -31,16 +31,18 @@ __protobuf__ = proto.module(
 
 
 class ExplainStats(proto.Message):
-    r"""Explain stats for an RPC request, includes both the optimized
-    plan and execution stats.
+    r"""Pipeline explain stats.
+
+    Depending on the explain options in the original request, this
+    can contain the optimized plan and / or execution stats.
 
     Attributes:
         data (google.protobuf.any_pb2.Any):
             The format depends on the ``output_format`` options in the
             request.
 
-            The only option today is ``TEXT``, which is a
-            ``google.protobuf.StringValue``.
+            Currently there are two supported options: ``TEXT`` and
+            ``JSON``. Both supply a ``google.protobuf.StringValue``.
     """
 
     data: any_pb2.Any = proto.Field(

@@ -39,6 +39,7 @@ from google.cloud.firestore_v1.base_client import (
 
 # Types needed only for Type Hints
 from google.cloud.firestore_v1.base_document import DocumentSnapshot
+from google.cloud.firestore_v1.base_transaction import MAX_ATTEMPTS
 from google.cloud.firestore_v1.batch import WriteBatch
 from google.cloud.firestore_v1.collection import CollectionReference
 from google.cloud.firestore_v1.document import DocumentReference
@@ -393,7 +394,9 @@ class Client(BaseClient):
         """
         return WriteBatch(self)
 
-    def transaction(self, **kwargs) -> Transaction:
+    def transaction(
+        self, max_attempts: int = MAX_ATTEMPTS, read_only: bool = False
+    ) -> Transaction:
         """Get a transaction that uses this client.
 
         See :class:`~google.cloud.firestore_v1.transaction.Transaction` for
@@ -409,7 +412,7 @@ class Client(BaseClient):
             :class:`~google.cloud.firestore_v1.transaction.Transaction`:
             A transaction attached to this client.
         """
-        return Transaction(self, **kwargs)
+        return Transaction(self, max_attempts=max_attempts, read_only=read_only)
 
     @property
     def _pipeline_cls(self):
