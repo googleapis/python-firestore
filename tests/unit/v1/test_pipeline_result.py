@@ -213,7 +213,6 @@ class TestPipelineSnapshot:
         expected_transaction = object()
         expected_read_time = 123
         expected_explain_options = object()
-        expected_index_mode = "mode"
         expected_addtl_options = {}
         source = PipelineStream(
             expected_type,
@@ -221,7 +220,6 @@ class TestPipelineSnapshot:
             expected_transaction,
             expected_read_time,
             expected_explain_options,
-            expected_index_mode,
             expected_addtl_options,
         )
         instance = self._make_one(in_arr, source)
@@ -229,7 +227,7 @@ class TestPipelineSnapshot:
         assert instance.pipeline == expected_pipeline
         assert instance._client == expected_pipeline._client
         assert instance._additonal_options == expected_addtl_options
-        assert instance._index_mode == expected_index_mode
+        assert instance._index_mode is None
         assert instance._explain_options == expected_explain_options
         assert instance._explain_stats is None
         assert instance._started is True
@@ -281,7 +279,6 @@ class SharedStreamTests:
             "transaction": None,
             "read_time": None,
             "explain_options": None,
-            "index_mode": None,
             "additional_options": {},
         }
 
@@ -312,7 +309,6 @@ class SharedStreamTests:
     @pytest.mark.parametrize(
         "init_kwargs,expected_options",
         [
-            ({"index_mode": "mode"}, {"index_mode": encode_value("mode")}),
             (
                 {"explain_options": PipelineExplainOptions()},
                 {"explain_options": encode_value({"mode": "analyze"})},
@@ -335,13 +331,6 @@ class SharedStreamTests:
                     "additional_options": {"explain_options": Constant.of("override")},
                 },
                 {"explain_options": encode_value("override")},
-            ),
-            (
-                {
-                    "index_mode": "mode",
-                    "additional_options": {"index_mode": Constant("new")},
-                },
-                {"index_mode": encode_value("new")},
             ),
         ],
     )
