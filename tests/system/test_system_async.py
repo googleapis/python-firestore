@@ -57,7 +57,6 @@ from test__helpers import (
     ENTERPRISE_MODE_ERROR,
     TEST_DATABASES,
     TEST_DATABASES_W_ENTERPRISE,
-    IS_KOKORO_TEST,
     FIRESTORE_ENTERPRISE_DB,
 )
 
@@ -147,10 +146,6 @@ def _verify_explain_metrics_analyze_false(explain_metrics):
 def database(request):
     from test__helpers import FIRESTORE_ENTERPRISE_DB
 
-    # enterprise mode currently does not support RunQuery calls in prod on kokoro test project
-    # TODO: remove skip when kokoro test project supports full enterprise mode
-    if request.param == FIRESTORE_ENTERPRISE_DB and IS_KOKORO_TEST:
-        pytest.skip("enterprise mode does not support RunQuery on kokoro")
     return request.param
 
 
@@ -180,11 +175,6 @@ async def verify_pipeline(query):
     modalities at the same time
     """
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
-
-    # return early on kokoro. Test project doesn't currently support pipelines
-    # TODO: enable pipeline verification when kokoro test project is whitelisted
-    if IS_KOKORO_TEST:
-        pytest.skip("skipping pipeline verification on kokoro")
 
     def _clean_results(results):
         if isinstance(results, dict):
@@ -1694,7 +1684,6 @@ async def test_pipeline_explain_options_using_additional_options(
     assert "Execution:" in text_stats
 
 
-@pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 async def test_pipeline_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
