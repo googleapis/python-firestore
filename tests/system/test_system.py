@@ -383,7 +383,7 @@ def test_create_document_w_vector(client, cleanup, database):
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -409,10 +409,11 @@ def test_vector_search_collection(client, database, distance_measure):
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -438,10 +439,11 @@ def test_vector_search_collection_with_filter(client, database, distance_measure
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 def test_vector_search_collection_with_distance_parameters_euclid(client, database):
     # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
     collection_id = "vector_search"
@@ -468,10 +470,11 @@ def test_vector_search_collection_with_distance_parameters_euclid(client, databa
         "color": "red",
         "vector_distance": 1.0,
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 def test_vector_search_collection_with_distance_parameters_cosine(client, database):
     # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
     collection_id = "vector_search"
@@ -498,10 +501,11 @@ def test_vector_search_collection_with_distance_parameters_cosine(client, databa
         "color": "yellow",
         "vector_distance": 0.017292370176009153,
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -527,6 +531,7 @@ def test_vector_search_collection_group(client, database, distance_measure):
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
@@ -537,7 +542,7 @@ def test_vector_search_collection_group(client, database, distance_measure):
         DistanceMeasure.COSINE,
     ],
 )
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 def test_vector_search_collection_group_with_filter(client, database, distance_measure):
     # Documents and Indexes are a manual step from util/bootstrap_vector_index.py
     collection_id = "vector_search"
@@ -556,10 +561,11 @@ def test_vector_search_collection_group_with_filter(client, database, distance_m
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 def test_vector_search_collection_group_with_distance_parameters_euclid(
     client, database
 ):
@@ -588,6 +594,7 @@ def test_vector_search_collection_group_with_distance_parameters_euclid(
         "color": "red",
         "vector_distance": 1.0,
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")

@@ -632,3 +632,117 @@ def test_query_stream_multiple_empty_response_in_stream():
         },
         metadata=client._rpc_metadata,
     )
+
+
+def test_vector_query_build_pipeline():
+    from google.cloud.firestore_v1.pipeline_stages import FindNearest
+    from google.cloud.firestore_v1.pipeline_source import PipelineSource
+    from google.cloud.firestore_v1.base_pipeline import _BasePipeline
+
+    client = make_client()
+    parent = client.collection("dee")
+    query = make_query(parent)
+    vector_query = make_vector_query(query)
+
+    vector_query.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=5,
+        distance_result_field="vector_distance",
+    )
+
+    source = PipelineSource(client)
+    pipeline = vector_query._build_pipeline(source)
+
+    assert isinstance(pipeline, _BasePipeline)
+    # The pipeline should have 2 stages: Collection + FindNearest (since nested_query is a query on "dee")
+    # Actually, query._build_pipeline(source) uses source.collection(parent.id) if it is a simple collection query.
+    # make_query(parent) -> parent._query() -> Query(parent, ...)
+    # Query._build_pipeline converts parent to pipeline first.
+    # parent is collection "dee".
+    # So first stage is Collection("dee").
+    # Second stage is FindNearest.
+
+    assert len(pipeline.stages) == 2
+    
+    find_nearest_stage = pipeline.stages[-1]
+    assert isinstance(find_nearest_stage, FindNearest)
+    assert find_nearest_stage.field.path == "embedding"
+    assert find_nearest_stage.vector == Vector([1.0, 2.0, 3.0])
+    assert find_nearest_stage.distance_measure == DistanceMeasure.EUCLIDEAN
+    assert find_nearest_stage.options.limit == 5
+    assert find_nearest_stage.options.distance_field.path == "vector_distance"
+
+
+def test_vector_query_build_pipeline_with_threshold():
+    from google.cloud.firestore_v1.pipeline_stages import FindNearest, Where, RemoveFields
+    from google.cloud.firestore_v1.pipeline_source import PipelineSource
+    from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+    from google.cloud.firestore_v1.pipeline_expressions import Field
+
+    client = make_client()
+    parent = client.collection("dee")
+    query = make_query(parent)
+    vector_query = make_vector_query(query)
+
+    # Test with explicit distance field
+    vector_query.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=5,
+        distance_result_field="dist",
+        distance_threshold=0.5,
+    )
+
+    source = PipelineSource(client)
+    pipeline = vector_query._build_pipeline(source)
+
+    # Stages: Collection, FindNearest, Where
+    assert len(pipeline.stages) == 3
+    assert isinstance(pipeline.stages[1], FindNearest)
+    assert isinstance(pipeline.stages[2], Where)
+    
+    # Check FindNearest
+    fn_stage = pipeline.stages[1]
+    assert fn_stage.options.distance_field.path == "dist"
+    
+    # Check Where
+    where_stage = pipeline.stages[2]
+    # condition: dist <= 0.5
+    # We can check the protobuf or internal structure
+    # BooleanExpression: less_than_or_equal
+    assert where_stage.condition.name == "less_than_or_equal"
+    assert where_stage.condition.params[0] == Field("dist")
+    
+    # Test with implicit distance field (no distance_result_field provided)
+    vector_query_implicit = make_vector_query(query)
+    vector_query_implicit.find_nearest(
+        vector_field="embedding",
+        query_vector=Vector([1.0, 2.0, 3.0]),
+        distance_measure=DistanceMeasure.DOT_PRODUCT,
+        limit=5,
+        distance_threshold=0.9,
+    )
+    
+    pipeline_implicit = vector_query_implicit._build_pipeline(source)
+    
+    # Stages: Collection, FindNearest, Where, RemoveFields
+    assert len(pipeline_implicit.stages) == 4
+    assert isinstance(pipeline_implicit.stages[1], FindNearest)
+    assert isinstance(pipeline_implicit.stages[2], Where)
+    assert isinstance(pipeline_implicit.stages[3], RemoveFields)
+    
+    # Check FindNearest uses temp field
+    fn_stage_imp = pipeline_implicit.stages[1]
+    assert fn_stage_imp.options.distance_field.path == "__vector_distance__"
+    
+    # Check Where uses temp field and greater_than_or_equal (for DOT_PRODUCT)
+    where_stage_imp = pipeline_implicit.stages[2]
+    assert where_stage_imp.condition.name == "greater_than_or_equal"
+    assert where_stage_imp.condition.params[0] == Field("__vector_distance__")
+    
+    # Check RemoveFields removes temp field
+    rf_stage = pipeline_implicit.stages[3]
+    assert rf_stage.fields[0].path == "__vector_distance__"

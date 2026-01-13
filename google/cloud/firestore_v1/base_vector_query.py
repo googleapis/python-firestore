@@ -169,3 +169,59 @@ class BaseVectorQuery(ABC):
     ) -> StreamGenerator[DocumentSnapshot] | AsyncStreamGenerator[DocumentSnapshot]:
         """Reads the documents in the collection that match this query."""
         raise NotImplementedError
+
+    def _build_pipeline(self, source: "PipelineSource"):
+        """
+        Convert this query into a Pipeline
+
+        Queries containing a `cursor` or `limit_to_last` are not currently supported
+
+        Args:
+            source: the PipelineSource to build the pipeline off of
+        Raises:
+            - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
+        Returns:
+            a Pipeline representing the query
+        """
+        from google.cloud.firestore_v1 import pipeline_stages as stages
+        from google.cloud.firestore_v1.pipeline_expressions import Field
+
+        distance_field_name = self._distance_result_field
+        cleanup_distance_field = False
+
+        if self._distance_threshold is not None and not distance_field_name:
+            distance_field_name = "__vector_distance__"
+            cleanup_distance_field = True
+
+        options = stages.FindNearestOptions(
+            limit=self._limit,
+            distance_field=Field(distance_field_name)
+            if distance_field_name
+            else None,
+        )
+
+        pipeline = self._nested_query._build_pipeline(source).find_nearest(
+            field=self._vector_field,
+            vector=self._query_vector,
+            distance_measure=self._distance_measure,
+            options=options,
+        )
+
+        if self._distance_threshold is not None:
+            if self._distance_measure == DistanceMeasure.DOT_PRODUCT:
+                pipeline = pipeline.where(
+                    Field(distance_field_name).greater_than_or_equal(
+                        self._distance_threshold
+                    )
+                )
+            else:
+                pipeline = pipeline.where(
+                    Field(distance_field_name).less_than_or_equal(
+                        self._distance_threshold
+                    )
+                )
+
+        if cleanup_distance_field:
+            pipeline = pipeline.remove_fields(distance_field_name)
+
+        return pipeline

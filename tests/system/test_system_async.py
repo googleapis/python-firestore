@@ -530,7 +530,7 @@ async def test_document_update_w_int_field(client, cleanup, database):
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -555,10 +555,11 @@ async def test_vector_search_collection(client, database, distance_measure):
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -583,10 +584,11 @@ async def test_vector_search_collection_with_filter(client, database, distance_m
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 async def test_vector_search_collection_with_distance_parameters_euclid(
     client, database
 ):
@@ -615,10 +617,11 @@ async def test_vector_search_collection_with_distance_parameters_euclid(
         "color": "red",
         "vector_distance": 1.0,
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 async def test_vector_search_collection_with_distance_parameters_cosine(
     client, database
 ):
@@ -647,10 +650,11 @@ async def test_vector_search_collection_with_distance_parameters_cosine(
         "color": "yellow",
         "vector_distance": 0.017292370176009153,
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -676,10 +680,11 @@ async def test_vector_search_collection_group(client, database, distance_measure
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 @pytest.mark.parametrize(
     "distance_measure",
     [
@@ -707,10 +712,11 @@ async def test_vector_search_collection_group_with_filter(
         "embedding": Vector([1.0, 2.0, 3.0]),
         "color": "red",
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 async def test_vector_search_collection_group_with_distance_parameters_euclid(
     client, database
 ):
@@ -739,10 +745,11 @@ async def test_vector_search_collection_group_with_distance_parameters_euclid(
         "color": "red",
         "vector_distance": 1.0,
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(FIRESTORE_EMULATOR, reason="Require index and seed data")
-@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
 async def test_vector_search_collection_group_with_distance_parameters_cosine(
     client, database
 ):
@@ -771,6 +778,7 @@ async def test_vector_search_collection_group_with_distance_parameters_cosine(
         "color": "yellow",
         "vector_distance": 0.017292370176009153,
     }
+    verify_pipeline(vector_query)
 
 
 @pytest.mark.skipif(
