@@ -178,8 +178,8 @@ class _PipelineResultContainer(Generic[T]):
         transaction: Transaction | AsyncTransaction | None,
         read_time: datetime.datetime | None,
         explain_options: PipelineExplainOptions | None,
-        index_mode: str | None,
         additional_options: dict[str, Constant | Value],
+        index_mode: str | None = None,
     ):
         # public
         self.transaction = transaction
