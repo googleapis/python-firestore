@@ -68,7 +68,6 @@ class AsyncPipeline(_BasePipeline):
         transaction: "AsyncTransaction" | None = None,
         read_time: datetime.datetime | None = None,
         explain_options: PipelineExplainOptions | None = None,
-        index_mode: str | None = None,
         additional_options: dict[str, Value | Constant] = {},
     ) -> PipelineSnapshot[PipelineResult]:
         """
@@ -87,10 +86,8 @@ class AsyncPipeline(_BasePipeline):
             explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned list.
-            index_mode (Optional[str]): Configures the pipeline to require a certain type of indexes to be present.
-                Firestore will reject the request if there is not appropiate indexes to serve the query.
             additional_options (Optional[dict[str, Value | Constant]]): Additional options to pass to the query.
-                These options will take precedence over method argument if there is a conflict (e.g. explain_options, index_mode)
+                These options will take precedence over method argument if there is a conflict (e.g. explain_options)
         """
         kwargs = {k: v for k, v in locals().items() if k != "self"}
         stream = AsyncPipelineStream(PipelineResult, self, **kwargs)
@@ -103,7 +100,6 @@ class AsyncPipeline(_BasePipeline):
         read_time: datetime.datetime | None = None,
         transaction: "AsyncTransaction" | None = None,
         explain_options: PipelineExplainOptions | None = None,
-        index_mode: str | None = None,
         additional_options: dict[str, Value | Constant] = {},
     ) -> AsyncPipelineStream[PipelineResult]:
         """
@@ -122,10 +118,8 @@ class AsyncPipeline(_BasePipeline):
             explain_options (Optional[:class:`~google.cloud.firestore_v1.query_profile.PipelineExplainOptions`]):
                 Options to enable query profiling for this query. When set,
                 explain_metrics will be available on the returned generator.
-            index_mode (Optional[str]): Configures the pipeline to require a certain type of indexes to be present.
-                Firestore will reject the request if there is not appropiate indexes to serve the query.
             additional_options (Optional[dict[str, Value | Constant]]): Additional options to pass to the query.
-                These options will take precedence over method argument if there is a conflict (e.g. explain_options, index_mode)
+                These options will take precedence over method argument if there is a conflict (e.g. explain_options)
         """
         kwargs = {k: v for k, v in locals().items() if k != "self"}
         return AsyncPipelineStream(PipelineResult, self, **kwargs)

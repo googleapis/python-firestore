@@ -1759,22 +1759,6 @@ def test_pipeline_explain_options_using_additional_options(
     assert "Execution:" in text_stats
 
 
-@pytest.mark.skipif(
-    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
-)
-@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
-def test_pipeline_index_mode(database, query_docs):
-    """test pipeline query with explicit index mode"""
-
-    collection, _, allowed_vals = query_docs
-    client = collection._client
-    query = collection.where(filter=FieldFilter("a", "==", 1))
-    pipeline = client.pipeline().create_from(query)
-    with pytest.raises(InvalidArgument) as e:
-        pipeline.execute(index_mode="fake_index")
-    assert "Invalid index_mode: fake_index" in str(e)
-
-
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_query_stream_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
