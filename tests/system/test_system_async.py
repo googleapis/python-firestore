@@ -144,8 +144,6 @@ def _verify_explain_metrics_analyze_false(explain_metrics):
 
 @pytest.fixture(scope="session")
 def database(request):
-    from test__helpers import FIRESTORE_ENTERPRISE_DB
-
     return request.param
 
 

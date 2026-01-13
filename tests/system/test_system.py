@@ -66,8 +66,6 @@ def _get_credentials_and_project():
 
 @pytest.fixture(scope="session")
 def database(request):
-    from test__helpers import FIRESTORE_ENTERPRISE_DB
-
     return request.param
 
 
