@@ -15,10 +15,8 @@ UNIQUE_RESOURCE_ID = unique_resource_id("-")
 EMULATOR_CREDS = EmulatorCreds()
 FIRESTORE_EMULATOR = os.environ.get(_FIRESTORE_EMULATOR_HOST) is not None
 FIRESTORE_OTHER_DB = os.environ.get("SYSTEM_TESTS_DATABASE", "system-tests-named-db")
-FIRESTORE_ENTERPRISE_DB = os.environ.get("ENTERPRISE_DATABASE", "enterprise-db")
+FIRESTORE_ENTERPRISE_DB = os.environ.get("ENTERPRISE_DATABASE", "enterprise-db-native")
 
 # run all tests against default database, and a named database
 TEST_DATABASES = [None, FIRESTORE_OTHER_DB]
 TEST_DATABASES_W_ENTERPRISE = TEST_DATABASES + [FIRESTORE_ENTERPRISE_DB]
-# TODO remove when kokoro fully supports enterprise mode/pipelines
-IS_KOKORO_TEST = os.getenv("KOKORO_JOB_NAME") is not None
