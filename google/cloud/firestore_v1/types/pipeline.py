@@ -34,7 +34,7 @@ class StructuredPipeline(proto.Message):
     r"""A Firestore query represented as an ordered list of operations /
     stages.
 
-    This is considered the top-level function which plans & executes a
+    This is considered the top-level function which plans and executes a
     query. It is logically equivalent to ``query(stages, options)``, but
     prevents the client from having to build a function wrapper.
 

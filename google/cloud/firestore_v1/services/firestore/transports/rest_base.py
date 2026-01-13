@@ -474,6 +474,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseGetDocument:
