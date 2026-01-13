@@ -179,7 +179,6 @@ class _PipelineResultContainer(Generic[T]):
         read_time: datetime.datetime | None,
         explain_options: PipelineExplainOptions | None,
         additional_options: dict[str, Constant | Value],
-        index_mode: str | None = None,
     ):
         # public
         self.transaction = transaction
@@ -192,7 +191,6 @@ class _PipelineResultContainer(Generic[T]):
         self._explain_stats: ExplainStats | None = None
         self._explain_options: PipelineExplainOptions | None = explain_options
         self._return_type = return_type
-        self._index_mode = index_mode
         self._additonal_options = {
             k: v if isinstance(v, Value) else v._to_pb()
             for k, v in additional_options.items()
@@ -226,8 +224,6 @@ class _PipelineResultContainer(Generic[T]):
         options = {}
         if self._explain_options:
             options["explain_options"] = self._explain_options._to_value()
-        if self._index_mode:
-            options["index_mode"] = Value(string_value=self._index_mode)
         if self._additonal_options:
             options.update(self._additonal_options)
         request = ExecutePipelineRequest(

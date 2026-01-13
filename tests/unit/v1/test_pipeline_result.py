@@ -227,7 +227,6 @@ class TestPipelineSnapshot:
         assert instance.pipeline == expected_pipeline
         assert instance._client == expected_pipeline._client
         assert instance._additonal_options == expected_addtl_options
-        assert instance._index_mode is None
         assert instance._explain_options == expected_explain_options
         assert instance._explain_stats is None
         assert instance._started is True
