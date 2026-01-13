@@ -11,6 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+.. warning::
+    **Preview API**: Firestore Pipelines is currently in preview and is 
+    subject to potential breaking changes in future releases
+"""
 
 from __future__ import annotations
 from typing import TYPE_CHECKING
@@ -50,6 +55,10 @@ class AsyncPipeline(_BasePipeline):
         ...         print(result)
 
     Use `client.pipeline()` to create instances of this class.
+
+    .. warning::
+        **Preview API**: Firestore Pipelines is currently in preview and is
+        subject to potential breaking changes in future releases
     """
 
     def __init__(self, client: AsyncClient, *stages: stages.Stage):
