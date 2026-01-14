@@ -566,12 +566,12 @@ class TestBooleanExpression:
             BooleanExpression._from_query_filter_pb(document_pb.Value(), mock_client)
 
 
-class TestFunction:
+class TestFunctionExpression:
     def test_equals(self):
-        assert expr.Function.sqrt("1") == expr.Function.sqrt("1")
-        assert expr.Function.sqrt("1") != expr.Function.sqrt("2")
-        assert expr.Function.sqrt("1") != expr.Function.sum("1")
-        assert expr.Function.sqrt("1") != object()
+        assert expr.FunctionExpression.sqrt("1") == expr.FunctionExpression.sqrt("1")
+        assert expr.FunctionExpression.sqrt("1") != expr.FunctionExpression.sqrt("2")
+        assert expr.FunctionExpression.sqrt("1") != expr.FunctionExpression.sum("1")
+        assert expr.FunctionExpression.sqrt("1") != object()
 
 
 class TestArray:

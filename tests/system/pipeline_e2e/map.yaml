@@ -8,13 +8,13 @@ tests:
           - DESCENDING
       - Select:
           - AliasedExpression:
-              - Function.map_get:
+              - FunctionExpression.map_get:
                   - Field: awards
                   - hugo
               - "hugoAward"
           - Field: title
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: hugoAward
               - Constant: true
     assert_results:
@@ -59,7 +59,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "Dune"
       - AddFields:
@@ -68,7 +68,7 @@ tests:
             - "award_name"
       - Select:
           - AliasedExpression:
-              - Function.map_get:
+              - FunctionExpression.map_get:
                   - Field: awards
                   - Field: award_name
               - "hugoAward"
@@ -111,12 +111,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "Dune"
       - Select:
         - AliasedExpression:
-            - Function.map_remove:
+            - FunctionExpression.map_remove:
                 - Field: awards
                 - "nebula"
             - "awards_removed"
@@ -150,12 +150,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "Dune"
       - Select:
         - AliasedExpression:
-            - Function.map_merge:
+            - FunctionExpression.map_merge:
                 - Field: awards
                 - Map:
                    elements: {"new_award": true, "hugo": false}
@@ -206,7 +206,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: awards.hugo
               - Constant: true
       - Sort:
@@ -256,7 +256,7 @@ tests:
       - Limit: 1
       - Select:
         - AliasedExpression:
-            - Function.map_merge:
+            - FunctionExpression.map_merge:
                 - Map:
                     elements: {"a": "orig", "b": "orig"}
                 - Map:
