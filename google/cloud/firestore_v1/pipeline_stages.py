@@ -13,7 +13,7 @@
 # limitations under the License.
 """
 .. warning::
-    **Preview API**: Firestore Pipelines is currently in preview and is 
+    **Preview API**: Firestore Pipelines is currently in preview and is
     subject to potential breaking changes in future releases.
 """
 
