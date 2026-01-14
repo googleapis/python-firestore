@@ -4,7 +4,7 @@ tests:
       - Collection: vectors
       - Select:
         - AliasedExpression:
-            - Function.vector_length:
+            - FunctionExpression.vector_length:
                 - Field: embedding
             - "embedding_length"
       - Sort:
@@ -117,12 +117,12 @@ tests:
     pipeline:
       - Collection: vectors
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: embedding
               - Vector: [1.0, 2.0, 3.0]
       - Select:
         - AliasedExpression:
-            - Function.dot_product:
+            - FunctionExpression.dot_product:
                 - Field: embedding
                 - Vector: [1.0, 1.0, 1.0]
             - "dot_product_result"
@@ -132,12 +132,12 @@ tests:
     pipeline:
       - Collection: vectors
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: embedding
               - Vector: [1.0, 2.0, 3.0]
       - Select:
         - AliasedExpression:
-            - Function.euclidean_distance:
+            - FunctionExpression.euclidean_distance:
                 - Field: embedding
                 - Vector: [1.0, 2.0, 3.0]
             - "euclidean_distance_result"
@@ -147,12 +147,12 @@ tests:
     pipeline:
       - Collection: vectors
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: embedding
               - Vector: [1.0, 2.0, 3.0]
       - Select:
         - AliasedExpression:
-            - Function.cosine_distance:
+            - FunctionExpression.cosine_distance:
                 - Field: embedding
                 - Vector: [1.0, 2.0, 3.0]
             - "cosine_distance_result"

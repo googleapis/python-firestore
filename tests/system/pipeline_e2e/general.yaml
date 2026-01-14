@@ -57,13 +57,13 @@ tests:
       - Collection: books
       - AddFields:
         - AliasedExpression:
-            - Function.string_concat:
+            - FunctionExpression.string_concat:
                 - Field: author
                 - Constant: _
                 - Field: title
             - "author_title"
         - AliasedExpression:
-            - Function.string_concat:
+            - FunctionExpression.string_concat:
                 - Field: title
                 - Constant: _
                 - Field: author
@@ -227,14 +227,14 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: genre
               - Constant: Romance
       - Union:
         - Pipeline:
             - Collection: books
             - Where:
-                - Function.equal:
+                - FunctionExpression.equal:
                     - Field: genre
                     - Constant: Dystopian
       - Select:
@@ -299,12 +299,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Select:
         - AliasedExpression:
-            - Function.document_id:
+            - FunctionExpression.document_id:
                 - Field: __name__
             - "doc_id"
     assert_results:
@@ -337,7 +337,7 @@ tests:
       - Limit: 1
       - Select:
         - AliasedExpression:
-            - Function.collection_id:
+            - FunctionExpression.collection_id:
                 - Field: __name__
             - "collectionName"
     assert_results:
@@ -481,7 +481,7 @@ tests:
       - Select:
         - AliasedExpression:
           - Conditional:
-            - Function.greater_than_or_equal:
+            - FunctionExpression.greater_than_or_equal:
               - Field: count
               - Constant: 10
             - Constant: True
@@ -536,7 +536,7 @@ tests:
               reference_value: "/books"
       - RawStage:
         - "where"
-        - Function.equal:
+        - FunctionExpression.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
       - RawStage:
@@ -571,7 +571,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Function.equal:
+        - FunctionExpression.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
       - Unnest:
@@ -609,7 +609,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Function.equal:
+        - FunctionExpression.equal:
           - Field: title
           - Constant: The Hitchhiker's Guide to the Galaxy
       - Unnest:
@@ -660,7 +660,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Function.equal:
+        - FunctionExpression.equal:
           - Field: title
           - Constant: "The Hitchhiker's Guide to the Galaxy"
       - ReplaceWith:

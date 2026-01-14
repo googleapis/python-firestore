@@ -6,13 +6,13 @@ tests:
       - Select:
         - AliasedExpression:
             - And:
-              - Function.greater_than_or_equal:
+              - FunctionExpression.greater_than_or_equal:
                   - CurrentTimestamp: []
-                  - Function.unix_seconds_to_timestamp:
+                  - FunctionExpression.unix_seconds_to_timestamp:
                     - Constant: 1735689600 # 2025-01-01
-              - Function.less_than:
+              - FunctionExpression.less_than:
                   - CurrentTimestamp: []
-                  - Function.unix_seconds_to_timestamp:
+                  - FunctionExpression.unix_seconds_to_timestamp:
                     - Constant: 4892438400 # 2125-01-01
             - "is_between_2025_and_2125"
     assert_results:
@@ -52,42 +52,42 @@ tests:
                             args:
                             - integerValue: '4892438400'
           name: select
-  - description: testTimestampFunctions
+  - description: testTimestampFunctionExpressions
     pipeline:
       - Collection: timestamps
       - Select:
         - AliasedExpression:
-            - Function.timestamp_to_unix_micros:
+            - FunctionExpression.timestamp_to_unix_micros:
                 - Field: time
             - "micros"
         - AliasedExpression:
-            - Function.timestamp_to_unix_millis:
+            - FunctionExpression.timestamp_to_unix_millis:
                 - Field: time
             - "millis"
         - AliasedExpression:
-            - Function.timestamp_to_unix_seconds:
+            - FunctionExpression.timestamp_to_unix_seconds:
                 - Field: time
             - "seconds"
         - AliasedExpression:
-            - Function.unix_micros_to_timestamp:
+            - FunctionExpression.unix_micros_to_timestamp:
                 - Field: micros
             - "from_micros"
         - AliasedExpression:
-            - Function.unix_millis_to_timestamp:
+            - FunctionExpression.unix_millis_to_timestamp:
                 - Field: millis
             - "from_millis"
         - AliasedExpression:
-            - Function.unix_seconds_to_timestamp:
+            - FunctionExpression.unix_seconds_to_timestamp:
                 - Field: seconds
             - "from_seconds"
         - AliasedExpression:
-            - Function.timestamp_add:
+            - FunctionExpression.timestamp_add:
                 - Field: time
                 - Constant: "day"
                 - Constant: 1
             - "plus_day"
         - AliasedExpression:
-            - Function.timestamp_subtract:
+            - FunctionExpression.timestamp_subtract:
                 - Field: time
                 - Constant: "hour"
                 - Constant: 1

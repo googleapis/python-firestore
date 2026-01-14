@@ -3,61 +3,61 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "Dune"
       - Select:
         - AliasedExpression:
-            - Function.add:
+            - FunctionExpression.add:
                 - Field: published
                 - Field: rating
             - "pub_plus_rating"
     assert_results:
       - pub_plus_rating: 1969.6
-  - description: testMathFunctionessions
+  - description: testMathFunctionExpressionessions
     pipeline:
       - Collection: books
       - Where:
-        - Function.equal:
+        - FunctionExpression.equal:
           - Field: title
           - Constant: To Kill a Mockingbird
       - Select:
         - AliasedExpression:
-            - Function.abs:
+            - FunctionExpression.abs:
                 - Field: rating
             - "abs_rating"
         - AliasedExpression:
-            - Function.ceil:
+            - FunctionExpression.ceil:
                 - Field: rating
             - "ceil_rating"
         - AliasedExpression:
-            - Function.exp:
+            - FunctionExpression.exp:
                 - Field: rating
             - "exp_rating"
         - AliasedExpression:
-            - Function.floor:
+            - FunctionExpression.floor:
                 - Field: rating
             - "floor_rating"
         - AliasedExpression:
-            - Function.ln:
+            - FunctionExpression.ln:
                 - Field: rating
             - "ln_rating"
         - AliasedExpression:
-            - Function.log10:
+            - FunctionExpression.log10:
                 - Field: rating
             - "log_rating_base10"
         - AliasedExpression:
-            - Function.log:
+            - FunctionExpression.log:
                 - Field: rating
                 - Constant: 2
             - "log_rating_base2"
         - AliasedExpression:
-            - Function.pow:
+            - FunctionExpression.pow:
                 - Field: rating
                 - Constant: 2
             - "pow_rating"
         - AliasedExpression:
-            - Function.sqrt:
+            - FunctionExpression.sqrt:
                 - Field: rating
             - "sqrt_rating"
     assert_results_approximate:
@@ -134,11 +134,11 @@ tests:
                     - fieldReferenceValue: rating
                     name: sqrt
           name: select
-  - description: testRoundFunctionessions
+  - description: testRoundFunctionExpressionessions
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal_any:
+          - FunctionExpression.equal_any:
               - Field: title
               - - Constant: "To Kill a Mockingbird" # rating 4.2
                 - Constant: "Pride and Prejudice" # rating 4.5
@@ -146,7 +146,7 @@ tests:
       - Select:
         - title
         - AliasedExpression:
-            - Function.round:
+            - FunctionExpression.round:
                 - Field: rating
             - "round_rating"
       - Sort:
@@ -201,42 +201,42 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-        - Function.equal:
+        - FunctionExpression.equal:
           - Field: title
           - Constant: To Kill a Mockingbird
       - Select:
         - AliasedExpression:
-            - Function.add:
+            - FunctionExpression.add:
                 - Field: rating
                 - Constant: 1
             - "ratingPlusOne"
         - AliasedExpression:
-            - Function.subtract:
+            - FunctionExpression.subtract:
                 - Field: published
                 - Constant: 1900
             - "yearsSince1900"
         - AliasedExpression:
-            - Function.multiply:
+            - FunctionExpression.multiply:
                 - Field: rating
                 - Constant: 10
             - "ratingTimesTen"
         - AliasedExpression:
-            - Function.divide:
+            - FunctionExpression.divide:
                 - Field: rating
                 - Constant: 2
             - "ratingDividedByTwo"
         - AliasedExpression:
-            - Function.multiply:
+            - FunctionExpression.multiply:
                 - Field: rating
                 - Constant: 20
             - "ratingTimes20"
         - AliasedExpression:
-            - Function.add:
+            - FunctionExpression.add:
                 - Field: rating
                 - Constant: 3
             - "ratingPlus3"
         - AliasedExpression:
-            - Function.mod:
+            - FunctionExpression.mod:
                 - Field: rating
                 - Constant: 2
             - "ratingMod2"
