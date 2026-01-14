@@ -130,7 +130,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -139,7 +139,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -148,6 +148,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseBatchWrite:
@@ -186,7 +187,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -195,7 +196,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -204,6 +205,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseBeginTransaction:
@@ -242,7 +244,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -251,7 +253,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -260,6 +262,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseCommit:
@@ -298,7 +301,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -307,7 +310,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -316,6 +319,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseCreateDocument:
@@ -354,7 +358,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -363,7 +367,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -372,6 +376,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseDeleteDocument:
@@ -409,7 +414,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -418,6 +423,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseExecutePipeline:
@@ -456,7 +462,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -465,7 +471,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -569,7 +575,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -578,6 +584,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseListCollectionIds:
@@ -621,7 +628,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -630,7 +637,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -639,6 +646,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseListDocuments:
@@ -680,7 +688,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -689,6 +697,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseListen:
@@ -736,7 +745,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -745,7 +754,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -754,6 +763,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseRollback:
@@ -792,7 +802,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -801,7 +811,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -810,6 +820,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseRunAggregationQuery:
@@ -853,7 +864,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -862,7 +873,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -871,6 +882,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseRunQuery:
@@ -914,7 +926,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -923,7 +935,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -932,6 +944,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseUpdateDocument:
@@ -970,7 +983,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             # Jsonify the request body
 
             body = json_format.MessageToJson(
-                transcoded_request["body"], use_integers_for_enums=False
+                transcoded_request["body"], use_integers_for_enums=True
             )
             return body
 
@@ -979,7 +992,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
             query_params = json.loads(
                 json_format.MessageToJson(
                     transcoded_request["query_params"],
-                    use_integers_for_enums=False,
+                    use_integers_for_enums=True,
                 )
             )
             query_params.update(
@@ -988,6 +1001,7 @@ class _BaseFirestoreRestTransport(FirestoreTransport):
                 )
             )
 
+            query_params["$alt"] = "json;enum-encoding=int"
             return query_params
 
     class _BaseWrite:
