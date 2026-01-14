@@ -23,12 +23,14 @@ from google.cloud.firestore_v1.base_document import BaseDocumentReference
 from google.cloud.firestore_v1.query import Query
 from google.cloud.firestore_v1.async_query import AsyncQuery
 
+from tests.unit.v1._test_helpers import make_async_client
+from tests.unit.v1._test_helpers import make_client
 
 class TestPipelineSource:
     _expected_pipeline_type = Pipeline
 
     def _make_client(self):
-        return Client()
+        return make_client()
 
     def _make_query(self):
         return Query(mock.Mock())
@@ -120,7 +122,7 @@ class TestPipelineSourceWithAsyncClient(TestPipelineSource):
     _expected_pipeline_type = AsyncPipeline
 
     def _make_client(self):
-        return AsyncClient()
+        return make_async_client()
 
     def _make_query(self):
         return AsyncQuery(mock.Mock())
