@@ -174,6 +174,9 @@ async def verify_pipeline(query):
     """
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
 
+    if FIRESTORE_EMULATOR:
+        pytest.skip("skip pipeline verification on emulator")
+
     def _clean_results(results):
         if isinstance(results, dict):
             return {k: _clean_results(v) for k, v in results.items()}

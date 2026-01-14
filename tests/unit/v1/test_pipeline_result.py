@@ -484,7 +484,7 @@ class TestAsyncPipelineStream(SharedStreamTests):
 
         async def async_gen(items):
             for item in items:
-                yield item
+                yield item  # pragma: NO COVER
 
         # mock the api call to avoid real network requests
         instance._client._firestore_api.execute_pipeline = mock.AsyncMock(

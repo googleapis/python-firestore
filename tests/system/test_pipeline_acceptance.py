@@ -34,8 +34,14 @@ from google.api_core.exceptions import GoogleAPIError
 from google.cloud.firestore import Client, AsyncClient
 
 from test__helpers import FIRESTORE_ENTERPRISE_DB
+from test__helpers import FIRESTORE_EMULATOR
 
 FIRESTORE_PROJECT = os.environ.get("GCLOUD_PROJECT")
+
+pytestmark = pytest.mark.skipif(
+    condition=FIRESTORE_EMULATOR,
+    reason="Pipeline tests are currently not supported by emulator",
+)
 
 test_dir_name = os.path.dirname(__file__)
 
