@@ -24,6 +24,7 @@ from typing import (
     AsyncIterator,
     Iterable,
     Iterator,
+    List,
     Generic,
     MutableMapping,
     Type,
@@ -258,12 +259,12 @@ class _PipelineResultContainer(Generic[T]):
             )
 
 
-class PipelineSnapshot(_PipelineResultContainer[T], list[T]):
+class PipelineSnapshot(_PipelineResultContainer[T], List[T]):
     """
     A list type that holds the result of a pipeline.execute() operation, along with related metadata
     """
 
-    def __init__(self, results_list: list[T], source: _PipelineResultContainer[T]):
+    def __init__(self, results_list: List[T], source: _PipelineResultContainer[T]):
         self.__dict__.update(source.__dict__.copy())
         list.__init__(self, results_list)
         # snapshots are always complete
