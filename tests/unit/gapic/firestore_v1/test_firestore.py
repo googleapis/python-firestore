@@ -6385,7 +6385,7 @@ def test_get_document_rest_required_fields(request_type=firestore.GetDocumentReq
 
             response = client.get_document(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -6526,7 +6526,7 @@ def test_list_documents_rest_required_fields(
 
             response = client.list_documents(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -6727,7 +6727,7 @@ def test_update_document_rest_required_fields(
 
             response = client.update_document(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -6919,7 +6919,7 @@ def test_delete_document_rest_required_fields(
 
             response = client.delete_document(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -7105,7 +7105,7 @@ def test_batch_get_documents_rest_required_fields(
                 iter_content.return_value = iter(json_return_value)
                 response = client.batch_get_documents(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -7228,7 +7228,7 @@ def test_begin_transaction_rest_required_fields(
 
             response = client.begin_transaction(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -7405,7 +7405,7 @@ def test_commit_rest_required_fields(request_type=firestore.CommitRequest):
 
             response = client.commit(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -7585,7 +7585,7 @@ def test_rollback_rest_required_fields(request_type=firestore.RollbackRequest):
 
             response = client.rollback(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -7773,7 +7773,7 @@ def test_run_query_rest_required_fields(request_type=firestore.RunQueryRequest):
                 iter_content.return_value = iter(json_return_value)
                 response = client.run_query(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -8028,7 +8028,7 @@ def test_run_aggregation_query_rest_required_fields(
                 iter_content.return_value = iter(json_return_value)
                 response = client.run_aggregation_query(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -8149,7 +8149,7 @@ def test_partition_query_rest_required_fields(
 
             response = client.partition_query(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -8357,7 +8357,7 @@ def test_list_collection_ids_rest_required_fields(
 
             response = client.list_collection_ids(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -8597,7 +8597,7 @@ def test_batch_write_rest_required_fields(request_type=firestore.BatchWriteReque
 
             response = client.batch_write(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
@@ -8729,7 +8729,7 @@ def test_create_document_rest_required_fields(
 
             response = client.create_document(request)
 
-            expected_params = []
+            expected_params = [("$alt", "json;enum-encoding=int")]
             actual_params = req.call_args.kwargs["params"]
             assert expected_params == actual_params
 
