@@ -1685,6 +1685,9 @@ async def test_pipeline_explain_options_using_additional_options(
     assert "Execution:" in text_stats
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Pipeline query not supported in emulator."
+)
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 async def test_pipeline_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs

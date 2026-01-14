@@ -1800,6 +1800,9 @@ def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert new_values[new_ref.id] == new_data
 
 
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Pipeline query not supported in emulator."
+)
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 def test_pipeline_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
