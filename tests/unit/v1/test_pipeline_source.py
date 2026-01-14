@@ -16,8 +16,6 @@ import mock
 from google.cloud.firestore_v1.pipeline_source import PipelineSource
 from google.cloud.firestore_v1.pipeline import Pipeline
 from google.cloud.firestore_v1.async_pipeline import AsyncPipeline
-from google.cloud.firestore_v1.client import Client
-from google.cloud.firestore_v1.async_client import AsyncClient
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.base_document import BaseDocumentReference
 from google.cloud.firestore_v1.query import Query
@@ -25,6 +23,7 @@ from google.cloud.firestore_v1.async_query import AsyncQuery
 
 from tests.unit.v1._test_helpers import make_async_client
 from tests.unit.v1._test_helpers import make_client
+
 
 class TestPipelineSource:
     _expected_pipeline_type = Pipeline
