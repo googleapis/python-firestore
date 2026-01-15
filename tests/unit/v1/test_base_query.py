@@ -2120,7 +2120,9 @@ def test__query_pipeline_cursors():
     from google.cloud.firestore_v1 import pipeline_expressions as expr
 
     client = make_client()
-    query_start = client.collection("my_col").order_by("field_a").start_at({"field_a": 10})
+    query_start = (
+        client.collection("my_col").order_by("field_a").start_at({"field_a": 10})
+    )
     pipeline = query_start._build_pipeline(client.pipeline())
 
     # Stages:
@@ -2129,7 +2131,7 @@ def test__query_pipeline_cursors():
     # 2: Where (cursor condition)
     # 3: Sort (field_a)
     assert len(pipeline.stages) == 4
-    
+
     where_stage = pipeline.stages[2]
     assert isinstance(where_stage, stages.Where)
     # Expected: (field_a > 10) OR (field_a == 10)
@@ -2336,6 +2338,7 @@ def _make_snapshot(docref, values):
 
     return document.DocumentSnapshot(docref, values, True, None, None, None)
 
+
 def test__where_conditions_from_cursor_descending():
     from google.cloud.firestore_v1.base_query import _where_conditions_from_cursor
     from google.cloud.firestore_v1 import pipeline_expressions
@@ -2348,10 +2351,7 @@ def test__where_conditions_from_cursor_descending():
     cursor = ([10], True)
     condition = _where_conditions_from_cursor(cursor, [ordering], is_start_cursor=True)
     # Expected: field < 10 OR field == 10
-    expected = pipeline_expressions.Or(
-        field_expr.less_than(10),
-        field_expr.equal(10)
-    )
+    expected = pipeline_expressions.Or(field_expr.less_than(10), field_expr.equal(10))
     assert condition == expected
 
     # Case 2: StartAfter (exclusive) -> < 10
@@ -2366,8 +2366,7 @@ def test__where_conditions_from_cursor_descending():
     condition = _where_conditions_from_cursor(cursor, [ordering], is_start_cursor=False)
     # Expected: field > 10 OR field == 10
     expected = pipeline_expressions.Or(
-        field_expr.greater_than(10),
-        field_expr.equal(10)
+        field_expr.greater_than(10), field_expr.equal(10)
     )
     assert condition == expected
 
