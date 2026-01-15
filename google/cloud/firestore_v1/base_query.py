@@ -1134,8 +1134,12 @@ class BaseQuery(object):
         """
         Convert this query into a Pipeline
 
+        Queries containing a `cursor` or `limit_to_last` are not currently supported
+
         Args:
             source: the PipelineSource to build the pipeline off of
+        Raises:
+            - NotImplementedError: raised if the query contains a `cursor` or `limit_to_last`
         Returns:
             a Pipeline representing the query
         """
@@ -1158,10 +1162,9 @@ class BaseQuery(object):
 
         # Orders
         orders = self._normalize_orders()
-
-        exists = []
-        orderings = []
         if orders:
+            exists = []
+            orderings = []
             for order in orders:
                 field = pipeline_expressions.Field.of(order.field.field_path)
                 exists.append(field.exists())
@@ -1175,58 +1178,22 @@ class BaseQuery(object):
             # Add exists filters to match Query's implicit orderby semantics.
             if len(exists) == 1:
                 ppl = ppl.where(exists[0])
-            elif len(exists) > 1:
+            else:
                 ppl = ppl.where(pipeline_expressions.And(*exists))
 
-        if orderings:
-            # Normalize cursors to get the raw values corresponding to the orders
-            start_at_val = None
-            if self._start_at:
-                start_at_val = self._normalize_cursor(self._start_at, orders)
+            # Add sort orderings
+            ppl = ppl.sort(*orderings)
 
-            end_at_val = None
-            if self._end_at:
-                end_at_val = self._normalize_cursor(self._end_at, orders)
-
-            # If limit_to_last is set, we need to reverse the orderings to find the
-            # "last" N documents (which effectively become the "first" N in reverse order).
-            if self._limit_to_last:
-                actual_orderings = _reverse_orderings(orderings)
-                ppl = ppl.sort(*actual_orderings)
-
-            # Apply cursor conditions.
-            # Cursors are translated into filter conditions (e.g., field > value)
-            # based on the orderings.
-            if start_at_val:
-                ppl = ppl.where(
-                    _where_conditions_from_cursor(
-                        start_at_val, orderings, is_start_cursor=True
-                    )
-                )
-
-            if end_at_val:
-                ppl = ppl.where(
-                    _where_conditions_from_cursor(
-                        end_at_val, orderings, is_start_cursor=False
-                    )
-                )
-
-            if not self._limit_to_last:
-                ppl = ppl.sort(*orderings)
-
-            if self._limit is not None:
+        # Cursors, Limit and Offset
+        if self._start_at or self._end_at or self._limit_to_last:
+            raise NotImplementedError(
+                "Query to Pipeline conversion: cursors and limit_to_last is not supported yet."
+            )
+        else:  # Limit & Offset without cursors
+            if self._offset:
+                ppl = ppl.offset(self._offset)
+            if self._limit:
                 ppl = ppl.limit(self._limit)
-
-            # If we reversed the orderings for limit_to_last, we must now re-sort
-            # using the original orderings to return the results in the user-requested order.
-            if self._limit_to_last:
-                ppl = ppl.sort(*orderings)
-        elif self._limit is not None and not self._limit_to_last:
-            ppl = ppl.limit(self._limit)
-
-        # Offset
-        if self._offset:
-            ppl = ppl.offset(self._offset)
 
         return ppl
 

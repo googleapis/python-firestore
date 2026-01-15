@@ -998,14 +998,6 @@ class FirestoreRestTransport(_BaseFirestoreRestTransport):
         state (preview). We welcome your feedback via a GitHub issue in
         this library's repository. Thank you!
 
-         Args:
-             host (Optional[str]):
-                  The hostname to connect to (default: 'firestore.googleapis.com').
-             credentials (Optional[google.auth.credentials.Credentials]): The
-                 authorization credentials to attach to requests. These
-                 credentials identify the application to the service; if none
-                 are specified, the client will attempt to ascertain the
-                 credentials from the environment.
             credentials_file (Optional[str]): Deprecated. A file with credentials that can
                 be loaded with :func:`google.auth.load_credentials_from_file`.
                 This argument is ignored if ``channel`` is provided. This argument will be

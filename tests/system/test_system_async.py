@@ -57,7 +57,6 @@ from test__helpers import (
     ENTERPRISE_MODE_ERROR,
     TEST_DATABASES,
     TEST_DATABASES_W_ENTERPRISE,
-    IS_KOKORO_TEST,
     FIRESTORE_ENTERPRISE_DB,
 )
 
@@ -181,10 +180,8 @@ async def verify_pipeline(query):
     """
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
 
-    # return early on kokoro. Test project doesn't currently support pipelines
-    # TODO: enable pipeline verification when kokoro test project is whitelisted
-    if IS_KOKORO_TEST:
-        pytest.skip("skipping pipeline verification on kokoro")
+    if FIRESTORE_EMULATOR:
+        pytest.skip("skip pipeline verification on emulator")
 
     def _clean_results(results):
         if isinstance(results, dict):
@@ -1694,7 +1691,9 @@ async def test_pipeline_explain_options_using_additional_options(
     assert "Execution:" in text_stats
 
 
-@pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Pipeline query not supported in emulator."
+)
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 async def test_pipeline_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs

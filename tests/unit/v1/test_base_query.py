@@ -2116,96 +2116,19 @@ def test__query_pipeline_order_sorts():
     assert sort_stage.orders[1].order_dir == expr.Ordering.Direction.DESCENDING
 
 
-def test__query_pipeline_cursors():
-    from google.cloud.firestore_v1 import pipeline_expressions as expr
-
+def test__query_pipeline_unsupported():
     client = make_client()
-    query_start = (
-        client.collection("my_col").order_by("field_a").start_at({"field_a": "value"})
-    )
-    pipeline = query_start._build_pipeline(client.pipeline())
-    
-    # Expected stages: Collection, Exists, Where(Cursor), Sort
-    assert len(pipeline.stages) == 4
-    assert pipeline.stages[0].path == "/my_col"
-    assert isinstance(pipeline.stages[1], stages.Where)  # Exists
+    query_start = client.collection("my_col").start_at({"field_a": "value"})
+    with pytest.raises(NotImplementedError, match="cursors"):
+        query_start._build_pipeline(client.pipeline())
 
-    cursor_stage = pipeline.stages[2]
-    assert isinstance(cursor_stage, stages.Where)
-    condition = cursor_stage.condition
-    # start_at({"field_a": "value"}) -> field_a >= "value"
-    # Implemented as Or(field_a > "value", field_a == "value")
-    assert isinstance(condition, expr.Or)
-    assert len(condition.params) == 2
-    assert condition.params[0].name == "greater_than"
-    assert isinstance(condition.params[0].params[0], expr.Field)
-    assert condition.params[0].params[0].path == "field_a"
-    assert condition.params[1].name == "equal"
+    query_end = client.collection("my_col").end_at({"field_a": "value"})
+    with pytest.raises(NotImplementedError, match="cursors"):
+        query_end._build_pipeline(client.pipeline())
 
-    assert isinstance(pipeline.stages[3], stages.Sort)
-
-    query_end = (
-        client.collection("my_col").order_by("field_a").end_at({"field_a": "value"})
-    )
-    pipeline = query_end._build_pipeline(client.pipeline())
-    
-    # Expected stages: Collection, Exists, Where(Cursor), Sort
-    assert len(pipeline.stages) == 4
-    assert pipeline.stages[0].path == "/my_col"
-    assert isinstance(pipeline.stages[1], stages.Where)  # Exists
-
-    cursor_stage = pipeline.stages[2]
-    assert isinstance(cursor_stage, stages.Where)
-    condition = cursor_stage.condition
-    # end_at({"field_a": "value"}) -> field_a <= "value"
-    # Implemented as Or(field_a < "value", field_a == "value")
-    assert isinstance(condition, expr.Or)
-    assert len(condition.params) == 2
-    assert condition.params[0].name == "less_than"
-    assert isinstance(condition.params[0].params[0], expr.Field)
-    assert condition.params[0].params[0].path == "field_a"
-    assert condition.params[1].name == "equal"
-
-    assert isinstance(pipeline.stages[3], stages.Sort)
-
-
-def test__query_pipeline_limit_to_last():
-    from google.cloud.firestore_v1 import pipeline_expressions as expr
-
-    client = make_client()
-    query_limit_last = (
-        client.collection("my_col").order_by("field_a").limit_to_last(10)
-    )
-    pipeline = query_limit_last._build_pipeline(client.pipeline())
-    # stages: collection, exists, sort(desc), limit, sort(asc)
-
-    assert len(pipeline.stages) == 5
-
-    # 0. Collection
-    assert pipeline.stages[0].path == "/my_col"
-
-    # 1. Exists
-    exists_stage = pipeline.stages[1]
-    assert isinstance(exists_stage, stages.Where)
-
-    # 2. Sort DESCENDING (reversed)
-    sort_desc = pipeline.stages[2]
-    assert isinstance(sort_desc, stages.Sort)
-    assert len(sort_desc.orders) == 1
-    assert sort_desc.orders[0].expr.path == "field_a"
-    assert sort_desc.orders[0].order_dir == expr.Ordering.Direction.DESCENDING
-
-    # 3. Limit
-    limit_stage = pipeline.stages[3]
-    assert isinstance(limit_stage, stages.Limit)
-    assert limit_stage.limit == 10
-
-    # 4. Sort ASCENDING (original)
-    sort_asc = pipeline.stages[4]
-    assert isinstance(sort_asc, stages.Sort)
-    assert len(sort_asc.orders) == 1
-    assert sort_asc.orders[0].expr.path == "field_a"
-    assert sort_asc.orders[0].order_dir == expr.Ordering.Direction.ASCENDING
+    query_limit_last = client.collection("my_col").limit_to_last(10)
+    with pytest.raises(NotImplementedError, match="limit_to_last"):
+        query_limit_last._build_pipeline(client.pipeline())
 
 
 def test__query_pipeline_limit():

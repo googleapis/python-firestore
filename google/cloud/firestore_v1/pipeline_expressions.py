@@ -11,6 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+.. warning::
+    **Preview API**: Firestore Pipelines is currently in preview and is
+    subject to potential breaking changes in future releases.
+"""
 
 from __future__ import annotations
 from typing import (
@@ -95,7 +100,7 @@ class Expression(ABC):
 
     - **Field references:** Access values from document fields.
     - **Literals:** Represent constant values (strings, numbers, booleans).
-    - **Function calls:** Apply functions to one or more expressions.
+    - **FunctionExpression calls:** Apply functions to one or more expressions.
     - **Aggregations:** Calculate aggregate values (e.g., sum, average) over a set of documents.
 
     The `Expression` class provides a fluent API for building expressions. You can chain
@@ -134,7 +139,7 @@ class Expression(ABC):
 
         Example:
             >>> Field.of("test").add(5)
-            >>> Function.add("test", 5)
+            >>> FunctionExpression.add("test", 5)
         """
 
         def __init__(self, instance_func):
@@ -174,7 +179,9 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the addition operation.
         """
-        return Function("add", [self, self._cast_to_expr_or_convert_to_constant(other)])
+        return FunctionExpression(
+            "add", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def subtract(self, other: Expression | float) -> "Expression":
@@ -192,7 +199,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the subtraction operation.
         """
-        return Function(
+        return FunctionExpression(
             "subtract", [self, self._cast_to_expr_or_convert_to_constant(other)]
         )
 
@@ -212,7 +219,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the multiplication operation.
         """
-        return Function(
+        return FunctionExpression(
             "multiply", [self, self._cast_to_expr_or_convert_to_constant(other)]
         )
 
@@ -232,7 +239,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the division operation.
         """
-        return Function(
+        return FunctionExpression(
             "divide", [self, self._cast_to_expr_or_convert_to_constant(other)]
         )
 
@@ -252,7 +259,9 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the modulo operation.
         """
-        return Function("mod", [self, self._cast_to_expr_or_convert_to_constant(other)])
+        return FunctionExpression(
+            "mod", [self, self._cast_to_expr_or_convert_to_constant(other)]
+        )
 
     @expose_as_static
     def abs(self) -> "Expression":
@@ -265,7 +274,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the absolute value.
         """
-        return Function("abs", [self])
+        return FunctionExpression("abs", [self])
 
     @expose_as_static
     def ceil(self) -> "Expression":
@@ -278,7 +287,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the ceiling value.
         """
-        return Function("ceil", [self])
+        return FunctionExpression("ceil", [self])
 
     @expose_as_static
     def exp(self) -> "Expression":
@@ -291,7 +300,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the exponential value.
         """
-        return Function("exp", [self])
+        return FunctionExpression("exp", [self])
 
     @expose_as_static
     def floor(self) -> "Expression":
@@ -304,7 +313,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the floor value.
         """
-        return Function("floor", [self])
+        return FunctionExpression("floor", [self])
 
     @expose_as_static
     def ln(self) -> "Expression":
@@ -317,7 +326,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the natural logarithm.
         """
-        return Function("ln", [self])
+        return FunctionExpression("ln", [self])
 
     @expose_as_static
     def log(self, base: Expression | float) -> "Expression":
@@ -335,7 +344,9 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the logarithm.
         """
-        return Function("log", [self, self._cast_to_expr_or_convert_to_constant(base)])
+        return FunctionExpression(
+            "log", [self, self._cast_to_expr_or_convert_to_constant(base)]
+        )
 
     @expose_as_static
     def log10(self) -> "Expression":
@@ -347,7 +358,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the logarithm.
         """
-        return Function("log10", [self])
+        return FunctionExpression("log10", [self])
 
     @expose_as_static
     def pow(self, exponent: Expression | float) -> "Expression":
@@ -365,7 +376,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the power operation.
         """
-        return Function(
+        return FunctionExpression(
             "pow", [self, self._cast_to_expr_or_convert_to_constant(exponent)]
         )
 
@@ -380,7 +391,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the rounded value.
         """
-        return Function("round", [self])
+        return FunctionExpression("round", [self])
 
     @expose_as_static
     def sqrt(self) -> "Expression":
@@ -393,7 +404,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the square root.
         """
-        return Function("sqrt", [self])
+        return FunctionExpression("sqrt", [self])
 
     @expose_as_static
     def logical_maximum(self, *others: Expression | CONSTANT_TYPE) -> "Expression":
@@ -415,7 +426,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the logical maximum operation.
         """
-        return Function(
+        return FunctionExpression(
             "maximum",
             [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
             infix_name_override="logical_maximum",
@@ -441,7 +452,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the logical minimum operation.
         """
-        return Function(
+        return FunctionExpression(
             "minimum",
             [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
             infix_name_override="logical_minimum",
@@ -630,7 +641,7 @@ class Expression(ABC):
         )
 
     @expose_as_static
-    def array_get(self, offset: Expression | int) -> "Function":
+    def array_get(self, offset: Expression | int) -> "FunctionExpression":
         """
         Creates an expression that indexes into an array from the beginning or end and returns the
         element. A negative offset starts from the end.
@@ -644,7 +655,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the `array_get` operation.
         """
-        return Function(
+        return FunctionExpression(
             "array_get", [self, self._cast_to_expr_or_convert_to_constant(offset)]
         )
 
@@ -736,7 +747,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the length of the array.
         """
-        return Function("array_length", [self])
+        return FunctionExpression("array_length", [self])
 
     @expose_as_static
     def array_reverse(self) -> "Expression":
@@ -749,7 +760,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the reversed array.
         """
-        return Function("array_reverse", [self])
+        return FunctionExpression("array_reverse", [self])
 
     @expose_as_static
     def array_concat(
@@ -767,7 +778,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the concatenated array.
         """
-        return Function(
+        return FunctionExpression(
             "array_concat",
             [self]
             + [self._cast_to_expr_or_convert_to_constant(arr) for arr in other_arrays],
@@ -783,7 +794,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the concatenated value.
         """
-        return Function(
+        return FunctionExpression(
             "concat",
             [self] + [self._cast_to_expr_or_convert_to_constant(o) for o in others],
         )
@@ -800,7 +811,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the length of the expression.
         """
-        return Function("length", [self])
+        return FunctionExpression("length", [self])
 
     @expose_as_static
     def is_absent(self) -> "BooleanExpression":
@@ -830,7 +841,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the ifAbsent operation.
         """
-        return Function(
+        return FunctionExpression(
             "if_absent",
             [self, self._cast_to_expr_or_convert_to_constant(default_value)],
         )
@@ -846,7 +857,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the isError operation.
         """
-        return Function("is_error", [self])
+        return FunctionExpression("is_error", [self])
 
     @expose_as_static
     def if_error(self, then_value: Expression | CONSTANT_TYPE) -> "Expression":
@@ -863,7 +874,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the ifError operation.
         """
-        return Function(
+        return FunctionExpression(
             "if_error", [self, self._cast_to_expr_or_convert_to_constant(then_value)]
         )
 
@@ -987,7 +998,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the length of the string.
         """
-        return Function("char_length", [self])
+        return FunctionExpression("char_length", [self])
 
     @expose_as_static
     def byte_length(self) -> "Expression":
@@ -1000,7 +1011,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the byte length of the string.
         """
-        return Function("byte_length", [self])
+        return FunctionExpression("byte_length", [self])
 
     @expose_as_static
     def like(self, pattern: Expression | str) -> "BooleanExpression":
@@ -1138,7 +1149,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the concatenated string.
         """
-        return Function(
+        return FunctionExpression(
             "string_concat",
             [self] + [self._cast_to_expr_or_convert_to_constant(el) for el in elements],
         )
@@ -1154,7 +1165,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the lowercase string.
         """
-        return Function("to_lower", [self])
+        return FunctionExpression("to_lower", [self])
 
     @expose_as_static
     def to_upper(self) -> "Expression":
@@ -1167,7 +1178,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the uppercase string.
         """
-        return Function("to_upper", [self])
+        return FunctionExpression("to_upper", [self])
 
     @expose_as_static
     def trim(self) -> "Expression":
@@ -1180,7 +1191,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the trimmed string.
         """
-        return Function("trim", [self])
+        return FunctionExpression("trim", [self])
 
     @expose_as_static
     def string_reverse(self) -> "Expression":
@@ -1193,7 +1204,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the reversed string.
         """
-        return Function("string_reverse", [self])
+        return FunctionExpression("string_reverse", [self])
 
     @expose_as_static
     def substring(
@@ -1217,7 +1228,7 @@ class Expression(ABC):
         args = [self, self._cast_to_expr_or_convert_to_constant(position)]
         if length is not None:
             args.append(self._cast_to_expr_or_convert_to_constant(length))
-        return Function("substring", args)
+        return FunctionExpression("substring", args)
 
     @expose_as_static
     def join(self, delimeter: Expression | str) -> "Expression":
@@ -1233,7 +1244,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the joined string.
         """
-        return Function(
+        return FunctionExpression(
             "join", [self, self._cast_to_expr_or_convert_to_constant(delimeter)]
         )
 
@@ -1251,7 +1262,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the value associated with the given key in the map.
         """
-        return Function(
+        return FunctionExpression(
             "map_get", [self, self._cast_to_expr_or_convert_to_constant(key)]
         )
 
@@ -1269,7 +1280,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the map_remove operation.
         """
-        return Function(
+        return FunctionExpression(
             "map_remove", [self, self._cast_to_expr_or_convert_to_constant(key)]
         )
 
@@ -1284,7 +1295,7 @@ class Expression(ABC):
 
         Example:
             >>> Map({"city": "London"}).map_merge({"country": "UK"}, {"isCapital": True})
-            >>> Field.of("settings").map_merge({"enabled":True}, Function.conditional(Field.of('isAdmin'), {"admin":True}, {}})
+            >>> Field.of("settings").map_merge({"enabled":True}, FunctionExpression.conditional(Field.of('isAdmin'), {"admin":True}, {}})
 
         Args:
             *other_maps: Sequence of maps to merge into the resulting map.
@@ -1292,7 +1303,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the value associated with the given key in the map.
         """
-        return Function(
+        return FunctionExpression(
             "map_merge",
             [self] + [self._cast_to_expr_or_convert_to_constant(m) for m in other_maps],
         )
@@ -1313,7 +1324,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the cosine distance between the two vectors.
         """
-        return Function(
+        return FunctionExpression(
             "cosine_distance",
             [
                 self,
@@ -1339,7 +1350,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the Euclidean distance between the two vectors.
         """
-        return Function(
+        return FunctionExpression(
             "euclidean_distance",
             [
                 self,
@@ -1363,7 +1374,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the dot product between the two vectors.
         """
-        return Function(
+        return FunctionExpression(
             "dot_product",
             [
                 self,
@@ -1382,7 +1393,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the length of the vector.
         """
-        return Function("vector_length", [self])
+        return FunctionExpression("vector_length", [self])
 
     @expose_as_static
     def timestamp_to_unix_micros(self) -> "Expression":
@@ -1398,7 +1409,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the number of microseconds since the epoch.
         """
-        return Function("timestamp_to_unix_micros", [self])
+        return FunctionExpression("timestamp_to_unix_micros", [self])
 
     @expose_as_static
     def unix_micros_to_timestamp(self) -> "Expression":
@@ -1412,7 +1423,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the timestamp.
         """
-        return Function("unix_micros_to_timestamp", [self])
+        return FunctionExpression("unix_micros_to_timestamp", [self])
 
     @expose_as_static
     def timestamp_to_unix_millis(self) -> "Expression":
@@ -1428,7 +1439,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the number of milliseconds since the epoch.
         """
-        return Function("timestamp_to_unix_millis", [self])
+        return FunctionExpression("timestamp_to_unix_millis", [self])
 
     @expose_as_static
     def unix_millis_to_timestamp(self) -> "Expression":
@@ -1442,7 +1453,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the timestamp.
         """
-        return Function("unix_millis_to_timestamp", [self])
+        return FunctionExpression("unix_millis_to_timestamp", [self])
 
     @expose_as_static
     def timestamp_to_unix_seconds(self) -> "Expression":
@@ -1458,7 +1469,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the number of seconds since the epoch.
         """
-        return Function("timestamp_to_unix_seconds", [self])
+        return FunctionExpression("timestamp_to_unix_seconds", [self])
 
     @expose_as_static
     def unix_seconds_to_timestamp(self) -> "Expression":
@@ -1472,7 +1483,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the timestamp.
         """
-        return Function("unix_seconds_to_timestamp", [self])
+        return FunctionExpression("unix_seconds_to_timestamp", [self])
 
     @expose_as_static
     def timestamp_add(
@@ -1494,7 +1505,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the resulting timestamp.
         """
-        return Function(
+        return FunctionExpression(
             "timestamp_add",
             [
                 self,
@@ -1523,7 +1534,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the resulting timestamp.
         """
-        return Function(
+        return FunctionExpression(
             "timestamp_subtract",
             [
                 self,
@@ -1543,7 +1554,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the collection ID.
         """
-        return Function("collection_id", [self])
+        return FunctionExpression("collection_id", [self])
 
     @expose_as_static
     def document_id(self):
@@ -1556,7 +1567,7 @@ class Expression(ABC):
         Returns:
             A new `Expression` representing the document ID.
         """
-        return Function("document_id", [self])
+        return FunctionExpression("document_id", [self])
 
     def ascending(self) -> Ordering:
         """Creates an `Ordering` that sorts documents in ascending order based on this expression.
@@ -1634,7 +1645,7 @@ class Constant(Expression, Generic[CONSTANT_TYPE]):
         return encode_value(self.value)
 
 
-class Function(Expression):
+class FunctionExpression(Expression):
     """A base class for expressions that represent function calls."""
 
     def __init__(
@@ -1652,7 +1663,7 @@ class Function(Expression):
 
     def __repr__(self):
         """
-        Most Functions can be triggered infix. Eg: Field.of('age').greater_than(18).
+        Most FunctionExpressions can be triggered infix. Eg: Field.of('age').greater_than(18).
 
         Display them this way in the repr string where possible
         """
@@ -1667,7 +1678,7 @@ class Function(Expression):
         return f"{self.__class__.__name__}({', '.join([repr(p) for p in self.params])})"
 
     def __eq__(self, other):
-        if not isinstance(other, Function):
+        if not isinstance(other, FunctionExpression):
             return False
         else:
             return other.name == self.name and other.params == self.params
@@ -1681,7 +1692,7 @@ class Function(Expression):
         )
 
 
-class AggregateFunction(Function):
+class AggregateFunction(FunctionExpression):
     """A base class for aggregation functions that operate across multiple inputs."""
 
 
@@ -1778,7 +1789,7 @@ class Field(Selectable):
         return Value(field_reference_value=self.path)
 
 
-class BooleanExpression(Function):
+class BooleanExpression(FunctionExpression):
     """Filters the given data in some way."""
 
     @staticmethod
@@ -1845,7 +1856,7 @@ class BooleanExpression(Function):
             raise TypeError(f"Unexpected filter type: {type(filter_pb)}")
 
 
-class Array(Function):
+class Array(FunctionExpression):
     """
     Creates an expression that creates a Firestore array value from an input list.
 
@@ -1868,7 +1879,7 @@ class Array(Function):
         return f"Array({self.params})"
 
 
-class Map(Function):
+class Map(FunctionExpression):
     """
     Creates an expression that creates a Firestore map value from an input dict.
 
@@ -2004,7 +2015,7 @@ class Count(AggregateFunction):
         super().__init__("count", expression_list, use_infix_repr=bool(expression_list))
 
 
-class CurrentTimestamp(Function):
+class CurrentTimestamp(FunctionExpression):
     """Creates an expression that returns the current timestamp
 
     Returns:

@@ -46,7 +46,6 @@ from test__helpers import (
     ENTERPRISE_MODE_ERROR,
     TEST_DATABASES,
     TEST_DATABASES_W_ENTERPRISE,
-    IS_KOKORO_TEST,
     FIRESTORE_ENTERPRISE_DB,
 )
 
@@ -101,10 +100,8 @@ def verify_pipeline(query):
     """
     from google.cloud.firestore_v1.base_aggregation import BaseAggregationQuery
 
-    # return early on kokoro. Test project doesn't currently support pipelines
-    # TODO: enable pipeline verification when kokoro test project is whitelisted
-    if IS_KOKORO_TEST:
-        pytest.skip("skipping pipeline verification on kokoro")
+    if FIRESTORE_EMULATOR:
+        pytest.skip("skip pipeline verification on emulator")
 
     def _clean_results(results):
         if isinstance(results, dict):
@@ -1445,7 +1442,7 @@ def test_query_stream_w_field_path(query_docs, database):
     verify_pipeline(query)
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_query_stream_w_start_end_cursor(query_docs, database):
     collection, stored, allowed_vals = query_docs
     num_vals = len(allowed_vals)
@@ -1772,22 +1769,6 @@ def test_pipeline_explain_options_using_additional_options(
     assert "Execution:" in text_stats
 
 
-@pytest.mark.skipif(
-    FIRESTORE_EMULATOR, reason="Query profile not supported in emulator."
-)
-@pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
-def test_pipeline_index_mode(database, query_docs):
-    """test pipeline query with explicit index mode"""
-
-    collection, _, allowed_vals = query_docs
-    client = collection._client
-    query = collection.where(filter=FieldFilter("a", "==", 1))
-    pipeline = client.pipeline().create_from(query)
-    with pytest.raises(InvalidArgument) as e:
-        pipeline.execute(index_mode="fake_index")
-    assert "Invalid index_mode: fake_index" in str(e)
-
-
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_query_stream_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
@@ -1826,7 +1807,9 @@ def test_query_stream_w_read_time(query_docs, cleanup, database):
     assert new_values[new_ref.id] == new_data
 
 
-@pytest.mark.skipif(IS_KOKORO_TEST, reason="skipping pipeline verification on kokoro")
+@pytest.mark.skipif(
+    FIRESTORE_EMULATOR, reason="Pipeline query not supported in emulator."
+)
 @pytest.mark.parametrize("database", [FIRESTORE_ENTERPRISE_DB], indirect=True)
 def test_pipeline_w_read_time(query_docs, cleanup, database):
     collection, stored, allowed_vals = query_docs
@@ -1870,7 +1853,7 @@ def test_pipeline_w_read_time(query_docs, cleanup, database):
         assert key != new_ref.id
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_query_with_order_dot_key(client, cleanup, database):
     db = client
     collection_id = "collek" + UNIQUE_RESOURCE_ID
@@ -2003,7 +1986,7 @@ def test_collection_group_queries(client, cleanup, database):
     verify_pipeline(query)
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_collection_group_queries_startat_endat(client, cleanup, database):
     collection_group = "b" + UNIQUE_RESOURCE_ID
 
@@ -2866,7 +2849,6 @@ def test_repro_429(client, cleanup, database):
     for snapshot in query2.stream():
         print(f"id: {snapshot.id}")
     verify_pipeline(query)
-    verify_pipeline(query2)
 
 
 @pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
@@ -3026,7 +3008,7 @@ def test_count_query_stream_empty_aggregation(query, database):
     assert "Aggregations can not be empty" in exc_info.value.message
 
 
-@pytest.mark.parametrize("database", TEST_DATABASES_W_ENTERPRISE, indirect=True)
+@pytest.mark.parametrize("database", TEST_DATABASES, indirect=True)
 def test_count_query_with_start_at(query, database):
     """
     Ensure that count aggregation queries work when chained with a start_at

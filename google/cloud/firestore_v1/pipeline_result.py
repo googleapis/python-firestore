@@ -11,6 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+.. warning::
+    **Preview API**: Firestore Pipelines is currently in preview and is
+    subject to potential breaking changes in future releases.
+"""
 
 from __future__ import annotations
 from typing import (
@@ -19,6 +24,7 @@ from typing import (
     AsyncIterator,
     Iterable,
     Iterator,
+    List,
     Generic,
     MutableMapping,
     Type,
@@ -178,7 +184,6 @@ class _PipelineResultContainer(Generic[T]):
         transaction: Transaction | AsyncTransaction | None,
         read_time: datetime.datetime | None,
         explain_options: PipelineExplainOptions | None,
-        index_mode: str | None,
         additional_options: dict[str, Constant | Value],
     ):
         # public
@@ -192,7 +197,6 @@ class _PipelineResultContainer(Generic[T]):
         self._explain_stats: ExplainStats | None = None
         self._explain_options: PipelineExplainOptions | None = explain_options
         self._return_type = return_type
-        self._index_mode = index_mode
         self._additonal_options = {
             k: v if isinstance(v, Value) else v._to_pb()
             for k, v in additional_options.items()
@@ -226,8 +230,6 @@ class _PipelineResultContainer(Generic[T]):
         options = {}
         if self._explain_options:
             options["explain_options"] = self._explain_options._to_value()
-        if self._index_mode:
-            options["index_mode"] = Value(string_value=self._index_mode)
         if self._additonal_options:
             options.update(self._additonal_options)
         request = ExecutePipelineRequest(
@@ -257,12 +259,12 @@ class _PipelineResultContainer(Generic[T]):
             )
 
 
-class PipelineSnapshot(_PipelineResultContainer[T], list[T]):
+class PipelineSnapshot(_PipelineResultContainer[T], List[T]):
     """
     A list type that holds the result of a pipeline.execute() operation, along with related metadata
     """
 
-    def __init__(self, results_list: list[T], source: _PipelineResultContainer[T]):
+    def __init__(self, results_list: List[T], source: _PipelineResultContainer[T]):
         self.__dict__.update(source.__dict__.copy())
         list.__init__(self, results_list)
         # snapshots are always complete

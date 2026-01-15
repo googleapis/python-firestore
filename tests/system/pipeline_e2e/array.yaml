@@ -3,7 +3,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.array_contains:
+          - FunctionExpression.array_contains:
               - Field: tags
               - Constant: comedy
     assert_results:
@@ -33,7 +33,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.array_contains_any:
+          - FunctionExpression.array_contains_any:
             - Field: tags
             - - Constant: comedy
               - Constant: classic
@@ -81,7 +81,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.array_contains_all:
+          - FunctionExpression.array_contains_all:
               - Field: tags
               - - Constant: adventure
                 - Constant: magic
@@ -117,11 +117,11 @@ tests:
       - Collection: books
       - Select:
         - AliasedExpression:
-            - Function.array_length:
+            - FunctionExpression.array_length:
                 - Field: tags
             - "tagsCount"
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: tagsCount
               - Constant: 3
     assert_results: # All documents have 3 tags
@@ -161,12 +161,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Select:
         - AliasedExpression:
-            - Function.array_reverse:
+            - FunctionExpression.array_reverse:
                 - Field: tags
             - "reversedTags"
     assert_results:
@@ -178,12 +178,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Select:
         - AliasedExpression:
-            - Function.array_concat:
+            - FunctionExpression.array_concat:
                 - Field: tags
                 - ["new_tag", "another_tag"]
             - "concatenatedTags"
@@ -225,12 +225,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "Dune"
       - Select:
         - AliasedExpression:
-            - Function.array_concat:
+            - FunctionExpression.array_concat:
                 - Field: tags
                 - ["sci-fi"]
                 - ["classic", "epic"]
@@ -279,12 +279,12 @@ tests:
       - Collection: books
       - AddFields:
         - AliasedExpression:
-            - Function.array_concat:
+            - FunctionExpression.array_concat:
                 - Field: tags
                 - Array: ["Dystopian"]
             - "new_tags"
       - Where:
-          - Function.array_contains_any:
+          - FunctionExpression.array_contains_any:
             - Field: new_tags
             - - Constant: non_existent_tag
               - Field: genre
@@ -352,7 +352,7 @@ tests:
       - Limit: 1
       - Select:
         - AliasedExpression:
-            - Function.array_concat:
+            - FunctionExpression.array_concat:
                 - Array: [1, 2, 3]
                 - Array: [4, 5]
             - "concatenated"
@@ -390,12 +390,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Select:
         - AliasedExpression:
-            - Function.array_get:
+            - FunctionExpression.array_get:
                 - Field: tags
                 - Constant: 0
             - "firstTag"
@@ -428,12 +428,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Select:
         - AliasedExpression:
-            - Function.array_get:
+            - FunctionExpression.array_get:
                 - Field: tags
                 - Constant: -1
             - "lastTag"

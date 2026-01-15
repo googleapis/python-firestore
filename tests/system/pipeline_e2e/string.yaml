@@ -8,7 +8,7 @@ tests:
             - ASCENDING
       - Select:
           - AliasedExpression:
-              - Function.string_concat:
+              - FunctionExpression.string_concat:
                   - Field: author
                   - Constant: " - "
                   - Field: title
@@ -48,7 +48,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.starts_with:
+          - FunctionExpression.starts_with:
               - Field: title
               - Constant: The
       - Select:
@@ -93,7 +93,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.ends_with:
+          - FunctionExpression.ends_with:
               - Field: title
               - Constant: y
       - Select:
@@ -136,18 +136,18 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Select:
         - AliasedExpression:
-            - Function.concat:
+            - FunctionExpression.concat:
                 - Field: author
                 - Constant: ": "
                 - Field: title
             - "author_title"
         - AliasedExpression:
-            - Function.concat:
+            - FunctionExpression.concat:
                 - Field: tags
                 - - Constant: "new_tag"
             - "concatenatedTags"
@@ -162,20 +162,20 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: title
               - Constant: "The Hitchhiker's Guide to the Galaxy"
       - Select:
         - AliasedExpression:
-            - Function.length:
+            - FunctionExpression.length:
                 - Field: title
             - "titleLength"
         - AliasedExpression:
-            - Function.length:
+            - FunctionExpression.length:
                 - Field: tags
             - "tagsLength"
         - AliasedExpression:
-            - Function.length:
+            - FunctionExpression.length:
                 - Field: awards
             - "awardsLength"
     assert_results:
@@ -187,12 +187,12 @@ tests:
       - Collection: books
       - Select:
         - AliasedExpression:
-            - Function.char_length:
+            - FunctionExpression.char_length:
                 - Field: title
             - "titleLength"
         - title
       - Where:
-          - Function.greater_than:
+          - FunctionExpression.greater_than:
               - Field: titleLength
               - Constant: 20
       - Sort:
@@ -244,12 +244,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: "Douglas Adams"
       - Select:
         - AliasedExpression:
-            - Function.char_length:
+            - FunctionExpression.char_length:
                 - Field: title
             - "title_length"
     assert_results:
@@ -280,13 +280,13 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: Douglas Adams
       - Select:
         - AliasedExpression:
-            - Function.byte_length:
-                - Function.string_concat:
+            - FunctionExpression.byte_length:
+                - FunctionExpression.string_concat:
                   - Field: title
                   - Constant: _银河系漫游指南
             - "title_byte_length"
@@ -322,7 +322,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.like:
+          - FunctionExpression.like:
               - Field: title
               - Constant: "%Guide%"
       - Select:
@@ -334,7 +334,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.regex_contains:
+          - FunctionExpression.regex_contains:
               - Field: title
               - Constant: "(?i)(the|of)"
     assert_count: 5
@@ -356,7 +356,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.regex_match:
+          - FunctionExpression.regex_match:
               - Field: title
               - Constant: ".*(?i)(the|of).*"
     assert_count: 5
@@ -377,7 +377,7 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.string_contains:
+          - FunctionExpression.string_contains:
               - Field: title
               - Constant: "Hitchhiker's"
       - Select:
@@ -388,12 +388,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: "Douglas Adams"
       - Select:
         - AliasedExpression:
-            - Function.to_lower:
+            - FunctionExpression.to_lower:
                 - Field: title
             - "lower_title"
     assert_results:
@@ -424,12 +424,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: "Douglas Adams"
       - Select:
         - AliasedExpression:
-            - Function.to_upper:
+            - FunctionExpression.to_upper:
                 - Field: title
             - "upper_title"
     assert_results:
@@ -460,13 +460,13 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: "Douglas Adams"
       - Select:
         - AliasedExpression:
-            - Function.trim:
-                - Function.string_concat:
+            - FunctionExpression.trim:
+                - FunctionExpression.string_concat:
                   - Constant: "  "
                   - Field: title
                   - Constant: "  "
@@ -504,12 +504,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: "Jane Austen"
       - Select:
         - AliasedExpression:
-            - Function.string_reverse:
+            - FunctionExpression.string_reverse:
                 - Field: title
             - "reversed_title"
     assert_results:
@@ -540,12 +540,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: "Douglas Adams"
       - Select:
         - AliasedExpression:
-            - Function.substring:
+            - FunctionExpression.substring:
                 - Field: title
                 - Constant: 4
                 - Constant: 11
@@ -580,12 +580,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: "Fyodor Dostoevsky"
       - Select:
         - AliasedExpression:
-            - Function.substring:
+            - FunctionExpression.substring:
                 - Field: title
                 - Constant: 10
             - "substring_title"
@@ -618,12 +618,12 @@ tests:
     pipeline:
       - Collection: books
       - Where:
-          - Function.equal:
+          - FunctionExpression.equal:
               - Field: author
               - Constant: "Douglas Adams"
       - Select:
         - AliasedExpression:
-            - Function.join:
+            - FunctionExpression.join:
                 - Field: tags
                 - Constant: ", "
             - "joined_tags"

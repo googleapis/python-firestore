@@ -18,6 +18,8 @@ import pytest
 from google.cloud.firestore_v1 import pipeline_stages as stages
 from google.cloud.firestore_v1.pipeline_expressions import Field
 
+from tests.unit.v1._test_helpers import make_client
+
 
 def _make_pipeline(*args, client=mock.Mock()):
     from google.cloud.firestore_v1.pipeline import Pipeline
@@ -190,11 +192,10 @@ def test_pipeline_stream_populated():
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import ExecutePipelineRequest
     from google.cloud.firestore_v1.types import Value
-    from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.document import DocumentReference
     from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
-    real_client = Client()
+    real_client = make_client()
     client = mock.Mock()
     client.project = "A"
     client._database = "B"
@@ -244,10 +245,9 @@ def test_pipeline_stream_multiple():
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import ExecutePipelineRequest
     from google.cloud.firestore_v1.types import Value
-    from google.cloud.firestore_v1.client import Client
     from google.cloud.firestore_v1.pipeline_result import PipelineResult
 
-    real_client = Client()
+    real_client = make_client()
     client = mock.Mock()
     client.project = "A"
     client._database = "B"
@@ -348,9 +348,8 @@ def test_pipeline_execute_stream_equivalence():
     from google.cloud.firestore_v1.types import Document
     from google.cloud.firestore_v1.types import ExecutePipelineResponse
     from google.cloud.firestore_v1.types import Value
-    from google.cloud.firestore_v1.client import Client
 
-    real_client = Client()
+    real_client = make_client()
     client = mock.Mock()
     client.project = "A"
     client._database = "B"
