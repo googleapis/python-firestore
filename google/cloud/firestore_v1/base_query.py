@@ -1185,10 +1185,10 @@ class BaseQuery(object):
         # Apply cursors as filters.
         if orderings:
             for cursor, is_start in [(self._start_at, True), (self._end_at, False)]:
+                cursor = self._normalize_cursor(cursor, normalized_orders)
                 if cursor:
-                    val = self._normalize_cursor(cursor, normalized_orders)
                     ppl = ppl.where(
-                        _where_conditions_from_cursor(val, orderings, is_start)
+                        _where_conditions_from_cursor(cursor, orderings, is_start)
                     )
 
         # Handle sort and limit, including limit_to_last semantics.
