@@ -1160,71 +1160,54 @@ class BaseQuery(object):
 
         # "explicit_orders" are only those explicitly added by the user via order_by().
         # We only generate existence filters for these fields.
-        explicit_orders = self._orders
-        exists = []
-        for order in explicit_orders:
-            field = pipeline_expressions.Field.of(order.field.field_path)
-            exists.append(field.exists())
-
-        # Add exists filters to match Query's implicit orderby semantics.
-        if len(exists) == 1:
-            ppl = ppl.where(exists[0])
-        elif len(exists) > 1:
-            ppl = ppl.where(pipeline_expressions.And(*exists))
+        if self._orders:
+            exists = [
+                pipeline_expressions.Field.of(o.field.field_path).exists()
+                for o in self._orders
+            ]
+            ppl = ppl.where(
+                pipeline_expressions.And(*exists) if len(exists) > 1 else exists[0]
+            )
 
         # "normalized_orders" includes both user-specified orders and implicit orders
         # (e.g. __name__ or inequality fields) required by Firestore semantics.
         normalized_orders = self._normalize_orders()
-        orderings = []
-        if normalized_orders:
-            for order in normalized_orders:
-                field = pipeline_expressions.Field.of(order.field.field_path)
-                direction = (
-                    "ascending"
-                    if order.direction == StructuredQuery.Direction.ASCENDING
-                    else "descending"
-                )
-                orderings.append(pipeline_expressions.Ordering(field, direction))
+        orderings = [
+            pipeline_expressions.Ordering(
+                pipeline_expressions.Field.of(o.field.field_path),
+                "ascending"
+                if o.direction == StructuredQuery.Direction.ASCENDING
+                else "descending",
+            )
+            for o in normalized_orders
+        ]
 
+        # Apply cursors as filters.
         if orderings:
+            for cursor_data, is_start in [(self._start_at, True), (self._end_at, False)]:
+                if cursor_data:
+                    val = self._normalize_cursor(cursor_data, normalized_orders)
+                    ppl = ppl.where(
+                        _where_conditions_from_cursor(val, orderings, is_start)
+                    )
+
+        # Handle sort and limit, including limit_to_last semantics.
+        is_limit_to_last = self._limit_to_last and bool(orderings)
+
+        if is_limit_to_last:
             # If limit_to_last is set, we need to reverse the orderings to find the
             # "last" N documents (which effectively become the "first" N in reverse order).
-            if self._limit_to_last:
-                actual_orderings = _reverse_orderings(orderings)
-                ppl = ppl.sort(*actual_orderings)
+            ppl = ppl.sort(*_reverse_orderings(orderings))
+        elif orderings:
+            ppl = ppl.sort(*orderings)
 
-            # Apply cursor conditions.
-            # Cursors are translated into filter conditions (e.g., field > value)
-            # based on the orderings.
-            if self._start_at:
-                # Normalize cursors to get the raw values corresponding to the orders
-                start_at_val = self._normalize_cursor(self._start_at, normalized_orders)
-                ppl = ppl.where(
-                    _where_conditions_from_cursor(
-                        start_at_val, orderings, is_start_cursor=True
-                    )
-                )
+        if self._limit is not None and (not self._limit_to_last or orderings):
+            ppl = ppl.limit(self._limit)
 
-            if self._end_at:
-                end_at_val = self._normalize_cursor(self._end_at, normalized_orders)
-                ppl = ppl.where(
-                    _where_conditions_from_cursor(
-                        end_at_val, orderings, is_start_cursor=False
-                    )
-                )
-
-            if not self._limit_to_last:
-                ppl = ppl.sort(*orderings)
-
-            if self._limit is not None:
-                ppl = ppl.limit(self._limit)
-
+        if is_limit_to_last:
             # If we reversed the orderings for limit_to_last, we must now re-sort
             # using the original orderings to return the results in the user-requested order.
-            if self._limit_to_last:
-                ppl = ppl.sort(*orderings)
-        elif self._limit is not None and not self._limit_to_last:
-            ppl = ppl.limit(self._limit)
+            ppl = ppl.sort(*orderings)
 
         # Offset
         if self._offset:
