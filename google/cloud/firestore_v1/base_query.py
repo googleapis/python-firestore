@@ -1157,14 +1157,28 @@ class BaseQuery(object):
             ppl = ppl.select(*[field.field_path for field in self._projection.fields])
 
         # Orders
-        orders = self._normalize_orders()
 
+        # "explicit_orders" are only those explicitly added by the user via order_by().
+        # We only generate existence filters for these fields.
+        explicit_orders = self._orders
         exists = []
+        for order in explicit_orders:
+            field = pipeline_expressions.Field.of(order.field.field_path)
+            exists.append(field.exists())
+
+        # Add exists filters to match Query's implicit orderby semantics.
+        if len(exists) == 1:
+            ppl = ppl.where(exists[0])
+        elif len(exists) > 1:
+            ppl = ppl.where(pipeline_expressions.And(*exists))
+
+        # "normalized_orders" includes both user-specified orders and implicit orders
+        # (e.g. __name__ or inequality fields) required by Firestore semantics.
+        normalized_orders = self._normalize_orders()
         orderings = []
-        if orders:
-            for order in orders:
+        if normalized_orders:
+            for order in normalized_orders:
                 field = pipeline_expressions.Field.of(order.field.field_path)
-                exists.append(field.exists())
                 direction = (
                     "ascending"
                     if order.direction == StructuredQuery.Direction.ASCENDING
@@ -1172,21 +1186,15 @@ class BaseQuery(object):
                 )
                 orderings.append(pipeline_expressions.Ordering(field, direction))
 
-            # Add exists filters to match Query's implicit orderby semantics.
-            if len(exists) == 1:
-                ppl = ppl.where(exists[0])
-            elif len(exists) > 1:
-                ppl = ppl.where(pipeline_expressions.And(*exists))
-
         if orderings:
             # Normalize cursors to get the raw values corresponding to the orders
             start_at_val = None
             if self._start_at:
-                start_at_val = self._normalize_cursor(self._start_at, orders)
+                start_at_val = self._normalize_cursor(self._start_at, normalized_orders)
 
             end_at_val = None
             if self._end_at:
-                end_at_val = self._normalize_cursor(self._end_at, orders)
+                end_at_val = self._normalize_cursor(self._end_at, normalized_orders)
 
             # If limit_to_last is set, we need to reverse the orderings to find the
             # "last" N documents (which effectively become the "first" N in reverse order).
