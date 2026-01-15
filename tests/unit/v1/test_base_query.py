@@ -2335,3 +2335,45 @@ def _make_snapshot(docref, values):
     from google.cloud.firestore_v1 import document
 
     return document.DocumentSnapshot(docref, values, True, None, None, None)
+
+def test__where_conditions_from_cursor_descending():
+    from google.cloud.firestore_v1.base_query import _where_conditions_from_cursor
+    from google.cloud.firestore_v1 import pipeline_expressions
+
+    # Create ordering: field DESC
+    field_expr = pipeline_expressions.Field.of("field")
+    ordering = pipeline_expressions.Ordering(field_expr, "descending")
+
+    # Case 1: StartAt (inclusive) -> <= 10
+    cursor = ([10], True)
+    condition = _where_conditions_from_cursor(cursor, [ordering], is_start_cursor=True)
+    # Expected: field < 10 OR field == 10
+    expected = pipeline_expressions.Or(
+        field_expr.less_than(10),
+        field_expr.equal(10)
+    )
+    assert condition == expected
+
+    # Case 2: StartAfter (exclusive) -> < 10
+    cursor = ([10], False)
+    condition = _where_conditions_from_cursor(cursor, [ordering], is_start_cursor=True)
+    # Expected: field < 10
+    expected = field_expr.less_than(10)
+    assert condition == expected
+
+    # Case 3: EndAt (inclusive) -> >= 10
+    cursor = ([10], False)
+    condition = _where_conditions_from_cursor(cursor, [ordering], is_start_cursor=False)
+    # Expected: field > 10 OR field == 10
+    expected = pipeline_expressions.Or(
+        field_expr.greater_than(10),
+        field_expr.equal(10)
+    )
+    assert condition == expected
+
+    # Case 4: EndBefore (exclusive) -> > 10
+    cursor = ([10], True)
+    condition = _where_conditions_from_cursor(cursor, [ordering], is_start_cursor=False)
+    # Expected: field > 10
+    expected = field_expr.greater_than(10)
+    assert condition == expected

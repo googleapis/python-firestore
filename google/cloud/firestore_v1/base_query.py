@@ -1407,6 +1407,28 @@ def _cursor_pb(cursor_pair: Optional[Tuple[list, bool]]) -> Optional[Cursor]:
         return None
 
 
+def _get_cursor_exclusive_condition(
+    is_start_cursor: bool,
+    ordering: pipeline_expressions.Ordering,
+    value: pipeline_expressions.Constant,
+) -> pipeline_expressions.BooleanExpression:
+    """
+    Helper to determine the correct comparison operator (greater_than or less_than)
+    based on the cursor type (start/end) and the sort direction (ascending/descending).
+    """
+    field = ordering.expr
+    if (
+        is_start_cursor
+        and ordering.order_dir == pipeline_expressions.Ordering.Direction.ASCENDING
+    ) or (
+        not is_start_cursor
+        and ordering.order_dir == pipeline_expressions.Ordering.Direction.DESCENDING
+    ):
+        return field.greater_than(value)
+    else:
+        return field.less_than(value)
+
+
 def _where_conditions_from_cursor(
     cursor: Tuple[List, bool],
     orderings: List[pipeline_expressions.Ordering],
@@ -1425,16 +1447,12 @@ def _where_conditions_from_cursor(
     cursor_values, before = cursor
     size = len(cursor_values)
 
-    if is_start_cursor:
-        filter_func = pipeline_expressions.Expression.greater_than
-    else:
-        filter_func = pipeline_expressions.Expression.less_than
-
-    field = orderings[size - 1].expr
+    ordering = orderings[size - 1]
+    field = ordering.expr
     value = pipeline_expressions.Constant(cursor_values[size - 1])
 
     # Add condition for last bound
-    condition = filter_func(field, value)
+    condition = _get_cursor_exclusive_condition(is_start_cursor, ordering, value)
 
     if (is_start_cursor and before) or (not is_start_cursor and not before):
         # When the cursor bound is inclusive, then the last bound
@@ -1443,14 +1461,18 @@ def _where_conditions_from_cursor(
 
     # Iterate backwards over the remaining bounds, adding a condition for each one
     for i in range(size - 2, -1, -1):
-        field = orderings[i].expr
+        ordering = orderings[i]
+        field = ordering.expr
         value = pipeline_expressions.Constant(cursor_values[i])
 
         # For each field in the orderings, the condition is either
         # a) lessThan|greaterThan the cursor value,
         # b) or equal the cursor value and lessThan|greaterThan the cursor values for other fields
+        exclusive_condition = _get_cursor_exclusive_condition(
+            is_start_cursor, ordering, value
+        )
         condition = pipeline_expressions.Or(
-            filter_func(field, value),
+            exclusive_condition,
             pipeline_expressions.And(field.equal(value), condition),
         )
 
