@@ -1184,9 +1184,9 @@ class BaseQuery(object):
 
         # Apply cursors as filters.
         if orderings:
-            for cursor_data, is_start in [(self._start_at, True), (self._end_at, False)]:
-                if cursor_data:
-                    val = self._normalize_cursor(cursor_data, normalized_orders)
+            for cursor, is_start in [(self._start_at, True), (self._end_at, False)]:
+                if cursor:
+                    val = self._normalize_cursor(cursor, normalized_orders)
                     ppl = ppl.where(
                         _where_conditions_from_cursor(val, orderings, is_start)
                     )
