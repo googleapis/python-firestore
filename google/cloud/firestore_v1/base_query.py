@@ -1187,15 +1187,6 @@ class BaseQuery(object):
                 orderings.append(pipeline_expressions.Ordering(field, direction))
 
         if orderings:
-            # Normalize cursors to get the raw values corresponding to the orders
-            start_at_val = None
-            if self._start_at:
-                start_at_val = self._normalize_cursor(self._start_at, normalized_orders)
-
-            end_at_val = None
-            if self._end_at:
-                end_at_val = self._normalize_cursor(self._end_at, normalized_orders)
-
             # If limit_to_last is set, we need to reverse the orderings to find the
             # "last" N documents (which effectively become the "first" N in reverse order).
             if self._limit_to_last:
@@ -1205,14 +1196,17 @@ class BaseQuery(object):
             # Apply cursor conditions.
             # Cursors are translated into filter conditions (e.g., field > value)
             # based on the orderings.
-            if start_at_val:
+            if self._start_at:
+                # Normalize cursors to get the raw values corresponding to the orders
+                start_at_val = self._normalize_cursor(self._start_at, normalized_orders)
                 ppl = ppl.where(
                     _where_conditions_from_cursor(
                         start_at_val, orderings, is_start_cursor=True
                     )
                 )
 
-            if end_at_val:
+            if self._end_at:
+                end_at_val = self._normalize_cursor(self._end_at, normalized_orders)
                 ppl = ppl.where(
                     _where_conditions_from_cursor(
                         end_at_val, orderings, is_start_cursor=False
