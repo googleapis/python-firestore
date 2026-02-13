@@ -275,12 +275,12 @@ class _BasePipeline:
 
     def literals(
         self,
-        documents: Selectable,
+        *documents: Selectable,
     ) -> "_BasePipeline":
         """
         TODO: add docstring.
         """
-        return self._append(stages.Literals(documents))
+        return self._append(stages.Literals(*documents))
 
     def replace_with(
         self,

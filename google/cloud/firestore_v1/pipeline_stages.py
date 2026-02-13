@@ -345,12 +345,18 @@ class Limit(Stage):
 class Literals(Stage):
     """TODO: add docstring."""
 
-    def __init__(self, documents: Selectable):
+    def __init__(self, *documents: Selectable):
         super().__init__("literals")
-        self.documents = Field(documents) if isinstance(documents, str) else documents
+        self.documents = documents
 
     def _pb_args(self):
-        return [self.documents._to_pb()]
+        args = []
+        for doc in self.documents:
+            if hasattr(doc, "_to_pb"):
+                args.append(doc._to_pb())
+            else:
+                args.append(encode_value(doc))
+        return args
 
 
 class Offset(Stage):

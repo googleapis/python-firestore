@@ -688,9 +688,8 @@ tests:
   - description: literals
     pipeline:
       - Literals:
-        - Constant:
-            - title: "The Hitchhiker's Guide to the Galaxy"
-              author: "Douglas Adams"
+        - title: "The Hitchhiker's Guide to the Galaxy"
+          author: "Douglas Adams"
     assert_results:
       - title: "The Hitchhiker's Guide to the Galaxy"
         author: "Douglas Adams"
@@ -698,13 +697,11 @@ tests:
       pipeline:
         stages:
         - args:
-          - arrayValue:
-              values:
-              - mapValue:
-                  fields:
-                    author:
-                      stringValue: "Douglas Adams"
-                    title:
-                      stringValue: "The Hitchhiker's Guide to the Galaxy"
+          - mapValue:
+              fields:
+                author:
+                  stringValue: "Douglas Adams"
+                title:
+                  stringValue: "The Hitchhiker's Guide to the Galaxy"
           name: literals
   

@@ -521,24 +521,27 @@ class TestLiterals:
         return stages.Literals(*args, **kwargs)
 
     def test_ctor(self):
-        val = Constant.of({"a": 1})
-        instance = self._make_one(val)
-        assert instance.documents == val
+        val1 = Constant.of({"a": 1})
+        val2 = Constant.of({"b": 2})
+        instance = self._make_one(val1, val2)
+        assert instance.documents == (val1, val2)
         assert instance.name == "literals"
 
     def test_repr(self):
-        val = Constant.of({"a": 1})
-        instance = self._make_one(val)
+        val1 = Constant.of({"a": 1})
+        instance = self._make_one(val1)
         repr_str = repr(instance)
-        assert repr_str == "Literals(documents=Constant.of({'a': 1}))"
+        assert repr_str == "Literals(documents=(Constant.of({'a': 1}),))"
 
     def test_to_pb(self):
-        val = Constant.of({"a": 1})
-        instance = self._make_one(val)
+        val1 = Constant.of({"a": 1})
+        val2 = Constant.of({"b": 2})
+        instance = self._make_one(val1, val2)
         result = instance._to_pb()
         assert result.name == "literals"
-        assert len(result.args) == 1
+        assert len(result.args) == 2
         assert result.args[0].map_value.fields["a"].integer_value == 1
+        assert result.args[1].map_value.fields["b"].integer_value == 2
         assert len(result.options) == 0
 
 
