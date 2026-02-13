@@ -516,6 +516,32 @@ class TestLimit:
         assert len(result.options) == 0
 
 
+class TestLiterals:
+    def _make_one(self, *args, **kwargs):
+        return stages.Literals(*args, **kwargs)
+
+    def test_ctor(self):
+        val = Constant.of({"a": 1})
+        instance = self._make_one(val)
+        assert instance.documents == val
+        assert instance.name == "literals"
+
+    def test_repr(self):
+        val = Constant.of({"a": 1})
+        instance = self._make_one(val)
+        repr_str = repr(instance)
+        assert repr_str == "Literals(documents=Constant.of({'a': 1}))"
+
+    def test_to_pb(self):
+        val = Constant.of({"a": 1})
+        instance = self._make_one(val)
+        result = instance._to_pb()
+        assert result.name == "literals"
+        assert len(result.args) == 1
+        assert result.args[0].map_value.fields["a"].integer_value == 1
+        assert len(result.options) == 0
+
+
 class TestOffset:
     def _make_one(self, *args, **kwargs):
         return stages.Offset(*args, **kwargs)

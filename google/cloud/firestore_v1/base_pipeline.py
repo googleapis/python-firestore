@@ -273,6 +273,15 @@ class _BasePipeline:
             stages.FindNearest(field, vector, distance_measure, options)
         )
 
+    def literals(
+        self,
+        documents: Selectable,
+    ) -> "_BasePipeline":
+        """
+        TODO: add docstring.
+        """
+        return self._append(stages.Literals(documents))
+
     def replace_with(
         self,
         field: Selectable,

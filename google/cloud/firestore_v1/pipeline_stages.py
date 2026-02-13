@@ -342,6 +342,17 @@ class Limit(Stage):
         return [Value(integer_value=self.limit)]
 
 
+class Literals(Stage):
+    """TODO: add docstring."""
+
+    def __init__(self, documents: Selectable):
+        super().__init__("literals")
+        self.documents = Field(documents) if isinstance(documents, str) else documents
+
+    def _pb_args(self):
+        return [self.documents._to_pb()]
+
+
 class Offset(Stage):
     """Skips a specified number of documents."""
 
