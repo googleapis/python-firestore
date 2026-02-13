@@ -57,7 +57,8 @@ for library in s.get_staging_dirs(default_version=firestore_admin_default_versio
     s.move(library / "scripts" / fixup_script_path)
 
 for library in s.get_staging_dirs():
-    s.replace(
+    replacement_count = 1
+    assert replacement_count == s.replace(
         library / "google/cloud/bundle/types/bundle.py",
         "from google.firestore.v1 import document_pb2  # type: ignore\n"
         "from google.firestore.v1 import query_pb2  # type: ignore",
@@ -65,7 +66,7 @@ for library in s.get_staging_dirs():
         "from google.cloud.firestore_v1.types import query as query_pb2 # type: ignore"        
     )
 
-    s.replace(
+    assert replacement_count == s.replace(
         library / "google/cloud/bundle/__init__.py",
         "from .types.bundle import BundleMetadata\n"
         "from .types.bundle import NamedQuery\n",
@@ -75,13 +76,13 @@ for library in s.get_staging_dirs():
         "from .bundle import FirestoreBundle\n",
     )
 
-    s.replace(
+    assert replacement_count == s.replace(
         library / "google/cloud/bundle/__init__.py",
         "from google.cloud.bundle import gapic_version as package_version\n",
         "from google.cloud.firestore_bundle import gapic_version as package_version\n",
     )
 
-    s.replace(
+    assert replacement_count == s.replace(
         library / "google/cloud/bundle/__init__.py",
         "\'BundledQuery\',",
         "\"BundledQuery\",\n\"FirestoreBundle\",",)
