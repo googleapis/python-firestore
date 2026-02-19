@@ -345,7 +345,7 @@ class Limit(Stage):
 class Literals(Stage):
     """Returns documents from a fixed set of predefined document objects."""
 
-    def __init__(self, *documents: Selectable):
+    def __init__(self, *documents: str | Selectable):
         super().__init__("literals")
         self.documents = documents
 

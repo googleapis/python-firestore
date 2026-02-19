@@ -273,10 +273,7 @@ class _BasePipeline:
             stages.FindNearest(field, vector, distance_measure, options)
         )
 
-    def literals(
-        self,
-        *documents: Selectable,
-    ) -> "_BasePipeline":
+    def literals(self, *documents: str | Selectable) -> "_BasePipeline":
         """
         Returns documents from a fixed set of predefined document objects.
 
@@ -284,14 +281,14 @@ class _BasePipeline:
         also be used as inputs to join conditions.
 
         Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Constant
+            >>> documents = [
+            ...     {"name": "joe", "age": 10},
+            ...     {"name": "bob", "age": 30},
+            ...     {"name": "alice", "age": 40}
+            ... ]
             >>> pipeline = client.pipeline()
-            ...     .literals(
-            ...         [
-            ...             {"name": "joe", "age": 10},
-            ...             {"name": "bob", "age": 30},
-            ...             {"name": "alice", "age": 40}
-            ...         ]
-            ...     )
+            ...     .literals(Constant.of(documents))
             ...     .where(field("age").lessThan(35))
 
             Output documents:
@@ -317,13 +314,11 @@ class _BasePipeline:
 
         Example:
             >>> from google.cloud.firestore_v1.pipeline_expressions import Constant
-            >>> pipeline = client.pipeline()
-            ... .literals(
-            ...     [
-            ...         {"x": Constant.of("foo-bar-baz").char_length()},
-            ...         {"x": Constant.of("bar").char_length()}
-            ...     ]
-            ... )
+            >>> documents = [
+            ...     {"x": Constant.of("foo-bar-baz").char_length()},
+            ...     {"x": Constant.of("bar").char_length()}
+            ... ]
+            >>> pipeline = client.pipeline().literals(Constant.of(documents))
 
             Output documents:
             ```json
@@ -334,9 +329,12 @@ class _BasePipeline:
             ```
 
         Args:
-            documents: A fixed set of predefined document objects.
+            documents: A `str` or `Selectable` expression. If a `str`, it's
+                       treated as a field path to an array of documents.
+                       If a `Selectable`, it's usually a `Constant`
+                       containing an array of documents (as dictionaries).
         Returns:
-            A new Pipeline object with this stage appended to the stage list
+            A new Pipeline object with this stage appended to the stage list.
         """
         return self._append(stages.Literals(*documents))
 
