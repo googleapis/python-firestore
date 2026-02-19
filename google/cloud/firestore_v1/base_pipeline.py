@@ -278,7 +278,65 @@ class _BasePipeline:
         *documents: Selectable,
     ) -> "_BasePipeline":
         """
-        TODO: add docstring.
+        Returns documents from a fixed set of predefined document objects.
+
+        This stage is commonly used for testing other stages in isolation, though it can
+        also be used as inputs to join conditions.
+
+        Example:
+            >>> pipeline = client.pipeline()
+            ...     .literals(
+            ...         [
+            ...             {"name": "joe", "age": 10},
+            ...             {"name": "bob", "age": 30},
+            ...             {"name": "alice", "age": 40}
+            ...         ]
+            ...     )
+            ...     .where(field("age").lessThan(35))
+
+            Output documents:
+            ```json
+            [
+                {"name": "joe", "age": 10},
+                {"name": "bob", "age": 30}
+            ]
+            ```
+
+        Behavior:
+            The `literals(...)` stage can only be used as the first stage in a pipeline (or
+            sub-pipeline). The order of documents returned from the `literals` matches the
+            order in which they are defined.
+
+            While literal values are the most common, it is also possible to pass in
+            expressions, which will be evaluated and returned, making it possible to test
+            out different query / expression behavior without first needing to create some
+            test data.
+
+            For example, the following shows how to quickly test out the `length(...)`
+            function on some constant test sets:
+
+        Example:
+            >>> from google.cloud.firestore_v1.pipeline_expressions import Constant
+            >>> pipeline = client.pipeline()
+            ... .literals(
+            ...     [
+            ...         {"x": Constant.of("foo-bar-baz").char_length()},
+            ...         {"x": Constant.of("bar").char_length()}
+            ...     ]
+            ... )
+
+            Output documents:
+            ```json
+            [
+                {"x": 11},
+                {"x": 3}
+            ]
+            ```
+
+        Args:
+            documents: A fixed set of predefined document objects.
+        Returns:
+            A new Pipeline object with this stage appended to the stage list
         """
         return self._append(stages.Literals(*documents))
 

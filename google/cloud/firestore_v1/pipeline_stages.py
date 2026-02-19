@@ -343,7 +343,7 @@ class Limit(Stage):
 
 
 class Literals(Stage):
-    """TODO: add docstring."""
+    """Returns documents from a fixed set of predefined document objects."""
 
     def __init__(self, *documents: Selectable):
         super().__init__("literals")
